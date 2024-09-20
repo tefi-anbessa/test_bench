@@ -3,6 +3,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby "3.1.2"
 
+# Rails defaults:
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 7.0.8", ">= 7.0.8.4"
 
@@ -34,6 +35,7 @@ gem "jbuilder"
 # gem "kredis"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
+# Inactive by default:
 gem "bcrypt", "~> 3.1.7"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
@@ -46,11 +48,15 @@ gem "bootsnap", require: false
 gem "sassc-rails"
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
+# Inactive by default:
 # gem "image_processing", "~> 1.2"
 
+# Added gems
 gem 'bootstrap', '~> 5.1.3'
+gem "faker"
 
 group :development, :test do
+# Rails defaults:
   # Use sqlite3 as the database for Active Record
   gem "sqlite3", "~> 1.4"
 
@@ -59,6 +65,7 @@ group :development, :test do
 end
 
 group :development do
+# Rails defaults:
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
 
@@ -80,4 +87,9 @@ group :test do
   gem "guard",                    "2.18.0"
   gem "guard-minitest",           "2.4.6"
 
+end
+
+# Added gems
+group :production do
+  gem "pg",         "1.3.5"
 end
