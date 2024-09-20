@@ -1,0 +1,42 @@
+
+en:
+  app_name: "Test Bench"
+
+  rails:
+    walking:      "Walking on"
+
+  actions:
+    save:         "Save changes"
+    delete:       "Delete"
+    delete_sure:  "Are you sure? Delete cannot be undone."
+    discard:      "Discard changes"
+    sure:         "Are you sure?"
+    show:         "Show"
+    new:          "New"
+    edit:         "Edit"
+    index:        "Index"
+    next:         "Next"
+    previous:     "Prev"
+
+  menu:
+    toggle:       "Toggle navigation"
+    profile:      "Profile"
+    edit:         "Edit"
+    log_out:      "Log out"
+    log_in:       "Log in"
+    home:         "Home"
+    about:        "About"
+    help:         "Help"
+    contact:      "Contact"
+
+  table:
+    links:        "Links"
+
+  footer:
+    credit:       "Website by frankie fusion. "
+
+  locales:
+    en: "English"
+    kh: "Khmer"
+    th: "Thai"
+    cn: "Chinese ()"
