@@ -1,0 +1,11 @@
+
+en:
+  users:
+    index:
+      title:        "Users"
+      header:       "Users Index"
+      message:      "Log in"
+    show:
+      title:        "User"
+      header:       "Show User"
+      message:      "Log in"

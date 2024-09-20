@@ -1,0 +1,40 @@
+kh:
+  app_name:       "kh Project Assistant"
+
+  rails:
+    walking:      "kh Walking on"
+
+  actions:
+    save:         "kh Save changes"
+    delete:       "kh Delete"
+    delete_sure:  "kh Are you sure? Delete cannot be undone."
+    discard:      "kh Discard changes"
+    sure:         "kh Are you sure?"
+    show:         "kh Show"
+    new:          "kh New"
+    edit:         "kh Edit"
+    next:         "kh Next"
+    previous:     "kh Prev"
+
+  menu:
+    toggle:       "Toggle navigation"
+    profile:      "kh Profile"
+    edit:         "kh Edit"
+    log_out:      "kh Log out"
+    log_in:       "kh Log in"
+    home:         "kh Home"
+    about:        "kh About"
+    help:         "kh Help"
+    contact:      "kh Contact"
+
+  table:
+    links:        "kh Links"
+
+  footer:
+    credit:       "Website by frankie fusion. "
+
+  locales:
+    en: "Angle terror"
+    kh: "Kampuchea"
+    th: "Thailandish"
+    cn: "Chinese ()"

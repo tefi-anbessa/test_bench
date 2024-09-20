@@ -1,0 +1,42 @@
+
+en:
+  devise:
+    confirmations:
+      new:
+        title:            "Confirmation"
+        header:           "Password Confirmation"
+        message:          "Resend confirmation instructions"
+    passwords:
+      new:
+        title:            "Password Reset"
+        header:           "Forgot your password?"
+        message:          "Please send me password reset instructions"
+      edit:
+        title:            "Password Edit"
+        header:           "Change Password"
+        message:          "Change my password"
+        label_pw:         "New password"
+        label_pw_conf:    "Confirm new password"
+        pw_len:           "characters minimum"
+    registrations:
+      new:
+        title:            "New User"
+        header:           "Register for %{for}"
+        message:          "Submit registration"
+      edit:
+        title:            "Edit User"
+        header:           "Edit User: %{user}"
+        message:          "Save changes"
+        conf_pending:         "Currently waiting confirmation for %{email}. "
+        password_label_html:  "New password <i>(leave blank if you don't want to change it)</i>"
+        password_min_chars:   "Password must have minimum %{min_chars} characters"
+        password_conf_label:  "Password confirmation"
+        pw_curr_label_html:   "Current password <i>(required to confirm changes)</i>"
+    sessions:
+      new:
+        title:            "Log in"
+        header:           "Log in to %{to}"
+        message:          "Log in"
+        login:            "Log in with user name or email"
+        user_name:        "user_name"
+        label_pw:         "Password"

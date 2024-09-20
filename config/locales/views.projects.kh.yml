@@ -1,0 +1,15 @@
+
+kh:
+  projects:
+    index:
+      title:            "kh Projects"
+      header:           "kh Projects Index"
+    edit:
+      title:            "Edit Project"
+      header:           "Edit Project: %{project}"
+    new:
+      title:            "New Project"
+      header:           "New Project"
+    show:
+      title:            "%{code}"
+      header:           "Project: %{code}"

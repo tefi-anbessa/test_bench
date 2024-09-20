@@ -1,0 +1,29 @@
+en:
+  activerecord:
+    models:
+      user:               "User"
+      project:            "Project"
+      discipline:         "Discipline"
+      tag:                "Tag"
+    attributes:
+      user:
+        user_name:        "user_name"
+        email:            "email"
+        admin:            "Administrator?"
+        password:         "Password"
+        password_confirmation:  "Confirm password"
+      project:
+        code:             "Code"
+        title:            "Title"
+        description:      "Description"
+      discipline:
+        code:             "Code"
+        name:             "Name"
+      tag:
+        prefix:           "Prefix"
+        loop:             "Loop"
+        suffix:           "Suffix"
+        description:      "Description"
+        project_phase:    "Phase"
+        notes:            "Notes"
+        full_tag:         "Full tag"

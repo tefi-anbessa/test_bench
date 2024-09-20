@@ -1,16 +1,22 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
 <div class="container-fluid">
-  <a class="navbar-brand" href="#">Navbar</a>
+  <%= link_to root_path, class: "navbar-brand", id: "logo" do %>
+    <%= image_tag("favicon.ico") %>
+  <% end %>
   <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
       <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="#">Home</a>
+        <%= link_to t('menu.about'), site_about_path,
+          class: "nav-link active",
+          aria: { label: t('menu.about') } %>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#">Link</a>
+        <%= link_to t('menu.help'), site_help_path,
+          class: "nav-link active",
+          aria: { label: t('menu.help') } %>
       </li>
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -23,8 +29,33 @@
           <li><a class="dropdown-item" href="#">Something else here</a></li>
         </ul>
       </li>
+
+
       <li class="nav-item">
         <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+      </li>
+
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#"
+              id="navbarLocaleSelect"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false">
+              <%= flag_icon(flag_code(locale)) %>
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <% I18n.available_locales.each do |locale| %>
+            <li>
+              <%= flag_icon(flag_code(locale)) %>
+              <% if I18n.locale == locale %>
+                <%= t(locale, scope: 'locales') %>
+              <% else %>
+                <%= link_to t(locale, scope: 'locales'),
+                            url_for(locale: locale) %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
       </li>
     </ul>
     <form class="d-flex">

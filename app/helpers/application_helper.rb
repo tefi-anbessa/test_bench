@@ -10,4 +10,8 @@ module ApplicationHelper
     end
   end
 
+  def flag_code(locale)
+    codes = {en: :gb}
+    flag_code = codes[locale] || locale
+  end
 end

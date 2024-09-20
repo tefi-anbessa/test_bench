@@ -1,0 +1,15 @@
+
+en:
+  projects:
+    index:
+      title:            "Projects"
+      header:           "Projects Index"
+    edit:
+      title:            "Edit Project"
+      header:           "Edit Project: %{project}"
+    new:
+      title:            "New Project"
+      header:           "New Project"
+    show:
+      title:            "%{code}"
+      header:           "Project: %{code}"
