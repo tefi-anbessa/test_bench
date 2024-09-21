@@ -4,8 +4,11 @@ Rails.application.routes.draw do
     get 'site/help'
     get 'site/about'
     get 'site/contact'
-  end
+
+    devise_for :users
+    resources :users, :only => [:show, :index, :new, :edit]
+    end
 
   # Defines the root path route ("/")
-  root "site#home"
+  root to: 'site#home'
 end

@@ -5,6 +5,9 @@ require "minitest/reporters"
 Minitest::Reporters.use!
 
 class ActiveSupport::TestCase
+  setup do
+    Rails.application.routes.default_url_options[:locale] = I18n.default_locale
+  end
   # Run tests in parallel with specified workers
   parallelize(workers: :number_of_processors)
 

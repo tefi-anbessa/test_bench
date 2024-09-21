@@ -1,0 +1,11 @@
+
+km:
+  site:
+    home:
+      title:        "kh Home"
+    about:
+      title:        "kh About"
+    contact:
+      title:        "kh Contact"
+    help:
+      title:        "kh Help"

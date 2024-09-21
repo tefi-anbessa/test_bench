@@ -10,8 +10,10 @@ module ApplicationHelper
     end
   end
 
+  # Returns a country symbol for a given language symbol, to help with flag icons.
+  # Can be controversial!
   def flag_code(locale)
-    codes = {en: :gb}
+    codes = {en: :gb, km: :kh}
     flag_code = codes[locale] || locale
   end
 end

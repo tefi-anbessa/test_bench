@@ -1,0 +1,32 @@
+<% provide(:title, t('.title')) %>
+
+<%# Header with navigation buttons. %>
+<h2>
+  <div class="left">
+    <% if !current_user.nil && current_user.admin? %>
+      <%= link_to new_user_path(@user), class: "btn btn-primary" do %>
+          <%= t('actions.new') + " " + t('activerecord.models.user') %>
+        &nbsp;<span class="glyphicon glyphicon-pencil"></span>
+      <% end %>
+    <% end %>
+    <%= t('.header')%>
+  </div>
+
+</h2>
+
+<%= will_paginate %>
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th>Gravatar</th>
+      <th>Username</th>
+      <% if current_user.admin? %>
+        <th>Links</th>
+      <% end %>
+    </tr>
+  </thead>
+  <tbody>
+    <%= render @users %>
+  </tbody>
+</table>
+<%= will_paginate %>

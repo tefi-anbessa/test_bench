@@ -1,0 +1,21 @@
+valid:
+  name: valid
+  email: mystring@test.com
+  encrypted_password: <%= Devise::Encryptor.digest(User, 'password') %>
+
+invalid:
+  name: invalid
+  email: invalid@test.com
+  encrypted_password: <%= Devise::Encryptor.digest(User, 'wrong_password') %>
+
+rogue:
+  name: rogue
+  email: rogue@test.com
+  encrypted_password: <%= Devise::Encryptor.digest(User, 'password') %>
+
+
+admin:
+  name: admin
+  email: admin@test.com
+  admin: true
+  encrypted_password: <%= Devise::Encryptor.digest(User, 'password') %>

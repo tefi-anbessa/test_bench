@@ -1,0 +1,18 @@
+
+<tr>
+  <td><%= gravatar_for user, size: 50 %></td>
+  <td class="name"><%= link_to user.name, user %></td>
+  <td><%= user.email %></td>
+  <td>
+    <% if current_user.admin? %>
+      <%= link_to cancel_user_registration_path(@user), method: :delete, class: "btn btn-danger actions",
+              data: { confirm: t('actions.delete_sure') } do %>
+        Delete <span class="glyphicon glyphicon-trash" title="edit"></span>
+      <% end %>
+        <%= link_to edit_user_registration_path(@user), class: "btn btn-warning actions" do %>
+          Edit <span class="glyphicon glyphicon-edit" title="edit"></span>
+        <% end %>
+    <% end %>
+
+  </td>
+</tr>
