@@ -1,0 +1,15 @@
+
+km:
+  tags:
+    index:
+      title:            "kh Tags"
+      header:           "kh Tags Index"
+    edit:
+      title:            "kh Edit Tag"
+      header:           "kh Edit Tag: %{tag}"
+    new:
+      title:            "kh New Tag"
+      header:           "kh New Tag"
+    show:
+      title:            "%{tag}"
+      header:           "Tag: %{tag}"

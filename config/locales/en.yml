@@ -1,6 +1,7 @@
 
 en:
   app_name: "Test Bench"
+  flag:     gb
 
   rails:
     walking:      "Walking on"

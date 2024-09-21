@@ -1,0 +1,11 @@
+
+en:
+  site:
+    home:
+      title:        "Home"
+    about:
+      title:        "About"
+    contact:
+      title:        "Contact"
+    help:
+      title:        "Help"

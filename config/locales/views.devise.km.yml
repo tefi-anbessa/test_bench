@@ -1,0 +1,34 @@
+
+km:
+  devise:
+    confirmations:
+      new:
+        title:            "Confirmation"
+        header:           "Password Confirmation"
+        message:          "Resend confirmation instructions"
+    passwords:
+      new:
+        title:            "Password Reset"
+        header:           "Forgot your password?"
+        message:          "Please send me password reset instructions"
+      edit:
+        title:            "Password Edit"
+        header:           "Change Password"
+        message:          "Change my password"
+        label_pw:         "New password"
+        label_pw_conf:    "Confirm new password"
+        pw_len:           "characters minimum"
+    registrations:
+      new:
+        title:            "New User"
+        header:           "Register for %{for}"
+        message:          "Submit registration"
+    sessions:
+      new:
+        title:            "kh Log in"
+        header:           "kh Log in to %{to}"
+        message:          "kh Log in"
+        login:            "kh Log in with user name or email"
+        user_name:        "kh user_name"
+        email:            "kh email"
+        password:         "kh Password"

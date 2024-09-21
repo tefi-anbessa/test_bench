@@ -1,0 +1,72 @@
+# Files in the config/locales directory are used for internationalization
+# and are automatically loaded by Rails. If you want to use locales other
+# than English, add the necessary files in this directory.
+#
+# To use the locales, use `I18n.t`:
+#
+#     I18n.t "hello"
+#
+# In views, this is aliased to just `t`:
+#
+#     <%= t("hello") %>
+#
+# To use a different locale, set it with `I18n.locale`:
+#
+#     I18n.locale = :es
+#
+# This would use the information in config/locales/es.yml.
+#
+# The following keys must be escaped otherwise they will not be retrieved by
+# the default I18n backend:
+#
+# true, false, on, off, yes, no
+#
+# Instead, surround them with single quotes.
+#
+# en:
+#   "true": "foo"
+#
+# To learn more, please read the Rails Internationalization guide
+# available at https://guides.rubyonrails.org/i18n.html.
+
+th:
+  app_name: ".th Project Assistant"
+
+  rails:
+    walking:      ".th Walking on"
+
+  actions:
+    save:         ".th Save changes"
+    delete:       ".th Delete"
+    delete_sure:  ".th Are you sure? Delete cannot be undone."
+    discard:      ".th Discard changes"
+    sure:         ".th Are you sure?"
+    show:         ".th Show"
+    new:          ".th New"
+    edit:         ".th Edit"
+    index:        ".th Index"
+    next:         ".th Next"
+    previous:     ".th Prev"
+
+  menu:
+    sr_message01: ".th Toggle navigation"
+    profile:      ".th Profile"
+    edit:         ".th Edit"
+    log_out:      ".th Log out"
+    log_in:       ".th Log in"
+    home:         ".th Home"
+    about:        ".th About"
+    help:         ".th Help"
+    contact:      ".th Contact"
+
+  table:
+    links:        ".th Links"
+
+  footer:
+    credit:       ".th Website by frankie fusion. "
+
+  locales:
+    en: ".th English"
+    kh: ".th Khmer"
+    th: ".th Thai"
+    cn: ".th Chinese ()"

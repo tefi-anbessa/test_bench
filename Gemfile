@@ -54,6 +54,13 @@ gem "sassc-rails"
 # Added gems
 gem 'bootstrap', '~> 5.1.3'
 gem "faker"
+gem 'rails-i18n', '~> 7.0.0'
+
+# use gem 'flag-icons-rails' for internationalisation
+gem 'flag-icons-rails'
+# Use devise for access control
+gem "devise", "~> 4.9"
+gem 'devise-i18n'
 
 group :development, :test do
 # Rails defaults:

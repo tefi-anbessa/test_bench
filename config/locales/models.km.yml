@@ -1,0 +1,29 @@
+km:
+  activerecord:
+    models:
+      user:               "kh User"
+      project:            "kh Project"
+      discipline:         "kh Discipline"
+      tag:                "kh Tag"
+    attributes:
+      user:
+        user_name:        "name_user"
+        email:            "kh email"
+        admin:            "kh Administrator?"
+        password:         "kh Password"
+        password_confirmation:  "kh Confirm password"
+      project:
+        code:             "kh Code"
+        title:            "kh Title"
+        description:      "kh Description"
+      discipline:
+        code:             "kh Code"
+        name:             "kh Name"
+      tag:
+        prefix:           "kh Prefix"
+        loop:             "kh Loop"
+        suffix:           "kh Suffix"
+        description:      "kh Description"
+        project_phase:    "kh Phase"
+        notes:            "kh Notes"
+        full_tag:         "kh Full tag"

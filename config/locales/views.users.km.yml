@@ -1,0 +1,11 @@
+
+km:
+  users:
+    index:
+      title:        "kh Users"
+      header:       "kh Users Index"
+      message:      "kh Log in"
+    show:
+      title:        "kh User"
+      header:       "kh Show User"
+      message:      "kh Log in"

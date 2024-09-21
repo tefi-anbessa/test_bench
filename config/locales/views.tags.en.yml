@@ -1,0 +1,15 @@
+
+en:
+  tags:
+    index:
+      title:            "Tags"
+      header:           "Tags Index"
+    edit:
+      title:            "Edit Tag"
+      header:           "Edit Tag: %{tag}"
+    new:
+      title:            "New Tag"
+      header:           "New Tag"
+    show:
+      title:            "%{tag}"
+      header:           "Tag: %{tag}"
