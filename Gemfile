@@ -58,6 +58,7 @@ gem 'rails-i18n', '~> 7.0.0'
 
 # use gem 'flag-icons-rails' for internationalisation
 gem 'flag-icons-rails'
+
 # Use devise for access control
 gem "devise", "~> 4.9"
 gem 'devise-i18n'

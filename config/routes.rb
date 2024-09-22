@@ -6,7 +6,7 @@ Rails.application.routes.draw do
     get 'site/contact'
 
     devise_for :users
-    resources :users, :only => [:show, :index, :new, :edit]
+    resources :users, :only => [:show, :index]
     end
 
   # Defines the root path route ("/")
