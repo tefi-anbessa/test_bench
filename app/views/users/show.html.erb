@@ -20,12 +20,14 @@
     <% end %>
   </div>
 
-  <%= link_to @user.prev("name"), class: "btn btn-default" do %>
+  <%= link_to @user.prev("name"), class: "icon-link" do %>
     Prev <span class="glyphicon glyphicon-menu-left"></span>
   <% end %>
   &nbsp;&nbsp;<span class="name"><%= @user.name %></span>&nbsp;&nbsp;
-  <%= link_to @user.next("name"), class: "btn btn-default" do %>
-    <span class="glyphicon glyphicon-menu-right"></span> Next
+  <%= link_to @user.next("name"), class: "icon-link" do %>
+              <svg class="bi" aria-hidden="true">
+              <use xlink:href="#arrow-right"></use>
+    </svg> Next
   <% end %>
 </h2>
 

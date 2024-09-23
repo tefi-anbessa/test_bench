@@ -59,6 +59,11 @@ gem 'rails-i18n', '~> 7.0.0'
 # use gem 'flag-icons-rails' for internationalisation
 gem 'flag-icons-rails'
 
+# Use ransack for search and sort functionality.
+gem 'ransack'
+gem "will_paginate"
+gem "bootstrap-will_paginate"
+
 # Use devise for access control
 gem "devise", "~> 4.9"
 gem 'devise-i18n'

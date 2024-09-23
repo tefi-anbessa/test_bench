@@ -29,4 +29,14 @@ Discipline.create!(code: 'J', name: 'Instrument Engineering')
 Discipline.create!(code: 'M', name: 'Mechanical Engineering')
 Discipline.create!(code: 'P', name: 'Process Engineering')
 Discipline.create!(code: 'U', name: 'Multi-Discipline')
+
+30.times do |n|
+  c = Project.all.order(:code).last.code.succ
+  t = Faker::Company.bs.titleize
+  d = Faker::Lorem.paragraph(sentence_count: 2, supplemental: false,
+                              random_sentences_to_add: 4)
+  Project.create!(code: c,
+                  title: t,
+                  description: d)
+end
 =end

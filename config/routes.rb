@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :projects
   scope "(:locale)", locale: /#{I18n.available_locales.join("|")}/ do
     get 'site/home'
     get 'site/help'

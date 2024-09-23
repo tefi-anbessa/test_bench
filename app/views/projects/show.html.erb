@@ -1,0 +1,35 @@
+<% provide(:title, t('.title', code: @project.code)) %>
+
+<%# Header with navigation buttons. %>
+<h2>
+  <div class="left">
+    <%= link_to projects_path, class: "btn btn-default" do %>
+      <%= t('actions.index')%>
+      <span class="glyphicon glyphicon-eject"></span>
+    <% end %>
+    <%= link_to edit_project_path(@project), class: "btn btn-warning actions" do %>
+      <%= t('actions.edit') %>
+      <span class="glyphicon glyphicon-edit"></span>
+    <% end %>
+    <%= link_to @project, class: "btn btn-danger actions",
+            data: { "turbo-method": :delete,
+            turbo_confirm: t('actions.delete_sure') } do %>
+            <%= t('actions.delete') %>
+            <span class="glyphicon glyphicon-trash"></span>
+    <% end %>
+  </div>
+
+  <%= link_to @project.prev("code"), class: "btn btn-default" do %>
+    <%= t('actions.previous')%>
+    <span class="glyphicon glyphicon-menu-left"></span>
+  <% end %>
+  &nbsp;&nbsp;
+  <%= t('.header', code: @project.code)%>
+  &nbsp;&nbsp;
+  <%= link_to @project.next("code"), class: "btn btn-default" do %>
+    <span class="glyphicon glyphicon-menu-right"></span>
+    <%= t('actions.next')%>
+  <% end %>
+</h2>
+
+<%= render @project %>
