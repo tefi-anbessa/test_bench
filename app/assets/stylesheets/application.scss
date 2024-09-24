@@ -1,3 +1,14 @@
 @import "bootstrap";
 @import "flag-icon";
 @import "bootstrap-icons";
+@font-face {
+  font-family: "bootstrap-icons";
+  src: font-url("fonts/bootstrap-icons.woff2") format("woff2"),
+    font-url("/fonts/bootstrap-icons.woff") format("woff");
+}
+
+/* Reduce font size for more compact tables
+*/
+.listing  {
+  @include font-size(0.8rem);
+}

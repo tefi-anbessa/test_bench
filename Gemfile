@@ -29,10 +29,10 @@ gem "stimulus-rails"
 gem "jbuilder"
 
 # Use Redis adapter to run Action Cable in production
-# gem "redis", "~> 4.0"
+gem "redis", "~> 4.0"
 
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
-# gem "kredis"
+gem "kredis"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # Inactive by default:
@@ -61,8 +61,9 @@ gem 'flag-icons-rails'
 
 # Use ransack for search and sort functionality.
 gem 'ransack'
-gem "will_paginate"
-gem "bootstrap-will_paginate"
+
+# Use pagy for pagination
+gem "pagy", '~> 9.0'
 
 # Use devise for access control
 gem "devise", "~> 4.9"

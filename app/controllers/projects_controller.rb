@@ -4,7 +4,7 @@ class ProjectsController < ApplicationController
   # GET /projects or /projects.json
   def index
     @q = Project.ransack(params[:q])
-    @projects = @q.result.page(params[:page])
+    @pagy, @projects = pagy(@q.result, limit: 10)
   end
 
   # GET /projects/1 or /projects/1.json

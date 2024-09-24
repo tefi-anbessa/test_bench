@@ -1,35 +1,58 @@
 <% provide(:title, @user.name) %>
 <%# Header with navigation buttons. %>
-<h2>
-  <div class="left">
-    <%= link_to users_path, class: "btn btn-default" do %>
-      List <span class="glyphicon glyphicon-eject"></span>
-    <% end %>
-
-    <!-- Admin section -->
-    <% if @user == current_user || current_user.admin  %>
-      <%= link_to edit_user_registration_path(@user), class: "btn btn-warning actions" do %>
-        Edit <span class="glyphicon glyphicon-edit" title="edit"></span>
+<div class="container text-center">
+  <div class="row justify-content-md-center">
+    <div class="col col-sm-3">
+      <%= link_to users_path,
+            class: "icon-link btn btn-sm btn-secondary actions",
+            title: t('actions.index') do %>
+        <%== icon('list-columns-reverse') %>
+        <%= t('actions.index') %>
       <% end %>
-    <% end %>
-    <% if current_user.admin %>
-      <%= link_to cancel_user_registration_path(@user), method: :delete, class: "btn btn-danger actions",
+      <!-- Admin section -->
+      <% if @user == current_user || current_user.admin  %>
+        <%= link_to edit_user_registration_path(@user),
+              class: "icon-link btn btn-sm btn-warning actions",
+              title: t('actions.edit') do %>
+              <%== icon('pencil') %>
+              <%= t('actions.edit') %>
+        <% end %>
+      <% end %>
+      <% if current_user.admin %>
+        <%= link_to cancel_user_registration_path(@user),
+              method: :delete,
+              class: "icon-link btn btn-sm btn-danger actions",
+              title: t('actions.delete'),
               data: { confirm: "Are you sure? Delete cannot be undone." } do %>
-        Delete <span class="glyphicon glyphicon-trash" title="edit"></span>
+          <%== icon('trash') %>
+          <%= t('actions.delete') %>
+        <% end %>
       <% end %>
-    <% end %>
-  </div>
+    </div>
 
-  <%= link_to @user.prev("name"), class: "icon-link" do %>
-    Prev <span class="glyphicon glyphicon-menu-left"></span>
-  <% end %>
-  &nbsp;&nbsp;<span class="name"><%= @user.name %></span>&nbsp;&nbsp;
-  <%= link_to @user.next("name"), class: "icon-link" do %>
-              <svg class="bi" aria-hidden="true">
-              <use xlink:href="#arrow-right"></use>
-    </svg> Next
-  <% end %>
-</h2>
+    <div class="col col-sm-1">
+      <%= link_to @user.prev("name"),
+            class: "icon-link btn btn-sm btn-secondary actions",
+            title: t('actions.previous') do %>
+        <%== icon('arrow-left') %>
+        <%= t('actions.previous') %>
+      <% end %>
+    </div>
+
+    <div class="col col-sm-auto">
+      <h2><span class="name"><%= @user.name %></span></h2>
+    </div>
+
+    <div class="col col-sm-1">
+      <%= link_to @user.next("name"),
+            class: "icon-link btn btn-sm btn-secondary actions",
+            title: t('actions.next') do %>
+        <%= t('actions.next') %>
+        <%== icon('arrow-right') %>
+      <% end %>
+    </div>
+  </div>
+</div>
 
 <table class="table table-hover">
   <thead>
