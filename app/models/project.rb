@@ -1,7 +1,7 @@
 class Project < ApplicationRecord
 
   before_save { self.code = code.upcase }
-#  has_many :tags
+  has_many :tags
 
   VALID_CODE_REGEX = /[A-Z][A-Z]/
   validates :code,        presence: true, length: { is: 2},

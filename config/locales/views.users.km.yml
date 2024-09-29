@@ -5,7 +5,9 @@ km:
       title:        "kh Users"
       header:       "kh Users Index"
       message:      "kh Log in"
+      gravatar:     "km Gravatar"
     show:
       title:        "kh User"
       header:       "kh Show User"
       message:      "kh Log in"
+      gravatar:     "km Gravatar"

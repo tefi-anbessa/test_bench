@@ -7,4 +7,8 @@ class Discipline < ApplicationRecord
                           format: { with: VALID_CODE_REGEX },
                           uniqueness: true
   validates :name, presence: true, length: { maximum: 50 }
+
+  def self.ransackable_attributes(auth_object = nil)
+    ["code", "name"]
+  end
 end

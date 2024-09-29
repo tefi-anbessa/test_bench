@@ -51,7 +51,7 @@ gem "sassc-rails"
 # Inactive by default:
 # gem "image_processing", "~> 1.2"
 
-# Added gems
+# Added gems +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 gem 'bootstrap', '~> 5.1.3'
 gem "faker"
 gem 'rails-i18n', '~> 7.0.0'
@@ -68,6 +68,14 @@ gem "pagy", '~> 9.0'
 # Use devise for access control
 gem "devise", "~> 4.9"
 gem 'devise-i18n'
+
+# Use bootstrap_form for pretty easy forms.
+gem "bootstrap_form", "~> 5.4"
+
+# Using order_query for previous and next items in complex sort order.
+# gem 'order_query', '~> 0.2.0'
+
+# End of added gems +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 group :development, :test do
 # Rails defaults:

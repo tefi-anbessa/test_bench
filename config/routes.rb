@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-  resources :projects
   scope "(:locale)", locale: /#{I18n.available_locales.join("|")}/ do
     get 'site/home'
     get 'site/help'
@@ -8,6 +7,8 @@ Rails.application.routes.draw do
 
     devise_for :users
     resources :users, :only => [:show, :index]
+    resources :projects
+    resources :tags
     end
 
   # Defines the root path route ("/")

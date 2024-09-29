@@ -1,0 +1,65 @@
+<div class="container-fluid">
+  <%= bootstrap_form_with(model: @tag, layout: :horizontal) do |f| %>
+    <%= render 'shared/error_messages', object: f.object %>
+    <div class="flex-row d-flex" >
+      <div class="p-2"
+        <%= f.text_field :prefix, layout: :vertical,
+              help: t('activerecord.attributes.tag.prefix_help') %>
+      </div>
+      <div class="p-2"
+        <%= f.number_field :serial, layout: :vertical,
+              help: t('activerecord.attributes.tag.serial_help') %>
+      </div>
+      <div class="p-2"
+        <%= f.text_field :suffix, layout: :vertical,
+              help: t('activerecord.attributes.tag.suffix_help') %>
+      </div>
+    </div>
+
+    <div class="flex-row d-flex" >
+      <div class="p-2"
+        prefix
+      </div>
+      <div class="p-2"
+        serial
+      </div>
+      <div class="p-2"
+        suffix
+      </div>
+    </div>
+
+    <div class="flex-row d-flex" >
+      <div class="p-2  w-75"
+        <%= f.text_field :description, hide_label: true, required: true,
+              placeholder: t('activerecord.attributes.tag.description'),
+              help: t('activerecord.attributes.tag.description') %>
+      </div>
+    </div>
+        <div class="flex-row d-flex" >
+          <div class="p-2  w-75"
+        <%= f.text_area :notes, hide_label: true,
+              placeholder: t('activerecord.attributes.tag.notes') %>
+      </div>
+    </div>
+
+    <div class="actions">
+      <%= f.primary do %>
+        <%= yield(:button_text) %>
+        <%== icon('save') %>
+      <% end %>
+      <% if @tag.persisted? %>
+        <%= link_to @tag, class: "btn btn-warning actions",
+                data: { turbo_confirm: t('actions.sure') } do %>
+                <%= t('actions.discard') %>
+                <%== icon('x-square') %>
+        <% end %>
+      <% else %>
+        <%= link_to tags_path, class: "btn btn-warning actions",
+                data: { turbo_confirm: t('actions.sure') }  do %>
+          <%= t('actions.discard') %>
+          <%== icon('x-square') %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

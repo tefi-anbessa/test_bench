@@ -21,7 +21,7 @@ km:
         name:             "kh Name"
       tag:
         prefix:           "kh Prefix"
-        loop:             "kh Loop"
+        serial:           "kh Serial"
         suffix:           "kh Suffix"
         description:      "kh Description"
         project_phase:    "kh Phase"

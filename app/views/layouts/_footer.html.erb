@@ -1,13 +1,28 @@
-<footer class="footer">
-  <small>
-    <p><i> <%= t('credit', scope: 'footer') %></i>
-      <a id = 'hidden-link'
-        href = 'https://youtu.be/rVDBZFfDqB8?si=qvqS2soZoCEh63ZN'
-        target="_blank">
-        <%= t('walking', scope: 'rails') %></a>
-
-<%= link_to image_tag("rails.png", alt: "Rails logo", size: "30"),
-            'http://rubyonrails.org/' %>
-    </p>
-  </small>
-</footer>
+<div class="container-fluid">
+  <footer class="footer border-top">
+    <small>
+      <ul>
+        <li class="nav-item">
+          <%= link_to t('menu.about'), site_about_path,
+            class: ["nav-link", { active: current_page?(site_about_path) }],
+            aria: { label: t('menu.about') } %>
+        </li>
+        <li class="nav-item">
+          <%= link_to t('menu.help'), site_help_path,
+            class: ['nav-link', { active: current_page?(site_help_path) }],
+            aria: { label: t('menu.help') } %>
+        </li>
+      </ul>
+      <div class="credits">
+        <i> <%= t('credit', scope: 'footer') %></i>
+        <a id = 'hidden-link'
+          href = 'https://youtu.be/rVDBZFfDqB8?si=qvqS2soZoCEh63ZN'
+          target="_blank">
+          <%= t('walking', scope: 'rails') %>
+        </a>
+        <%= link_to image_tag("rails.png", alt: "Rails logo", size: "30"),
+                    'http://rubyonrails.org/' %>
+      </div>
+    </small>
+  </footer>
+</div>

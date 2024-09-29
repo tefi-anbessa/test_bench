@@ -1,11 +1,11 @@
 <nav class="navbar navbar-expand-md navbar-light bg-light">
   <div class="container-fluid">
-    <div class="container">
+    <div class="nav-item">
       <%= link_to root_path,
                 class: ["navbar-brand", { active: current_page?(root_path) }],
                 id: "logo" do %>
         <%= image_tag("favicon.ico") %>
-          <%= t('app_name') %>
+        <%= t('app_name') %>
       <% end %>
     </div>
 
@@ -40,6 +40,12 @@
                 class: ['nav-link', { active: current_page?(controller: 'projects') }],
                 aria: { label: t('project', scope: 'activerecord.models').pluralize } %>
             </li>
+            <li class="nav-item">
+              <%= link_to t('tag', scope: 'activerecord.models').pluralize,
+                tags_path,
+                class: "nav-link",
+                aria: { label: t('tag', scope: 'activerecord.models').pluralize } %>
+            </li>
           </ul>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle"
@@ -69,7 +75,10 @@
           </li>
         <% else %>
           <li class="nav-item">
-            <%= link_to t('menu.log_in'), new_user_session_path %>
+            <%= link_to t('menu.log_in'),
+                  new_user_session_path,
+                  class: 'nav-link',
+                  aria: { label: t('menu.log_in') } %>
           </li>
         <% end %>
 

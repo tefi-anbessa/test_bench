@@ -3,11 +3,11 @@
   <div class="container-fluid">
     <ul class="navbar-nav me-auto mb-2 mb-lg-0 flex-row">
       <li class="nav-item">
-        <%= link_to new_project_path, class: "btn btn-primary actions",
+        <%= link_to new_tag_path, class: "btn btn-primary actions",
               aria: { label: t('actions.new') },
               title: t('actions.new')  do %>
           <%== icon('plus-square-fill') %>
-          <%= t('actions.new') + " " + t('activerecord.models.project') %>
+          <%= t('actions.new') + " " + t('activerecord.models.tag') %>
         <% end %>
       </li>
       <span class="nav-text ms-3 me-3 h2">
@@ -19,33 +19,38 @@
 <div class = "container">
   <div class = 'listing'>
     <%= search_form_for @q do |f| %>
-      <%= f.search_field :code_or_title_or_description_cont, class: "search_field" %>
+      <%= f.search_field :full_tag_or_description_cont, class: "search_field" %>
       <%= f.button nil, class: "btn btn-primary btn-sm", action: :submit do %>
         <%== icon('search') %>
       <% end %>
     <% end %>
     <%== pagy_bootstrap_nav(@pagy) %>
-    <table id='projects' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
+    <table id='tags' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
       <thead>
-        <th scope="col"><%= sort_link(@q, :code) %></th>
-        <th scope="col"><%= sort_link(@q, :title) %></th>
+        <th scope="col"><%= sort_link(@q, :discipline_code,
+                  t('activerecord.attributes.tag.discipline')) %></th>
+        <th scope="col"><%= sort_link(@q, :phase) %></th>
+        <th scope="col"><%= sort_link(@q, :full_tag) %></th>
         <th scope="col"><%= sort_link(@q, :description) %></th>
+        <th scope="col"><%= t('activerecord.attributes.tag.notes') %></th>
         <th scope="col" width="150px"><%= t('table.links')%></th>
       </thead>
       <tbody>
-        <% @projects.each do |p| %>
+        <% @tags.each do |t| %>
           <tr scope="row">
-            <td><%= link_to p.code, project_path(p) %></td>
-            <td><%= highlight p.title, params.dig(:q, :title_cont)  %></td>
-            <td><%= highlight p.description, params.dig(:q, :description_cont)  %></td>
+            <td><%= t.discipline.code %></td>
+            <td><%= t.phase %></td>
+            <td><%= link_to t.full_tag, tag_path(t) %></td>
+            <td><%= highlight t.description, params.dig(:q, :full_tag_or_description_cont)  %></td>
+            <td><%= t.notes %></td>
             <td>
-              <%= link_to project_path(p), class: "btn btn-secondary btn-sm icon-link",
+              <%= link_to tag_path(t), class: "btn btn-secondary btn-sm icon-link",
                     aria: { label: t('actions.show') },
                     title: t('actions.show'),
                     display: "inline" do %>
                 <%== icon('eye') %>
               <% end %>
-              <%= link_to edit_project_path(p), class: "btn btn-warning btn-sm icon-link",
+              <%= link_to edit_tag_path(t), class: "btn btn-warning btn-sm icon-link",
                     aria: { label: t('actions.edit') },
                     title: t('actions.edit'),
                     display: "inline"  do %>

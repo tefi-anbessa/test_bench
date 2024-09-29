@@ -14,16 +14,22 @@ en:
         password_confirmation:  "Confirm password"
       project:
         code:             "Code"
+        code_help:        "2 uppercase characters"
         title:            "Title"
+        title_help:       "Maximum 50 characters"
         description:      "Description"
       discipline:
         code:             "Code"
         name:             "Name"
       tag:
         prefix:           "Prefix"
-        loop:             "Loop"
+        prefix_help:      "Prefix should be selected from ISA 5.1"
+        serial:           "Loop"
+        serial_help:      "Loop should be 4 digits"
         suffix:           "Suffix"
+        suffix_help:      "Suffix should be typically one character, blank if not required"
         description:      "Description"
+        description_help: "Description should be 40 characters maximum"
         project_phase:    "Phase"
         notes:            "Notes"
         full_tag:         "Full tag"

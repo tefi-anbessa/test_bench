@@ -1,10 +1,11 @@
-<% provide(:title, @user.name) %>
+
+<% provide(:title, t('.title', tag: @tag.full_tag)) %>
 <%# Header with navigation buttons. %>
 <nav class="navbar bg-body-tertiary">
   <div class="container-fluid">
     <ul class="navbar-nav flex-row page-heading">
       <li class="nav-item d-inline-flex p-1">
-        <%= link_to users_path,
+        <%= link_to tags_path,
               class: "icon-link btn btn-sm btn-secondary actions",
               title: t('actions.index') do %>
           <%== icon('list-columns-reverse') %>
@@ -12,9 +13,9 @@
         <% end %>
       </li>
       <!-- Admin section -->
-      <% if @user == current_user || current_user.admin  %>
+      <% if current_user && current_user.admin %>
         <li class="nav-item d-inline-flex p-1">
-          <%= link_to edit_user_registration_path(@user),
+          <%= link_to edit_tag_path(@tag),
                 class: "icon-link btn btn-sm btn-warning actions",
                 title: t('actions.edit') do %>
                 <%== icon('pencil') %>
@@ -22,9 +23,9 @@
           <% end %>
         </li>
       <% end %>
-      <% if current_user.admin %>
+      <% if current_user && current_user.admin %>
         <li class="nav-item d-inline-flex p-1">
-          <%= link_to cancel_user_registration_path(@user),
+          <%= link_to @tag,
                 method: :delete,
                 class: "icon-link btn btn-sm btn-danger actions",
                 title: t('actions.delete'),
@@ -36,7 +37,7 @@
       <% end %>
 
       <li class="nav-item d-inline-flex p-1">
-        <%= link_to @user.prev("name"),
+        <%= link_to @tag.prev("id"),
               class: "icon-link btn btn-sm btn-secondary actions",
               title: t('actions.previous') do %>
           <%== icon('arrow-left') %>
@@ -45,13 +46,13 @@
       </li>
 
       <li class="nav-text h2 d-inline-flex p-1 ms-5 me-5">
-        <%= @user.name %>
+        <%= t('.header', tag: @tag.full_tag) %>
       </li>
 
       <li class="nav-item d-inline-flex p-1">
-        <%= link_to @user.next("name"),
-            class: "icon-link btn btn-sm btn-secondary actions",
-            title: t('actions.next') do %>
+        <%= link_to @tag.next("id"),
+              class: "icon-link btn btn-sm btn-secondary actions",
+              title: t('actions.next') do %>
           <%= t('actions.next') %>
           <%== icon('arrow-right') %>
         <% end %>
@@ -60,4 +61,4 @@
   </div>
 </nav>
 
-<%= render @user %>
+<%= render @tag %>

@@ -1,0 +1,78 @@
+Measured or Initiating Variable
+A - Analysis
+B - Burner, combustion
+C - User's choice
+D - User's choice
+E - Voltage
+F - Flow rate
+G- User's choice
+H - Hand
+I - Current (electrical)
+J - Power
+K - Time, time schedule
+L - Level
+M- User's choice
+N- User's choice
+O- User's choice
+P - Pressure, vacuum
+Q - Quantity
+R - Radiation
+S - Speed, frequency
+T - Temperature
+U - Multivariable
+V - Vibration, mechanical analyses
+W - Weight, force
+X - Unclassified
+Y - Event, state or presence
+Z - Position, dimension
+
+Modifier
+D - Differential
+F - Ration (fraction)
+J - Scan
+K - Time rate of change
+M - Momentary
+Q - Integrate, totalizer
+S - Safety
+X - X-axis
+Y - Y-axis
+Z - Z-axis
+
+Second or Succeeding Letters
+Second or succeeding letters indicates a readout or passive function, output function or a modifier function.
+
+Readout or Passive Function
+A - Alarm
+B - User's choice
+E - Sensor (primary element)
+G- Glass, viewing device
+I - Indication
+L - Light
+N- User's choice
+O- Orifice, restriction
+P - Point (test connection)
+R - Record
+U - Multifunction
+W - Well
+X - Unclassified
+
+Output Function
+B - User's choice
+C - Control
+K - Control Station
+N- User's choice
+S - Switch
+T - Transmit
+U - Multifunction
+V - Valve, damper, louver
+X - Unclassified
+Y - Relay, compute, convert
+Z - Driver, actuator
+Modifier Function
+B - User's choice
+H - High
+L - Low
+M - Middle, intermediate
+N- User's choice
+U - Multifunction
+X - Unclassified

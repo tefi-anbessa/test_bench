@@ -5,7 +5,9 @@ en:
       title:        "Users"
       header:       "Users Index"
       message:      "Log in"
+      gravatar:     "Gravatar"
     show:
       title:        "User"
       header:       "Show User"
       message:      "Log in"
+      gravatar:     "Gravatar"

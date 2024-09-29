@@ -1,0 +1,27 @@
+<h1>Tags</h1>
+<%== pagy_bootstrap_nav(@pagy) %>
+<table class="table table-bordered">
+  <thead>
+    <th>Discipline</th>
+    <th>Tag</th>
+    <th>Description</th>
+    <th>Notes</th>
+    <th>Project</th>
+    <th>Phase</th>
+  </thead>
+  <tbody>
+      <% @tags.each do |tag| %>
+        <tr>
+          <div id="<%= dom_id tag %>">
+            <td><%= tag.discipline.code %></td>
+            <td><%= tag.full_tag %></td>
+            <td><%= tag.description %></td>
+            <td><%= tag.notes %></td>
+            <td><%= tag.project.code %></td>
+            <td><%= tag.project_phase %></td>
+          </div>
+        </tr>
+      <% end %>
+</tbody>
+</table>
+<%= link_to "New tag", new_tag_path %>

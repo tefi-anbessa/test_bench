@@ -4,7 +4,8 @@ class UsersController < ApplicationController
   end
 
   def index
-    @pagy, @records = pagy(User.all)
+    @q = User.ransack(params[:q])
+    @pagy, @users = pagy(@q.result, limit: 10)
   end
 
   private

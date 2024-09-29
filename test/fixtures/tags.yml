@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+pg:
+  prefix: PG
+  serial: 1001
+  suffix: ""
+  description: Header Pressure
+  phase: 1
+  notes: MyText
+  discipline: a
+  project: aa
+
+ec:
+  prefix: EC
+  serial: 1002
+  suffix: A
+  description: Cable type 4 from A to B
+  phase: 1
+  notes: MyText
+  discipline: b
+  project: zz

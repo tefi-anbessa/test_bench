@@ -1,44 +1,31 @@
-<div class="container-fluid form-horizontal">
-  <%= form_with(model: @project) do |f| %>
+<div class="container-fluid">
+  <%= bootstrap_form_with(model: @project) do |f| %>
     <%= render 'shared/error_messages', object: f.object %>
-
-    <div class="form-group row">
-      <%= f.label :code, class: "control-label col-sm-1" %>
-      <div class="col-sm-1">
-        <%= f.text_field :code, class: "form-control",
-                              placeholder: "Code" %>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <%= f.label :title, class: "control-label" %>
-      <div class="col-sm-4">
-        <%= f.text_field :title, class: "form-control",
-                              placeholder: "Title" %>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <%= f.label :description, class: "control-label col-sm-1" %>
-      <div class="col-sm-4">
-        <%= f.text_area :description, class: 'form-control',
-                              placeholder: "Description" %>
-      </div>
-    </div>
+    <%= f.text_field :code, hide_label: true,
+          placeholder: t('activerecord.attributes.project.code'),
+          help: t('activerecord.attributes.project.code_help') %>
+    <%= f.text_field :title, hide_label: true,
+          placeholder: t('activerecord.attributes.project.title'),
+          help: t('activerecord.attributes.project.title_help') %>
+    <%= f.text_area :description, hide_label: true,
+          placeholder: t('activerecord.attributes.project.description') %>
 
     <div class="actions">
-      <%= button_tag yield(:button_text), type: 'submit',
-              class: "btn btn-primary glyphicon glyphicon-record" %>
+      <%= f.primary do %>
+        <%= yield(:button_text) %>
+        <%== icon('save') %>
+      <% end %>
       <% if @project.persisted? %>
         <%= link_to @project, class: "btn btn-warning actions",
                 data: { turbo_confirm: t('actions.sure') } do %>
                 <%= t('actions.discard') %>
-                <span class="glyphicon glyphicon-eye-open"></span>
+                <%== icon('x-square') %>
         <% end %>
       <% else %>
-        <%= link_to projects_path, class: "btn btn-warning" do %>
-              <%= t('actions.discard') %>
-              <span class="glyphicon glyphicon-eject"></span>
+        <%= link_to projects_path, class: "btn btn-warning actions",
+                data: { turbo_confirm: t('actions.sure') }  do %>
+          <%= t('actions.discard') %>
+          <%== icon('x-square') %>
         <% end %>
       <% end %>
     </div>

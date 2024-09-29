@@ -33,4 +33,13 @@ class User < ApplicationRecord
       where(conditions.to_h).first
     end
   end
+
+  def self.ransackable_attributes(auth_object = nil)
+    ["name", "email", "created_at", "updated_at"]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    []
+  end
+  
 end

@@ -10,11 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_09_22_081007) do
-  create_table "disciplines", primary_key: "code", id: { type: :string, limit: 1 }, force: :cascade do |t|
+ActiveRecord::Schema[7.0].define(version: 2024_09_25_035835) do
+  create_table "disciplines", force: :cascade do |t|
+    t.string "code"
     t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
   end
 
   create_table "projects", force: :cascade do |t|
@@ -23,6 +22,22 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_22_081007) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "tags", force: :cascade do |t|
+    t.string "prefix"
+    t.integer "serial"
+    t.string "suffix", default: ""
+    t.string "description"
+    t.text "notes"
+    t.integer "project_id", null: false
+    t.integer "phase"
+    t.integer "discipline_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discipline_id"], name: "index_tags_on_discipline_id"
+    t.index ["prefix", "serial", "suffix"], name: "index_tags_on_full_tag", unique: true
+    t.index ["project_id"], name: "index_tags_on_project_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -53,4 +68,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_22_081007) do
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
+  add_foreign_key "tags", "disciplines"
+  add_foreign_key "tags", "projects"
 end
