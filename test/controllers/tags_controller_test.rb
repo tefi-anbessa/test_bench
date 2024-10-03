@@ -5,23 +5,33 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
 
   setup do
     @tag = tags(:pg)
+    @user = users(:valid)
+  end
+
+  test "no access if not signed in" do
+    get tags_url
+    assert_redirected_to new_user_session_url
+    assert_not flash.empty?
   end
 
   test "should get index" do
+    sign_in @user
     get tags_url
     assert_response :success
   end
 
   test "should get new" do
+    sign_in @user
     get new_tag_url
     assert_response :success
   end
 
   test "should create tag" do
+    sign_in @user
     assert_difference("Tag.count") do
       post tags_url, params: { tag: { description: @tag.description,
-                                      discipline: @tag.discipline,
-                                      serial: @tag.serial,
+                                      discipline_id: @tag.discipline_id,
+                                      serial: @tag.serial + 1,
                                       notes: @tag.notes,
                                       prefix: @tag.prefix,
                                       project_id: @tag.project_id,
@@ -33,28 +43,32 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should show tag" do
+    sign_in @user
     get tag_url(@tag)
     assert_response :success
   end
 
   test "should get edit" do
+    sign_in @user
     get edit_tag_url(@tag)
     assert_response :success
   end
 
   test "should update tag" do
+    sign_in @user
     patch tag_url(@tag), params: { tag: { description: @tag.description,
                                           discipline_id: @tag.discipline_id,
                                           serial: @tag.serial,
                                           notes: @tag.notes,
                                           prefix: @tag.prefix,
                                           project_id: @tag.project_id,
-                                          phase: @tag.project_phase,
+                                          phase: @tag.phase,
                                           suffix: @tag.suffix } }
     assert_redirected_to tag_url(@tag)
   end
 
   test "should destroy tag" do
+    sign_in @user
     assert_difference("Tag.count", -1) do
       delete tag_url(@tag)
     end

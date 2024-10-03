@@ -1,0 +1,48 @@
+
+en:
+  projects:
+    index:
+      title:            "Projects"
+      header:           "Projects Index"
+    edit:
+      title:            "Edit Project"
+      header:           "Edit Project: %{project}"
+    new:
+      title:            "New Project"
+      header:           "New Project"
+    show:
+      title:            "%{code}"
+      header:           "Project: %{code}"
+
+  site:
+    home:
+      title:        "Home"
+    about:
+      title:        "About"
+    contact:
+      title:        "Contact"
+    help:
+      title:        "Help"
+
+  tags:
+    index:
+      title:            "Tags"
+      header:           "Tags Index"
+    edit:
+      title:            "Edit Tag"
+      header:           "Edit Tag: %{tag}"
+    new:
+      title:            "New Tag"
+      header:           "New Tag"
+    show:
+      title:            "%{tag}"
+      header:           "Tag: %{tag}"
+
+  roles:
+    index:
+      title:            "Roles"
+      header:           "Roles Index"
+    new:
+      title:            "New Role"
+      header:           "New Role"
+      message_html:     "<small>This form can only submit global and resource roles. Submit instance roles from the resource view.</small>"

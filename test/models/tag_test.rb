@@ -50,7 +50,7 @@ class TagTest < ActiveSupport::TestCase
   end
 
 #  test "full tag method should work" do
-#    assert @tag.full_tag == "A-0001.B"
+#    assert tags(:pg).full_tag == "PG-1001"
 #  end
 
 end

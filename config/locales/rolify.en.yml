@@ -1,0 +1,10 @@
+en:
+  rolify:
+    names:
+      reader:       "reader"
+      author:       "author"
+      editor:       "editor"
+      checker:      "checker"
+      approver:     "approver"
+      admin:        "admin"
+      owner:        "owner"

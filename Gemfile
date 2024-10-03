@@ -75,6 +75,10 @@ gem "bootstrap_form", "~> 5.4"
 # Using order_query for previous and next items in complex sort order.
 # gem 'order_query', '~> 0.2.0'
 
+# Use gems "rolify" and "pundit" for authorization
+gem "rolify"
+gem "pundit"
+
 # End of added gems +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 group :development, :test do

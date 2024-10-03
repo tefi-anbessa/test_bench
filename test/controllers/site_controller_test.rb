@@ -2,10 +2,11 @@ require "test_helper"
 
 class SiteControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
-  
+
   test "should get home" do
     get site_home_url
     assert_response :success
+    assert_select "title", "Home"
   end
 
   test "should get help" do

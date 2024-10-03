@@ -1,6 +1,7 @@
 class Tag < ApplicationRecord
-  belongs_to :project
-  belongs_to :discipline
+  resourcify
+  belongs_to :project, dependent: :destroy
+  belongs_to :discipline, dependent: :destroy
 
   attribute :full_tag, :string
   after_find :set_full_tag
@@ -13,7 +14,7 @@ class Tag < ApplicationRecord
   validates :phase, inclusion: { in: 0..10 }
 
   def self.ransackable_attributes(auth_object = nil)
-    ["prefix", "serial", "suffix", "full_tag", "description", "phase", "created_at", "updated_at"]
+    ["prefix", "serial", "suffix", "description", "phase", "created_at", "updated_at"]
   end
 
   def self.ransackable_associations(auth_object = nil)

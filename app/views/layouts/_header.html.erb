@@ -4,7 +4,7 @@
       <%= link_to root_path,
                 class: ["navbar-brand", { active: current_page?(root_path) }],
                 id: "logo" do %>
-        <%= image_tag("favicon.ico") %>
+        <%= image_tag("favicon.ico", size: 40) %>
         <%= t('app_name') %>
       <% end %>
     </div>
@@ -34,6 +34,14 @@
 
         <% if user_signed_in? %>
           <ul class="nav nav-tabs">
+            <% if current_user.has_role? :admin %>
+              <li class="nav-item">
+                <%= link_to t('role', scope: 'activerecord.models').pluralize,
+                  roles_path,
+                  class: ['nav-link', { active: current_page?(controller: 'roles') }],
+                  aria: { label: t('role', scope: 'activerecord.models').pluralize } %>
+              </li>
+            <% end %>
             <li class="nav-item">
               <%= link_to t('project', scope: 'activerecord.models').pluralize,
                 projects_path,

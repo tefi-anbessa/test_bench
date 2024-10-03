@@ -1,5 +1,5 @@
 class Project < ApplicationRecord
-
+  resourcify
   before_save { self.code = code.upcase }
   has_many :tags
 

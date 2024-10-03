@@ -9,7 +9,11 @@ Rails.application.routes.draw do
     resources :users, :only => [:show, :index]
     resources :projects
     resources :tags
+    resources :users, :only => [] do
+      resources :roles, :only => [:destroy]
     end
+    resources :roles, :only => [:index, :new, :create]
+  end
 
   # Defines the root path route ("/")
   root to: 'site#home'

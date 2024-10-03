@@ -48,3 +48,7 @@ footer {
 .listing  {
   font-size: 0.8rem;
 }
+
+label.required:after {
+  content:" *";
+}

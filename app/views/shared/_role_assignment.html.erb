@@ -1,0 +1,29 @@
+<% if current_user && current_user.admin? %>
+<p class="h2 ps-2 mt-2 border-top">
+  <%= t('activerecord.models.role').pluralize %>
+</p>
+<div class="container-fluid">
+  <%= bootstrap_form_with(model: @role) do |f| %>
+    <%= render 'shared/error_messages', object: f.object %>
+    <%= t('.message_html') %>
+    <%= f.collection_select :user_id, @users, :id, :name, required: true %>
+    <%= f.select :name, role_names,
+            label: t('activerecord.model.role'), required: true %>
+    <%= f.hidden_field :resource_type, value: object.class %>
+    <%= f.hidden_field :resource_id, value: object.id %>
+
+    <div class="actions">
+      <%= f.primary do %>
+        <%= t('actions.save') %>
+        <%== icon('save') %>
+      <% end %>
+      <%= link_to roles_path, class: "btn btn-warning actions",
+              data: { turbo_confirm: t('actions.sure') }  do %>
+        <%= t('actions.discard') %>
+        <%== icon('x-square') %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<% end %>

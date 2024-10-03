@@ -1,6 +1,7 @@
 valid:
   name: valid
   email: mystring@test.com
+  confirmed_at: <%= Time.zone.now %>
   encrypted_password: <%= Devise::Encryptor.digest(User, 'password') %>
 
 invalid:
@@ -11,6 +12,7 @@ invalid:
 rogue:
   name: rogue
   email: rogue@test.com
+  confirmed_at: <%= Time.zone.now %>
   encrypted_password: <%= Devise::Encryptor.digest(User, 'password') %>
 
 
@@ -18,4 +20,5 @@ admin:
   name: admin
   email: admin@test.com
   admin: true
+  confirmed_at: <%= Time.zone.now %>
   encrypted_password: <%= Devise::Encryptor.digest(User, 'password') %>

@@ -1,13 +1,14 @@
 
 en:
-  app_name: "Test Bench"
   flag:     gb
+  app_name: "Test Bench"
 
   rails:
     walking:      "Walking on"
 
   actions:
-    save:         "Save changes"
+    save:         "Save"
+    save_change:  "Save Changes"
     delete:       "Delete"
     delete_sure:  "Are you sure? Delete cannot be undone."
     discard:      "Discard changes"

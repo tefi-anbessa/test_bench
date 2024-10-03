@@ -1,11 +1,15 @@
 en:
   activerecord:
     models:
+      resource:           "Resource"
       user:               "User"
       project:            "Project"
       discipline:         "Discipline"
       tag:                "Tag"
+      role:               "Role"
     attributes:
+      resource:
+        id:               "ID"
       user:
         user_name:        "user_name"
         email:            "email"
@@ -33,3 +37,6 @@ en:
         project_phase:    "Phase"
         notes:            "Notes"
         full_tag:         "Full tag"
+      role:
+        name:             "Name"
+        resource_type_help: "Leave blank for global role"

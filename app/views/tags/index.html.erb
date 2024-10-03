@@ -19,7 +19,15 @@
 <div class = "container">
   <div class = 'listing'>
     <%= search_form_for @q do |f| %>
-      <%= f.search_field :full_tag_or_description_cont, class: "search_field" %>
+      <%= f.search_field :prefix_cont,
+            class: "search_field",
+            placeholder: t('activerecord.attributes.tag.prefix') %>
+      <%= f.search_field :serial_cont,
+            class: "search_field",
+            placeholder: t('activerecord.attributes.tag.serial') %>
+      <%= f.search_field :description_cont,
+            class: "search_field",
+            placeholder: t('activerecord.attributes.tag.description') %>
       <%= f.button nil, class: "btn btn-primary btn-sm", action: :submit do %>
         <%== icon('search') %>
       <% end %>

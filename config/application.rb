@@ -27,5 +27,7 @@ module TestBench
       I18n.available_locales = [:en, :km ,:th, :cn]
     # end i18n
 
+      # List of approved role names for Rolify
+      config.role_names = %w[reader author editor checker approver admin owner]
   end
 end

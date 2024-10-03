@@ -1,9 +1,24 @@
 class ApplicationController < ActionController::Base
 
+  include Pundit::Authorization
   include Pagy::Backend
 
   around_action :switch_locale
   before_action :configure_permitted_parameters, if: :devise_controller?
+
+  rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
+#  rescue_from ActionController::Redirecting::UnsafeRedirectError do
+#    redirect_to root_url
+#  end
+
+  def xeqq(sql) # For use in console
+    results = ActiveRecord::Base.connection.exec_query(sql)
+    if results.present?
+      return results
+    else
+      return nil
+    end
+  end
 
   protected
 
@@ -23,4 +38,10 @@ class ApplicationController < ActionController::Base
       I18n.with_locale(locale, &action)
     end
 
+    private
+
+    def user_not_authorized
+      flash[:alert] = "You are not authorized to perform this action."
+      redirect_back_or_to(root_path)
+    end
 end

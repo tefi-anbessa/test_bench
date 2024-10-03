@@ -1,6 +1,7 @@
 <% provide(:title, t('.title')) %>
 <% provide(:button_text, t('actions.save')) %>
-<h2>
+<h2 class="m-2">
   <%= t('.header', project: @project.code)%>
 </h2>
 <%= render 'form' %>
+<%= render 'shared/role_assignment', object: @project %>

@@ -5,6 +5,7 @@ km:
       project:            "kh Project"
       discipline:         "kh Discipline"
       tag:                "kh Tag"
+      role:               "km Role"
     attributes:
       user:
         user_name:        "name_user"
@@ -27,3 +28,5 @@ km:
         project_phase:    "kh Phase"
         notes:            "kh Notes"
         full_tag:         "kh Full tag"
+      role:
+        name:             "km Name"

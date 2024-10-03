@@ -1,4 +1,7 @@
 class User < ApplicationRecord
+  rolify
+  after_create :assign_default_role
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
@@ -19,6 +22,11 @@ class User < ApplicationRecord
                    uniqueness: true
 
   attr_writer :login
+
+  def assign_default_role
+    self.add_role(:default) if self.roles.blank?
+  end
+
   # from devise wiki for allowing alternate login keys (name or email)
   def login
     @login || self.name || self.email
@@ -41,5 +49,5 @@ class User < ApplicationRecord
   def self.ransackable_associations(auth_object = nil)
     []
   end
-  
+
 end
