@@ -3,6 +3,7 @@ en:
     names:
       reader:       "reader"
       author:       "author"
+      creator:      "creator"
       editor:       "editor"
       checker:      "checker"
       approver:     "approver"

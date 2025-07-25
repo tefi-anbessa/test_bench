@@ -49,5 +49,26 @@ class ApplicationPolicy
     private
 
     attr_reader :user, :scope
+
   end
+
+  private
+    def can_read?(user, record)
+      user.has_any_role? :owner, :admin, {name: :reader, resource: record},
+                                          {name: :creator, resource: record},
+                                          {name: :editor, resource: record},
+                                          {name: :checker, resource: record},
+                                          {name: :approver, resource: record}
+    end
+
+    def can_edit?(user, record)
+      user.has_any_role? :owner, :admin, {name: :creator, resource: record},
+                                          {name: :editor, resource: record},
+                                          {name: :checker, resource: record},
+                                          {name: :approver, resource: record}
+    end
+
+    def can_create?(user, record)
+      user.has_any_role? :owner, :admin, {name: :creator, resource: record}
+    end
 end

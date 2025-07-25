@@ -29,7 +29,7 @@ class ProjectPolicy < ApplicationPolicy
   end
 
   def destroy?
-    user.is_owner? 
+    user.is_owner?
   end
 
   def edit?

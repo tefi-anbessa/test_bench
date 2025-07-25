@@ -1,28 +1,44 @@
 <div id="<%= dom_id tag %>">
-  <div class="container-fluid">
-    <div class="d-flex flex-row mb-3">
-      <p class="p2"><%= t('activerecord.attributes.discipline.code') %>:
-      <%= tag.discipline.code %></p>
+  <div class="container text-start">
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.models.project') %>:
+      </span>
+      <span class="col-4 data-field">
+        <%= tag.project.code + ': ' + tag.project.title %>
+      </span>
     </div>
-    <div class="d-flex flex-row mb-3">
-      <p class="p2"><%= t('activerecord.attributes.tag.full_tag') %>:
-        <%= tag.full_tag %></p>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.tag.phase') + ':' %>
+      </span>
+      <span class="col-1 data-field">
+        <%= tag.phase %>
+      </span>
     </div>
-    <div class="d-flex flex-row mb-3">
-      <p class="p2"><%= t('activerecord.attributes.tag.description') %>:
-        <%= tag.description %></p>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.tag.description') + ':' %>
+      </span>
+      <span class="col-4 data-field">
+        <%= tag.description %>
+      </span>
     </div>
-    <div class="d-flex flex-row mb-3">
-      <p class="p2"><%= t('activerecord.attributes.tag.notes') %>:
-        <%= tag.notes %></p>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.tag.notes')  + ':' %>
+      </span>
+      <span class="col-1 data-field">
+        <%= tag.notes %>
+      </span>
     </div>
-    <div class="d-flex flex-row mb-3">
-      <p class="p2"><%= t('activerecord.models.project') %>:
-        <%= tag.project.code %></p>
-    </div>
-    <div class="d-flex flex-row mb-3">
-      <p class="p2"><%= t('activerecord.attributes.tag.phase') %>:
-        <%= tag.phase %></p>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.tag.tagable_type') + ':' %>
+      </span>
+      <span class="col-1 data-field">
+        <%= tag.tagable_type %>
+      </span>
     </div>
   </div>
 </div>

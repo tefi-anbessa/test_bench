@@ -23,29 +23,29 @@
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
           <%= link_to t('menu.about'), site_about_path,
-            class: ["nav-link", { active: current_page?(site_about_path) }],
+            class: "nav-link",
             aria: { label: t('menu.about') } %>
         </li>
         <li class="nav-item">
           <%= link_to t('menu.help'), site_help_path,
-            class: ['nav-link', { active: current_page?(site_help_path) }],
+            class: 'nav-link',
             aria: { label: t('menu.help') } %>
         </li>
 
         <% if user_signed_in? %>
           <ul class="nav nav-tabs">
-            <% if current_user.has_role? :admin %>
+            <% if current_user.has_any_role? :admin, :owner %>
               <li class="nav-item">
                 <%= link_to t('role', scope: 'activerecord.models').pluralize,
                   roles_path,
-                  class: ['nav-link', { active: current_page?(controller: 'roles') }],
+                  class: 'nav-link',
                   aria: { label: t('role', scope: 'activerecord.models').pluralize } %>
               </li>
             <% end %>
             <li class="nav-item">
               <%= link_to t('project', scope: 'activerecord.models').pluralize,
                 projects_path,
-                class: ['nav-link', { active: current_page?(controller: 'projects') }],
+                class: 'nav-link',
                 aria: { label: t('project', scope: 'activerecord.models').pluralize } %>
             </li>
             <li class="nav-item">
@@ -54,7 +54,27 @@
                 class: "nav-link",
                 aria: { label: t('tag', scope: 'activerecord.models').pluralize } %>
             </li>
-          </ul>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle"
+                  href="#"
+                  data-bs-toggle="dropdown"
+                  id="electrical-menu-btn"
+                  role="button"
+                  aria-expanded="false">
+                Electrical
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li class="nav-item">
+                  <%= link_to t('load', scope: 'activerecord.models').pluralize,
+                    loads_path,
+                    class: "dropdown-item" %>
+                </li>
+                <li class="nav-item">
+                  <%= link_to t('cable', scope: 'activerecord.models').pluralize,
+                    cables_path,
+                    class: "dropdown-item" %>
+                </li>
+              </ul>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle"
                 href="#"

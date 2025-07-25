@@ -1,6 +1,6 @@
 valid:
   name: valid
-  email: mystring@test.com
+  email: valid@test.com
   confirmed_at: <%= Time.zone.now %>
   encrypted_password: <%= Devise::Encryptor.digest(User, 'password') %>
 

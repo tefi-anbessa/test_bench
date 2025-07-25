@@ -5,7 +5,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
   setup do
     @user = users(:valid)
-    $new_user = User.new
+    @new_user = User.new
     sign_in(@user)
   end
 

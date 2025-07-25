@@ -2,7 +2,7 @@
 <% provide(:title, t('.title', tag: @tag.full_tag)) %>
 <%# Header with navigation buttons. %>
 <nav class="navbar bg-body-tertiary">
-  <div class="container-fluid">
+  <div class="container">
     <ul class="navbar-nav flex-row page-heading">
       <li class="nav-item d-inline-flex p-1">
         <%= link_to tags_path,
@@ -45,7 +45,7 @@
         <% end %>
       </li>
 
-      <li class="nav-text h2 d-inline-flex p-1 ms-5 me-5">
+      <li class="nav-text h3 d-inline-flex p-1 ms-5 me-5">
         <%= t('.header', tag: @tag.full_tag) %>
       </li>
 
@@ -62,3 +62,31 @@
 </nav>
 
 <%= render @tag %>
+
+<% unless @tag.tagable_type.blank? %>
+  <nav class="navbar bg-body-tertiary">
+    <div class="container">
+      <ul class="navbar-nav flex-row">
+        <% if @tag.tagable_id.nil? %>
+          <li class="nav-item d-inline-flex p-1">
+            <%= link_to eval("new_tag_#{@tag.tagable_type.tableize.singularize}_path(#{@tag.id})"),
+                  class: "icon-link btn btn-sm btn-primary actions",
+                  title: t('actions.new') do %>
+              <%== icon('link-45deg') %>
+              <%= "Link New #{@tag.tagable_type}" %>
+            <% end %>
+          </li>
+        <% else %>
+          <li class="nav-item d-inline-flex p-1">
+            <%= link_to eval("#{@tag.tagable_type.tableize.singularize}_path(#{@tag.tagable_id})"),
+                  class: "icon-link btn btn-sm btn-secondary actions",
+                  title: t('actions.show') do %>
+              <%== icon('eye') %>
+              <%= "Show #{@tag.tagable_type}" %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </nav>
+<% end %>

@@ -1,0 +1,67 @@
+<% provide(:title, t('.title', id: @cable_type.id)) %>
+<%# Header with navigation buttons. %>
+<nav class="navbar bg-body-tertiary">
+  <div class="container">
+    <ul class="navbar-nav flex-row page-heading">
+      <% if policy(@cable_type).show? %>
+        <li class="nav-item d-inline-flex p-1">
+          <%= link_to cable_types_path,
+                class: "icon-link btn btn-sm btn-secondary actions",
+                title: t('actions.index') do %>
+            <%== icon('list-columns-reverse') %>
+            <%= t('actions.index') %>
+          <% end %>
+        </li>
+      <% end %>
+      <!-- Admin section -->
+      <% if policy(@cable_type).edit? %>
+        <li class="nav-item d-inline-flex p-1">
+          <%= link_to edit_cable_type_path(@cable_type),
+                class: "icon-link btn btn-sm btn-warning actions",
+                title: t('actions.edit') do %>
+                <%== icon('pencil') %>
+                <%= t('actions.edit') %>
+          <% end %>
+        </li>
+      <% end %>
+      <% if policy(@cable_type).destroy? %>
+        <li class="nav-item d-inline-flex p-1">
+          <%= link_to @cable_type,
+                method: :delete,
+                class: "icon-link btn btn-sm btn-danger actions",
+                title: t('actions.delete'),
+                data: { confirm: "Are you sure? Delete cannot be undone." } do %>
+            <%== icon('trash') %>
+            <%= t('actions.delete') %>
+          <% end %>
+        </li>
+      <% end %>
+
+      <li class="nav-item d-inline-flex p-1">
+        <%= link_to @cable_type.prev("id"),
+              class: "icon-link btn btn-sm btn-secondary actions",
+              title: t('actions.previous') do %>
+          <%== icon('arrow-left') %>
+          <%= t('actions.previous') %>
+        <% end %>
+      </li>
+
+      <li class="nav-text h3 d-inline-flex p-1 ms-5 me-5">
+        <%= t('.header', id: @cable_type.id) %>
+      </li>
+
+      <li class="nav-item d-inline-flex p-1">
+        <%= link_to @cable_type.next("id"),
+              class: "icon-link btn btn-sm btn-secondary actions",
+              title: t('actions.next') do %>
+          <%= t('actions.next') %>
+          <%== icon('arrow-right') %>
+        <% end %>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container">
+  <%= render @cable_type %>
+</div>

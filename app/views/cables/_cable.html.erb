@@ -1,0 +1,93 @@
+<div id="<%= dom_id cable %>">
+  <div class="container text-start">
+    <% if cable.tag.nil? %>
+      <div class="d-flex flex-row mb-1">
+        <span class="col-1 data-label">
+          <% t('show.orphan', model: t("activerecord.models.tag").tableize) %>
+        </span>
+      </div>
+    <% else %>
+      <div class="d-flex flex-row mb-1">
+        <span class="col-1 data-label">
+          <%= t('activerecord.attributes.tag.full_tag') + ':' %>
+        </span>
+        <span class="col-1 data-field">
+          <%= link_to cable.tag.full_tag, tag_path(cable.tag.id) %>
+        </span>
+        <span class="col-4 data-field">
+          <%= cable.tag.description %>
+        </span>
+      </div>
+    <% end %>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.cable.cable_type_id') %>:
+      </span>
+      <span class="col-1 data-field">
+        <%= link_to cable.cable_type_id, cable_type_path(cable.cable_type_id) %>
+      </span>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.cable.from_id') %>:
+      </span>
+      <span class="col-1 data-field">
+        <%= link_to cable.feeder.tag.full_tag, load_path(cable.feeder.tag.load.id) %>
+      </span>
+      <span class="col-4 data-field">
+        <%= cable.feeder.tag.description %>
+      </span>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.cable.to_id') %>:
+      </span>
+      <span class="col-1 data-field">
+        <%= link_to cable.incomer.tag.full_tag, load_path(cable.incomer.tag.load.id) %>
+      </span>
+      <span class="col-4 data-field">
+        <%= cable.incomer.tag.description %>
+      </span>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.cable.route_length') %>:
+      </span>
+      <span class="col-1 data-field">
+        <%= cable.route_length %>m
+      </span>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.cable.vertical_allowance') %>:
+      </span>
+      <span class="col-1 data-field">
+        <%= cable.vertical_allowance %>m
+      </span>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.cable.termination_allowance') %>:
+      </span>
+      <span class="col-1 data-field">
+        <%= cable.termination_allowance %>m
+      </span>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.cable.start_mark') %>:
+      </span>
+      <span class="col-1 data-field">
+        <%= cable.start_mark %>m
+      </span>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.cable.end_mark') %>:
+      </span>
+      <span class="col-1 data-field">
+        <%= cable.end_mark %>m
+      </span>
+    </div>
+  </div>
+</div>

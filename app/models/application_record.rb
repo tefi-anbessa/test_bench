@@ -8,5 +8,8 @@ class ApplicationRecord < ActiveRecord::Base
   def prev(attribute)
     self.class.where("#{attribute} < ?", self.send(attribute)).order("#{attribute} DESC").first || self
   end
-
+  
+  def self.human_enum_name(enum_name, enum_value)
+    I18n.t("activerecord.attributes.#{model_name.i18n_key}.#{enum_name.to_s.pluralize}.#{enum_value}")
+  end
 end

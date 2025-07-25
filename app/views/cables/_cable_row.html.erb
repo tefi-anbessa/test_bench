@@ -1,0 +1,37 @@
+  <tr scope="row">
+    <% if row.tag.nil? %>
+      <td class="table-danger">No tag; ID: <%= row.id %></td>
+    <% else %>
+      <td><%= link_to row.tag.full_tag, tag_path(row.tag) %></td>
+    <% end %>
+    <td><%= link_to row.cable_type_id, cable_type_path(row.cable_type_id) %></td>
+    <td><%= link_to row.feeder.tag.full_tag, load_path(row.feeder.tag.load.id) %></td>
+    <td><%= link_to row.incomer.tag.full_tag, load_path(row.incomer.tag.load.id) %></td>
+    <td><%= row.route_length %></td>
+    <td><%= row.vertical_allowance %></td>
+    <td><%= row.termination_allowance %></td>
+    <td><%= row.start_mark %></td>
+    <td><%= row.end_mark %></td>
+    <td>
+      <%= link_to cable_path(row), class: "btn btn-secondary btn-sm icon-link",
+            aria: { label: t('actions.show') },
+            title: t('actions.show'),
+            display: "inline" do %>
+        <%== icon('eye') %>
+      <% end %>
+      <%= link_to edit_cable_path(row), class: "btn btn-warning btn-sm icon-link",
+            aria: { label: t('actions.edit') },
+            title: t('actions.edit'),
+            display: "inline"  do %>
+        <%== icon('pencil') %>
+      <% end %>
+      <% if current_user && current_user.admin? %>
+        <%= link_to cable_path(row), method: :delete, class: "btn btn-danger btn-sm icon-link",
+              aria: { label: t('actions.delete') },
+              title: t('actions.delete'),
+              display: "inline"  do %>
+          <%== icon('trash') %>
+        <% end %>
+      <% end %>
+    </td>
+  </tr>

@@ -1,0 +1,28 @@
+    <tr scope="row">
+      <td><%= t.phase %></td>
+      <td><%= link_to t.full_tag, tag_path(t) %></td>
+      <td><%= t.description %></td>
+      <td><%= t.notes %></td>
+      <td>
+        <%= link_to tag_path(t), class: "btn btn-secondary btn-sm icon-link",
+              aria: { label: t('actions.show') },
+              title: t('actions.show'),
+              display: "inline" do %>
+          <%== icon('eye') %>
+        <% end %>
+        <%= link_to edit_tag_path(t), class: "btn btn-warning btn-sm icon-link",
+              aria: { label: t('actions.edit') },
+              title: t('actions.edit'),
+              display: "inline"  do %>
+          <%== icon('pencil') %>
+        <% end %>
+        <% if current_user && current_user.admin? %>
+          <%= link_to t, method: :delete, class: "btn btn-danger btn-sm icon-link",
+                aria: { label: t('actions.delete') },
+                title: t('actions.delete'),
+                display: "inline"  do %>
+            <%== icon('trash') %>
+          <% end %>
+        <% end %>
+      </td>
+    </tr>

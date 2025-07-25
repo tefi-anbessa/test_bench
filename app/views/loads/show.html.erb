@@ -1,0 +1,95 @@
+<% provide(:title, t('.title', tag: @load.tag.nil? ? "No tag" : @load.tag.full_tag )) %>
+<%# Header with navigation buttons. %>
+<nav class="navbar bg-body-tertiary">
+  <div class="container">
+    <ul class="navbar-nav flex-row page-heading">
+      <li class="nav-item d-inline-flex p-1">
+        <%= link_to loads_path,
+              class: "icon-link btn btn-sm btn-secondary actions",
+              title: t('actions.index') do %>
+          <%== icon('list-columns-reverse') %>
+          <%= t('actions.index') %>
+        <% end %>
+      </li>
+      <!-- Admin section -->
+      <% if current_user && current_user.admin %>
+        <li class="nav-item d-inline-flex p-1">
+          <%= link_to edit_load_path(@load),
+                class: "icon-link btn btn-sm btn-warning actions",
+                title: t('actions.edit') do %>
+                <%== icon('pencil') %>
+                <%= t('actions.edit') %>
+          <% end %>
+        </li>
+      <% end %>
+      <% if current_user && current_user.admin %>
+        <li class="nav-item d-inline-flex p-1">
+          <%= link_to @load,
+                method: :delete,
+                class: "icon-link btn btn-sm btn-danger actions",
+                title: t('actions.delete'),
+                data: { confirm: "Are you sure? Delete cannot be undone." } do %>
+            <%== icon('trash') %>
+            <%= t('actions.delete') %>
+          <% end %>
+        </li>
+      <% end %>
+
+      <li class="nav-item d-inline-flex p-1">
+        <%= link_to @load.prev("id"),
+              class: "icon-link btn btn-sm btn-secondary actions",
+              title: t('actions.previous') do %>
+          <%== icon('arrow-left') %>
+          <%= t('actions.previous') %>
+        <% end %>
+      </li>
+
+      <li class="nav-text h3 d-inline-flex p-1 ms-5 me-5">
+        <%= t('.header', tag: @load.tag.nil? ? "No tag" : @load.tag.full_tag ) %>
+      </li>
+
+      <li class="nav-item d-inline-flex p-1">
+        <%= link_to @load.next("id"),
+              class: "icon-link btn btn-sm btn-secondary actions",
+              title: t('actions.next') do %>
+          <%= t('actions.next') %>
+          <%== icon('arrow-right') %>
+        <% end %>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container">
+  <%= render @load %>
+</div>
+
+<div class="container">
+  <% unless @load.loadable_type.blank? %>
+    <nav class="navbar bg-body-tertiary">
+      <div class="container">
+        <ul class="navbar-nav flex-row">
+          <% if @load.loadable.nil? %>
+            <li class="nav-item d-inline-flex p-1">
+              <%= link_to eval("new_tag_#{@load.loadable_type.tableize.singularize}_path(#{@load.id})"),
+                    class: "icon-link btn btn-sm btn-primary actions",
+                    title: t('actions.new') do %>
+                <%== icon('link-45deg') %>
+                <%= "Link New #{@load.loadable_type}" %>
+              <% end %>
+            </li>
+          <% else %>
+            <li class="nav-item d-inline-flex p-1">
+              <%= link_to eval("#{@load.loadable_type.tableize.singularize}_path(#{@load.id})"),
+                    class: "icon-link btn btn-sm btn-primary actions",
+                    title: t('actions.new') do %>
+                <%== icon('eye') %>
+                <%= "Show #{@load.loadable_type}" %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </nav>
+  <% end %>
+</div>

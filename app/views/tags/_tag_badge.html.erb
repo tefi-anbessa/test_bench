@@ -1,0 +1,17 @@
+<div id="<%= dom_id tag %>">
+  <div class="container border bg-primary-subtle border-primary-subtle mb-2">
+
+    <div class="d-flex flex-row">
+      <div class="p-2">
+        <%= link_to tag.full_tag, tag_path(tag) %>
+        <%= tag.description %>
+      </div>
+    </div>
+    <div class="d-flex flex-row">
+      <div class="p-2">
+        <%= t('activerecord.attributes.tag.notes') %>:
+        <%= tag.notes %>
+      </div>
+    </div>
+  </div>
+</div>

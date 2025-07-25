@@ -1,7 +1,6 @@
-<% provide(:title, t('.title')) %>
+<% provide(:title, t('.title', tag: @tag.full_tag)) %>
 <% provide(:button_text, t('actions.save')) %>
 <h2 class="m-2">
   <%= t('.header', tag: @tag.full_tag)%>
 </h2>
 <%= render 'form' %>
-<%= render 'shared/role_assignment', object: @project %>

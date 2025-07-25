@@ -1,3 +1,22 @@
+/* Style for show data
+*/
+.data-field {
+  background-color: WhiteSmoke;
+  padding: 2px;
+  margin-right: 5px;
+}
+.data-label {
+  font-style: italic;
+  background-color: WhiteSmoke;
+  padding: 2px;
+  margin-right: 5px;
+}
+
+/* Style for form data
+*/
+.form-field {
+  background-color: HoneyDew;
+}
 
 /* Style the footer as BS doesn't
 */
@@ -51,4 +70,10 @@ footer {
 
 label.required:after {
   content:" *";
+}
+
+/* Highlight search results
+*/
+mark {
+  background-color: yellow;
 }

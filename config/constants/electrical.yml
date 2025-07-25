@@ -1,0 +1,85 @@
+electrical:
+  phase_designation:
+    "L1":       1
+    "L2":       2
+    "L3":       3
+    "ALL":      4
+  protection:
+    device:
+      "MCB":  1
+      "MCCB": 2
+    curve:
+      "A":  1
+      "B":  2
+      "C":  3
+      "D":  4
+      "K":  5
+    elcb:
+      "None": 1
+      "20mA": 2
+      "30mA": 3
+      "other":  4
+  mcb_rating:
+    - 1
+    - 2
+    - 4
+    - 6
+    - 10
+    - 16
+    - 20
+    - 25
+    - 32
+    - 40
+    - 50
+    - 63
+  conductor_csa:
+    - 0.5
+    - 0.75
+    - 1.0
+    - 1.5
+    - 2.5
+    - 4.0
+    - 6.0
+    - 10.0
+    - 16.0
+    - 25.0
+    - 35.0
+    - 50.0
+    - 70.0
+    - 95.0
+    - 120.0
+    - 150.0
+    - 185.0
+    - 240.0
+    - 300.0
+    - 400.0
+    - 500.0
+  temperature_rating:
+    - "60˚C"
+    - "75˚C"
+    - "90˚C"
+  load_basis:
+    summation:      1
+    power_pf:       2
+    vector_pf:      3
+    current_pf:     4
+    current_power:  5
+  load_configuration:
+    dc:             1
+    one:            2
+    two_120:        3
+    two_180:        4
+    three_3c:       5
+    three_4c:       6
+  supply:
+    "220V":             220.0
+    "240V":             240.0
+    "400V":             400.0
+    "415V":             415.0
+    "690V":             690.0
+    "1kV":              1000.0
+# Do not change the order! Insert any new element at the end. Don't remove any element.
+# The index is saved in the tag table enum, changing the index of a type will change all existing tags.
+  loadable:
+    - Switchboard
+    - Motor

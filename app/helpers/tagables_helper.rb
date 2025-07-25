@@ -1,0 +1,2 @@
+module TagablesHelper
+end

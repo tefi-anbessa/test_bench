@@ -1,0 +1,57 @@
+<%= form_with(model: cable) do |form| %>
+  <% if cable.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(cable.errors.count, "error") %> prohibited this cable from being saved:</h2>
+
+      <ul>
+        <% cable.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :cable_type_id, style: "display: block" %>
+    <%= form.text_field :cable_type_id %>
+  </div>
+
+  <div>
+    <%= form.label :from, style: "display: block" %>
+    <%= form.number_field :from %>
+  </div>
+
+  <div>
+    <%= form.label :to, style: "display: block" %>
+    <%= form.number_field :to %>
+  </div>
+
+  <div>
+    <%= form.label :route_length, style: "display: block" %>
+    <%= form.text_field :route_length %>
+  </div>
+
+  <div>
+    <%= form.label :vertical_allowance, style: "display: block" %>
+    <%= form.text_field :vertical_allowance %>
+  </div>
+
+  <div>
+    <%= form.label :termination_allowance, style: "display: block" %>
+    <%= form.text_field :termination_allowance %>
+  </div>
+
+  <div>
+    <%= form.label :start_mark, style: "display: block" %>
+    <%= form.number_field :start_mark %>
+  </div>
+
+  <div>
+    <%= form.label :end_mark, style: "display: block" %>
+    <%= form.number_field :end_mark %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

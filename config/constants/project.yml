@@ -1,0 +1,12 @@
+# Do not change the order! Insert any new element at the end.
+# The index is saved in the tag table enum, changing the index of a type will change all existing tags.
+tagable:
+  - Load
+  - Switchboard
+  - Cable
+  - Motor
+  - Socket_Circuit
+  - Light_Circuit
+  - Pipe
+  - Source
+  - Consumer

@@ -1,5 +1,25 @@
 
 en:
+  site:
+    home:
+      title:        "Home"
+    about:
+      title:        "About"
+    contact:
+      title:        "Contact"
+    help:
+      title:        "Help"
+  users:
+    index:
+      title:        "Users"
+      header:       "Users Index"
+      message:      "Log in"
+      gravatar:     "Gravatar"
+    show:
+      title:        "User"
+      header:       "Show User"
+      message:      "Log in"
+      gravatar:     "Gravatar"
   projects:
     index:
       title:            "Projects"
@@ -13,30 +33,19 @@ en:
     show:
       title:            "%{code}"
       header:           "Project: %{code}"
-
-  site:
-    home:
-      title:        "Home"
-    about:
-      title:        "About"
-    contact:
-      title:        "Contact"
-    help:
-      title:        "Help"
-
   tags:
     index:
       title:            "Tags"
-      header:           "Tags Index"
+      header:           "Tag List"
     edit:
-      title:            "Edit Tag"
-      header:           "Edit Tag: %{tag}"
+      title:            "Edit %{tag}"
+      header:           "%{tag}"
     new:
       title:            "New Tag"
       header:           "New Tag"
     show:
-      title:            "%{tag}"
-      header:           "Tag: %{tag}"
+      title:            "Tag %{tag}"
+      header:           "%{tag}"
 
   roles:
     index:
@@ -45,4 +54,46 @@ en:
     new:
       title:            "New Role"
       header:           "New Role"
-      message_html:     "<small>This form can only submit global and resource roles. Submit instance roles from the resource view.</small>"
+      message_html:     "<small>This form can only submit global and resource roles. Submit instance roles from the resource view (if available).</small>"
+
+  cable_types:
+    index:
+      title:            "Cable Types"
+      header:           "Cable Types"
+    edit:
+      title:            "Edit Cable Type"
+      header:           "Edit Cable Type"
+    new:
+      title:            "New Cable Type"
+      header:           "New Cable Type"
+    show:
+      title:            "Cable Type %{id}"
+      header:           "Cable Type %{id}"
+
+  cables:
+    index:
+      title:            "Cables"
+      header:           "Cables"
+    edit:
+      title:            "Edit Cable"
+      header:           "Edit Cable"
+    new:
+      title:            "New Cable"
+      header:           "New Cable"
+    show:
+      title:            "Cable %{tag}"
+      header:           "Cable %{tag}"
+
+  loads:
+    index:
+      title:            "Load List"
+      header:           "Load List"
+    edit:
+      title:            "Edit Load"
+      header:           "Edit Load"
+    new:
+      title:            "New Load"
+      header:           "New Load"
+    show:
+      title:            "Load %{tag}"
+      header:           "Load: %{tag}"

@@ -1,0 +1,14 @@
+<thead>
+  <th scope="col"><%= sort_link(@q, :code, t('activerecord.attributes.tag.full_tag')) %></th>
+  <th scope="col"><%= t('activerecord.attributes.load.basis') %></th>
+  <th scope="col"><%= t('activerecord.attributes.load.config') %></th>
+  <th scope="col"><%= t('activerecord.attributes.load.supply') %></th>
+  <th scope="col"><%= t('activerecord.attributes.load.power') %></th>
+  <th scope="col"><%= t('activerecord.attributes.load.vector') %></th>
+  <th scope="col"><%= t('activerecord.attributes.load.power_factor') %></th>
+  <th scope="col"><%= t('activerecord.attributes.load.current') %></th>
+  <th scope="col"><%= t('activerecord.attributes.load.duty') %></th>
+  <th scope="col"><%= t('activerecord.attributes.load.loadable_type') %></th>
+  <th scope="col" width="150px"><%= t('table.links')%></th>
+</thead>
+sort_link(@q, :code)

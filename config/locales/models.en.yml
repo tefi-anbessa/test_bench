@@ -7,6 +7,11 @@ en:
       discipline:         "Discipline"
       tag:                "Tag"
       role:               "Role"
+      cable_type:         "Cable Type"
+      cable:              "Cable"
+      load:               "Load"
+      switchboard:        "Switchboard"
+      protection:         "Protection"
     attributes:
       resource:
         id:               "ID"
@@ -27,7 +32,7 @@ en:
         name:             "Name"
       tag:
         prefix:           "Prefix"
-        prefix_help:      "Prefix should be selected from ISA 5.1"
+        prefix_help:      "Prefix should preferebly be selected from existing list"
         serial:           "Loop"
         serial_help:      "Loop should be 4 digits"
         suffix:           "Suffix"
@@ -36,7 +41,68 @@ en:
         description_help: "Description should be 40 characters maximum"
         project_phase:    "Phase"
         notes:            "Notes"
-        full_tag:         "Full tag"
+        full_tag:         "Tag"
+        tagable_type:     "Tag Type"
       role:
         name:             "Name"
         resource_type_help: "Leave blank for global role"
+      cable_type:
+        conductor_material:	Conductor material
+        conductor_makeup:	Conductor makeup
+        csa:	CSA
+        csa_units:  sq mm
+        neutral_csa:	Neutral CSA
+        earth_csa:	Earth CSA
+        insulation:	Insulation
+        bedding:	Bedding
+        armour:	Armour
+        sheath:	Sheath
+        bedding_od:	Bedding OD
+        overall_od:	Overall OD
+        od_units: mm
+        temperature_rating:	Temperature Rating
+      cable:
+        cable_type_id:        "Cable Type"
+        from_id:              "From Tag"
+        to_id:                "To Tag"
+        route_length:         "Route Length"
+        vertical_allowance:   "Vertical Allowance"
+        termination_allowance:  "Termination Allowance"
+        start_mark:           "Start Mark"
+        end_mark:             "End Mark"
+
+      load:
+        basis:            "Basis"
+        bases:
+          summation:      "Summation of outgoing feeders"
+          power_pf:       "Calculate current from power and power factor"
+          vector_pf:      "Calculate current from vector and power factor"
+          current_pf:     "Calculate power, vector from current and power factor"
+          current_power:  "Calculate vector, power factor from current and power"
+        basis_help:       "Defines which load parameters are given and which are calculated"
+        basis_notes:      "Load Basis Notes"
+        basis_notes_help: "Record references for derivation of the load parameters"
+        config:           "Configuration"
+        configs:
+          dc:             "DC"
+          one:            "AC L-N 1 phase"
+          two_120:        "AC L-N 2 phase 120˚"
+          two_180:        "AC L-N 2 phase 180˚"
+          three_3c:       "AC L-L 3 phase 3 wire"
+          three_4c:       "AC L-N 3 phase 4 wire"
+        config_help:      "Select the power system for the load"
+        supply:           "Supply (V)"
+        supply_help:      "Select the supply voltage for the load. Leave blank for other supply."
+        power:            "Power (W)"
+        vector:           "Vector (VA)"
+        power_factor:     "Power Factor"
+        current:          "Current (A)"
+        duty:             "Duty"
+        duty_help:        "Proportional ON time for the load, for total load estimates"
+        loadable_type:    "Load Type"
+        loadable:         "Load Detail"
+        loadable_help:    "Click for datasheet"
+      switchboard:
+        ingress_protection: "Ingress Protection"
+      feeder:
+        circuit:          "Circuit"

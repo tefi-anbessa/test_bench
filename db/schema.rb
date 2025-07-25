@@ -10,10 +10,80 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_09_29_050821) do
+ActiveRecord::Schema[7.0].define(version: 2025_07_24_031503) do
+  create_table "cable_types", force: :cascade do |t|
+    t.string "conductor_material"
+    t.string "conductor_makeup"
+    t.float "csa"
+    t.float "neutral_csa"
+    t.float "earth_csa"
+    t.string "insulation"
+    t.string "bedding"
+    t.string "armour"
+    t.string "sheath"
+    t.decimal "bedding_od", precision: 3, scale: 1
+    t.decimal "overall_od", precision: 3, scale: 1
+    t.integer "temperature_rating"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "cables", force: :cascade do |t|
+    t.integer "cable_type_id", null: false
+    t.integer "from_id"
+    t.integer "to_id"
+    t.decimal "route_length", precision: 4, scale: 1
+    t.decimal "vertical_allowance", precision: 3, scale: 1
+    t.decimal "termination_allowance", precision: 3, scale: 1
+    t.integer "start_mark"
+    t.integer "end_mark"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["cable_type_id"], name: "index_cables_on_cable_type_id"
+    t.index ["from_id"], name: "index_cables_on_from_id"
+    t.index ["to_id"], name: "index_cables_on_to_id"
+  end
+
+  create_table "circuits", force: :cascade do |t|
+    t.integer "switchboard_id", null: false
+    t.integer "device"
+    t.integer "poles"
+    t.integer "curve"
+    t.float "rating"
+    t.integer "elcb"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "serial"
+    t.integer "phase"
+    t.boolean "contactor?"
+    t.integer "load_id"
+    t.integer "cable_id"
+    t.index ["cable_id"], name: "index_circuits_on_cable_id"
+    t.index ["load_id"], name: "index_circuits_on_load_id"
+    t.index ["switchboard_id"], name: "index_circuits_on_switchboard_id"
+  end
+
   create_table "disciplines", force: :cascade do |t|
     t.string "code"
     t.string "name"
+  end
+
+  create_table "loads", force: :cascade do |t|
+    t.integer "basis"
+    t.string "basis_notes"
+    t.float "supply"
+    t.integer "config"
+    t.float "power"
+    t.float "vector"
+    t.float "power_factor"
+    t.float "current"
+    t.float "duty"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "loadable_type"
+    t.integer "loadable_id"
+    t.index ["loadable_type", "loadable_id"], name: "index_loads_on_loadable"
   end
 
   create_table "projects", force: :cascade do |t|
@@ -35,6 +105,22 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_29_050821) do
     t.index ["resource_type", "resource_id"], name: "index_roles_on_resource"
   end
 
+  create_table "switchboards", force: :cascade do |t|
+    t.string "location"
+    t.integer "service"
+    t.string "ingress_protection"
+    t.float "busbar_rating"
+    t.float "busbar_fault_rating"
+    t.float "busbar_fault_duration"
+    t.string "cable_entry"
+    t.text "incomer_protection"
+    t.text "metering"
+    t.text "neutral_bar_connections"
+    t.text "earth_bar_connections"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "tags", force: :cascade do |t|
     t.string "prefix"
     t.integer "serial"
@@ -46,9 +132,12 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_29_050821) do
     t.integer "discipline_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "tagable_type"
+    t.integer "tagable_id"
     t.index ["discipline_id"], name: "index_tags_on_discipline_id"
     t.index ["prefix", "serial", "suffix"], name: "index_tags_on_full_tag", unique: true
     t.index ["project_id"], name: "index_tags_on_project_id"
+    t.index ["tagable_type", "tagable_id"], name: "index_tags_on_tagable"
   end
 
   create_table "users", force: :cascade do |t|
@@ -87,6 +176,12 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_29_050821) do
     t.index ["user_id"], name: "index_users_roles_on_user_id"
   end
 
+  add_foreign_key "cables", "cable_types"
+  add_foreign_key "cables", "loads", column: "from_id"
+  add_foreign_key "cables", "loads", column: "to_id"
+  add_foreign_key "circuits", "cables"
+  add_foreign_key "circuits", "loads"
+  add_foreign_key "circuits", "switchboards"
   add_foreign_key "tags", "disciplines"
   add_foreign_key "tags", "projects"
 end

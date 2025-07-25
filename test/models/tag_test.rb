@@ -7,10 +7,10 @@ class TagTest < ActiveSupport::TestCase
                     serial: 1,
                     suffix: "B",
                     description: "Pump sump",
+                    project: projects(:aa),
                     phase: 0,
                     notes: "yadda",
-                    discipline: disciplines(:a),
-                    project: projects(:aa)
+                    discipline: disciplines(:a)
                   )
   end
 
@@ -20,7 +20,7 @@ class TagTest < ActiveSupport::TestCase
     end
   end
 
-  test "should be valid" do
+  test "setup should be valid" do
     assert @tag.valid?
   end
 
@@ -49,8 +49,9 @@ class TagTest < ActiveSupport::TestCase
     assert_not @tag.valid?
   end
 
-#  test "full tag method should work" do
-#    assert tags(:pg).full_tag == "PG-1001"
-#  end
+  test "full tag method should work" do
+    assert_equal tags(:pg).full_tag, "A:PG-1001"
+    assert_equal tags(:ec).full_tag, "B:EC-1002.A"
+  end
 
 end

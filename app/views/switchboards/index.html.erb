@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Switchboards</h1>
+
+<div id="switchboards">
+  <% @switchboards.each do |switchboard| %>
+    <%= render switchboard %>
+    <p>
+      <%= link_to "Show this switchboard", switchboard %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New switchboard", new_switchboard_path %>

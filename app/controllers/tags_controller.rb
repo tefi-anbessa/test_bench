@@ -1,7 +1,8 @@
 class TagsController < ApplicationController
   before_action :set_tag, only: %i[ show edit update destroy ]
+#  before_action :new_params, only: %i[ create update ]
   before_action :authenticate_user!
-  after_action :verify_authorized
+#  after_action :verify_authorized
 
   # GET /tags or /tags.json
   def index
@@ -63,13 +64,22 @@ class TagsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
     def set_tag
       @tag = authorize Tag.find(params[:id])
     end
 
-    # Only allow a list of trusted parameters through.
     def tag_params
-      params.require(:tag).permit(:prefix, :serial, :suffix, :description, :notes, :project_id, :discipline_id, :phase)
+      params.require(:tag).permit(:project_id, :phase, :discipline_id,
+                                  :prefix, :new_prefix, :serial, :suffix,
+                                  :description, :notes,
+                                  :tagable_type, :tagable_id)
     end
+
+    def new_params
+      # This has been moved to model callback. Check if a new prefix has been added.
+      if params[:tag][:new_prefix].present? && params[:tag][:prefix].empty?
+        params[:tag][:prefix] = params[:tag][:new_prefix]
+      end
+    end
+
 end

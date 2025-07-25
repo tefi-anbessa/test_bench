@@ -20,6 +20,14 @@ en:
     next:         "Next"
     previous:     "Prev"
 
+  show:
+    orphan:       "No associated parent %{model}"
+
+  form:
+    other:        "Other"
+    new_select:   "Leave blank when adding new selection"
+    undefined:    "Undefined"
+
   menu:
     toggle:       "Toggle navigation"
     profile:      "Profile"
@@ -33,6 +41,11 @@ en:
 
   table:
     links:        "Links"
+
+  index:
+    orphans:      "The following %{models} do not have an associated tag:"
+    link_incomplete:  "The following tags are listed as %{models} but are not yet assigned:"
+    link_broken:      "The following tags are listed as %{models} but the %{models} do not exist:"
 
   footer:
     credit:       "Website by frankie fusion. "

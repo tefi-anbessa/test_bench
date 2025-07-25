@@ -1,0 +1,41 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+ec1:
+  cable_type: one
+  feeder: ex4
+  incomer: pm
+  route_length: 9.99
+  vertical_allowance: 9.99
+  termination_allowance: 9.99
+  start_mark: 1
+  end_mark: 16
+
+ec2:
+  cable_type: two
+  feeder: ex4
+  incomer: es
+  route_length: 9.99
+  vertical_allowance: 9.99
+  termination_allowance: 9.99
+  start_mark: 17
+  end_mark: 41
+
+ec3:
+  cable_type: two
+  feeder: ex4
+  incomer: es
+  route_length: 9.99
+  vertical_allowance: 9.99
+  termination_allowance: 9.99
+  start_mark: 17
+  end_mark: 41
+
+ec4:
+  cable_type: two
+  feeder: ex4
+  incomer: es
+  route_length: 9.99
+  vertical_allowance: 9.99
+  termination_allowance: 9.99
+  start_mark: 17
+  end_mark: 41

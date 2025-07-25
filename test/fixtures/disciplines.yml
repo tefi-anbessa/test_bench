@@ -7,3 +7,7 @@ a:
 b:
   code: B
   name: Architecture
+
+e:
+  code: E
+  name: Electrical

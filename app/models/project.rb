@@ -1,7 +1,7 @@
 class Project < ApplicationRecord
   resourcify
   before_save { self.code = code.upcase }
-  has_many :tags
+  has_many :tags, dependent: :destroy
 
   VALID_CODE_REGEX = /[A-Z][A-Z]/
   validates :code,        presence: true, length: { is: 2},
@@ -14,6 +14,6 @@ class Project < ApplicationRecord
   end
 
   def self.ransackable_associations(auth_object = nil)
-    []
+    [ :tags ]
   end
 end

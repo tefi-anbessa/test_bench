@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @switchboard %>
+
+<div>
+  <%= link_to "Edit this switchboard", edit_switchboard_path(@switchboard) %> |
+  <%= link_to "Back to switchboards", switchboards_path %>
+
+  <%= button_to "Destroy this switchboard", @switchboard, method: :delete %>
+</div>

@@ -1,6 +1,6 @@
 class Discipline < ApplicationRecord
   before_save { self.code = code.upcase }
-  has_many :tags
+  has_many :tags, dependent: :destroy
 
   VALID_CODE_REGEX = /[A-Z]/
   validates :code,        presence: true, length: { is: 1},

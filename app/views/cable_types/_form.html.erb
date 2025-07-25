@@ -1,0 +1,80 @@
+<div class="container">
+  <%= bootstrap_form_with(model: @cable_type) do |f| %>
+    <%= render 'shared/error_messages', object: f.object %>
+    <div class="d-flex flex-row mb-1">
+      <div class="p-2 me-1 form-field">
+        <%= f.text_field :conductor_material %>
+      </div>
+      <div class="p-2 me-1 form-field">
+        <%= f.text_field :conductor_makeup %>
+      </div>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <div class="p-2 me-1 form-field">
+        <%= f.select :csa, Constants.electrical.conductor_csa,
+              append: "sq mm" %>
+      </div>
+      <div class="p-2 me-1 form-field">
+        <%= f.select :neutral_csa, Constants.electrical.conductor_csa,
+              include_blank: "",
+              append: "sq mm" %>
+      </div>
+      <div class="p-2 me-1 form-field">
+        <%= f.select :earth_csa, Constants.electrical.conductor_csa,
+              include_blank: "",
+              append: "sq mm"  %>
+      </div>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <div class="p-2 me-1 form-field">
+        <%= f.text_field :insulation %>
+      </div>
+      <div class="p-2 me-1 form-field">
+        <%= f.text_field :bedding %>
+      </div>
+      <div class="p-2 me-1 form-field">
+        <%= f.text_field :armour %>
+      </div>
+      <div class="p-2 me-1 form-field">
+        <%= f.text_field :sheath %>
+      </div>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <div class="p-2 me-1 form-field">
+        <%= f.text_field :bedding_od,
+              append: "mm" %>
+      </div>
+      <div class="p-2 me-1 form-field">
+        <%= f.text_field :overall_od,
+              append: "mm" %>
+      </div>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <div class="p-2 me-1 form-field">
+        <%= f.select :temperature_rating,
+                Constants.electrical.temperature_rating %>
+      </div>
+    </div>
+    <div class="flex-row d-flex mb-1 actions">
+      <div class="p-2 me-1">
+        <%= f.primary do %>
+          <%= yield(:button_text) %>
+          <%== icon('save') %>
+        <% end %>
+        <% if @cable_type.persisted? %>
+          <%= link_to @cable_type, class: "btn btn-warning actions",
+                  data: { turbo_confirm: t('actions.sure') } do %>
+                  <%= t('actions.discard') %>
+                  <%== icon('x-square') %>
+          <% end %>
+        <% else %>
+          <%= link_to cable_types_path, class: "btn btn-warning actions",
+                  data: { turbo_confirm: t('actions.sure') }  do %>
+            <%= t('actions.discard') %>
+            <%== icon('x-square') %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

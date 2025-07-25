@@ -1,5 +1,6 @@
 km:
   app_name:       "kh Project Assistant"
+  flag:           km
 
   rails:
     walking:      "kh Walking on"

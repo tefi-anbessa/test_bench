@@ -1,6 +1,6 @@
 <% provide(:title, t('.title')) %>
 <nav class="navbar bg-body-tertiary">
-  <div class="container-fluid">
+  <div class="container">
     <ul class="navbar-nav me-auto mb-2 mb-lg-0 flex-row">
       <li class="nav-item">
         <%= link_to new_tag_path, class: "btn btn-primary actions",
@@ -28,6 +28,9 @@
       <%= f.search_field :description_cont,
             class: "search_field",
             placeholder: t('activerecord.attributes.tag.description') %>
+      <%= f.search_field :notes_cont,
+            class: "search_field",
+            placeholder: t('activerecord.attributes.tag.notes') %>
       <%= f.button nil, class: "btn btn-primary btn-sm", action: :submit do %>
         <%== icon('search') %>
       <% end %>
@@ -35,8 +38,6 @@
     <%== pagy_bootstrap_nav(@pagy) %>
     <table id='tags' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
       <thead>
-        <th scope="col"><%= sort_link(@q, :discipline_code,
-                  t('activerecord.attributes.tag.discipline')) %></th>
         <th scope="col"><%= sort_link(@q, :phase) %></th>
         <th scope="col"><%= sort_link(@q, :full_tag) %></th>
         <th scope="col"><%= sort_link(@q, :description) %></th>
@@ -46,7 +47,6 @@
       <tbody>
         <% @tags.each do |t| %>
           <tr scope="row">
-            <td><%= t.discipline.code %></td>
             <td><%= t.phase %></td>
             <td><%= link_to t.full_tag, tag_path(t) %></td>
             <td><%= highlight t.description, params.dig(:q, :full_tag_or_description_cont)  %></td>
@@ -65,7 +65,7 @@
                 <%== icon('pencil') %>
               <% end %>
               <% if current_user && current_user.admin? %>
-                <%= link_to p, method: :delete, class: "btn btn-danger btn-sm icon-link",
+                <%= link_to t, method: :delete, class: "btn btn-danger btn-sm icon-link",
                       aria: { label: t('actions.delete') },
                       title: t('actions.delete'),
                       display: "inline"  do %>

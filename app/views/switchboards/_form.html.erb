@@ -1,0 +1,72 @@
+<%= form_with(model: switchboard) do |form| %>
+  <% if switchboard.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(switchboard.errors.count, "error") %> prohibited this switchboard from being saved:</h2>
+
+      <ul>
+        <% switchboard.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :location, style: "display: block" %>
+    <%= form.text_field :location %>
+  </div>
+
+  <div>
+    <%= form.label :service, style: "display: block" %>
+    <%= form.number_field :service %>
+  </div>
+
+  <div>
+    <%= form.label :ingress_protection, style: "display: block" %>
+    <%= form.text_field :ingress_protection %>
+  </div>
+
+  <div>
+    <%= form.label :busbar_rating, style: "display: block" %>
+    <%= form.text_field :busbar_rating %>
+  </div>
+
+  <div>
+    <%= form.label :busbar_fault_rating, style: "display: block" %>
+    <%= form.text_field :busbar_fault_rating %>
+  </div>
+
+  <div>
+    <%= form.label :busbar_fault_duration, style: "display: block" %>
+    <%= form.text_field :busbar_fault_duration %>
+  </div>
+
+  <div>
+    <%= form.label :cable_entry, style: "display: block" %>
+    <%= form.text_field :cable_entry %>
+  </div>
+
+  <div>
+    <%= form.label :incomer_protection, style: "display: block" %>
+    <%= form.text_area :incomer_protection %>
+  </div>
+
+  <div>
+    <%= form.label :metering, style: "display: block" %>
+    <%= form.text_area :metering %>
+  </div>
+
+  <div>
+    <%= form.label :neutral_bar_connections, style: "display: block" %>
+    <%= form.text_area :neutral_bar_connections %>
+  </div>
+
+  <div>
+    <%= form.label :earth_bar_connections, style: "display: block" %>
+    <%= form.text_area :earth_bar_connections %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

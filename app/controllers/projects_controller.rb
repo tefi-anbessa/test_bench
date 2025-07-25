@@ -4,7 +4,7 @@ class ProjectsController < ApplicationController
 
   # GET /projects or /projects.json
   def index
-    @q = policy_scope(Project).ransack(params[:q])
+    @q = Project.ransack(params[:q])
     @pagy, @projects = pagy(@q.result, limit: 10)
   end
 
@@ -20,7 +20,7 @@ class ProjectsController < ApplicationController
   # GET /projects/1/edit
   def edit
     @role = Role.new
-    @roles = ["owner", "admin", "author", "editor", "checker", "approver"]
+    @roles = Constants.role.name
     @users = User.all
   end
 

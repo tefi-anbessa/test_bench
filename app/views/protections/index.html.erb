@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Protections</h1>
+
+<div id="protections">
+  <% @protections.each do |protection| %>
+    <%= render protection %>
+    <p>
+      <%= link_to "Show this protection", protection %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New protection", new_protection_path %>

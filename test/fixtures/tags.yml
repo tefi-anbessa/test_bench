@@ -19,3 +19,48 @@ ec:
   notes: MyText
   discipline: b
   project: zz
+  tagable: ec1 (Cable)
+
+ex2:
+  prefix: EX
+  serial: 2
+  suffix: ""
+  description:  GATEHOUSE SWITCHBOARD
+  phase:  1
+  notes: Test for switchboard polymorphic association
+  discipline: e
+  project: aa
+  tagable: ex2 (Load)
+
+ex4:
+  prefix: EX
+  serial: 4
+  suffix: ""
+  description:  SOUTH AREA DISTRIBUTION BOARD
+  phase:  1
+  notes: Test for switchboard polymorphic association
+  discipline: e
+  project: aa
+  tagable: ex4 (Load)
+
+pm:
+  prefix: PM
+  serial: 21
+  suffix: ""
+  description:  DISTRIBUTION PUMP MOTOR
+  phase:  1
+  notes: Test for switchboard polymorphic association
+  discipline: e
+  project: aa
+  tagable: pm (Load)
+
+es:
+  prefix: ES
+  serial: 21
+  suffix: ""
+  description:  SOCKET OUTLETS
+  phase:  1
+  notes: Test for tagable polymorphic association
+  discipline: e
+  project: aa
+  tagable: es (Load)
