@@ -1,11 +1,8 @@
 class Load < ApplicationRecord
-  include Tagable
-#  has_one :tag, as: :tagable, touch: true
-  delegated_type :loadable, types: %w[ Switchboard Motor ], optional: true
-  accepts_nested_attributes_for :loadable, update_only: true
-  has_many :incomers, class_name: "Cable", foreign_key: "to_id"
-  has_many :feeders, class_name: "Cable", foreign_key: "from_id"
-  has_one :circuit
+  belongs_to :circuit, optional: true
+
+  delegated_type :loadable, types: Constants.electrical.loadable
+
   enum :basis, Constants.electrical.load_basis.to_h
   enum :config, Constants.electrical.load_configuration.to_h
   validates :config, presence: true
@@ -16,6 +13,7 @@ class Load < ApplicationRecord
   validates :power_factor, numericality: { in: -1.0..1.0 }, allow_nil: true
   validates :power_factor, numericality: { other_than: 0.0,
     message: "Power factor of zero will cause calculation errors" }, allow_nil: true
+  validates :duty, numericality: { in: 0.0..1.0 }, allow_nil: true
   attribute :power_factor, default: 1.0
   attribute :duty, default: 1.0
 
@@ -25,7 +23,7 @@ class Load < ApplicationRecord
   end
 
   def self.ransackable_associations(auth_object = nil)
-    [ :protection, :tag, :incomers, :feeders ]
+    [ :circuit, :tag, :cable ]
   end
 
   private

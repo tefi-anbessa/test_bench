@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @socket_cct %>
+
+<div>
+  <%= link_to "Edit this socket cct", edit_socket_cct_path(@socket_cct) %> |
+  <%= link_to "Back to socket ccts", socket_ccts_path %>
+
+  <%= button_to "Destroy this socket cct", @socket_cct, method: :delete %>
+</div>

@@ -72,7 +72,7 @@ class CablesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def cable_params
-      params.require(:cable).permit(:cable_type_id, :from_id, :to_id,
+      params.require(:cable).permit(:cable_type_id, :circuit_id, :load_id, 
         :route_length, :vertical_allowance, :termination_allowance,
         :start_mark, :end_mark)
     end

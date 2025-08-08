@@ -5,7 +5,6 @@ class RolesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @role = roles(:resource_instance_role)
     @user = users(:valid)
-    @user.grant :admin
   end
 
   test "no access if not signed in" do

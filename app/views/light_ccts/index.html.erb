@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Light ccts</h1>
+
+<div id="light_ccts">
+  <% @light_ccts.each do |light_cct| %>
+    <%= render light_cct %>
+    <p>
+      <%= link_to "Show this light cct", light_cct %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New light cct", new_light_cct_path %>

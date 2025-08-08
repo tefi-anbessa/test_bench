@@ -1,6 +1,6 @@
 class Tag < ApplicationRecord
   resourcify
-  delegated_type :tagable, types: %w[ Cable Load ], optional: true, dependent: :destroy
+  delegated_type :tagable, types: Constants.tagable, optional: true, dependent: :destroy
   accepts_nested_attributes_for :tagable, update_only: true
   belongs_to :project
   belongs_to :discipline
@@ -9,18 +9,18 @@ class Tag < ApplicationRecord
   after_find :set_full_tag
 
   validates :prefix, format: { with: /\A[a-zA-Z]+\z/, message: "only allows letters" }
-  validates :prefix, length: { in: 0..6 }
+  validates :prefix, length: { in: 1..6 }
   attr_accessor :new_prefix, :string
-  validates :new_prefix, length: { in: 0..6, allow_nil: true }
+  validates :new_prefix, length: { in: 1..6, allow_nil: true }
   before_validation :set_prefix
 
   validates :serial, presence: true, inclusion: { in: 0..9999 }
   validates :suffix, length: { maximum: 5 }
   validates :description, length: { maximum: 40 }
-  validates :phase, inclusion: { in: 0..10 }
+  validates :stage, inclusion: { in: 0..10 }
 
   def self.ransackable_attributes(auth_object = nil)
-    ["prefix", "serial", "suffix", "description", "full_tag", "project_phase",
+    ["prefix", "serial", "suffix", "description", "full_tag", "stage",
       "notes", "discipline_id", "created_at", "updated_at"]
   end
 

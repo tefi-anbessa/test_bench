@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_07_24_031503) do
+ActiveRecord::Schema[7.0].define(version: 2025_08_02_043305) do
   create_table "cable_types", force: :cascade do |t|
     t.string "conductor_material"
     t.string "conductor_makeup"
@@ -30,8 +30,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_07_24_031503) do
 
   create_table "cables", force: :cascade do |t|
     t.integer "cable_type_id", null: false
-    t.integer "from_id"
-    t.integer "to_id"
+    t.integer "circuit_id"
     t.decimal "route_length", precision: 4, scale: 1
     t.decimal "vertical_allowance", precision: 3, scale: 1
     t.decimal "termination_allowance", precision: 3, scale: 1
@@ -40,27 +39,23 @@ ActiveRecord::Schema[7.0].define(version: 2025_07_24_031503) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["cable_type_id"], name: "index_cables_on_cable_type_id"
-    t.index ["from_id"], name: "index_cables_on_from_id"
-    t.index ["to_id"], name: "index_cables_on_to_id"
+    t.index ["circuit_id"], name: "index_cables_on_circuit_id"
   end
 
   create_table "circuits", force: :cascade do |t|
     t.integer "switchboard_id", null: false
+    t.integer "serial"
+    t.integer "phase"
     t.integer "device"
     t.integer "poles"
     t.integer "curve"
     t.float "rating"
     t.integer "elcb"
+    t.boolean "contactor"
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "serial"
-    t.integer "phase"
-    t.boolean "contactor?"
-    t.integer "load_id"
-    t.integer "cable_id"
-    t.index ["cable_id"], name: "index_circuits_on_cable_id"
-    t.index ["load_id"], name: "index_circuits_on_load_id"
+    t.index ["switchboard_id", "serial"], name: "index_circuits_on_switchboard_id_and_serial", unique: true
     t.index ["switchboard_id"], name: "index_circuits_on_switchboard_id"
   end
 
@@ -69,7 +64,17 @@ ActiveRecord::Schema[7.0].define(version: 2025_07_24_031503) do
     t.string "name"
   end
 
+  create_table "light_ccts", force: :cascade do |t|
+    t.string "light_fitting_type"
+    t.integer "quantity"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "loads", force: :cascade do |t|
+    t.string "loadable_type", null: false
+    t.integer "loadable_id", null: false
+    t.integer "circuit_id"
     t.integer "basis"
     t.string "basis_notes"
     t.float "supply"
@@ -81,9 +86,18 @@ ActiveRecord::Schema[7.0].define(version: 2025_07_24_031503) do
     t.float "duty"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "loadable_type"
-    t.integer "loadable_id"
+    t.index ["circuit_id"], name: "index_loads_on_circuit_id"
     t.index ["loadable_type", "loadable_id"], name: "index_loads_on_loadable"
+  end
+
+  create_table "motors", force: :cascade do |t|
+    t.string "motor_type"
+    t.string "frame_size"
+    t.integer "poles"
+    t.string "ingress_protection"
+    t.float "speed_rated"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "projects", force: :cascade do |t|
@@ -105,6 +119,13 @@ ActiveRecord::Schema[7.0].define(version: 2025_07_24_031503) do
     t.index ["resource_type", "resource_id"], name: "index_roles_on_resource"
   end
 
+  create_table "socket_ccts", force: :cascade do |t|
+    t.string "socket_type"
+    t.integer "quantity"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "switchboards", force: :cascade do |t|
     t.string "location"
     t.integer "service"
@@ -122,14 +143,14 @@ ActiveRecord::Schema[7.0].define(version: 2025_07_24_031503) do
   end
 
   create_table "tags", force: :cascade do |t|
+    t.integer "discipline_id", null: false
     t.string "prefix"
     t.integer "serial"
     t.string "suffix", default: ""
     t.string "description"
     t.text "notes"
     t.integer "project_id", null: false
-    t.integer "phase"
-    t.integer "discipline_id", null: false
+    t.integer "stage"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "tagable_type"
@@ -177,11 +198,9 @@ ActiveRecord::Schema[7.0].define(version: 2025_07_24_031503) do
   end
 
   add_foreign_key "cables", "cable_types"
-  add_foreign_key "cables", "loads", column: "from_id"
-  add_foreign_key "cables", "loads", column: "to_id"
-  add_foreign_key "circuits", "cables"
-  add_foreign_key "circuits", "loads"
+  add_foreign_key "cables", "circuits"
   add_foreign_key "circuits", "switchboards"
+  add_foreign_key "loads", "circuits"
   add_foreign_key "tags", "disciplines"
   add_foreign_key "tags", "projects"
 end

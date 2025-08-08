@@ -5,16 +5,26 @@ Rails.application.routes.draw do
     get 'site/about'
     get 'site/contact'
 
-    devise_for :users
+    devise_for :users, controllers: {
+        sessions: 'users/sessions'
+      }
     resources :users, :only => [:show, :index]
-    resources :projects
+    resources :projects do
+      collection do
+        get "select"
+      end
+      member do
+        post "set"
+      end
+    end
     resources :tags, shallow: true do
-      resources :loads, :except => [:index] do
-        resources :switchboards, :except => [:index] do
-          resources :circuits
-        end
+      resources :switchboards, :except => [:index] do
+        resources :circuits
       end
       resources :cables, :except => [:index]
+      resources :light_ccts, :except => [:index]
+      resources :socket_ccts, :except => [:index]
+      resources :motors, :except => [:index]
     end
     resources :loads, :only => [:index]
     resources :switchboards, :only => [:index]

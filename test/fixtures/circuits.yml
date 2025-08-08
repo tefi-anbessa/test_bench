@@ -4,8 +4,6 @@ es:
   switchboard: ex2
   serial: 6
   phase: L1
-  load: loads(:es)
-  cable: ec1
   device: 1
   poles: 1
   curve: 1
@@ -17,8 +15,6 @@ el:
   switchboard: ex2
   serial: 7
   phase: L2
-  load: loads(:el)
-  cable: ec2
   device: 1
   poles: 1
   curve: 1
@@ -30,8 +26,6 @@ ex4:
   switchboard: ex2
   serial: 3
   phase: ALL
-  load: loads(:ex4)
-  cable: ec3
   device: 1
   poles: 3
   curve: 1
@@ -42,12 +36,10 @@ ex4:
 pm:
   switchboard: ex4
   serial: 2
-  phase: L3
-  load: loads(:pm)
-  cable: ec4
+  phase: ALL
   device: 1
   poles: 3
   curve: 1
   rating: 10
   elcb: 1
-  notes: pump motor
+  notes: 3 phase pump motor

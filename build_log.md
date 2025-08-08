@@ -101,7 +101,7 @@ Run
 `rails generate devise:install`
 
 Edit  
-`project_assistant/config/initializers/devise.rb`: set mailer for each evironment.
+`project_assistant/config/initializers/devise.rb`: set mailer for each environment.
 Change the keys used for authentication - login is a virtual param.
 `config.authentication_keys = [ :login ]`  
 `config.case_insensitive_keys = [:email]`  
@@ -118,9 +118,6 @@ Edit
 `project_assistant/db/migrate/20240901093618_devise_create_users.rb`  
 Include all modules by uncommenting. Add name field at the top:  
 `t.string :name, null: false`
-
-Edit  
-`project_assistant/app/controllers/application_controller.rb`  
 
 Follow the [devise wiki](https://github.com/heartcombo/devise/wiki/How-To:-Allow-users-to-sign-in-using-their-username-or-email-address) to allow both name and email as keys for sign in:  
 Edit  
@@ -166,6 +163,22 @@ and fix the errors :-)
 
 Run  
 `rails generate devise:views`
+
+Run
+`rails generate devise:controllers users -c sessions`
+
+Edit:
+`test_bench/app/controllers/users/sessions_controller.rb`
+
+# POST /resource/sign_in
+def create
+  super
+    if @current_project = sessions[:project]
+      redirect_to user_path(current_user)
+    else
+      redirect_to select_projects_path
+    end
+end
 
 Copy  
 `test_bench/app/helpers/users_helper.rb`  
@@ -337,7 +350,7 @@ Check the migration file:
 Make tags the superclass for delegated types such as cable, load.
 Edit the tag model:
   delegated_type :tagable, types: %w[ Cable Load ], optional: true
-and add module at the bottom:
+and add module tagable.rb:
   module Tagable
     extend ActiveSupport::Concern
 
@@ -354,7 +367,7 @@ Copy the controller tests, views. Run. Check the app.
 
 rails g scaffold electrical/load circuit:integer basis:integer basis_notes:string supply:float phases:integer power:float vector:float power_factor:float current:float duty:float
 Edit the migration to add the polymorphic reference to loadable.
-rails g scaffold electrical/cable cable_type:references from:integer to:integer route_length:decimal vertical_allowance:decimal termination_allowance:decimal start_mark:integer end_mark:integer
+
 
 rails g scaffold electrical/protection electrical_loads:references device:integer poles:integer curve:integer rating:float elcb:integer notes:text
 
@@ -369,4 +382,10 @@ https://dev.to/vladhilko/say-goodbye-to-messy-constants-a-new-approach-to-moving
 and copy electrical.yml into config.
 
 Add human_enum_name to ApplicationRecord.rb for i18n translation of enum fields:
-https://gist.github.com/repoles/e798a915a0df49e3bcce0b7932478728
+
+Build scaffold for all tagable electrical models: Switchboard, Motor, SocketCct, LightCct
+rails g scaffold Circuit switchboard:references load:references cable:references serial:integer phase:integer device:integer poles:integer
+  curve:integer rating:float
+rails g scaffold electrical/cable cable_type:references route_length:decimal vertical_allowance:decimal termination_allowance:decimal start_mark:integer end_mark:integer elcb:integer contactor:boolean notes:text
+In the migration, add index for:
+["switchboard_id", "serial"], name: "index_circuits_on_switchboard_id_and_serial", unique: true

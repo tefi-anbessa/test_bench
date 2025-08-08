@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @motor %>
+
+<div>
+  <%= link_to "Edit this motor", edit_motor_path(@motor) %> |
+  <%= link_to "Back to motors", motors_path %>
+
+  <%= button_to "Destroy this motor", @motor, method: :delete %>
+</div>

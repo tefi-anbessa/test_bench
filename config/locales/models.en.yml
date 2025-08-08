@@ -11,7 +11,10 @@ en:
       cable:              "Cable"
       load:               "Load"
       switchboard:        "Switchboard"
-      protection:         "Protection"
+      circuit:            "Circuit"
+      motor:              "Motor"
+      socket_cct:         "SocketCct"
+      light_cct:          "LightCct"
     attributes:
       resource:
         id:               "ID"
@@ -39,7 +42,7 @@ en:
         suffix_help:      "Suffix should be typically one character, blank if not required"
         description:      "Description"
         description_help: "Description should be 40 characters maximum"
-        project_phase:    "Phase"
+        stage:            "Project Stage"
         notes:            "Notes"
         full_tag:         "Tag"
         tagable_type:     "Tag Type"
@@ -66,11 +69,13 @@ en:
         from_id:              "From Tag"
         to_id:                "To Tag"
         route_length:         "Route Length"
+        route_length_help:    "Route length of cable run, plan view"
         vertical_allowance:   "Vertical Allowance"
+        vertical_allowance_help:  "Cable length to be added to plan view, e.g. for riser to switchboard. If routes are 3D modeled, set to zero."
         termination_allowance:  "Termination Allowance"
+        termination_allowance_help: "Allowance for cable routing inside boxes"
         start_mark:           "Start Mark"
         end_mark:             "End Mark"
-
       load:
         basis:            "Basis"
         bases:
@@ -103,6 +108,37 @@ en:
         loadable:         "Load Detail"
         loadable_help:    "Click for datasheet"
       switchboard:
+        location:         "Location"
+        service:          "Service"
         ingress_protection: "Ingress Protection"
-      feeder:
-        circuit:          "Circuit"
+        busbar_rating:    "Busbar Rating"
+        busbar_fault_rating:  "Busbar Fault Rating"
+        busbar_fault_duration:  "Busbar Fault Duration"
+        cable_entry:      "Cable Entry"
+        incomer_protection: "Incomer Protection"
+        metering:         "Metering"
+        neutral_bar_connections:  "Neutral Bar Connections"
+        earth_bar_connections:  "Earth Bar Connections"
+      circuit:
+        serial:           "Serial Number"
+        phase:            "Phase Designation"
+        device:           "Protection Device"
+        poles:            "Poles"
+        curve:            "Curve"
+        rating:           "Rating (A)"
+        elcb:             "ELCB"
+        contactor:        "Contactor"
+        notes:            "Notes"
+      motor:
+        motor_type:       "Motor Type"
+        frame_size:       "Frame Size"
+        poles:            "Poles"
+        ingress_protection:   "Ingress Protection"
+        speed_rated:      "Speed At Rated Load"
+      socket_ccts:
+        socket_type:      "Socket Type"
+        quantity:         "Quantity"
+      light_ccts:
+        light_fitting_type: "Light Fitting Type"
+        light_fitting_type_help:  ""
+        quantity:         "Quantity"

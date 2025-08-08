@@ -1,0 +1,42 @@
+<%= form_with(model: motor) do |form| %>
+  <% if motor.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(motor.errors.count, "error") %> prohibited this motor from being saved:</h2>
+
+      <ul>
+        <% motor.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :type, style: "display: block" %>
+    <%= form.text_field :type %>
+  </div>
+
+  <div>
+    <%= form.label :frame_size, style: "display: block" %>
+    <%= form.text_field :frame_size %>
+  </div>
+
+  <div>
+    <%= form.label :poles, style: "display: block" %>
+    <%= form.number_field :poles %>
+  </div>
+
+  <div>
+    <%= form.label :ip, style: "display: block" %>
+    <%= form.text_field :ip %>
+  </div>
+
+  <div>
+    <%= form.label :speed_rated, style: "display: block" %>
+    <%= form.text_field :speed_rated %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

@@ -8,7 +8,7 @@
               Project.all.collect { |p| [ "#{p.code}: #{p.title}", p.id ] }%>
       </div>
       <div class="p-2 me-1 form-field">
-        <%= f.number_field :phase %>
+        <%= f.number_field :stage %>
       </div>
       <div class="p-2 me-1 form-field">
         <%= f.collection_select :discipline_id, Discipline.all, :id, :code%>

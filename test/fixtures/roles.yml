@@ -5,12 +5,17 @@
 # below each fixture, per the syntax in the comments below
 #
 global_role:
+  name:           :owner
+  resource:
+  users:          owner
+
+global_role:
   name:           :admin
   resource:
-  users:          valid
+  users:          admin
 
 resource_role:
-  name:           :owner
+  name:           :creator
   resource:       pg(Tag).class
   users:          valid
 
@@ -18,3 +23,8 @@ resource_instance_role:
   name:           :checker
   resource:       pg(Tag)
   users:          valid
+
+cable_type_entry:
+  name:           :creator
+  resource:       cable_type
+  users:          ee

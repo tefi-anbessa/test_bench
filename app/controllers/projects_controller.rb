@@ -1,11 +1,21 @@
 class ProjectsController < ApplicationController
-  before_action :set_project, only: %i[ show edit update destroy ]
+  before_action :set_project, only: %i[ set show edit update destroy ]
   before_action :authenticate_user!
 
   # GET /projects or /projects.json
   def index
-    @q = Project.ransack(params[:q])
+    @q = policy_scope(Project).ransack(params[:q])
     @pagy, @projects = pagy(@q.result, limit: 10)
+  end
+
+  # GET /projects/select
+  def select
+    @options = policy_scope(Project)
+  end
+
+  # POST /projects/1/set
+  def set
+    @current_project = session[:project] = @project.id
   end
 
   # GET /projects/1 or /projects/1.json

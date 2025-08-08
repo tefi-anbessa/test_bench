@@ -2,7 +2,7 @@ require "test_helper"
 
 class ProjectTest < ActiveSupport::TestCase
   def setup
-    @project = Project.new(code: "BB", title: "Title", description: "yadda")
+    @project = projects(:ab)
   end
 
   test "fixtures should be valid" do
@@ -13,6 +13,14 @@ class ProjectTest < ActiveSupport::TestCase
 
   test "should be valid" do
     assert @project.valid?
+  end
+
+  test "create new project" do
+    code = Project.pluck(:code).sort.last.next
+    assert_difference 'Project.count', 1, "Next code is #{code}" do
+      Project.create(code: code,
+        title: "Title", description: "yadda")
+    end
   end
 
   test "code should be present" do
@@ -40,5 +48,12 @@ class ProjectTest < ActiveSupport::TestCase
     @project.title = "a" * 51
     assert_not @project.valid?
   end
+=begin
+  test "destroy project" do
+    assert_difference 'Project.count', -1 do
+      @project.destroy
+    end
+  end
+=end
 
 end

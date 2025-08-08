@@ -1,0 +1,27 @@
+<%= form_with(model: light_cct) do |form| %>
+  <% if light_cct.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(light_cct.errors.count, "error") %> prohibited this light_cct from being saved:</h2>
+
+      <ul>
+        <% light_cct.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :type, style: "display: block" %>
+    <%= form.text_field :type %>
+  </div>
+
+  <div>
+    <%= form.label :quantity, style: "display: block" %>
+    <%= form.number_field :quantity %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

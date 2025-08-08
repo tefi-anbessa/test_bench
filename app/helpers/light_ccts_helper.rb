@@ -1,0 +1,2 @@
+module LightCctsHelper
+end

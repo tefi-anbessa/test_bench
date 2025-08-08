@@ -35,7 +35,7 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
                                       notes: @tag.notes,
                                       prefix: @tag.prefix,
                                       project_id: @tag.project_id,
-                                      phase: @tag.phase,
+                                      stage: @tag.stage,
                                       suffix: @tag.suffix } }
     end
 
@@ -62,7 +62,7 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
                                           notes: @tag.notes,
                                           prefix: @tag.prefix,
                                           project_id: @tag.project_id,
-                                          phase: @tag.phase,
+                                          stage: @tag.stage,
                                           suffix: @tag.suffix } }
     assert_redirected_to tag_url(@tag)
   end

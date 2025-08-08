@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Socket ccts</h1>
+
+<div id="socket_ccts">
+  <% @socket_ccts.each do |socket_cct| %>
+    <%= render socket_cct %>
+    <p>
+      <%= link_to "Show this socket cct", socket_cct %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New socket cct", new_socket_cct_path %>

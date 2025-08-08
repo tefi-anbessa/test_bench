@@ -65,11 +65,11 @@ class TagsController < ApplicationController
 
   private
     def set_tag
-      @tag = authorize Tag.find(params[:id])
+      @tag = Tag.find(params[:id])
     end
 
     def tag_params
-      params.require(:tag).permit(:project_id, :phase, :discipline_id,
+      params.require(:tag).permit(:project_id, :stage, :discipline_id,
                                   :prefix, :new_prefix, :serial, :suffix,
                                   :description, :notes,
                                   :tagable_type, :tagable_id)

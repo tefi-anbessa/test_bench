@@ -5,7 +5,7 @@ pg:
   serial: 1001
   suffix: ""
   description: Header Pressure
-  phase: 1
+  stage: 1
   notes: MyText
   discipline: a
   project: aa
@@ -15,10 +15,10 @@ ec:
   serial: 1002
   suffix: A
   description: Cable type 4 from A to B
-  phase: 1
+  stage: 1
   notes: MyText
   discipline: b
-  project: zz
+  project: cc
   tagable: ec1 (Cable)
 
 ex2:
@@ -26,41 +26,52 @@ ex2:
   serial: 2
   suffix: ""
   description:  GATEHOUSE SWITCHBOARD
-  phase:  1
+  stage:  1
   notes: Test for switchboard polymorphic association
   discipline: e
-  project: aa
-  tagable: ex2 (Load)
+  project: ab
+  tagable: ex2 (Switchboard)
 
 ex4:
   prefix: EX
   serial: 4
   suffix: ""
   description:  SOUTH AREA DISTRIBUTION BOARD
-  phase:  1
+  stage:  1
   notes: Test for switchboard polymorphic association
   discipline: e
-  project: aa
-  tagable: ex4 (Load)
+  project: ab
+  tagable: ex4 (Switchboard)
 
 pm:
   prefix: PM
   serial: 21
   suffix: ""
   description:  DISTRIBUTION PUMP MOTOR
-  phase:  1
-  notes: Test for switchboard polymorphic association
+  stage:  1
+  notes: Test for tagable polymorphic association
   discipline: e
-  project: aa
-  tagable: pm (Load)
+  project: ab
+  tagable: pm (Motor)
 
 es:
   prefix: ES
   serial: 21
   suffix: ""
   description:  SOCKET OUTLETS
-  phase:  1
+  stage:  1
   notes: Test for tagable polymorphic association
   discipline: e
-  project: aa
-  tagable: es (Load)
+  project: ab
+  tagable: es (SocketCct)
+
+el:
+  prefix: EL
+  serial: 12
+  suffix: ""
+  description:  GATEHOUSE LIGHTING
+  stage:  1
+  notes: Test for tagable polymorphic association
+  discipline: e
+  project: ab
+  tagable: el (LightCct)

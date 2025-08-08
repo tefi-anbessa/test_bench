@@ -1,4 +1,11 @@
 electrical:
+  loadable:
+    - Switchboard
+    - SocketCct
+    - LightCct
+    - Motor
+    - Heater
+    - Equipment
   phase_designation:
     "L1":       1
     "L2":       2
@@ -78,8 +85,3 @@ electrical:
     "415V":             415.0
     "690V":             690.0
     "1kV":              1000.0
-# Do not change the order! Insert any new element at the end. Don't remove any element.
-# The index is saved in the tag table enum, changing the index of a type will change all existing tags.
-  loadable:
-    - Switchboard
-    - Motor

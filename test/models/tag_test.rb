@@ -3,15 +3,8 @@ require "test_helper"
 class TagTest < ActiveSupport::TestCase
 
   def setup
-    @tag = Tag.new(prefix: "A",
-                    serial: 1,
-                    suffix: "B",
-                    description: "Pump sump",
-                    project: projects(:aa),
-                    phase: 0,
-                    notes: "yadda",
-                    discipline: disciplines(:a)
-                  )
+    @project = projects(:ab)
+    @tag = tags(:pm)
   end
 
   test "fixtures should be valid" do
@@ -21,7 +14,20 @@ class TagTest < ActiveSupport::TestCase
   end
 
   test "setup should be valid" do
+    assert @project.valid?
     assert @tag.valid?
+    assert_equal @project, @tag.project
+  end
+
+  test "should be able to create new tag on project" do
+    @new_tag = @project.tags.create(prefix: "A",
+                    serial: 1,
+                    suffix: "B",
+                    description: "Pump sump",
+                    stage: 0,
+                    notes: "yadda",
+                    discipline: disciplines(:a)
+                  )
   end
 
   test "prefix should be present" do
@@ -44,8 +50,8 @@ class TagTest < ActiveSupport::TestCase
     assert_not @tag.valid?
   end
 
-  test "project phase should be in the range 0 to 10" do
-    @tag.phase = 11
+  test "project stage should be in the range 0 to 10" do
+    @tag.stage = 11
     assert_not @tag.valid?
   end
 
@@ -54,4 +60,19 @@ class TagTest < ActiveSupport::TestCase
     assert_equal tags(:ec).full_tag, "B:EC-1002.A"
   end
 
+  test "destroy tag should remove from project" do
+    assert_difference '@project.tags.count', -1 do
+      @tag.destroy
+      assert_not_includes(@project.tags, @tag)
+    end
+  end
+=begin
+  test "destroy project should destroy tags" do
+    count = @project.tags.count
+    assert_difference 'Tag.count', -count do
+      @project.destroy
+      assert_not_includes(@project.tags, @tag)
+    end
+  end
+=end
 end

@@ -1,6 +1,8 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 pm:
+  loadable: pm (Motor)
+  circuit: pm
   basis: 2
   basis_notes: "power_pf"
   supply: 240.0
@@ -12,6 +14,8 @@ pm:
   duty: 0.1
 
 es:
+  loadable: es (SocketCct)
+  circuit: es
   basis: 1
   basis_notes: "current_pf"
   supply: 240.0
@@ -23,6 +27,8 @@ es:
   duty: 0.5
 
 el:
+  loadable: el (LightCct)
+  circuit: el
   basis: 1
   basis_notes: "current_pf"
   supply: 240.0
@@ -34,15 +40,17 @@ el:
   duty: 0.2
 
 ex2:
+  loadable: ex2 (Switchboard)
+  circuit: ex2
   basis: 1
   basis_notes: "summation"
   supply: 240.0
   config: "three_4c"
-  loadable: ex2 (Switchboard)
 
 ex4:
+  loadable: ex4 (Switchboard)
+  circuit: ex4
   basis: 1
   basis_notes: "summation"
   supply: 240.0
   config: "three_4c"
-  loadable: ex4 (Switchboard)

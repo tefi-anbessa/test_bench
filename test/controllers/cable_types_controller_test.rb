@@ -8,6 +8,7 @@ class CableTypesControllerTest < ActionDispatch::IntegrationTest
     @user = users(:valid)
     sign_in @user
   end
+  
   test "should get index" do
     get cable_types_url
     assert_response :success
@@ -46,7 +47,7 @@ class CableTypesControllerTest < ActionDispatch::IntegrationTest
     end
     assert_redirected_to cable_types_url
   end
-  
+
 =begin
 =end
 end
