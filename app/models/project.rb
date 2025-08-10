@@ -9,6 +9,11 @@ class Project < ApplicationRecord
                           uniqueness: true
   validates :title, presence: true, length: { maximum: 50 }
 
+
+  def label
+      "#{code}: #{title}"
+  end
+  
   def self.ransackable_attributes(auth_object = nil)
     ["code", "title", "description", "created_at", "updated_at"]
   end
@@ -18,6 +23,5 @@ class Project < ApplicationRecord
   end
 
   private
-
 
 end

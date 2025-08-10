@@ -12,24 +12,25 @@ Rails.application.routes.draw do
     resources :projects do
       collection do
         get "select"
-      end
-      member do
-        post "set"
+          post "set"
       end
     end
     resources :tags, shallow: true do
       resources :switchboards, :except => [:index] do
         resources :circuits
       end
+      resources :motors, :except => [:index]
       resources :cables, :except => [:index]
       resources :light_ccts, :except => [:index]
       resources :socket_ccts, :except => [:index]
-      resources :motors, :except => [:index]
     end
+    resources :motors, :only => [:index]
     resources :loads, :only => [:index]
     resources :switchboards, :only => [:index]
-    resources :cables, :only => [:index]
+    resources :light_ccts, :only => [:index]
+    resources :socket_ccts, :only => [:index]
     resources :cable_types
+    resources :cables, :only => [:index]
 
     resources :users, :only => [] do
       resources :roles, :only => [:destroy]

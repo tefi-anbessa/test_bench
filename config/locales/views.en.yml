@@ -24,6 +24,9 @@ en:
     index:
       title:            "Projects"
       header:           "Projects Index"
+    select:
+      title:            "Select Project"
+      header:           "Project Selection"
     edit:
       title:            "Edit Project"
       header:           "Edit Project: %{project}"

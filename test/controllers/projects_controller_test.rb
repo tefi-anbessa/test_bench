@@ -16,7 +16,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get index" do
-    sign_in @user
+    sign_in @owner
     get projects_url
     assert_response :success
   end

@@ -1,21 +1,31 @@
 class ProjectsController < ApplicationController
-  before_action :set_project, only: %i[ set show edit update destroy ]
+  before_action :get_project, only: %i[ show edit update destroy ]
+  before_action :set_project, only: %i[ set ]
   before_action :authenticate_user!
 
   # GET /projects or /projects.json
   def index
     @q = policy_scope(Project).ransack(params[:q])
+    # debugger
     @pagy, @projects = pagy(@q.result, limit: 10)
   end
 
   # GET /projects/select
   def select
     @options = policy_scope(Project)
+    @project = Project.new
   end
 
   # POST /projects/1/set
   def set
-    @current_project = session[:project] = @project.id
+
+    if session[:project] = @project.id
+      @current_project = @project
+      redirect_to @project
+    else
+      flash[:warning] = "Invalid project selected"
+      redirect_to select_projects_path
+    end
   end
 
   # GET /projects/1 or /projects/1.json
@@ -74,8 +84,12 @@ class ProjectsController < ApplicationController
 
   private
     # Use callbacks to share common setup or constraints between actions.
-    def set_project
+    def get_project
       @project = Project.find(params[:id])
+    end
+
+    def set_project
+      @project = Project.find(params[:project_id])
     end
 
     # Only allow a list of trusted parameters through.

@@ -11,11 +11,11 @@ class Users::SessionsController < Devise::SessionsController
   # POST /resource/sign_in
   def create
     super
-      if @current_project = sessions[:project]
-        redirect_to user_path(current_user)
-      else
-        redirect_to select_projects_path
-      end
+  #    if @current_project = session[:project]
+  #      redirect_to user_path(current_user)
+  #    else
+  #      redirect_to select_projects_path
+  #    end
   end
 
   # DELETE /resource/sign_out

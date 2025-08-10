@@ -2,7 +2,7 @@ require "test_helper"
 
 class SocketCctsControllerTest < ActionDispatch::IntegrationTest
   setup do
-    @socket_cct = socket_ccts(:one)
+    @socket_cct = socket_ccts(:es)
   end
 
   test "should get index" do

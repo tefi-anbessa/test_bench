@@ -1,0 +1,21 @@
+<% provide(:title, t('.title')) %>
+<% provide(:button_text, t('actions.set') + " " + t('activerecord.models.project')) %>
+
+<div class="container">
+  <span class="nav-text ms-3 me-3 h2">
+    <%= t('.header')%>
+  </span>
+  <%= bootstrap_form_tag url: set_projects_url do |f| %>
+    <div class="d-flex flex-row mb-1">
+      <div class="p-2 me-1 form-field">
+        <%= f.collection_radio_buttons :project_id, @options, :id, :label %>
+      </div>
+    </div>
+    <div class="actions">
+      <%= f.submit do %>
+        <%= yield(:button_text) %>
+        <%== icon('save') %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

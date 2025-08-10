@@ -45,13 +45,15 @@
                     display: "inline" do %>
                 <%== icon('eye') %>
               <% end %>
+
               <%= link_to edit_project_path(p), class: "btn btn-warning btn-sm icon-link",
                     aria: { label: t('actions.edit') },
                     title: t('actions.edit'),
                     display: "inline"  do %>
                 <%== icon('pencil') %>
               <% end %>
-              <% if current_user && current_user.admin? %>
+              <% if policy(p).destroy? %>
+
                 <%= link_to p, method: :delete, class: "btn btn-danger btn-sm icon-link",
                       aria: { label: t('actions.delete') },
                       title: t('actions.delete'),

@@ -8,6 +8,7 @@ en:
 
   actions:
     save:         "Save"
+    set:          "Set"
     save_change:  "Save Changes"
     delete:       "Delete"
     delete_sure:  "Are you sure? Delete cannot be undone."

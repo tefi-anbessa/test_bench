@@ -6,6 +6,7 @@ class ApplicationController < ActionController::Base
   around_action :switch_locale
   before_action :configure_permitted_parameters, if: :devise_controller?
 
+
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 #  rescue_from ActionController::Redirecting::UnsafeRedirectError do
 #    redirect_to root_url
@@ -21,6 +22,14 @@ class ApplicationController < ActionController::Base
   end
 
   protected
+
+    def after_sign_in_path_for(resource)
+      if @current_project = session[:project]
+        user_path(current_user)
+      else
+        select_projects_path
+      end
+    end
 
     def default_url_options
       { locale: I18n.locale }

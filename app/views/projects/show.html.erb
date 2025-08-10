@@ -1,7 +1,7 @@
 <% provide(:title, t('.title', code: @project.code)) %>
 <%# Header with navigation buttons. %>
-<nav class="navbar bg-body-tertiary">
-  <div class="container-fluid">
+<div class="container">
+  <nav class="navbar bg-body-tertiary">
     <ul class="navbar-nav flex-row page-heading">
       <li class="nav-item d-inline-flex p-1">
         <%= link_to projects_path,
@@ -12,7 +12,7 @@
         <% end %>
       </li>
       <!-- Admin section -->
-      <% if current_user.admin %>
+      <% if current_user && (current_user.is_admin? || current_user.is_owner?) %>
         <li class="nav-item d-inline-flex p-1">
           <%= link_to edit_project_path(@project),
                 class: "icon-link btn btn-sm btn-warning actions",
@@ -22,7 +22,7 @@
           <% end %>
         </li>
       <% end %>
-      <% if current_user.admin %>
+      <% if current_user.is_owner? %>
         <li class="nav-item d-inline-flex p-1">
           <%= link_to @project,
                 method: :delete,
@@ -57,7 +57,12 @@
         <% end %>
       </li>
     </ul>
-  </div>
-</nav>
+  </nav>
 
-<%= render @project %>
+  <div class="container border bg-primary-subtle border-primary-subtle mb-2">
+    <div class="d-flex flex-row">
+      <div class="p-2">
+        <%= render @project %>
+      </div>
+    </div>
+  </div>
