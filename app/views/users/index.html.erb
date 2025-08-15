@@ -30,7 +30,7 @@
         <th scope="col" width="150px"><%= t('.gravatar')%></th>
         <th scope="col"><%= sort_link(@q, :name) %></th>
         <th scope="col"><%= sort_link(@q, :email) %></th>
-        <th scope="col"><%= sort_link(@q, :admin) %></th>
+        <th scope="col"><%= t('admin') %></th>
         <th scope="col" width="150px"><%= t('table.links')%></th>
       </thead>
       <tbody>
@@ -39,7 +39,7 @@
             <td><%= gravatar_for u, size: 20 %></td>
             <td><%= link_to u.name, user_path(u) %></td>
             <td><%= highlight u.email, params.dig(:q, :email_cont)  %></td>
-            <td><%= u.admin %></td>
+            <td><%= u.has_role?(:admin) ? '✓' : '' %></td>
             <td>
               <%= link_to user_path(u), class: "btn btn-secondary btn-sm icon-link",
                     aria: { label: t('actions.show') },
@@ -53,7 +53,7 @@
                     display: "inline"  do %>
                 <%== icon('pencil') %>
               <% end %>
-              <% if current_user && current_user.admin? %>
+              <% if current_user&.is_admin? %>
                 <%= link_to u, method: :delete, class: "btn btn-danger btn-sm icon-link",
                       aria: { label: t('actions.delete') },
                       title: t('actions.delete'),

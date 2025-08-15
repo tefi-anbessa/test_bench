@@ -1,8 +1,0 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
-pm:
-  motor_type: induction
-  frame_size: 80
-  poles: 2
-  ingress_protection: 67
-  speed_rated: 1500.0

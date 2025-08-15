@@ -12,7 +12,7 @@
         <% end %>
       </li>
       <!-- Admin section -->
-      <% if @user == current_user || current_user.is_admin  %>
+      <% if @user == current_user || current_user&.is_admin? %>
         <li class="nav-item d-inline-flex p-1">
           <%= link_to edit_user_registration_path(@user),
                 class: "icon-link btn btn-sm btn-warning actions",
@@ -22,7 +22,7 @@
           <% end %>
         </li>
       <% end %>
-      <% if current_user && current_user.is_admin? %>
+      <% if current_user&.is_admin? %>
         <li class="nav-item d-inline-flex p-1">
           <%= link_to cancel_user_registration_path(@user),
                 method: :delete,

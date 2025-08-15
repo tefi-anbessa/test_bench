@@ -34,7 +34,7 @@
 
         <% if user_signed_in? %>
           <ul class="nav nav-tabs">
-            <% if current_user && (current_user.is_admin? || current_user.is_owner?) %>
+            <% if current_user&.is_admin? || current_user&.is_owner? %>
               <li class="nav-item">
                 <%= link_to t('role', scope: 'activerecord.models').pluralize,
                   roles_path,

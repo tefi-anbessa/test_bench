@@ -1,6 +1,56 @@
-# README
+# Test Bench
 
-This README documents the Test Bench application, a Ruby on Rails project.
+A Ruby on Rails application for managing engineering projects, tags, and user roles.
+
+## Role Hierarchy and Permissions
+
+The application implements a role-based access control (RBAC) system with the following hierarchy:
+
+### 1. Owner (Super Admin)
+- **Role**: `:owner`
+- **Permissions**:
+  - Full system access
+  - Can assign/revoke `:admin` roles
+  - Can perform all CRUD operations on all resources
+  - Only one user should have this role
+
+### 2. Admin
+- **Role**: `:admin`
+- **Permissions**:
+  - Can perform all CRUD operations on all resources
+  - Can manage users (except assigning `:owner` role)
+  - Can assign/revoke `:creator` and `:member` roles
+
+### 3. Creator
+- **Role**: `:creator`
+- **Permissions**:
+  - Can create and edit resources
+  - Cannot delete resources
+  - Cannot manage users
+
+### 4. Member (Default)
+- **Role**: `:member` (default role for new users)
+- **Permissions**:
+  - Read-only access to most resources
+  - Limited to viewing resources they have been granted access to
+
+## Resource-Specific Roles
+
+In addition to global roles, users can have project-specific roles:
+
+- `:project_owner` - Full control over a specific project
+- `:project_editor` - Can edit a specific project
+- `:project_viewer` - Read-only access to a specific project
+
+## Implementation Notes
+
+- Roles are managed using the `rolify` gem
+- Permissions are enforced using Pundit policies
+- The `:owner` role should be assigned during initial setup
+- Only the `:owner` can assign the `:admin` role
+- `:admin` users can manage other users' roles except for the `:owner` role
+
+## Development Guidelines
 
 ## Development Guidelines
 

@@ -30,17 +30,11 @@ if owner = User.find_by(name: "owner")
   owner.grant :owner
 end
 
-# Disciplines
-if Discipline.count < 5
-  Discipline.create!(code: 'A', name: 'Administration')
-  Discipline.create!(code: 'B', name: 'Architecture')
-  Discipline.create!(code: 'C', name: 'Civil Engineering')
-  Discipline.create!(code: 'E', name: 'Electrical Engineering')
-  Discipline.create!(code: 'I', name: 'Information Tech')
-  Discipline.create!(code: 'J', name: 'Instrument Engineering')
-  Discipline.create!(code: 'M', name: 'Mechanical Engineering')
-  Discipline.create!(code: 'P', name: 'Process Engineering')
-  Discipline.create!(code: 'U', name: 'Multi-Discipline')
+# Create standard disciplines if they don't exist
+Discipline::DISCIPLINES.each do |disc|
+  Discipline.find_or_create_by!(code: disc[:code]) do |d|
+    d.name = disc[:name]
+  end
 end
 
 # Projects

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_08_02_043305) do
+ActiveRecord::Schema[7.0].define(version: 2025_08_15_033041) do
   create_table "cable_types", force: :cascade do |t|
     t.string "conductor_material"
     t.string "conductor_makeup"
@@ -164,7 +164,6 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_02_043305) do
   create_table "users", force: :cascade do |t|
     t.string "name", null: false
     t.string "email", default: "", null: false
-    t.boolean "admin", default: false
     t.string "encrypted_password", default: "", null: false
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"

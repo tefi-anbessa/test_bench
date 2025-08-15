@@ -17,4 +17,9 @@ module ApplicationHelper
     codes = {en: :gb, km: :kh}
     flag_code = codes[locale] || locale
   end
+  
+  # Check if current user is an admin
+  def admin?
+    current_user&.has_role?(:admin)
+  end
 end
