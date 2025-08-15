@@ -42,12 +42,6 @@
                   aria: { label: t('role', scope: 'activerecord.models').pluralize } %>
               </li>
             <% end %>
-            <li class="nav-item">
-              <%= link_to t('project', scope: 'activerecord.models').pluralize,
-                projects_path,
-                class: 'nav-link',
-                aria: { label: t('project', scope: 'activerecord.models').pluralize } %>
-            </li>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle"
                   href="#"
@@ -55,7 +49,9 @@
                   id="project-menu-btn"
                   role="button"
                   aria-expanded="false">
-                <%= project_selected? ? current_project.code : "Projects" %>
+                <%= project_selected? ? 
+                  t('project', scope: 'activerecord.models') + ": " + current_project.code : 
+                  t('project', scope: 'activerecord.models').pluralize %>
               </a>
               <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                 <li class="nav-item">
@@ -103,7 +99,7 @@
                 id="user-menu-btn"
                 role="button"
                 aria-expanded="false">
-              <%= current_user.name %>
+              <%= t('user', scope: 'activerecord.models') + ": " + current_user.name %>
             </a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
               <li class="nav-item"><%= link_to t('menu.profile'),
