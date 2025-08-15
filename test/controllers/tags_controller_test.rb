@@ -4,6 +4,7 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
   setup do
+    @current_project = projects(:ab) # Instead of trying to access session in tests
     @tag = tags(:pg)
     @user = users(:valid)
   end
@@ -16,12 +17,14 @@ class TagsControllerTest < ActionDispatch::IntegrationTest
 
   test "should get index" do
     sign_in @user
+    @current_user = @user
     get tags_url
     assert_response :success
   end
 
   test "should get new" do
     sign_in @user
+    @current_user = @user
     get new_tag_url
     assert_response :success
   end

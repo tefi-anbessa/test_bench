@@ -13,18 +13,34 @@ class ProjectsController < ApplicationController
   # GET /projects/select
   def select
     @options = policy_scope(Project)
-    @project = Project.new
+    # Add a 'No Project' option at the beginning
+    @options = [OpenStruct.new(id: 'none', label: 'No Project')] + @options
   end
 
-  # POST /projects/1/set
+  # POST /projects/set
   def set
-
-    if session[:project] = @project.id
-      @current_project = @project
-      redirect_to @project
+    if params[:project_id] == 'none'
+      # Handle 'No Project' selection
+      cookies.delete(:project_id)
+      session.delete(:project_id)
+      clear_stored_location_for_project
+      
+      redirect_to stored_location_for_project || root_path,
+                  notice: 'No project is currently selected'
+    elsif @project
+      # Set the project in both cookie (signed for security) and session
+      cookies.signed[:project_id] = { value: @project.id, expires: 1.year.from_now }
+      session[:project_id] = @project.id
+      
+      # Clear any stored location for project to prevent redirect loops
+      clear_stored_location_for_project
+      
+      redirect_to stored_location_for_project || @project,
+                  notice: "Project '#{@project.code}' is now selected"
     else
-      flash[:warning] = "Invalid project selected"
-      redirect_to select_projects_path
+      # If no valid project is selected
+      redirect_to select_projects_path,
+                  alert: 'Please select a valid project to continue'
     end
   end
 
@@ -34,7 +50,7 @@ class ProjectsController < ApplicationController
 
   # GET /projects/new
   def new
-    @project = Project.new
+    @project = authorize Project.new
   end
 
   # GET /projects/1/edit
@@ -46,15 +62,15 @@ class ProjectsController < ApplicationController
 
   # POST /projects or /projects.json
   def create
-    @project = Project.new(project_params)
+    @project = authorize Project.new(project_params)
 
     respond_to do |format|
       if @project.save
-        format.html { redirect_to @project, notice: "Project was successfully created." }
-        format.json { render :show, status: :created, location: @project }
+        flash[:success] = "Project was successfully created."
+        redirect_to @project
       else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @project.errors, status: :unprocessable_entity }
+        flash[:alert] = "Unable to create project"
+        render :new, status: :unprocessable_entity 
       end
     end
   end
@@ -75,11 +91,7 @@ class ProjectsController < ApplicationController
   # DELETE /projects/1 or /projects/1.json
   def destroy
     @project.destroy
-
-    respond_to do |format|
-      format.html { redirect_to projects_path, status: :see_other, notice: "Project was successfully destroyed." }
-      format.json { head :no_content }
-    end
+        flash[:success] = "Project was successfully destroyed."
   end
 
   private
@@ -89,7 +101,11 @@ class ProjectsController < ApplicationController
     end
 
     def set_project
-      @project = Project.find(params[:project_id])
+      if policy_scope(Project).pluck(:id).include?(params[:project_id].to_i)
+        @project = Project.find(params[:project_id])
+      else
+        @project = nil
+      end
     end
 
     # Only allow a list of trusted parameters through.

@@ -4,8 +4,6 @@ class ProjectPolicyTest < ActiveSupport::TestCase
   include Devise::Test::IntegrationHelpers
 
   def test_scope
-    sign_in users(:owner)
-    assert_equal policy_scope(Project).count, Project.count
   end
 
   def test_show

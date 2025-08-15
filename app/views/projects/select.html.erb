@@ -5,16 +5,30 @@
   <span class="nav-text ms-3 me-3 h2">
     <%= t('.header')%>
   </span>
-  <%= bootstrap_form_tag url: set_projects_url do |f| %>
+  
+  <%= bootstrap_form_tag url: set_projects_path, method: :post do |f| %>
     <div class="d-flex flex-row mb-1">
       <div class="p-2 me-1 form-field">
-        <%= f.collection_radio_buttons :project_id, @options, :id, :label %>
+        <% @options.each do |option| %>
+          <div class="form-check">
+            <%= f.radio_button :project_id, 
+                             option.id, 
+                             class: 'form-check-input',
+                             checked: (option.id == 'none' && current_project.nil?) || (option.id == current_project&.id),
+                             label: (option.id == 'none' ? t('.no_project') : option.label) %>
+          </div>
+        <% end %>
       </div>
     </div>
+    
     <div class="actions">
-      <%= f.submit do %>
+      <button type="submit" class="btn btn-primary">
         <%= yield(:button_text) %>
         <%== icon('save') %>
+      </button>
+      <%= link_to (session[:project_return_to] || root_path), 
+                 class: 'btn btn-warning ms-2' do %>
+        <span class="me-1"><%== icon('x-square') %></span> <%= t('.cancel') %>
       <% end %>
     </div>
   <% end %>

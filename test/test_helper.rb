@@ -15,4 +15,11 @@ class ActiveSupport::TestCase
   fixtures :all
 
   # Add more helper methods to be used by all tests here...
+  def current_user
+    @current_user
+  end
+
+  def current_project
+    @current_project
+  end
 end

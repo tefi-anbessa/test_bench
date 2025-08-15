@@ -48,6 +48,27 @@
                 class: 'nav-link',
                 aria: { label: t('project', scope: 'activerecord.models').pluralize } %>
             </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle"
+                  href="#"
+                  data-bs-toggle="dropdown"
+                  id="project-menu-btn"
+                  role="button"
+                  aria-expanded="false">
+                <%= project_selected? ? current_project.code : "Projects" %>
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li class="nav-item">
+                  <%= link_to t('project', scope: 'activerecord.models').pluralize,
+                    projects_path,
+                    class: "dropdown-item" %>
+                </li>
+                <li class="nav-item">
+                  <%= link_to t('actions.select'),
+                    select_projects_path,
+                    class: "dropdown-item" %>
+                </li>
+              </ul>
             <li class="nav-item">
               <%= link_to t('tag', scope: 'activerecord.models').pluralize,
                 tags_path,
@@ -93,6 +114,14 @@
                   edit_user_registration_path,
                   class: "dropdown-item" %>
               </li>
+              <% if current_user && (current_user.is_admin? || current_user.is_owner?) %>
+                <li class="nav-item">
+                  <%= link_to t('user', scope: 'activerecord.models').pluralize,
+                    users_path,
+                    class: 'dropdown-item',
+                    aria: { label: t('user', scope: 'activerecord.models').pluralize } %>
+                </li>
+              <% end %>
               <li><hr class="dropdown-divider"></li>
               <li class="nav-item"><%= link_to t('menu.log_out'),
                   destroy_user_session_path,

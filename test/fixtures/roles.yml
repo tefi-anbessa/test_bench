@@ -17,14 +17,11 @@ global_role:
 resource_role:
   name:           :creator
   resource:       pg(Tag).class
-  users:          valid
 
 resource_instance_role:
   name:           :checker
   resource:       pg(Tag)
-  users:          valid
 
-cable_type_entry:
+ee1:
   name:           :creator
   resource:       cable_type
-  users:          ee

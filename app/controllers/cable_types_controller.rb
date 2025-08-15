@@ -1,4 +1,5 @@
 class CableTypesController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_cable_type, only: %i[ show edit update destroy ]
 
   # GET /electrical/cable_types or /electrical/cable_types.json
@@ -13,16 +14,17 @@ class CableTypesController < ApplicationController
 
   # GET /electrical/cable_types/new
   def new
-    @cable_type = CableType.new
+    @cable_type = authorize CableType.new
   end
 
   # GET /electrical/cable_types/1/edit
   def edit
+    authorize @cable_type
   end
 
   # POST /electrical/cable_types or /electrical/cable_types.json
   def create
-    @cable_type = CableType.new(cable_type_params)
+    @cable_type = authorize CableType.new(cable_type_params)
 
     respond_to do |format|
       if @cable_type.save
@@ -40,6 +42,7 @@ class CableTypesController < ApplicationController
 
   # PATCH/PUT /electrical/cable_types/1 or /electrical/cable_types/1.json
   def update
+    authorize @cable_type
     respond_to do |format|
       if @cable_type.update(cable_type_params)
         format.html { redirect_to @cable_type,
@@ -56,6 +59,7 @@ class CableTypesController < ApplicationController
 
   # DELETE /electrical/cable_types/1 or /electrical/cable_types/1.json
   def destroy
+    authorize @cable_type
     @cable_type.destroy
     respond_to do |format|
       format.html { redirect_to cable_types_path,

@@ -27,9 +27,10 @@ owner:
   email: owner@test.com
   confirmed_at: <%= Time.zone.now %>
   encrypted_password: <%= Devise::Encryptor.digest(User, 'password') %>
-  
+
 ee:
   name: electrical
   email: electrical@test.com
   confirmed_at: <%= Time.zone.now %>
   encrypted_password: <%= Devise::Encryptor.digest(User, 'password') %>
+  roles: ee1

@@ -4,6 +4,7 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
   setup do
+    @current_project = projects(:ab)
     @project = projects(:ab)
     @user = users(:valid)
     @owner = users(:owner)
@@ -21,8 +22,21 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "should show project" do
+    sign_in @user
+    get project_url(@project)
+    assert_response :success
+  end
+
+  test "should not get new if not authorized" do
+    sign_in users(:valid)
+    get new_project_url
+    assert_redirected_to root_path
+  end
+
   test "should get new" do
-    sign_in users(:owner)
+    sign_in @owner
+    @owner.grant :owner, Project
     get new_project_url
     assert_response :success
   end
@@ -34,12 +48,6 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_redirected_to project_url(Project.last)
-  end
-
-  test "should show project" do
-    sign_in @user
-    get project_url(@project)
-    assert_response :success
   end
 
   test "should get edit" do

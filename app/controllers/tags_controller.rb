@@ -1,12 +1,13 @@
 class TagsController < ApplicationController
+  before_action :authenticate_user!
+  before_action :set_project
   before_action :set_tag, only: %i[ show edit update destroy ]
 #  before_action :new_params, only: %i[ create update ]
-  before_action :authenticate_user!
 #  after_action :verify_authorized
 
   # GET /tags or /tags.json
   def index
-    @q = Tag.ransack(params[:q])
+    @q = @project.tags.ransack(params[:q])
     @pagy, @tags = pagy(@q.result.includes(:discipline, :project), limit: 10)
   end
 
@@ -64,6 +65,15 @@ class TagsController < ApplicationController
   end
 
   private
+
+    def set_project
+      if current_project
+        @project = current_project
+      else
+        redirect_to select_projects_path
+      end
+    end
+
     def set_tag
       @tag = Tag.find(params[:id])
     end

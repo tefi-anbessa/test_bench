@@ -20,20 +20,24 @@ class ProjectPolicy < ApplicationPolicy
     true
   end
 
-  def update?
-    user.is_owner? || user.is_admin?
+  def new?
+    user.is_owner?
   end
 
   def create?
     user.is_owner?
   end
 
-  def destroy?
-    user.is_owner?
+  def update?
+    edit?
   end
 
   def edit?
     user.is_owner? || user.is_admin?
+  end
+
+  def destroy?
+    user.is_owner?
   end
 
 
@@ -47,7 +51,8 @@ class ProjectPolicy < ApplicationPolicy
         Project.all
       else
         # Scope includes the projects where user has any resource specific role
-        Project.where(:id => user.roles.where(resource_type: "Project").pluck(:resource_id))
+        Project.where(:id => user.roles.where(resource_type: "Project")
+                        .pluck(:resource_id)).unique
       end
     end
   end

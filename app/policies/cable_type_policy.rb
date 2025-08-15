@@ -8,34 +8,41 @@ class CableTypePolicy < ApplicationPolicy
   end
 
   def index?
-    can_read?(@user, @cable_type)
+    true
   end
 
   def show?
-    can_read?(@user, @cable_type)
+    true
   end
 
-  def update?
-    can_edit?(@user, @cable_type)
+  def new?
+    create?
   end
 
   def create?
-    can_create?(@user, @cable_type)
-  end
-
-  def destroy?
-    can_create?(@user, @cable_type)
+    user.has_any_role? :owner, :admin, { name: :creator, resource: CableType }
   end
 
   def edit?
-    can_edit?(@user, @cable_type)
+    user.has_any_role? :owner, :admin, { name: :creator, resource: CableType },
+                                        {name: :editor, resource: CableType },
+                                        {name: :checker, resource: CableType },
+                                        {name: :approver, resource: CableType }
+  end
+
+  def update?
+    edit?
+  end
+
+  def destroy?
+    create?
   end
 
 
   class Scope < ApplicationPolicy::Scope
-    # Any cable_type for which the user has a role can be listed.
+    # Any cable_type can be listed.
     def resolve
-      scope.with_roles([:reader, :author, :editor, :checker, :approver, :admin, :owner], user)
+      CableType.all
     end
   end
 end
