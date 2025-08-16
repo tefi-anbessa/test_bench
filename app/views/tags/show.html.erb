@@ -13,7 +13,7 @@
         <% end %>
       </li>
       <!-- Admin section -->
-      <% if current_user && current_user.admin %>
+      <% if policy(@tag).edit? %>
         <li class="nav-item d-inline-flex p-1">
           <%= link_to edit_tag_path(@tag),
                 class: "icon-link btn btn-sm btn-warning actions",
@@ -23,7 +23,7 @@
           <% end %>
         </li>
       <% end %>
-      <% if current_user && current_user.admin %>
+      <% if policy(@tag).destroy? %>
         <li class="nav-item d-inline-flex p-1">
           <%= link_to @tag,
                 method: :delete,

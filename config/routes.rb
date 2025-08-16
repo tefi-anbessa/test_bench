@@ -25,7 +25,7 @@ Rails.application.routes.draw do
       resources :socket_ccts, :except => [:index]
     end
     resources :motors, :only => [:index]
-    resources :loads, :only => [:index]
+    resources :loads
     resources :switchboards, :only => [:index]
     resources :light_ccts, :only => [:index]
     resources :socket_ccts, :only => [:index]

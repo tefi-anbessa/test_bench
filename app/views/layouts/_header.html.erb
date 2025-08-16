@@ -49,8 +49,8 @@
                   id="project-menu-btn"
                   role="button"
                   aria-expanded="false">
-                <%= project_selected? ? 
-                  t('project', scope: 'activerecord.models') + ": " + current_project.code : 
+                <%= project_selected? ?
+                  t('project', scope: 'activerecord.models') + ": " + current_project.code :
                   t('project', scope: 'activerecord.models').pluralize %>
               </a>
               <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -82,13 +82,18 @@
               </a>
               <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                 <li class="nav-item">
-                  <%= link_to t('load', scope: 'activerecord.models').pluralize,
-                    loads_path,
+                  <%= link_to t('cable_type', scope: 'activerecord.models').pluralize,
+                    cable_types_path,
                     class: "dropdown-item" %>
                 </li>
                 <li class="nav-item">
                   <%= link_to t('cable', scope: 'activerecord.models').pluralize,
                     cables_path,
+                    class: "dropdown-item" %>
+                </li>
+                <li class="nav-item">
+                  <%= link_to t('load', scope: 'activerecord.models').pluralize,
+                    loads_path,
                     class: "dropdown-item" %>
                 </li>
               </ul>

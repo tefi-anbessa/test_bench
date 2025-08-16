@@ -24,6 +24,7 @@ en:
 
   show:
     orphan:       "No associated parent %{model}"
+    unassigned:   "%{model} not assigned"
 
   form:
     other:        "Other"

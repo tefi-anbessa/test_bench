@@ -27,28 +27,45 @@
         <%= link_to cable.cable_type_id, cable_type_path(cable.cable_type_id) %>
       </span>
     </div>
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable.from_id') %>:
-      </span>
-      <span class="col-1 data-field">
-        <%= link_to cable.feeder.tag.full_tag, load_path(cable.feeder.tag.load.id) %>
-      </span>
-      <span class="col-4 data-field">
-        <%= cable.feeder.tag.description %>
-      </span>
+    <% if cable.circuit.present? %>
+      <div class="d-flex flex-row mb-1">
+        <span class="col-1 data-label">
+          <%= t('activerecord.models.switchboard') %>:
+        </span>
+        <span class="col-1 data-field">
+          <%= link_to cable.circuit.switchboard.tag.full_tag,
+                switchboard_path(cable.circuit.switchboard) %>
+        </span>
+        <span class="col-1 data-field">
+          <%= cable.circuit.switchboard.tag.description %>:
+        </span>
+        <span class="col-1 data-label">
+          <%= t('activerecord.models.circuit') %>:
+        </span>
+        <span class="col-1 data-field">
+          <%= link_to cable.circuit.serial,
+                circuit_path(cable.circuit) %>
+        </span>
+      <% else %>
+        <%= t('show.unassigned', model: t('activerecord.models.circuit')) %>
+      <% end %>
     </div>
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable.to_id') %>:
-      </span>
-      <span class="col-1 data-field">
-        <%= link_to cable.incomer.tag.full_tag, load_path(cable.incomer.tag.load.id) %>
-      </span>
-      <span class="col-4 data-field">
-        <%= cable.incomer.tag.description %>
-      </span>
-    </div>
+    <% if cable.circuit.load.present? %>
+      <div class="d-flex flex-row mb-1">
+        <span class="col-1 data-label">
+          <%= t('activerecord.models.load') %>:
+        </span>
+        <span class="col-1 data-field">
+          <%= link_to cable.circuit.load.loadable.tag.full_tag,
+                load_path(cable.circuit.load) %>
+        </span>
+        <span class="col-4 data-field">
+          <%= cable.circuit.load.loadable.tag.description %>
+        </span>
+      </div>
+    <% else %>
+      <%= t('show.unassigned', model: t('activerecord.models.load')) %>
+    <% end %>
     <div class="d-flex flex-row mb-1">
       <span class="col-1 data-label">
         <%= t('activerecord.attributes.cable.route_length') %>:

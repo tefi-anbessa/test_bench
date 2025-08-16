@@ -29,5 +29,13 @@ module TestBench
 
     config.active_record.verify_foreign_keys_for_fixtures = false
     
+    # Include FactoryBot methods in console
+    console do
+      # Make FactoryBot methods available without the FactoryBot prefix
+      include FactoryBot::Syntax::Methods
+      
+      # Optional: Load all factories for autocompletion
+      # FactoryBot.find_definitions if Rails.env.development?
+    end
   end
 end
