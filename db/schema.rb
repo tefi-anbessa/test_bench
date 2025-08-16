@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_08_15_033041) do
+ActiveRecord::Schema[7.0].define(version: 2025_08_16_013602) do
   create_table "cable_types", force: :cascade do |t|
     t.string "conductor_material"
     t.string "conductor_makeup"
@@ -26,6 +26,9 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_15_033041) do
     t.integer "temperature_rating"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "unique_spec"
+    t.text "description", default: "", null: false
+    t.index ["unique_spec"], name: "index_cable_types_on_unique_spec", unique: true
   end
 
   create_table "cables", force: :cascade do |t|

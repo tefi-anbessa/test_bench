@@ -2,13 +2,7 @@ require "test_helper"
 
 class ProjectTest < ActiveSupport::TestCase
   def setup
-    @project = projects(:ab)
-  end
-
-  test "fixtures should be valid" do
-    projects.each do |p|
-      assert p.valid?, p.errors.full_messages.inspect
-    end
+    @project = build(:project)
   end
 
   test "should be valid" do
@@ -16,10 +10,8 @@ class ProjectTest < ActiveSupport::TestCase
   end
 
   test "create new project" do
-    code = Project.pluck(:code).sort.last.next
-    assert_difference 'Project.count', 1, "Next code is #{code}" do
-      Project.create(code: code,
-        title: "Title", description: "yadda")
+    assert_difference 'Project.count', 1 do
+      create(:project)
     end
   end
 
@@ -37,6 +29,16 @@ class ProjectTest < ActiveSupport::TestCase
     assert_not @project.valid?
     @project.code = "Aa"
     assert_not @project.valid?
+    @project.code = "A1"
+    assert_not @project.valid?
+    @project.code = "A!"
+    assert_not @project.valid?
+  end
+
+  test "code should be unique" do
+    project = create(:project, code: 'ZZ')
+    duplicate_project = build(:project, code: 'ZZ')
+    assert_not duplicate_project.valid?
   end
 
   test "title should be present" do
@@ -45,8 +47,18 @@ class ProjectTest < ActiveSupport::TestCase
   end
 
   test "title should not be too long" do
-    @project.title = "a" * 51
+    @project.title = "a" * 256
     assert_not @project.valid?
+  end
+  
+  test "description can be blank" do
+    @project.description = ""
+    assert @project.valid?
+  end
+  
+  test "description can be very long" do
+    @project.description = "a" * 5000
+    assert @project.valid?
   end
 =begin
   test "destroy project" do

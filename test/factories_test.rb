@@ -53,12 +53,17 @@ class FactoriesTest < ActiveSupport::TestCase
     discipline = build(:discipline)
     assert discipline.valid?
   end
-
-  test 'discipline with tags' do
-    discipline = create(:discipline)
-    project = create(:project)
-    create_list(:tag, 2, discipline: discipline, project: project)
-    assert_equal 2, discipline.tags.count
+  
+  test 'creates all standard disciplines' do
+    # This will trigger the after_build hook that creates all standard disciplines
+    create(:discipline)
+    
+    # Verify all standard disciplines exist
+    Discipline::DISCIPLINES.each do |disc|
+      d = Discipline.find_by(code: disc[:code])
+      assert d.present?, "Expected discipline with code #{disc[:code]} to exist"
+      assert_equal disc[:name], d.name
+    end
   end
 
   test 'tag factory' do
@@ -66,9 +71,9 @@ class FactoriesTest < ActiveSupport::TestCase
     assert tag.valid?
   end
 
-  test 'cable tag' do
-    discipline = create(:discipline, code: 'C')
-    tag = build(:tag, :cable, discipline: discipline)
+  test 'civil tag' do
+    discipline = create(:discipline, :c)  # Using standard discipline 'C' (Civil)
+    tag = build(:tag, :civil, discipline: discipline)
     assert tag.valid?
     assert_equal 'C', tag.prefix
   end
@@ -153,47 +158,44 @@ class FactoriesTest < ActiveSupport::TestCase
     assert project.valid?, "Project with tags is not valid: #{project.errors.full_messages.join(', ')}"
   end
   
-  test 'project with cable tags is valid' do
+  test 'project with civil tags is valid' do
     project = create(:project, code: 'DD')
-    discipline = create(:discipline, code: 'H')
-    create_list(:tag, 2, :cable, project: project, discipline: discipline)
-    assert project.valid?, "Project with cable tags is not valid: #{project.errors.full_messages.join(', ')}"
+    discipline = create(:discipline, :c)  # Using standard discipline 'C' (Civil)
+    create_list(:tag, 2, :civil, project: project, discipline: discipline)
+    assert project.valid?, "Project with civil tags is not valid: #{project.errors.full_messages.join(', ')}"
   end
   
   test 'discipline variants are valid' do
-    # Create a discipline with a unique code
-    discipline = create(:discipline, code: 'Z', name: 'Test Discipline')
+    # Test creating a standard discipline
+    discipline = create(:discipline, :a)  # Using standard discipline 'A'
     assert discipline.valid?
+    assert_equal 'A', discipline.code
     
-    # Create another discipline with a different unique code
-    discipline_with_tags = create(:discipline, :with_tags, code: 'Y', name: 'Test Discipline with Tags')
-    assert discipline_with_tags.valid?
-    assert_equal 3, discipline_with_tags.tags.count
+    # Test creating another standard discipline
+    discipline2 = create(:discipline, :b)  # Using standard discipline 'B'
+    assert discipline2.valid?
+    assert_equal 'B', discipline2.code
   end
   
   test 'tag variants are valid' do
-    # Create a discipline with a unique code for these tests
-    discipline = create(:discipline, code: 'X', name: 'Test Discipline for Tags')
     project = create(:project, code: 'TT')
     
-    tag = create(:tag, discipline: discipline, project: project)
+    # Test creating tags with different standard disciplines
+    tag = create(:tag, :civil, project: project)  # Using civil discipline
     assert tag.valid?
+    assert_equal 'C', tag.prefix
     
-    tag_with_notes = create(:tag, :with_notes, discipline: discipline, project: project)
+    # Test with notes
+    tag_with_notes = create(:tag, :with_notes, :electrical, project: project)  # Using electrical discipline
     assert tag_with_notes.valid?
     assert_not_nil tag_with_notes.notes
     
-    cable_tag = create(:tag, :cable, discipline: discipline, project: project)
-    assert cable_tag.valid?
-    assert_equal 'C', cable_tag.prefix
-    
-    electrical_tag = create(:tag, :electrical, discipline: discipline, project: project)
-    assert electrical_tag.valid?
-    
-    mechanical_tag = create(:tag, :mechanical, discipline: discipline, project: project)
+    # Test mechanical tag
+    mechanical_tag = create(:tag, :mechanical, project: project)  # Using mechanical discipline
     assert mechanical_tag.valid?
     
-    sequential_tag = create(:tag, :sequential, discipline: discipline, project: project)
+    # Test sequential tag with electrical discipline
+    sequential_tag = create(:tag, :sequential, :electrical, project: project)
     assert sequential_tag.valid?
   end
   

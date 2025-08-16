@@ -2,36 +2,72 @@ require "test_helper"
 
 class DisciplineTest < ActiveSupport::TestCase
   def setup
-    @discipline = Discipline.new(code: "C", name: "Checking")
-  end
-
-  test "fixtures should be valid" do
-    disciplines.each do |d|
-      assert d.valid?, d.errors.full_messages.inspect
-    end
+    @discipline = build(:discipline)
   end
 
   test "should be valid" do
     assert @discipline.valid?
   end
 
+  test "code should be present" do
+    @discipline.code = ""
+    assert_not @discipline.valid?
+  end
+
   test "code should be one character" do
     @discipline.code = "AA"
     assert_not @discipline.valid?
+    @discipline.code = "A"
+    assert @discipline.valid?
   end
 
-  test "code should alpha" do
+  test "code should be alphabetic" do
     @discipline.code = "2"
+    assert_not @discipline.valid?
+    @discipline.code = "!"
+    assert_not @discipline.valid?
+    @discipline.code = " "
     assert_not @discipline.valid?
   end
 
-  test "name should not be blank" do
+  test "code should be unique" do
+    # Create a discipline directly to avoid factory issues with DISCIPLINES
+    discipline = Discipline.create!(code: 'Z', name: 'Test Discipline')
+    
+    # Try to create another discipline with the same code
+    duplicate = Discipline.new(code: 'Z', name: 'Duplicate Discipline')
+    assert_not duplicate.valid?, "Should not allow duplicate discipline codes"
+    assert_includes duplicate.errors[:code], 'has already been taken'
+    
+    # Clean up
+    discipline.destroy
+  end
+
+  test "name should be present" do
     @discipline.name = "     "
     assert_not @discipline.valid?
   end
 
-  test "name should be maximum 50 character" do
+  test "name should not be too long" do
     @discipline.name = "A" * 51
     assert_not @discipline.valid?
+  end
+  
+  test "standard disciplines are created" do
+    # This will trigger the after_build hook that creates standard disciplines
+    create(:discipline)
+    
+    # Verify all standard disciplines exist
+    Discipline::DISCIPLINES.each do |disc|
+      d = Discipline.find_by(code: disc[:code])
+      assert d.present?, "Expected discipline with code #{disc[:code]} to exist"
+      assert_equal disc[:name], d.name
+    end
+  end
+  
+  test "can create custom discipline" do
+    discipline = create(:discipline, code: 'X', name: 'Custom Discipline')
+    assert_equal 'X', discipline.code
+    assert_equal 'Custom Discipline', discipline.name
   end
 end

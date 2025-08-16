@@ -6,6 +6,7 @@ class Load < ApplicationRecord
   enum :basis, Constants.electrical.load_basis.to_h
   enum :config, Constants.electrical.load_configuration.to_h
   validates :config, presence: true
+  validates :basis, presence: true
   attr_accessor :other_supply
   before_validation :set_supply
   validates :supply, numericality: { greater_than: 0.0 }, allow_nil: true
@@ -24,6 +25,19 @@ class Load < ApplicationRecord
 
   def self.ransackable_associations(auth_object = nil)
     [ :circuit, :tag, :cable ]
+  end
+
+  def conductor_count
+    case self.config
+    when "dc", "one"
+      1
+    when "two_120", "two_180"
+      2
+    when "three_3c", "three_4c"
+      3
+    else
+      1
+    end
   end
 
   private

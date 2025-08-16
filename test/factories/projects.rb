@@ -9,6 +9,7 @@ FactoryBot.define do
     sequence(:title) { |n| "Project #{n}" }
     description { "A test project" }
     
+    # Project roles as per the new hierarchy
     trait :with_owner do
       transient do
         owner { create(:user) }
@@ -19,19 +20,69 @@ FactoryBot.define do
       end
     end
     
-    trait :with_members do
+    trait :with_creator do
       transient do
-        members_count { 2 }
-        role { :member }
+        creator { create(:user) }
       end
       
       after(:create) do |project, evaluator|
-        create_list(:user, evaluator.members_count).each do |user|
-          user.add_role(evaluator.role, project)
-        end
+        evaluator.creator.add_role(:creator, project)
       end
     end
     
+    trait :with_editor do
+      transient do
+        editor { create(:user) }
+      end
+      
+      after(:create) do |project, evaluator|
+        evaluator.editor.add_role(:editor, project)
+      end
+    end
+    
+    trait :with_checker do
+      transient do
+        checker { create(:user) }
+      end
+      
+      after(:create) do |project, evaluator|
+        evaluator.checker.add_role(:checker, project)
+      end
+    end
+    
+    trait :with_approver do
+      transient do
+        approver { create(:user) }
+      end
+      
+      after(:create) do |project, evaluator|
+        evaluator.approver.add_role(:approver, project)
+      end
+    end
+    
+    trait :with_viewer do
+      transient do
+        viewer { create(:user) }
+      end
+      
+      after(:create) do |project, evaluator|
+        evaluator.viewer.add_role(:viewer, project)
+      end
+    end
+    
+    # Helper trait to create a project with all role types
+    trait :with_all_roles do
+      after(:create) do |project, _evaluator|
+        create(:user) { |u| u.add_role(:owner, project) }
+        create(:user) { |u| u.add_role(:creator, project) }
+        create(:user) { |u| u.add_role(:editor, project) }
+        create(:user) { |u| u.add_role(:checker, project) }
+        create(:user) { |u| u.add_role(:approver, project) }
+        create(:user) { |u| u.add_role(:viewer, project) }
+      end
+    end
+    
+    # Tags
     trait :with_tags do
       transient do
         tags_count { 3 }
@@ -45,19 +96,17 @@ FactoryBot.define do
       end
     end
     
-    trait :with_cable_tags do
+    trait :with_civil_tags do
       transient do
         tags_count { 3 }
-        discipline { create(:discipline, code: 'C', name: 'Cables') }
+        discipline { create(:discipline, :c) }  # Using standard civil discipline
       end
       
       after(:create) do |project, evaluator|
         create_list(:tag, evaluator.tags_count, 
-                   :with_notes,
+                   :civil,  # Using civil trait from tag factory
                    project: project, 
-                   discipline: evaluator.discipline,
-                   prefix: 'C',
-                   description: 'Cable Tag')
+                   discipline: evaluator.discipline)
       end
     end
   end

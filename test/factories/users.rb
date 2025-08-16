@@ -47,7 +47,7 @@ FactoryBot.define do
     
     trait :with_role do
       transient do
-        role { :default }
+        role { :reader }
         resource { nil }
       end
       

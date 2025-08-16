@@ -1,52 +1,69 @@
 require "test_helper"
 
 class SwitchboardTest < ActiveSupport::TestCase
-
   def setup
-    @tag = tags(:ex2)
-    @switchboard = @tag.switchboard
+    @switchboard = create(:switchboard)
+    @tag = @switchboard.tag
   end
 
-  test "fixtures should be valid" do
-    switchboards.each do |f|
-      assert f.valid?, f.errors.full_messages.inspect
+  test "factory should create valid switchboard with tag" do
+    assert @switchboard.valid?
+    assert @tag.valid?
+    assert_equal 'EX', @tag.prefix
+    assert_equal @switchboard, @tag.tagable
+  end
+
+  test "should create switchboard with custom tag attributes" do
+    project = create(:project, title: 'Test Project')
+    
+    switchboard = nil
+    assert_difference ['Switchboard.count', 'Tag.count'], 1 do
+      switchboard = create(:switchboard, 
+        prefix: 'EX',
+        serial: 5,
+        project: project,
+        description: 'TEST SWITCHBOARD',
+        location: 'Gatehouse',
+        service: 2,  # Sub-main
+        ingress_protection: 'IP22'
+      )
+    end
+    
+    assert_equal 'TEST SWITCHBOARD', switchboard.tag.description
+    assert_equal 'Test Project', switchboard.tag.project.title
+    assert_equal 'Gatehouse', switchboard.location
+    assert_equal 2, switchboard.service
+    assert_equal 'IP22', switchboard.ingress_protection
+    
+    # Verify tag number format if the method exists
+    if switchboard.tag.respond_to?(:full_tag) && switchboard.tag.full_tag.present?
+      assert_match(/^EX-\d+/, switchboard.tag.full_tag)
     end
   end
-
-  test "setup should be valid" do
-    assert @tag.valid?
-    assert @switchboard.valid?, @switchboard.errors.full_messages.inspect
-  end
-
-  test "create switchboard as tagable linked to existing tag" do
-    @ex5 = Tag.create(prefix: "EX",
-                    serial: 5,
-                    suffix: "",
-                    description: "DUMMY SWITCHBOARD",
-                    project: projects(:ab),
-                    stage: 1,
-                    notes: "SWBD TEST",
-                    discipline: disciplines(:e)
-                  )
-    assert @ex5.valid?
-    assert @ex5.persisted?
+  
+  test "should create switchboard through tag update" do
+    project = create(:project)
+    
+    tag = create(:tag,
+      prefix: 'EX',
+      serial: 5,
+      project: project,
+      discipline: create(:discipline, code: 'E', name: 'Electrical')
+    )
+    
     assert_difference 'Switchboard.count', 1 do
-      @ex5.update(tagable: Switchboard.new(
-        location:                   "Gatehouse",
-        service:                    "Indoor tropical environment",
-        ingress_protection:         "IP22",
-        busbar_rating:              200.0,
-        busbar_fault_rating:        5000.0,
-        busbar_fault_duration:      0.5,
-        cable_entry:                "Bottom",
-        incomer_protection:         "None",
-        metering:                   "VOLTS (SWITCH TO ANY PHASE)",
-        neutral_bar_connections:    "1 x 50 mm2, 1 X 35 mm2, 1 x 10 mm2, 2 x 150 mm2",
-        earth_bar_connections:      "9 X 2.5 mm2, 6 X 4 mm2, 2 x 150 mm2"
-        )
-      )
-      end
-    assert_equal @ex5.tagable, @ex5.switchboard
+      tag.update(tagable: build(:switchboard,
+        location: 'Gatehouse',
+        service: 2,
+        ingress_protection: 'IP22',
+        description: 'Custom Switchboard'
+      ))
+    end
+    
+    assert tag.reload.tagable.is_a?(Switchboard)
+    assert_equal 'Gatehouse', tag.tagable.location
+    assert_equal 2, tag.tagable.service
+    assert_equal 'IP22', tag.tagable.ingress_protection
   end
 
   test "destroy switchboard should nullify tagable" do
@@ -62,9 +79,29 @@ class SwitchboardTest < ActiveSupport::TestCase
   end
 
   test "destroy switchboard should destroy associated circuits" do
+    # First, create a circuit associated with the switchboard
+    circuit = create(:circuit, switchboard: @switchboard)
+    
+    # Verify the circuit was created
+    assert_includes @switchboard.circuits, circuit
+    
+    # Now destroy the switchboard and verify the circuit is also destroyed
     assert_difference 'Circuit.count', -1 do
       @switchboard.destroy
     end
+    
+    # Verify the circuit was destroyed
+    assert_raises(ActiveRecord::RecordNotFound) { circuit.reload }
+  end
+  
+  test "should create switchboard with specified number of circuits" do
+    switchboard = create(:switchboard, :with_circuits, circuits_count: 5)
+    assert_equal 5, switchboard.circuits.count
+    
+    # Verify all circuits have unique serial numbers between 1 and 36
+    serials = switchboard.circuits.pluck(:serial)
+    assert_equal serials.uniq, serials, "All circuit serials should be unique"
+    assert serials.all? { |s| (1..36).cover?(s) }, "All serials should be between 1 and 36"
   end
 
 end

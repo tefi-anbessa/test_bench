@@ -7,8 +7,15 @@ class Role < ApplicationRecord
              :optional => true
 
   validates :resource_type,
-            :inclusion => { :in => Rolify.resource_types },
-            :allow_nil => true
+            inclusion: { in: Rolify.resource_types },
+            allow_nil: true
+            
+  validates :name, 
+            presence: true,
+            uniqueness: { 
+              scope: [:resource_type, :resource_id],
+              message: 'role already exists for this resource'
+            }
 
   def self.ransackable_attributes(auth_object = nil)
     ["name", "id"]
