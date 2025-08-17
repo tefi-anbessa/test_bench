@@ -1,7 +1,10 @@
 class Circuit < ApplicationRecord
   belongs_to :switchboard
-  has_one :load, dependent: :nullify
+  has_one :demand, dependent: :nullify
   has_one :cable, dependent: :nullify
+  
+  # Alias for backward compatibility
+  alias_method :load, :demand
   validates :serial, inclusion: { in: 1..36 }
   validates :serial, uniqueness: { scope: :switchboard_id,
     message: "already exists" }

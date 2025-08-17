@@ -92,7 +92,7 @@ en:
       title:            "Cable %{tag}"
       header:           "Cable %{tag}"
 
-  loads:
+  demands:
     index:
       title:            "Load List"
       header:           "Load List"

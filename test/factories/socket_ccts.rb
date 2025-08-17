@@ -6,20 +6,21 @@ FactoryBot.define do
     
     # Associations
     # The Tagable concern will handle the tag association
-    # The Loadable concern will handle the load association
+    # The Demandable concern will handle the demand association
     
-    # Callback to create associated load if needed
+    # Callback to create associated demand if needed
     after(:build) do |socket_cct, evaluator|
-      # Create a default load if one isn't provided
-      if socket_cct.load.nil?
-        socket_cct.load = build(:load, 
-                              loadable: socket_cct,
-                              basis: :power_pf,
-                              supply: 230.0,
-                              config: :one,
-                              power: 2000.0,
-                              power_factor: 0.9,
-                              duty: 0.1)
+      # Create a default demand if one isn't provided
+      if socket_cct.demand.nil?
+        socket_cct.build_demand(
+          demandable: socket_cct,
+          basis: :power_pf,
+          supply: 230.0,
+          config: :one,
+          power: 2000.0,
+          power_factor: 0.9,
+          duty: 0.1
+        )
       end
     end
     

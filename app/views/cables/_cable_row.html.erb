@@ -13,7 +13,7 @@
       <td><%= link_to row.circuit.switchboard.tag.full_tag,
               switchboard_path(row.circuit.switchboard) %></td>
       <td><%= link_to row.circuit.serial, circuit_path(row.circuit) %></td>
-      <td><%= link_to row.circuit.load.loadable.tag.full_tag, load_path(row.circuit.load) %></td>
+      <td><%= link_to row.circuit.load.loadable.tag.full_tag, demand_path(row.circuit.load) %></td>
     <% end %>
     <td><%= row.route_length %></td>
     <td><%= row.vertical_allowance %></td>

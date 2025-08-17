@@ -21,7 +21,7 @@ class LightCctTest < ActiveSupport::TestCase
   test "factory should be valid" do
     assert @light_cct.valid?
     assert @tag.valid?
-    assert @light_cct.load.valid?
+    assert @light_cct.demand.valid?
   end
 
   test "should create light circuit with valid attributes" do
@@ -63,10 +63,23 @@ class LightCctTest < ActiveSupport::TestCase
     end
   end
 
-  test "should create load when creating light circuit" do
-    light = create(:light_cct, :with_tag)
-    assert light.load.present?
-    assert_equal light, light.load.loadable
+  test "should create demand when creating light circuit" do
+    # Create a unique tag to avoid uniqueness constraint
+    unique_serial = 9999
+    light = create(:light_cct, 
+                  light_fitting_type: 'emergency',
+                  quantity: 2,
+                  tag_attributes: {
+                    prefix: 'EL',
+                    serial: unique_serial,
+                    description: 'UNIQUE TEST LIGHT',
+                    project: @project,
+                    discipline: @discipline,
+                    stage: 1
+                  }
+                 )
+    assert light.demand.present?
+    assert_equal light, light.demand.demandable
   end
 
   test "destroy light circuit should nullify tagable" do
@@ -79,12 +92,12 @@ class LightCctTest < ActiveSupport::TestCase
     assert_nil @tag.tagable_id
   end
 
-  test "destroy light circuit should destroy load" do
-    load = @light_cct.load
-    assert_difference 'Load.count', -1 do
+  test "destroy light circuit should destroy demand" do
+    demand = @light_cct.demand
+    assert_difference 'Demand.count', -1 do
       @light_cct.destroy
     end
-    assert_raises(ActiveRecord::RecordNotFound) { load.reload }
+    assert_raises(ActiveRecord::RecordNotFound) { demand.reload }
   end
 
   test "destroy tag should destroy light circuit" do
@@ -95,9 +108,9 @@ class LightCctTest < ActiveSupport::TestCase
     assert_raises(ActiveRecord::RecordNotFound) { LightCct.find(light_id) }
   end
   
-  test "should have load through loadable concern" do
-    assert_respond_to @light_cct, :load
-    assert_kind_of Load, @light_cct.load
+  test "should have demand through demandable concern" do
+    assert_respond_to @light_cct, :demand
+    assert_kind_of Demand, @light_cct.demand
   end
   
   test "should have tag through tagable concern" do

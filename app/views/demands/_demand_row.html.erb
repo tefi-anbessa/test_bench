@@ -1,0 +1,54 @@
+  <tr scope="row">
+    <% if d.tag.nil? %>
+      <td class="table-danger">No tag; ID: <%= d.id %></td>
+    <% else %>
+      <td><%= link_to d.tag.full_tag, tag_path(d.tag) %></td>
+    <% end %>
+    <td>
+      <% if d.basis.blank? %>
+        Undefined
+      <% else %>
+        <%= Demand.human_enum_name(:basis, d.basis) %>
+      <% end %>
+    </td>
+    <td>
+      <% if d.config.blank? %>
+        Undefined
+      <% else %>
+        <%= Demand.human_enum_name(:config, d.config) %>
+      <% end %>
+    </td>
+    <td><%= d.supply %></td>
+    <td><%= d.power %></td>
+    <td><%= d.vector %></td>
+    <td><%= d.power_factor %></td>
+    <td><%= d.current %></td>
+    <td><%= d.duty %></td>
+    <% if d.demandable.nil? %>
+      <td><%= d.demandable_type %></td>
+    <% else %>
+      <td><%= link_to d.demandable %></td>
+    <% end %>
+    <td>
+      <%= link_to demand_path(d), class: "btn btn-secondary btn-sm icon-link",
+            aria: { label: t('actions.show') },
+            title: t('actions.show'),
+            display: "inline" do %>
+        <%== icon('eye') %>
+      <% end %>
+      <%= link_to edit_demand_path(d), class: "btn btn-warning btn-sm icon-link",
+            aria: { label: t('actions.edit') },
+            title: t('actions.edit'),
+            display: "inline"  do %>
+        <%== icon('pencil') %>
+      <% end %>
+      <% if current_user && current_user.admin? %>
+        <%= link_to demand_path(d), method: :delete, class: "btn btn-danger btn-sm icon-link",
+              aria: { label: t('actions.delete') },
+              title: t('actions.delete'),
+              display: "inline"  do %>
+          <%== icon('trash') %>
+        <% end %>
+      <% end %>
+    </td>
+  </tr>

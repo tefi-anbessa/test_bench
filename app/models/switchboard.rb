@@ -1,6 +1,6 @@
 class Switchboard < ApplicationRecord
   include Tagable
-  include Loadable
+  include Demandable
   has_many :circuits, dependent: :destroy
 
   private
@@ -13,7 +13,7 @@ class Switchboard < ApplicationRecord
     end
 
     def self.ransackable_associations(auth_object = nil)
-      [ :circuits, :tag , :load ]
+      [ :circuits, :tag, :demand ]
     end
 
 end

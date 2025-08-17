@@ -21,7 +21,7 @@ class SocketCctTest < ActiveSupport::TestCase
   test "factory should be valid" do
     assert @socket_cct.valid?
     assert @tag.valid?
-    assert @socket_cct.load.valid?
+    assert @socket_cct.demand.valid?
   end
 
   test "should create socket circuit with valid attributes" do
@@ -54,7 +54,7 @@ class SocketCctTest < ActiveSupport::TestCase
     end
   end
 
-  test "should create load when creating socket circuit" do
+  test "should create demand when creating socket circuit" do
     # Create a unique tag for this test to avoid conflicts
     unique_serial = 9999
     socket = create(:socket_cct, 
@@ -69,8 +69,8 @@ class SocketCctTest < ActiveSupport::TestCase
                      stage: 1  # Adding a valid stage (0-10)
                    }
                   )
-    assert socket.load.present?
-    assert_equal socket, socket.load.loadable
+    assert socket.demand.present?
+    assert_equal socket, socket.demand.demandable
   end
 
   test "destroy socket circuit should nullify tagable" do
@@ -83,12 +83,12 @@ class SocketCctTest < ActiveSupport::TestCase
     assert_nil @tag.tagable_id
   end
 
-  test "destroy socket circuit should destroy load" do
-    load = @socket_cct.load
-    assert_difference 'Load.count', -1 do
+  test "destroy socket circuit should destroy demand" do
+    demand = @socket_cct.demand
+    assert_difference 'Demand.count', -1 do
       @socket_cct.destroy
     end
-    assert_raises(ActiveRecord::RecordNotFound) { load.reload }
+    assert_raises(ActiveRecord::RecordNotFound) { demand.reload }
   end
 
   test "destroy tag should destroy socket circuit" do
@@ -99,9 +99,9 @@ class SocketCctTest < ActiveSupport::TestCase
     assert_raises(ActiveRecord::RecordNotFound) { SocketCct.find(socket_id) }
   end
   
-  test "should have load through loadable concern" do
-    assert_respond_to @socket_cct, :load
-    assert_kind_of Load, @socket_cct.load
+  test "should have demand through demandable concern" do
+    assert_respond_to @socket_cct, :demand
+    assert_kind_of Demand, @socket_cct.demand
   end
   
   test "should have tag through tagable concern" do

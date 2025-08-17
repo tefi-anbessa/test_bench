@@ -6,20 +6,21 @@ FactoryBot.define do
     
     # Associations
     # The Tagable concern will handle the tag association
-    # The Loadable concern will handle the load association
+    # The Demandable concern will handle the demand association
     
-    # Callback to create associated load if needed
+    # Callback to create associated demand if needed
     after(:build) do |light_cct, evaluator|
-      # Create a default load if one isn't provided
-      if light_cct.load.nil?
-        light_cct.load = build(:load, 
-                             loadable: light_cct,
-                             basis: :power_pf,
-                             supply: 230.0,
-                             config: :one,
-                             power: 100.0, # Default to 100W per fitting
-                             power_factor: 0.9,
-                             duty: 0.1)
+      # Create a default demand if one isn't provided
+      if light_cct.demand.nil?
+        light_cct.build_demand(
+          demandable: light_cct,
+          basis: :power_pf,
+          supply: 230.0,
+          config: :one,
+          power: 100.0, # Default to 100W per fitting
+          power_factor: 0.9,
+          duty: 1.0
+        )
       end
     end
     
@@ -32,6 +33,32 @@ FactoryBot.define do
     trait :emergency do
       light_fitting_type { 'emergency' }
       quantity { 1 } # Typically one per room
+      after(:build) do |light_cct, evaluator|
+        light_cct.build_demand(
+          demandable: light_cct,
+          basis: :power_pf,
+          supply: 230.0,
+          config: :one,
+          power: 50.0, # Lower power for emergency lights
+          power_factor: 0.9,
+          duty: 0.1 # Typically lower duty cycle for emergency lights
+        )
+      end
+    end
+    
+    trait :high_bay do
+      light_fitting_type { 'high_bay' }
+      after(:build) do |light_cct, evaluator|
+        light_cct.build_demand(
+          demandable: light_cct,
+          basis: :power_pf,
+          supply: 400.0,
+          config: :three,
+          power: 400.0, # Higher power for high bay lights
+          power_factor: 0.9,
+          duty: 1.0
+        )
+      end
     end
     
     # Create with a tag

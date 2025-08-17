@@ -53,18 +53,18 @@
     <% if cable.circuit.load.present? %>
       <div class="d-flex flex-row mb-1">
         <span class="col-1 data-label">
-          <%= t('activerecord.models.load') %>:
+          <%= t('activerecord.models.demand') %>:
         </span>
         <span class="col-1 data-field">
           <%= link_to cable.circuit.load.loadable.tag.full_tag,
-                load_path(cable.circuit.load) %>
+                demand_path(cable.circuit.load) %>
         </span>
         <span class="col-4 data-field">
           <%= cable.circuit.load.loadable.tag.description %>
         </span>
       </div>
     <% else %>
-      <%= t('show.unassigned', model: t('activerecord.models.load')) %>
+      <%= t('show.unassigned', model: t('activerecord.models.demand')) %>
     <% end %>
     <div class="d-flex flex-row mb-1">
       <span class="col-1 data-label">

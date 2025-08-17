@@ -1,11 +1,53 @@
-class Load < ApplicationRecord
-  belongs_to :circuit, optional: true
-
-  delegated_type :loadable, types: Constants.electrical.loadable
-
-  enum :basis, Constants.electrical.load_basis.to_h
-  enum :config, Constants.electrical.load_configuration.to_h
-  validates :config, presence: true
+# This is a legacy model that's been replaced by Demand
+# It's kept for backward compatibility
+class Load < Demand
+  self.table_name = 'demands'  # Use the same table as Demand
+  
+  # Add deprecation warning
+  def self.inherited(subclass)
+    super
+    warn "[DEPRECATION] The Load model is deprecated. Please use Demand instead."
+  end
+  # Map legacy column names to new ones
+  self.inheritance_column = nil
+  
+  # Override the demandable getter/setter to maintain backward compatibility
+  def demandable=(value)
+    super(value)
+  end
+  
+  def demandable
+    super
+  end
+  
+  # Alias for backward compatibility
+  def loadable=(value)
+    self.demandable = value
+  end
+  
+  def loadable
+    demandable
+  end
+  
+  # Override to handle the old loadable_type
+  def self.sti_name
+    'Load'
+  end
+  
+  # For polymorphic associations
+  def self.polymorphic_name
+    'Load'
+  end
+  
+  # Override the polymorphic_name for instances
+  def polymorphic_name
+    'Load'
+  end
+  
+  # For form builders and other places that might call model_name
+  def self.model_name
+    @_model_name ||= ActiveModel::Name.new(self, nil, 'Load')
+  end
   validates :basis, presence: true
   attr_accessor :other_supply
   before_validation :set_supply

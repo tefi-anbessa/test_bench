@@ -2,8 +2,8 @@ class TagablesController < ApplicationController
   def new
     @tag = Tag.find(tagable_params[:tag_id])
     case tagable_params[:tagable_type]
-    when "Load"
-      redirect_to new_tag_load_path(@tag)
+    when "Demand"
+      redirect_to new_tag_demand_path(@tag)
     when "Cable"
       redirect_to new_tag_cable_path(@tag)
     else flash[:danger] = "Tag type #{tagable_params[:tagable_type]} is not implemented"

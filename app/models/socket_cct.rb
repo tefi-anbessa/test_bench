@@ -1,6 +1,6 @@
 class SocketCct < ApplicationRecord
   include Tagable
-  include Loadable
+  include Demandable
   
   # Validations
   validates :socket_type, presence: true
@@ -13,6 +13,6 @@ class SocketCct < ApplicationRecord
     end
 
     def self.ransackable_associations(auth_object = nil)
-      [ :load, :tag ]
+      [ :demand, :tag ]
     end
 end

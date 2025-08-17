@@ -1,0 +1,107 @@
+<div id="<%= dom_id demand %>">
+  <div class="container text-start">
+    <% if demand.tag.nil? %>
+      <div class="d-flex flex-row mb-1">
+        <span class="col-2 data-label">
+          <% t('show.orphan', model: t("activerecord.models.tag").tableize) %>
+        </span>
+      </div>
+    <% else %>
+      <div class="d-flex flex-row mb-1">
+        <span class="col-1 data-label">
+          <%= t('activerecord.attributes.tag.full_tag') + ':' %>
+        </span>
+        <span class="col-1 data-field">
+          <%= link_to demand.tag.full_tag, tag_path(demand.tag.id) %>
+        </span>
+        <span class="col-3 data-field">
+          <%= demand.tag.description %>
+        </span>
+      </div>
+    <% end %>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.demand.basis') + ':' %>
+      </span>
+      <span class="col-4 data-field">
+        <%= Demand.human_enum_name(:basis, demand.basis) %>
+      </span>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.demand.basis_notes') + ':' %>
+      </span>
+      <span class="col-4 data-field">
+        <%= demand.basis_notes %>
+      </span>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.demand.supply') + ':' %>
+      </span>
+      <span class="col-1 data-field">
+        <%= number_to_human(demand.supply, precision: 4,
+              units: { unit: "V", thousand: "kV"}) %>
+      </span>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.demand.phase') + ':' %>
+      </span>
+      <span class="col-4 data-field">
+        <%= Demand.human_enum_name(:config, demand.config) %>
+      </span>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.demand.power') + ':' %>
+      </span>
+      <span class="col-1 data-field">
+        <%= number_to_human(demand.power, precision: 4,
+              units: { unit: "W", thousand: "kW", million: "MW"}) %>
+      </span>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.demand.vector') + ':' %>
+      </span>
+      <span class="col-1 data-field">
+        <%= number_to_human(demand.vector, precision: 4,
+              units: { unit: "VA", thousand: "kVA", million: "MVA"}) %>
+      </span>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.demand.power_factor') + ':' %>
+      </span>
+      <span class="col-1 data-field">
+        <%= demand.power_factor %>
+      </span>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.demand.current') + ':' %>
+      </span>
+      <span class="col-1 data-field">
+        <%= number_to_human(demand.current, precision: 4,
+              units: { unit: "A", thousand: "kA", million: "MA"}) %>
+      </span>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.demand.duty') + ':' %>
+      </span>
+      <span class="col-1 data-field">
+        <%= demand.duty %>
+      </span>
+    </div>
+    <div class="d-flex flex-row mb-1">
+      <span class="col-1 data-label">
+        <%= t('activerecord.attributes.demand.demandable_type') + ':' %>
+      </span>
+      <span class="col-1 data-field">
+        <%= demand.demandable_type %>
+      </span>
+    </div>
+  </div>
+</div>

@@ -9,7 +9,7 @@ en:
       role:               "Role"
       cable_type:         "Cable Type"
       cable:              "Cable"
-      load:               "Load"
+      demand:             "Load"
       switchboard:        "Switchboard"
       circuit:            "Circuit"
       motor:              "Motor"
@@ -66,8 +66,6 @@ en:
         temperature_rating:	Temperature Rating
       cable:
         cable_type_id:        "Cable Type"
-        from_id:              "From Tag"
-        to_id:                "To Tag"
         route_length:         "Route Length"
         route_length_help:    "Route length of cable run, plan view"
         vertical_allowance:   "Vertical Allowance"
@@ -76,7 +74,7 @@ en:
         termination_allowance_help: "Allowance for cable routing inside boxes"
         start_mark:           "Start Mark"
         end_mark:             "End Mark"
-      load:
+      demand:
         basis:            "Basis"
         bases:
           summation:      "Summation of outgoing feeders"
@@ -104,9 +102,9 @@ en:
         current:          "Current (A)"
         duty:             "Duty"
         duty_help:        "Proportional ON time for the load, for total load estimates"
-        loadable_type:    "Load Type"
-        loadable:         "Load Detail"
-        loadable_help:    "Click for datasheet"
+        demandable_type:  "Load Type"
+        demandable:       "Load Detail"
+        demandable_help:  "Click for datasheet"
       switchboard:
         location:         "Location"
         service:          "Service"

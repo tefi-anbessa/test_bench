@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_08_16_013602) do
+ActiveRecord::Schema[7.0].define(version: 2025_08_16_094648) do
   create_table "cable_types", force: :cascade do |t|
     t.string "conductor_material"
     t.string "conductor_makeup"
@@ -62,21 +62,9 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_16_013602) do
     t.index ["switchboard_id"], name: "index_circuits_on_switchboard_id"
   end
 
-  create_table "disciplines", force: :cascade do |t|
-    t.string "code"
-    t.string "name"
-  end
-
-  create_table "light_ccts", force: :cascade do |t|
-    t.string "light_fitting_type"
-    t.integer "quantity"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "loads", force: :cascade do |t|
-    t.string "loadable_type", null: false
-    t.integer "loadable_id", null: false
+  create_table "demands", force: :cascade do |t|
+    t.string "demandable_type", null: false
+    t.integer "demandable_id", null: false
     t.integer "circuit_id"
     t.integer "basis"
     t.string "basis_notes"
@@ -89,8 +77,20 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_16_013602) do
     t.float "duty"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["circuit_id"], name: "index_loads_on_circuit_id"
-    t.index ["loadable_type", "loadable_id"], name: "index_loads_on_loadable"
+    t.index ["circuit_id"], name: "index_demands_on_circuit_id"
+    t.index ["demandable_type", "demandable_id"], name: "index_demands_on_demandable"
+  end
+
+  create_table "disciplines", force: :cascade do |t|
+    t.string "code"
+    t.string "name"
+  end
+
+  create_table "light_ccts", force: :cascade do |t|
+    t.string "light_fitting_type"
+    t.integer "quantity"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "motors", force: :cascade do |t|
@@ -202,7 +202,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_16_013602) do
   add_foreign_key "cables", "cable_types"
   add_foreign_key "cables", "circuits"
   add_foreign_key "circuits", "switchboards"
-  add_foreign_key "loads", "circuits"
+  add_foreign_key "demands", "circuits"
   add_foreign_key "tags", "disciplines"
   add_foreign_key "tags", "projects"
 end
