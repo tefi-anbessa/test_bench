@@ -9,7 +9,7 @@ FactoryBot.define do
     
     # Associations
     # The Tagable concern will handle the tag association
-    # The Loadable concern will handle the load association
+    # The Demandable concern will handle the demand association
     
     # Traits for different motor types
     trait :induction do
@@ -50,11 +50,19 @@ FactoryBot.define do
       ingress_protection { 'IP67' }
     end
     
-    # Callback to create associated load if needed
+    # Callback to create associated demand if needed
     after(:build) do |motor, evaluator|
-      # Create a default load if one isn't provided
-      if motor.load.nil?
-        motor.load = build(:load, loadable: motor)
+      # Create a default demand if one isn't provided
+      if motor.demand.nil?
+        motor.build_demand(
+          demandable: motor,
+          basis: :power_pf,
+          supply: 400.0,
+          config: :three_4c,
+          power: 75000.0,
+          power_factor: 0.85,
+          duty: 1.0
+        )
       end
     end
   end

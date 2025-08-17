@@ -30,20 +30,20 @@
       <td><%= link_to l.loadable %></td>
     <% end %>
     <td>
-      <%= link_to load_path(l), class: "btn btn-secondary btn-sm icon-link",
+      <%= link_to demand_path(l), class: "btn btn-secondary btn-sm icon-link",
             aria: { label: t('actions.show') },
             title: t('actions.show'),
             display: "inline" do %>
         <%== icon('eye') %>
       <% end %>
-      <%= link_to edit_load_path(l), class: "btn btn-warning btn-sm icon-link",
+      <%= link_to edit_demand_path(l), class: "btn btn-warning btn-sm icon-link",
             aria: { label: t('actions.edit') },
             title: t('actions.edit'),
             display: "inline"  do %>
         <%== icon('pencil') %>
       <% end %>
       <% if current_user && current_user.admin? %>
-        <%= link_to load_path(l), method: :delete, class: "btn btn-danger btn-sm icon-link",
+        <%= link_to demand_path(l), method: :delete, class: "btn btn-danger btn-sm icon-link",
               aria: { label: t('actions.delete') },
               title: t('actions.delete'),
               display: "inline"  do %>

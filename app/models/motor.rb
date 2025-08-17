@@ -1,6 +1,6 @@
 class Motor < ApplicationRecord
   include Tagable
-  include Loadable
+  include Demandable
 
   private
 
@@ -10,6 +10,6 @@ class Motor < ApplicationRecord
     end
 
     def self.ransackable_associations(auth_object = nil)
-      [ :load, :tag ]
+      [ :demand, :tag ]
     end
 end

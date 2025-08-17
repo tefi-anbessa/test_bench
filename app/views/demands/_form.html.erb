@@ -2,36 +2,36 @@
   <% unless @tag.nil? %>
     <%= render 'tags/tag_badge', tag: @tag %>
   <% end %>
-  <%= bootstrap_form_with(model: @load) do |f| %>
+  <%= bootstrap_form_with(model: @demand) do |f| %>
     <%= render 'shared/error_messages', object: f.object %>
-    <%= f.hidden_field :tag_id, value: @tag.id %>
+    <%= f.hidden_field :tag_id, value: @tag&.id %>
     <div class="d-flex flex-row mb-1">
       <div class="p-2 me-1 form-field">
-        <%= f.select :basis, Load.bases.keys.collect { |basis| [Load.human_enum_name(:basis, basis), basis] },
+        <%= f.select :basis, Demand.bases.keys.collect { |basis| [Demand.human_enum_name(:basis, basis), basis] },
               layout: :vertical,
-              help: t('activerecord.attributes.load.basis_help') %>
+              help: t('activerecord.attributes.demand.basis_help') %>
       </div>
       <div class="p-2 me-1 form-field">
         <%= f.text_area :basis_notes, layout: :vertical,
-            help: t('activerecord.attributes.load.basis_notes_help') %>
+            help: t('activerecord.attributes.demand.basis_notes_help') %>
       </div>
     </div>
     <div class="d-flex flex-row mb-1">
       <div class="p-2 me-1 form-field">
-        <%= f.select :config, Load.configs.keys.collect { |config| [Load.human_enum_name(:config, config), config] },
+        <%= f.select :config, Demand.configs.keys.collect { |config| [Demand.human_enum_name(:config, config), config] },
               layout: :vertical,
-              help: t('activerecord.attributes.load.config_help') %>
+              help: t('activerecord.attributes.demand.config_help') %>
       </div>
       <div class="p-2 me-1 form-field">
         <%= f.select :supply, Constants.electrical.supply.to_h,
               include_blank: t("form.other"),
               layout: :vertical, append: "V",
-              help: t('activerecord.attributes.load.supply_help') %>
+              help: t('activerecord.attributes.demand.supply_help') %>
         <%= f.number_field :other_supply, in: 1.0 .. 100000.0, step: 1, append: "V", layout: :vertical %>
       </div>
     </div>
 
-    <% case @load.basis %>
+    <% case @demand.basis %>
     <% when "summation" %>
       <div class="d-flex flex-row mb-1">
         <div class="p-2 me-1 data-field">
@@ -136,12 +136,12 @@
     <div class="d-flex flex-row mb-1">
       <div class="p-2 me-1 form-field">
         <%= f.number_field :duty, in: 0.0 .. 1.0, step: 0.01, layout: :vertical,
-              help: t('activerecord.attributes.load.duty_help') %>
+              help: t('activerecord.attributes.demand.duty_help') %>
       </div>
     </div>
     <div class="flex-row d-flex">
       <div class="p-2 me-1 form-field">
-        <%= f.select :loadable_type, Constants.electrical.loadable,
+        <%= f.select :demandable_type, Constants.electrical.loadable,
                       include_blank: true, layout: :vertical %>
       </div>
     </div>
@@ -154,14 +154,14 @@
         <% end %>
       </div>
 
-      <% if @load.persisted? %>
+      <% if @demand.persisted? %>
         <div class="p-2 me-1">
-          <%= link_to demand_path(@load),
+          <%= link_to demand_path(@demand),
             class: "btn btn-warning actions",
             data: { turbo_confirm: t('actions.sure') } do %>
               <%= t('actions.discard') %>
               <%== icon('x-square') %>
-          <% end %>
+            <% end %>
         </div>
       <% else %>
         <div class="p-2 me-1">

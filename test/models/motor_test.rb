@@ -24,7 +24,7 @@ class MotorTest < ActiveSupport::TestCase
   test "factory should be valid" do
     assert @motor.valid?
     assert @tag.valid?
-    assert @motor.load.valid?
+    assert @motor.demand.valid?
   end
 
   test "should create motor with valid attributes" do
@@ -75,12 +75,12 @@ class MotorTest < ActiveSupport::TestCase
     assert_nil @tag.tagable_id
   end
 
-  test "destroy motor should destroy load" do
-    load = @motor.load
-    assert_difference 'Load.count', -1 do
+  test "destroy motor should destroy demand" do
+    demand = @motor.demand
+    assert_difference 'Demand.count', -1 do
       @motor.destroy
     end
-    assert_raises(ActiveRecord::RecordNotFound) { load.reload }
+    assert_raises(ActiveRecord::RecordNotFound) { demand.reload }
   end
 
   test "destroy tag should destroy motor" do
@@ -91,9 +91,9 @@ class MotorTest < ActiveSupport::TestCase
     assert_raises(ActiveRecord::RecordNotFound) { Motor.find(motor_id) }
   end
   
-  test "should have load through loadable concern" do
-    assert_respond_to @motor, :load
-    assert_kind_of Load, @motor.load
+  test "should have demand through demandable concern" do
+    assert_respond_to @motor, :demand
+    assert_kind_of Demand, @motor.demand
   end
   
   test "should have tag through tagable concern" do
