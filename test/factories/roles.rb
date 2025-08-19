@@ -1,48 +1,31 @@
-# Define global roles constant for use in tests
-module RoleConstants
-  GLOBAL_ROLES = %w[owner admin].freeze
-  PROJECT_ROLES = %w[project_owner creator editor checker approver viewer].freeze
-end
-
 FactoryBot.define do
   factory :role do
-    # Default to a global role
-    sequence(:name) { |n| "role_#{n}" }
+    # Default to a global admin role
+    name { 'admin' }
     
-    # Traits for global roles
-    trait :owner do
-      name { 'owner' }
+    # Generate traits for all roles from constants
+    Constants.roles.global_roles.each do |role_name|
+      trait role_name.to_sym do
+        name { role_name }
+      end
     end
     
-    trait :admin do
-      name { 'admin' }
+    # Generate traits for functional roles
+    Constants.roles.functional_roles.each do |role_name|
+      trait role_name.to_sym do
+        name { role_name }
+      end
     end
     
-    # Traits for project-level roles
-    trait :project_owner do
-      name { 'project_owner' }
-      resource_type { 'Project' }
-      resource_id { create(:project).id }
-    end
-    
-    trait :creator do
-      name { 'creator' }
-    end
-    
-    trait :editor do
-      name { 'editor' }
-    end
-    
-    trait :checker do
-      name { 'checker' }
-    end
-    
-    trait :approver do
-      name { 'approver' }
-    end
-    
-    trait :viewer do
-      name { 'viewer' }
+    # Generate traits for resource-specific roles
+    Constants.roles.resources.to_h.each do |resource_type, roles|
+      roles.each do |role_name|
+        trait "#{resource_type}_#{role_name}".to_sym do
+          name { role_name }
+          resource_type { resource_type.to_s.classify }
+          resource { association resource_type.to_sym }
+        end
+      end
     end
     
     # Factory for resource-specific roles
@@ -62,14 +45,44 @@ FactoryBot.define do
       end
     end
     
-    # Factory for user assignment
+    # Factory for user assignment with role
     factory :user_role do
       transient do
         user { create(:user) }
+        role_name { nil }  # Allow specifying role name
+        resource { nil }   # Optional resource
       end
       
       after(:create) do |role, evaluator|
-        evaluator.user.add_role(role.name.to_sym, role.resource)
+        role_name = evaluator.role_name || role.name
+        evaluator.user.add_role(role_name.to_sym, role.resource)
+      end
+      
+      # Create traits for each role type
+      Constants.roles.global_roles.each do |role_name|
+        trait role_name.to_sym do
+          name { role_name }
+          resource { nil }
+        end
+      end
+      
+      # Create traits for functional roles
+      Constants.roles.functional_roles.each do |role_name|
+        trait role_name.to_sym do
+          name { role_name }
+          resource { nil }
+        end
+      end
+      
+      # Create traits for resource-specific roles
+      Constants.roles.resources.to_h.each do |resource_type, roles|
+        roles.each do |role_name|
+          trait "#{resource_type}_#{role_name}".to_sym do
+            name { role_name }
+            resource_type { resource_type.to_s.classify }
+            resource_id { create(resource_type.to_sym).id }
+          end
+        end
       end
     end
   end

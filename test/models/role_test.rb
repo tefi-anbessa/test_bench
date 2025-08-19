@@ -18,22 +18,22 @@ class RoleTest < ActiveSupport::TestCase
   end
 
   test "should create project role" do
-    role = create(:role, :project_owner, resource: @project)
+    role = create(:role, :project_project_owner, resource: @project)
     assert_equal 'project_owner', role.name
     assert_equal 'Project', role.resource_type
     assert_equal @project.id, role.resource_id
   end
 
   test "should create resource role with factory" do
-    role = create(:resource_role, resource: @project, name: 'editor')
-    assert_equal 'editor', role.name
+    role = create(:resource_role, resource: @project, name: 'team_member')
+    assert_equal 'team_member', role.name
     assert_equal 'Project', role.resource_type
     assert_equal @project.id, role.resource_id
   end
 
   test "should assign role to user" do
     user = create(:user)
-    role = create(:role, :editor)
+    role = create(:role, :electrical_designer)
     
     assert_difference 'user.roles.count', 1 do
       user.add_role(role.name.to_sym, role.resource)
@@ -49,17 +49,18 @@ class RoleTest < ActiveSupport::TestCase
   end
 
   test "should not allow duplicate role names for the same resource" do
-    # Create a role with a specific name
-    role1 = create(:role, name: 'test_role')
+    # Create a global role
+    admin_role = create(:role, :admin)
     
     # Should be invalid - same name and nil resource
-    role2 = build(:role, name: 'test_role', resource_type: nil, resource_id: nil)
-    assert_not role2.valid?
-    assert_includes role2.errors[:name], 'role already exists for this resource'
+    duplicate_global = build(:role, name: 'admin')
+    assert_not duplicate_global.valid?
+    assert_includes duplicate_global.errors[:name], 'role already exists for this resource'
     
-    # Should be valid - same name but different resource
-    role3 = build(:role, name: 'test_role', resource: @project)
-    assert role3.valid?, "Expected role with same name but different resource to be valid: #{role3.errors.full_messages}"
+    # Should be valid - different resource type with valid role name
+    project = create(:project)
+    project_role = build(:role, name: 'project_owner', resource: project)
+    assert project_role.valid?, "Expected role with valid name to be valid: #{project_role.errors.full_messages}"
   end
 
   test "should return ransackable attributes" do
@@ -67,6 +68,6 @@ class RoleTest < ActiveSupport::TestCase
   end
 
   test "should return ransackable associations" do
-    assert_equal ["users", "roles"], Role.ransackable_associations
+    assert_equal ["users", "resource"], Role.ransackable_associations
   end
 end

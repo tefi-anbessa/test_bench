@@ -15,6 +15,16 @@ en:
       motor:              "Motor"
       socket_cct:         "SocketCct"
       light_cct:          "LightCct"
+    errors:
+      messages:
+        blank: "can't be blank"
+        invalid: "is not a valid role for this resource"
+      models:
+        role:
+          attributes:
+            name:
+              taken: "role already exists for this resource"
+              invalid: "is not a valid role for this resource type"
     attributes:
       resource:
         id:               "ID"

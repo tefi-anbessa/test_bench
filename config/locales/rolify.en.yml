@@ -1,11 +1,12 @@
 en:
   rolify:
     names:
-      reader:       "reader"
-      author:       "author"
-      creator:      "creator"
-      editor:       "editor"
-      checker:      "checker"
-      approver:     "approver"
-      admin:        "admin"
-      owner:        "owner"
+      app_owner: "Owner"
+      admin: "Administrator"
+      project_owner: "Project Owner"
+      team_member: "Team Member"
+    descriptions:
+      app_owner: "Owner"
+      admin: "Administrator"
+      project_owner: "Full access to the project, can manage team members and settings"
+      team_member: "Can view and contribute to the project"

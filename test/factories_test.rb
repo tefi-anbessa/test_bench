@@ -1,62 +1,157 @@
 require 'test_helper'
 
 class FactoriesTest < ActiveSupport::TestCase
-  # Run each test in a transaction that gets rolled back
-  self.use_transactional_tests = true
+  # Test that all factories can be created and are valid
+  test 'all factories are valid' do
+    # Define factory-specific test cases
+    factory_tests = {
+      # Core models
+      :user => -> { build(:user) },
+      :role => -> { build(:role, :admin) },
+      :project => -> { build(:project) },
+      :discipline => -> { build(:discipline) },
+      :tag => -> { build(:tag, project: create(:project), discipline: create(:discipline)) },
+      :sequential_tag => -> { build(:sequential_tag, project: create(:project), discipline: create(:discipline)) },
+      :complete_tag => -> { 
+        project = create(:project)
+        discipline = create(:discipline)
+        create(:complete_tag, project: project, discipline: discipline)
+      },
+      
+      # Electrical components
+      :cable_type => -> { build(:cable_type) },
+      :cable => -> { build(:cable) },
+      :circuit => -> { 
+        switchboard = create(:switchboard)
+        build(:circuit, switchboard: switchboard)
+      },
+      :light_cct => -> { build(:light_cct) },
+      :motor => -> { build(:motor) },
+      :socket_cct => -> { build(:socket_cct) },
+      :switchboard => -> { build(:switchboard) },
+      :demand => -> { 
+        build(:demand, :with_light_cct)
+      },
+      
+      # Roles and permissions
+      :resource_role => -> { build(:resource_role, :project_project_owner) },
+      :user_role => -> { 
+        user = create(:user)
+        user.grant(:admin)
+        user
+      }
+    }
+    
+    # Get all registered factories
+    factory_names = FactoryBot.factories.map(&:name)
+    
+    # Test each factory
+    factory_names.sort.each do |factory_name|
+      next unless factory_tests.key?(factory_name) # Skip if no test defined
+      next if factory_tests[factory_name] == :skip # Skip explicitly skipped factories
+      
+      begin
+        DatabaseCleaner.cleaning do
+          instance = factory_tests[factory_name].call
+          assert instance.valid?, 
+                 "#{factory_name} factory is invalid: #{instance.errors.full_messages.to_sentence}"
+        end
+      rescue StandardError => e
+        flunk "Error with #{factory_name} factory: #{e.message}\n#{e.backtrace.first(5).join("\n")}"
+      end
+    end
+    
+    # Verify we're testing all factories
+    untested_factories = factory_names - factory_tests.keys
+    assert_empty untested_factories, "The following factories are not being tested: #{untested_factories.join(', ')}"
+  end
 
+  # User factory tests
   test 'user factory' do
     user = build(:user)
-    assert user.valid?
+    assert user.valid?, "User should be valid: #{user.errors.full_messages.join(', ')}"
+    assert user.email.present?
+    assert user.encrypted_password.present?
+    assert_match /^[a-zA-Z0-9_.-]*$/, user.name, 'Name should match the required format'
   end
 
   test 'admin user factory' do
     admin = create(:user, :admin)
-    assert admin.valid?
-    assert admin.has_role?(:admin)
+    assert admin.valid?, "Admin user should be valid: #{admin.errors.full_messages.join(', ')}"
+    assert admin.has_role?(:admin), 'User should have admin role'
   end
 
-  test 'user with project role' do
-    user = create(:user)
-    project = create(:project)
-    user.add_role(:member, project)
-    assert user.has_role?(:member, project)
-  end
-
+  # Project factory tests
   test 'project factory' do
     project = build(:project)
     assert project.valid?
+    assert project.code.present?
+    assert_match Project::VALID_CODE_REGEX, project.code
   end
 
-  test 'project with owner role' do
-    project = create(:project)
-    owner = create(:user)
-    owner.add_role(:owner, project)
-    assert owner.has_role?(:owner, project)
+  # Role factory tests
+  test 'role factory with valid role' do
+    # Test with a global role
+    role = create(:role, :admin)
+    assert role.valid?, "Role should be valid: #{role.errors.full_messages.join(', ')}"
+    assert_equal 'admin', role.name
+    assert_nil role.resource_type
+    
+    # Test with a resource-specific role using the project_owner trait
+    role = create(:role, :project_project_owner)
+    assert role.valid?, "Role should be valid: #{role.errors.full_messages.join(', ')}"
+    assert_equal 'project_owner', role.name
+    assert_equal 'Project', role.resource_type
+    assert_not_nil role.resource
   end
 
-  test 'project with member roles' do
-    project = create(:project)
-    member1 = create(:user)
-    member2 = create(:user)
-    member1.add_role(:member, project)
-    member2.add_role(:member, project)
-    assert_equal 2, User.with_role(:member, project).count
+  # Tag factory tests
+  test 'tag factory' do
+    tag = build(:tag, project: create(:project), discipline: create(:discipline))
+    assert tag.valid?
+    assert tag.prefix.present?
+    assert tag.serial.present?
   end
 
-  test 'project with tags' do
-    project = create(:project)
-    create_list(:tag, 3, project: project, discipline: create(:discipline))
-    assert_equal 3, project.tags.count
+  test 'tag with notes' do
+    tag = build(:tag, :with_notes, project: create(:project), discipline: create(:discipline))
+    assert tag.valid?
+    assert tag.notes.present?
   end
 
+  test 'tag with full tag' do
+    project = create(:project, code: 'XX')
+    discipline = create(:discipline, code: 'M')
+    tag = create(:tag, 
+      project: project, 
+      discipline: discipline, 
+      prefix: 'P', 
+      serial: 1, 
+      suffix: 'A',
+      stage: 1
+    )
+    
+    # Save and reload to trigger after_find callback
+    tag.save!
+    tag.reload
+    
+    assert tag.valid?, "Tag should be valid: #{tag.errors.full_messages.join(', ')}"
+    # Format is "M:P-0001.A" (discipline:prefix-serial.suffix)
+    assert_equal 'M:P-0001.A', tag.full_tag, "Full tag should be in format 'M:P-0001.A'"
+  end
+
+  # Discipline factory test
   test 'discipline factory' do
     discipline = build(:discipline)
     assert discipline.valid?
+    assert discipline.name.present?
+    assert discipline.code.present?
   end
   
   test 'creates all standard disciplines' do
     # This will trigger the after_build hook that creates all standard disciplines
-    create(:discipline)
+    discipline = create(:discipline)
+    assert discipline.valid?
     
     # Verify all standard disciplines exist
     Discipline::DISCIPLINES.each do |disc|
@@ -66,22 +161,11 @@ class FactoriesTest < ActiveSupport::TestCase
     end
   end
 
-  test 'tag factory' do
-    tag = build(:tag, project: create(:project), discipline: create(:discipline))
-    assert tag.valid?
-  end
-
   test 'civil tag' do
     discipline = create(:discipline, :c)  # Using standard discipline 'C' (Civil)
     tag = build(:tag, :civil, discipline: discipline)
     assert tag.valid?
-    assert_equal 'C', tag.prefix
-  end
-
-  test 'tag with notes' do
-    tag = build(:tag, :with_notes, project: create(:project), discipline: create(:discipline))
-    assert tag.valid?
-    assert_not_nil tag.notes
+    assert_equal 'C', tag.prefix  # Civil tags use 'C' prefix
   end
 
   test 'sequential tags' do
@@ -120,41 +204,16 @@ class FactoriesTest < ActiveSupport::TestCase
     assert_equal expected_full_tag2, tag2.full_tag, 'Second tag full_tag should match expected format'
   end
   
-  test 'simple factories are valid' do
-    # Use truncation for this test to ensure clean state
-    DatabaseCleaner.strategy = :truncation, { except: %w[ar_internal_metadata] }
-    
-    # Test each factory individually
-    FactoryBot.factories.each do |factory|
-      # Skip complex factories that are tested separately
-      next if [:tag, :project, :discipline, :user].include?(factory.name)
-      
-      DatabaseCleaner.cleaning do
-        instance = create(factory.name)
-        assert instance.valid?, "#{factory.name} factory is not valid: #{instance.errors.full_messages.join(', ')}"
-      end
-    end
-  ensure
-    # Reset to default strategy
-    DatabaseCleaner.strategy = :transaction
-  end
   
-  test 'project with owner is valid' do
+  test 'project is valid' do
     project = create(:project, code: 'AA')
-    owner = create(:user)
-    owner.add_role(:owner, project)
-    assert project.valid?, "Project with owner is not valid: #{project.errors.full_messages.join(', ')}"
-  end
-  
-  test 'project with members is valid' do
-    project = create(:project, code: 'BB')
-    2.times { create(:user).add_role(:member, project) }
-    assert project.valid?, "Project with members is not valid: #{project.errors.full_messages.join(', ')}"
+    assert project.valid?, "Project is not valid: #{project.errors.full_messages.join(', ')}"
   end
   
   test 'project with tags is valid' do
     project = create(:project, code: 'CC')
-    create_list(:tag, 3, project: project, discipline: create(:discipline, code: 'G'))
+    discipline = create(:discipline, code: 'M')
+    create_list(:tag, 3, project: project, discipline: discipline)
     assert project.valid?, "Project with tags is not valid: #{project.errors.full_messages.join(', ')}"
   end
   
@@ -183,7 +242,7 @@ class FactoriesTest < ActiveSupport::TestCase
     # Test creating tags with different standard disciplines
     tag = create(:tag, :civil, project: project)  # Using civil discipline
     assert tag.valid?
-    assert_equal 'C', tag.prefix
+    assert_equal 'C', tag.prefix  # Civil tags use 'C' prefix
     
     # Test with notes
     tag_with_notes = create(:tag, :with_notes, :electrical, project: project)  # Using electrical discipline

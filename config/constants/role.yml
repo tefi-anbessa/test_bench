@@ -1,9 +1,20 @@
-role:
-  name:
-    - reader
-    - creator
-    - editor
-    - checker
-    - approver
+roles:
+
+  # Global roles (not tied to a specific resource)
+  global_roles:
     - admin
-    - owner
+    - app_owner
+
+  # Resource-specific role definitions
+  resources:
+    project:
+      - project_owner
+      - team_member
+
+    
+  functional_roles:
+    - electrical_designer
+    - mechanical_designer
+    - structural_designer
+    - document_controller
+  

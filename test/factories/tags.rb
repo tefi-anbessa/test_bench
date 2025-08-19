@@ -33,13 +33,13 @@ FactoryBot.define do
     end
     
     trait :electrical do
-      prefix { 'E' }
+      prefix { 'EX' }
       description { 'Electrical Tag' }
       association :discipline, :e
     end
     
     trait :mechanical do
-      prefix { 'M' }
+      prefix { 'P' }
       description { 'Mechanical Tag' }
       association :discipline, :m
     end

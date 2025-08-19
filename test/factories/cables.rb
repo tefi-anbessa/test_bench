@@ -49,15 +49,15 @@ FactoryBot.define do
     end
     
     # Trait for creating a cable with a circuit
-    trait :with_circuit do
-      association :circuit, factory: :circuit
+#    trait :with_circuit do
+#      association :circuit, factory: :circuit
       
-      after(:build) do |cable|
-        # Set the project from the circuit's switchboard if not already set
-        if cable.circuit&.switchboard && !cable.tag&.project
-          cable.tag.project = cable.circuit.switchboard.project
-        end
-      end
-    end
+#      after(:build) do |cable|
+#        # Set the project from the circuit's switchboard if not already set
+#        if cable.circuit&.switchboard && !cable.tag&.project
+#          cable.tag.project = cable.circuit.switchboard.project
+#        end
+#      end
+#    end
   end
 end

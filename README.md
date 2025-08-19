@@ -9,22 +9,36 @@ A Ruby on Rails application for managing multiple engineering projects.
 - Projects are uniquely identified by a 2-letter code, e.g. AA, AB, AC, etc.
 
 ## Tags
-- Design elements require a tag to be assigned. 
+- Engineering design elements require a tag to be assigned. 
 - Tags belong to projects, but can be sub-grouped within a project by assigning a project stage (1 to 10).
-- The tag is the link to data sheet and further detailed information. [TODO - implement flexible tag structure.] Tags are unique across disciplines and projects.
-- For a tag to have further information added to produce a data sheet, it has to be assigned to a tagable type. The following tagable types are available: [TODO: keep this list up to date]
-- Switchboard
-- Cable
-- Motor
-- SocketCct
-- LightCct
-- Pipe
+- Tags belong to disciplines, e.g. Electrical, Piping, etc.
+- The tag is the link to data sheet and further detailed information. [TODO - implement flexible tag structure.] Tags are unique within disciplines and projects.
+[TODO]: Provide an option for tags to be unique only on the project level. Requires coordination of tag prefixes.
+- For a tag to have further information added, it has to be assigned to a tagable type. The information required is generally what is needed to produce a data sheet for procurement.
+- The following tagable types are available: [TODO: keep this list up to date]
+  - Switchboard
+  - Cable
+  - Motor
+  - SocketCct
+  - LightCct
+  - Pipe
 - Source
 - Consumer
 
+## Disciplines
+- Disciplines can be used to group tags, documents, etc.
+- Disciplines are set across the organization, so all projects share the same set of discipine codes.
+[HOLD] - Disciplines interact with functional role assignments. 
+- Because they are not typically mutable, there is no UI for managing disciplines. They are set by db:seed.
+
 ## Electrical
 - Electrical power distribution can be modeled, mainly for the purpose of producing documentation. 
-- The following tag types are loadable, meaning they can have attached electrical load information: Switchboard, Motor, SocketCct, LightCct. [TODO: keep this list up to date]
+- The following tag types are demandable, meaning they can have attached electrical load information: 
+  - Switchboard 
+  - Motor
+  - SocketCct
+  - LightCct
+[TODO: keep this list up to date]
 - Switchboards have multiple outgoing circuits, each uniquely identified. 
 - Each circuit has protection devices and options.
 - Each circuit can have an assigned load and cable.
@@ -32,13 +46,13 @@ A Ruby on Rails application for managing multiple engineering projects.
 
 ## Role Hierarchy and Permissions
 
-The application implements a role-based access control (RBAC) system with the following hierarchy:
+The application implements a role-based access control (RBAC) system. Because most resources will be subject to a revision control system, delete operations are not allowed by default. This is to prevent accidental deletion of data history. The roles have the following hierarchy:
 
 ### Global Roles
-The UI for global and resource roles is the roles index page.
+- The UI for global roles is the roles index page.
 
 #### 1. Owner (Super Admin)
-- **Role**: `:owner`
+- **Role**: `:app_owner`
 - **Permissions**:
   - Full system access
   - Can assign/revoke `:admin` roles
@@ -50,27 +64,42 @@ The UI for global and resource roles is the roles index page.
 - **Permissions**:
   - Can perform all CRUD operations on all resources
   - Can manage users (except assigning `:owner` global role)
-  - Can assign/revoke `:creator`, `:approver`, `:editor`, `:checker`, `:reader` roles
+  - Can assign/revoke functional roles
+  - Unless otherwise specified, only admin or app_owner can perform delete operations
+
 
 ### Projects resource
 - The UI for project instance roles is a sub-form on the project show page.
-- Roles on the project resource propagate down to child resources such as tags and documents. - These roles should be tied to project instances, they should not be resource wide.
-- `:owner` - Full control over a project, including all subsidiary resources
-- `:creator` - Can create and edit resources
-- `:editor` - Can edit resources
-- `:checker` - Can check resources
-- `:approver` - Can approve resources for publication
-- `:viewer` - Read-only access to resources
+- A ':team_member' role on the project instance is required to access child resources such as tags and documents.
+- There should be no resource wide roles for Project.
+- **Role**: `:project_owner`
+- **Permissions**:
+  - There should be only one user granted this role for each project instance
+  - Create, edit and update a project instance and its child resources
+  - Can assign/revoke `:team_member` roles
+- **Role**: `:team_member`
+- **Permissions**:
+  - Default read-only access to all of the project instances resources
+  - Required for create, edit and update access to child resources such as tags and documents, and other functional roles.
 
-### Resource-Instance Roles
-- The UI for resource instance roles is a sub-form on the resource show page, where applicable.
-- `:creator` - Can create and edit resources
-- `:editor` - Can edit resources
-- `:checker` - Can check resources
-- `:approver` - Can approve resources for publication
-- `:viewer` - Read-only access to resources
+### Resource-Wide Roles
+- The UI for resource wide roles is the roles index page.
+- Resource wide roles are based on functional roles.
+- A resource wide role gives a user create, edit and update access to the resources associated with the function, provided the user also has a member role for the project instance.
 
-- Can be assigned to other users on resource instances, e.g. Project, Document, etc. to allow delete permissions within that instance.
+#### 1. Electrical resources
+- **Role**: :electrical_designer'
+- **Permissions**:
+- Create, edit and update access to general project resources, as long a project role is also granted:
+  - Tags
+  - Documents
+- Create, edit and update access to resources in the Electrical module, as long as a project role is also granted:
+  - CableTypes
+  - Switchboards
+  - Motors
+  - SocketCcts
+  - LightCcts
+  - Cables
 
 ## Implementation Notes
 

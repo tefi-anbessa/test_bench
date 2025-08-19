@@ -1,27 +1,76 @@
 FactoryBot.define do
-  factory :demand, parent: :load, class: 'Demand' do
-    # Inherit all attributes from the :load factory but create a Demand instance
+  factory :demand, class: 'Demand' do
+    # Default demandable (light_cct) - will be built but not saved
+    demandable { build(:light_cct) }
     
-    # Set up the demandable association (replaces loadable from the parent)
-    demandable { association :light_cct }
-    
-    # Clear the loadable association from the parent
-    loadable { nil }
+    # Basic demand attributes
+    basis { 'power_pf' }
+    supply { 240.0 }
+    config { 'three_3c' }  # Using valid enum value
+    power { 1000.0 }
+    power_factor { 0.9 }
+    duty { 1.0 }
     
     # Define traits for different demandable types
     trait :with_light_cct do
-      demandable { association :light_cct }
+      transient do
+        project { create(:project) }
+        discipline { create(:discipline, :e) }  # 'E' for Electrical
+      end
+      
+      after(:build) do |demand, evaluator|
+        tag = create(:tag, 
+          project: evaluator.project,
+          discipline: evaluator.discipline,
+          prefix: 'LGT',
+          serial: rand(1..999)
+        )
+        
+        demand.demandable = create(:light_cct, tag: tag)
+      end
     end
     
     trait :with_motor do
-      demandable { association :motor }
+      transient do
+        project { create(:project) }
+        discipline { create(:discipline, :m) }  # 'M' for Mechanical
+      end
+      
+      after(:build) do |demand, evaluator|
+        tag = create(:tag, 
+          project: evaluator.project,
+          discipline: evaluator.discipline,
+          prefix: 'MTR',
+          serial: rand(1..999)
+        )
+        
+        demand.demandable = create(:motor, 
+          project: evaluator.project,
+          discipline: evaluator.discipline,
+          tag: tag
+        )
+      end
     end
     
     trait :with_socket_cct do
-      demandable { association :socket_cct }
+      transient do
+        project { create(:project) }
+        discipline { create(:discipline, :e) }
+      end
+      
+      after(:build) do |demand, evaluator|
+        tag = create(:tag, 
+          project: evaluator.project,
+          discipline: evaluator.discipline,
+          prefix: 'SOCK',
+          serial: rand(1..999)
+        )
+        
+        demand.demandable = create(:socket_cct, tag: tag)
+      end
     end
     
-    # Define basis-specific traits from the parent
+    # Define basis-specific traits
     trait :power_pf_basis do
       basis { 'power_pf' }
       power { rand(100..5000).to_f }
