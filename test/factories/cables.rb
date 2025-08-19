@@ -3,10 +3,12 @@
 FactoryBot.define do
   factory :cable do
     # Required attributes
-    cable_type { create(:cable_type, :pvc_flat_twin_earth, 
-      description: "Test Cable Type #{SecureRandom.hex(4)}",
-      csa: 1.0 + (SecureRandom.random_number(100) * 0.1)  # Random CSA to ensure uniqueness
-    ) }
+    cable_type { 
+      create(:cable_type, :pvc_flat_twin_earth, 
+        description: "Test Cable Type #{SecureRandom.hex(4)}",
+        csa: 1.0 + (SecureRandom.random_number(100) * 0.1)  # Random CSA to ensure uniqueness
+      ) 
+    }
     
     # Optional attributes
     route_length { nil }  # meters
@@ -39,8 +41,8 @@ FactoryBot.define do
         tagable: cable,
         prefix: evaluator.prefix,
         serial: evaluator.serial,
-        project: evaluator.project,
-        discipline: discipline
+        discipline: discipline,
+        project: evaluator.project
       }
       
       tag_attributes[:description] = evaluator.description if evaluator.description

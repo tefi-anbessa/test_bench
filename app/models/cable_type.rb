@@ -1,5 +1,6 @@
 class CableType < ApplicationRecord
   resourcify
+  belongs_to :project, required: true
   has_many :cables, dependent: :destroy
   enum :temperature_rating, Constants.electrical.temperature_rating.each_with_index.to_h
   
@@ -33,7 +34,7 @@ class CableType < ApplicationRecord
   # Validations
   validates :conductor_material, :conductor_makeup, :csa, presence: true
             
-  # Ensure we don't have duplicate cable types with the same specifications
+  # Ensure we don't have duplicate cable types with the same specifications within a project
   # Using a custom validation to handle nil values properly
   validate :unique_cable_specifications
   
@@ -43,8 +44,9 @@ class CableType < ApplicationRecord
     # Skip if we already have errors on any of the required fields
     return if errors[:conductor_material].any? || errors[:conductor_makeup].any? || errors[:csa].any?
     
-    # Start with required fields
+    # Start with required fields and scope to project
     existing = self.class.where(
+      project_id: project_id,
       conductor_material: conductor_material,
       conductor_makeup: conductor_makeup,
       csa: csa

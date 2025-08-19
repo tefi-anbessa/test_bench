@@ -8,7 +8,7 @@ class CreateTags < ActiveRecord::Migration[7.0]
       t.string :description
       t.text :notes
       t.references :project, null: false, foreign_key: true
-      t.integer :phase
+      t.integer :stage
 
       t.timestamps
     end

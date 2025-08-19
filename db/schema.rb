@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_08_16_094648) do
+ActiveRecord::Schema[7.0].define(version: 2025_08_19_034524) do
   create_table "cable_types", force: :cascade do |t|
     t.string "conductor_material"
     t.string "conductor_makeup"
@@ -28,6 +28,8 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_16_094648) do
     t.datetime "updated_at", null: false
     t.string "unique_spec"
     t.text "description", default: "", null: false
+    t.integer "project_id", null: false
+    t.index ["project_id"], name: "index_cable_types_on_project_id"
     t.index ["unique_spec"], name: "index_cable_types_on_unique_spec", unique: true
   end
 
@@ -167,6 +169,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_16_094648) do
   create_table "users", force: :cascade do |t|
     t.string "name", null: false
     t.string "email", default: "", null: false
+    t.boolean "admin", default: false
     t.string "encrypted_password", default: "", null: false
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
@@ -199,6 +202,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_16_094648) do
     t.index ["user_id"], name: "index_users_roles_on_user_id"
   end
 
+  add_foreign_key "cable_types", "projects"
   add_foreign_key "cables", "cable_types"
   add_foreign_key "cables", "circuits"
   add_foreign_key "circuits", "switchboards"

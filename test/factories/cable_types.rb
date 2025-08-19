@@ -2,6 +2,9 @@
 
 FactoryBot.define do
   factory :cable_type do
+    # Required association
+    project
+    
     conductor_material { 'Copper' }
     conductor_makeup { '2C+E' }  # Required field
     csa { 4.0 }  # Cross-sectional area in mm²

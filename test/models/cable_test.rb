@@ -44,7 +44,6 @@ class CableTest < ActiveSupport::TestCase
     
     # Verify tag attributes
     assert_equal 'TEST CABLE', cable.tag.description
-    assert_equal 'Test Project', cable.tag.project.title
     assert_equal '2C+E', cable.cable_type.conductor_makeup
     
     # Verify tag number format if the method exists

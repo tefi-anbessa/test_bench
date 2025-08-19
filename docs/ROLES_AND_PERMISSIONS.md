@@ -27,6 +27,23 @@ This document outlines the role-based access control (RBAC) system implemented i
    - Limited access to project settings
    - Cannot manage team members
 
+### Functional Roles (Global)
+1. **Electrical Designer**
+   - Required, in addition to project team member role, for create, edit, update on electrical resources:
+      - Cable Types
+      - Cables
+      - Circuits
+      - Demands
+      - Switchboards
+      - Motors
+      - Sockets
+      - Lights
+
+2. [TODO- HOLD]**Mechanical Designer**
+   - Can view and contribute to mechanical design content
+   - Limited access to mechanical design settings
+   - Cannot manage mechanical design settings
+
 ## Role Assignment
 
 ### New Users
