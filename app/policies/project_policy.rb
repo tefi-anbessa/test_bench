@@ -21,11 +21,11 @@ class ProjectPolicy < ApplicationPolicy
   end
 
   def new?
-    user.is_owner?
+    user.is_app_owner?
   end
 
   def create?
-    user.is_owner?
+    user.is_app_owner?
   end
 
   def update?
@@ -33,26 +33,25 @@ class ProjectPolicy < ApplicationPolicy
   end
 
   def edit?
-    user.is_owner? || user.is_admin?
+    user.is_app_owner? || user.is_admin?
   end
 
   def destroy?
-    user.is_owner?
+    user.is_app_owner?
   end
 
 
   class Scope < ApplicationPolicy::Scope
     # Any project for which the user has a role can be listed.
     def resolve
-      if user.is_owner? || user.is_admin? ||
+      if user.is_app_owner? || user.is_admin? ||
         user.roles.where(resource_type: "Project", resource_id: nil).count > 0
         # If user has global admin role, or any resource role on Projects,
         # scope includes all.
         Project.all
       else
         # Scope includes the projects where user has any resource specific role
-        Project.where(:id => user.roles.where(resource_type: "Project")
-                        .pluck(:resource_id)).unique
+        Project.where(id: user.roles.where(resource_type: "Project").pluck(:resource_id).uniq)
       end
     end
   end

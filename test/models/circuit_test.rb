@@ -67,20 +67,22 @@ class CircuitTest < ActiveSupport::TestCase
     assert_equal circuit, circuit.cable.circuit
   end
 
-  # TODO: Uncomment when load factory is available
-  # test "destroy circuit should nullify load and cable references" do
-  #   circuit = create(:circuit, :with_load, :with_cable, switchboard: @switchboard)
-  #   load = circuit.load
-  #   cable = circuit.cable
+  test "destroy circuit should nullify demand and cable references" do
+    circuit = create(:circuit, :with_demand, :with_cable, switchboard: @switchboard)
+    demand = circuit.demand
+    cable = circuit.cable
     
-  #   assert_difference ['Circuit.count', 'Load.count', 'Cable.count'], -1 do
-  #     circuit.destroy
-  #   end
+    # Only the circuit count should decrease
+    assert_difference 'Circuit.count', -1 do
+      assert_no_difference ['Demand.count', 'Cable.count'] do
+        circuit.destroy
+      end
+    end
     
-  #   # Check that load and cable still exist but their circuit reference is nullified
-  #   assert_nil load.reload.circuit_id
-  #   assert_nil cable.reload.circuit_id
-  # end
+    # Check that demand and cable still exist but their circuit reference is nullified
+    assert_nil demand.reload.circuit_id
+    assert_nil cable.reload.circuit_id
+  end
 
   test "should create multiple circuits with unique serial numbers" do
     # Create 3 circuits on the same switchboard

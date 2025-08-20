@@ -1,10 +1,11 @@
 class CableTypesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_cable_type, only: %i[ show edit update destroy ]
+  before_action :require_project!
+  before_action :set_cable_type, only: %i[show edit update destroy]
 
   # GET /electrical/cable_types or /electrical/cable_types.json
   def index
-    @q = CableType.ransack(params[:q])
+    @q = current_project.cable_types.ransack(params[:q])
     @pagy, @cable_types = pagy(@q.result.includes(:cables), limit: 10)
   end
 
@@ -14,7 +15,7 @@ class CableTypesController < ApplicationController
 
   # GET /electrical/cable_types/new
   def new
-    @cable_type = authorize CableType.new
+    @cable_type = authorize current_project.cable_types.new
   end
 
   # GET /electrical/cable_types/1/edit
@@ -24,7 +25,7 @@ class CableTypesController < ApplicationController
 
   # POST /electrical/cable_types or /electrical/cable_types.json
   def create
-    @cable_type = authorize CableType.new(cable_type_params)
+    @cable_type = authorize current_project.cable_types.new(cable_type_params)
 
     respond_to do |format|
       if @cable_type.save
@@ -71,14 +72,15 @@ class CableTypesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_cable_type
-      @cable_type = CableType.find(params[:id])
+      @cable_type = current_project.cable_types.find(params[:id])
     end
 
     # Only allow a list of trusted parameters through.
     def cable_type_params
-      params.require(:cable_type).permit(:conductor_material,
-        :conductor_makeup, :csa, :neutral_csa, :earth_csa, :insulation,
-        :bedding, :armour, :sheath, :bedding_od, :overall_od,
-        :temperature_rating)
+      params.require(:cable_type).permit(
+        :conductor_material, :conductor_makeup, :csa, :neutral_csa, :earth_csa, 
+        :insulation, :bedding, :armour, :sheath, :bedding_od, :overall_od,
+        :temperature_rating, :project_id
+      )
     end
 end

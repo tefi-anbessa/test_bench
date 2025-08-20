@@ -41,10 +41,10 @@ FactoryBot.define do
       notes { 'Test circuit notes' }
     end
     
-    # Factory to create a circuit with a load
-    trait :with_load do
+    # Factory to create a circuit with a demand
+    trait :with_demand do
       after(:create) do |circuit|
-        create(:load, circuit: circuit)
+        create(:demand, circuit: circuit)
       end
     end
     

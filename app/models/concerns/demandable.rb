@@ -11,20 +11,5 @@ module Demandable
             dependent: :destroy
             
     accepts_nested_attributes_for :demand
-    
-    # Alias for backward compatibility
-    def load
-      demand
-    end
-    
-    # For form builders and other places that might call build_load
-    def build_load(attributes = {})
-      build_demand(attributes)
-    end
-    
-    # For form builders and other places that might call build_demand
-    def build_demand(attributes = {})
-      super(attributes.merge(demandable: self))
-    end
   end
 end

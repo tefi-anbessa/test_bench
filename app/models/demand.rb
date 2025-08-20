@@ -1,27 +1,12 @@
 class Demand < ApplicationRecord
-  # Keep the same table name as loads until migration runs
-  self.table_name = 'demands'
-  
-  # Handle both old and new polymorphic names
-  def self.polymorphic_name
-    'Demand'
-  end
-  
-  # For form builders and other places that might call model_name
-  def self.model_name
-    @_model_name ||= ActiveModel::Name.new(self, nil, 'Demand')
-  end
-  
   # Associations
   belongs_to :circuit, optional: true
   
   # This is the delegated type that handles different kinds of demands (motors, light circuits, etc.)
   delegated_type :demandable, 
     types: Constants.electrical.loadable
-
-  # For backward compatibility with the old loadable association
-  alias_attribute :loadable, :demandable
   
+  # Enums
   enum :basis, Constants.electrical.load_basis.to_h
   enum :config, Constants.electrical.load_configuration.to_h
   

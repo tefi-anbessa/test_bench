@@ -5,7 +5,7 @@ require "minitest/reporters"
 require 'factory_bot_rails'
 require 'database_cleaner/active_record'
 
-# Load support files
+# Load test support files
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 Minitest::Reporters.use!
