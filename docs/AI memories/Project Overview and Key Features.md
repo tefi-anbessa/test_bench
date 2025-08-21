@@ -13,7 +13,17 @@
   - Project Owner
   - Team Member
 
-### 2. Project Management
+## Deployment Requirements
+
+### Offline/Local Operation
+- The application must function entirely offline or on local networks without internet access
+- All JavaScript/CSS dependencies must be bundled locally
+- No external CDN dependencies are allowed
+- All assets must be precompiled and served locally
+
+## Core Features
+
+### 1. Project Management
 - Unique 2-letter project codes (e.g., AA, AB, AC)
 - Project stages (1-10) for organization
 - Document versioning with paper_trail

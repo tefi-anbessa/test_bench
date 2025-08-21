@@ -4,6 +4,7 @@ Rails.application.routes.draw do
     get 'site/help'
     get 'site/about'
     get 'site/contact'
+    get 'site/test_icons'
 
     devise_for :users, controllers: {
       sessions: 'users/sessions'

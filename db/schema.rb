@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_08_19_034524) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_21_044644) do
   create_table "cable_types", force: :cascade do |t|
     t.string "conductor_material"
     t.string "conductor_makeup"

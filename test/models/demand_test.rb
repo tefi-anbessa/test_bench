@@ -91,32 +91,6 @@ class DemandTest < ActiveSupport::TestCase
   end
 
   # Test that the legacy load method works for backward compatibility
-  test "should support legacy load method for backward compatibility" do
-    # First, remove any existing demand to avoid conflicts
-    @light_cct.demand&.destroy
-    
-    # Create a demand with specific attributes for testing
-    demand = create(:demand, 
-      demandable: @light_cct,
-      basis: 'current_power',
-      basis_notes: 'Test basis notes 2',
-      supply: 240.0,
-      config: 'three_3c',
-      power: 2283.0,
-      current: 19.0,
-      duty: 0.6
-    )
-    
-    # Reload to ensure associations are set
-    @light_cct.reload
-    
-    # Test the legacy load method by comparing IDs
-    assert_equal demand.id, @light_cct.load.id
-    
-    # Also test that the load method returns the same object as demand
-    assert_equal @light_cct.demand, @light_cct.load
-  end
-
   # Test that the demand is destroyed when demandable is destroyed if dependent: :destroy is set
   test "should destroy demand when demandable is destroyed" do
     # Create required associations

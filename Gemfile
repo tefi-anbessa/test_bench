@@ -1,29 +1,26 @@
 source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby "3.1.2"
+ruby "3.3.5"
 
 # Rails defaults:
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 7.0.8", ">= 7.0.8.4"
+gem "rails", "~> 8.0.0"
 
-# The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
-gem "sprockets-rails"
-
-# Use sqlite3 as the database for Active Record
-# gem "sqlite3", "~> 1.4"
+# Use Propshaft for the asset pipeline [https://github.com/rails/propshaft]
+gem "propshaft"
 
 # Use the Puma web server [https://github.com/puma/puma]
-gem "puma", "~> 5.0"
+gem "puma", ">= 6.0.0"
 
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
-gem "importmap-rails"
+gem "importmap-rails", "~> 2.0"
 
 # Hotwire's SPA-like page accelerator [https://turbo.hotwired.dev]
-gem "turbo-rails"
+gem "turbo-rails", "~> 2.0"
 
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
-gem "stimulus-rails"
+gem "stimulus-rails", "~> 1.3"
 
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
@@ -45,16 +42,20 @@ gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
 gem "bootsnap", require: false
 
 # Use Sass to process CSS
-gem "sassc-rails"
+gem "sassc-rails"  # Required for Sprockets if still needed, but consider moving to Propshaft
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # Inactive by default:
 # gem "image_processing", "~> 1.2"
 
+# Address Ruby 3.3+ deprecation warnings
+gem "ostruct"
+gem "mutex_m"
+
 # Added gems +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-gem 'bootstrap', '~> 5.1.3'
+gem 'bootstrap', '~> 5.3.0'
 gem "faker"
-gem 'rails-i18n', '~> 7.0.0'
+gem 'rails-i18n', '~> 8.0'
 
 # use gem 'flag-icons-rails' for internationalisation
 gem 'flag-icons-rails'
@@ -72,6 +73,9 @@ gem 'devise-i18n'
 # Use bootstrap_form for pretty easy forms.
 gem "bootstrap_form", "~> 5.4"
 
+# Use bootstrap_icons.
+gem 'bootstrap-icons-helper'
+
 # Using order_query for previous and next items in complex sort order.
 # gem 'order_query', '~> 0.2.0'
 
@@ -84,13 +88,13 @@ gem "pundit"
 group :development, :test do
 # Rails defaults:
   # Use sqlite3 as the database for Active Record
-  gem "sqlite3", "~> 1.4"
+  gem "sqlite3", "~> 2.0", ">= 2.1.0"
 
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
-  
+
   # Test factories for generating test data and development fixtures
-  gem 'factory_bot_rails', '~> 6.2'
+  gem 'factory_bot_rails', '~> 6.5'
 end
 
 group :development do
@@ -106,16 +110,22 @@ group :development do
 end
 
 group :test do
-  # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
-  gem "capybara"
-  gem "selenium-webdriver",       "4.2.0"
+  # System testing [https://guides.rubyonrails.org/testing.html#system-testing]
+  gem "capybara", "~> 3.39"
+  gem "selenium-webdriver", "~> 4.10"
+  gem "webdrivers", "~> 5.3"
+
+  # Test database management
   gem "database_cleaner-active_record"
-  gem "webdrivers",               "5.0.0"
-  gem "rails-controller-testing", "1.0.5"
-  gem "minitest",                 "5.15.0"
-  gem "minitest-reporters",       "1.5.0"
-  gem "guard",                    "2.18.0"
-  gem "guard-minitest",           "2.4.6"
+
+  # Testing framework
+  gem "minitest", "~> 5.15"
+  gem "minitest-reporters", "~> 1.5"
+  gem "rails-controller-testing", "~> 1.0"
+
+  # Test automation
+  gem "guard", "~> 2.18"
+  gem "guard-minitest", "~> 2.4"
 end
 
 # Added gems

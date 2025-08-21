@@ -234,6 +234,10 @@ Edit `/app/assets/stylesheets/application.scss`, add:
   font-family: "bootstrap-icons";
   src: font-url("fonts/bootstrap-icons.woff2") format("woff2"),
     font-url("/fonts/bootstrap-icons.woff") format("woff");`
+}
+
+Run:
+`bin/importmap pin bootstrap-icons
 
 Copy `test_bench/app/helpers/bootstrap_icon_helper.rb`.
 

@@ -1,10 +1,10 @@
 class Demand < ApplicationRecord
-  # Associations
-  belongs_to :circuit, optional: true
-  
   # This is the delegated type that handles different kinds of demands (motors, light circuits, etc.)
   delegated_type :demandable, 
     types: Constants.electrical.loadable
+
+  # Associations
+  belongs_to :circuit, optional: true
   
   # Enums
   enum :basis, Constants.electrical.load_basis.to_h

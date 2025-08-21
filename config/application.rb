@@ -9,7 +9,15 @@ Bundler.require(*Rails.groups)
 module TestBench
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 7.0
+    config.load_defaults 8.0
+
+    # Handle to_time deprecation warning in Rails 8.1
+    config.active_support.to_time_preserves_timezone = :zone
+
+    # Please, add to the `ignore` list any other `lib` subdirectories that do
+    # not contain `.rb` files, or that should not be reloaded or eager loaded.
+    # Common ones are `templates`, `generators`, or `middleware`, for example.
+    config.autoload_lib(ignore: %w[assets tasks])
 
     # Configuration for the application, engines, and railties goes here.
     #
@@ -18,24 +26,12 @@ module TestBench
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
-
     # Added for i18n installation
-      # Path to search for translation files
-      config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
+    # Path to search for translation files
+    config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
 
-      # Permitted locales available for the application
-      I18n.available_locales = [:en, :km ,:th, :cn]
+    # Permitted locales available for the application
+    I18n.available_locales = [:en, :kh ,:th, :cn]
     # end i18n
-
-    config.active_record.verify_foreign_keys_for_fixtures = false
-    
-    # Include FactoryBot methods in console
-    console do
-      # Make FactoryBot methods available without the FactoryBot prefix
-      include FactoryBot::Syntax::Methods
-      
-      # Optional: Load all factories for autocompletion
-      # FactoryBot.find_definitions if Rails.env.development?
-    end
   end
 end

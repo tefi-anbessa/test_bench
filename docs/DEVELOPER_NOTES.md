@@ -50,7 +50,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Write more tests for the Demand model
 - [ ] Add performance optimizations for large demand calculations
 - [ ] Update API documentation
-- [ ] Clean up old Load model references after migration
+- [x] Clean up old Load model references after migration
 
 ## Refactoring Opportunities
 - [ ] Improve role and permissions implementation and workflow.
@@ -58,6 +58,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Consider extracting demand calculations into a service object
 - [ ] Add type checking with Sorbet or RBS
 - [ ] Implement caching for frequently accessed demand data
+- [ ] Upgrade to Rails 8
 
 ## Potential Features
 - [ ] Add more comprehensive reporting for demand calculations
