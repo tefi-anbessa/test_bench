@@ -15,7 +15,7 @@
 - **Role**: `:admin`
 - **Permissions**:
   - Can perform all CRUD operations on all resources
-  - Can manage users (except assigning `:owner` global role)
+  - Can manage users (except assigning `:owner` or `:admin` global roles)
   - Can assign/revoke functional roles
   - Unless otherwise specified, only admin or app_owner can perform delete operations
 

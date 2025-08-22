@@ -47,6 +47,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    - Prefer simple, maintainable solutions over clever ones
 
 ## Technical Debt
+- [ ] Serve bootstrap from local dev or prod
 - [ ] Write more tests for the Demand model
 - [ ] Add performance optimizations for large demand calculations
 - [ ] Update API documentation
@@ -64,6 +65,8 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Add more comprehensive reporting for demand calculations
 - [ ] Implement bulk import/export for demands
 - [ ] Add more detailed documentation for the demand calculation formulas
+- [ ] See if pagy can provide usesr selectable page size
+- [ ] Customize devise views
 
 ## Architecture Considerations
 - [ ] Evaluate if we should move to a more modular architecture

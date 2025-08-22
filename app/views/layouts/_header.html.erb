@@ -33,8 +33,8 @@
         </li>
 
         <% if user_signed_in? %>
-          <ul class="nav nav-tabs">
-            <% if current_user&.is_admin? || current_user&.is_owner? %>
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <% if policy(Role).index? %>
               <li class="nav-item">
                 <%= link_to t('role', scope: 'activerecord.models').pluralize,
                   roles_path,
@@ -53,18 +53,15 @@
                   t('project', scope: 'activerecord.models') + ": " + current_project.code :
                   t('project', scope: 'activerecord.models').pluralize %>
               </a>
-              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li class="nav-item">
-                  <%= link_to t('project', scope: 'activerecord.models').pluralize,
-                    projects_path,
-                    class: "dropdown-item" %>
-                </li>
-                <li class="nav-item">
-                  <%= link_to t('actions.select'),
-                    select_projects_path,
-                    class: "dropdown-item" %>
-                </li>
+              <ul class="dropdown-menu" aria-labelledby="project-menu-btn">
+                <li><%= link_to t('project', scope: 'activerecord.models').pluralize,
+                      projects_path,
+                      class: "dropdown-item" %></li>
+                <li><%= link_to t('actions.select'),
+                      select_projects_path,
+                      class: "dropdown-item" %></li>
               </ul>
+            </li>
             <li class="nav-item">
               <%= link_to t('tag', scope: 'activerecord.models').pluralize,
                 tags_path,
@@ -80,23 +77,24 @@
                   aria-expanded="false">
                 Electrical
               </a>
-              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li class="nav-item">
+              <ul class="dropdown-menu" aria-labelledby="electrical-menu-btn">
+                <li>
                   <%= link_to t('cable_type', scope: 'activerecord.models').pluralize,
                     cable_types_path,
                     class: "dropdown-item" %>
                 </li>
-                <li class="nav-item">
+                <li>
                   <%= link_to t('cable', scope: 'activerecord.models').pluralize,
                     cables_path,
                     class: "dropdown-item" %>
                 </li>
-                <li class="nav-item">
+                <li>
                   <%= link_to t('demand', scope: 'activerecord.models').pluralize,
                     demands_path,
                     class: "dropdown-item" %>
                 </li>
               </ul>
+            </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle"
                 href="#"

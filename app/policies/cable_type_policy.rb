@@ -1,75 +1,68 @@
 class CableTypePolicy < ApplicationPolicy
-  attr_reader :user, :cable_type, :project
-
-  def initialize(user, cable_type)
-    super
-    @cable_type = record
-    @project = @cable_type.respond_to?(:project) && @cable_type.persisted? ? @cable_type.project : current_project
+  def cable_type
+    record
   end
 
-  class Scope < Scope
-    attr_reader :current_project
-
-    def initialize(user, scope, current_project = nil)
-      super(user, scope)
-      @current_project = current_project
-    end
-
+  class Scope < ApplicationPolicy::Scope
     def resolve
-      if current_project.present?
-        scope.where(project: current_project)
-      else
-        scope.none
-      end
+      return scope.none unless @current_project
+      scope.where(project: @current_project)
     end
   end
 
   def index?
-    # Anyone can list cable types if there's a selected project
-    project.present?
+    # Only allow if user is present and has a current project
+    user.present? && current_project.present?
   end
 
   def show?
     # Can view if the cable type belongs to the current project
-    project.present? && cable_type.project == project
+    return false unless user && current_project && cable_type
+    cable_type.project == current_project
   end
-
+  
   def new?
     create?
   end
-
+  
   def create?
-    # Can create if user has electrical designer role and a project is selected
-    # and is a team member of the project
-    project.present? && electrical_designer_with_access?
+    # Only electrical designers in the project can create cable types
+    return false if user.nil? || current_project.nil?
+    # Allow class-level checks for create? and new? actions
+    return user.has_role?(:electrical_designer) && user.has_role?(:team_member, current_project) if record.is_a?(Class)
+    
+    # For instance-level checks, also verify the project matches
+    cable_type.project == current_project &&
+      user.has_role?(:electrical_designer) && 
+      user.has_role?(:team_member, current_project)
   end
-
+  
   def edit?
     update?
   end
-
+  
   def update?
-    # Can update if cable type belongs to current project and user has electrical designer role
-    project.present? && 
-    cable_type.project == project &&
-    electrical_designer_with_access?
+    # Only electrical designers in the project can update cable types
+    return false if user.nil? || current_project.nil?
+    return false if record.is_a?(Class)  # Don't allow class-level updates
+    return false unless cable_type.project == current_project
+    user.has_role?(:electrical_designer) && user.has_role?(:team_member, current_project)
   end
   
+  def destroy?
+    # Only global admin or app owner can destroy
+    return false unless user
+    user.has_role?(:admin) || user.has_role?(:app_owner)
+  end
+
   private
   
   def electrical_designer_with_access?
-    (user.has_role?(:electrical_designer, project) || 
+    return false unless current_project
+    
+    (user.has_role?(:electrical_designer, current_project) || 
      user.has_role?(:electrical_designer)) &&
-    user.has_role?(:team_member, project)
+    user.has_role?(:team_member, current_project)
   end
 
-  def current_project
-    @current_project ||= begin
-      if @cable_type.persisted?
-        @cable_type.project
-      elsif defined?(controller) && controller.respond_to?(:current_project)
-        controller.current_project
-      end
-    end
-  end
 end

@@ -33,7 +33,11 @@ guard :minitest, all_on_start: false do
   watch(%r{^app/models/(.*?)\.rb$}) do |matches|
     "test/models/#{matches[1].singularize}_test.rb"
   end
-  watch(%r{^app/policies/(.*?)\.rb$}) do |matches|
+  watch('app/policies/application_policy.rb') do
+    Dir['test/policies/*_test.rb']
+  end
+  
+  watch(%r{^app/policies/(?!application_policy\.rb$)(.*?)\.rb$}) do |matches|
     "test/policies/#{matches[1].singularize}_test.rb"
   end
   watch(%r{^app/mailers/(.*?)\.rb$}) do |matches|

@@ -1,15 +1,25 @@
 class ProjectPolicy < ApplicationPolicy
-  # NOTE: Up to Pundit v2.3.1, the inheritance was declared as
-  # `Scope < Scope` rather than `Scope < ApplicationPolicy::Scope`.
-  # In most cases the behavior will be identical, but if updating existing
-  # code, beware of possible changes to the ancestors:
-  # https://gist.github.com/Burgestrand/4b4bc22f31c8a95c425fc0e30d7ef1f5
+  def project
+    record
+  end
 
-  attr_reader :user, :project
-
-  def initialize(user, project)
-    @user = user
-    @project = project
+  class Scope < ApplicationPolicy::Scope
+    def resolve(scope = nil, current_project: nil)
+      scope ||= self.scope
+      
+      if user.has_role?(:app_owner) || user.has_role?(:admin)
+        # App owners and admins can see all projects
+        scope.all
+      elsif current_project
+        # If a current project is specified, only show that project if user has access
+        scope.where(id: current_project.id)
+             .joins(:roles)
+             .where(roles: { user_id: user.id })
+      else
+        # Regular users can only see projects where they have any role
+        scope.joins(:roles).where(roles: { user_id: user.id }).distinct
+      end
+    end
   end
 
   def index?
@@ -33,20 +43,30 @@ class ProjectPolicy < ApplicationPolicy
   end
 
   def edit?
-    user.is_app_owner? || user.is_admin?
+    user.is_app_owner? || user.is_admin? || project_owner?
   end
 
   def destroy?
-    user.is_app_owner?
+    user.present? && user.is_app_owner?
   end
 
+  def manage_team_members?
+    user.is_app_owner? || project_owner?
+  end
+
+  private
+
+  def project_owner?
+    user.has_role?(:project_owner, project) if project.persisted?
+  end
 
   class Scope < ApplicationPolicy::Scope
     # Any project for which the user has a role can be listed.
     def resolve
-      if user.is_app_owner? || user.is_admin? ||
-        user.roles.where(resource_type: "Project", resource_id: nil).count > 0
-        # If user has global admin role, or any resource role on Projects,
+      if user.is_app_owner? || user.is_admin? || 
+         user.has_role?(:project_owner, :any) ||
+         user.roles.where(resource_type: "Project").exists?
+        # If user has global admin role, project owner role, or any project-specific role,
         # scope includes all.
         Project.all
       else

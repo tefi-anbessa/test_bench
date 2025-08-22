@@ -1,151 +1,112 @@
 require 'test_helper'
 
 class CableTypePolicyTest < ActiveSupport::TestCase
+  # Setup test data
   setup do
     @project = create(:project)
     @other_project = create(:project)
+    
     @cable_type = create(:cable_type, project: @project)
     @other_cable_type = create(:cable_type, project: @other_project)
     
-    # Create test users with different roles
+    # Create test users
     @admin = create(:user)
-    @admin.add_role(:admin)  # Global admin role
+    @admin.add_role(:admin)
     
     @app_owner = create(:user)
-    @app_owner.add_role(:app_owner)  # Global app_owner role
+    @app_owner.add_role(:app_owner)
     
     @electrical_designer = create(:user)
-    @electrical_designer.add_role(:electrical_designer)  # Global functional role
-    @electrical_designer.add_role(:team_member, @project)  # Project membership
+    @electrical_designer.add_role(:electrical_designer) # Global role
+    @electrical_designer.add_role(:team_member, @project) # Project-specific role
     
-    @other_electrical_designer = create(:user)
-    @other_electrical_designer.add_role(:electrical_designer)  # Global functional role
-    @other_electrical_designer.add_role(:team_member, @other_project)  # Other project membership
+    @electrical_designer_no_team = create(:user)
+    @electrical_designer_no_team.add_role(:electrical_designer) # Global role
     
     @regular_user = create(:user)
   end
-
-  # Helper to set current project in the request
-  def with_current_project(project, &block)
-    @current_project = project
-    yield
-  ensure
-    @current_project = nil
-  end
-
-  # Scope Tests
-  test 'scope returns cable types for the current project' do
-    with_current_project(@project) do
-      scope = CableTypePolicy::Scope.new(@electrical_designer, CableType.all, @project).resolve
-      assert_includes scope, @cable_type
-      refute_includes scope, @other_cable_type
-    end
-  end
-
-  test 'scope returns empty when no project is selected' do
-    scope = CableTypePolicy::Scope.new(@electrical_designer, CableType.all, nil).resolve
-    assert_empty scope
-  end
-
-  # Index Tests
-  test 'index? allows any user when project is selected' do
-    policy = CableTypePolicy.new(@regular_user, @cable_type)
-    policy.instance_variable_set(:@project, @project)
-    assert policy.index?
-  end
-
-  test 'index? denies when no project is selected' do
-    policy = CableTypePolicy.new(@regular_user, @cable_type)
-    policy.instance_variable_set(:@project, nil)
-    refute policy.index?
-  end
-
-  # Show Tests
-  test 'show? allows viewing cable type in current project' do
-    policy = CableTypePolicy.new(@regular_user, @cable_type)
-    policy.instance_variable_set(:@project, @project)
-    assert policy.show?
-  end
-
-  test 'show? denies viewing cable type from other projects' do
-    policy = CableTypePolicy.new(@regular_user, @cable_type)
-    policy.instance_variable_set(:@project, @other_project)
-    refute policy.show?
-  end
-
-  # Create Tests
-  test 'create? allows electrical designers' do
-    policy = CableTypePolicy.new(@electrical_designer, CableType.new(project: @project))
-    policy.instance_variable_set(:@project, @project)
-    assert policy.create?
-  end
-
-  test 'create? denies regular users' do
-    policy = CableTypePolicy.new(@regular_user, CableType.new(project: @project))
-    policy.instance_variable_set(:@project, @project)
-    refute policy.create?
+  
+  # Helper to create policy with user and project context
+  def policy(user, project, record = nil)
+    user_context = ApplicationPolicy::UserContext.new(user, project)
+    CableTypePolicy.new(user_context, record || CableType)
   end
   
-  test 'create? denies electrical designers without project membership' do
-    electrical_designer = create(:user)
-    electrical_designer.add_role(:electrical_designer)  # Global role only, no project membership
+  # Scope Tests
+  test 'scope returns cable types for current project' do
+    context = ApplicationPolicy::UserContext.new(@electrical_designer, @project)
+    scope = CableTypePolicy::Scope.new(context, CableType).resolve
+    assert_includes scope, @cable_type
+    refute_includes scope, @other_cable_type
+  end
+  
+  test 'scope returns empty when no project is selected' do
+    context = ApplicationPolicy::UserContext.new(@electrical_designer, nil)
+    scope = CableTypePolicy::Scope.new(context, CableType).resolve
+    assert_empty scope
+  end
+  
+  # Index Tests
+  test 'index? allows any user when project is selected' do
+    assert policy(@regular_user, @project).index?
+  end
+  
+  test 'index? denies when no project is selected' do
+    refute policy(@regular_user, nil).index?
+  end
+  
+  # Show Tests
+  test 'show? allows viewing cable type in current project' do
+    assert policy(@electrical_designer, @project, @cable_type).show?
+  end
+  
+  test 'show? denies viewing cable type from other projects' do
+    refute policy(@electrical_designer, @project, @other_cable_type).show?
+  end
+  
+  test 'show? denies when no project is selected' do
+    refute policy(@electrical_designer, nil, @cable_type).show?
+  end
+  
+  # Edit Tests
+  # Electrical designer with project team membership
+  test 'electrical designers with project team membership have full edit control but not destroy' do
+    # For create? and new?, we pass the class as the record
+    assert policy(@electrical_designer, @project, CableType).create?
+    assert policy(@electrical_designer, @project, CableType).new?
     
-    policy = CableTypePolicy.new(electrical_designer, CableType.new(project: @project))
-    policy.instance_variable_set(:@project, @project)
-    refute policy.create?
+    # For update? and edit?, we pass the instance as the record
+    assert policy(@electrical_designer, @project, @cable_type).update?
+    assert policy(@electrical_designer, @project, @cable_type).edit?
+    refute policy(@electrical_designer, @project, @cable_type).destroy?
+  end
+  
+  test 'electrical designers without project team membership have no edit access' do
+    refute policy(@electrical_designer_no_team, @project, CableType).create?
+    refute policy(@electrical_designer_no_team, @project, CableType).new?
+    refute policy(@electrical_designer_no_team, @project, @cable_type).update?
+    refute policy(@electrical_designer_no_team, @project, @cable_type).edit?
+    refute policy(@electrical_designer_no_team, @project, @cable_type).destroy?
   end
 
-  test 'create? denies when no project is selected' do
-    refute CableTypePolicy.new(@electrical_designer, CableType.new).create?
+  # Regular team member tests
+  test 'regular team members without electrical designer role have no edit access' do
+    refute policy(@regular_user, @project, CableType).create?
+    refute policy(@regular_user, @project, CableType).new?
+    refute policy(@regular_user, @project, @cable_type).update?
+    refute policy(@regular_user, @project, @cable_type).edit?
+    refute policy(@regular_user, @project, @cable_type).destroy?
   end
-
-  # Update Tests
-  test 'update? allows electrical designers' do
-    policy = CableTypePolicy.new(@electrical_designer, @cable_type)
-    policy.instance_variable_set(:@project, @project)
-    assert policy.update?
-  end
-
-  test 'update? denies regular users' do
-    policy = CableTypePolicy.new(@regular_user, @cable_type)
-    policy.instance_variable_set(:@project, @project)
-    refute policy.update?
-  end
-
-  test 'update? denies when no project is selected' do
-    policy = CableTypePolicy.new(@electrical_designer, @cable_type)
-    policy.instance_variable_set(:@project, nil)
-    refute policy.update?
-  end
-
+  
   # Destroy Tests
-  test 'destroy? only allows global admin or app owner' do
-    admin = create(:user, :admin)
-    app_owner = create(:user, :app_owner)
-
-    [admin, app_owner].each do |user|
-      policy = CableTypePolicy.new(user, @cable_type)
-      policy.instance_variable_set(:@project, @project)
-      assert policy.destroy?
-    end
-
-    [@electrical_designer, @regular_user].each do |user|
-      policy = CableTypePolicy.new(user, @cable_type)
-      policy.instance_variable_set(:@project, @project)
-      refute policy.destroy?
-    end
+  test 'admin can destroy' do
+    assert policy(@admin, @project, @cable_type).destroy?
+  end
+  
+  test 'app owner can destroy' do
+    assert policy(@app_owner, @project, @cable_type).destroy?
   end
 
-  # New/Edit Delegation Tests
-  test 'new? delegates to create?' do
-    policy = CableTypePolicy.new(@electrical_designer, CableType.new(project: @project))
-    policy.instance_variable_set(:@project, @project)
-    assert policy.new?
-  end
+  
 
-  test 'edit? delegates to update?' do
-    policy = CableTypePolicy.new(@electrical_designer, @cable_type)
-    policy.instance_variable_set(:@project, @project)
-    assert policy.edit?
-  end
 end

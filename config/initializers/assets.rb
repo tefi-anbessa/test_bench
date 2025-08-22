@@ -1,15 +1,6 @@
-# Be sure to restart your server when you modify this file.
+# This file is intentionally left empty as we're using Propshaft for asset management.
+# All assets in app/assets are automatically included by Propshaft.
+# For more information, see: https://github.com/rails/propshaft
 
-# Version of your assets, change this if you want to expire all your assets.
-Rails.application.config.assets.version = "1.0"
-
-# Add additional assets to the asset load path.
-# Rails.application.config.assets.paths << Emoji.images_path
-
-# Precompile additional assets.
-# application.js, application.css, and all non-JS/CSS in the app/assets
-# folder are already added.
-# Rails.application.config.assets.precompile += %w( admin.js admin.css )
-Rails.application.config.assets.precompile += %w( application.scss bootstrap.min.js popper.js )
-# Add node_modules to asset paths
-Rails.application.config.assets.paths << Rails.root.join('node_modules')
+# If you need to add additional asset paths, you can do so in config/application.rb
+# using config.assets.paths << Rails.root.join('path/to/assets')

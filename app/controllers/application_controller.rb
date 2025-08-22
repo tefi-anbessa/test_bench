@@ -6,7 +6,7 @@ class ApplicationController < ActionController::Base
 
   around_action :switch_locale
   before_action :configure_permitted_parameters, if: :devise_controller?
-
+  
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
   # rescue_from ActionController::Redirecting::UnsafeRedirectError do
   #   redirect_to root_url
@@ -19,19 +19,24 @@ class ApplicationController < ActionController::Base
 
   # This method is now in CurrentProjectConcern
 
+  # Override Pundit's default user context
+  def pundit_user
+    @pundit_user ||= ApplicationPolicy::UserContext.new(current_user, current_project)
+  end
+
   protected
 
   def after_sign_in_path_for(resource)
-    # Get all projects the user has access to via roles
-    accessible_projects = policy_scope(Project)
+    # Use Pundit's policy_scope to get projects user has access to
+    projects = policy_scope(Project)
     
-    case accessible_projects.count
+    case projects.count
     when 0
       # User has no access to any projects, redirect to user profile
       user_path(resource)
     when 1
       # If only one project, set it as current and proceed
-      project = accessible_projects.first
+      project = projects.first
       cookies.signed[:project_id] = { value: project.id, expires: 1.year.from_now }
       session[:project_id] = project.id
       

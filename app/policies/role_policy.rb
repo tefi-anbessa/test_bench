@@ -1,45 +1,43 @@
 class RolePolicy < ApplicationPolicy
-
-    attr_reader :user, :role
-
-    def initialize(user, tag)
-      @user = user
-      @tag = tag
-    end
-
-    def index?
-      true
-    end
-
-    def show?
-      true
-    end
-
-    def update?
-      role_admin?
-    end
-
-    def create?
-      @user.is_owner? || @user.is_owner?
-    end
-
-    def destroy?
-      @user.is_owner? || @user.is_owner?
-    end
-
-    def edit?
-      @user.is_owner? || @user.is_owner?
-    end
-
-    private
-      def role_admin
-        @user.is_owner? || @user.is_owner?
-      end
+  def role
+    record
+  end
 
   class Scope < ApplicationPolicy::Scope
-    # NOTE: Be explicit about which records you allow access to!
+    attr_reader :project
+
     def resolve
-      scope.all
+      if user&.is_app_owner? || user&.has_role?(:admin)
+        scope.all
+      elsif current_project.present?
+        # Show roles for the current project
+        scope.where(resource: current_project)
+      else
+        scope.none
+      end
     end
   end
+
+  # Anyone can view the roles index if a project is selected
+  def index?
+    current_project.present?
+  end
+
+  # Only app owners can view the new role form
+  def new?
+    user.present? && user.is_app_owner?
+  end
+
+  # Only app owners can create new roles
+  def create?
+    user.present? && user.is_app_owner?
+  end
+
+  # Only app owners can destroy roles
+  def destroy?
+    user.present? && user.is_app_owner?
+  end
+
+  private
+
 end

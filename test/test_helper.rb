@@ -1,14 +1,19 @@
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"
-require "minitest/reporters"
+require 'minitest/reporters'
 require 'factory_bot_rails'
 require 'database_cleaner/active_record'
 
 # Load test support files
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
-Minitest::Reporters.use!
+# Configure minitest-reporters
+Minitest::Reporters.use!(
+  Minitest::Reporters::DefaultReporter.new,
+  ENV,
+  Minitest.backtrace_filter
+)
 
 # Configure DatabaseCleaner
 DatabaseCleaner.strategy = :transaction

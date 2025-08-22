@@ -28,7 +28,7 @@ module CurrentProjectConcern
       return if project_selected?
       
       store_location_for_project(request.fullpath) if request.get?
-      redirect_to select_projects_path, alert: 'Please select a project to continue.'
+      redirect_to select_projects_path, alert: 'Please select a project to continue.' #TODO: internationalize
     end
     
     # Store location for project navigation

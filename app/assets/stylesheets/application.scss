@@ -1,14 +1,4 @@
-@import "bootstrap";
+// Bootstrap is imported separately in bootstrap.scss
 @import "flag-icon";
-/*
-@import "bootstrap-icons";
-*/
-@import "rails_bootstrap_forms.css";
-/*
-@font-face {
-  font-family: "bootstrap-icons";
-  src: font-url("fonts/bootstrap-icons.woff2") format("woff2"),
-    font-url("/fonts/bootstrap-icons.woff") format("woff");
-}
-*/
+@import "rails_bootstrap_forms";
 @import "custom";

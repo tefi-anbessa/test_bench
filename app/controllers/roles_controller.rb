@@ -2,24 +2,29 @@ class RolesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_create_params, only: %i[ create ]
   before_action :set_destroy_params, only: %i[ destroy ]
-#  after_action :verify_authorized
+  after_action :verify_authorized, except: :index
+  after_action :verify_policy_scoped, only: :index
 
   # GET /roles or /roles.json
   def index
-    @pagy, @roles = pagy(Role.joins(:users), limit: 20)
+    @pagy, @roles = pagy(policy_scope(Role).joins(:users), limit: 20)
+    authorize @roles
   end
 
   # GET /roles/new
   def new
     @role = Role.new # Required as vehicle for error_messages
+    authorize @role
     @users = User.all
     Rails.application.eager_load! if Rails.env.development?
-#    @resources = ApplicationRecord.descendants.collect(&:name)
     @resources = Rolify.resource_types.uniq
   end
 
   # POST /roles or /roles.json
   def create
+    @role = Role.new # For policy authorization
+    authorize @role
+    
     if @user # Check user is valid
       if @resource_type.nil? # This is a global role
         if @user.grant @name

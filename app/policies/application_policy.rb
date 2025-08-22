@@ -1,10 +1,33 @@
 # frozen_string_literal: true
 
 class ApplicationPolicy
-  attr_reader :user, :record
+  # Wrapper for pundit user, to include current_project in policies
+  class UserContext
+    attr_reader :user, :current_project
 
-  def initialize(user, record)
-    @user = user
+    def initialize(user, current_project)
+      @user = user
+      @current_project = current_project
+    end
+  end
+
+  class Scope
+    attr_reader :user_context, :user, :scope, :current_project
+
+    def initialize(user_context, scope)
+      @user_context = user_context
+      @user = user_context&.user
+      @current_project = user_context&.current_project
+      @scope = scope
+    end
+  end
+
+  attr_reader :user_context, :record, :user, :current_project
+
+  def initialize(user_context, record)
+    @user_context = user_context
+    @user = user_context&.user
+    @current_project = user_context&.current_project
     @record = record
   end
 
@@ -39,8 +62,9 @@ class ApplicationPolicy
   end
 
   class Scope
-    def initialize(user, scope)
-      @user = user
+    def initialize(user_context, scope)
+      @user = user_context.user
+      @current_project = user_context.current_project
       @scope = scope
     end
 
