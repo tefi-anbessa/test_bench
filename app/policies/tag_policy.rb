@@ -1,60 +1,81 @@
 class TagPolicy < ApplicationPolicy
+  def tag
+    record
+  end
 
-  attr_reader :user, :tag
+  class Scope < ApplicationPolicy::Scope
+    def resolve
+      if user&.is_app_owner? || user&.has_role?(:admin)
+        scope.all
+      elsif user.present? && current_project.present? && user_has_project_role?
+        # Users can see tags in projects where they have a role
+        scope.where(project: current_project)
+      else
+        scope.none
+      end
+    end
 
-  def initialize(user, tag)
-    @user = user
-    @tag = tag
+    private
+
+    def user_has_project_role?
+      user.roles
+          .where(resource: current_project)
+          .exists?
+    end
   end
 
   def index?
-    can_read?(user)
+    # Anyone can view the tags index (actual tags are filtered by scope)
+    true
   end
 
   def show?
-    can_read?(user)
+    # Only show tag if user has access to its project
+    return false unless record.present? && record.project.present?
+    
+    # Check if user has any role on the project
+    return true if user&.is_app_owner? || user&.has_role?(:admin)
+    
+    # Check if user has a role on the project
+    user_has_project_role?(record.project)
   end
 
-  def update?
-    can_edit?(user)
+  def new?
+    create?
   end
 
   def create?
-    can_create?(user)
-  end
-
-  def destroy?
-    can_create?(user)
+    # Any user with a role on the project can create tags
+    project_policy.show? && user_has_project_role?
   end
 
   def edit?
-    can_edit?(user)
+    update?
+  end
+
+  def update?
+    # Any user with a role on the project can update tags
+    project_policy.show? && user_has_project_role?
+  end
+
+  def destroy?
+    # Default to admin-only for destroy, as per application policy
+    user&.has_role?(:admin) || user&.is_app_owner?
   end
 
   private
-    def can_read?(user)
-      user.has_any_role? :owner, :admin, {name: :reader, resource: Tag},
-                                          {name: :creator, resource: Tag},
-                                          {name: :editor, resource: Tag},
-                                          {name: :checker, resource: Tag},
-                                          {name: :approver, resource: Tag}
-    end
 
-    def can_edit?(user)
-      user.has_any_role? :owner, :admin, {name: :creator, resource: Tag},
-                                          {name: :editor, resource: Tag},
-                                          {name: :checker, resource: Tag},
-                                          {name: :approver, resource: Tag}
-    end
+  def project_policy
+    @project_policy ||= ProjectPolicy.new(user_context, tag&.project || current_project)
+  end
 
-    def can_create?(user)
-      user.has_any_role? :owner, :admin, {name: :creator, resource: Tag}
-    end
-
-  class Scope < ApplicationPolicy::Scope
-    # NOTE: Be explicit about which records you allow access to!
-    def resolve
-      scope.all
-    end
+  def user_has_project_role?(project = nil)
+    project ||= current_project
+    return false if user.nil? || project.nil?
+    
+    # Check if user has any role on the specified project
+    user.roles
+        .where(resource_type: 'Project', resource_id: project.id)
+        .exists?
   end
 end

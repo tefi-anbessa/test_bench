@@ -47,6 +47,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    - Prefer simple, maintainable solutions over clever ones
 
 ## Technical Debt
+- [ ] Refactor models to incorporate i18n messages for validations
 - [ ] Serve bootstrap from local dev or prod
 - [ ] Write more tests for the Demand model
 - [ ] Add performance optimizations for large demand calculations
@@ -66,7 +67,12 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Implement bulk import/export for demands
 - [ ] Add more detailed documentation for the demand calculation formulas
 - [ ] See if pagy can provide usesr selectable page size
+- [ ] Data revision management
 - [ ] Customize devise views
+- [ ] Customize devise users:
+   - Allow users to self register through devise, edit their own profile and user name, email, password. 
+   - Insert an admin approval in the confirmation process
+   - Disable destroy, because the [future] change history will have links to users making changes. We may need to historise user name changes as well, that's a future problem. The revision management system may well include some sort of active/inactive status features. 
 
 ## Architecture Considerations
 - [ ] Evaluate if we should move to a more modular architecture
