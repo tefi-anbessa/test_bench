@@ -60,7 +60,8 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Consider extracting demand calculations into a service object
 - [ ] Add type checking with Sorbet or RBS
 - [ ] Implement caching for frequently accessed demand data
-- [ ] Upgrade to Rails 8
+- [x] Upgrade to Rails 8 (Completed in rails8 branch)
+- [ ] Refactor policy classes (CablePolicy, SwitchboardPolicy, MotorPolicy, LightCctPolicy, SocketCctPolicy) to use a shared concern or base class to reduce code duplication
 
 ## Potential Features
 - [ ] Add more comprehensive reporting for demand calculations
