@@ -52,19 +52,38 @@ This document outlines the role-based access control (RBAC) system implemented i
 - Roles can be assigned at both the global and project level
 - Use the role management interface in the application to assign roles
 
+
+## Permissions
+
+#### General Rules
+- Only `:app_owner` and `:admin` roles can create new users
+- The project uses a revision control system for most data
+- Deletion of data is restricted and only used for database repairs or similar
+- Roles can be created and destroyed but not edited (roles are recreated when changed)
+
+#### Destroy Action Rules
+- By default, destroy action is only available to admins
+- **Exception for Projects**: Only `app_owner` can destroy projects due to significant impact
+- **Exception for Roles**: 
+  - Roles are destroyed when revoked without history tracking
+  - Project owners can destroy roles within their own projects
+  - Role destruction permissions are resource-specific
+
 ## Permission Matrix
 
 | Action                     | App Owner | Admin | Project Owner | Team Member |
 |----------------------------|-----------|-------|---------------|-------------|
-| Create Project             | ✓         | ✓     | -             | -           |
-| Edit Any Project           | ✓         | ✓     | -             | -           |
-| Delete Project             | ✓         | ✓     | ✓ (own)       | -           |
+| Create Project             | ✓         | -     | -             | -           |
+| Edit Any Project           | ✓         | ✓     | ✓ (own)       | -           |
+| Delete Project             | ✓         | -     | -             | -           |
 | Manage Team Members        | ✓         | ✓     | ✓ (own)       | -           |
 | View Project               | ✓         | ✓     | ✓             | ✓           |
 | View Team Members          | ✓         | ✓     | ✓             | ✓           |
 | View Functional Roles      | ✓         | ✓     | ✓             | ✓           |
 | Edit Project Content       | ✓         | ✓     | ✓             | ✓ (config)  |
-| Assign Admin Role          | ✓         | -     | -             | -           |
+| Create Users               | ✓         | ✓     | -             | -           |
+| Manage Roles               | ✓         | ✓     | ✓ (own proj)  | -           |
+| Delete Roles               | ✓         | ✓     | ✓ (own proj)  | -           |
 
 ## Managing Roles
 
