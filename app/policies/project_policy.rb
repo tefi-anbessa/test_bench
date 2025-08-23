@@ -21,14 +21,15 @@ class ProjectPolicy < ApplicationPolicy
   end
 
   def index?
-    # Anyone can view the projects index (actual projects are filtered by scope)
-    true
+    # Only authenticated users can view the projects index
+    # (actual projects are filtered by scope)
+    user.present?
   end
 
   def show?
-    # Anyone can view a project if they know the URL
-    # Actual authorization is handled by the scope
-    true
+    # Only authenticated users can view projects
+    # (actual project access is filtered by scope)
+    user.present?
   end
   
   def new?

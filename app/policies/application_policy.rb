@@ -58,7 +58,7 @@ class ApplicationPolicy
   # Only global admins or app owner can destroy records by default
   # Override in specific policies if different rules are needed
   def destroy?
-    user.has_role?(:admin) || user.has_role?(:app_owner)
+    user.present? && (user.has_role?(:admin) || user.has_role?(:app_owner))
   end
 
   class Scope

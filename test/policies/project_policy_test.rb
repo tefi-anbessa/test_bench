@@ -43,6 +43,27 @@ class ProjectPolicyTest < ActiveSupport::TestCase
     assert_not_includes projects, @project, 'Regular user should not see projects they are not part of'
   end
 
+  test 'index? allows any authenticated user' do
+    assert ProjectPolicy.new(user_context(@app_owner), Project).index?
+    assert ProjectPolicy.new(user_context(@admin), Project).index?
+    assert ProjectPolicy.new(user_context(@project_owner), Project).index?
+    assert ProjectPolicy.new(user_context(@team_member), Project).index?
+    assert ProjectPolicy.new(user_context(@regular_user), Project).index?
+  end
+
+  test 'index? denies unauthenticated users' do
+    refute ProjectPolicy.new(nil, Project).index?
+  end
+
+  test 'show? allows any authenticated user with project access' do
+    assert ProjectPolicy.new(user_context(@project_owner), @project).show?
+    assert ProjectPolicy.new(user_context(@team_member), @project).show?
+  end
+
+  test 'show? denies unauthenticated users' do
+    refute ProjectPolicy.new(nil, @project).show?
+  end
+
   test 'scope with current_project only includes that project if user has access' do
     projects = ProjectPolicy::Scope.new(
       user_context(@project_owner, @project), 
