@@ -21,6 +21,9 @@ class Project < ApplicationRecord
   def self.ransackable_associations(auth_object = nil)
     [ :tags ]
   end
+  
+  # Default scope for ordering projects
+  scope :ordered, -> { order(:code) }
 
   private
 

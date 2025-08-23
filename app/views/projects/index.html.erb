@@ -24,8 +24,18 @@
         <%== icon('search') %>
       <% end %>
     <% end %>
-    <%== pagy_bootstrap_nav(@pagy) %>
-    <table id='projects' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
+    
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <%== pagy_bootstrap_nav(@pagy) %>
+      </div>
+      <div>
+        <%= render 'shared/page_size_selector', pagy: @pagy %>
+      </div>
+    </div>
+    
+    <div class="table-responsive">
+      <table id='projects' class='table table-condensed table-striped table-hover table-bordered'>
       <thead>
         <th scope="col"><%= sort_link(@q, :code) %></th>
         <th scope="col"><%= sort_link(@q, :title) %></th>
@@ -65,10 +75,16 @@
           </tr>
         <% end %>
       </tbody>
-    </table>
-    <%== pagy_bootstrap_nav(@pagy) %>
-    <%== pagy_info(@pagy) %>
-
-
+      </table>
+    </div>
+    
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <div>
+        <%== pagy_bootstrap_nav(@pagy) %>
+      </div>
+      <div class="text-muted small">
+        <%= t('pagination.page_info', items: @pagy.count) %>
+      </div>
+    </div>
   </div>
 </div>

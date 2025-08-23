@@ -1,0 +1,55 @@
+<%# This partial provides a reusable page size selector for paginated views %>
+<%#
+  Parameters:
+    - pagy: The pagy object for the current page
+    - options: (optional) Additional options
+      - form_class: CSS class for the form
+      - select_class: CSS class for the select element
+      - button_class: CSS class for the submit button
+%>
+
+<% options ||= {} %>
+
+<%= form_tag(request.path, method: :get, 
+    class: ["page-size-form", options[:form_class]].compact.join(' '),
+    data: { controller: "page-size" } ) do |f| %>
+  
+  <%# Preserve all existing parameters except page and per_page %>
+  <% request.query_parameters.except(:page, :per_page, :commit, :_method, :authenticity_token).each do |key, value| %>
+    <% if value.is_a?(Hash) %>
+      <% value.each do |nested_key, nested_value| %>
+        <%= hidden_field_tag "#{key}[#{nested_key}]", nested_value %>
+      <% end %>
+    <% else %>
+      <%= hidden_field_tag key, value %>
+    <% end %>
+  <% end %>
+  
+  <div class="input-group input-group-sm" style="width: auto;">
+    <label for="per_page" class="input-group-text">
+      <%= t('pagination.per_page') %>:
+    </label>
+    
+    <% 
+      # Get the current page size, falling back to default if not set
+      current_size = @page_size || PageSizeable::DEFAULT_PAGE_SIZE
+      
+      # Create options array, ensuring the current size is included even if not in defaults
+      page_sizes = PageSizeable::DEFAULT_PAGE_SIZES.dup
+      page_sizes << current_size unless page_sizes.include?(current_size)
+      page_sizes.sort!
+    %>
+    <%= select_tag :per_page, 
+          options_for_select(page_sizes, selected: current_size),
+          class: ["form-select form-select-sm", options[:select_class]].compact.join(' '),
+          "aria-label" => t('pagination.per_page_aria'),
+          data: { action: "change->page-size#submit" } %>
+    
+    <button type="submit" 
+            class="btn btn-outline-secondary"
+            aria-label="<%= t('pagination.apply_page_size') %>"
+            title="<%= t('pagination.apply_page_size') %>">
+      <%= t('pagination.go') %>
+    </button>
+  </div>
+<% end %>

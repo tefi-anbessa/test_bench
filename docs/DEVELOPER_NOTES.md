@@ -17,6 +17,23 @@ From git commit 6da446f onwards, this project has used Windsurf/Cascade AI to sp
 - Any changes should be reflected in the documentation.
 - Request the AI to update its Memories when significant changes occur.
 
+## Known Issues
+
+### Pagination
+- **Issue**: The pagination system is not respecting the `per_page` parameter correctly.
+- **Symptoms**: 
+  - The URL updates with the selected `per_page` value
+  - The page size selector shows the correct selected value
+  - However, the number of items displayed remains at the default (20)
+- **Affected Files**:
+  - `app/controllers/concerns/page_sizeable.rb`
+  - `app/views/shared/_page_size_selector.html.erb`
+  - `test/system/page_size_selector_test.rb`
+- **Next Steps**:
+  - Check if the pagination is being overridden by any default scopes
+  - Verify the pagination parameters are being passed correctly to the database query
+  - Add more detailed logging to trace the pagination flow
+
 ## KISS Principle Guidelines
 
 The project follows the KISS (Keep It Simple, Stupid) principle with these priorities:

@@ -28,6 +28,10 @@ FactoryBot.define do
     trait :locked do
       failed_attempts { User.maximum_attempts + 1 }
       locked_at { Time.current }
+      
+    trait :admin do
+      after(:create) { |user| user.add_role(:admin) }
+    end
     end
 
     # Role-based traits - these should be used with create, not build
@@ -39,9 +43,11 @@ FactoryBot.define do
       after(:create) { |user| user.add_role(:app_owner) }
     end
 
-    # Skip default role assignment in tests unless explicitly needed
+    # Assign team_member role which is a valid project role
     trait :with_default_role do
-      after(:create) { |user| user.add_role(:team_member) }
+      after(:create) do |user|
+        user.add_role(:team_member, Project.first || create(:project))
+      end
     end
   end
 end

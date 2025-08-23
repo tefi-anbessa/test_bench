@@ -29,6 +29,10 @@
       <% end %>
     </div>
     <%= yield %>
+    
+    <%# Page size selector functionality %>
+    <%= javascript_import_module_tag "controllers/page_size" %>
+    
     <%= render 'layouts/footer' %>
     <%= debug(params) if Rails.env.development? %>
 

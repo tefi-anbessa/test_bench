@@ -27,9 +27,13 @@ class ProjectPolicy < ApplicationPolicy
   end
 
   def show?
-    # Only authenticated users can view projects
-    # (actual project access is filtered by scope)
-    user.present?
+    # Only users with explicit access can view projects
+    user.present? && (
+      user.is_app_owner? ||
+      user.has_role?(:admin) ||
+      user.has_role?(:project_owner, record) ||
+      user.has_role?(:team_member, record)
+    )
   end
   
   def new?
@@ -56,9 +60,8 @@ class ProjectPolicy < ApplicationPolicy
   end
   
   def destroy?
-    # Only app owners and admins can delete projects
-    # Project owners cannot delete projects (business rule)
-    user.present? && (user.is_app_owner? || user.has_role?(:admin))
+    # Only app owner can delete projects (business rule)
+    user&.is_app_owner?
   end
 
   def manage_team_members?

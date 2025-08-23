@@ -46,6 +46,36 @@ en:
 
   table:
     links:        "Links"
+  
+  # Flash messages
+  flash:
+    actions:
+      create:
+        notice: "%{resource_name} was successfully created."
+        alert: "Could not create %{resource_name}."
+      update:
+        notice: "%{resource_name} was successfully updated."
+        alert: "Could not update %{resource_name}."
+      destroy:
+        notice: "%{resource_name} was successfully deleted."
+        alert: "Could not delete %{resource_name}."
+  
+  # Project specific messages
+  projects:
+    none_selected: "No project is currently selected"
+    selected: "Project '%{code}' is now selected"
+    invalid_selection: "Please select a valid project to continue"
+  
+  # Pundit authorization messages
+  pundit:
+    unauthorized: "You are not authorized to perform this action."
+  
+  pagination:
+    per_page: "Items per page"
+    per_page_aria: "Select number of items per page"
+    apply_page_size: "Apply page size"
+    go: "Go"
+    page_info: "Showing %{items} items per page"
 
   index:
     admin:        "Admin"

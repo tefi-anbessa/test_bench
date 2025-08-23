@@ -1,4 +1,6 @@
 class ProjectsController < ApplicationController
+  include PageSizeable
+  
   before_action :get_project, only: %i[ show edit update destroy ]
   before_action :set_project, only: %i[ set ]
   before_action :authenticate_user!
@@ -6,8 +8,7 @@ class ProjectsController < ApplicationController
   # GET /projects or /projects.json
   def index
     @q = policy_scope(Project).ransack(params[:q])
-    # debugger
-    @pagy, @projects = pagy(@q.result, limit: 10)
+    @pagy, @projects = pagy_with_page_size(@q.result.ordered)
   end
 
   # GET /projects/select
@@ -26,7 +27,7 @@ class ProjectsController < ApplicationController
       clear_stored_location_for_project
       
       redirect_to stored_location_for_project || root_path,
-                  notice: 'No project is currently selected' #TODO: internationalize
+                  notice: I18n.t('projects.none_selected')
     elsif @project
       # Set the project in both cookie (signed for security) and session
       cookies.signed[:project_id] = { value: @project.id, expires: 1.year.from_now }
@@ -36,63 +37,158 @@ class ProjectsController < ApplicationController
       clear_stored_location_for_project
       
       redirect_to stored_location_for_project || @project,
-                  notice: "Project '#{@project.code}' is now selected" #TODO: internationalize
+                  notice: I18n.t('projects.selected', code: @project.code)
     else
       # If no valid project is selected
       redirect_to select_projects_path,
-                  alert: 'Please select a valid project to continue' #TODO: internationalize
+                  alert: I18n.t('projects.invalid_selection')
     end
   end
 
   # GET /projects/1 or /projects/1.json
   def show
+    @project = Project.find(params[:id])
+    authorize @project
+    
+    respond_to do |format|
+      format.html
+      format.json { render json: @project }
+    end
+  rescue Pundit::NotAuthorizedError => e
+    respond_to do |format|
+      format.html do
+        flash[:alert] = I18n.t('pundit.unauthorized')
+        redirect_to root_path
+      end
+      format.json { head :forbidden }
+    end
   end
 
   # GET /projects/new
   def new
-    @project = authorize Project.new
+    @project = Project.new
+    authorize @project
+    @roles = Constants.roles.resources[:project] || []
+    @users = User.all
+    
+    respond_to do |format|
+      format.html
+      format.json { head :forbidden }
+    end
+  rescue Pundit::NotAuthorizedError
+    respond_to do |format|
+      format.html do
+        flash[:alert] = I18n.t('pundit.unauthorized')
+        redirect_to root_path
+      end
+      format.json { head :forbidden }
+    end
   end
 
   # GET /projects/1/edit
   def edit
+    authorize @project
     @role = Role.new
-    @roles = Constants.role.name
+    @roles = Constants.roles.resources[:project] || []
     @users = User.all
+    
+    respond_to do |format|
+      format.html
+      format.json { head :forbidden }
+    end
+  rescue Pundit::NotAuthorizedError
+    respond_to do |format|
+      format.html do
+        flash[:alert] = I18n.t('pundit.unauthorized')
+        redirect_to root_path
+      end
+      format.json { head :forbidden }
+    end
   end
 
   # POST /projects or /projects.json
   def create
-    @project = authorize Project.new(project_params)
+    @project = Project.new(project_params)
+    authorize @project
 
     respond_to do |format|
       if @project.save
-        flash[:success] = "Project was successfully created." #TODO: internationalize
-        redirect_to @project
+        format.html do 
+          flash[:success] = I18n.t('flash.actions.create.notice', resource_name: I18n.t('activerecord.models.project'))
+          redirect_to @project
+        end
+        format.json { render json: @project, status: :created, location: @project }
       else
-        flash[:alert] = "Unable to create project" #TODO: internationalize
-        render :new, status: :unprocessable_entity 
+        format.html do
+          flash.now[:alert] = I18n.t('flash.actions.create.alert', resource_name: I18n.t('activerecord.models.project'))
+          render :new, status: :unprocessable_entity
+        end
+        format.json { render json: @project.errors, status: :unprocessable_entity }
       end
+    end
+  rescue Pundit::NotAuthorizedError
+    respond_to do |format|
+      format.html do
+        flash[:alert] = I18n.t('pundit.unauthorized')
+        redirect_to root_path
+      end
+      format.json { head :forbidden }
     end
   end
 
   # PATCH/PUT /projects/1 or /projects/1.json
   def update
+    authorize @project
+    
     respond_to do |format|
       if @project.update(project_params)
-        format.html { redirect_to @project, notice: "Project was successfully updated." } #TODO: internationalize
+        format.html do
+          flash[:success] = I18n.t('flash.actions.update.notice', resource_name: I18n.t('activerecord.models.project'))
+          redirect_to @project
+        end
         format.json { render :show, status: :ok, location: @project }
       else
-        format.html { render :edit, status: :unprocessable_entity }
+        format.html do
+          flash.now[:alert] = I18n.t('flash.actions.update.alert', resource_name: I18n.t('activerecord.models.project'))
+          render :edit, status: :unprocessable_entity 
+        end
         format.json { render json: @project.errors, status: :unprocessable_entity }
       end
+    end
+  rescue Pundit::NotAuthorizedError => e
+    respond_to do |format|
+      format.html do
+        flash[:alert] = I18n.t('pundit.unauthorized')
+        redirect_to root_path
+      end
+      format.json { head :forbidden }
     end
   end
 
   # DELETE /projects/1 or /projects/1.json
   def destroy
-    @project.destroy
-    flash[:success] = "Project was successfully destroyed." #TODO: internationalize
-    redirect_to projects_url
+    authorize @project
+    
+    respond_to do |format|
+      if @project.destroy
+        format.html { redirect_to projects_url, notice: I18n.t('flash.actions.destroy.notice', resource_name: I18n.t('activerecord.models.project')) }
+        format.json { head :no_content }
+      else
+        format.html do
+          flash[:alert] = I18n.t('flash.actions.destroy.alert', resource_name: I18n.t('activerecord.models.project'))
+          redirect_to @project
+        end
+        format.json { render json: { error: I18n.t('flash.actions.destroy.alert', resource_name: I18n.t('activerecord.models.project')) }, status: :unprocessable_entity }
+      end
+    end
+  rescue Pundit::NotAuthorizedError
+    respond_to do |format|
+      format.html do
+        flash[:alert] = I18n.t('pundit.unauthorized')
+        redirect_to root_path
+      end
+      format.json { head :forbidden }
+    end
   end
 
   private

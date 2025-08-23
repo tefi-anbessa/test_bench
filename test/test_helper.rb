@@ -5,15 +5,16 @@ require 'minitest/reporters'
 require 'factory_bot_rails'
 require 'database_cleaner/active_record'
 
+# Keep test output clean but visible
+Rails.logger.level = Logger::WARN
+
 # Load test support files
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
-# Configure minitest-reporters
-Minitest::Reporters.use!(
-  Minitest::Reporters::DefaultReporter.new,
-  ENV,
-  Minitest.backtrace_filter
-)
+# Simple test output
+Minitest::Reporters.use! [
+  Minitest::Reporters::ProgressReporter.new(color: true)
+]
 
 # Configure DatabaseCleaner
 DatabaseCleaner.strategy = :transaction
@@ -45,10 +46,34 @@ class ActiveSupport::TestCase
   def current_user
     @current_user
   end
-
+  
   # Returns the current project
   def current_project
     @current_project
+  end
+  
+  # Sets the current project in the session
+  # @param project [Project] The project to set as current
+  def set_current_project(project)
+    @current_project = project
+    # Also set in session if controller test
+    if defined?(controller) && controller.respond_to?(:session)
+      session[:current_project_id] = project.id
+    end
+  end
+
+  # Assert that the response is an unauthorized access
+  # This can be either:
+  # 1. A 403 Forbidden response, or
+  # 2. A redirect to root with an unauthorized flash message
+  def assert_unauthorized
+    if response.redirect?
+      assert_redirected_to root_path
+      assert_not flash.empty?
+      assert_equal I18n.t('pundit.not_authorized'), flash[:alert]
+    else
+      assert_response :forbidden
+    end
   end
   
   # Signs in a user for integration tests
