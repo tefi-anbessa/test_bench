@@ -3,16 +3,35 @@
 ## Overview
 Guidelines for maintaining comprehensive documentation in the codebase for both human and AI reference.
 
+## Protected Documentation
+
+The following core documentation files are READ-ONLY and must not be modified by AI:
+1. `docs/DEVELOPER_NOTES.md`
+2. `docs/TESTING.md`
+3. `docs/ROLES_AND_PERMISSIONS.md`
+
+### Protection Methods
+- **AI Restriction**: 
+  - These files are marked as read-only for AI assistance
+  - AI will not modify these files under any circumstances
+- **User Access**: 
+  - Files remain fully writable by the user
+  - No OS-level read-only restrictions are applied
+- **Git Protection**: 
+  - Marked as `-crlf -diff -merge` in Git attributes
+  - Helps prevent accidental modifications
+  - Can be overridden when intentional changes are needed
+
 ## Key Documentation Files
 
 ### 1. Core Documentation
 - `README.md` - General project information and setup
-- `DEVELOPMENT.md` - Development guidelines and practices
-- `TESTING.md` - Testing guidelines and practices
-- `MIGRATION.md` - Database migration guides
+- `docs/DEVELOPER_NOTES.md` - Development guidelines and practices (Protected)
+- `docs/TESTING.md` - Testing guidelines and practices (Protected)
+- `docs/MIGRATION.md` - Database migration guides
+- `docs/ROLES_AND_PERMISSIONS.md` - Role and permission structure (Protected)
 
 ### 2. Project-Specific Documentation
-- `docs/ROLES_AND_PERMISSIONS.md` - Detailed role and permission structure
 - `docs/USER_GUIDE.md` - End-user documentation
 - `AI memories/` - AI-specific context and knowledge
 

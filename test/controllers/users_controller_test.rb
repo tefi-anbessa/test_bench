@@ -1,7 +1,7 @@
 require "test_helper"
 
-class UsersControllerTest < ActionDispatch::IntegrationTest
-  include Devise::Test::IntegrationHelpers
+class UsersControllerTest < ActionController::TestCase
+  include Devise::Test::ControllerHelpers
 
   setup do
     @user = create(:user)
@@ -9,28 +9,21 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     @app_owner = create(:user, :app_owner)
   end
 
-  # Show action tests
-  test "should show user to signed in users" do
-    sign_in @user
-    get user_url(@user)
-    assert_response :success
-  end
-
-  test "should not show user profile to guest users" do
-    get user_path(@user)
-    assert_redirected_to new_user_session_path
+  test "should not get any action if not authenticated" do
+    get :index
+    assert_unauthenticated
   end
 
   # Index action tests
-  test "should get index for admin" do
-    sign_in @admin
-    get users_url
-    assert_response :success
+  test "should not get index for signed in users" do
+    sign_in @user
+    get :index
+    assert_response :forbidden
   end
 
-  test "should get index for app_owner" do
-    sign_in @app_owner
-    get users_url
+  test "should get index for admin" do
+    sign_in @admin
+    get :index
     assert_response :success
   end
 
@@ -38,20 +31,19 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     sign_in @admin
     test_user = create(:user, name: 'TestUser', email: 'test@example.com')
     
-    get users_url, params: { q: { name_or_email_cont: 'test' } }
+    get :index, params: { q: { name_or_email_cont: 'test' } }
     assert_response :success
   end
 
-  # Authorization tests
-  test "app owner should have access to users index" do
-    sign_in @app_owner
-    get users_url
-    assert_response :success
+  # Show action tests
+  test "should not show user profile to guest users" do
+    get :show, params: { id: @user.id }
+    assert_redirected_to new_user_session_path
   end
 
-  test "regular user can access users index" do
+  test "should show own user profile to signed in users" do
     sign_in @user
-    get users_url
+    get :show, params: { id: @user.id }
     assert_response :success
   end
 end

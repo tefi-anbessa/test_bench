@@ -16,10 +16,10 @@ This document outlines the role-based access control (RBAC) system implemented i
    - Can manage most resources
    - Cannot modify App Owner accounts
 
-### Project Roles (Resource-scoped)
+### Project Roles (Resource instance scoped)
 1. **Project Owner**
    - Full control over a specific project
-   - Can manage team members and their roles
+   - Can create and revoke project instance roles
    - Can modify project settings and content
 
 2. **Team Member**
@@ -27,7 +27,7 @@ This document outlines the role-based access control (RBAC) system implemented i
    - Limited access to project settings
    - Cannot manage team members
 
-### Functional Roles (Global)
+### Functional Roles (Global or Resource scoped)
 1. **Electrical Designer**
    - Required, in addition to project team member role, for create, edit, update on electrical resources:
       - Cable Types
@@ -49,21 +49,23 @@ This document outlines the role-based access control (RBAC) system implemented i
 ### New Users
 - New users are created without any roles by default
 - An administrator must explicitly assign appropriate roles to each new user
-- Roles can be assigned at both the global and project level
-- Use the role management interface in the application to assign roles
 
+### User Interface
+- The user interface for granting and revoking global and resource wide roles is the roles form based on the roles index.
+- It is only accessible to admins and app_owner.
+- The user interface for instance specific roles is a sub_form on the resource instance edit page, present only if the user has the required permissions to grant or revoke roles on that instance.
 
 ## Permissions
 
 #### General Rules
-- Only `:app_owner` and `:admin` roles can create new users
-- The project uses a revision control system for most data
-- Deletion of data is restricted and only used for database repairs or similar
-- Roles can be created and destroyed but not edited (roles are recreated when changed)
+- Only `:app_owner` and `:admin` roles can create new users [HOLD - at preent creation of users is managed by devise]
+- Roles can be created and destroyed but not edited. (The concept of editing is invalid: if a role changes it is a different role.)
+- Permissions are generally managed through the project resource. A user must have a role on a project to perform actions on that project. A functional role may also be required depending on the resource and action.
 
 #### Destroy Action Rules
-- By default, destroy action is only available to admins
-- **Exception for Projects**: Only `app_owner` can destroy projects due to significant impact
+- The project uses a revision control system for most data
+- Deletion of data is restricted to admins, and only used for database repairs or similar, to preserve the data history.
+- Only `app_owner` can destroy projects due to the significant impact of this action.
 - **Exception for Roles**: 
   - Roles are destroyed when revoked without history tracking
   - Project owners can destroy roles within their own projects
@@ -87,16 +89,28 @@ This document outlines the role-based access control (RBAC) system implemented i
 
 ## Managing Roles
 
-### Assigning Roles
+### Assigning and Revoking Roles
 ```ruby
 # Make a user a project owner (only App Owner can do this)
-user.add_role(:project_owner, project)
+user.grant(:project_owner, project)
 
 # Make a user a team member
-user.add_role(:team_member, project)
+user.grant(:team_member, project)
 
 # Grant admin privileges (only App Owner can do this)
-user.add_role(:admin) if current_user.app_owner?
+user.grant(:admin) if current_user.app_owner?
+```
+
+### Revoking Roles
+```ruby
+# Revoke a user's project owner role
+user.revoke(:project_owner, project)
+
+# Revoke a user's team member role
+user.revoke(:team_member, project)
+
+# Revoke admin privileges (only App Owner can do this)
+user.revoke(:admin) if current_user.app_owner?
 ```
 
 ### Team Management
@@ -117,7 +131,7 @@ end
 
 # In policies
 def edit?
-  user.admin? || user.project_owner?(@project)
+  user.is_app_owner? || user.is_admin? || user.is_project_owner?(@project)
 end
 ```
 

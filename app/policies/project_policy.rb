@@ -7,32 +7,32 @@ class ProjectPolicy < ApplicationPolicy
     def resolve(scope = nil, current_project: nil)
       scope ||= self.scope
       
-      if user&.is_app_owner? || user&.has_role?(:admin)
-        # App owners and admins can see all projects
+      if user.is_app_owner? || user.is_admin? ||
+        user.roles.where(resource_type: "Project", resource_id: nil).count > 0
+        # If user has global admin role, or any resource wide role on Projects,
+        # scope includes all.
         scope.all
-      elsif user.present?
-        # Regular users can see all projects where they have any role
-        scope.with_roles([:project_owner, :team_member], user)
       else
-        # Unauthenticated users see no projects
-        scope.none
+        # Scope includes the projects where user has any resource specific role
+        scope.where(:id => user.roles.where(resource_type: "Project")
+                        .pluck(:resource_id)).uniq
       end
+
     end
   end
 
   def index?
-    # Only authenticated users can view the projects index
+    # Authenticated users can view the projects index
     # (actual projects are filtered by scope)
     user.present?
   end
 
   def show?
-    # Only users with explicit access can view projects
+    # Admins and authenticated users with project role can view projects
     user.present? && (
       user.is_app_owner? ||
-      user.has_role?(:admin) ||
-      user.has_role?(:project_owner, record) ||
-      user.has_role?(:team_member, record)
+      user.is_admin? ||
+      user.roles.where(resource: project).count > 0
     )
   end
   
@@ -54,8 +54,8 @@ class ProjectPolicy < ApplicationPolicy
     # Only app owners, admins, or project owners can update a project
     user.present? && (
       user.is_app_owner? || 
-      user.has_role?(:admin) || 
-      user.has_role?(:project_owner, record)
+      user.is_admin? || 
+      user.is_project_owner_of?(project)
     )
   end
   
@@ -64,13 +64,13 @@ class ProjectPolicy < ApplicationPolicy
     user&.is_app_owner?
   end
 
-  def manage_team_members?
-    user.present? && (
-      user.is_app_owner? || 
-      user.has_role?(:admin) || 
-      user.has_role?(:project_owner, record)
-    )
-  end
+#  def manage_team_members?
+#    user.present? && (
+#      user.is_app_owner? || 
+#      user.has_role?(:admin) || 
+#      user.has_role?(:project_owner, record)
+#    )
+#  end
 
   private
 

@@ -84,7 +84,6 @@
 
 ## Documentation
 - Comprehensive README with setup instructions
-- API documentation with RDoc
 - Database schema documentation
 - Architecture decision records (ADRs)
 - User guides and developer documentation

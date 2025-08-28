@@ -329,6 +329,7 @@ $ rails active_storage:update
 - Updated JavaScript dependencies
 - Removed Bootstrap icons from assets, reinstalled bootstrap-icons in node_modules with npm.
 - Installed bootstrap-icons-helper gem.
+- Added Rails 8 Devise test helper fix to `test_helper.rb` for proper route loading in test environment
 
 ### Pending:
 - Review and update deprecated methods

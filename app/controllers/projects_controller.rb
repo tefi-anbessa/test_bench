@@ -4,45 +4,13 @@ class ProjectsController < ApplicationController
   before_action :get_project, only: %i[ show edit update destroy ]
   before_action :set_project, only: %i[ set ]
   before_action :authenticate_user!
+  before_action :ensure_html_format, except: [:show] # or any actions where you want to allow
 
   # GET /projects or /projects.json
   def index
-    @q = policy_scope(Project).ransack(params[:q])
+    @q = Project.ransack(params[:q])
+    @q.result.merge(policy_scope(Project))
     @pagy, @projects = pagy_with_page_size(@q.result.ordered)
-  end
-
-  # GET /projects/select
-  def select
-    @options = policy_scope(Project)
-    # Add a 'No Project' option at the beginning
-    @options = [OpenStruct.new(id: 'none', label: 'No Project')] + @options
-  end
-
-  # POST /projects/set
-  def set
-    if params[:project_id] == 'none'
-      # Handle 'No Project' selection
-      cookies.delete(:project_id)
-      session.delete(:project_id)
-      clear_stored_location_for_project
-      
-      redirect_to stored_location_for_project || root_path,
-                  notice: I18n.t('projects.none_selected')
-    elsif @project
-      # Set the project in both cookie (signed for security) and session
-      cookies.signed[:project_id] = { value: @project.id, expires: 1.year.from_now }
-      session[:project_id] = @project.id
-      
-      # Clear any stored location for project to prevent redirect loops
-      clear_stored_location_for_project
-      
-      redirect_to stored_location_for_project || @project,
-                  notice: I18n.t('projects.selected', code: @project.code)
-    else
-      # If no valid project is selected
-      redirect_to select_projects_path,
-                  alert: I18n.t('projects.invalid_selection')
-    end
   end
 
   # GET /projects/1 or /projects/1.json
@@ -54,14 +22,7 @@ class ProjectsController < ApplicationController
       format.html
       format.json { render json: @project }
     end
-  rescue Pundit::NotAuthorizedError => e
-    respond_to do |format|
-      format.html do
-        flash[:alert] = I18n.t('pundit.unauthorized')
-        redirect_to root_path
-      end
-      format.json { head :forbidden }
-    end
+
   end
 
   # GET /projects/new
@@ -70,19 +31,6 @@ class ProjectsController < ApplicationController
     authorize @project
     @roles = Constants.roles.resources[:project] || []
     @users = User.all
-    
-    respond_to do |format|
-      format.html
-      format.json { head :forbidden }
-    end
-  rescue Pundit::NotAuthorizedError
-    respond_to do |format|
-      format.html do
-        flash[:alert] = I18n.t('pundit.unauthorized')
-        redirect_to root_path
-      end
-      format.json { head :forbidden }
-    end
   end
 
   # GET /projects/1/edit
@@ -91,103 +39,80 @@ class ProjectsController < ApplicationController
     @role = Role.new
     @roles = Constants.roles.resources[:project] || []
     @users = User.all
-    
-    respond_to do |format|
-      format.html
-      format.json { head :forbidden }
-    end
-  rescue Pundit::NotAuthorizedError
-    respond_to do |format|
-      format.html do
-        flash[:alert] = I18n.t('pundit.unauthorized')
-        redirect_to root_path
-      end
-      format.json { head :forbidden }
-    end
   end
 
-  # POST /projects or /projects.json
+  # POST /projects
   def create
     @project = Project.new(project_params)
     authorize @project
 
-    respond_to do |format|
-      if @project.save
-        format.html do 
-          flash[:success] = I18n.t('flash.actions.create.notice', resource_name: I18n.t('activerecord.models.project'))
-          redirect_to @project
-        end
-        format.json { render json: @project, status: :created, location: @project }
-      else
-        format.html do
-          flash.now[:alert] = I18n.t('flash.actions.create.alert', resource_name: I18n.t('activerecord.models.project'))
-          render :new, status: :unprocessable_entity
-        end
-        format.json { render json: @project.errors, status: :unprocessable_entity }
-      end
-    end
-  rescue Pundit::NotAuthorizedError
-    respond_to do |format|
-      format.html do
-        flash[:alert] = I18n.t('pundit.unauthorized')
-        redirect_to root_path
-      end
-      format.json { head :forbidden }
+    if @project.save
+        flash[:success] = I18n.t('flash.actions.create.notice', resource_name: I18n.t('activerecord.models.project'))
+        redirect_to @project
+    else
+        flash.now[:alert] = I18n.t('flash.actions.create.alert', resource_name: I18n.t('activerecord.models.project'))
+        render :new, status: :unprocessable_entity
     end
   end
 
-  # PATCH/PUT /projects/1 or /projects/1.json
+  # PATCH/PUT /projects/1
   def update
     authorize @project
     
-    respond_to do |format|
-      if @project.update(project_params)
-        format.html do
-          flash[:success] = I18n.t('flash.actions.update.notice', resource_name: I18n.t('activerecord.models.project'))
-          redirect_to @project
-        end
-        format.json { render :show, status: :ok, location: @project }
-      else
-        format.html do
-          flash.now[:alert] = I18n.t('flash.actions.update.alert', resource_name: I18n.t('activerecord.models.project'))
-          render :edit, status: :unprocessable_entity 
-        end
-        format.json { render json: @project.errors, status: :unprocessable_entity }
-      end
-    end
-  rescue Pundit::NotAuthorizedError => e
-    respond_to do |format|
-      format.html do
-        flash[:alert] = I18n.t('pundit.unauthorized')
-        redirect_to root_path
-      end
-      format.json { head :forbidden }
+    if @project.update(project_params)
+        flash[:success] = I18n.t('flash.actions.update.notice', resource_name: I18n.t('activerecord.models.project'))
+        redirect_to @project
+    else
+        flash.now[:alert] = I18n.t('flash.actions.update.alert', resource_name: I18n.t('activerecord.models.project'))
+        render :edit, status: :unprocessable_entity
     end
   end
 
-  # DELETE /projects/1 or /projects/1.json
+  # DELETE /projects/1
   def destroy
     authorize @project
     
-    respond_to do |format|
-      if @project.destroy
-        format.html { redirect_to projects_url, notice: I18n.t('flash.actions.destroy.notice', resource_name: I18n.t('activerecord.models.project')) }
-        format.json { head :no_content }
-      else
-        format.html do
-          flash[:alert] = I18n.t('flash.actions.destroy.alert', resource_name: I18n.t('activerecord.models.project'))
-          redirect_to @project
-        end
-        format.json { render json: { error: I18n.t('flash.actions.destroy.alert', resource_name: I18n.t('activerecord.models.project')) }, status: :unprocessable_entity }
-      end
+    if @project.destroy
+        flash[:success] = I18n.t('flash.actions.destroy.notice', resource_name: I18n.t('activerecord.models.project'))
+        redirect_to projects_url
+    else
+        flash.now[:alert] = @project.errors.full_messages.join(', ')
+        redirect_to projects_url
     end
-  rescue Pundit::NotAuthorizedError
-    respond_to do |format|
-      format.html do
-        flash[:alert] = I18n.t('pundit.unauthorized')
-        redirect_to root_path
-      end
-      format.json { head :forbidden }
+  end
+
+  # Select and set actions are used to set the persistent current project for the session.
+  # Select action shows the list of projects to choose from.
+  # Set action sets the current project for the session.
+  # GET /projects/select
+  def select
+    @options = policy_scope(Project)
+    # Add a 'No Project' option at the beginning
+    @options = [OpenStruct.new(id: 'none', label: 'No Project')] + @options
+  end
+
+  # POST /projects/set
+  def set
+    if params[:project_id] == 'none'
+      # Handle 'No Project' selection
+      set_current_project(nil)
+      # Clear any stored location for project to prevent redirect loops
+      # clear_stored_location_for_project
+      redirect_to stored_location_for_project || root_path,
+                  notice: I18n.t('projects.none_selected')
+    elsif @project
+      # Set the project in both cookie (signed for security) and session
+      set_current_project(@project)
+      
+      # Clear any stored location for project to prevent redirect loops
+      clear_stored_location_for_project
+      
+      redirect_to stored_location_for_project || @project,
+                  notice: I18n.t('projects.selected', code: @project.code)
+    else
+      # If invalid project is selected
+      redirect_to select_projects_path,
+                  alert: I18n.t('projects.invalid_selection')
     end
   end
 
@@ -203,6 +128,11 @@ class ProjectsController < ApplicationController
       else
         @project = nil
       end
+    end
+
+    def ensure_html_format
+      return if request.format.html?
+      head :not_acceptable
     end
 
     # Only allow a list of trusted parameters through.

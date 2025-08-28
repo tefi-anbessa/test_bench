@@ -1,26 +1,30 @@
+require "test_helper"
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"
+require 'devise'
 require 'minitest/reporters'
+Minitest::Reporters.use!
+
 require 'factory_bot_rails'
 require 'database_cleaner/active_record'
-
-# Keep test output clean but visible
-Rails.logger.level = Logger::WARN
 
 # Load test support files
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
-# Simple test output
-Minitest::Reporters.use! [
-  Minitest::Reporters::ProgressReporter.new(color: true)
-]
+# Configure minitest-reporters
+Minitest::Reporters.use!(
+  Minitest::Reporters::DefaultReporter.new,
+  ENV,
+  Minitest.backtrace_filter
+)
 
 # Configure DatabaseCleaner
 DatabaseCleaner.strategy = :transaction
 DatabaseCleaner.clean_with(:truncation)
 
 class ActiveSupport::TestCase
+  include Devise::Test::IntegrationHelpers
   # Disable fixtures completely
   # fixtures :all
 
@@ -38,9 +42,9 @@ class ActiveSupport::TestCase
   # Run tests in parallel with specified workers
   parallelize(workers: :number_of_processors)
 
-  # Add more helper methods to be used by all tests here...
+    # Add more helper methods to be used by all tests here...
   include FactoryBot::Syntax::Methods
-  include Devise::Test::IntegrationHelpers
+  # include Devise::Test::IntegrationHelpers
   
   # Returns the current user
   def current_user
@@ -52,63 +56,109 @@ class ActiveSupport::TestCase
     @current_project
   end
   
-  # Sets the current project in the session
+  # Sets the current project in the session and cookies to match application behavior
   # @param project [Project] The project to set as current
   def set_current_project(project)
+    # post set_projects_url, params: { project_id: project.id }
     @current_project = project
-    # Also set in session if controller test
-    if defined?(controller) && controller.respond_to?(:session)
-      session[:current_project_id] = project.id
-    end
+    # Also set in session and cookies if controller test
+    # if defined?(controller) && controller.respond_to?(:session)
+    session[:project_id] = project.id
+    cookies[:project_id] = project.id
+    # end
   end
+  
 
-  # Assert that the response is an unauthorized access
-  # This can be either:
-  # 1. A 403 Forbidden response, or
-  # 2. A redirect to root with an unauthorized flash message
-  def assert_unauthorized
-    if response.redirect?
-      assert_redirected_to root_path
-      assert_not flash.empty?
-      assert_equal I18n.t('pundit.not_authorized'), flash[:alert]
-    else
-      assert_response :forbidden
-    end
+  # Asserts that the request was rejected because the user is not signed in
+  # Verifies:
+  # - 302 Found status code
+  # - Redirects to sign-in page
+  # - Correct flash message
+  #
+  # @param message [String] Optional custom assertion message
+  def assert_unauthenticated(message = nil)
+    assert_response :found, message # 302
+    assert_redirected_to new_user_session_path, message
+    assert_equal I18n.t('devise.failure.unauthenticated'), flash[:alert], message
   end
   
-  # Signs in a user for integration tests
-  def sign_in_user(user = nil)
-    @current_user = user || create(:user)
-    sign_in @current_user
+  # Asserts that the request was rejected due to insufficient permissions
+  # Verifies:
+  # - 302 Found status code
+  # - Redirects to root path
+  # - Unauthorized flash message
+  # (This will be updated to use a custom unauthorized page in the future)
+  #
+  # @param message [String] Optional custom assertion message
+  def assert_unauthorized(message = nil)
+    assert_response :found, message # 302
+    assert_redirected_to root_path, message
+    assert_equal I18n.t('pundit.not_authorized'), flash[:alert], message
   end
   
-  # Signs in an admin user for integration tests
-  def sign_in_admin(admin = nil)
-    @current_user = admin || create(:user, :admin)
-    sign_in @current_user
+  # Asserts that the request was explicitly forbidden (403)
+  # Verifies:
+  # - 403 Forbidden status code
+  # - No redirect (renders 403 page)
+  #
+  # @param message [String] Optional custom assertion message
+  def assert_forbidden(message = nil)
+    assert_response :forbidden, message # 403
   end
-  
-  # Signs out the current user
-  def sign_out_user
-    sign_out :user
-    @current_user = nil
-  end
-  
+ 
   # Assigns a role to a user
   def assign_role(user, role, resource = nil)
-    user.add_role(role, resource)
+    user.grant(role, resource)
   end
   
   # Removes a role from a user
   def remove_role(user, role, resource = nil)
-    user.remove_role(role, resource)
+    user.revoke(role, resource)
   end
   
   # Creates and signs in a user with the specified role on a resource
-  def sign_in_as(role, resource = nil)
-    user = create(:user)
-    assign_role(user, role, resource) if role
-    sign_in_user(user)
-    user
+#  def sign_in_as(role, resource = nil)
+#    user = create(:user)
+#    assign_role(user, role, resource) if role
+#    sign_in_user(user)
+#    user
+#  end
+end
+
+# For controller tests
+class ActionController::TestCase
+  include Devise::Test::ControllerHelpers
+
+  ActiveSupport.on_load(:action_controller) do
+    Rails.application.reload_routes_unless_loaded
+  end 
+
+  setup do
+    @request.env['devise.mapping'] = Devise.mappings[:user]
+    @request.env['action_dispatch.cookies_serializer'] = :json
+    
+    # Set up Warden test mode
+    # @request.env['warden'] = begin
+    #  manager = Warden::Manager.new(nil) do |config|
+    #    config.merge! Devise.warden_config
+    #  end
+    #  Warden::Proxy.new(@request.env, manager)
+    #end
+    
+    # Set default locale for tests
+  #  I18n.locale = I18n.default_locale
   end
+  
+  # Helper to set current project in session and cookies to match CurrentProjectConcern
+  def set_current_project(project)
+    @current_project = project
+    session[:project_id] = project.id
+    cookies.signed[:project_id] = project.id
+  end
+  
+  ## Sign in helper that ensures the user is properly set in the session
+  # def sign_in_user(user)
+  #   sign_in(user, scope: :user)
+  #   @current_user = user
+  # end
 end

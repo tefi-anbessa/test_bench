@@ -8,9 +8,12 @@ From git commit 6da446f onwards, this project has used Windsurf/Cascade AI to sp
 1. When initiating a new session with AI, request it to review these memories and follow the guidance therein.
 2. If memories are not available, refer to the duplicated documentation in `docs/AI memories/`.
 3. Always review these additional resources for guidance:
-   - `DEVELOPER_NOTES.md`
    - `README.md`
    - Project documentation in `docs/`
+      - `docs/DEVELOPER_NOTES.md`
+      - `docs/TESTING.md`
+      - `docs/ROLES_AND_PERMISSIONS.md`
+
 
 ### Maintenance:
 - These guidelines and requirements will evolve over time.
@@ -68,8 +71,10 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Serve bootstrap from local dev or prod
 - [ ] Write more tests for the Demand model
 - [ ] Add performance optimizations for large demand calculations
-- [ ] Update API documentation
+- [ ] Review all policies and tests for compliance with guidelines
+- [ ] Review all models for compliance with guidelines
 - [x] Clean up old Load model references after migration
+- [ ] The project was originally written for Rails 7 but got hibernated. On reawakening, it was upgraded to Rails 8. It has never been deployed to production, so Rails 8 upgrade is not yet officially declared complete.
 
 ## Refactoring Opportunities
 - [ ] Improve role and permissions implementation and workflow.
@@ -78,8 +83,14 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Add type checking with Sorbet or RBS
 - [ ] Implement caching for frequently accessed demand data
 - [x] Upgrade to Rails 8 (Completed in rails8 branch)
-- [ ] Refactor policy classes (CablePolicy, SwitchboardPolicy, MotorPolicy, LightCctPolicy, SocketCctPolicy) to use a shared concern or base class to reduce code duplication
-
+- [ ] Refactor electrical policy classes (CablePolicy, SwitchboardPolicy, MotorPolicy, LightCctPolicy, SocketCctPolicy) to use a shared concern or base class to reduce code duplication
+- [ ] Change terminology and implementation from project owner to project manager.
+- [ ] Refactor projects controller and application controller `def after_sign_in_path_for(resource)to use app/controllers/concerns/current_project_concern.rb to reduce code duplication.
+- [ ] Cable types: 
+   - [ ] convert core material to enum.
+   - [ ] convert insulation material to enum.
+   - [ ] add volt rating enum.
+ 
 ## Potential Features
 - [ ] Add more comprehensive reporting for demand calculations
 - [ ] Implement bulk import/export for demands
@@ -91,9 +102,14 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    - Allow users to self register through devise, edit their own profile and user name, email, password. 
    - Insert an admin approval in the confirmation process
    - Disable destroy, because the [future] change history will have links to users making changes. We may need to historise user name changes as well, that's a future problem. The revision management system may well include some sort of active/inactive status features. 
+- [ ] Customize error trapping:
+   - [ ] Customize error trapping for Pundit::NotAuthorizedError
+   - [ ] Customize error trapping for unknown format
+   - [ ] Customize error trapping for forbidden
+- [ ] Improve locale setting, and include language/currency/flag in locale selection.:
 
 ## Architecture Considerations
-- [ ] Evaluate if we should move to a more modular architecture
+- [ ] Move Electrical to a module or namespace.
 - [ ] Consider API versioning strategy
 - [ ] Plan for database scaling as demand data grows
 

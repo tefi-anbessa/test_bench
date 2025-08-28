@@ -31,6 +31,19 @@ km:
   table:
     links:        "kh Links"
 
+  # Flash messages
+  flash:
+    roles:
+      granted: "kh %{role_type} ត្រូវបានផ្ដល់"
+      revoked: "kh %{role_type} ត្រូវបានដកហូត"
+      failed_to_grant: "kh មិនអាចផ្ដល់ %{role_type} បានទេ"
+      failed_to_revoke: "kh មិនអាចដកហូត %{role_type} បានទេ"
+      user_not_found: "kh រកមិនឃើញអ្នកប្រើ"
+    role_types:
+      global: "kh សកល"
+      resource_wide: "kh ទូទៅសម្រាប់ធនធាន"
+      resource_instance: "kh ករណីជាក់លាក់"
+
   footer:
     credit:       "Website by frankie fusion. "
 

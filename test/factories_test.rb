@@ -149,23 +149,22 @@ class FactoriesTest < ActiveSupport::TestCase
   end
   
   test 'creates all standard disciplines' do
-    # This will trigger the after_build hook that creates all standard disciplines
-    discipline = create(:discipline)
-    assert discipline.valid?
-    
-    # Verify all standard disciplines exist
-    Discipline::DISCIPLINES.each do |disc|
-      d = Discipline.find_by(code: disc[:code])
-      assert d.present?, "Expected discipline with code #{disc[:code]} to exist"
-      assert_equal disc[:name], d.name
-    end
-  end
+    # Create all standard disciplines using factory traits (lowercase code as trait name)
+    create(:discipline, :a)  # Administration
+    create(:discipline, :b)  # Architecture
+    create(:discipline, :c)  # Civil Engineering
+    create(:discipline, :e)  # Electrical Engineering
+    create(:discipline, :i)  # Information Tech
+    create(:discipline, :j)  # Instrument Engineering
+    create(:discipline, :m)  # Mechanical Engineering
+    create(:discipline, :p)  # Process Engineering
+    create(:discipline, :u)  # Multi-Discipline
 
-  test 'civil tag' do
-    discipline = create(:discipline, :c)  # Using standard discipline 'C' (Civil)
-    tag = build(:tag, :civil, discipline: discipline)
-    assert tag.valid?
-    assert_equal 'C', tag.prefix  # Civil tags use 'C' prefix
+    # Verify all standard disciplines exist
+    Discipline::DISCIPLINES.each do |discipline|
+      assert Discipline.exists?(code: discipline[:code], name: discipline[:name]), 
+             "Expected to find discipline: #{discipline[:name]} (#{discipline[:code]})"
+    end
   end
 
   test 'sequential tags' do

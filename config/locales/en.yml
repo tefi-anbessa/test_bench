@@ -49,6 +49,19 @@ en:
   
   # Flash messages
   flash:
+    roles:
+      granted: "%{role_type} role was granted"
+      revoked: "%{role_type} role was revoked"
+      failed_to_grant: "Failed to grant %{role_type} role"
+      failed_to_revoke: "Failed to revoke %{role_type} role"
+      user_not_found: "User not found"
+      resource_not_found: "Resource not found"
+      role_not_found: "Role not found"
+      insufficient_permissions: "You do not have permission for this action"
+    role_types:
+      global: "Global"
+      resource_wide: "Resource-wide"
+      resource_instance: "Resource instance"
     actions:
       create:
         notice: "%{resource_name} was successfully created."

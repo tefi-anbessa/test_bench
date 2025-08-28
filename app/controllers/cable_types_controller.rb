@@ -5,22 +5,18 @@ class CableTypesController < ApplicationController
 
   # GET /electrical/cable_types or /electrical/cable_types.json
   def index
-    @q = current_project.cable_types.ransack(params[:q])
+    @q = policy_scope(CableType).ransack(params[:q])
     @pagy, @cable_types = pagy(@q.result.includes(:cables), limit: 10)
   end
 
   # GET /electrical/cable_types/1 or /electrical/cable_types/1.json
   def show
+    authorize @cable_type
   end
 
   # GET /electrical/cable_types/new
   def new
     @cable_type = authorize current_project.cable_types.new
-  end
-
-  # GET /electrical/cable_types/1/edit
-  def edit
-    authorize @cable_type
   end
 
   # POST /electrical/cable_types or /electrical/cable_types.json
@@ -39,6 +35,11 @@ class CableTypesController < ApplicationController
           status: :unprocessable_entity }
       end
     end
+  end
+
+  # GET /electrical/cable_types/1/edit
+  def edit
+    authorize @cable_type
   end
 
   # PATCH/PUT /electrical/cable_types/1 or /electrical/cable_types/1.json
@@ -72,7 +73,7 @@ class CableTypesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_cable_type
-      @cable_type = current_project.cable_types.find(params[:id])
+      @cable_type = policy_scope(CableType).find(params[:id])
     end
 
     # Only allow a list of trusted parameters through.

@@ -1,105 +1,166 @@
 require "test_helper"
 
-class CableTypesControllerTest < ActionDispatch::IntegrationTest
-  include Devise::Test::IntegrationHelpers
-
+class CableTypesControllerTest < ActionController::TestCase
+  include Devise::Test::ControllerHelpers
+  
   setup do
-    @cable_type = cable_types(:one)
-    @user = users(:valid)
-    @ee = users(:ee)
+    @project = create(:project)
+    set_current_project(@project)
+    @cable_type = create(:cable_type, project: @project)
+    
+    # Create base users without any roles
+    @admin = create(:user)
+    @regular_user = create(:user)
+    @team_member = create(:user)
+    @electrical_designer = create(:user)
+    
+    # Add global admin role
+    @admin.grant(:admin)
+
+    # Add project-specific team member roles
+    @team_member.grant(:team_member, @project)
+    @electrical_designer.grant(:team_member, @project)
+
+    # Add global functional role
+    @electrical_designer.grant(:electrical_designer)
+  
+    # Set up request environment
+#    @request.env['HTTP_REFERER'] = 'http://test.host/'
+#    @request.env['devise.mapping'] = Devise.mappings[:user]
   end
 
-  test "no access if not signed in" do
-    get cable_types_url
-    assert_redirected_to new_user_session_url
-    assert_not flash.empty?
+  # Authentication tests
+  test "should redirect to sign in if not authenticated" do
+    get :index
+    assert_unauthenticated
   end
 
-  test "should get index" do
-    sign_in @user
-    get cable_types_url
+  test "any authenticated user can view index" do
+    sign_in(@regular_user)
+    # @request.session[:project_id] = @project.id
+    get :index
+    assert_response :success
+    assert_not_nil assigns(:cable_types)
+  end
+
+  # TODO: Properly test the authorize call in the show action
+  # Currently, the test only verifies RecordNotFound from policy_scope
+  # We should also test the actual authorization in the show action
+  test "team member cannot show cable type on different project" do
+    sign_in(@team_member)
+    @project2 = create(:project)
+    @cable_type2 = create(:cable_type, project: @project2)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      get :show, params: { id: @cable_type2.id }
+    end
+  end
+
+  test "any authenticated user can show cable type on current project" do
+    sign_in(@regular_user)
+    get :show, params: { id: @cable_type.id }
+    assert_response :success
+    assert_not_nil assigns(:cable_type)
+  end
+
+  test "regular user cannot access new form" do
+    sign_in @regular_user
+#    @request.session[:project_id] = @project.id
+    get :new
+    assert_forbidden
+  end
+
+  test "electrical designer can access new form" do
+    sign_in @electrical_designer
+    get :new
     assert_response :success
   end
 
-  test "should not get new if user does not have creator role on cable types" do
-    sign_in @user
-    get new_cable_type_url
-    assert_redirected_to root_path
+  test "regular user cannot create cable type" do
+    sign_in @regular_user
+    assert_no_difference('CableType.count') do
+      post :create, params: {
+        cable_type: attributes_for(:cable_type, project_id: @project.id)
+      }
+    end
+    assert_forbidden
   end
 
-  test "should get new if user has creator role on cable types" do
-    sign_in @ee
-    @ee.grant :creator, CableType
-    get new_cable_type_url
+  test "electrical designer can create cable type" do
+    sign_in @electrical_designer
+    assert_difference('CableType.count') do
+      post :create, params: { 
+        cable_type: { 
+          project_id: @project.id,
+          conductor_material: "Copper",
+          conductor_makeup: "Stranded",
+          csa: 4.0,  # Changed from 2.5 to make it unique
+          insulation: "XLPE",
+          bedding: "PVC",
+          armour: "Steel Wire Armour",
+          sheath: "PVC",
+          temperature_rating: "75˚C",
+          neutral_csa: 4.0,  # Changed to match csa
+          earth_csa: 2.5,    # Changed from 1.5
+          bedding_od: 12.5,  # Changed from 10.5
+          overall_od: 17.2   # Changed from 15.2
+        }
+      }
+    end
+    assert_redirected_to cable_type_path(CableType.last)
+  end
+
+  test "any authenticated user can view cable type" do
+    sign_in @regular_user
+    get :show, params: { id: @cable_type.id }
     assert_response :success
   end
 
-  test "should not create cable_type when not authorized" do
-    sign_in @user
-    assert_no_difference("CableType.count") do
-      post cable_types_url, params: { cable_type: { armour: @cable_type.armour, bedding: @cable_type.bedding, bedding_od: @cable_type.bedding_od, conductor_makeup: @cable_type.conductor_makeup, conductor_material: @cable_type.conductor_material, csa: @cable_type.csa, earth_csa: @cable_type.earth_csa, insulation: @cable_type.insulation, neutral_csa: @cable_type.neutral_csa, overall_od: @cable_type.overall_od, sheath: @cable_type.sheath, temperature_rating: @cable_type.temperature_rating } }
-    end
-    assert_redirected_to root_path
+  test "regular user cannot edit cable type" do
+    sign_in @regular_user
+    get :edit, params: { id: @cable_type.id }
+    assert_forbidden
   end
 
-  test "should create cable_type when authorized" do
-    sign_in @ee
-    @ee.grant :creator, CableType
-    assert_difference("CableType.count") do
-      post cable_types_url, params: { cable_type: { armour: @cable_type.armour, bedding: @cable_type.bedding, bedding_od: @cable_type.bedding_od, conductor_makeup: @cable_type.conductor_makeup, conductor_material: @cable_type.conductor_material, csa: @cable_type.csa, earth_csa: @cable_type.earth_csa, insulation: @cable_type.insulation, neutral_csa: @cable_type.neutral_csa, overall_od: @cable_type.overall_od, sheath: @cable_type.sheath, temperature_rating: @cable_type.temperature_rating } }
-    end
-    assert_redirected_to cable_type_url(CableType.last)
-  end
-
-  test "should show cable_type" do
-    sign_in @user
-    get cable_type_url(@cable_type)
+  test "electrical designer can edit cable type" do
+    sign_in @electrical_designer
+    get :edit, params: { id: @cable_type.id }
     assert_response :success
   end
 
-  test "should not get edit when not authorized" do
-    sign_in @user
-    get edit_cable_type_url(@cable_type)
-    assert_redirected_to root_path
+  test "regular user cannot update cable type" do
+    original_material = @cable_type.conductor_material
+    sign_in @regular_user
+    patch :update, params: {
+      id: @cable_type.id,
+      cable_type: { conductor_material: 'Aluminum' }
+    }
+    assert_forbidden
+    assert_equal original_material, @cable_type.reload.conductor_material
   end
 
-  test "should get edit" do
-    sign_in @ee
-    @ee.grant :creator, CableType
-    get edit_cable_type_url(@cable_type)
-    assert_response :success
+  test "electrical designer can update cable type" do
+    sign_in @electrical_designer
+    patch :update, params: {
+      id: @cable_type.id,
+      cable_type: { conductor_material: 'Aluminum' }
+    }
+    assert_redirected_to cable_type_path(@cable_type)
+    assert_equal 'Aluminum', @cable_type.reload.conductor_material
   end
 
-  test "should not update cable_type when not authorized" do
-    sign_in @user
-    patch cable_type_url(@cable_type), params: { cable_type: { armour: @cable_type.armour, bedding: @cable_type.bedding, bedding_od: @cable_type.bedding_od, conductor_makeup: @cable_type.conductor_makeup, conductor_material: @cable_type.conductor_material, csa: @cable_type.csa, earth_csa: @cable_type.earth_csa, insulation: @cable_type.insulation, neutral_csa: @cable_type.neutral_csa, overall_od: @cable_type.overall_od, sheath: @cable_type.sheath, temperature_rating: @cable_type.temperature_rating } }
-    assert_redirected_to root_path
-  end
-
-  test "should update cable_type" do
-    sign_in @ee
-    @ee.grant :creator, CableType
-    patch cable_type_url(@cable_type), params: { cable_type: { armour: @cable_type.armour, bedding: @cable_type.bedding, bedding_od: @cable_type.bedding_od, conductor_makeup: @cable_type.conductor_makeup, conductor_material: @cable_type.conductor_material, csa: @cable_type.csa, earth_csa: @cable_type.earth_csa, insulation: @cable_type.insulation, neutral_csa: @cable_type.neutral_csa, overall_od: @cable_type.overall_od, sheath: @cable_type.sheath, temperature_rating: @cable_type.temperature_rating } }
-    assert_redirected_to cable_type_url(@cable_type)
-  end
-
-  test "should not destroy cable_type when not authorized" do
-    sign_in @user
-    assert_no_difference("CableType.count") do
-      delete cable_type_url(@cable_type)
+  test "regular user cannot destroy cable type" do
+    sign_in @regular_user
+    assert_no_difference('CableType.count') do
+      delete :destroy, params: { id: @cable_type.id }
     end
-    assert_redirected_to root_path
+    assert_forbidden
   end
 
-  test "should destroy cable_type" do
-    sign_in @ee
-    @ee.grant :creator, CableType
-    assert_difference("CableType.count", -1) do
-      delete cable_type_url(@cable_type)
+  test "admin can destroy cable type" do
+    sign_in @admin
+    assert_difference('CableType.count', -1) do
+      delete :destroy, params: { id: @cable_type.id }
     end
-    assert_redirected_to cable_types_url
+    assert_redirected_to cable_types_path
   end
-
-=begin
-=end
 end

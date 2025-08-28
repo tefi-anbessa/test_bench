@@ -30,15 +30,14 @@ Rails.application.routes.draw do
     end
     
     resources :motors, only: [:index]
-    
-    # Demands routes
-    resources :demands
-    
     resources :switchboards, only: [:index]
     resources :light_ccts, only: [:index]
     resources :socket_ccts, only: [:index]
     resources :cable_types
     resources :cables, only: [:index]
+    
+    # Demands routes
+    resources :demands
 
     resources :users, only: [] do
       resources :roles, only: [:destroy]
@@ -49,4 +48,7 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root to: 'site#home'
+  
+  # Error handling - only custom 403 page, others use static files in public/
+  get '/403', to: 'errors#forbidden', as: :forbidden
 end

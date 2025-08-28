@@ -8,6 +8,12 @@ A Ruby on Rails application for managing multiple engineering projects.
 - Projects are the top-level resource. 
 - Projects are uniquely identified by a 2-letter code, e.g. AA, AB, AC, etc.
 
+## Disciplines
+- Disciplines can be used to group tags, documents, etc.
+- Disciplines are set across the organization, so all projects share the same set of discipine codes.
+[HOLD] - Disciplines interact with functional role assignments. 
+- Because they are not typically mutable, there is no UI for managing disciplines. They are set by db:seed.
+
 ## Tags
 - Engineering design elements require a tag to be assigned. 
 - Tags belong to projects, but can be sub-grouped within a project by assigning a project stage (1 to 10).
@@ -22,14 +28,8 @@ A Ruby on Rails application for managing multiple engineering projects.
   - SocketCct
   - LightCct
   - Pipe
-- Source
-- Consumer
-
-## Disciplines
-- Disciplines can be used to group tags, documents, etc.
-- Disciplines are set across the organization, so all projects share the same set of discipine codes.
-[HOLD] - Disciplines interact with functional role assignments. 
-- Because they are not typically mutable, there is no UI for managing disciplines. They are set by db:seed.
+  - Source
+  - Consumer
 
 ## Electrical
 - Electrical power distribution can be modeled, mainly for the purpose of producing documentation. 
@@ -39,10 +39,15 @@ A Ruby on Rails application for managing multiple engineering projects.
   - SocketCct
   - LightCct
 [TODO: keep this list up to date]
+### Switchboards
 - Switchboards have multiple outgoing circuits, each uniquely identified. 
-- Each circuit has protection devices and options.
-- Each circuit can have an assigned load and cable.
+  - Each circuit has protection devices and options.
+  - Each circuit can have an assigned load and cable.
 - Switchboards are always of load type "summation", meaning they aggregate the loads of their outgoing circuits.
+### Cables
+- Cables are assigned to cable types, which define the cable's properties, such as insulation type, conductor material, etc.
+- Cable type set is specific to the project.
+- [TODO - at present cables are only "from" power source (switchboard) to load (motor, socket, light, etc.) Build a more flexible cable model]
 
 ## Role Hierarchy and Permissions
 

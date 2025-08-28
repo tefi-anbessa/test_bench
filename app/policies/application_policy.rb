@@ -4,7 +4,10 @@ class ApplicationPolicy
   # Wrapper for pundit user, to include current_project in policies
   class UserContext
     attr_reader :user, :current_project
-
+# The application modifies the behaviour of pundit to include the current project context in policies.
+# Most work in the application is scoped to the current project, so the current project is used in most policies.
+# This implementation follows the pundit gem documentation guidelines, by overriding the pundit_user method to a 
+# UserContext object, which includes the current project.
     def initialize(user, current_project)
       @user = user
       @current_project = current_project

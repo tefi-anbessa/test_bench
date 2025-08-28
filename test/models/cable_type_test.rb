@@ -94,6 +94,17 @@ class CableTypeTest < ActiveSupport::TestCase
                   "A cable type with these specifications already exists"
   end
 
+  test "should be destroyed when associated project is destroyed" do
+    project = create(:project)
+    cable_type = create(:cable_type, project: project)
+    
+    assert_difference 'CableType.count', -1 do
+      project.destroy
+    end
+    
+    assert_not CableType.exists?(cable_type.id)
+  end
+  
   test "traits should work correctly" do
     flat_twin = create(:cable_type, :pvc_flat_twin_earth, project: @project)
     assert_equal @project, flat_twin.project

@@ -16,7 +16,7 @@ FactoryBot.define do
     sheath { 'XLPE/nylon' }
     bedding_od { 10.5 }  # Outer diameter in mm
     overall_od { 12.5 }  # Overall diameter in mm
-    temperature_rating { 1 }  # Using enum value, typically 70°C for PVC
+    temperature_rating { '75˚C' }  # Using string value from the enum, 75°C for PVC
 
     # Traits for common cable types
     trait :pvc_flat_twin_earth do

@@ -1,0 +1,141 @@
+<div class="row justify-content-center mt-5">
+  <div class="col-md-8 text-center">
+    <%# HAL 9000 Image - using a placeholder if the image doesn't exist %>
+    <%= image_tag(
+      'HAL9000.jpg', 
+      class: "img-fluid mb-4", 
+      alt: "HAL 9000", 
+      style: "max-width: 300px;"
+    ) rescue image_tag("https://via.placeholder.com/300x200?text=HAL+9000", class: "img-fluid mb-4") %>
+    
+    <h1 class="display-4 text-danger">403: Forbidden.</h1>
+    
+    <% if flash[:alert].present? %>
+      <div class="alert alert-danger"><%= flash[:alert] %></div>
+    <% end %>
+    
+    <div class="card mt-4">
+      <div class="card-header bg-danger text-white">
+        <h2 class="h5 mb-0">Access Denied</h2>
+      </div>
+      <div class="card-body text-start">
+        <% if @exception.present? %>
+          <p class="card-text"><strong>Reason:</strong> <%= @exception.message %></p>
+          
+          <% if @exception.respond_to?(:query) && @exception.query.present? %>
+            <p class="card-text"><strong>Action:</strong> <code><%= @exception.query %></code></p>
+          <% end %>
+          
+          <% if @exception.respond_to?(:record) && @exception.record.present? %>
+            <p class="card-text">
+              <strong>Resource:</strong> 
+              <code><%= @exception.record.class.name %></code>
+              <% if @exception.record.respond_to?(:id) %>
+                (ID: <%= @exception.record.id %>)
+              <% end %>
+            </p>
+          <% end %>
+          
+          <% if @exception.respond_to?(:policy) && @exception.policy.present? %>
+            <p class="card-text">
+              <strong>Policy:</strong> 
+              <code><%= @exception.policy.class.name %></code>
+            </p>
+          <% end %>
+        <% end %>
+        
+        <% if defined?(current_user) && current_user %>
+          <p class="card-text"><strong>User:</strong> <%= current_user.email %></p>
+          <% if current_user.respond_to?(:roles) %>
+            <p class="card-text"><strong>Roles:</strong> <%= current_user.roles.pluck(:name).join(', ') %></p>
+          <% end %>
+        <% end %>
+          
+          <% if defined?(current_project) && current_project %>
+            <p class="card-text">
+              <strong>Current Project:</strong> 
+              <%= current_project.label %>
+            </p>
+          <% end %>
+        </div>
+      </div>
+      
+      <div class="mt-4">
+        <%= link_to root_path, class: "btn btn-primary me-2" do %>
+          <i class="bi bi-house-door"></i> Return to Home
+        <% end %>
+        
+        <% if defined?(current_project) && current_project %>
+          <%= link_to project_path(current_project), class: "btn btn-outline-primary" do %>
+            <i class="bi bi-arrow-left"></i> Back to Project
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%# Audio element that will play automatically if sound is available %>
+<div id="audio-container" style="display: none;">
+  <audio id="hal-audio" preload="auto">
+    <source src="<%= asset_path('hal.wav') %>" type="audio/wav">
+    Your browser does not support the audio element.
+  </audio>
+  <div id="audio-notice" style="display: none; position: fixed; bottom: 20px; right: 20px; background: #ffc107; color: #000; padding: 10px; border-radius: 4px; z-index: 1000;">
+    Click anywhere to enable sound
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const audioContainer = document.getElementById('audio-container');
+    const audio = document.getElementById('hal-audio');
+    const audioNotice = document.getElementById('audio-notice');
+    
+    if (!audio) return;
+    
+    // Make container visible
+    audioContainer.style.display = 'block';
+    
+    // Set volume to 50%
+    audio.volume = 0.5;
+    
+    // Function to handle audio playback
+    const playAudio = () => {
+      audio.play()
+        .then(() => {
+          if (audioNotice) audioNotice.style.display = 'none';
+        })
+        .catch(error => {
+          console.log('Autoplay prevented:', error);
+          if (audioNotice) audioNotice.style.display = 'block';
+          
+          const enableAudio = () => {
+            audio.play()
+              .then(() => {
+                if (audioNotice) audioNotice.style.display = 'none';
+              })
+              .catch(console.warn);
+              
+            // Clean up event listeners
+            document.removeEventListener('click', enableAudio);
+            document.removeEventListener('keydown', enableAudio);
+          };
+          
+          // Add event listeners for user interaction
+          document.addEventListener('click', enableAudio, { once: true });
+          document.addEventListener('keydown', enableAudio, { once: true });
+        });
+    };
+    
+    // Initial playback attempt
+    playAudio();
+    
+    // Retry when page becomes visible again
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        playAudio();
+      }
+    });
+  });
+</script>

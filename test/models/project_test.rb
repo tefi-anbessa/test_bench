@@ -2,7 +2,7 @@ require "test_helper"
 
 class ProjectTest < ActiveSupport::TestCase
   def setup
-    @project = build(:project)
+    @project = create(:project)
   end
 
   test "should be valid" do
@@ -60,12 +60,12 @@ class ProjectTest < ActiveSupport::TestCase
     @project.description = "a" * 5000
     assert @project.valid?
   end
-=begin
+
   test "destroy project" do
     assert_difference 'Project.count', -1 do
       @project.destroy
     end
   end
-=end
+  
 
 end

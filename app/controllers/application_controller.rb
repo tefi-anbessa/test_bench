@@ -7,7 +7,23 @@ class ApplicationController < ActionController::Base
   around_action :switch_locale
   before_action :configure_permitted_parameters, if: :devise_controller?
   
-  rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
+  rescue_from Pundit::NotAuthorizedError do |exception|
+    @exception = exception
+    respond_to do |format|
+      format.html do
+        flash[:alert] = exception.message
+        render 'errors/forbidden', status: :forbidden
+      end
+      format.json { render json: { error: exception.message }, status: :forbidden }
+    end
+  end
+
+  # Handle unknown formats consistently
+  rescue_from ActionController::UnknownFormat do
+    respond_to do |format|
+      format.any { head :not_acceptable }
+    end
+  end
   # rescue_from ActionController::Redirecting::UnsafeRedirectError do
   #   redirect_to root_url
   # end
@@ -16,8 +32,6 @@ class ApplicationController < ActionController::Base
     results = ActiveRecord::Base.connection.exec_query(sql)
     results.presence
   end
-
-  # This method is now in CurrentProjectConcern
 
   # Override Pundit's default user context
   def pundit_user

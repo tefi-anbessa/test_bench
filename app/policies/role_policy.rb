@@ -26,11 +26,11 @@ class RolePolicy < ApplicationPolicy
   # If no current project, only app owners and admins can view roles
   def index?
     if current_project.present?
-      user.present? && (user.is_app_owner? || user.has_role?(:admin) || 
+      user.present? && (user.is_app_owner? || user.is_admin? || 
                        user.has_role?(:project_owner, current_project) || 
                        user.has_role?(:team_member, current_project))
     else
-      user.present? && (user.is_app_owner? || user.has_role?(:admin))
+      user.present? && (user.is_app_owner? || user.is_admin?)
     end
   end
 
