@@ -1,15 +1,29 @@
 FactoryBot.define do
   factory :motor do
-    # Basic attributes
-    motor_type { %w[Induction Synchronous DC].sample }
-    frame_size { "#{rand(50..400)}L" }
-    ingress_protection { "IP#{rand(23..68)}" }
-    poles { [2, 4, 6, 8].sample }
-    speed_rated { (500..3600).step(10).to_a.sample }
-    
-    # Associations
-    # The Tagable concern will handle the tag association
-    # The Demandable concern will handle the demand association
+    # Require tag to be provided
+    tag
+
+    # Trait to create a new tag with default motor settings
+    trait :with_tag do
+      transient do
+        prefix { 'M' }
+        project { create(:project) }
+        discipline { Discipline.find_or_create_by(code: 'E') { |d| d.name = 'Electrical Engineering' } }
+        description { nil }
+      end
+
+      after(:build) do |motor, evaluator|
+        motor.tag = build(
+          :tag,
+          :unique_tag,
+          tagable: motor,
+          prefix: evaluator.prefix,
+          project: evaluator.project,
+          discipline: evaluator.discipline,
+          description: evaluator.description
+        )
+      end
+    end
     
     # Traits for different motor types
     trait :induction do

@@ -18,7 +18,7 @@ class Discipline < ApplicationRecord
   VALID_CODE_REGEX = /[A-Z]/
   validates :code,        presence: true, length: { is: 1},
                           format: { with: VALID_CODE_REGEX },
-                          uniqueness: true
+                          uniqueness:  { message: "%{model} code %{value} already exists" }
   validates :name, presence: true, length: { maximum: 50 }
 
   def self.ransackable_attributes(auth_object = nil)

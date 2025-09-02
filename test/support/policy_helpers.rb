@@ -1,4 +1,5 @@
 module PolicyHelpers
+  # creates core users with associated roles
   def setup_policy_test
     @app_owner = create(:user, :app_owner)
     @admin = create(:user, :admin)
@@ -7,10 +8,13 @@ module PolicyHelpers
     @regular_user = create(:user)
     
     @project = create(:project)
-    @project_owner.add_role(:project_owner, @project)
-    @team_member.add_role(:team_member, @project)
+    @project_owner.grant(:project_owner, @project)
+    @team_member.grant(:team_member, @project)
+
+    @other_project = create(:project)
   end
   
+  # returns user_context for given user and project
   def user_context(user, project = nil)
     ApplicationPolicy::UserContext.new(user, project || @project)
   end

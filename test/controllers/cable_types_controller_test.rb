@@ -35,6 +35,7 @@ class CableTypesControllerTest < ActionController::TestCase
     assert_unauthenticated
   end
 
+  # Index tests
   test "any authenticated user can view index" do
     sign_in(@regular_user)
     # @request.session[:project_id] = @project.id
@@ -43,6 +44,7 @@ class CableTypesControllerTest < ActionController::TestCase
     assert_not_nil assigns(:cable_types)
   end
 
+  # Show tests
   # TODO: Properly test the authorize call in the show action
   # Currently, the test only verifies RecordNotFound from policy_scope
   # We should also test the actual authorization in the show action
@@ -55,13 +57,13 @@ class CableTypesControllerTest < ActionController::TestCase
     end
   end
 
-  test "any authenticated user can show cable type on current project" do
+  test "regular user cannot show cable type on current project" do
     sign_in(@regular_user)
     get :show, params: { id: @cable_type.id }
-    assert_response :success
-    assert_not_nil assigns(:cable_type)
+    assert_forbidden
   end
 
+  # New tests
   test "regular user cannot access new form" do
     sign_in @regular_user
 #    @request.session[:project_id] = @project.id
@@ -75,6 +77,7 @@ class CableTypesControllerTest < ActionController::TestCase
     assert_response :success
   end
 
+  # Create tests
   test "regular user cannot create cable type" do
     sign_in @regular_user
     assert_no_difference('CableType.count') do
@@ -109,12 +112,7 @@ class CableTypesControllerTest < ActionController::TestCase
     assert_redirected_to cable_type_path(CableType.last)
   end
 
-  test "any authenticated user can view cable type" do
-    sign_in @regular_user
-    get :show, params: { id: @cable_type.id }
-    assert_response :success
-  end
-
+  # Edit tests
   test "regular user cannot edit cable type" do
     sign_in @regular_user
     get :edit, params: { id: @cable_type.id }
@@ -127,6 +125,7 @@ class CableTypesControllerTest < ActionController::TestCase
     assert_response :success
   end
 
+  # Update tests
   test "regular user cannot update cable type" do
     original_material = @cable_type.conductor_material
     sign_in @regular_user
@@ -148,6 +147,7 @@ class CableTypesControllerTest < ActionController::TestCase
     assert_equal 'Aluminum', @cable_type.reload.conductor_material
   end
 
+  # Destroy tests
   test "regular user cannot destroy cable type" do
     sign_in @regular_user
     assert_no_difference('CableType.count') do

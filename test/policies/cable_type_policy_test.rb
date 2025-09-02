@@ -1,29 +1,20 @@
 require 'test_helper'
 
 class CableTypePolicyTest < ActiveSupport::TestCase
+  include PolicyHelpers
   # Setup test data
-  setup do
-    @project = create(:project)
-    @other_project = create(:project)
+  setup do 
+    # Create projects and common test users
+    setup_policy_test
     
     @cable_type = create(:cable_type, project: @project)
     @other_cable_type = create(:cable_type, project: @other_project)
     
     # Create test users
-    @admin = create(:user)
-    @admin.add_role(:admin)
-    
-    @app_owner = create(:user)
-    @app_owner.add_role(:app_owner)
     
     @electrical_designer = create(:user)
-    @electrical_designer.add_role(:electrical_designer) # Global role
-    @electrical_designer.add_role(:team_member, @project) # Project-specific role
-    
-    @electrical_designer_no_team = create(:user)
-    @electrical_designer_no_team.add_role(:electrical_designer) # Global role
-    
-    @regular_user = create(:user)
+    @electrical_designer.grant(:electrical_designer) # Global role
+    @electrical_designer.grant(:team_member, @project) # Project-specific role
   end
   
   # Helper to create policy with user and project context
@@ -47,25 +38,30 @@ class CableTypePolicyTest < ActiveSupport::TestCase
   end
   
   # Index Tests
-  test 'index? allows any user when project is selected' do
-    assert policy(@regular_user, @project).index?
+  test 'index? is available to admin and app_owner without current project' do
+    assert policy(@admin, nil).index?
+    assert policy(@app_owner, nil).index?
+  end
+
+  test 'index? requires user to have a project role' do
+    refute policy(@regular_user, @project).index?
   end
   
   test 'index? denies when no project is selected' do
-    refute policy(@regular_user, nil).index?
+    refute policy(@team_member, nil).index?
   end
   
   # Show Tests
-  test 'show? allows viewing cable type in current project' do
-    assert policy(@electrical_designer, @project, @cable_type).show?
+  test 'show? allows viewing in current project' do
+    assert policy(@team_member, @project, @cable_type).show?
   end
   
-  test 'show? denies viewing cable type from other projects' do
-    refute policy(@electrical_designer, @project, @other_cable_type).show?
+  test 'show? denies viewing in other projects' do
+    refute policy(@team_member, @project, @other_cable_type).show?
   end
   
   test 'show? denies when no project is selected' do
-    refute policy(@electrical_designer, nil, @cable_type).show?
+    refute policy(@team_member, nil, @cable_type).show?
   end
   
   # Edit Tests

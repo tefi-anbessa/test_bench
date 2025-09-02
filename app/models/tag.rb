@@ -18,6 +18,66 @@ class Tag < ApplicationRecord
   validates :suffix, length: { maximum: 5 }
   validates :description, length: { maximum: 40 }
   validates :stage, inclusion: { in: 0..10 }
+  validate :validate_tagable_assignment, on: :update
+  validate :validate_tagable_existence
+
+  # Allow setting tagable_type without tagable_id to indicate intended type
+  # Only validate presence of tagable_id if we're setting a non-nil value
+  validates :tagable_id, presence: { message: 'must be present when setting a tagable' }, 
+                         if: -> { tagable_type.present? && tagable_id_changed? && tagable_id.present? }
+  validates :tagable_type, inclusion: { in: Constants.tagable.map(&:to_s) }, 
+                           allow_nil: true,
+                           allow_blank: true
+  
+  # Ensure a tagable is only associated with one tag
+  validate :tagable_not_already_taken, if: -> { tagable_id.present? && tagable_type.present? }
+
+  # Track original values to detect changes
+  def initialize(*)
+    super
+    @original_tagable_type = tagable_type
+    @original_tagable_id = tagable_id
+  end
+
+  private
+  
+  def tagable_not_already_taken
+    return unless tagable_id.present? && tagable_type.present?
+    
+    existing_tag = Tag.where(
+      tagable_id: tagable_id,
+      tagable_type: tagable_type
+    ).where.not(id: id).exists?
+    
+    if existing_tag
+      errors.add(:tagable, 'is already associated with another tag')
+    end
+  end
+
+  # Prevent changing tagable association if it's already set and valid
+  def validate_tagable_assignment
+    return unless tagable_type_changed? || tagable_id_changed?
+    return if tagable_id_was.blank? || tagable_type_was.blank?
+    
+    # Allow changes if the current association is invalid
+    return if tagable_type_was.constantize.where(id: tagable_id_was).none?
+    
+    errors.add(:base, 'Cannot change tagable association once set') 
+  end
+
+  # Ensure tagable exists if both type and id are present
+  def validate_tagable_existence
+    return if tagable_id.blank? || tagable_type.blank?
+    
+    begin
+      tagable_class = tagable_type.constantize
+      return if tagable_class.exists?(tagable_id)
+      
+      errors.add(:tagable, 'must exist')
+    rescue NameError
+      errors.add(:tagable_type, 'is not a valid type')
+    end
+  end
 
   def self.ransackable_attributes(auth_object = nil)
     ["prefix", "serial", "suffix", "description", "full_tag", "stage",

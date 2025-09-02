@@ -1,7 +1,27 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
+  # Create a tag first, then build/associate the cable with it
+  # Usage:
+  #   1. Create a tag first: tag = create(:tag, prefix: 'EC', serial: 1001, project: project)
+  #   2. Then create cable: cable = create(:cable, tag: tag)
+  #
+  # Or use the :with_tag trait for a one-liner:
+  #   cable = create(:cable, :with_tag, project: project)
+  #
   factory :cable do
+    transient do
+      # Allow passing in an existing tag
+      tag { nil }
+      # Or specify tag attributes to create one
+      prefix { 'EC' }
+      sequence(:serial) { |n| n + 1000 }
+      project { create(:project) }
+      discipline { create(:discipline, code: 'E', name: 'Electrical') }
+      description { nil }
+      custom_cable_type { nil }
+    end
+
     # Required attributes
     cable_type { 
       create(:cable_type, :pvc_flat_twin_earth, 
@@ -16,38 +36,37 @@ FactoryBot.define do
     termination_allowance { nil }  # meters per end
     start_mark { nil }
     end_mark { nil }
-    
-    # Create a cable by building it through a tag
-    transient do
-      prefix { 'EC' }  # Default prefix for cable tags
-      sequence(:serial) { |n| n + 1000 }  # Start from 1001
-      project { create(:project) }
-      discipline { create(:discipline, code: 'E', name: 'Electrical') }
-      description { nil }
-      custom_cable_type { nil }
-    end
-    
-    # This creates a tag with the cable as its tagable
+
+    # This callback runs after build but before validation/creation
     after(:build) do |cable, evaluator|
-      # Use custom cable type if provided, otherwise generate a unique one
+      # Use custom cable type if provided
       if evaluator.custom_cable_type
         cable.cable_type = evaluator.custom_cable_type
       end
-      
-      discipline = evaluator.discipline
-      discipline ||= Discipline.find_or_create_by(code: 'E', name: 'Electrical')
-      
-      tag_attributes = {
-        tagable: cable,
-        prefix: evaluator.prefix,
-        serial: evaluator.serial,
-        discipline: discipline,
-        project: evaluator.project
-      }
-      
-      tag_attributes[:description] = evaluator.description if evaluator.description
-      
-      cable.tag ||= build(:tag, **tag_attributes)
+
+      # If tag was passed in, use it (this will raise if tag is already associated)
+      if evaluator.tag
+        raise "Tag is already associated with another record" if evaluator.tag.tagable.present?
+        cable.tag = evaluator.tag
+      end
+    end
+
+    # Trait to automatically create and associate a tag
+    trait :with_tag do
+      after(:build) do |cable, evaluator|
+        next if evaluator.tag  # Skip if tag was explicitly provided
+        
+        # Create a new tag for this cable
+        tag_attrs = {
+          prefix: evaluator.prefix,
+          serial: evaluator.serial,
+          discipline: evaluator.discipline,
+          project: evaluator.project,
+          description: evaluator.description
+        }.compact
+        
+        cable.tag = create(:tag, **tag_attrs)
+      end
     end
     
     # Trait for creating a cable with a circuit

@@ -30,7 +30,8 @@ class FactoriesTest < ActiveSupport::TestCase
       :socket_cct => -> { build(:socket_cct) },
       :switchboard => -> { build(:switchboard) },
       :demand => -> { 
-        build(:demand, :with_light_cct)
+        light_cct = create(:light_cct, :with_tag)
+        build(:demand, demandable: light_cct)
       },
       
       # Roles and permissions
@@ -61,8 +62,8 @@ class FactoriesTest < ActiveSupport::TestCase
       end
     end
     
-    # Verify we're testing all factories
-    untested_factories = factory_names - factory_tests.keys
+    # Verify we're testing all factories (excluding discipline_set which is now a trait)
+    untested_factories = factory_names - factory_tests.keys - [:discipline_set]
     assert_empty untested_factories, "The following factories are not being tested: #{untested_factories.join(', ')}"
   end
 
@@ -143,11 +144,29 @@ class FactoriesTest < ActiveSupport::TestCase
   # Discipline factory test
   test 'discipline factory' do
     discipline = build(:discipline)
-    assert discipline.valid?
-    assert discipline.name.present?
-    assert discipline.code.present?
+    assert discipline.valid?, "Discipline should be valid: #{discipline.errors.full_messages.join(', ')}"
   end
-  
+
+  test 'can create all standard disciplines using trait' do
+    # Clear any existing disciplines to avoid unique constraint issues
+    Discipline.destroy_all
+    
+    # Create one discipline with the trait to create all standard ones
+    create(:discipline, :with_all_standard)
+    
+    # Verify all standard disciplines were created
+    assert_equal Discipline::DISCIPLINES.size, Discipline.count
+    
+    # Verify all created disciplines have valid codes and names
+    discipline_codes = Discipline.pluck(:code)
+    discipline_names = Discipline.pluck(:name)
+    
+    Discipline::DISCIPLINES.each do |disc|
+      assert_includes discipline_codes, disc[:code], "Missing discipline with code #{disc[:code]}"
+      assert_includes discipline_names, disc[:name], "Missing discipline with name #{disc[:name]}"
+    end
+  end
+
   test 'creates all standard disciplines' do
     # Create all standard disciplines using factory traits (lowercase code as trait name)
     create(:discipline, :a)  # Administration
@@ -216,13 +235,6 @@ class FactoriesTest < ActiveSupport::TestCase
     assert project.valid?, "Project with tags is not valid: #{project.errors.full_messages.join(', ')}"
   end
   
-  test 'project with civil tags is valid' do
-    project = create(:project, code: 'DD')
-    discipline = create(:discipline, :c)  # Using standard discipline 'C' (Civil)
-    create_list(:tag, 2, :civil, project: project, discipline: discipline)
-    assert project.valid?, "Project with civil tags is not valid: #{project.errors.full_messages.join(', ')}"
-  end
-  
   test 'discipline variants are valid' do
     # Test creating a standard discipline
     discipline = create(:discipline, :a)  # Using standard discipline 'A'
@@ -236,25 +248,26 @@ class FactoriesTest < ActiveSupport::TestCase
   end
   
   test 'tag variants are valid' do
-    project = create(:project, code: 'TT')
+    project = create(:project)
+    discipline = create(:discipline)
     
-    # Test creating tags with different standard disciplines
-    tag = create(:tag, :civil, project: project)  # Using civil discipline
-    assert tag.valid?
-    assert_equal 'C', tag.prefix  # Civil tags use 'C' prefix
+    # Test sequential tag creation
+    tag1 = create(:sequential_tag, project: project, discipline: discipline)
+    tag2 = create(:sequential_tag, project: project, discipline: discipline)
     
-    # Test with notes
-    tag_with_notes = create(:tag, :with_notes, :electrical, project: project)  # Using electrical discipline
-    assert tag_with_notes.valid?
-    assert_not_nil tag_with_notes.notes
+    # Verify sequential tags have sequential serial numbers
+    assert_equal 1, tag2.serial - tag1.serial
     
-    # Test mechanical tag
-    mechanical_tag = create(:tag, :mechanical, project: project)  # Using mechanical discipline
-    assert mechanical_tag.valid?
-    
-    # Test sequential tag with electrical discipline
-    sequential_tag = create(:tag, :sequential, :electrical, project: project)
-    assert sequential_tag.valid?
+    # Test complete tag
+    complete_tag = create(:complete_tag, 
+                         project: project, 
+                         discipline: discipline)
+    assert complete_tag.valid?
+    assert complete_tag.prefix.present?
+    assert complete_tag.serial.present?
+    assert complete_tag.description.present?
+    assert complete_tag.stage.present?
+    assert complete_tag.notes.present?
   end
   
 

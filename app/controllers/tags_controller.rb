@@ -7,28 +7,24 @@ class TagsController < ApplicationController
 
   # GET /tags or /tags.json
   def index
+    authorize Tag
     @q = @project.tags.ransack(params[:q])
     @pagy, @tags = pagy(@q.result.includes(:discipline, :project), limit: 10)
   end
 
   # GET /tags/1 or /tags/1.json
   def show
+    authorize @tag
   end
 
   # GET /tags/new
   def new
-    @tag = Tag.new
-  end
-
-  # GET /tags/1/edit
-  def edit
-    @role = Role.new
-    @users = User.all
+    authorize @tag = Tag.new
   end
 
   # POST /tags or /tags.json
   def create
-    @tag = Tag.new(tag_params)
+    @tag = authorize Tag.new(tag_params)
 
     respond_to do |format|
       if @tag.save
@@ -41,8 +37,16 @@ class TagsController < ApplicationController
     end
   end
 
+  # GET /tags/1/edit
+  def edit
+    authorize @tag
+    @role = Role.new
+    @users = User.all
+  end
+
   # PATCH/PUT /tags/1 or /tags/1.json
   def update
+    authorize @tag
     respond_to do |format|
       if @tag.update(tag_params)
         format.html { redirect_to @tag, notice: "Tag was successfully updated." }
@@ -56,6 +60,7 @@ class TagsController < ApplicationController
 
   # DELETE /tags/1 or /tags/1.json
   def destroy
+    authorize @tag
     @tag.destroy
 
     respond_to do |format|

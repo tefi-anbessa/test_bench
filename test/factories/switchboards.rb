@@ -2,44 +2,29 @@
 
 FactoryBot.define do
   factory :switchboard do
-    # Required attributes with sensible defaults
-    location { "Main Electrical Room" }
-    service { 1 }  # Using enum value, typically 1 for 'Main'
-    ingress_protection { "IP65" }
-    busbar_rating { 400.0 }  # Amps
-    busbar_fault_rating { 25.0 }  # kA
-    busbar_fault_duration { 1.0 }  # seconds
-    cable_entry { "Bottom" }
-    incomer_protection { "630A MCCB" }
-    metering { "Main energy meter with CTs" }
-    neutral_bar_connections { "100A" }
-    earth_bar_connections { "100A" }
-    
-    # Create a switchboard by building it through a tag
-    transient do
-      prefix { 'EX' }  # Default prefix for switchboard tags
-      sequence(:serial) { |n| n + 1000 }  # Start from 1001
-      project { create(:project) }
-      discipline { create(:discipline, code: 'E', name: 'Electrical') }
-      description { nil }
-    end
-    
-    # This creates a tag with the switchboard as its tagable
-    after(:build) do |switchboard, evaluator|
-      discipline = evaluator.discipline
-      discipline ||= Discipline.find_or_create_by(code: 'E', name: 'Electrical')
-      
-      tag_attributes = {
-        tagable: switchboard,
-        prefix: evaluator.prefix,
-        serial: evaluator.serial,
-        project: evaluator.project,
-        discipline: discipline
-      }
-      
-      tag_attributes[:description] = evaluator.description if evaluator.description
-      
-      switchboard.tag ||= build(:tag, **tag_attributes)
+    # Require tag to be provided
+    tag
+
+    # Trait to create a new tag with default switchboard settings
+    trait :with_tag do
+      transient do
+        prefix { 'EX' }
+        project { create(:project) }
+        discipline { Discipline.find_or_create_by(code: 'E') { |d| d.name = 'Electrical Engineering' } }
+        description { nil }
+      end
+
+      after(:build) do |switchboard, evaluator|
+        switchboard.tag = build(
+          :tag,
+          :unique_tag,
+          tagable: switchboard,
+          prefix: evaluator.prefix,
+          project: evaluator.project,
+          discipline: evaluator.discipline,
+          description: evaluator.description
+        )
+      end
     end
     
     # Traits for different types of switchboards

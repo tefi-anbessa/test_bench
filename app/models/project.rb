@@ -7,7 +7,7 @@ class Project < ApplicationRecord
   VALID_CODE_REGEX = /[A-Z][A-Z]/
   validates :code,        presence: true, length: { is: 2},
                           format: { with: VALID_CODE_REGEX },
-                          uniqueness: true
+                          uniqueness: { message: "%{model} code %{value} already exists" }
   validates :title, presence: true, length: { maximum: 50 }
 
 

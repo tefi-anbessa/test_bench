@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :demand, class: 'Demand' do
-    # Default demandable (light_cct) - will be built but not saved
-    demandable { build(:light_cct) }
+    # Demandable must be provided
+    demandable factory: :light_cct  # Default to light_cct for backward compatibility
     
     # Basic demand attributes
     basis { 'power_pf' }
@@ -10,65 +10,6 @@ FactoryBot.define do
     power { 1000.0 }
     power_factor { 0.9 }
     duty { 1.0 }
-    
-    # Define traits for different demandable types
-    trait :with_light_cct do
-      transient do
-        project { create(:project) }
-        discipline { create(:discipline, :e) }  # 'E' for Electrical
-      end
-      
-      after(:build) do |demand, evaluator|
-        tag = create(:tag, 
-          project: evaluator.project,
-          discipline: evaluator.discipline,
-          prefix: 'LGT',
-          serial: rand(1..999)
-        )
-        
-        demand.demandable = create(:light_cct, tag: tag)
-      end
-    end
-    
-    trait :with_motor do
-      transient do
-        project { create(:project) }
-        discipline { create(:discipline, :m) }  # 'M' for Mechanical
-      end
-      
-      after(:build) do |demand, evaluator|
-        tag = create(:tag, 
-          project: evaluator.project,
-          discipline: evaluator.discipline,
-          prefix: 'MTR',
-          serial: rand(1..999)
-        )
-        
-        demand.demandable = create(:motor, 
-          project: evaluator.project,
-          discipline: evaluator.discipline,
-          tag: tag
-        )
-      end
-    end
-    
-    trait :with_socket_cct do
-      transient do
-        project { create(:project) }
-        discipline { create(:discipline, :e) }
-      end
-      
-      after(:build) do |demand, evaluator|
-        tag = create(:tag, 
-          project: evaluator.project,
-          discipline: evaluator.discipline,
-          prefix: 'SOCK',
-          serial: rand(1..999)
-        )
-        
-        demand.demandable = create(:socket_cct, tag: tag)
-      end
-    end
     
     # Define basis-specific traits
     trait :power_pf_basis do

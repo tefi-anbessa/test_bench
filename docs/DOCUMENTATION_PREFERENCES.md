@@ -6,9 +6,27 @@ Guidelines for maintaining comprehensive documentation in the codebase for both 
 ## Protected Documentation
 
 The following core documentation files are READ-ONLY and must not be modified by AI:
-1. `docs/DEVELOPER_NOTES.md`
+1. `docs/Documentation Preferences.md`
+  - Purpose:
+    - This document explains the purpose of the various documents used to control this software application building project, and the
+2. `docs/DEVELOPER_NOTES.md`
+  - Purposes:
+    - Guidance for new developer and reminder for original developer on how the project is structured and intended to behave
+    - Guidance for AI on how to interact with the project
+    - Record the history of how things were done
+    - Lists of things to do:
+      - ongoing development check list (Development TODO)
+      - outstanding fixes required (Technical Debt)
+      - future improvements (Potential Features)
+      - major restructure (Architecture Considerations)
 2. `docs/TESTING.md`
+  - Purposes:
+    - Provide clear guidance and rules for testing the application.
 3. `docs/ROLES_AND_PERMISSIONS.md`
+  - Purposes:
+    - Explain how the roles and permission system works internally
+    - Explain the roles and permissions for each module, as the basis for setting up tests
+
 
 ### Protection Methods
 - **AI Restriction**: 
@@ -25,14 +43,14 @@ The following core documentation files are READ-ONLY and must not be modified by
 ## Key Documentation Files
 
 ### 1. Core Documentation
-- `README.md` - General project information and setup
+- `README.md` - This document will become the default landing page in github when the app is deployed. It should conform to rails conventions for README files, including basic installation instructions, user instructions, and links to further information. It should be updated as the project matures, AI can assist.
 - `docs/DEVELOPER_NOTES.md` - Development guidelines and practices (Protected)
 - `docs/TESTING.md` - Testing guidelines and practices (Protected)
-- `docs/MIGRATION.md` - Database migration guides
 - `docs/ROLES_AND_PERMISSIONS.md` - Role and permission structure (Protected)
+- [HOLD] `docs/MIGRATION.md` - Database migration guides
 
 ### 2. Project-Specific Documentation
-- `docs/USER_GUIDE.md` - End-user documentation
+- `docs/USER_GUIDE.md` - End-user documentation [TODO: Create user documentation when the project has matured enough to be deployed in production, and ready to share to other users] [HOLD: consider if it is required, or README is sufficient]
 - `AI memories/` - AI-specific context and knowledge
 
 ## Best Practices

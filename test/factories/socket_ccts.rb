@@ -1,12 +1,33 @@
 FactoryBot.define do
   factory :socket_cct do
+    # Required tag association
+    tag
+    
     # Basic attributes
     socket_type { 'standard' }
     quantity { rand(1..20) }
     
-    # Associations
-    # The Tagable concern will handle the tag association
-    # The Demandable concern will handle the demand association
+    # Trait to create a new tag with default socket circuit settings
+    trait :with_tag do
+      transient do
+        prefix { 'S' }
+        project { create(:project) }
+        discipline { Discipline.find_or_create_by(code: 'E') { |d| d.name = 'Electrical Engineering' } }
+        description { nil }
+      end
+
+      after(:build) do |socket_cct, evaluator|
+        socket_cct.tag = build(
+          :tag,
+          :unique_tag,
+          tagable: socket_cct,
+          prefix: evaluator.prefix,
+          project: evaluator.project,
+          discipline: evaluator.discipline,
+          description: evaluator.description
+        )
+      end
+    end
     
     # Callback to create associated demand if needed
     after(:build) do |socket_cct, evaluator|

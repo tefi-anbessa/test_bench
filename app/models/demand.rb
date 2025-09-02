@@ -1,5 +1,5 @@
 class Demand < ApplicationRecord
-  # This is the delegated type that handles different kinds of demands (motors, light circuits, etc.)
+# Demandable types are the models that can have electrical load information attached.
   delegated_type :demandable, 
     types: Constants.electrical.loadable
 

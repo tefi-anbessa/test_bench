@@ -39,7 +39,7 @@ class RolePolicy < ApplicationPolicy
   def new?
     return false unless user.present?
     
-    # For resource roles, we don't use the new action - access is controlled by the resource's show view
+    # For resource roles, we don't use the new action - access is controlled by the resource's edit view
     return false if record.is_a?(Class) && record != Role
     
     # For global roles, only app owners and admins can access
