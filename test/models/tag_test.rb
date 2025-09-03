@@ -7,6 +7,30 @@ class TagTest < ActiveSupport::TestCase
     @tag = build(:tag, project: @project, discipline: @discipline)
   end
 
+  # Factory Tests
+  test 'tag factory should be valid' do
+    tag = build(:tag, project: @project, discipline: @discipline)
+    assert tag.valid?
+    assert tag.prefix.present?
+    assert tag.serial.present?
+  end
+
+  test 'sequential_tag factory should create sequential tags' do
+    tag1 = create(:sequential_tag, project: @project, discipline: @discipline)
+    tag2 = create(:sequential_tag, project: @project, discipline: @discipline)
+    assert_equal 1, tag2.serial - tag1.serial
+  end
+
+  test 'complete_tag factory should create complete tags' do
+    complete_tag = create(:complete_tag, project: @project, discipline: @discipline)
+    assert complete_tag.valid?
+    assert complete_tag.prefix.present?
+    assert complete_tag.serial.present?
+    assert complete_tag.description.present?
+    assert complete_tag.stage.present?
+    assert complete_tag.notes.present?
+  end
+
   test "should be valid" do
     assert @tag.valid?
   end

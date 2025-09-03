@@ -1,7 +1,10 @@
+# frozen_string_literal: true
+
 class Demand < ApplicationRecord
 # Demandable types are the models that can have electrical load information attached.
   delegated_type :demandable, 
-    types: Constants.electrical.loadable
+    types: Constants.electrical.loadable,
+    required: true
 
   # Associations
   belongs_to :circuit, optional: true
@@ -13,6 +16,7 @@ class Demand < ApplicationRecord
   # Validations
   validates :config, presence: true
   validates :basis, presence: true
+  validate :demandable_must_have_tag, if: :demandable?
   
   attr_accessor :other_supply
   before_validation :set_supply
@@ -29,15 +33,6 @@ class Demand < ApplicationRecord
   
   attribute :power_factor, default: 1.0
   attribute :duty, default: 1.0
-
-  def self.ransackable_attributes(auth_object = nil)
-    ["circuit", "basis", "basis_notes", "supply", "config", "power", "vector",
-     "power_factor", "current", "duty", "created_at", "updated_at"]
-  end
-
-  def self.ransackable_associations(auth_object = nil)
-    [:circuit, :demandable]
-  end
 
   def conductor_count
     case self.config
@@ -80,4 +75,26 @@ class Demand < ApplicationRecord
   def set_supply
     self.supply = other_supply if other_supply.present?
   end
+
+  def demandable?
+    demandable.present?
+  end
+
+  def demandable_must_have_tag
+    return unless demandable?
+    return if demandable.respond_to?(:tag) && demandable.tag.present?
+    
+    errors.add(:base, 'Demandable must have a tag')
+  end
+
+  def self.ransackable_attributes(auth_object = nil)
+    ["circuit", "basis", "basis_notes", "supply", "config", "power", "vector",
+     "power_factor", "current", "duty", "created_at", "updated_at"]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    [:circuit, :demandable]
+  end
+
+
 end

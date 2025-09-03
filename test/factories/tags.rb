@@ -20,10 +20,6 @@ FactoryBot.define do
     trait :with_stage do
       stage { rand(1..3) }  # 1-3 to match seeds.rb phase range
     end
-    
-    trait :with_notes do
-      notes { Faker::Lorem.paragraph(sentence_count: 2) }
-    end
 
     trait :unique_tag do
       prefix { 'CC' } # default the prefix in cases where it is not specified
@@ -45,7 +41,7 @@ FactoryBot.define do
     # Factory for creating a full tag with all attributes
     factory :complete_tag do
       with_stage
-      with_notes
+      notes { Faker::Lorem.paragraph(sentence_count: 2) }
     end
   end
 end

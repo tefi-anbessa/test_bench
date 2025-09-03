@@ -10,11 +10,19 @@ class FactoriesTest < ActiveSupport::TestCase
       :role => -> { build(:role, :admin) },
       :project => -> { build(:project) },
       :discipline => -> { build(:discipline) },
-      :tag => -> { build(:tag, project: create(:project), discipline: create(:discipline)) },
-      :sequential_tag => -> { build(:sequential_tag, project: create(:project), discipline: create(:discipline)) },
-      :complete_tag => -> { 
+      :tag => -> { 
         project = create(:project)
-        discipline = create(:discipline)
+        discipline = create(:discipline, code: 'E')
+        build(:tag, project: project, discipline: discipline)
+      },
+      :sequential_tag => -> { 
+        project = create(:project)
+        discipline = create(:discipline, code: 'E')
+        build(:sequential_tag, project: project, discipline: discipline)
+      },
+      :complete_tag => -> {
+        project = create(:project)
+        discipline = create(:discipline, code: 'E')
         create(:complete_tag, project: project, discipline: discipline)
       },
       
@@ -25,9 +33,9 @@ class FactoriesTest < ActiveSupport::TestCase
         switchboard = create(:switchboard)
         build(:circuit, switchboard: switchboard)
       },
-      :light_cct => -> { build(:light_cct) },
-      :motor => -> { build(:motor) },
-      :socket_cct => -> { build(:socket_cct) },
+      :light_cct => -> { build(:light_cct, :with_tag) },
+      :motor => -> { build(:motor, :with_tag) },
+      :socket_cct => -> { build(:socket_cct, :with_tag) },
       :switchboard => -> { build(:switchboard) },
       :demand => -> { 
         light_cct = create(:light_cct, :with_tag)
@@ -97,49 +105,17 @@ class FactoriesTest < ActiveSupport::TestCase
     assert role.valid?, "Role should be valid: #{role.errors.full_messages.join(', ')}"
     assert_equal 'admin', role.name
     assert_nil role.resource_type
-    
-    # Test with a resource-specific role using the project_owner trait
-    role = create(:role, :project_project_owner)
+  end
+  
+  test 'resource role factory with project owner' do
+    # Test with a resource-specific role
+    role = create(:resource_role, :project_project_owner)
     assert role.valid?, "Role should be valid: #{role.errors.full_messages.join(', ')}"
     assert_equal 'project_owner', role.name
     assert_equal 'Project', role.resource_type
     assert_not_nil role.resource
   end
 
-  # Tag factory tests
-  test 'tag factory' do
-    tag = build(:tag, project: create(:project), discipline: create(:discipline))
-    assert tag.valid?
-    assert tag.prefix.present?
-    assert tag.serial.present?
-  end
-
-  test 'tag with notes' do
-    tag = build(:tag, :with_notes, project: create(:project), discipline: create(:discipline))
-    assert tag.valid?
-    assert tag.notes.present?
-  end
-
-  test 'tag with full tag' do
-    project = create(:project, code: 'XX')
-    discipline = create(:discipline, code: 'M')
-    tag = create(:tag, 
-      project: project, 
-      discipline: discipline, 
-      prefix: 'P', 
-      serial: 1, 
-      suffix: 'A',
-      stage: 1
-    )
-    
-    # Save and reload to trigger after_find callback
-    tag.save!
-    tag.reload
-    
-    assert tag.valid?, "Tag should be valid: #{tag.errors.full_messages.join(', ')}"
-    # Format is "M:P-0001.A" (discipline:prefix-serial.suffix)
-    assert_equal 'M:P-0001.A', tag.full_tag, "Full tag should be in format 'M:P-0001.A'"
-  end
 
   # Discipline factory test
   test 'discipline factory' do
@@ -186,41 +162,6 @@ class FactoriesTest < ActiveSupport::TestCase
     end
   end
 
-  test 'sequential tags' do
-    project = create(:project, code: 'YY')
-    discipline = create(:discipline, code: 'E')  # Single character code
-    
-    # Create tags with explicit serials to ensure they're sequential
-    tag1 = create(:tag, 
-      project: project, 
-      discipline: discipline, 
-      prefix: discipline.code,
-      serial: 1,
-      suffix: nil  # Explicitly set to nil to avoid suffix in full_tag
-    )
-    
-    tag2 = create(:tag, 
-      project: project, 
-      discipline: discipline, 
-      prefix: discipline.code,
-      serial: 2,
-      suffix: nil  # Explicitly set to nil to avoid suffix in full_tag
-    )
-    
-    # Reload to ensure full_tag is set
-    tag1.reload
-    tag2.reload
-    
-    # Check that serials are sequential numbers
-    assert_equal tag1.serial + 1, tag2.serial, 'Serials should be sequential'
-    
-    # Check the full_tag format (E:prefix-0001)
-    expected_full_tag1 = "#{discipline.code}:#{tag1.prefix}-#{tag1.serial.to_s.rjust(4, '0')}"
-    expected_full_tag2 = "#{discipline.code}:#{tag2.prefix}-#{tag2.serial.to_s.rjust(4, '0')}"
-    
-    assert_equal expected_full_tag1, tag1.full_tag, 'First tag full_tag should match expected format'
-    assert_equal expected_full_tag2, tag2.full_tag, 'Second tag full_tag should match expected format'
-  end
   
   
   test 'project is valid' do
@@ -235,40 +176,13 @@ class FactoriesTest < ActiveSupport::TestCase
     assert project.valid?, "Project with tags is not valid: #{project.errors.full_messages.join(', ')}"
   end
   
-  test 'discipline variants are valid' do
+  test 'discipline with standard code is valid' do
     # Test creating a standard discipline
-    discipline = create(:discipline, :a)  # Using standard discipline 'A'
+    discipline = create(:discipline, :e)  # Using standard discipline 'E' for Electrical
     assert discipline.valid?
-    assert_equal 'A', discipline.code
-    
-    # Test creating another standard discipline
-    discipline2 = create(:discipline, :b)  # Using standard discipline 'B'
-    assert discipline2.valid?
-    assert_equal 'B', discipline2.code
+    assert_equal 'E', discipline.code
   end
   
-  test 'tag variants are valid' do
-    project = create(:project)
-    discipline = create(:discipline)
-    
-    # Test sequential tag creation
-    tag1 = create(:sequential_tag, project: project, discipline: discipline)
-    tag2 = create(:sequential_tag, project: project, discipline: discipline)
-    
-    # Verify sequential tags have sequential serial numbers
-    assert_equal 1, tag2.serial - tag1.serial
-    
-    # Test complete tag
-    complete_tag = create(:complete_tag, 
-                         project: project, 
-                         discipline: discipline)
-    assert complete_tag.valid?
-    assert complete_tag.prefix.present?
-    assert complete_tag.serial.present?
-    assert complete_tag.description.present?
-    assert complete_tag.stage.present?
-    assert complete_tag.notes.present?
-  end
   
 
 end

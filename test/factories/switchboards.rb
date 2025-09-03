@@ -2,48 +2,33 @@
 
 FactoryBot.define do
   factory :switchboard do
-    # Require tag to be provided
-    tag
+    # Basic attributes
+    
+    # Association with tag (required)
+    association :tag, factory: :tag, strategy: :build
 
-    # Trait to create a new tag with default switchboard settings
+    # Trait to create a switchboard with a properly associated tag
     trait :with_tag do
-      transient do
-        prefix { 'EX' }
-        project { create(:project) }
-        discipline { Discipline.find_or_create_by(code: 'E') { |d| d.name = 'Electrical Engineering' } }
-        description { nil }
-      end
-
       after(:build) do |switchboard, evaluator|
-        switchboard.tag = build(
-          :tag,
-          :unique_tag,
-          tagable: switchboard,
-          prefix: evaluator.prefix,
-          project: evaluator.project,
-          discipline: evaluator.discipline,
-          description: evaluator.description
-        )
+        if switchboard.tag.nil?
+          project = create(:project)
+          discipline = Discipline.find_or_create_by(code: 'E')
+          switchboard.tag = create(:tag, :unique_tag,
+            project: project,
+            discipline: discipline,
+            prefix: 'SWB',
+            description: "Switchboard #{switchboard.voltage}V #{switchboard.current_rating}A",
+            tagable: switchboard
+          )
+        end
       end
     end
     
-    # Traits for different types of switchboards
-    trait :main_switchboard do
-      location { "Main Switch Room" }
-      service { 1 }  # Main
-      ingress_protection { "IP31" }
-      busbar_rating { 1200.0 }
-      busbar_fault_rating { 50.0 }
-      description { "Main LV Switchboard" }
-    end
-    
-    trait :sub_switchboard do
-      location { "Plant Room" }
-      service { 2 }  # Sub-main
-      ingress_protection { "IP55" }
-      busbar_rating { 250.0 }
-      busbar_fault_rating { 25.0 }
-      description { "Sub-main Distribution Board" }
+    # Validation to ensure tag is present
+    after(:build) do |switchboard, evaluator|
+      if switchboard.tag.nil?
+        raise ArgumentError, "Switchboard factory requires a tag. Use `create(:switchboard, tag: your_tag)` or `create(:switchboard, :with_tag)`"
+      end
     end
     
     trait :with_circuits do

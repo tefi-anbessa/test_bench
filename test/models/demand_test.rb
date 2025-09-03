@@ -2,7 +2,10 @@ require "test_helper"
 
 class DemandTest < ActiveSupport::TestCase
   setup do
-    @light_cct = create(:light_cct)
+    project = create(:project)
+    discipline = create(:discipline, code: 'E', name: 'Electrical')
+    tag = create(:tag, :unique_tag, project: project, discipline: discipline, prefix: 'EL')
+    @light_cct = create(:light_cct, tag: tag)
   end
 
   # Test validations
@@ -90,8 +93,42 @@ class DemandTest < ActiveSupport::TestCase
     assert_equal 50.0, @light_cct.demand.current
   end
 
-  # Test that the legacy load method works for backward compatibility
-  # Test that the demand is destroyed when demandable is destroyed if dependent: :destroy is set
+  # Test that the demand is destroyed when demandable is destroyed
+  test "should require demandable to have a tag" do
+    # Create a project and discipline for the tag
+    project = create(:project)
+    discipline = Discipline.find_or_create_by(code: 'E')
+    
+    # Create a tag without a tagable
+    tag = create(:tag, :unique_tag,
+      project: project,
+      discipline: discipline,
+      prefix: 'EL',
+      description: 'Test Light Circuit'
+    )
+    
+    # Create a light_cct with a tag first
+    demandable = create(:light_cct, tag: tag)
+    
+    # Remove the tag association directly in the database
+    tag.update_columns(tagable_id: nil, tagable_type: nil)
+    
+    # Create a demand with this demandable
+    demand = build(:demand, demandable: demandable.reload)
+    
+    # Should not be valid because demandable has no tag
+    assert_not demand.valid?, "Demand should not be valid with demandable without a tag"
+    assert_includes demand.errors[:base], "Demandable must have a tag"
+    
+    # Now assign the tag and it should be valid
+    tag.update_columns(tagable_id: demandable.id, tagable_type: 'LightCct')
+    demandable.reload
+    assert demand.valid?, "Demand should be valid when demandable has a tag"
+    assert_difference 'Demand.count', 1 do
+      demand.save!
+    end
+  end
+
   test "should destroy demand when demandable is destroyed" do
     # Create required associations
     project = create(:project)

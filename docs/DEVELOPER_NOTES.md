@@ -71,13 +71,13 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [x] Build application layout with headers, footers, navigation
 - [x] Build core module with project and tag models
 - [x] Internationalise the application
-- [ ] Build user interaction management, using gems devise for authentication, rolify and pundit for authorization
-- [ ] Build electrical module with basic data sheet options for electrical tagged items
+- [x] Build user interaction management, using gems devise for authentication, rolify and pundit for authorization
+- [x] Build electrical module with basic data sheet options for electrical tagged items
 - [ ] Enhance electrical module, allowing interconnection of tagged items with cables to model a distribution network
-- [ ] Build a process piping module similar to the electrical module, using pipes and fittings to model a process piping network
-- [ ] Build a document control module to manage document storage, issue, history including versions
 - [ ] Enhance the existing database models to allow revison control of data
+- [ ] Build a document control module to manage document storage, issue, history including versions
 - [ ] Build a bookkeeping module to manage financial transactions
+- [ ] Build a process piping module similar to the electrical module, using pipes and fittings to model a process piping network
 - [ ] Build an asset management module to track assets and link from design to maintenance
 - [ ] Build a maintenance management module 
 
@@ -90,8 +90,9 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Review all models for compliance with guidelines
 - [x] Clean up old Load model references after migration
 - [ ] The project was originally written for Rails 7 but got hibernated. On reawakening, it was upgraded to Rails 8. It has never been deployed to production, so Rails 8 upgrade is not yet officially declared complete.
-- [ ] Improve has_one validation on tagable, possibly include database constraint.
-- [ ] Improve has_one validation on demandable, possibly include database constraint.
+- [x] Improve has_one validation on tagable, possibly include database constraint.
+- [x] Improve has_one validation on demandable, possibly include database constraint.
+   - Database constraints deferred due to risk of locking database. Continue with inclusion of orphans on index displays, and manual clean up.
 - [ ] Nest project related resource under projects to improve security around assignment to other than the current project.
 
 ## Refactoring Opportunities
@@ -101,13 +102,20 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Add type checking with Sorbet or RBS
 - [ ] Implement caching for frequently accessed demand data
 - [x] Upgrade to Rails 8 (Completed in rails8 branch)
-- [ ] Refactor electrical policy classes (CablePolicy, SwitchboardPolicy, MotorPolicy, LightCctPolicy, SocketCctPolicy) to use a shared concern or base class to reduce code duplication
+- [x] Refactor electrical policy classes (CablePolicy, SwitchboardPolicy, MotorPolicy, LightCctPolicy, SocketCctPolicy) to use a shared concern or base class to reduce code duplication
+- [ ] Refactor all views to use pundit policy checks.
 - [ ] Change terminology and implementation from project owner to project manager.
 - [ ] Refactor projects controller and application controller `def after_sign_in_path_for(resource)to use app/controllers/concerns/current_project_concern.rb to reduce code duplication.
 - [ ] Cable types: 
    - [ ] convert core material to enum.
    - [ ] convert insulation material to enum.
    - [ ] add volt rating enum.
+- [ ] Motors: 
+   - [ ] convert motor type to enum.
+   - [ ] convert frame size to enum.
+   - [ ] build a ruby structure for ingress protection, convert ingress protection to this type.
+   - [ ] convert poles to enum.
+   - [ ] convert speed rated to enum.
 - [ ] Refactor tag 'description' to 'service'.
 - [ ] Redesign tag module:
    - [ ] base full tag becomes a string object.

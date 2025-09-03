@@ -41,6 +41,7 @@ class Tag < ApplicationRecord
 
   private
   
+  # Prevent re-assigning a tagable to a different tag
   def tagable_not_already_taken
     return unless tagable_id.present? && tagable_type.present?
     
@@ -86,7 +87,7 @@ class Tag < ApplicationRecord
 
 
   def self.ransackable_associations(auth_object = nil)
-    ["discipline", "project"]
+    ["discipline", "project", "tagable"]
   end
 
   private
