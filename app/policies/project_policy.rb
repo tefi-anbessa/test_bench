@@ -37,13 +37,13 @@ class ProjectPolicy < ApplicationPolicy
   end
   
   def new?
-    # Only app owners can access the new project form
-    user&.is_app_owner?
+    # :new defers to :create
+    create?
   end
   
   def create?
-    # Only app owners can create new projects
-    user&.is_app_owner?
+    # Only app owners or admins can create new projects
+    user&.is_app_owner? || user&.is_admin?
   end
   
   def edit?
@@ -64,17 +64,45 @@ class ProjectPolicy < ApplicationPolicy
     user&.is_app_owner?
   end
 
-#  def manage_team_members?
-#    user.present? && (
-#      user.is_app_owner? || 
-#      user.has_role?(:admin) || 
-#      user.has_role?(:project_owner, record)
-#    )
-#  end
+  def grant_role?
+    # Implement the permissions grant policy for the project resource type
+    role_name = record.name
+    resource = record.resource
+    allowed_roles = Role.valid_roles_for(resource.class.name)
+    return false unless role_name.in?(allowed_roles)
+    
+    # App owners and admins can grant any valid role
+    return true if user.is_app_owner? || user.is_admin?
+    
+    # Project owners can grant non-admin roles
+    if user.has_role?(:project_owner, resource)
+      return !%w[admin app_owner].include?(role_name)
+    end
+    
+    false
+  end
+
+  def revoke_role?
+    # Implement the permissions revoke policy for the project resource type
+    role_name = record.name
+    resource = record.resource
+    allowed_roles = Role.valid_roles_for(resource.class.name)
+    return false unless role_name.in?(allowed_roles)
+    
+    # App owners and admins can grant any valid role
+    return true if user.is_app_owner? || user.is_admin?
+    
+    # Project owners can grant non-admin roles
+    if user.has_role?(:project_owner, resource)
+      return !%w[admin app_owner].include?(role_name)
+    end
+    
+    false
+  end
 
   private
 
-  def project_owner?
-    user.present? && user.has_role?(:project_owner, record)
-  end
+    def project_owner?
+      user.present? && user.has_role?(:project_owner, record)
+    end
 end

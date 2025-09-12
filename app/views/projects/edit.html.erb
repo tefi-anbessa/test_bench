@@ -1,7 +1,26 @@
 <% provide(:title, t('.title')) %>
 <% provide(:button_text, t('actions.save')) %>
-<h2 class="m-2">
-  <%= t('.header', project: @project.code)%>
-</h2>
+
+<div class="container mb-3">
+  <div class="position-relative">
+    <h2 class="text-center mb-0">
+      <%= t('.header', project: @project.code) %>
+    </h2>
+  </div>
+</div>
+
 <%= render 'form' %>
-<%= render 'shared/role_assignment', object: @project %>
+
+<% if policy(@project).edit? %>
+  <div class="container mt-4">
+    <%= render 'roles/role_assignment',
+    users: @users,
+    role: @role,
+    roles: @roles,
+    resources: @resources,
+    selected_user_id: nil,
+    selected_resource: @project,
+    selected_role_name: nil,
+    role_return_path: edit_project_path(@project) %>
+  </div>
+<% end %>

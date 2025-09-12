@@ -21,20 +21,25 @@
     <td><%= row.start_mark %></td>
     <td><%= row.end_mark %></td>
     <td>
-      <%= link_to cable_path(row), class: "btn btn-secondary btn-sm icon-link",
+      <% if policy(row).show? %>
+        <%= link_to cable_path(row), class: "btn btn-secondary btn-sm icon-link",
             aria: { label: t('actions.show') },
             title: t('actions.show'),
             display: "inline" do %>
-        <%== icon('eye') %>
+              <%== icon('eye') %>
+            <% end %>
       <% end %>
-      <%= link_to edit_cable_path(row), class: "btn btn-warning btn-sm icon-link",
-            aria: { label: t('actions.edit') },
-            title: t('actions.edit'),
-            display: "inline"  do %>
-        <%== icon('pencil') %>
-      <% end %>
-      <% if current_user&.is_admin? %>
-        <%= link_to cable_path(row), method: :delete, class: "btn btn-danger btn-sm icon-link",
+        <% if policy(row).edit? %>
+        <%= link_to edit_cable_path(row), class: "btn btn-warning btn-sm icon-link",
+              aria: { label: t('actions.edit') },
+              title: t('actions.edit'),
+              display: "inline"  do %>
+                <%== icon('pencil') %>
+              <% end %>
+        <% end %>
+      <% if policy(row).destroy? %>
+        <%= link_to cable_path(row), method: :delete,
+              class: "btn btn-danger btn-sm icon-link",
               aria: { label: t('actions.delete') },
               title: t('actions.delete'),
               display: "inline"  do %>

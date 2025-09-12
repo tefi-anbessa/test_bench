@@ -1,3 +1,4 @@
+<% provide(:title, t('.title')) %>
 <div class="row justify-content-center mt-5">
   <div class="col-md-8 text-center">
     <%# HAL 9000 Image - using a placeholder if the image doesn't exist %>
@@ -8,11 +9,9 @@
       style: "max-width: 300px;"
     ) rescue image_tag("https://via.placeholder.com/300x200?text=HAL+9000", class: "img-fluid mb-4") %>
     
-    <h1 class="display-4 text-danger">403: Forbidden.</h1>
+    <h1 class="display-4 text-danger">403: <%= t('.header') %></h1>
     
-    <% if flash[:alert].present? %>
-      <div class="alert alert-danger"><%= flash[:alert] %></div>
-    <% end %>
+    <%= render 'shared/flash' if flash.any? %>
     
     <div class="card mt-4">
       <div class="card-header bg-danger text-white">

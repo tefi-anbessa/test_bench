@@ -1,4 +1,18 @@
-# Developer Notes & Ideas
+# Developer Guidance
+
+1. Read Readme.md, it is the primary documentation for installers and users. It explains the application's capabilities.
+2. Read docs/DOCUMENTATION_PREFERENCES.md, it explains the available documentation for the application and how to use it.
+3. Read docs/ROLES_AND_PERMISSIONS.md, it explains the role based access control (RBAC) system, one of the pillars of the application.
+4. Read the following sections of this document:
+   - AI Integration
+   - KISS Principle Guidelines
+   - Implementation
+   Other sections can be skimmed until needed:
+   - Known Issues
+   - Development Check List
+   - Technical Debt
+   - Refactoring Opportunities
+   - Potential Features
 
 ## AI Integration
 
@@ -19,23 +33,6 @@ From git commit 6da446f onwards, this project has used Windsurf/Cascade AI to sp
 - Any changes should be reflected in the documentation.
 - When modifying role permissions or access controls, ensure both `ROLES_AND_PERMISSIONS.md` and the corresponding policy files are updated.
 - Request the AI to update its Memories when significant changes occur.
-
-## Known Issues
-
-### Pagination
-- **Issue**: The pagination system is not respecting the `per_page` parameter correctly.
-- **Symptoms**: 
-  - The URL updates with the selected `per_page` value
-  - The page size selector shows the correct selected value
-  - However, the number of items displayed remains at the default (20)
-- **Affected Files**:
-  - `app/controllers/concerns/page_sizeable.rb`
-  - `app/views/shared/_page_size_selector.html.erb`
-  - `test/system/page_size_selector_test.rb`
-- **Next Steps**:
-  - Check if the pagination is being overridden by any default scopes
-  - Verify the pagination parameters are being passed correctly to the database query
-  - Add more detailed logging to trace the pagination flow
 
 ## KISS Principle Guidelines
 
@@ -66,6 +63,27 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    - Challenge features that weren't explicitly requested
    - Prefer simple, maintainable solutions over clever ones
 
+## Implementation
+
+### Error Handling
+
+## Known Issues
+
+### Pagination
+- **Issue**: The pagination system is not respecting the `per_page` parameter correctly.
+- **Symptoms**: 
+  - The URL updates with the selected `per_page` value
+  - The page size selector shows the correct selected value
+  - However, the number of items displayed remains at the default (20)
+- **Affected Files**:
+  - `app/controllers/concerns/page_sizeable.rb`
+  - `app/views/shared/_page_size_selector.html.erb`
+  - `test/system/page_size_selector_test.rb`
+- **Next Steps**:
+  - Check if the pagination is being overridden by any default scopes
+  - Verify the pagination parameters are being passed correctly to the database query
+  - Add more detailed logging to trace the pagination flow
+
 ## Development Check List
 - [x] Build static pages as framework for future displays for casual visitors
 - [x] Build application layout with headers, footers, navigation
@@ -84,7 +102,10 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 
 ## Technical Debt
 - [ ] Refactor models to incorporate i18n messages for validations
-- [ ] Serve bootstrap from local dev or prod
+- [ ] Refactor error messages partial to use i18n.
+- [ ] Refactor error views to use i18n.
+- [ ] Refactor roles new view and projects edit view to translate resource names with a key value pair in the select field.
+- [x] Serve bootstrap from local dev or prod
 - [ ] Write more tests for the Demand model
 - [ ] Review all policies and tests for compliance with guidelines
 - [ ] Review all models for compliance with guidelines
@@ -94,9 +115,13 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [x] Improve has_one validation on demandable, possibly include database constraint.
    - Database constraints deferred due to risk of locking database. Continue with inclusion of orphans on index displays, and manual clean up.
 - [ ] Nest project related resource under projects to improve security around assignment to other than the current project.
+- [ ] Revisit the roles policy test. The roles policy is now using the role context from the controller, need to factor this into tests. 
+- [ ] Roles policy is delegating to resource policies for resource instances. Tests need to consider this.
+- [ ] Ensure select for role names does not include restricted roles unless current user has app_owner role.
 
 ## Refactoring Opportunities
 - [ ] Improve role and permissions implementation and workflow.
+- [ ] Refactor models to include a universal "label" attribute to be used when presenting polymorphic associations.
 - [ ] Refactor projects controller with improved workflow.
 - [ ] Consider extracting demand calculations into a service object
 - [ ] Add type checking with Sorbet or RBS
@@ -144,24 +169,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Consider API versioning strategy
 - [ ] Plan for database scaling as demand data grows
 
-## Role System Documentation
 
-The role system is defined by the following components:
-
-1. **Configuration**:
-   - Defined in `config/constants/role.yml`
-   - Uses three categories: `global_roles`, `functional_roles`, and resource-specific roles under `resources`
-
-2. **Key Files**:
-   - `app/models/role.rb`: Core role model with validation and query methods
-   - `test/factories/roles.rb`: Dynamic factory that generates traits from Constants
-   - `docs/ROLES_AND_PERMISSIONS.md`: Detailed documentation on the role system
-   - `docs/USER_GUIDE.md`: End-user documentation for role management
-
-3. **Integration**:
-   - The Role model validates against the constants
-   - Provides helper methods like `valid_roles_for` and `valid_role?`
-   - Factory generates traits dynamically from the constants
 
 ## Notes
 - Keep backward compatibility during the Load → Demand transition

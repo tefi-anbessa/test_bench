@@ -51,47 +51,50 @@ class RolePolicy < ApplicationPolicy
   # For resource roles, the ability to create is determined by the resource's policy
   def create?
     return false unless user.present?
-    
-    # For resource roles, the resource's policy will control access
-    if record.is_a?(Role) && record.resource.present?
-      return record.resource_policy.new(user_context, record.resource).create_role?(record.name)
+
+    # Global / functional roles 
+    unless role.resource.present?
+      return can_manage_global_roles?
     end
     
-    # Check if this is a global role creation
-    if record.is_a?(Class) || (record.is_a?(Role) && record.resource.nil?)
-      # Only app owners can create admin or app_owner roles
-      if %w[admin app_owner].include?(record.try(:name).to_s)
-        return user.is_app_owner?
-      end
-      
-      # App owners and admins can create other global roles
-      return user.is_app_owner? || user.has_role?(:admin)
-    end
+    # Get the resource's policy class
+    resource_policy_class = Pundit::PolicyFinder.new(role.resource).policy!
     
-    false
+    # Create a new policy instance with the role as the record
+    resource_policy = resource_policy_class.new(user_context, role)
+    
+    # For resource roles, delegate to the resource's create_role? policy if it exists, otherwise false.
+    resource_policy.respond_to?(:grant_role?) && resource_policy.grant_role?
   end
 
   # App owners and admins can destroy any role
   # Project owners can destroy roles within their projects
   def destroy?
     return false unless user.present?
-    
-    # App owners and admins can delete any role
-    return true if user.is_app_owner? || user.has_role?(:admin)
-    
-    # For project roles, check if the user is a project owner of the resource
-    if record.resource.is_a?(Project)
-      return user.has_role?(:project_owner, record.resource)
+
+    # Global / functional roles 
+    unless role.resource.present?
+      return can_manage_global_roles?
     end
     
-    # For other resource roles, check if the user is a project owner of the resource's project
-    if record.resource.respond_to?(:project) && record.resource.project.present?
-      return user.has_role?(:project_owner, record.resource.project)
-    end
+    # Get the resource's policy class
+    resource_policy_class = Pundit::PolicyFinder.new(role.resource).policy!
     
-    false
+    # Create a new policy instance with the role as the record
+    resource_policy = resource_policy_class.new(user_context, role)
+    
+    # For resource roles, delegate to the resource's revoke_role? policy if it exists, otherwise false.
+    resource_policy.respond_to?(:revoke_role?) && resource_policy.revoke_role?
   end
 
   private
-
+    def can_manage_global_roles?
+      # Only app owners can create admin/app_owner roles
+      if %w[admin app_owner].include?(record.name)
+        return user.is_app_owner?
+      end
+      
+      # Admins and app owners can create other global roles
+      user.is_admin? || user.is_app_owner?
+    end
 end

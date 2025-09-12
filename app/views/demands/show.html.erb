@@ -3,16 +3,17 @@
 <nav class="navbar bg-body-tertiary">
   <div class="container">
     <ul class="navbar-nav flex-row page-heading">
-      <li class="nav-item d-inline-flex p-1">
-        <%= link_to demands_path,
-              class: "icon-link btn btn-sm btn-secondary actions",
-              title: t('actions.index') do %>
-          <%== icon('list-columns-reverse') %>
-          <%= t('actions.index') %>
-        <% end %>
-      </li>
-      <!-- Admin section -->
-      <% if current_user && current_user.admin %>
+    <% if policy(Demand).index? %>
+        <li class="nav-item d-inline-flex p-1">
+          <%= link_to demands_path,
+                class: "icon-link btn btn-sm btn-secondary actions",
+                title: t('actions.index') do %>
+            <%== icon('list-columns-reverse') %>
+            <%= t('actions.index') %>
+          <% end %>
+        </li>
+      <% end %>
+      <% if policy(Demand).edit? %>
         <li class="nav-item d-inline-flex p-1">
           <%= link_to edit_demand_path(@demand),
                 class: "icon-link btn btn-sm btn-warning actions",
@@ -22,7 +23,7 @@
           <% end %>
         </li>
       <% end %>
-      <% if current_user && current_user.admin %>
+      <% if policy(Demand).destroy? %>
         <li class="nav-item d-inline-flex p-1">
           <%= link_to @demand,
                 method: :delete,
@@ -69,7 +70,7 @@
     <nav class="navbar bg-body-tertiary">
       <div class="container">
         <ul class="navbar-nav flex-row">
-          <% if @demand.demandable.nil? %>
+          <% if policy(@demand.demandable).new? && @demand.demandable.nil? %>
             <li class="nav-item d-inline-flex p-1">
               <%= link_to eval("new_tag_#{@demand.demandable_type.tableize.singularize}_path(#{@demand.id})"),
                     class: "icon-link btn btn-sm btn-primary actions",

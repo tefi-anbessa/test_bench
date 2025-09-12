@@ -1,13 +1,13 @@
 <div class="container-fluid">
   <%= bootstrap_form_with(model: @project) do |f| %>
     <%= render 'shared/error_messages', object: f.object %>
-    <%= f.text_field :code, hide_label: true,
+    <%= f.text_field :code, 
           placeholder: t('activerecord.attributes.project.code'),
           help: t('activerecord.attributes.project.code_help') %>
-    <%= f.text_field :title, hide_label: true,
+    <%= f.text_field :title, 
           placeholder: t('activerecord.attributes.project.title'),
           help: t('activerecord.attributes.project.title_help') %>
-    <%= f.text_area :description, hide_label: true,
+    <%= f.text_area :description, 
           placeholder: t('activerecord.attributes.project.description') %>
 
     <div class="actions">

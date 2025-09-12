@@ -15,22 +15,12 @@ en:
       motor:              "Motor"
       socket_cct:         "SocketCct"
       light_cct:          "LightCct"
-    errors:
-      messages:
-        blank: "can't be blank"
-        invalid: "is not a valid role for this resource"
-      models:
-        role:
-          attributes:
-            name:
-              taken: "role already exists for this resource"
-              invalid: "is not a valid role for this resource type"
     attributes:
       resource:
         id:               "ID"
       user:
-        user_name:        "user_name"
-        email:            "email"
+        user_name:        "User"
+        email:            "Email"
         admin:            "Administrator?"
         password:         "Password"
         password_confirmation:  "Confirm password"
@@ -58,7 +48,9 @@ en:
         tagable_type:     "Tag Type"
       role:
         name:             "Name"
+        resource_type:    "Resource"
         resource_type_help: "Leave blank for global role"
+        resource_id:      "Instance"
       cable_type:
         conductor_material:	Conductor material
         conductor_makeup:	Conductor makeup
@@ -113,8 +105,8 @@ en:
         duty:             "Duty"
         duty_help:        "Proportional ON time for the load, for total load estimates"
         demandable_type:  "Load Type"
-        demandable:       "Load Detail"
-        demandable_help:  "Click for datasheet"
+        demandable:       "Equipment"
+        demandable_help:  "Equipment datasheet"
       switchboard:
         location:         "Location"
         service:          "Service"
@@ -150,3 +142,13 @@ en:
         light_fitting_type: "Light Fitting Type"
         light_fitting_type_help:  ""
         quantity:         "Quantity"
+    errors:
+      unique: "%{model} %{attribute} has already been taken, must be unique"
+      blank: "%{model} %{attribute} is required"
+      models:
+        role:
+          attributes:
+            name:
+              blank: "Role must be selected"
+              invalid: "%{name} is not a valid role for %{resource}"
+#

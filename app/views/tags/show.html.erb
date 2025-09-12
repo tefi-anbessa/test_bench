@@ -5,13 +5,15 @@
   <div class="container">
     <ul class="navbar-nav flex-row page-heading">
       <li class="nav-item d-inline-flex p-1">
-        <%= link_to tags_path,
-              class: "icon-link btn btn-sm btn-secondary actions",
-              title: t('actions.index') do %>
-          <%== icon('list-columns-reverse') %>
-          <%= t('actions.index') %>
-        <% end %>
-      </li>
+        <% if policy(@tag).index? %>
+          <%= link_to tags_path,
+                class: "icon-link btn btn-sm btn-secondary actions",
+                title: t('actions.index') do %>
+            <%== icon('list-columns-reverse') %>
+            <%= t('actions.index') %>
+          <% end %>
+        </li>
+      <% end %>
       <!-- Admin section -->
       <% if policy(@tag).edit? %>
         <li class="nav-item d-inline-flex p-1">

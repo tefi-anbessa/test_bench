@@ -1,0 +1,132 @@
+<%# This partial renders an index view if a resource instance is supplied, %>
+<%# and the role assignment form for new roles of any role type. It can be included in any view %>
+<%= bootstrap_form_with(model: role || Role.new, url: roles_path, data: { turbo: true }) do |f| %>
+  <%= render 'shared/error_messages', object: f.object %>
+
+  <div class="card shadow-sm bg-light">
+    <div class="card-body p-4">
+
+      <%# If resource exists, this partial is for an instance edit form %>
+      <% if local_assigns[:selected_resource].present? && local_assigns[:selected_resource].persisted? %>
+        <%# If resource has existing roles, list them first %>
+        <% if local_assigns[:selected_resource]&.roles&.any? %>
+          <div class="mb-4">
+            <h4 class="h4 card-title text-center mb-3">
+              <%= t('roles.partial.existing_roles') %>
+            </h4>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th><%= t('activerecord.models.role') %></th>
+                    <th><%= t('activerecord.models.user') %></th>
+                    <th class="text-end"><%= t('actions.actions') %></th>
+                  </tr>
+                </thead>
+                <tbody id="roles-table-body">
+                  <% local_assigns[:selected_resource]&.roles.each do |r| %>
+                    <% r.users.each do |u| %>
+                      <tr class="role_row">
+                        <td><%= t("rolify.names.#{r.name}") %></td>
+                        <td><%= u.name %></td>
+                        <td class="text-end">
+                          <% role = Role.find_by(id: r.id) %>
+                          <% if role && policy(role).destroy? %>
+                            <%= link_to user_role_path(u, r, role_return_path: local_assigns[:role_return_path]),
+                                method: :delete,
+                                class: 'btn btn-sm btn-danger icon-link',
+                                data: { turbo_method: :delete, turbo_confirm: t('actions.delete_sure') },
+                                aria: { label: t('actions.revoke') },
+                                title: t('actions.revoke'),
+                                display: 'inline' do %>
+                                  <%== icon('trash') %>
+                                <% end %>
+                          <% end %>
+                        </td>
+                      </tr>
+                    <% end %>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <% else %>
+          <div class="mb-3">
+            <%= t('roles.partial.no_roles_assigned') %>
+          </div>
+        <% end %>
+      <% end %>
+
+      <%# Partial section with form for new role %>
+      <h4 class="card-title text-center mb-4">
+        <%= t('roles.new.title') %>
+      </h4>
+
+      <div class="mb-3">
+        <% if local_assigns[:selected_resource].present? && local_assigns[:selected_resource].persisted? %>
+          <%= t('roles.new.message_instance_html') %>
+        <% else %>
+          <%= t('roles.new.message_global_html') %>
+        <% end %>
+      </div>
+
+      <div class="row g-3">
+
+        <div class="col-12 col-md-4">
+          <% if local_assigns[:selected_resource].present? && local_assigns[:selected_resource].persisted? %>
+            <%# Resource instance role - show read-only resource info %>
+            <%= f.hidden_field :resource_type, value: local_assigns[:selected_resource].class.name %>
+            <%= f.hidden_field :resource_id, value: local_assigns[:selected_resource].id %>
+            <div class="mb-3">
+              <label class="form-label"><%= t('activerecord.attributes.role.resource') %></label>
+              <div class="form-control form-control-sm bg-light">
+                <%= t("activerecord.models.#{local_assigns[:selected_resource].class.model_name.i18n_key}")
+                + ": " + local_assigns[:selected_resource].label %>
+              </div>
+            </div>
+          <% else %>
+            <%# Global or resource-wide role - show resource type dropdown %>
+            <%= f.select :resource_type, resources,
+                  { label: t('activerecord.attributes.role.resource_type'),
+                    selected: local_assigns[:selected_resource_type],
+                    include_blank: t('activerecord.attributes.role.resource_type_help') },
+                  { id: 'role_resource_type',
+                    class: 'form-select form-select-sm' } %>
+            <%= f.hidden_field :resource_id, value: nil %>
+          <% end %>
+        </div>
+
+        <div class="col-12 col-md-3">
+          <%= f.select :name, grouped_options_for_select(role_names),
+              { label: t('activerecord.models.role'),
+                selected: local_assigns[:selected_role_name],
+                include_blank: true },
+                { id: 'role_name',
+                  class: 'form-select form-select-sm',
+                  required: true } %>
+        </div>
+        <div class="col-12 col-md-3">
+          <%= f.collection_select :user_id, users, :id, :name,
+                { label: t('activerecord.attributes.role.user'),
+                  selected: local_assigns[:selected_user_id],
+                  required: true },
+                  { id: 'role_user_id',
+                    class: 'form-select form-select-sm' } %>
+        </div>
+
+        <%= f.hidden_field :role_return_path, value: local_assigns[:role_return_path] || roles_path %>
+
+        <div class="col-md-2 d-flex justify-content-end">
+          <div style="margin-top: 1.5rem;">
+            <%= button_tag type: 'submit',
+              class: 'btn btn-primary btn-sm',
+              title: t('actions.grant'),
+              'aria-label' => t('actions.grant') do %>
+                <%== icon('save') %>
+              <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

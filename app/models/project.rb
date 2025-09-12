@@ -12,7 +12,7 @@ class Project < ApplicationRecord
 
 
   def label
-      "#{code}: #{title}"
+      "#{code}"
   end
 
   def self.ransackable_attributes(auth_object = nil)

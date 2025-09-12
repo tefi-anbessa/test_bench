@@ -33,12 +33,14 @@ class RolesControllerTest < ActionController::TestCase
     sign_in @regular_user
     get :index
     assert_forbidden
+    sign_out @regular_user
   end
 
   test "admin can view roles index" do
     sign_in @admin
     get :index
     assert_response :success
+    sign_out @admin
   end
 
   # New tests
@@ -52,59 +54,187 @@ class RolesControllerTest < ActionController::TestCase
     sign_in @admin
     get :new
     assert_response :success
+    sign_out @admin
+  end
+
+# Create tests
+# Test failing paths in the controller first
+  test "admin cannot create invalid resource role" do
+    sign_in @admin
+    error_message = "Security event: Attempt to create role on invalid resource: NonExistentResource"
+    assert_logs(error_message, :error) do
+      assert_no_difference '@regular_user.roles.count' do
+        post :create, params: { role: { user_id: @regular_user.id,
+                                      name: :electrical_designer,
+                                      resource_type: 'NonExistentResource',
+                                      resource_id: 1,
+                                      role_return_path: nil } }
+      end
+    end
+    assert_forbidden
+    sign_out @admin
+  end
+
+  test "admin cannot create role for non-existent resource instance" do
+    sign_in @admin
+    non_existent_id = Project.maximum(:id).to_i + 1
+    error_message = "Security event: Attempt to create role on non existent resource instance: Project id #{non_existent_id}"
+    assert_logs(error_message, :error) do
+      assert_no_difference '@regular_user.roles.count' do
+        post :create, params: { 
+          role: { 
+            user_id: @regular_user.id,
+            name: :team_member,
+            resource_type: 'Project',
+            resource_id: non_existent_id,
+            role_return_path: nil 
+          } 
+        }
+      end
+    end
+    assert_forbidden
+    sign_out @admin
+  end
+
+  test "admin cannot create role with blank user_id" do
+    sign_in @admin
+    assert_no_difference '@project.roles.count' do
+      post :create, params: { 
+        role: { 
+          user_id: "",  # Blank user_id, easily done on the form
+          name: :team_member,
+          resource_type: @project.class.to_s,
+          resource_id: @project.id,
+          role_return_path: edit_project_path(@project)
+        } 
+      }
+    end
+    assert_equal I18n.t('rolify.flash.user_id_blank'), flash[:warning]
+    assert_response :unprocessable_content
+    sign_out @admin
+  end
+
+  test "admin cannot create role with invalid user" do
+    sign_in @admin
+    error_message = "Security event: Attempt to create role for non existent user id: 999999"
+    assert_logs(error_message, :error) do
+      assert_no_difference '@regular_user.roles.count' do
+        post :create, params: { 
+          role: { 
+            user_id: 999999,  # Non-existent user
+            name: :team_member,
+            resource_type: @project.class.to_s,
+            resource_id: @project.id,
+            role_return_path: edit_project_path(@project)
+          } 
+        }
+      end
+    end
+    assert_forbidden
+    sign_out @admin
+  end
+
+  test "admin cannot create role with blank role name" do
+    sign_in @admin
+    assert_no_difference '@regular_user.roles.count' do
+      post :create, params: { 
+        role: { 
+          user_id: @regular_user.id,
+          name: "",
+          resource_type: @project.class.to_s,
+          resource_id: @project.id,
+          role_return_path: edit_project_path(@project)
+        } 
+      }
+    end
+    assert_equal I18n.t("rolify.flash.name_blank"), flash[:warning]
+    assert_response :unprocessable_content
+    sign_out @admin
+  end
+
+  test "admin cannot create role with invalid role name for the resource" do
+    sign_in @admin
+    assert_no_difference '@regular_user.roles.count' do
+      post :create, params: { 
+        role: { 
+          user_id: @regular_user.id,  # Valid user
+          name: "electrical_designer",
+          resource_type: @project.class.to_s,
+          resource_id: @project.id,
+          role_return_path: edit_project_path(@project)
+        } 
+      }
+    end
+    assert_equal I18n.t("rolify.flash.name_invalid", 
+      name: I18n.t("rolify.names.electrical_designer"), 
+      resource: I18n.t("activerecord.models.#{@project.class.model_name.i18n_key}")), flash[:warning]
+    assert_response :unprocessable_content
+    sign_out @admin
+  end
+
+  test "admin cannot create admin role" do
+    sign_in @admin
+    error_message = "Security event: Attempt to grant admin role by non app owner: #{@admin.name}"
+    assert_logs(error_message, :error) do
+      assert_no_difference '@regular_user.roles.count' do
+        post :create, params: { 
+          role: { 
+            user_id: @regular_user.id,  # Valid user
+            name: "admin",
+            resource_type: nil,
+            role_return_path: roles_path
+          } 
+        }
+      end
+    end
+    assert_forbidden
+    sign_out @admin
   end
 
   # Create tests
-  test "regular user cannot create global role" do
-    sign_in @regular_user
-    post :create, params: { role: { user_id: @regular_user.id,
-                                    name: :electrical_designer,
-                                    resource_type: "",
-                                    resource_id: ""} }
-    refute @regular_user.has_role?(:electrical_designer)
-    assert_forbidden
+  # Success tests
+  test "app_owner can create admin role" do
+    sign_in @app_owner
+    assert_difference '@regular_user.roles.count', 1 do
+        post :create, params: { 
+          role: { 
+            user_id: @regular_user.id,  # Valid user
+            name: "admin",
+            resource_type: nil,
+            role_return_path: roles_path
+          } 
+        }
+      end
+    assert_redirected_to roles_url
+    assert_equal I18n.t('rolify.flash.granted', role_type: I18n.t('rolify.role_types.global')), flash[:success]
+    sign_out @app_owner
   end
 
   test "admin can create global role" do
     sign_in @admin
     post :create, params: { role: { user_id: @regular_user.id,
-                                    name: :electrical_designer,
+                                    name: "electrical_designer",
                                     resource_type: "",
-                                    resource_id: ""} }
+                                    resource_id: "",
+                                    role_return_path: roles_path} }
     assert @regular_user.has_role?(:electrical_designer)
     assert_equal flash_message('global', :grant), flash[:success]
     assert_redirected_to roles_url
+    sign_out @admin
   end
 
-  test "regular user cannot create resource-wide role" do
-    sign_in @regular_user
-    post :create, params: { role: { user_id: @regular_user.id,
-                                    name: :team_member,
-                                    resource_type: @project.class,
-                                    resource_id: ""} }
-    refute @regular_user.has_role?(:team_member, @project.class)
-    assert_forbidden
-  end
-
-  test "admin can create resource-wide role" do
+  test "admin can create resource wide role" do
     sign_in @admin
     post :create, params: { role: { user_id: @regular_user.id,
-                                    name: :team_member,
-                                    resource_type: @project.class,
-                                    resource_id: ""} }
-    assert @regular_user.has_role?(:team_member, @project.class)
+                                    name: "team_member",
+                                    resource_type: "Project",
+                                    resource_id: "",
+                                    role_return_path: roles_path} }
+    # For resource-wide roles, check with the class as the resource
+    assert @regular_user.has_role?(:team_member, Project)
     assert_equal flash_message('resource_wide', :grant), flash[:success]
     assert_redirected_to roles_url
-  end
-
-  test "regular user cannot create resource instance role" do
-    sign_in @regular_user
-    post :create, params: { role: { user_id: @regular_user.id,
-                                    name: :team_member,
-                                    resource_type: @project.class.to_s,
-                                    resource_id: @project.id} }
-    refute @regular_user.has_role?(:team_member, @project)
-    assert_forbidden
+    sign_out @admin
   end
 
   test "admin can create resource instance role" do
@@ -112,61 +242,75 @@ class RolesControllerTest < ActionController::TestCase
     post :create, params: { role: { user_id: @regular_user.id,
                                     name: :team_member,
                                     resource_type: @project.class.to_s,
-                                    resource_id: @project.id} }
+                                    resource_id: @project.id,
+                                    role_return_path: edit_project_path(@project)} }
     assert @regular_user.has_role?(:team_member, @project)
     assert_equal flash_message('resource_instance', :grant), flash[:success]
     assert_redirected_to edit_project_path(@project.id)
+    sign_out @admin
   end
 
-# Test failure cases for create action
-test "fails to create role with invalid user" do
-  sign_in @admin
-  assert_no_difference 'Role.count' do
-    post :create, params: { 
-      role: { 
-        user_id: 999999,  # Non-existent user
-        name: :team_member,
-        resource_type: @project.class.to_s,
-        resource_id: @project.id
-      } 
-    }
+  test "project owner can create resource instance role" do
+    sign_in @project_owner
+    post :create, params: { role: { user_id: @regular_user.id,
+                                    name: :team_member,
+                                    resource_type: @project.class.to_s,
+                                    resource_id: @project.id,
+                                    role_return_path: edit_project_path(@project)} }
+    assert @regular_user.has_role?(:team_member, @project)
+    assert_equal flash_message('resource_instance', :grant), flash[:success]
+    assert_redirected_to edit_project_path(@project.id)
+    sign_out @project_owner
   end
-  assert_match I18n.t('flash.roles.user_not_found'), flash[:danger]
-  assert_response :not_found
-end
-
-test "fails to create role with invalid resource" do
-  sign_in @admin
-  assert_no_changes -> { @regular_user.has_role?(:team_member, nil) } do
-    post :create, params: { 
-      role: { 
-        user_id: @regular_user.id,
-        name: :team_member,
-        resource_type: 'NonExistentResource',
-        resource_id: 999
-      } 
-    }
-  end
-  assert_match I18n.t('flash.roles.resource_not_found'), flash[:danger]
-  assert_response :not_found
-end
 
   # Destroy tests
+  # Test failing paths first
+  test "admin cannot revoke role that doesn't exist" do
+    sign_in @admin
+    assert_no_difference '@electrical_designer.roles.count' do
+      delete :destroy, params: { user_id: @electrical_designer.id, 
+                  id: 9999,
+                  role_return_path: roles_path }
+    end
+    assert_forbidden
+    sign_out @admin
+  end
+
+  test "admin cannot revoke admin role" do
+    # This is actually now a policy test, but it is kept here in case we need it again
+    # First create an admin role as app_owner
+    admin_role = nil
+    sign_in @app_owner
+    assert_changes -> { @regular_user.has_role?(:admin) }, from: false, to: true do
+      post :create, params: { 
+        role: { 
+          user_id: @regular_user.id,
+          name: 'admin',
+          resource_type: '',
+          resource_id: '',
+          role_return_path: roles_path
+        } 
+      }
+      admin_role = @regular_user.roles.find_by(name: 'admin')
+    end
+    sign_out @app_owner
+    
+    # Now try to revoke as admin
+    sign_in @admin
+    assert_no_changes -> { @regular_user.has_role?(:admin) } do
+      delete :destroy, params: { id: admin_role.id, user_id: @regular_user.id, role_return_path: roles_path }
+    end
+    assert_equal I18n.t('pundit.unauthorized'), flash[:danger]
+    assert_response :forbidden
+  end
+
   test "regular user cannot revoke global role" do
     sign_in @regular_user
     delete :destroy, params: { user_id: @electrical_designer.id, 
-                id: @electrical_designer.roles.where(name: 'electrical_designer', resource: nil).first.id }
+                id: @electrical_designer.roles.where(name: 'electrical_designer', resource: nil).first.id,
+                role_return_path: roles_path }
     assert @electrical_designer.has_role?(:electrical_designer)
     assert_forbidden
-  end
-
-  test "admin can revoke global role" do
-    sign_in @admin
-    delete :destroy, params: { user_id: @electrical_designer.id, 
-                id: @electrical_designer.roles.where(name: 'electrical_designer', resource: nil).first.id }
-    refute @electrical_designer.has_role?(:electrical_designer)
-    assert_equal flash_message('global', :revoke), flash[:success]
-    assert_redirected_to roles_url
   end
 
   test "regular user cannot revoke resource-wide role" do
@@ -176,10 +320,68 @@ end
     role = @electrical_designer.roles.find_by(name: 'team_member', resource_type: 'Project', resource_id: nil)
     delete :destroy, params: { 
       user_id: @electrical_designer.id, 
-      id: role.id 
+      id: role.id,
+      role_return_path: roles_path 
     }
     assert @electrical_designer.has_role?(:team_member, Project)
     assert_forbidden
+  end
+
+  test "regular user cannot revoke resource instance role" do
+    sign_in @electrical_designer
+    delete :destroy, params: { user_id: @electrical_designer.id, 
+                                id: @electrical_designer.roles.where(name: 'team_member', resource: @project).first.id,
+                                role_return_path: edit_project_path(@project) }
+    assert @electrical_designer.has_role?(:team_member, @project)
+    assert_forbidden
+  end
+
+  # Destroy tests
+  # Test success paths 
+
+  test "app_owner can revoke admin role" do
+    # First create an admin role as app_owner
+    admin_role = nil
+    sign_in @app_owner
+    assert_changes -> { @regular_user.has_role?(:admin) }, from: false, to: true do
+      post :create, params: { 
+        role: { 
+          user_id: @regular_user.id,
+          name: 'admin',
+          resource_type: '',
+          resource_id: '',
+          role_return_path: roles_path
+        } 
+      }
+      admin_role = @regular_user.roles.find_by(name: 'admin')
+    end
+    
+    # Now revoke as app_owner
+    assert_changes -> { @regular_user.has_role?(:admin) }, from: true, to: false do
+      delete :destroy, params: { id: admin_role.id, user_id: @regular_user.id, role_return_path: roles_path }
+    end
+    assert_redirected_to roles_url
+  end
+
+  # Worryingly, app_owner can revoke their own app_owner role
+  test "app_owner can revoke app_owner role" do
+    sign_in @app_owner
+    delete :destroy, params: { user_id: @app_owner.id, 
+                id: @app_owner.roles.where(name: 'app_owner', resource: nil).first.id,
+                role_return_path: roles_path }
+    refute @app_owner.has_role?(:app_owner)
+    assert_equal flash_message('global', :revoke), flash[:success]
+    assert_redirected_to roles_url
+  end
+
+  test "admin can revoke global role" do
+    sign_in @admin
+    delete :destroy, params: { user_id: @electrical_designer.id, 
+                id: @electrical_designer.roles.where(name: 'electrical_designer', resource: nil).first.id,
+                role_return_path: roles_path }
+    refute @electrical_designer.has_role?(:electrical_designer)
+    assert_equal flash_message('global', :revoke), flash[:success]
+    assert_redirected_to roles_url
   end
 
   test "admin can revoke resource-wide role" do
@@ -188,129 +390,31 @@ end
     @electrical_designer.grant(:team_member, Project)
     role = @electrical_designer.roles.find_by(name: 'team_member', resource_type: 'Project', resource_id: nil)
     delete :destroy, params: { user_id: @electrical_designer.id, 
-                  id: role.id }
+                  id: role.id,
+                  role_return_path: roles_path }
     refute @electrical_designer.has_role?(:team_member, Project)
     assert_equal flash_message('resource_wide', :revoke), flash[:success]
     assert_redirected_to roles_url
-  end
-
-  test "regular user cannot revoke resource instance role" do
-    sign_in @electrical_designer
-    delete :destroy, params: { user_id: @electrical_designer.id, 
-                                id: @electrical_designer.roles.where(name: 'team_member', resource: @project).first.id }
-    assert @electrical_designer.has_role?(:team_member, @project)
-    assert_forbidden
   end
 
   test "project owner can revoke resource instance role" do
     sign_in @project_owner
     @electrical_designer.grant(:team_member, @project)
     delete :destroy, params: { user_id: @electrical_designer.id, 
-                          id: @electrical_designer.roles.where(name: 'team_member', resource: @project).first.id }
+                          id: @electrical_designer.roles.where(name: 'team_member', resource: @project).first.id,
+                          role_return_path: edit_project_path(@project) }
     refute @electrical_designer.has_role?(:team_member, @project)
     assert_equal flash_message('resource_instance', :revoke), flash[:success]
     assert_redirected_to edit_project_path(@project.id)
   end
 
-  # Test failure cases for destroy action
-test "fails to revoke non-existent role" do
-  sign_in @admin
-  non_existent_role_id = 999999
-  delete :destroy, params: { 
-    id: non_existent_role_id,
-    user_id: @regular_user.id
-  }
-  assert_match I18n.t('flash.roles.role_not_found'), flash[:danger]
-  assert_response :not_found
-end
-
-test "admin cannot grant admin role" do
-  sign_in @admin
-  assert_no_changes -> { @regular_user.has_role?(:admin) } do
-    post :create, params: { 
-      role: { 
-        user_id: @regular_user.id,
-        name: 'admin',
-        resource_type: '',
-        resource_id: ''
-      } 
-    }
-  end
-  assert_equal I18n.t('flash.roles.insufficient_permissions'), flash[:danger]
-  assert_response :forbidden
-end
-
-test "app_owner can grant admin role" do
-  sign_in @app_owner
-  assert_changes -> { @regular_user.has_role?(:admin) }, from: false, to: true do
-    post :create, params: { 
-      role: { 
-        user_id: @regular_user.id,
-        name: 'admin',
-        resource_type: '',
-        resource_id: ''
-      } 
-    }
-  end
-  assert_redirected_to roles_url
-end
-
-test "admin cannot revoke admin role" do
-  # First create an admin role as app_owner
-  admin_role = nil
-  sign_in @app_owner
-  assert_changes -> { @regular_user.has_role?(:admin) }, from: false, to: true do
-    post :create, params: { 
-      role: { 
-        user_id: @regular_user.id,
-        name: 'admin',
-        resource_type: '',
-        resource_id: ''
-      } 
-    }
-    admin_role = @regular_user.roles.find_by(name: 'admin')
-  end
-  sign_out @app_owner
-  
-  # Now try to revoke as admin
-  sign_in @admin
-  assert_no_changes -> { @regular_user.has_role?(:admin) } do
-    delete :destroy, params: { id: admin_role.id, user_id: @regular_user.id }
-  end
-  assert_equal I18n.t('flash.roles.insufficient_permissions'), flash[:danger]
-  assert_response :forbidden
-end
-
-test "app_owner can revoke admin role" do
-  # First create an admin role as app_owner
-  admin_role = nil
-  sign_in @app_owner
-  assert_changes -> { @regular_user.has_role?(:admin) }, from: false, to: true do
-    post :create, params: { 
-      role: { 
-        user_id: @regular_user.id,
-        name: 'admin',
-        resource_type: '',
-        resource_id: ''
-      } 
-    }
-    admin_role = @regular_user.roles.find_by(name: 'admin')
-  end
-  
-  # Now revoke as app_owner
-  assert_changes -> { @regular_user.has_role?(:admin) }, from: true, to: false do
-    delete :destroy, params: { id: admin_role.id, user_id: @regular_user.id }
-  end
-  assert_redirected_to roles_url
-end
-
-private
+  private
     def flash_message(role_type, action_type)
       case action_type
       when :grant
-         I18n.t('flash.roles.granted', role_type: I18n.t("flash.role_types.#{role_type}"))
+         I18n.t('rolify.flash.granted', role_type: I18n.t("rolify.role_types.#{role_type}"))
       when :revoke
-         I18n.t('flash.roles.revoked', role_type: I18n.t("flash.role_types.#{role_type}"))
+         I18n.t('rolify.flash.revoked', role_type: I18n.t("rolify.role_types.#{role_type}"))
       end
     end
 end

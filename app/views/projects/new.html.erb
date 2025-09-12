@@ -1,6 +1,12 @@
 <% provide(:title, t('.title')) %>
 <% provide(:button_text, t('actions.save')) %>
-<h2>
-  <%= t('.header')%>
-</h2>
+
+<div class="container mb-3">
+  <div class="position-relative">
+    <h2 class="text-center mb-0">
+      <%= t('.header')%>
+    </h2>
+  </div>
+</div>
+
 <%= render 'form' %>

@@ -1,21 +1,23 @@
 <% provide(:title, t('.title')) %>
-<nav class="navbar bg-body-tertiary">
-  <div class="container-fluid">
-    <ul class="navbar-nav me-auto mb-2 mb-lg-0 flex-row">
-      <li class="nav-item">
+
+<div class="container mb-3">
+  <div class="position-relative">
+    <% if policy(Project).new? %>
+      <div class="position-absolute">
         <%= link_to new_project_path, class: "btn btn-primary actions",
               aria: { label: t('actions.new') },
               title: t('actions.new')  do %>
           <%== icon('plus-square-fill') %>
           <%= t('actions.new') + " " + t('activerecord.models.project') %>
         <% end %>
-      </li>
-      <span class="nav-text ms-3 me-3 h2">
-        <%= t('.header')%>
-      </span>
-    </ul>
+      </div>
+    <% end %>
+    
+    <h2 class="text-center mb-0">
+      <%= t('.header')%>
+    </h2>
   </div>
-</nav>
+</div>
 <div class = "container">
   <div class = 'listing'>
     <%= search_form_for @q do |f| %>
@@ -64,10 +66,12 @@
               <% end %>
               <% if policy(p).destroy? %>
 
-                <%= link_to p, method: :delete, class: "btn btn-danger btn-sm icon-link",
-                      aria: { label: t('actions.delete') },
-                      title: t('actions.delete'),
-                      display: "inline"  do %>
+                <%= link_to p, 
+                    data: { turbo_method: :delete, turbo_confirm: t('actions.delete_sure') },
+                    class: "btn btn-danger btn-sm icon-link",
+                    aria: { label: t('actions.delete') },
+                    title: t('actions.delete'),
+                    display: "inline"  do %>
                   <%== icon('trash') %>
                 <% end %>
               <% end %>

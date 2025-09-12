@@ -3,7 +3,7 @@
 <nav class="navbar bg-body-tertiary">
   <div class="container">
     <ul class="navbar-nav flex-row page-heading">
-      <% if policy(@cable).show? %>
+      <% if policy(@cable).index? %>
         <li class="nav-item d-inline-flex p-1">
           <%= link_to cables_path,
                 class: "icon-link btn btn-sm btn-secondary actions",

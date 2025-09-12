@@ -10,6 +10,8 @@ roles:
     project:
       - project_owner
       - team_member
+    tag:
+      - editor
 
     
   functional_roles:

@@ -1,0 +1,9 @@
+<%# Flash messages %>
+<%= turbo_stream.replace "flash-messages" do %>
+  <%= render "shared/flash" %>
+<% end %>
+
+<% if flash[:success].present? %>
+  <%# Remove the deleted role from the list if it exists on the page %>
+  <%= turbo_stream.remove dom_id(@role) %>
+<% end %>

@@ -20,6 +20,11 @@ en:
       header:       "Show User"
       message:      "Log in"
       gravatar:     "Gravatar"
+  errors:
+    forbidden:
+      title:        "Forbidden"
+      header:       "Forbidden"
+      message:      "You are not authorized to perform this action."
   projects:
     index:
       title:            "Projects"
@@ -61,8 +66,13 @@ en:
       header:           "Roles Index"
     new:
       title:            "New Role"
-      header:           "New Role"
-      message_html:     "<small>This form can only submit global and resource roles. Submit instance roles from the resource view (if available).</small>"
+      header:           "Assign New Role"
+      message_global_html:   "<small>This form can only submit global and resource roles. Submit instance roles from the resource view (if available).</small>"
+      message_instance_html: "<small>This form can only submit instance roles. Submit global and resource roles from the roles index view (if available).</small>"
+    partial:
+      message_html:     "Assign a new user role for %{resource}"
+      no_roles_assigned:  "No roles have been assigned yet"
+      existing_roles:  "Existing roles"
 
   cable_types:
     index:

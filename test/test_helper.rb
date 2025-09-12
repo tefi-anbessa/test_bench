@@ -44,6 +44,25 @@ class ActiveSupport::TestCase
 
     # Add more helper methods to be used by all tests here...
   include FactoryBot::Syntax::Methods
+  
+  # Assert that a specific message is logged at the given level
+  def assert_logs(message, level = :info, &block)
+    original_logger = Rails.logger
+    logged = false
+    mock_logger = Class.new do
+      define_method(level) do |msg|
+        logged ||= (msg == message)
+      end
+      def method_missing(*); end
+    end.new
+    
+    Rails.logger = mock_logger
+    yield
+    assert logged, "Expected to log: #{message}"
+  ensure
+    Rails.logger = original_logger
+  end
+  
   # include Devise::Test::IntegrationHelpers
   
   # Returns the current user

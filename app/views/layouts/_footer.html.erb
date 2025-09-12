@@ -1,7 +1,17 @@
 <div class="container-fluid">
   <footer class="footer border-top">
     <small>
-      <ul>
+      <ul class="footer-links">
+        <li class="nav-item">
+          <%= link_to t('menu.about'), site_about_path,
+            class: ["nav-link", { active: current_page?(site_about_path) }],
+            aria: { label: t('menu.about') } %>
+        </li>
+        <li class="nav-item">
+          <%= link_to t('menu.help'), site_help_path,
+            class: ["nav-link", { active: current_page?(site_help_path) }],
+            aria: { label: t('menu.help') } %>
+        </li>
         <li class="nav-item">
           <%= link_to t('menu.contact'), site_contact_path,
             class: ["nav-link", { active: current_page?(site_contact_path) }],

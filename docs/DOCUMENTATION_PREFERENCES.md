@@ -8,10 +8,11 @@ Guidelines for maintaining comprehensive documentation in the codebase for both 
 The following core documentation files are READ-ONLY and must not be modified by AI:
 1. `docs/Documentation Preferences.md`
   - Purpose:
-    - This document explains the purpose of the various documents used to control this software application building project, and the
+    - This document explains the purpose of the various other documents used to manage this software application development project.
 2. `docs/DEVELOPER_NOTES.md`
   - Purposes:
-    - Guidance for new developer and reminder for original developer on how the project is structured and intended to behave
+    - Guidance for new developer and reminder for original developer on how the application is structured and intended to behave
+    - Guidance on the implementation techniques to be followed to maintain consistency
     - Guidance for AI on how to interact with the project
     - Record the history of how things were done
     - Lists of things to do:
@@ -24,8 +25,9 @@ The following core documentation files are READ-ONLY and must not be modified by
     - Provide clear guidance and rules for testing the application.
 3. `docs/ROLES_AND_PERMISSIONS.md`
   - Purposes:
-    - Explain how the roles and permission system works internally
-    - Explain the roles and permissions for each module, as the basis for setting up tests
+    - Explains the roles based access control (RBAC) system
+    - Details the roles and permissions for each module, as the basis for setting up tests 
+    - Explains how the roles and permission system is implemented
 
 
 ### Protection Methods

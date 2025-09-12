@@ -11,10 +11,10 @@ class ApplicationController < ActionController::Base
     @exception = exception
     respond_to do |format|
       format.html do
-        flash[:alert] = exception.message
+        flash[:danger] = I18n.t('pundit.unauthorized')
         render 'errors/forbidden', status: :forbidden
       end
-      format.json { render json: { error: exception.message }, status: :forbidden }
+      format.json { render json: { error: I18n.t('pundit.unauthorized') }, status: :forbidden }
     end
   end
 
@@ -36,6 +36,20 @@ class ApplicationController < ActionController::Base
   # Override Pundit's default user context
   def pundit_user
     @pundit_user ||= ApplicationPolicy::UserContext.new(current_user, current_project)
+  end
+
+  # Helper method to prepare role assignment data for any resource
+  # @param resource [ActiveRecord::Base] The resource to get roles for
+  # @return [Hash] A hash of role data grouped by user
+  def prepare_role_assignment_data(resource)
+    return {} unless resource.persisted?
+    
+    resource.roles
+      .joins(:users)
+      .select('roles.id as role_id, roles.name as role_name, users.name as user_name, users.id as user_id')
+      .order('users.name, roles.name')
+      .group_by { |r| [r.user_id, r.user_name] }
+      .transform_values { |roles| roles.map { |r| [r.role_name, r.role_id] } }
   end
 
   protected
@@ -83,7 +97,7 @@ class ApplicationController < ActionController::Base
     private
 
     def user_not_authorized
-      flash[:alert] = "You are not authorized to perform this action."
+      flash[:danger] = "You are not authorized to perform this action."
       redirect_back_or_to(root_path)
     end
 end

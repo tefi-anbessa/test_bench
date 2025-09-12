@@ -6,7 +6,8 @@ class TagablesController < ApplicationController
       redirect_to new_tag_demand_path(@tag)
     when "Cable"
       redirect_to new_tag_cable_path(@tag)
-    else flash[:danger] = "Tag type #{tagable_params[:tagable_type]} is not implemented"
+    else 
+      flash[:danger] = "Tag type #{tagable_params[:tagable_type]} is not implemented"
       redirect_back_or_to @tag
     end
   end

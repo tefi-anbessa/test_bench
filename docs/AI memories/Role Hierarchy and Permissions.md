@@ -1,4 +1,5 @@
 # Role Hierarchy and Permissions
+This is an AI generated summary, refer to docs/ROLES_AND_PERMISSIONS.md for up to date guidance.
 
 ## Global Roles
 - The UI for global roles is the roles index page.

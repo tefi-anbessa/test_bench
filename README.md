@@ -18,8 +18,9 @@ A Ruby on Rails application for managing multiple engineering projects.
 - Engineering design elements require a tag to be assigned. 
 - Tags belong to projects, but can be sub-grouped within a project by assigning a project stage (1 to 10).
 - Tags belong to disciplines, e.g. Electrical, Piping, etc.
-- The tag is the link to data sheet and further detailed information. [TODO - implement flexible tag structure.] Tags are unique within disciplines and projects.
-[TODO]: Provide an option for tags to be unique only on the project level. Requires coordination of tag prefixes.
+- The tag is the link to data sheet and further detailed information. 
+- [TODO - implement flexible tag structure.] Tags are unique within disciplines and projects.
+- [TODO]: Provide an option for tags to be unique only on the project level. Requires coordination of tag prefixes.
 - For a tag to have further information added, it has to be assigned to a tagable type. The information required is generally what is needed to produce a data sheet for procurement.
 - The following tagable types are available: [TODO: keep this list up to date]
   - Switchboard
@@ -39,11 +40,13 @@ A Ruby on Rails application for managing multiple engineering projects.
   - SocketCct
   - LightCct
 [TODO: keep this list up to date]
+
 ### Switchboards
 - Switchboards have multiple outgoing circuits, each uniquely identified. 
-  - Each circuit has protection devices and options.
-  - Each circuit can have an assigned load and cable.
+  - Each circuit can have protection devices and options.
+  - Each circuit can have an assigned load and cable. These are used to evaluate the distribution as a tree data structure.
 - Switchboards are always of load type "summation", meaning they aggregate the loads of their outgoing circuits.
+
 ### Cables
 - Cables are assigned to cable types, which define the cable's properties, such as insulation type, conductor material, etc.
 - Cable type set is specific to the project.
@@ -51,68 +54,7 @@ A Ruby on Rails application for managing multiple engineering projects.
 
 ## Role Hierarchy and Permissions
 
-The application implements a role-based access control (RBAC) system. Because most resources will be subject to a revision control system, delete operations are not allowed by default. This is to prevent accidental deletion of data history. The roles have the following hierarchy:
-
-### Global Roles
-- The UI for global roles is the roles index page.
-
-#### 1. Owner (Super Admin)
-- **Role**: `:app_owner`
-- **Permissions**:
-  - Full system access
-  - Can assign/revoke `:admin` roles
-  - Can perform all CRUD operations on all resources
-  - Only one user should have this role globally
-
-#### 2. Admin
-- **Role**: `:admin`
-- **Permissions**:
-  - Can perform all CRUD operations on all resources
-  - Can manage users (except assigning `:owner` global role)
-  - Can assign/revoke functional roles
-  - Unless otherwise specified, only admin or app_owner can perform delete operations
-
-
-### Projects resource
-- The UI for project instance roles is a sub-form on the project show page.
-- A ':team_member' role on the project instance is required to access child resources such as tags and documents.
-- There should be no resource wide roles for Project.
-- **Role**: `:project_owner`
-- **Permissions**:
-  - There should be only one user granted this role for each project instance
-  - Create, edit and update a project instance and its child resources
-  - Can assign/revoke `:team_member` roles
-- **Role**: `:team_member`
-- **Permissions**:
-  - Default read-only access to all of the project instances resources
-  - Required for create, edit and update access to child resources such as tags and documents, and other functional roles.
-
-### Resource-Wide Roles
-- The UI for resource wide roles is the roles index page.
-- Resource wide roles are based on functional roles.
-- A resource wide role gives a user create, edit and update access to the resources associated with the function, provided the user also has a member role for the project instance.
-
-#### 1. Electrical resources
-- **Role**: :electrical_designer'
-- **Permissions**:
-- Create, edit and update access to general project resources, as long a project role is also granted:
-  - Tags
-  - Documents
-- Create, edit and update access to resources in the Electrical module, as long as a project role is also granted:
-  - CableTypes
-  - Switchboards
-  - Motors
-  - SocketCcts
-  - LightCcts
-  - Cables
-
-## Implementation Notes
-
-- Roles are managed using the `rolify` gem
-- Permissions are enforced using Pundit policies
-- The `:owner` role should be assigned during initial setup
-- Only the `:owner` can assign the `:admin` role
-- `:admin` users can manage other users' roles except for the `:owner` role
+The application implements a role-based access control (RBAC) system. Refer to docs/ROLES_AND_PERMISSIONS.md for details.
 
 ### Development Guidelines
 

@@ -2,14 +2,16 @@
 <nav class="navbar bg-body-tertiary">
   <div class="container">
     <ul class="navbar-nav me-auto mb-2 mb-lg-0 flex-row">
-      <li class="nav-item">
-        <%= link_to new_tag_path, class: "btn btn-primary actions",
-              aria: { label: t('actions.new') },
-              title: t('actions.new')  do %>
-          <%== icon('plus-square-fill') %>
-          <%= t('actions.new') + " " + t('activerecord.models.tag') %>
-        <% end %>
-      </li>
+      <% if policy(Demand).new? %>
+        <li class="nav-item">
+          <%= link_to new_tag_path, class: "btn btn-primary actions",
+                aria: { label: t('actions.new') },
+                title: t('actions.new')  do %>
+            <%== icon('plus-square-fill') %>
+            <%= t('actions.new') + " " + t('activerecord.models.tag') %>
+          <% end %>
+        </li>
+      <% end %>
       <span class="nav-text ms-3 me-3 h2">
         <%= t('.header')%>
       </span>

@@ -7,7 +7,7 @@ This document outlines the role-based access control (RBAC) system implemented i
 The application RBAC system uses the rolify gem for role management.
 
 ### Constraints
-The permitted roles are constrained by a constant hash built from `config/constants/role.yml`. Assignment of a role name other than those permitted in the constants set up will result in a validation error.
+The permitted roles are constrained by a constant hash built from `config/constants/role.yml`. Assignment of a role name other than those permitted in the constant set up will result in a permissions error. Details are in the implementation section.
 
 ### Hierarchy
 
@@ -22,10 +22,16 @@ The permitted roles are constrained by a constant hash built from `config/consta
    - Can manage most resources
    - Cannot modify App Owner accounts
 
-#### Project Roles (Resource instance scoped)
+#### Resource Wide Roles
+- The RBAC system caters for resource wide roles, but none have been implemented to date.
+- A resource wide role would give a user access to all instances of a resource, e.g. all projects or all tags.
+
+#### Resource Instance Roles
+- Permissions are primarily managed through the project resource, with users requiring a role on a specific project to interact with that project's data.
+
 1. **Project Owner**
    - Full control over a specific project
-   - Can create and revoke project instance roles
+   - Can grant and revoke project instance roles
    - Can modify project settings and content
 
 2. **Team Member**
@@ -47,7 +53,7 @@ The permitted roles are constrained by a constant hash built from `config/consta
 - An administrator must explicitly assign appropriate roles to each new user
 
 #### User Interface
-- The user interface for granting and revoking global and resource wide roles is the roles form based on the roles index.
+- The user interface for granting and revoking global and resource wide roles is the new roles form, available from the roles index if authorised.
 - It is only accessible to admins and app_owner.
 - The user interface for instance specific roles is a sub_form on the resource instance edit page, present only if the user has the required permissions to grant or revoke roles on that instance.
 
@@ -117,7 +123,7 @@ The application RBAC system uses the pundit gem for permissions and scopes.
 | Action                         | App Owner | Admin | Project Owner | Team Member         |
 |--------------------------------|-----------|-------|---------------|---------------------|
 | View Project                   | ✓         | ✓     | ✓ (own)       | ✓ (in project team) |
-| Create Project                 | ✓         | x     | x             | x                   |
+| Create Project                 | ✓         | ✓     | x             | x                   |
 | Edit Project                   | ✓         | ✓     | ✓ (own)       | x                   |
 | Delete Project                 | ✓         | x     | x             | x                   |
 |--------------------------------|-----------|-------|---------------|---------------------|
@@ -161,12 +167,28 @@ The application RBAC system uses the pundit gem for permissions and scopes.
 
 
 ## Implementation Guidance
+- Read the gem documentation for rolify (https://github.com/RolifyCommunity/rolify) and pundit (https://github.com/varvet/pundit) to understand them.
+
+### Rolify
+- To control access to any resource, start by adding "resourcify" to the model class.
+- Take care with this decision, as resourcfiy will require a lot of work to implement.
+- Prefer to inherit roles and permissions from existing resources wherever possible. 
+- Most resources can inherit from Project.
+- Update the constants definition in config/constants/role.yml to add any new roles, or modify availabilty of roles to specific resources. 
+- This constant hash determines what role name options are available in the role assignment forms, and is also used to validate role assignments before application, for security.
+- Methods for listing valid roles of different types, and for checking role validity for a resource are provided in the Role class.
+
+### Pundit
+- When adding a new resource (resourcified or not) and controller, consider whether a new Pundit policy is required.
+- Pundit policies determine access to controller actions based on the logged in user, the role/s assigned to the user, and the current project.
+- Note that including the current project in the pundit context is not rails/pundit convention, it is an extension for this application.
+- A new policy needs a new test.
 
 ### Synonyms
 
 Rolify provides various synonyms or short cut names for the role methods. The following synonyms are preferred in the implementation:
- - grant is a synonym for add_role 
- - revoke is a synonym for remove_role 
+ - grant is a synonym for add_role and is preferred. 
+ - revoke is a synonym for remove_role and is preferred. 
  - is_[:name]? is a synonym for has_role?[:name]
 
 ### Assigning and Revoking Roles

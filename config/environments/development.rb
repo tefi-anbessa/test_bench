@@ -11,7 +11,7 @@ Rails.application.configure do
 
   # Show full error reports.
   config.consider_all_requests_local = true
-  
+
   # Enable serving of static files from node_modules
   config.public_file_server.enabled = true
   config.public_file_server.headers = {
@@ -69,7 +69,7 @@ Rails.application.configure do
 
   # Uncomment if you wish to allow Action Cable access from any origin.
   # config.action_cable.disable_request_forgery_protection = true
- 
+
   config.sass.inline_source_maps = true
 
   # From devise setup instructions:
@@ -77,4 +77,8 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # asset pipeline
+  config.assets.debug = true
+
 end

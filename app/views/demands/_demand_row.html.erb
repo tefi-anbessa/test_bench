@@ -30,19 +30,23 @@
       <td><%= link_to d.demandable %></td>
     <% end %>
     <td>
-      <%= link_to demand_path(d), class: "btn btn-secondary btn-sm icon-link",
-            aria: { label: t('actions.show') },
-            title: t('actions.show'),
-            display: "inline" do %>
-        <%== icon('eye') %>
+      <% if policy(d).show? %>
+        <%= link_to demand_path(d), class: "btn btn-secondary btn-sm icon-link",
+              aria: { label: t('actions.show') },
+              title: t('actions.show'),
+              display: "inline" do %>
+          <%== icon('eye') %>
+        <% end %>
       <% end %>
-      <%= link_to edit_demand_path(d), class: "btn btn-warning btn-sm icon-link",
-            aria: { label: t('actions.edit') },
-            title: t('actions.edit'),
-            display: "inline"  do %>
-        <%== icon('pencil') %>
+      <% if policy(d).edit? %>
+        <%= link_to edit_demand_path(d), class: "btn btn-warning btn-sm icon-link",
+              aria: { label: t('actions.edit') },
+              title: t('actions.edit'),
+              display: "inline"  do %>
+          <%== icon('pencil') %>
+        <% end %>
       <% end %>
-      <% if current_user && current_user.admin? %>
+      <% if policy(d).destroy? %>
         <%= link_to demand_path(d), method: :delete, class: "btn btn-danger btn-sm icon-link",
               aria: { label: t('actions.delete') },
               title: t('actions.delete'),

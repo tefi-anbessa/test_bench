@@ -33,26 +33,24 @@ class ProjectsController < ApplicationController
     @users = User.all
   end
 
-  # GET /projects/1/edit
-  def edit
-    authorize @project
-    @role = Role.new
-    @roles = Constants.roles.resources[:project] || []
-    @users = User.all
-  end
-
   # POST /projects
   def create
     @project = Project.new(project_params)
     authorize @project
 
     if @project.save
-        flash[:success] = I18n.t('flash.actions.create.notice', resource_name: I18n.t('activerecord.models.project'))
-        redirect_to @project
+      flash[:success] = I18n.t('flash.actions.create.notice', resource_name: I18n.t('activerecord.models.project'))
+      redirect_to @project
     else
-        flash.now[:alert] = I18n.t('flash.actions.create.alert', resource_name: I18n.t('activerecord.models.project'))
-        render :new, status: :unprocessable_entity
+      flash.now[:alert] = I18n.t('flash.actions.create.alert', resource_name: I18n.t('activerecord.models.project'))
+      render :new, status: :unprocessable_content
     end
+  end
+
+  # GET /projects/1/edit
+  def edit
+    authorize @project
+    setup_role_assignment_variables
   end
 
   # PATCH/PUT /projects/1
@@ -60,11 +58,12 @@ class ProjectsController < ApplicationController
     authorize @project
     
     if @project.update(project_params)
-        flash[:success] = I18n.t('flash.actions.update.notice', resource_name: I18n.t('activerecord.models.project'))
-        redirect_to @project
+      flash[:success] = I18n.t('flash.actions.update.notice', resource_name: I18n.t('activerecord.models.project'))
+      redirect_to @project
     else
-        flash.now[:alert] = I18n.t('flash.actions.update.alert', resource_name: I18n.t('activerecord.models.project'))
-        render :edit, status: :unprocessable_entity
+      setup_role_assignment_variables
+      flash.now[:alert] = I18n.t('flash.actions.update.alert', resource_name: I18n.t('activerecord.models.project'))
+      render :edit, status: :unprocessable_content
     end
   end
 
@@ -76,7 +75,7 @@ class ProjectsController < ApplicationController
         flash[:success] = I18n.t('flash.actions.destroy.notice', resource_name: I18n.t('activerecord.models.project'))
         redirect_to projects_url
     else
-        flash.now[:alert] = @project.errors.full_messages.join(', ')
+        flash.now[:danger] = @project.errors.full_messages.join(', ')
         redirect_to projects_url
     end
   end
@@ -133,6 +132,30 @@ class ProjectsController < ApplicationController
     def ensure_html_format
       return if request.format.html?
       head :not_acceptable
+    end
+    
+    def setup_role_assignment_variables
+      @role = Role.new
+      @roles = @project.roles
+      @available_roles = Constants.roles.resources[:project] || []
+      @users = User.all
+      @resource_roles = prepare_role_assignment_data(@project)
+    end
+    
+    # Formats role data for the view
+    # @param project [Project] the project to get roles for
+    # @return [Hash] formatted role data for the view
+    def prepare_role_assignment_data(project)
+      resource_roles = {}
+      
+      project.roles.includes(:users).each do |role|
+        role.users.each do |user|
+          resource_roles[user.id] ||= { name: user.name, roles: [] }
+          resource_roles[user.id][:roles] << [role.name, role.id]
+        end
+      end
+      
+      resource_roles
     end
 
     # Only allow a list of trusted parameters through.

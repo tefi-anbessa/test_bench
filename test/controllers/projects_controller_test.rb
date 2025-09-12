@@ -49,10 +49,10 @@ class ProjectsControllerTest < ActionController::TestCase
   end
 
   # New action tests
-  test "even admin cannot access new project form" do
+  test "admin can access new project form" do
     sign_in @admin
     get :new
-    assert_forbidden
+    assert_response :success
   end
 
   test "only app owner can access new project form" do
@@ -68,9 +68,9 @@ class ProjectsControllerTest < ActionController::TestCase
   end
 
   # Create action tests
-  test "even admin cannot create project" do
+  test "admin can create project" do
     sign_in @admin
-    assert_no_difference('Project.count') do
+    assert_difference('Project.count', 1) do
       post :create, params: {
         project: {
           code: 'ZZ',
@@ -79,7 +79,7 @@ class ProjectsControllerTest < ActionController::TestCase
         }
       }
     end
-    assert_forbidden
+    assert_redirected_to project_url(Project.last)
   end
 
   test "only app owner can create project" do

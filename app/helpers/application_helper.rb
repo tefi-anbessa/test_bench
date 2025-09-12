@@ -22,4 +22,34 @@ module ApplicationHelper
   def admin?
     current_user&.has_role?(:admin)
   end
+
+  # Maps flash message types to Bootstrap alert classes
+  #
+  # @param flash_type [String, Symbol] The flash message type (e.g., :success, :danger, :notice, :alert)
+  # @return [String] The corresponding Bootstrap alert class
+  #
+  # @example
+  #   bootstrap_alert_class(:success) # => 'success'
+  #   bootstrap_alert_class('danger') # => 'danger'
+  #   bootstrap_alert_class(:notice)  # => 'success'
+  #   bootstrap_alert_class(:alert)   # => 'danger'
+  #   bootstrap_alert_class(:error)   # => 'danger'
+  #   bootstrap_alert_class(:warning) # => 'warning'
+  #   bootstrap_alert_class(:info)    # => 'info'
+  #   bootstrap_alert_class(:other)   # => 'other'
+  def bootstrap_alert_class(flash_type)
+    case flash_type.to_s.downcase.to_sym
+    when :success, :notice
+      'success'
+    when :danger, :alert, :error
+      'danger'
+    when :warning
+      'warning'
+    when :info
+      'info'
+    else
+      # Default to the original flash type if no match is found
+      flash_type.to_s
+    end
+  end
 end

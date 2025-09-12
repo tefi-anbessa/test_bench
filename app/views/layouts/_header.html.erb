@@ -19,21 +19,9 @@
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <%= link_to t('menu.about'), site_about_path,
-            class: "nav-link",
-            aria: { label: t('menu.about') } %>
-        </li>
-        <li class="nav-item">
-          <%= link_to t('menu.help'), site_help_path,
-            class: 'nav-link',
-            aria: { label: t('menu.help') } %>
-        </li>
-
+    <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+      <ul class="navbar-nav">
         <% if user_signed_in? %>
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <% if policy(Role).index? %>
               <li class="nav-item">
                 <%= link_to t('role', scope: 'activerecord.models').pluralize,
@@ -42,32 +30,37 @@
                   aria: { label: t('role', scope: 'activerecord.models').pluralize } %>
               </li>
             <% end %>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle"
-                  href="#"
-                  data-bs-toggle="dropdown"
-                  id="project-menu-btn"
-                  role="button"
-                  aria-expanded="false">
-                <%= project_selected? ?
-                  t('project', scope: 'activerecord.models') + ": " + current_project.code :
-                  t('project', scope: 'activerecord.models').pluralize %>
-              </a>
-              <ul class="dropdown-menu" aria-labelledby="project-menu-btn">
-                <li><%= link_to t('project', scope: 'activerecord.models').pluralize,
-                      projects_path,
-                      class: "dropdown-item" %></li>
-                <li><%= link_to t('actions.select'),
-                      select_projects_path,
-                      class: "dropdown-item" %></li>
-              </ul>
-            </li>
+            
+            <% if policy(Project).index? %>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle"
+                    href="#"
+                    data-bs-toggle="dropdown"
+                    id="project-menu-btn"
+                    role="button"
+                    aria-expanded="false">
+                  <%= project_selected? ?
+                    t('project', scope: 'activerecord.models') + ": " + current_project.code :
+                    t('project', scope: 'activerecord.models').pluralize %>
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="project-menu-btn">
+                  <li><%= link_to t('project', scope: 'activerecord.models').pluralize,
+                        projects_path,
+                        class: "dropdown-item" %></li>
+                  <li><%= link_to t('actions.select'),
+                        select_projects_path,
+                        class: "dropdown-item" %></li>
+                </ul>
+              </li>
+            <% end %>
+            
             <li class="nav-item">
               <%= link_to t('tag', scope: 'activerecord.models').pluralize,
                 tags_path,
-                class: "nav-link",
+                class: 'nav-link',
                 aria: { label: t('tag', scope: 'activerecord.models').pluralize } %>
             </li>
+            
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle"
                   href="#"
@@ -75,54 +68,66 @@
                   id="electrical-menu-btn"
                   role="button"
                   aria-expanded="false">
-                Electrical
+                <%= t('electrical', scope: 'menu') %>
               </a>
               <ul class="dropdown-menu" aria-labelledby="electrical-menu-btn">
                 <li>
-                  <%= link_to t('cable_type', scope: 'activerecord.models').pluralize,
-                    cable_types_path,
-                    class: "dropdown-item" %>
+                  <h6 class="dropdown-header"><%= t('menu.electrical_resources') %></h6>
                 </li>
-                <li>
-                  <%= link_to t('cable', scope: 'activerecord.models').pluralize,
-                    cables_path,
-                    class: "dropdown-item" %>
-                </li>
-                <li>
-                  <%= link_to t('demand', scope: 'activerecord.models').pluralize,
-                    demands_path,
-                    class: "dropdown-item" %>
-                </li>
+                <% if policy(:cable_type).index? %>
+                  <li>
+                    <%= link_to t('cable_type', scope: 'activerecord.models').pluralize,
+                      cable_types_path,
+                      class: "dropdown-item" %>
+                  </li>
+                <% end %>
+                <% if policy(:cable).index? %>
+                  <li>
+                    <%= link_to t('cable', scope: 'activerecord.models').pluralize,
+                      cables_path,
+                      class: "dropdown-item" %>
+                  </li>
+                <% end %>
+                <% if policy(:demand).index? %>
+                  <li>
+                    <%= link_to t('demand', scope: 'activerecord.models').pluralize,
+                      demands_path,
+                      class: "dropdown-item" %>
+                  </li>
+                <% end %>
               </ul>
             </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle"
-                href="#"
-                data-bs-toggle="dropdown"
-                id="user-menu-btn"
-                role="button"
-                aria-expanded="false">
-              <%= t('user', scope: 'activerecord.models') + ": " + current_user.name %>
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <li class="nav-item"><%= link_to t('menu.profile'),
+            
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle"
+                  href="#"
+                  data-bs-toggle="dropdown"
+                  id="user-menu-btn"
+                  role="button"
+                  aria-expanded="false">
+                <%= current_user.name %>
+              </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="user-menu-btn">
+              <li>
+                <%= link_to t('menu.profile'),
                   user_path(current_user),
                   class: "dropdown-item" %>
               </li>
-              <li class="nav-item"><%= link_to t('menu.edit'),
+              <li>
+                <%= link_to t('menu.edit'),
                   edit_user_registration_path,
                   class: "dropdown-item" %>
               </li>
-              <% if current_user && (current_user.is_admin? || current_user.is_owner?) %>
-                <li class="nav-item">
+              <% if current_user.is_admin? || current_user.is_app_owner? %>
+                <li>
                   <%= link_to t('user', scope: 'activerecord.models').pluralize,
                     users_path,
-                    class: 'dropdown-item',
-                    aria: { label: t('user', scope: 'activerecord.models').pluralize } %>
+                    class: 'dropdown-item' %>
                 </li>
               <% end %>
               <li><hr class="dropdown-divider"></li>
-              <li class="nav-item"><%= link_to t('menu.log_out'),
+              <li>
+                <%= link_to t('menu.log_out'),
                   destroy_user_session_path,
                   data: { "turbo-method": :delete },
                   class: "dropdown-item" %>
@@ -138,7 +143,7 @@
           </li>
         <% end %>
 
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown ms-2">
           <a class="nav-link dropdown-toggle" href="#"
                 id="navbarLocaleSelect"
                 role="button"
@@ -146,15 +151,16 @@
                 aria-expanded="false">
                 <%= flag_icon(flag_code(locale)) %>
           </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarLocaleSelect">
             <% I18n.available_locales.each do |locale| %>
-              <li class="nav-item">
+              <li>
                 <%= flag_icon(flag_code(locale)) %>
                 <% if I18n.locale == locale %>
-                  <%= t(locale, scope: 'locales') %>
+                  <span class="ms-2"><%= t(locale, scope: 'locales') %></span>
                 <% else %>
                   <%= link_to t(locale, scope: 'locales'),
-                              url_for(locale: locale) %>
+                            url_for(locale: locale),
+                            class: "ms-2 text-decoration-none" %>
                 <% end %>
               </li>
             <% end %>

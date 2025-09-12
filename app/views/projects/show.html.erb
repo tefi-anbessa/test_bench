@@ -12,7 +12,7 @@
         <% end %>
       </li>
       <!-- Admin section -->
-      <% if current_user && (current_user.is_admin? || current_user.is_owner?) %>
+      <% if policy(@project).edit? %>
         <li class="nav-item d-inline-flex p-1">
           <%= link_to edit_project_path(@project),
                 class: "icon-link btn btn-sm btn-warning actions",
@@ -22,7 +22,7 @@
           <% end %>
         </li>
       <% end %>
-      <% if current_user.is_owner? %>
+      <% if policy(@project).destroy? %>
         <li class="nav-item d-inline-flex p-1">
           <%= link_to @project,
                 method: :delete,
