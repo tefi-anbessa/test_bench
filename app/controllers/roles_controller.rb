@@ -23,57 +23,25 @@ class RolesController < ApplicationController
     @pagy, @roles = pagy(roles_scope, limit: 20)
     authorize @roles
 
-    sorted_roles = []
-    @roles.each do |role|
-      role.users.each do |user|
-        if role.resource_id.blank?
-          resource_label = "-"
-        elsif role.resource&.respond_to?(:label)
-          resource_label = role.resource.label
-        else
-          resource_label = role.resource_id
-        end
-        rt = role.resource_type.presence || "-" # Convert nil to blank for safe sorting
-        sorted_roles << { id: role.id, user_id: user.id, resource_type: rt,
-          resource_label: resource_label, role_name: role.name,
-          user_name: user.name }
-      end
+    # Set up variables for the view
+    setup_role_assignment
+    @role_return_path = roles_path
+    
+    # Use helper to prepare roles for display
+    @grouped_roles = prepare_roles_for_display(@roles)
+    
+    respond_to do |format|
+      format.html
+      format.json { render json: @roles }
     end
-    sorted_roles.sort_by! { |h| [h[:resource_type], h[:resource_label], h[:role_name]] }
-
-    # Then group the sorted roles
-    @grouped_roles = {}
-    sorted_roles.each do |role|
-      rt = role[:resource_type]
-      @grouped_roles[rt] ||= {}
-      rl = role[:resource_label]
-      @grouped_roles[rt][rl] ||= {}
-      rn = role[:role_name]
-      @grouped_roles[rt][rl][rn] ||= []
-      @grouped_roles[rt][rl][rn] << role[:user_name]
-    end
-
-    # Set instance variables
-    set_index_variables
-    @users = User.all
-    @resources = Rolify.resource_types.uniq
   end
 
   # GET /roles/new
   def new
     @role = Role.new # Required as vehicle for error_messages
     authorize @role
-    set_index_variables
-    @users = User.all
+    setup_role_assignment
 
-    Rails.application.eager_load! if Rails.env.development?
-    @resources = Rolify.resource_types.uniq
-
-    # Set field defaults to nil
-    @resource_type = nil
-    @resource_id = nil
-    @role_name = nil
-    @user_id = nil
   end
 
   # POST /roles or /roles.json
@@ -135,11 +103,6 @@ class RolesController < ApplicationController
     # Only allow a list of trusted parameters through.
     def create_role_params
       params.require(:role).permit(:id, :name, :resource_type, :resource_id, :user_id, :role_return_path)
-    end
-
-    # Set up instance variables for the roles index and new form
-    def set_index_variables
-      @role_names = role_names  # This uses the helper method from RolesHelper
     end
 
     # Sets up variables from params for role creation
@@ -330,5 +293,19 @@ class RolesController < ApplicationController
         # format.any  { head :forbidden }  # Simple response for non-HTML formats
       end
       return false
+    end
+
+    # Prepare roles for display using the helper method
+    def prepare_roles_for_display(roles_scope)
+      roles_helper.prepare_roles_for_display(roles_scope)
+    end
+  
+    # Access roles helper methods
+    def roles_helper
+      @roles_helper ||= Class.new do
+        include RolesHelper
+        include ActionView::Helpers::TranslationHelper
+        include ActionView::Helpers::TextHelper
+      end.new
     end
 end

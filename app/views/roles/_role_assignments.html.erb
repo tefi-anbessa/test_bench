@@ -1,0 +1,77 @@
+<%# This partial displays role assignments using the same grid layout as the index view %>
+<% @grouped_roles = grouped_roles_for_resource(local_assigns[:selected_resource]) %>
+
+<% if @grouped_roles.any? %>
+  <% @grouped_roles.each do |resource_type, resources| %>
+    <div class="card mb-3">
+      <div class="card-header py-1 cursor-pointer d-flex justify-content-between align-items-center"
+           data-bs-toggle="collapse"
+           href="#collapse-assignments-<%= resource_type.parameterize %>"
+           role="button"
+           aria-expanded="true"
+           aria-controls="collapse-assignments-<%= resource_type.parameterize %>">
+        <h6 class="mb-0 small">
+          <i class="bi bi-chevron-down me-1"></i>
+          <%= (resource_type == 'global' || resource_type == '-') ? t('rolify.role_types.global') : resource_type %>
+          <span class="badge bg-secondary ms-1"><%= resources.values.sum { |r| r.values.sum(&:count) } %></span>
+        </h6>
+        <i class="bi bi-chevron-down small"></i>
+      </div>
+
+      <div class="collapse show" id="collapse-assignments-<%= resource_type.parameterize %>">
+        <div class="card-body p-2">
+          <div class="container-fluid">
+            <!-- Header -->
+            <div class="row g-1 mb-1 fw-bold border-bottom pb-1 small">
+              <div class="col-md-4"><%= t('activerecord.attributes.role.resource') %></div>
+              <div class="col-md-3"><%= t('activerecord.models.role') %></div>
+              <div class="col-md-4"><%= t('activerecord.models.user') %></div>
+              <div class="col-md-1 text-end pe-3"><%= t('actions.actions') %></div>
+            </div>
+
+            <!-- Rows -->
+            <% resources.each do |resource_label, roles| %>
+              <% roles.each do |role_name, user_names| %>
+                <% user_names.each do |user_name| %>
+                  <% role = local_assigns[:selected_resource].roles
+                    .joins(:users)
+                    .find_by(name: role_name, users: { name: user_name }) %>
+
+                  <% if role %>
+                    <div class="row g-1 mb-1 align-items-center py-1 border-bottom small">
+                      <div class="col-md-4 text-truncate" title="<%= resource_label.presence || t('rolify.role_types.global') %>">
+                        <%= resource_label.presence || t('rolify.role_types.global') %>
+                      </div>
+                      <div class="col-md-3">
+                        <%= t("rolify.names.#{role_name}", default: role_name.to_s.humanize) %>
+                      </div>
+                      <div class="col-md-4">
+                        <%= user_name %>
+                      </div>
+                      <div class="col-md-1 text-end">
+                        <% if policy(role).destroy? %>
+                          <%= link_to user_role_path(role.users.find_by(name: user_name), role,
+                                    role_return_path: local_assigns[:role_return_path]),
+                                  method: :delete,
+                                  class: 'btn btn-sm btn-danger icon-link',
+                                  data: {
+                                    turbo_method: :delete,
+                                    turbo_confirm: t('actions.delete_sure')
+                                  },
+                                  aria: { label: t('actions.revoke') },
+                                  title: t('actions.revoke') do %>
+                            <%== icon('trash') %>
+                          <% end %>
+                        <% end %>
+                      </div>
+                    </div>
+                  <% end %>
+                <% end %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+<% end %>

@@ -3,128 +3,77 @@
 <%= bootstrap_form_with(model: role || Role.new, url: roles_path, data: { turbo: true }) do |f| %>
   <%= render 'shared/error_messages', object: f.object %>
 
-  <div class="card shadow-sm bg-light">
-    <div class="card-body p-4">
-
+  <div class="card shadow-sm bg-light mb-3">
+    <div class="card-body p-3">
       <%# If resource exists, this partial is for an instance edit form %>
       <% if local_assigns[:selected_resource].present? && local_assigns[:selected_resource].persisted? %>
-        <%# If resource has existing roles, list them first %>
-        <% if local_assigns[:selected_resource]&.roles&.any? %>
-          <div class="mb-4">
-            <h4 class="h4 card-title text-center mb-3">
-              <%= t('roles.partial.existing_roles') %>
-            </h4>
-            <div class="table-responsive">
-              <table class="table table-hover align-middle">
-                <thead class="table-light">
-                  <tr>
-                    <th><%= t('activerecord.models.role') %></th>
-                    <th><%= t('activerecord.models.user') %></th>
-                    <th class="text-end"><%= t('actions.actions') %></th>
-                  </tr>
-                </thead>
-                <tbody id="roles-table-body">
-                  <% local_assigns[:selected_resource]&.roles.each do |r| %>
-                    <% r.users.each do |u| %>
-                      <tr class="role_row">
-                        <td><%= t("rolify.names.#{r.name}") %></td>
-                        <td><%= u.name %></td>
-                        <td class="text-end">
-                          <% role = Role.find_by(id: r.id) %>
-                          <% if role && policy(role).destroy? %>
-                            <%= link_to user_role_path(u, r, role_return_path: local_assigns[:role_return_path]),
-                                method: :delete,
-                                class: 'btn btn-sm btn-danger icon-link',
-                                data: { turbo_method: :delete, turbo_confirm: t('actions.delete_sure') },
-                                aria: { label: t('actions.revoke') },
-                                title: t('actions.revoke'),
-                                display: 'inline' do %>
-                                  <%== icon('trash') %>
-                                <% end %>
-                          <% end %>
-                        </td>
-                      </tr>
-                    <% end %>
-                  <% end %>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        <% else %>
-          <div class="mb-3">
-            <%= t('roles.partial.no_roles_assigned') %>
-          </div>
-        <% end %>
+        <%# Render existing roles if any %>
+        <h5 class="h5 card-title text-center mb-3">
+          <%= t('roles.partial.existing_roles') %>
+        </h5>
+        <%= render 'roles/role_assignments', 
+             selected_resource: local_assigns[:selected_resource],
+             role_return_path: local_assigns[:role_return_path] %>
       <% end %>
 
-      <%# Partial section with form for new role %>
-      <h4 class="card-title text-center mb-4">
+      <h5 class="h5 card-title text-center mb-3">
         <%= t('roles.new.title') %>
-      </h4>
-
+      </h5>
+      
       <div class="mb-3">
         <% if local_assigns[:selected_resource].present? && local_assigns[:selected_resource].persisted? %>
           <%= t('roles.new.message_instance_html') %>
         <% else %>
           <%= t('roles.new.message_global_html') %>
         <% end %>
-      </div>
+    </div>
 
-      <div class="row g-3">
-
+      <div class="row g-2">
         <div class="col-12 col-md-4">
           <% if local_assigns[:selected_resource].present? && local_assigns[:selected_resource].persisted? %>
             <%# Resource instance role - show read-only resource info %>
             <%= f.hidden_field :resource_type, value: local_assigns[:selected_resource].class.name %>
             <%= f.hidden_field :resource_id, value: local_assigns[:selected_resource].id %>
-            <div class="mb-3">
-              <label class="form-label"><%= t('activerecord.attributes.role.resource') %></label>
-              <div class="form-control form-control-sm bg-light">
-                <%= t("activerecord.models.#{local_assigns[:selected_resource].class.model_name.i18n_key}")
-                + ": " + local_assigns[:selected_resource].label %>
-              </div>
+            
+            <div class="form-group mb-2">
+              <label class="form-label small text-muted mb-1"><%= t('activerecord.attributes.role.resource') %></label>
+              <input type="text" class="form-control form-control-sm" 
+                     value="<%= local_assigns[:selected_resource].try(:label) || local_assigns[:selected_resource].class.model_name.human %>" 
+                     readonly>
             </div>
           <% else %>
-            <%# Global or resource-wide role - show resource type dropdown %>
-            <%= f.select :resource_type, resources,
-                  { label: t('activerecord.attributes.role.resource_type'),
-                    selected: local_assigns[:selected_resource_type],
-                    include_blank: t('activerecord.attributes.role.resource_type_help') },
-                  { id: 'role_resource_type',
-                    class: 'form-select form-select-sm' } %>
-            <%= f.hidden_field :resource_id, value: nil %>
+            <%# Global role or resource class role - show dropdowns %>
+            <%= f.select :resource_type, 
+                  options_for_select(@resource_types, f.object.resource_type),
+                  { label: t('activerecord.attributes.role.resource_type'), label_class: 'small text-muted' },
+                  class: 'form-select form-select-sm mb-2',
+                  data: { controller: 'resource-type-selector', 
+                          action: 'change->resource-type-selector#updateResourceSelect' } %>
+            
+            <div data-resource-type-selector-target="resourceSelector" class="d-none">
+              <%= f.select :resource_id, 
+                    [],
+                    { label: t('activerecord.attributes.role.resource'), label_class: 'small text-muted' },
+                    class: 'form-select form-select-sm mb-2' %>
+            </div>
           <% end %>
         </div>
 
         <div class="col-12 col-md-3">
-          <%= f.select :name, grouped_options_for_select(role_names),
-              { label: t('activerecord.models.role'),
-                selected: local_assigns[:selected_role_name],
-                include_blank: true },
-                { id: 'role_name',
-                  class: 'form-select form-select-sm',
-                  required: true } %>
+          <%= f.select :name, 
+                grouped_options_for_select(@grouped_role_names, f.object.name),
+                { label: t('activerecord.attributes.role.name'), label_class: 'small text-muted', include_blank: true },
+                class: 'form-select form-select-sm' %>
         </div>
+
         <div class="col-12 col-md-3">
-          <%= f.collection_select :user_id, users, :id, :name,
-                { label: t('activerecord.attributes.role.user'),
-                  selected: local_assigns[:selected_user_id],
-                  required: true },
-                  { id: 'role_user_id',
-                    class: 'form-select form-select-sm' } %>
+          <%= f.collection_select :user_id, @users, :id, :name, 
+                { label: t('activerecord.attributes.role.user'), label_class: 'small text-muted', include_blank: true },
+                { class: 'form-select form-select-sm' } %>
         </div>
 
-        <%= f.hidden_field :role_return_path, value: local_assigns[:role_return_path] || roles_path %>
-
-        <div class="col-md-2 d-flex justify-content-end">
-          <div style="margin-top: 1.5rem;">
-            <%= button_tag type: 'submit',
-              class: 'btn btn-primary btn-sm',
-              title: t('actions.grant'),
-              'aria-label' => t('actions.grant') do %>
-                <%== icon('save') %>
-              <% end %>
-          </div>
+        <div class="col-12 col-md-2 d-flex align-items-end">
+          <%= f.submit t('actions.grant'), class: 'btn btn-sm btn-primary w-100' %>
         </div>
       </div>
     </div>

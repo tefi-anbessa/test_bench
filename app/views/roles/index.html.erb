@@ -1,68 +1,66 @@
 <% provide(:title, t('.title')) %>
-<div class="container mb-3">
-  <div class="position-relative"> 
-    <h2 class="text-center mb-4">
+<div class="container mb-2">
+  <div class="position-relative">
+    <h3 class="text-center mb-3">
       <%= t('.header')%>
-    </h2>
+    </h3>
   </div>
 </div>
 
 <div class="container">
   <%== pagy_bootstrap_nav(@pagy) %>
-  
+
   <% @grouped_roles.each do |resource_type, resources| %>
-    <div class="card mb-4">
-      <div class="card-header cursor-pointer d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#collapse-<%= resource_type.parameterize %>" role="button" aria-expanded="true" aria-controls="collapse-<%= resource_type.parameterize %>">
-        <h5 class="mb-0">
-          <i class="bi bi-chevron-down me-2"></i>
-          <%= (resource_type == 'global' || resource_type == '-') ? t('rolify.role_types.global') : resource_type %>
-          <span class="badge bg-secondary ms-2"><%= resources.values.sum { |r| r.values.sum(&:count) } %></span>
-        </h5>
+    <div class="card mb-3">
+      <div class="card-header py-1 cursor-pointer d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#collapse-<%= resource_type.parameterize %>" role="button" aria-expanded="true" aria-controls="collapse-<%= resource_type.parameterize %>">
+        <h6 class="mb-0 small">
+          <i class="bi bi-chevron-down me-1"></i>
+          <%= (resource_type == 'global' || resource_type == '-') ? t('rolify.role_types.global') : t("activerecord.models.#{resource_type.constantize.model_name.i18n_key}") %>
+          <span class="badge bg-secondary ms-1"><%= resources.values.sum { |r| r.values.sum(&:count) } %></span>
+        </h6>
         <div class="d-flex align-items-center">
-          <span class="badge bg-light text-dark me-2"><%= resources.size %> resources</span>
-          <i class="bi bi-chevron-down transition-all"></i>
+          <i class="bi bi-chevron-down transition-all small"></i>
         </div>
       </div>
-      
+
       <div class="collapse show" id="collapse-<%= resource_type.parameterize %>">
-        <div class="card-body">
+        <div class="card-body p-2">
           <div class="container-fluid">
             <!-- Header -->
-            <div class="row g-2 mb-2 fw-bold border-bottom pb-2">
+            <div class="row g-1 mb-1 fw-bold border-bottom pb-1 small">
               <div class="col-md-4"><%= t('activerecord.attributes.role.resource') %></div>
-              <div class="col-md-3"><%= t('activerecord.attributes.role.name') %></div>
-              <div class="col-md-4"><%= t('activerecord.models.user.one') %></div>
-              <div class="col-md-1 text-end"><%= t('actions.actions') %></div>
+              <div class="col-md-3"><%= t('activerecord.models.role') %></div>
+              <div class="col-md-4"><%= t('activerecord.models.user') %></div>
+              <div class="col-md-1 text-end pe-3"><%= t('actions.actions') %></div>
             </div>
-            
+
             <!-- Rows -->
             <% resources.each do |resource_label, roles| %>
               <% roles.each do |role_name, user_names| %>
                 <% user_names.each do |user_name| %>
-                  <% # Find matching role, handling both string and symbol comparisons
-                  role = @roles.find do |r| 
-                    r.name.to_s == role_name.to_s && 
-                    ((r.resource_type == resource_type) || 
+                  <% role = @roles.find do |r|
+                    r.name.to_s == role_name.to_s &&
+                    ((r.resource_type == resource_type) ||
                      (r.resource_type.nil? && (resource_type == 'global' || resource_type == '-'))) &&
                     r.users.any? { |u| u.name == user_name }
                   end %>
-                  
+
                   <% if role && (user = role.users.find { |u| u.name == user_name }) %>
-                    <div class="row g-2 mb-2 align-items-center py-2 border-bottom">
+                    <div class="row g-1 mb-1 align-items-center py-1 border-bottom small">
                       <div class="col-md-4"><%= resource_label.presence || t('roles.all_resources') %></div>
                       <div class="col-md-3"><%= t("roles.names.#{role_name}", default: role_name.to_s.humanize) %></div>
                       <div class="col-md-4"><%= user.name %></div>
                       <div class="col-md-1 text-end">
                         <% if policy(role).destroy? %>
                           <%= link_to user_role_path(user, role, role_return_path: roles_path),
-                                data: { 
-                                  turbo_method: :delete, 
-                                  turbo_confirm: t('actions.delete_sure') 
+                                data: {
+                                  turbo_method: :delete,
+                                  turbo_confirm: t('actions.delete_sure')
                                 },
-                                class: "btn btn-sm btn-link text-danger p-1",
+                                class: "btn btn-sm btn-danger icon-link",
                                 aria: { label: t('actions.revoke') },
                                 title: t('actions.revoke') do %>
-                            <%== icon('trash-fill') %>
+                            <%== icon('trash') %>
                           <% end %>
                         <% end %>
                       </div>
@@ -81,7 +79,7 @@
   <%== pagy_info(@pagy) %>
 
   <% if policy(Role).new? %>
-    <div class="card mt-4">
+    <div class="card mt-3">
       <div class="card-body">
         <%= render 'roles/role_assignment',
                     role: @role,

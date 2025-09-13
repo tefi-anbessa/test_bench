@@ -1,7 +1,8 @@
 class ProjectsController < ApplicationController
   include PageSizeable
+  include RolesHelper
   
-  before_action :get_project, only: %i[ show edit update destroy ]
+  before_action :get_project, only: %i[ show update destroy ]
   before_action :set_project, only: %i[ set ]
   before_action :authenticate_user!
   before_action :ensure_html_format, except: [:show] # or any actions where you want to allow
@@ -49,8 +50,19 @@ class ProjectsController < ApplicationController
 
   # GET /projects/1/edit
   def edit
+    @project = Project.find(params[:id])
     authorize @project
-    setup_role_assignment_variables
+
+    if policy(Role).new?
+      # Set up select options and scope for the roles assignment form
+      setup_role_assignment(@project)
+      @role_return_path = project_path(@project)
+    end
+    
+    respond_to do |format|
+      format.html
+      format.json { render json: @project }
+    end
   end
 
   # PATCH/PUT /projects/1
@@ -61,7 +73,7 @@ class ProjectsController < ApplicationController
       flash[:success] = I18n.t('flash.actions.update.notice', resource_name: I18n.t('activerecord.models.project'))
       redirect_to @project
     else
-      setup_role_assignment_variables
+      setup_role_assignment(@project)
       flash.now[:alert] = I18n.t('flash.actions.update.alert', resource_name: I18n.t('activerecord.models.project'))
       render :edit, status: :unprocessable_content
     end
@@ -134,30 +146,6 @@ class ProjectsController < ApplicationController
       head :not_acceptable
     end
     
-    def setup_role_assignment_variables
-      @role = Role.new
-      @roles = @project.roles
-      @available_roles = Constants.roles.resources[:project] || []
-      @users = User.all
-      @resource_roles = prepare_role_assignment_data(@project)
-    end
-    
-    # Formats role data for the view
-    # @param project [Project] the project to get roles for
-    # @return [Hash] formatted role data for the view
-    def prepare_role_assignment_data(project)
-      resource_roles = {}
-      
-      project.roles.includes(:users).each do |role|
-        role.users.each do |user|
-          resource_roles[user.id] ||= { name: user.name, roles: [] }
-          resource_roles[user.id][:roles] << [role.name, role.id]
-        end
-      end
-      
-      resource_roles
-    end
-
     # Only allow a list of trusted parameters through.
     def project_params
       params.require(:project).permit(:code, :title, :description)

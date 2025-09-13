@@ -64,8 +64,20 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    - Prefer simple, maintainable solutions over clever ones
 
 ## Implementation
+Set options for select fields in the controller, not in the view. Complete i18n translations for select fields in the view.
 
 ### Error Handling
+   - Errors are categorized as:
+      - User data entry errors: These are errors that can be fixed by the user, such as missing required fields or invalid data.
+         - Required fields are highlighted by html5 without any additional code. Not sure how to translate these.
+         - Invalid data should be detected in the controller and the form displayed again with error messages. Rails manages standard error messages but translations may need to be provided [HOLD] check this.
+         - More complex validations of associations use custom error messages with translations.
+      - 
+      - Security breach attempts: These are trapped forbidden operations that should not be possible using normal workflows. They are probably direct HTML requests in an attempt to defeat the permissions system. This type of error should log a message to the rails logger, redirect to the custom /403 page, and log out the user. 
+
+### Form Design
+
+### Icons
 
 ## Known Issues
 

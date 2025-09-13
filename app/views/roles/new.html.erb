@@ -1,0 +1,73 @@
+<% provide(:title, t('.title')) %>
+
+<div class="row justify-content-center mt-4">
+  <div class="col-12 col-md-10 col-lg-8 col-xl-8">
+    <div class="card shadow-sm bg-light">
+      <div class="card-body p-4">
+        <h2 class="card-title text-center mb-4">
+          <%= t('.header') %>
+        </h2>
+        
+        <div id="new_role">
+          <%= bootstrap_form_with(model: @role, data: { turbo: true }) do |f| %>
+          <%= render 'shared/error_messages', object: f.object %>
+          
+          <div class="mb-3">
+            <%= t('.message_html') %>
+          </div>
+          
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <%= f.collection_select :user_id, @users, :id, :name, 
+                    { label: t('activerecord.attributes.role.user'),
+                      selected: @user_id,
+                      required: true }, 
+                    { id: 'role_user_id', 
+                      class: 'form-select form-select-sm' } %>
+            </div>
+            
+            <div class="col-12 col-md-4">
+              <%= f.select :resource_type, @resources, 
+                    { label: t('activerecord.attributes.role.resource_type'),
+                      selected: @resource_type,
+                      include_blank: t('helpers.select.prompt') }, 
+                    { id: 'role_resource_type', 
+                      class: 'form-select form-select-sm',
+                      help: t('activerecord.attributes.role.resource_type_help') } %>
+              <%= f.hidden_field :resource_id, value: nil %>
+            </div>
+            
+            <div class="col-12 col-md-4">
+              <%= f.select :name, grouped_options_for_select(role_names), 
+                    { label: t('activerecord.attributes.role.name'),
+                      include_blank: true },
+                    { id: 'role_name',
+                      class: 'form-select form-select-sm',
+                      required: true } %>
+            </div>
+            
+            <div class="col-12 mt-4">
+              <div class="d-flex justify-content-between">
+                <%= link_to roles_path, 
+                      class: "btn btn-outline-secondary",
+                      data: { turbo_confirm: t('actions.sure') } do %>
+                  <%= t('actions.cancel') %>
+                  <%== icon('x-square') %>
+                <% end %>
+                
+                <%= button_tag type: 'submit', 
+                      class: 'btn btn-primary',
+                      'aria-label' => t('actions.grant'),
+                      title: t('actions.grant'),
+                      data: { toggle: 'tooltip', placement: 'top' } do %>
+                  <%= t('actions.grant') %>
+                  <%== icon('save') %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
