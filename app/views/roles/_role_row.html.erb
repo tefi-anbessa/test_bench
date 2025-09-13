@@ -1,0 +1,12 @@
+<%# This partial renders user name and delete button for a role assignment %>
+<%= user.name %>
+<% if policy(role).destroy? %>
+  <%= link_to user_role_path(user, role, role_return_path: roles_path),
+        data: { turbo_method: :delete, 
+                turbo_confirm: t('actions.delete_sure') },
+        class: "btn btn-sm btn-danger icon-link float-end",
+        aria: { label: t('actions.revoke') },
+        title: t('actions.revoke') do %>
+    <%== icon('trash') %>
+  <% end %>
+<% end %>

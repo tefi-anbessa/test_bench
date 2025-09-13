@@ -18,6 +18,45 @@
   background-color: HoneyDew;
 }
 
+/* Card header styles */
+.card-header.cursor-pointer {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  user-select: none;
+  
+  &:hover {
+    background-color: #f8f9fa;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.05);
+  }
+  
+  .bi-chevron-down {
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  &[aria-expanded="false"] {
+    .bi-chevron-down:first-child {
+      transform: rotate(-90deg);
+    }
+    .bi-chevron-down:last-child {
+      transform: rotate(0);
+    }
+  }
+  
+  &[aria-expanded="true"] {
+    .bi-chevron-down:first-child {
+      transform: rotate(0);
+    }
+    .bi-chevron-down:last-child {
+      transform: rotate(180deg);
+    }
+  }
+  
+  .badge {
+    font-weight: 500;
+    font-size: 0.8em;
+  }
+}
+
 /* Style the footer as BS doesn't
 */
 footer {

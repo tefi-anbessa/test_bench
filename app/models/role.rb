@@ -1,6 +1,17 @@
 class Role < ApplicationRecord
   resourcify
   
+    # Default scope to sort by resource_type (with nil first), then by resource_id, and finally by name
+    # This helps maintain consistent pagination while the exact label-based sort is handled in the controller
+    default_scope { 
+      order(
+        Arel.sql('CASE WHEN resource_type IS NULL THEN 0 ELSE 1 END'), 
+        :resource_type,
+        :resource_id,
+        :name
+      ) 
+    }
+  
   # This sets up the many-to-many relationship with users through the users_roles join table
   has_and_belongs_to_many :users, join_table: :users_roles, class_name: 'User'
 

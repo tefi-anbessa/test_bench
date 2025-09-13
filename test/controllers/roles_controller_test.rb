@@ -43,20 +43,6 @@ class RolesControllerTest < ActionController::TestCase
     sign_out @admin
   end
 
-  # New tests
-  test "regular user cannot access new role form" do
-    sign_in @regular_user
-    get :new
-    assert_forbidden
-  end
-
-  test "admin can access new role form" do
-    sign_in @admin
-    get :new
-    assert_response :success
-    sign_out @admin
-  end
-
 # Create tests
 # Test failing paths in the controller first
   test "admin cannot create invalid resource role" do

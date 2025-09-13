@@ -1,6 +1,6 @@
 class RolesController < ApplicationController
   include RolesHelper
-  
+
   before_action :authenticate_user!
   before_action :get_role_variables_for_create, only: %i[create]
   before_action :get_role_variables_for_destroy, only: %i[destroy]
@@ -18,11 +18,44 @@ class RolesController < ApplicationController
 
   # GET /roles or /roles.json
   def index
-    @pagy, @roles = pagy(policy_scope(Role).joins(:users), limit: 20)
+    # Get paginated roles with users
+    roles_scope = policy_scope(Role).includes(:users)
+    @pagy, @roles = pagy(roles_scope, limit: 20)
     authorize @roles
+
+    sorted_roles = []
+    @roles.each do |role|
+      role.users.each do |user|
+        if role.resource_id.blank?
+          resource_label = "-"
+        elsif role.resource&.respond_to?(:label)
+          resource_label = role.resource.label
+        else
+          resource_label = role.resource_id
+        end
+        rt = role.resource_type.presence || "-" # Convert nil to blank for safe sorting
+        sorted_roles << { id: role.id, user_id: user.id, resource_type: rt,
+          resource_label: resource_label, role_name: role.name,
+          user_name: user.name }
+      end
+    end
+    sorted_roles.sort_by! { |h| [h[:resource_type], h[:resource_label], h[:role_name]] }
+
+    # Then group the sorted roles
+    @grouped_roles = {}
+    sorted_roles.each do |role|
+      rt = role[:resource_type]
+      @grouped_roles[rt] ||= {}
+      rl = role[:resource_label]
+      @grouped_roles[rt][rl] ||= {}
+      rn = role[:role_name]
+      @grouped_roles[rt][rl][rn] ||= []
+      @grouped_roles[rt][rl][rn] << role[:user_name]
+    end
+
+    # Set instance variables
     set_index_variables
     @users = User.all
-    Rails.application.eager_load! if Rails.env.development?
     @resources = Rolify.resource_types.uniq
   end
 
@@ -32,7 +65,7 @@ class RolesController < ApplicationController
     authorize @role
     set_index_variables
     @users = User.all
-    
+
     Rails.application.eager_load! if Rails.env.development?
     @resources = Rolify.resource_types.uniq
 
@@ -71,8 +104,6 @@ class RolesController < ApplicationController
           end
         end
       end
-
-
   end
 
   # DELETE /roles/1 or /roles/1.json
@@ -84,12 +115,12 @@ class RolesController < ApplicationController
       when 'resource_wide' then @resource_type_class
       when 'resource_instance' then @resource
     end
-    
+
     if @user.revoke(@role.name, target)
-      flash[:success] = I18n.t('rolify.flash.revoked', role_type: role_type_name)
       # resource_retun_path is a fallback, delete should return to the calling form
       respond_to do |format|
         format.any do
+          flash[:success] = I18n.t('rolify.flash.revoked', role_type: role_type_name)
           redirect_to @role_return_path
         end
       end
@@ -105,7 +136,7 @@ class RolesController < ApplicationController
     def create_role_params
       params.require(:role).permit(:id, :name, :resource_type, :resource_id, :user_id, :role_return_path)
     end
-    
+
     # Set up instance variables for the roles index and new form
     def set_index_variables
       @role_names = role_names  # This uses the helper method from RolesHelper
@@ -118,7 +149,7 @@ class RolesController < ApplicationController
       # Check resource
       @resource_type = create_role_params[:resource_type].presence
       @resource_id = create_role_params[:resource_id].presence
-      
+
       if @resource_type.present?
         unless Rolify.resource_types.include?(@resource_type)
           # Log security event if resource type doesn't exist or isn't resourcified
@@ -128,11 +159,11 @@ class RolesController < ApplicationController
           return false
         end
         @resource_type_class = @resource_type.safe_constantize
-        
+
         if @resource_id.present?
           @resource = @resource_type_class.find_by(id: @resource_id)
           # Log security event if resource instance doesn't exist
-          unless @resource 
+          unless @resource
             Rails.logger.error("Security event: Attempt to create role on non existent resource instance: #{@resource_type} id #{@resource_id}")
             return trap_forbidden
           end
@@ -143,7 +174,7 @@ class RolesController < ApplicationController
           @role.resource_id = nil
           @role_type = :resource_wide
         end
-      else 
+      else
         @role.resource_type = nil
         @role.resource_id = nil
         @role_type = :global
@@ -157,7 +188,7 @@ class RolesController < ApplicationController
         redirect_back(fallback_location: @role_return_path, status: :unprocessable_content)
         return false
       end
-    
+
       # Log security event if user doesn't exist
       unless @user = User.find_by(id: @user_id)
         Rails.logger.error("Security event: Attempt to create role for non existent user id: #{@user_id}")
@@ -175,16 +206,16 @@ class RolesController < ApplicationController
 
     @role_name = @role_name.to_sym
     unless Role.valid_role?(@role_name, @resource_type, @resource_id)
-      flash.now[:warning] = I18n.t("rolify.flash.name_invalid", 
-        name: I18n.t("rolify.names.#{@role_name}", default: @role_name.to_s.humanize), 
+      flash.now[:warning] = I18n.t("rolify.flash.name_invalid",
+        name: I18n.t("rolify.names.#{@role_name}", default: @role_name.to_s.humanize),
         resource: @resource_type ? I18n.t("activerecord.models.#{@resource_type.downcase}", default: @resource_type) : I18n.t('roles.global')
       )
-        # Return to form with warning - user error [TODO] Check whether this should be upgraded to security after 
+        # Return to form with warning - user error [TODO] Check whether this should be upgraded to security after
         # the name select is upgraded with only valid names available.
         redirect_back(fallback_location: @role_return_path, status: :unprocessable_content)
       return false
     end
-    
+
     # Trap if trying to manage admin/app_owner roles, and redirect to forbidden.
     if %i[admin app_owner].include?(@role_name) && !current_user.is_app_owner?
       Rails.logger.error("Security event: Attempt to grant admin role by non app owner: #{current_user.name}")
@@ -194,23 +225,23 @@ class RolesController < ApplicationController
     true
   end
 
-    # Set up variables from params for role destroy 
+    # Set up variables from params for role destroy
     def get_role_variables_for_destroy
       @role_return_path = safe_return_path(params[:role_return_path]) || roles_path
       @user = User.find_by(id: params[:user_id])
-      # [TODO: Is it possible that orphaned users_role entries exist? 
-      # If user doesn't exist, revoke method won't work. 
+      # [TODO: Is it possible that orphaned users_role entries exist?
+      # If user doesn't exist, revoke method won't work.
       # It may still be possible to destroy the habtm entry for the role.]
       @role = Role.find_by(id: params[:id])
       unless @role
         # trap role not found - trying to destroy non-existent role
         Rails.logger.error("Security event: Attempt to destroy non existent role id: #{params[:id]}")
-        return trap_forbidden 
+        return trap_forbidden
       end
       @resource_type = @role.resource_type.presence
       @resource_id = @role.resource_id.presence
       # No checks on the resource type: even if it is non-existent, the role can still be destroyed if it exists.
-      if @resource_type.present? 
+      if @resource_type.present?
           @resource_type_class = @resource_type.safe_constantize
           if @resource_id.present?
             @resource = @resource_type_class.find(@resource_id)
@@ -218,7 +249,7 @@ class RolesController < ApplicationController
           else
             @role_type = :resource_wide
           end
-      else 
+      else
         @role_type = :global
       end
 
@@ -240,13 +271,13 @@ class RolesController < ApplicationController
       I18n.t("rolify.role_types.#{role_type}")
     end
 
-    # Use safe_return_path 
+    # Use safe_return_path
     def role_return_path
       return roles_url(locale: I18n.locale) if @resource_type.blank? || @resource_id.blank?
-      
+
       resource_class = @resource_type.safe_constantize
       return roles_url(locale: I18n.locale) unless resource_class
-      
+
       begin
         edit_path = "edit_#{@resource_type.underscore.singularize}_path"
         send(edit_path, @resource_id, locale: I18n.locale)
@@ -254,15 +285,15 @@ class RolesController < ApplicationController
         roles_url(locale: I18n.locale)
       end
     end
-    
+
     # Validates that a return path is safe (relative or same domain)
     def safe_return_path(path)
       return nil if path.blank?
-      
+
       # Only allow relative paths or paths starting with root path
       uri = URI.parse(path) rescue nil
       return nil unless uri
-      
+
       # Allow relative paths
       if uri.relative?
         path if path.start_with?('/')
@@ -273,7 +304,7 @@ class RolesController < ApplicationController
     rescue URI::InvalidURIError
       nil
     end
-    
+
     # Return with flash message to the appropriate form for the role type, which should be where the user came from.
     # This is used when there's a controller detected validation error in the form submission.
     def return_to_form
@@ -282,17 +313,17 @@ class RolesController < ApplicationController
       @users = User.all
       Rails.application.eager_load! if Rails.env.development?
       @resources = Rolify.resource_types.uniq
-      
+
       # Set flash message if not already set
       flash[:warning] ||= flash.now[:warning]
-      
+
       # Use roles_path as the fallback if no return path is specified
       redirect_back(
         fallback_location: @role_return_path.presence || roles_path,
         status: :unprocessable_content
       )
     end
-    
+
     def trap_forbidden
       respond_to do |format|
         format.html { render 'errors/forbidden', status: :forbidden }
