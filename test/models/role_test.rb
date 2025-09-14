@@ -18,8 +18,8 @@ class RoleTest < ActiveSupport::TestCase
   end
 
   test "should create project role" do
-    role = create(:role, :project_project_owner, resource: @project)
-    assert_equal 'project_owner', role.name
+    role = create(:role, :project_project_manager, resource: @project)
+    assert_equal 'project_manager', role.name
     assert_equal 'Project', role.resource_type
     assert_equal @project.id, role.resource_id
   end
@@ -60,7 +60,7 @@ class RoleTest < ActiveSupport::TestCase
 
   # Should be valid - different resource type with valid role name
   #    project = create(:project)
-  #    project_role = build(:role, name: 'project_owner', resource: project)
+  #    project_role = build(:role, name: 'project_manager', resource: project)
   #    assert project_role.valid?, "Expected role with valid name to be valid: #{project_role.errors.full_messages}"
   # end
 
@@ -78,14 +78,14 @@ class RoleTest < ActiveSupport::TestCase
     project2 = create(:project)
     
     # Create roles with valid project roles (only two per project)
-    role1 = create(:role, name: 'project_owner', resource_type: 'Project', resource_id: project1.id)
+    role1 = create(:role, name: 'project_manager', resource_type: 'Project', resource_id: project1.id)
     role2 = create(:role, name: 'team_member', resource_type: 'Project', resource_id: project1.id)
     
     # Create a global role
     global_role = create(:role, name: 'admin', resource_type: nil, resource_id: nil)
     
     # Create a role for a different project
-    other_project_role = create(:role, name: 'project_owner', resource_type: 'Project', resource_id: project2.id)
+    other_project_role = create(:role, name: 'project_manager', resource_type: 'Project', resource_id: project2.id)
     
     # Get all roles in default scope order
     roles = Role.all.to_a

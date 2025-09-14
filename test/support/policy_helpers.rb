@@ -3,12 +3,12 @@ module PolicyHelpers
   def setup_policy_test
     @app_owner = create(:user, :app_owner)
     @admin = create(:user, :admin)
-    @project_owner = create(:user)
+    @project_manager = create(:user)
     @team_member = create(:user)
     @regular_user = create(:user)
     
     @project = create(:project)
-    @project_owner.grant(:project_owner, @project)
+    @project_manager.grant(:project_manager, @project)
     @team_member.grant(:team_member, @project)
 
     @other_project = create(:project)

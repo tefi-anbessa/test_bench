@@ -45,7 +45,7 @@ class TagPolicyTest < ActiveSupport::TestCase
 
   # Show Tests
   test 'show allows anyone with project access' do
-    assert TagPolicy.new(user_context(@project_owner), @tag).show?
+    assert TagPolicy.new(user_context(@project_manager), @tag).show?
     assert TagPolicy.new(user_context(@team_member), @tag).show?
     assert TagPolicy.new(user_context(@admin), @tag).show?
     assert TagPolicy.new(user_context(@app_owner), @tag).show?
@@ -59,7 +59,7 @@ class TagPolicyTest < ActiveSupport::TestCase
   test 'cannot show tag from different project' do
     @other_project = create(:project)
     @other_tag = create(:tag, :unique_tag, project: @other_project)
-    refute TagPolicy.new(user_context(@project_owner), @other_tag).show?
+    refute TagPolicy.new(user_context(@project_manager), @other_tag).show?
     refute TagPolicy.new(user_context(@team_member), @other_tag).show?
   end
 
@@ -67,7 +67,7 @@ class TagPolicyTest < ActiveSupport::TestCase
   # Create Tests
   test 'create allows users with any project role' do
     # Test with standard project roles
-    assert TagPolicy.new(user_context(@project_owner), Tag.new(project: @project)).create?
+    assert TagPolicy.new(user_context(@project_manager), Tag.new(project: @project)).create?
     assert TagPolicy.new(user_context(@team_member), Tag.new(project: @project)).create?
   end
 
@@ -80,7 +80,7 @@ class TagPolicyTest < ActiveSupport::TestCase
   # Update Tests
   test 'update allows users with any project role' do
     # Test with standard project roles
-    assert TagPolicy.new(user_context(@project_owner), @tag).update?
+    assert TagPolicy.new(user_context(@project_manager), @tag).update?
     assert TagPolicy.new(user_context(@team_member), @tag).update?
   end
 
@@ -95,11 +95,11 @@ class TagPolicyTest < ActiveSupport::TestCase
     assert TagPolicy.new(user_context(@app_owner), @tag).destroy?
   end
 
-  test 'destroy denies project owner, team members and regular users' do
-    @project_owner.add_role(:project_owner, @project)
+  test 'destroy denies project manager, team members and regular users' do
+    @project_manager.add_role(:project_manager, @project)
     @team_member.add_role(:team_member, @project)
     
-    refute TagPolicy.new(user_context(@project_owner), @tag).destroy?
+    refute TagPolicy.new(user_context(@project_manager), @tag).destroy?
     refute TagPolicy.new(user_context(@team_member), @tag).destroy?
     refute TagPolicy.new(user_context(@regular_user), @tag).destroy?
     refute TagPolicy.new(user_context(nil), @tag).destroy?

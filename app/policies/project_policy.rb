@@ -55,7 +55,7 @@ class ProjectPolicy < ApplicationPolicy
     user.present? && (
       user.is_app_owner? || 
       user.is_admin? || 
-      user.is_project_owner_of?(project)
+      user.is_project_manager_of?(project)
     )
   end
   
@@ -74,8 +74,8 @@ class ProjectPolicy < ApplicationPolicy
     # App owners and admins can grant any valid role
     return true if user.is_app_owner? || user.is_admin?
     
-    # Project owners can grant non-admin roles
-    if user.has_role?(:project_owner, resource)
+    # Project managers can grant non-admin roles
+    if user.has_role?(:project_manager, resource)
       return !%w[admin app_owner].include?(role_name)
     end
     
@@ -92,8 +92,8 @@ class ProjectPolicy < ApplicationPolicy
     # App owners and admins can grant any valid role
     return true if user.is_app_owner? || user.is_admin?
     
-    # Project owners can grant non-admin roles
-    if user.has_role?(:project_owner, resource)
+    # Project managers can grant non-admin roles
+    if user.has_role?(:project_manager, resource)
       return !%w[admin app_owner].include?(role_name)
     end
     
@@ -102,7 +102,7 @@ class ProjectPolicy < ApplicationPolicy
 
   private
 
-    def project_owner?
-      user.present? && user.has_role?(:project_owner, record)
+    def project_manager?
+      user.present? && user.has_role?(:project_manager, record)
     end
 end

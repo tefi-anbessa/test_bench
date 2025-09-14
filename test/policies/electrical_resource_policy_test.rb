@@ -12,8 +12,8 @@ class ElectricalResourcePolicyTest < ActiveSupport::TestCase
     # Create test users with different roles
     @app_owner = create(:user, :app_owner)
     @admin = create(:user, :admin)
-    @project_owner = create(:user)
-    @project_owner.grant(:project_owner, @project)
+    @project_manager = create(:user)
+    @project_manager.grant(:project_manager, @project)
     
     @team_member = create(:user)
     @team_member.grant(:team_member, @project)
@@ -44,7 +44,7 @@ class ElectricalResourcePolicyTest < ActiveSupport::TestCase
   end
 
   test 'index? allows users with project role' do
-    assert policy(@project_owner, @project).index?
+    assert policy(@project_manager, @project).index?
     assert policy(@team_member, @project).index?
     assert policy(@electrical_designer, @project).index?
   end
@@ -55,7 +55,7 @@ class ElectricalResourcePolicyTest < ActiveSupport::TestCase
   end
 
   test 'index? denies when no project is selected' do
-    refute policy(@project_owner, nil).index?
+    refute policy(@project_manager, nil).index?
   end
 
   # Show Tests
@@ -67,19 +67,19 @@ class ElectricalResourcePolicyTest < ActiveSupport::TestCase
 
   test 'show? allows users with project role for resources in their project' do
     record = OpenStruct.new(tag: @tag)
-    assert policy(@project_owner, @project, record).show?
+    assert policy(@project_manager, @project, record).show?
     assert policy(@team_member, @project, record).show?
     assert policy(@electrical_designer, @project, record).show?
   end
 
   test 'show? denies users for resources in other projects' do
     other_record = OpenStruct.new(tag: @other_tag)
-    refute policy(@project_owner, @project, other_record).show?
+    refute policy(@project_manager, @project, other_record).show?
   end
 
   test 'show? denies when no project is selected' do
     record = OpenStruct.new(tag: @tag)
-    refute policy(@project_owner, nil, record).show?
+    refute policy(@project_manager, nil, record).show?
   end
 
   # Create/Update Tests
@@ -99,20 +99,20 @@ class ElectricalResourcePolicyTest < ActiveSupport::TestCase
 
   test 'create? and update? deny non-electrical users' do
     record = OpenStruct.new(tag: @tag)
-    refute policy(@project_owner, @project, record).create?
+    refute policy(@project_manager, @project, record).create?
     refute policy(@team_member, @project, record).create?
-    refute policy(@project_owner, @project, record).update?
+    refute policy(@project_manager, @project, record).update?
     refute policy(@team_member, @project, record).update?
   end
 
   # Destroy Tests
-  test 'destroy? allows only app owner and admin' do
+  test 'destroy? only allows app owners and admins' do
     record = OpenStruct.new(tag: @tag)
     assert policy(@app_owner, @project, record).destroy?
     assert policy(@admin, @project, record).destroy?
     
     refute policy(@electrical_designer, @project, record).destroy?
-    refute policy(@project_owner, @project, record).destroy?
+    refute policy(@project_manager, @project, record).destroy?
     refute policy(@team_member, @project, record).destroy?
     refute policy(nil, @project, record).destroy?
   end

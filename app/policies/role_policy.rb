@@ -10,8 +10,8 @@ class RolePolicy < ApplicationPolicy
 
       # For project context, show roles for that project
       if current_project.present?
-        # Project owners and team members can see roles for their project
-        if user.present? && (user.has_role?(:project_owner, current_project) ||
+        # Project managers and team members can see roles for their project
+        if user.present? && (user.has_role?(:project_manager, current_project) ||
                             user.has_role?(:team_member, current_project))
           return scope.where(resource: current_project)
         end
@@ -27,7 +27,7 @@ class RolePolicy < ApplicationPolicy
   def index?
     if current_project.present?
       user.present? && (user.is_app_owner? || user.is_admin? ||
-                       user.has_role?(:project_owner, current_project) ||
+                       user.has_role?(:project_manager, current_project) ||
                        user.has_role?(:team_member, current_project))
     else
       user.present? && (user.is_app_owner? || user.is_admin?)

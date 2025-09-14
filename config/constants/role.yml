@@ -8,7 +8,7 @@ roles:
   # Resource-specific role definitions
   resources:
     project:
-      - project_owner
+      - project_manager
       - team_member
     tag:
       - editor

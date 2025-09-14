@@ -107,8 +107,8 @@ class CablePolicyTest < ActiveSupport::TestCase
     # Regular users cannot destroy
     refute policy(@regular_user, @project, @cable).destroy?
     
-    # Project owners cannot destroy
-    refute policy(@project_owner, @project, @cable).destroy?
+    # Project managers cannot destroy
+    refute policy(@project_manager, @project, @cable).destroy?
     
     # Team members cannot destroy
     refute policy(@team_member, @project, @cable).destroy?

@@ -43,7 +43,7 @@ class FactoriesTest < ActiveSupport::TestCase
       },
       
       # Roles and permissions
-      :resource_role => -> { build(:resource_role, :project_project_owner) },
+      :resource_role => -> { build(:resource_role, :project_project_manager) },
       :user_role => -> { 
         user = create(:user)
         user.grant(:admin)
@@ -107,11 +107,11 @@ class FactoriesTest < ActiveSupport::TestCase
     assert_nil role.resource_type
   end
   
-  test 'resource role factory with project owner' do
+  test 'resource role factory with project manager' do
     # Test with a resource-specific role
-    role = create(:resource_role, :project_project_owner)
+    role = create(:resource_role, :project_project_manager)
     assert role.valid?, "Role should be valid: #{role.errors.full_messages.join(', ')}"
-    assert_equal 'project_owner', role.name
+    assert_equal 'project_manager', role.name
     assert_equal 'Project', role.resource_type
     assert_not_nil role.resource
   end

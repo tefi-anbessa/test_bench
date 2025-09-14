@@ -4,26 +4,20 @@ class MotorTest < ActiveSupport::TestCase
   def setup
     @project = create(:project)
     @discipline = create(:discipline, code: 'E', name: 'Electrical')
-    @tag = create(:tag, 
-                 prefix: 'KM',
-                 serial: 1,
-                 description: 'TEST MOTOR',
-                 project: @project,
-                 discipline: @discipline
-               )
-    @motor = create(:motor, 
+    @motor = create(:motor, :with_tag, 
                    motor_type: 'Induction',
                    frame_size: '132L',
                    poles: 4,
                    ingress_protection: 'IP55',
-                   speed_rated: 1500.0,
-                   tag: @tag
+                   speed_rated: 1500.0
                  )
+    @tag = @motor.tag
   end
 
   test "factory should be valid" do
     assert @motor.valid?
     assert @tag.valid?
+    assert @motor.demand.present?
     assert @motor.demand.valid?
   end
 
@@ -62,6 +56,7 @@ class MotorTest < ActiveSupport::TestCase
       tag.reload
       assert_equal tag.tagable, motor
       assert_equal tag.motor, motor
+      assert motor.demand.present?, 'Motor should have a demand'
     end
   end
 
@@ -93,6 +88,7 @@ class MotorTest < ActiveSupport::TestCase
   
   test "should have demand through demandable concern" do
     assert_respond_to @motor, :demand
+    assert @motor.demand.present?, 'Motor should have a demand'
     assert_kind_of Demand, @motor.demand
   end
   

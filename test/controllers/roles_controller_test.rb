@@ -12,14 +12,14 @@ class RolesControllerTest < ActionController::TestCase
     @role = create(:role)
     @regular_user = create(:user)
     @electrical_designer = create(:user)
-    @project_owner = create(:user)
+    @project_manager = create(:user)
     @admin = create(:user, :admin)
     @app_owner = create(:user, :app_owner)
     
     # Roles
     @electrical_designer.grant(:team_member, @project)
     @electrical_designer.grant(:electrical_designer)
-    @project_owner.grant(:project_owner, @project)
+    @project_manager.grant(:project_manager, @project)
   end
 
   # Authentication tests
@@ -236,8 +236,8 @@ class RolesControllerTest < ActionController::TestCase
     sign_out @admin
   end
 
-  test "project owner can create resource instance role" do
-    sign_in @project_owner
+  test "project manager can create resource instance role" do
+    sign_in @project_manager
     post :create, params: { role: { user_id: @regular_user.id,
                                     name: :team_member,
                                     resource_type: @project.class.to_s,
@@ -246,7 +246,7 @@ class RolesControllerTest < ActionController::TestCase
     assert @regular_user.has_role?(:team_member, @project)
     assert_equal flash_message('resource_instance', :grant), flash[:success]
     assert_redirected_to edit_project_path(@project.id)
-    sign_out @project_owner
+    sign_out @project_manager
   end
 
   # Destroy tests
@@ -383,8 +383,8 @@ class RolesControllerTest < ActionController::TestCase
     assert_redirected_to roles_url
   end
 
-  test "project owner can revoke resource instance role" do
-    sign_in @project_owner
+  test "project manager can revoke resource instance role" do
+    sign_in @project_manager
     @electrical_designer.grant(:team_member, @project)
     delete :destroy, params: { user_id: @electrical_designer.id, 
                           id: @electrical_designer.roles.where(name: 'team_member', resource: @project).first.id,

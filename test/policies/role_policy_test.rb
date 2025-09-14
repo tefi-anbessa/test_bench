@@ -9,8 +9,8 @@ class RolePolicyTest < ActiveSupport::TestCase
     @admin = create(:user, :admin)
     
     # Create project-specific roles
-    @project_owner = create(:user)
-    @project_owner.add_role(:project_owner, @project)
+    @project_manager = create(:user)
+    @project_manager.add_role(:project_manager, @project)
     
     @team_member = create(:user)
     @team_member.add_role(:team_member, @project)
@@ -39,8 +39,8 @@ class RolePolicyTest < ActiveSupport::TestCase
       'App owner should be able to view roles with project context'
     assert RolePolicy.new(user_context(@admin, @project), Role).index?,
       'Admin should be able to view roles with project context'
-    assert RolePolicy.new(user_context(@project_owner, @project), Role).index?,
-      'Project owner should be able to view roles with project context'
+    assert RolePolicy.new(user_context(@project_manager, @project), Role).index?,
+      'Project manager should be able to view roles with project context'
     assert RolePolicy.new(user_context(@team_member, @project), Role).index?,
       'Team member should be able to view roles with project context'
     refute RolePolicy.new(user_context(@regular_user, @project), Role).index?,
@@ -53,8 +53,8 @@ class RolePolicyTest < ActiveSupport::TestCase
       'App owner should be able to view roles without project context'
     assert RolePolicy.new(user_context(@admin, nil), nil).index?,
       'Admin should be able to view roles without project context'
-    refute RolePolicy.new(user_context(@project_owner, nil), nil).index?,
-      'Project owner should not be able to view roles without project context'
+    refute RolePolicy.new(user_context(@project_manager, nil), nil).index?,
+      'Project manager should not be able to view roles without project context'
     refute RolePolicy.new(user_context(@team_member, nil), nil).index?,
       'Team member should not be able to view roles without project context'
     refute RolePolicy.new(user_context(@regular_user, nil), nil).index?,
@@ -70,8 +70,8 @@ class RolePolicyTest < ActiveSupport::TestCase
       'Admin should be able to access new global role form'
       
     # Other roles should not have access to global role creation
-    refute RolePolicy.new(user_context(@project_owner, @project), @new_global_role).new?,
-      'Project owner should not be able to access new global role form'
+    refute RolePolicy.new(user_context(@project_manager, @project), @new_global_role).new?,
+      'Project manager should not be able to access new global role form'
     refute RolePolicy.new(user_context(@team_member, @project), @new_global_role).new?,
       'Team member should not be able to access new global role form'
     refute RolePolicy.new(user_context(@regular_user, @project), @new_global_role).new?,
@@ -124,12 +124,12 @@ class RolePolicyTest < ActiveSupport::TestCase
       'App owner should be able to destroy global roles'
     refute RolePolicy.new(user_context(@admin, nil), @global_role).destroy?,
       'Admin should not be able to destroy global roles'
-    refute RolePolicy.new(user_context(@project_owner, nil), @global_role).destroy?,
-      'Project owner should not be able to destroy global roles'
+    refute RolePolicy.new(user_context(@project_manager, nil), @global_role).destroy?,
+      'Project manager should not be able to destroy global roles'
 
-    # Project roles - project owners can destroy roles in their projects
-    assert RolePolicy.new(user_context(@project_owner, @project), @project_role).destroy?,
-      'Project owner should be able to destroy roles in their project'
+    # Project roles - project managers can destroy roles in their projects
+    assert RolePolicy.new(user_context(@project_manager, @project), @project_role).destroy?,
+      'Project manager should be able to destroy roles in their project'
     refute RolePolicy.new(user_context(@team_member, @project), @project_role).destroy?,
       'Team member should not be able to destroy roles in their project'
     refute RolePolicy.new(user_context(@regular_user, @project), @project_role).destroy?,
@@ -154,12 +154,12 @@ class RolePolicyTest < ActiveSupport::TestCase
     assert_includes admin_scope, @project_role,
       'Admin should see project roles'
 
-    # Project owner sees only their project's roles
-    project_owner_scope = RolePolicy::Scope.new(user_context(@project_owner, @project), Role).resolve
-    refute_includes project_owner_scope, @global_role,
-      'Project owner should not see global roles'
-    assert_includes project_owner_scope, @project_role,
-      'Project owner should see roles from their project'
+    # Project manager sees only their project's roles
+    project_manager_scope = RolePolicy::Scope.new(user_context(@project_manager, @project), Role).resolve
+    refute_includes project_manager_scope, @global_role,
+      'Project manager should not see global roles'
+    assert_includes project_manager_scope, @project_role,
+      'Project manager should see roles from their project'
 
     # Team member sees only their project's roles
     team_member_scope = RolePolicy::Scope.new(user_context(@team_member, @project), Role).resolve

@@ -107,8 +107,8 @@ class MotorPolicyTest < ActiveSupport::TestCase
     # Regular users cannot destroy
     refute policy(@regular_user, @project, @motor).destroy?
     
-    # Project owners cannot destroy
-    refute policy(@project_owner, @project, @motor).destroy?
+    # Project managers cannot destroy
+    refute policy(@project_manager, @project, @motor).destroy?
     
     # Team members cannot destroy
     refute policy(@team_member, @project, @motor).destroy?

@@ -10,9 +10,9 @@ class ProjectsControllerTest < ActionController::TestCase
     @admin = create(:user)
     @admin.add_role(:admin)
 
-    @project_owner = create(:user)
+    @project_manager = create(:user)
     @project = create(:project)
-    @project_owner.add_role(:project_owner, @project)
+    @project_manager.add_role(:project_manager, @project)
 
     @team_member = create(:user)
     @team_member.add_role(:team_member, @project)
@@ -140,8 +140,8 @@ class ProjectsControllerTest < ActionController::TestCase
     assert_response :not_acceptable
   end
 
-  test "project owner can edit their project" do
-    sign_in @project_owner
+  test "project manager can edit their project" do
+    sign_in @project_manager
     get :edit, params: { id: @project.id }
     assert_response :success
   end

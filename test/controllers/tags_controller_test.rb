@@ -12,14 +12,14 @@ class TagsControllerTest < ActionController::TestCase
     # Set up users
     @admin = create(:user)
     @regular_user = create(:user)
-    @project_owner = create(:user)
+    @project_manager = create(:user)
     @team_member = create(:user)
     
     # Add global admin role
     @admin.grant(:admin)
 
     # Add project-specific team member roles
-    @project_owner.grant(:project_owner, @project)
+    @project_manager.grant(:project_manager, @project)
     @team_member.grant(:team_member, @project)
   end
 
@@ -148,7 +148,7 @@ class TagsControllerTest < ActionController::TestCase
 
   # Destroy action tests
   test "users other than admin are forbidden to destroy tag" do
-    sign_in @project_owner
+    sign_in @project_manager
     assert_no_difference("Tag.count") do
       delete :destroy, params: { id: @tag.id }
     end

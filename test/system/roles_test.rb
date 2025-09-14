@@ -13,9 +13,9 @@ class RolesTest < ApplicationSystemTestCase
     # Create admin user with admin role using factory
     @admin = create(:user, :admin)
     
-    # Create project owner user with project_owner role on the project
-    @project_owner = create(:user)
-    @project_owner.add_role(:project_owner, @project)
+    # Create project manager user with project_manager role on the project
+    @project_manager = create(:user)
+    @project_manager.add_role(:project_manager, @project)
     
     # Create team member user with team_member role on the project
     @team_member = create(:user)
@@ -64,31 +64,34 @@ class RolesTest < ApplicationSystemTestCase
   end
   
   test "admin can grant functional role to user" do
+    # Use a valid functional role from constants
+    role_name = 'electrical_designer'  # From config/constants/role.yml
+    
     sign_in @admin
     visit roles_path
     
-    # Select user
+    # Wait for the page to load
+    assert_selector 'h3', text: I18n.t('roles.index.header')
+    
+    # Select the user and role
     select @regular_user.name, from: 'role_user_id'
-    
-    # Get available functional roles
-    functional_roles = Role.valid_roles_for(nil).select { |r| Role.functional_roles.include?(r) }
-    assert_not_empty functional_roles, "No functional roles available"
-    
-    # Select the first available functional role
-    role_name = functional_roles.first
-    select I18n.t("rolify.names.#{role_name}"), from: 'role_name'
+    role_display_name = I18n.t("rolify.names.#{role_name}", default: role_name.to_s.humanize)
+    select role_display_name, from: 'role_name'
     
     # Submit the form and verify role assignment
     assert_difference('@regular_user.roles.count', 1) do
       click_button I18n.t('actions.grant')
-      # Wait for the AJAX request to complete
-      assert_no_selector '.spinner-border', wait: 10
+      
+      # Wait for the AJAX request to complete by checking for the success flash message
+      assert_text I18n.t('rolify.flash.granted', role_type: I18n.t('rolify.role_types.global')), wait: 10
+      
+      # Ensure the user is reloaded to get the latest state
+      @regular_user.reload
     end
     
-    # Verify success message and role assignment
-    assert_text I18n.t('rolify.flash.granted', role_type: I18n.t('rolify.role_types.global'))
-    @regular_user.reload
+    # Verify the result
     assert @regular_user.has_role?(role_name.to_sym), "User should have the #{role_name} role"
+    
     sign_out @admin
   end
   
@@ -206,31 +209,31 @@ class RolesTest < ApplicationSystemTestCase
     assert_selector "h5", text: I18n.t('roles.new.title')
     sign_out @admin
   end
-
-  test "project owner can see roles partial on resource edit form" do
-    sign_in @project_owner
+  
+  test "project manager can see roles partial on resource edit form" do
+    sign_in @project_manager
     visit edit_project_path(@project)
     
-    # Wait for the role assignment section to be visible
-    assert_selector "h5", text: I18n.t('roles.new.title'), wait: 10
-    sign_out @project_owner
+    # Wait for the page to load and the form to be ready
+    assert_selector 'h5', text: I18n.t('roles.new.title')
+    sign_out @project_manager
   end
 
-  test "project owner can assign team_member role on project" do
+  test "project manager can assign team_member role on project" do
     # Ensure all users are created and persisted
-    assert @project_owner.persisted?, "Project owner should be persisted"
+    assert @project_manager.persisted?, "Project manager should be persisted"
     assert @regular_user.persisted?, "Regular user should be persisted"
     
-    # Ensure project owner has the project_owner role on the project
-    assert @project_owner.has_role?(:project_owner, @project), 
-           "Project owner should have project_owner role on the project"
+    # Ensure project manager has the project_manager role on the project
+    assert @project_manager.has_role?(:project_manager, @project), 
+           "Project manager should have project_manager role on project"
     
-    
-    # Sign in as the project owner
-    sign_in @project_owner
-    
-    # Visit the edit project page
+    # Sign in as project manager and navigate to project roles
+    sign_in @project_manager
     visit edit_project_path(@project)
+    
+    # Wait for the page to load and the form to be ready
+    assert_selector 'h5', text: I18n.t('roles.new.title')
     
     # Wait for the form to be interactive and find it by action
     form = find('form[action*="/roles"]', wait: 10)
@@ -266,6 +269,6 @@ class RolesTest < ApplicationSystemTestCase
     # Check the flash message
     assert_text I18n.t('rolify.flash.granted', role_type: I18n.t('rolify.role_types.resource_instance')), wait: 10
     
-    sign_out @project_owner
+    sign_out @project_manager
   end
 end

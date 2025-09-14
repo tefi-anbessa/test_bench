@@ -69,14 +69,14 @@ class ProjectPolicyTest < ActiveSupport::TestCase
 
   test 'create denies users other than admins or app owners' do
     refute ProjectPolicy.new(user_context(@regular_user), Project).create?
-    refute ProjectPolicy.new(user_context(@project_owner), Project).create?
+    refute ProjectPolicy.new(user_context(@project_manager), Project).create?
     refute ProjectPolicy.new(user_context(nil), Project).create?
   end
 
   # Edit tests defer to update
   # Update tests
-  test 'update allows project owner' do
-    assert ProjectPolicy.new(user_context(@project_owner), @project).update?
+  test 'update allows project manager' do
+    assert ProjectPolicy.new(user_context(@project_manager), @project).update?
   end
 
   test 'update allows app owner and admin' do
@@ -95,8 +95,8 @@ class ProjectPolicyTest < ActiveSupport::TestCase
     assert ProjectPolicy.new(user_context(@app_owner), @project).destroy?
   end
 
-  test 'destroy denies project owner, team members and regular users' do
-    refute ProjectPolicy.new(user_context(@project_owner), @project).destroy?
+  test 'destroy denies project manager, team members and regular users' do
+    refute ProjectPolicy.new(user_context(@project_manager), @project).destroy?
     refute ProjectPolicy.new(user_context(@team_member), @project).destroy?
     refute ProjectPolicy.new(user_context(@regular_user), @project).destroy?
   end

@@ -4,6 +4,7 @@ en:
       app_owner: "Owner"
       admin: "Administrator"
       project_owner: "Project Owner"
+      project_manager: "Project Manager"
       team_member: "Team Member"
       electrical_designer: "Electrical Designer"
       mechanical_designer: "Mechanical Designer"
