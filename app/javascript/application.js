@@ -2,11 +2,18 @@
 import "@hotwired/turbo-rails"
 import "controllers"
 import 'bootstrap'
-import '@popperjs/core';
+import { Dropdown } from 'bootstrap'
+import { Tooltip } from 'bootstrap'
+import { Popover } from 'bootstrap'
+// import '@popperjs/core';
 
 // Initialize Bootstrap components when the page loads
 document.addEventListener('turbo:load', function() {
   // Initialize dropdowns (they should auto-initialize with data-bs-toggle="dropdown")
+  const dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
+  const dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+    return new Dropdown(dropdownToggleEl)
+  })
 
   // Initialize tooltips
   var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));

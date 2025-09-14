@@ -55,22 +55,21 @@ class ApplicationController < ActionController::Base
   protected
 
   def after_sign_in_path_for(resource)
-    # Use Pundit's policy_scope to get projects user has access to
+    # Get the projects the user has access to
     projects = policy_scope(Project)
     
     case projects.count
     when 0
-      # User has no access to any projects, redirect to user profile
-      user_path(resource)
+      # No projects available, go to root or another appropriate path
+      root_path
     when 1
       # If only one project, set it as current and proceed
       project = projects.first
-      cookies.signed[:project_id] = { value: project.id, expires: 1.year.from_now }
-      session[:project_id] = project.id
+      set_current_project(project)
       
-      # Clear any stored location and redirect to project or stored location
-      stored_path = stored_location_for(:project)
-      clear_stored_location_for(:project)
+      # Get and clear stored location for the project
+      stored_path = stored_location_for_project
+      clear_stored_location_for_project
       stored_path || project_path(project)
     else
       # Multiple projects available, go to selection

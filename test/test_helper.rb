@@ -42,7 +42,17 @@ class ActiveSupport::TestCase
   # Run tests in parallel with specified workers
   parallelize(workers: :number_of_processors)
 
-    # Add more helper methods to be used by all tests here...
+  # Helper method to wait until a condition is met
+  def wait_until(timeout = Capybara.default_max_wait_time)
+    Timeout.timeout(timeout) do
+      sleep(0.1) until value = yield
+      value
+    end
+  rescue Timeout::Error
+    raise "Timed out after #{timeout} seconds"
+  end
+
+  # Add more helper methods to be used by all tests here...
   include FactoryBot::Syntax::Methods
   
   # Assert that a specific message is logged at the given level

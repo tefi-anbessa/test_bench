@@ -37,13 +37,9 @@ class RolePolicy < ApplicationPolicy
   # For global roles (no resource), only app owners and admins can access new form
   # For resource roles, access is controlled via the resource's show view
   def new?
-    return false unless user.present?
-
-    # For resource roles, we don't use the new action - access is controlled by the resource's edit view
-    return false if record.is_a?(Class) && record != Role
-
-    # For global roles, only app owners and admins can access
-    user.is_app_owner? || user.has_role?(:admin)
+    # :new is not really used for roles, there is no :new form to create roles.
+    # New authorisation is used for conditionally presenting the role assignment form on the roles index.
+    user.present? && (user.is_app_owner? || user.is_admin?)
   end
 
   # Only app owners can create global roles
@@ -53,7 +49,7 @@ class RolePolicy < ApplicationPolicy
     return false unless user.present?
 
     # Global / functional roles
-    unless role.resource.present?
+    unless role.resource&.present?
       return can_manage_global_roles?
     end
 

@@ -52,9 +52,9 @@ class ProjectsController < ApplicationController
   def edit
     @project = Project.find(params[:id])
     authorize @project
-
-    if policy(Role).new?
-      # Set up select options and scope for the roles assignment form
+    
+    # Set up role assignment form if user has permission
+    if policy(@project).edit?
       setup_role_assignment(@project)
       @role_return_path = project_path(@project)
     end

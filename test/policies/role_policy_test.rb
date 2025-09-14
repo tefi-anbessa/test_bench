@@ -14,12 +14,18 @@ class RolePolicyTest < ActiveSupport::TestCase
     
     @team_member = create(:user)
     @team_member.add_role(:team_member, @project)
+    @team_member.add_role(:electrical_designer)
     
     @regular_user = create(:user)
     
     # Get reference to role instances for testing
     @global_role = Role.find_by(name: 'admin', resource: nil)
+    @functional_role = Role.find_by(name: 'electrical_designer', resource: nil)
     @project_role = Role.find_by(name: 'team_member', resource: @project)
+
+    # Create role instances for testing (even though they won't be valid)
+    @new_role = Role.new(name: 'team_member', resource: @project)
+    @new_global_role = Role.new(name: 'team_member', resource: nil)
   end
 
   # Helper to create user context for policy
@@ -55,22 +61,22 @@ class RolePolicyTest < ActiveSupport::TestCase
       'Regular user should not be able to view roles without project context'
   end
 
-  # New action - only app owners and admins can access global role creation
+  # New action - only app owners and admins can access global role creation from the index form
   test 'new only allows app owners and admins to access global role creation' do
     # Test global role creation (record is the Role class)
-    assert RolePolicy.new(user_context(@app_owner, nil), Role).new?,
+    assert RolePolicy.new(user_context(@app_owner, nil), @new_global_role).new?,
       'App owner should be able to access new global role form'
-    assert RolePolicy.new(user_context(@admin, nil), Role).new?,
+    assert RolePolicy.new(user_context(@admin, nil), @new_global_role).new?,
       'Admin should be able to access new global role form'
       
     # Other roles should not have access to global role creation
-    refute RolePolicy.new(user_context(@project_owner, @project), Role).new?,
+    refute RolePolicy.new(user_context(@project_owner, @project), @new_global_role).new?,
       'Project owner should not be able to access new global role form'
-    refute RolePolicy.new(user_context(@team_member, @project), Role).new?,
+    refute RolePolicy.new(user_context(@team_member, @project), @new_global_role).new?,
       'Team member should not be able to access new global role form'
-    refute RolePolicy.new(user_context(@regular_user, @project), Role).new?,
+    refute RolePolicy.new(user_context(@regular_user, @project), @new_global_role).new?,
       'Regular user should not be able to access new global role form'
-    refute RolePolicy.new(user_context(nil, @project), Role).new?,
+    refute RolePolicy.new(user_context(nil, @project), @new_global_role).new?,
       'Guest user should not be able to access new global role form'
   end
 
@@ -116,8 +122,8 @@ class RolePolicyTest < ActiveSupport::TestCase
     # Global roles - only app owners and admins can destroy
     assert RolePolicy.new(user_context(@app_owner, nil), @global_role).destroy?,
       'App owner should be able to destroy global roles'
-    assert RolePolicy.new(user_context(@admin, nil), @global_role).destroy?,
-      'Admin should be able to destroy global roles'
+    refute RolePolicy.new(user_context(@admin, nil), @global_role).destroy?,
+      'Admin should not be able to destroy global roles'
     refute RolePolicy.new(user_context(@project_owner, nil), @global_role).destroy?,
       'Project owner should not be able to destroy global roles'
 

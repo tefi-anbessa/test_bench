@@ -61,19 +61,28 @@
 
         <div class="col-12 col-md-3">
           <%= f.select :name, 
-                grouped_options_for_select(@grouped_role_names, f.object.name),
+                grouped_options_for_select(@grouped_role_names || {}, f.object.name),
                 { label: t('activerecord.attributes.role.name'), label_class: 'small text-muted', include_blank: true },
                 class: 'form-select form-select-sm' %>
         </div>
 
         <div class="col-12 col-md-3">
-          <%= f.collection_select :user_id, @users, :id, :name, 
+          <%= f.collection_select :user_id, 
+                @users || User.none, 
+                :id, :name, 
                 { label: t('activerecord.attributes.role.user'), label_class: 'small text-muted', include_blank: true },
                 { class: 'form-select form-select-sm' } %>
         </div>
 
-        <div class="col-12 col-md-2 d-flex align-items-end">
-          <%= f.submit t('actions.grant'), class: 'btn btn-sm btn-primary w-100' %>
+        <div class="col-12 col-md-2 d-flex justify-content-end">
+          <div class="d-flex align-items-center" style="height: 100%;">
+            <%= button_tag type: 'submit',
+                class: 'btn btn-primary btn-sm',
+                title: t('actions.grant'),
+                'aria-label' => t('actions.grant') do %>
+                  <%== icon('save') %>
+                <% end %>
+          </div>
         </div>
       </div>
     </div>

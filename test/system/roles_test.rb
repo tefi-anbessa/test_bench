@@ -6,7 +6,6 @@ class RolesTest < ApplicationSystemTestCase
   # Use JavaScript driver for tests that need it
   driven_by :selenium, using: :headless_chrome, screen_size: [1400, 1400]
   
-  # [TODO: clean up this setup. It is copied from another resource. Project and current project are irrelevant to roles.]
   setup do
     # Create a project first to avoid reference issues
     @project = create(:project, code: 'AA', title: 'Test Project')
@@ -41,8 +40,8 @@ class RolesTest < ApplicationSystemTestCase
   test "admin can view roles index" do
     sign_in @admin
     visit roles_path
-    assert_selector "h2", text: I18n.t('roles.index.header')
-    assert_selector "table tbody tr"
+    assert_selector "h3", text: I18n.t('roles.index.header')
+    assert_selector "#roles-index"
     sign_out @admin
   end
   
@@ -57,11 +56,9 @@ class RolesTest < ApplicationSystemTestCase
     # Submit the form - should be denied
     assert_no_difference("@team_member.roles.count") do
       click_button I18n.t('actions.grant')
-      sleep 0.1 # Give time for the request to complete
-    end
+      end
     @team_member.reload
     refute @team_member.has_role?(:admin)
-    # Check for the redirect to forbidden page
     assert_selector 'h1', text: I18n.t('errors.forbidden.header')
     sign_out @admin
   end
@@ -84,12 +81,14 @@ class RolesTest < ApplicationSystemTestCase
     # Submit the form and verify role assignment
     assert_difference('@regular_user.roles.count', 1) do
       click_button I18n.t('actions.grant')
-      sleep 0.1 # Give time for the request to complete
+      # Wait for the AJAX request to complete
+      assert_no_selector '.spinner-border', wait: 10
     end
     
+    # Verify success message and role assignment
     assert_text I18n.t('rolify.flash.granted', role_type: I18n.t('rolify.role_types.global'))
     @regular_user.reload
-    assert @regular_user.has_role?(role_name.to_sym)
+    assert @regular_user.has_role?(role_name.to_sym), "User should have the #{role_name} role"
     sign_out @admin
   end
   
@@ -99,25 +98,40 @@ class RolesTest < ApplicationSystemTestCase
     # Clear any existing roles to avoid interference
     @team_member.roles.destroy_all
     
+    # Get the translated role name from the locale file
+    role_name = :electrical_designer
+    translated_role = I18n.t("rolify.names.#{role_name}")
+    
     # Assign a role to a user
-    @team_member.add_role(:electrical_designer)
-    assert @team_member.has_role?(:electrical_designer), "Role should be assigned before test"
+    @team_member.add_role(role_name)
+    assert @team_member.has_role?(role_name), "Role should be assigned before test"
     
     visit roles_path
     
     # Ensure the page has loaded the roles table
-    assert_selector 'table#roles', wait: 5
+    assert_selector '#roles-index', wait: 5
     
-    # Find the row containing the role we just created
+    
+    # Find the row with the role and user using the translated role name
     role_row = nil
-    all('table#roles tbody tr').each do |row|
-      if row.has_text?('electrical_designer') && row.has_text?(@team_member.name)
+    all('.row.g-1.mb-1').each do |row|
+      if row.has_text?(translated_role, wait: 0) && row.has_text?(@team_member.name, wait: 0)
         role_row = row
         break
       end
     end
     
-    assert role_row, "Could not find role assignment row for user #{@team_member.name}"
+    # Fallback to raw role name if not found with translation
+    unless role_row
+      all('.row.g-1.mb-1').each do |row|
+        if row.has_text?(role_name.to_s.humanize, wait: 0) && row.has_text?(@team_member.name, wait: 0)
+          role_row = row
+          break
+        end
+      end
+    end
+    
+    assert role_row, "Could not find role assignment row for user #{@team_member.name} with role #{translated_role} (#{role_name})"
     
     # Find and click the delete button
     delete_button = role_row.find('a[data-turbo-method="delete"]')
@@ -150,11 +164,8 @@ class RolesTest < ApplicationSystemTestCase
     # Submit the form - Rolify will silently ignore the duplicate
     assert_no_difference('@team_member.roles.count') do
       click_button I18n.t('actions.grant')
-      sleep 0.1 # Give time for the request to complete
-    end
+      end
     
-    # No error message: rolify ignores duplicate roles [TODO: possibly catch this in the controller to show a message]
-    # assert_text I18n.t('flash.roles.failed_to_grant', role_type: I18n.t('flash.role_types.global'))
     sign_out @admin
   end
   
@@ -169,8 +180,6 @@ class RolesTest < ApplicationSystemTestCase
     
     # Should still be on the new role page with flash message
     assert_current_path roles_path
-    # Defer error message checks as html form validation is preventing the error getting to the controller.
-    # assert_selector '.alert.alert-warning', text: I18n.t('rolify.flash.user_id_blank')
 
     sign_out @admin
   end
@@ -185,8 +194,6 @@ class RolesTest < ApplicationSystemTestCase
     
     # Should still be on the new role page with flash message
     assert_current_path roles_path
-    # Defer error message checks as html form validation is preventing the error getting to the controller.
-    # assert_selector '.alert.alert-warning', text: I18n.t('rolify.flash.name_blank')
 
     sign_out @admin
   end
@@ -196,7 +203,7 @@ class RolesTest < ApplicationSystemTestCase
     sign_in @admin
     visit edit_project_path(@project)
     
-    assert_selector "h4", text: I18n.t('roles.new.title')
+    assert_selector "h5", text: I18n.t('roles.new.title')
     sign_out @admin
   end
 
@@ -204,24 +211,60 @@ class RolesTest < ApplicationSystemTestCase
     sign_in @project_owner
     visit edit_project_path(@project)
     
-    assert_selector "h4", text: I18n.t('roles.new.title')
+    # Wait for the role assignment section to be visible
+    assert_selector "h5", text: I18n.t('roles.new.title'), wait: 10
     sign_out @project_owner
   end
 
-  test "project owner can assign team_member role on own project" do
+  test "project owner can assign team_member role on project" do
+    # Ensure all users are created and persisted
+    assert @project_owner.persisted?, "Project owner should be persisted"
+    assert @regular_user.persisted?, "Regular user should be persisted"
+    
+    # Ensure project owner has the project_owner role on the project
+    assert @project_owner.has_role?(:project_owner, @project), 
+           "Project owner should have project_owner role on the project"
+    
+    
+    # Sign in as the project owner
     sign_in @project_owner
+    
+    # Visit the edit project page
     visit edit_project_path(@project)
     
-    select @regular_user.name, from: 'role_user_id'
-    select I18n.t('rolify.names.team_member'), from: 'role_name'
-        
-    # Submit the form and verify role assignment
-    assert_difference('@regular_user.roles.count', 1) do
-      click_button I18n.t('actions.grant')
-      sleep 0.1 # Give time for the request to complete
+    # Wait for the form to be interactive and find it by action
+    form = find('form[action*="/roles"]', wait: 10)
+    
+    # Wait for the user select to be present and enabled
+    within form do
+      # Wait for the user select to be present and enabled
+      assert_selector 'select[name="role[user_id]"]:not([disabled])', wait: 10
+      
+      # Wait for the dropdown to be populated with users (excluding the current user)
+      user_options = all('select[name="role[user_id]"] option').map { |opt| [opt.text, opt.value] }
+      
+      # Check if the regular user is in the dropdown
+      assert_includes user_options.map(&:first), @regular_user.name, "Regular user should be in the dropdown"
+      
+      # Select the user
+      select @regular_user.name, from: 'role[user_id]'
+      
+      # Wait for the role select to be present and enabled
+      assert_selector 'select[name="role[name]"]:not([disabled])', wait: 10
+      
+      # Select the role
+      select I18n.t('rolify.names.team_member'), from: 'role[name]', match: :first
+      
+      # Submit the form and verify role assignment
+      assert_difference('@regular_user.roles.count', 1) do
+        click_button I18n.t('actions.grant')
+        # Wait for the AJAX request to complete
+        assert_no_selector '.spinner-border', wait: 10
+      end
     end
+    
     # Check the flash message
-    assert_text I18n.t('rolify.flash.granted', role_type: I18n.t('rolify.role_types.resource_instance'))
+    assert_text I18n.t('rolify.flash.granted', role_type: I18n.t('rolify.role_types.resource_instance')), wait: 10
     
     sign_out @project_owner
   end
