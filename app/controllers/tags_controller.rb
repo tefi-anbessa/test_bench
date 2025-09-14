@@ -40,8 +40,6 @@ class TagsController < ApplicationController
   # GET /tags/1/edit
   def edit
     authorize @tag
-    @role = Role.new
-    @users = User.all
   end
 
   # PATCH/PUT /tags/1 or /tags/1.json

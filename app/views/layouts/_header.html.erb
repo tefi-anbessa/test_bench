@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-md navbar-light bg-light">
+<nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
   <div class="container-fluid">
     <div class="nav-item">
       <%= link_to root_path,
@@ -30,37 +30,50 @@
                   aria: { label: t('role', scope: 'activerecord.models').pluralize } %>
               </li>
             <% end %>
-            
+
             <% if policy(Project).index? %>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle"
-                    href="#"
-                    data-bs-toggle="dropdown"
-                    id="project-menu-btn"
-                    role="button"
-                    aria-expanded="false">
-                  <%= project_selected? ?
-                    t('project', scope: 'activerecord.models') + ": " + current_project.code :
-                    t('project', scope: 'activerecord.models').pluralize %>
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="project-menu-btn">
-                  <li><%= link_to t('project', scope: 'activerecord.models').pluralize,
-                        projects_path,
-                        class: "dropdown-item" %></li>
-                  <li><%= link_to t('actions.select'),
-                        select_projects_path,
-                        class: "dropdown-item" %></li>
-                </ul>
-              </li>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle"
+                      href="#"
+                      data-bs-toggle="dropdown"
+                      id="project-menu-btn"
+                      role="button"
+                      aria-expanded="false">
+                      <%= project_selected? ?
+                        t('project', scope: 'activerecord.models') + ": " + current_project.code :
+                        t('project', scope: 'activerecord.models').pluralize %>
+                  </a>
+                  <ul class="dropdown-menu" aria-labelledby="project-menu-btn">
+                    <% if project_selected? %>
+                      <% if policy(current_project).show? %>
+                      <li><%= link_to t('actions.show') + " " + current_project.code,
+                            project_path(current_project),
+                            class: "dropdown-item" %></li>
+                      <% end %>
+                      <% if policy(current_project).edit? %>
+                      <li><%= link_to t('actions.edit') + " " + current_project.code,
+                            edit_project_path(current_project),
+                            class: "dropdown-item" %></li>
+                      <% end %>
+                    <% end %>
+                    
+                    <li><%= link_to t('actions.select'),
+                          select_projects_path,
+                          class: "dropdown-item" %></li>
+                    <li><%= link_to t('project', scope: 'activerecord.models').pluralize,
+                          projects_path,
+                          class: "dropdown-item" %></li>
+                  </ul>
+                </li>
             <% end %>
-            
+
             <li class="nav-item">
               <%= link_to t('tag', scope: 'activerecord.models').pluralize,
                 tags_path,
                 class: 'nav-link',
                 aria: { label: t('tag', scope: 'activerecord.models').pluralize } %>
             </li>
-            
+
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle"
                   href="#"
@@ -97,7 +110,7 @@
                 <% end %>
               </ul>
             </li>
-            
+
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle"
                   href="#"
