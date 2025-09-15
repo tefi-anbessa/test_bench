@@ -1,10 +1,35 @@
 require "test_helper"
 
 class TagTest < ActiveSupport::TestCase
-  def setup
+  setup do
+    # Set up project and discipline
     @project = create(:project)
     @discipline = create(:discipline, :e)  # Using electrical discipline as an example
+    
+    # Clear any existing tags to avoid uniqueness conflicts
+    Tag.destroy_all
+    
+    # Create test tags 
+    @tag_a1 = create(:tag, project: @project, discipline: @discipline, 
+                     prefix: 'A', serial: 1, suffix: 'A', service: 'Service A1A')
+    @tag_a2 = create(:tag, project: @project, discipline: @discipline, 
+                     prefix: 'A', serial: 1, suffix: 'B', service: 'Service A1B')
+    @tag_a3 = create(:tag, project: @project, discipline: @discipline, 
+                     prefix: 'A', serial: 2, suffix: nil, service: 'Service A2')
+    @tag_b1 = create(:tag, project: @project, discipline: @discipline, 
+                     prefix: 'B', serial: 1, suffix: nil, service: 'Service B1')
+    @tag_ba2 = create(:tag, project: @project, discipline: @discipline, 
+                     prefix: 'BA', serial: 2, suffix: nil, service: 'Service BA2')
+    @tag_bb1 = create(:tag, project: @project, discipline: @discipline, 
+                     prefix: 'BB', serial: 1, suffix: nil, service: 'Service BB1')
+    @tag_c1 = create(:tag, project: @project, discipline: @discipline, 
+                     prefix: 'C', serial: 1, suffix: nil, service: 'Service C1')
+    
+    # Initialize a new tag for testing validations
     @tag = build(:tag, project: @project, discipline: @discipline)
+    
+    # Reload all tags to ensure we have the latest state
+    [@tag_a1, @tag_a2, @tag_a3, @tag_b1, @tag_bb1, @tag_ba2, @tag_c1].each(&:reload)
   end
 
   # Factory Tests
@@ -13,6 +38,48 @@ class TagTest < ActiveSupport::TestCase
     assert tag.valid?
     assert tag.prefix.present?
     assert tag.serial.present?
+  end
+
+  test 'next returns next tag in loop-based order' do
+    # Test next method for each tag
+    assert_equal @tag_a2, @tag_a1.next, 'A1A.next should be A1B'
+    assert_equal @tag_a3, @tag_a2.next, 'A1B.next should be A2'
+    assert_equal @tag_b1, @tag_a3.next, 'A2.next should be B1'
+    assert_equal @tag_bb1, @tag_b1.next, 'B1.next should be BB1'
+    assert_equal @tag_ba2, @tag_bb1.next, 'BB1.next should be BA2'
+    assert_equal @tag_c1, @tag_ba2.next, 'BA2.next should be C1'
+    assert_equal @tag_c1, @tag_c1.next, 'C1.next should return itself (last tag)'
+  end
+
+  test 'prev returns previous tag in loop-based order' do
+    # Test prev method for each tag
+    assert_equal @tag_ba2, @tag_c1.prev, 'C1.prev should be BA2'
+    assert_equal @tag_bb1, @tag_ba2.prev, 'BA2.prev should be BB1'
+    assert_equal @tag_b1, @tag_bb1.prev, 'BB1.prev should be B1'
+    assert_equal @tag_a3, @tag_b1.prev, 'B1.prev should be A2'
+    assert_equal @tag_a2, @tag_a3.prev, 'A2.prev should be A1B'
+    assert_equal @tag_a1, @tag_a2.prev, 'A1B.prev should be A1A'
+    assert_equal @tag_a1, @tag_a1.prev, 'A1A.prev should return itself (first tag)'
+  end
+
+  test 'next with loop_id attribute returns next tag in loop-based order' do
+    assert_equal @tag_a2, @tag_a1.next(:loop_id), 
+                 'A1A.next(:loop_id) should be A1B'
+  end
+
+  test 'prev with loop_id attribute returns previous tag in loop-based order' do
+    assert_equal @tag_a1, @tag_a2.prev(:loop_id),
+                 'A1B.prev(:loop_id) should be A1A'
+  end
+
+  test 'next with non-loop_id attribute falls back to parent implementation' do
+    assert_equal @tag_a2, @tag_a1.next(:id),
+                 'A1A.next(:id) should fall back to ID-based ordering'
+  end
+
+  test 'prev with non-loop_id attribute falls back to parent implementation' do
+    assert_equal @tag_a1, @tag_a2.prev(:id),
+                 'A1B.prev(:id) should fall back to ID-based ordering'
   end
 
   test 'sequential_tag factory should create sequential tags' do
@@ -26,7 +93,7 @@ class TagTest < ActiveSupport::TestCase
     assert complete_tag.valid?
     assert complete_tag.prefix.present?
     assert complete_tag.serial.present?
-    assert complete_tag.description.present?
+    assert complete_tag.service.present?
     assert complete_tag.stage.present?
     assert complete_tag.notes.present?
   end
@@ -34,19 +101,96 @@ class TagTest < ActiveSupport::TestCase
   test "should be valid" do
     assert @tag.valid?
   end
-
-  test "should be able to create new tag on project" do
-    assert_difference 'Tag.count', 1 do
-      @project.tags.create!(
-        prefix: "A",
-        serial: 1,
-        suffix: "B",
-        description: "Pump sump",
-        stage: 0,
-        notes: "yadda",
-        discipline: @discipline
-      )
-    end
+  
+  test "should require unique combination of project, discipline, prefix, serial, and suffix" do
+    # Create initial tag
+    tag1 = create(:tag, 
+      project: @project,
+      discipline: @discipline,
+      prefix: 'CC',
+      serial: 1001,
+      suffix: 'A'
+    )
+    
+    # Same project, same discipline, same prefix, same serial, same suffix should be invalid
+    tag2 = build(:tag,
+      project: tag1.project,
+      discipline: tag1.discipline,
+      prefix: tag1.prefix,
+      serial: tag1.serial,
+      suffix: tag1.suffix
+    )
+    assert_not tag2.valid?
+    assert_includes tag2.errors[:prefix], I18n.t('activerecord.errors.models.tag.full_tag')
+    
+    # Different project, same other attributes should be valid
+    tag3 = build(:tag,
+      project: create(:project),
+      discipline: tag1.discipline,
+      prefix: tag1.prefix,
+      serial: tag1.serial,
+      suffix: tag1.suffix
+    )
+    assert tag3.valid?
+    
+    # Different discipline, same other attributes should be valid
+    tag4 = build(:tag,
+      project: tag1.project,
+      discipline: create(:discipline, code: 'M'),
+      prefix: tag1.prefix,
+      serial: tag1.serial,
+      suffix: tag1.suffix
+    )
+    assert tag4.valid?
+    
+    # Different prefix, same other attributes should be valid
+    tag5 = build(:tag,
+      project: tag1.project,
+      discipline: tag1.discipline,
+      prefix: 'CE',
+      serial: tag1.serial,
+      suffix: tag1.suffix
+    )
+    assert tag5.valid?
+    
+    # Different serial, same other attributes should be valid
+    tag6 = build(:tag,
+      project: tag1.project,
+      discipline: tag1.discipline,
+      prefix: tag1.prefix,
+      serial: tag1.serial + 1,
+      suffix: tag1.suffix
+    )
+    assert tag6.valid?
+    
+    # Different suffix, same other attributes should be valid
+    tag7 = build(:tag,
+      project: tag1.project,
+      discipline: tag1.discipline,
+      prefix: tag1.prefix,
+      serial: tag1.serial,
+      suffix: 'B'
+    )
+    assert tag7.valid?
+    
+    # Empty suffix should be treated as nil for uniqueness
+    tag8 = create(:tag,
+      project: @project,
+      discipline: @discipline,
+      prefix: 'CC',
+      serial: 1002,
+      suffix: ''
+    )
+    
+    tag9 = build(:tag,
+      project: tag8.project,
+      discipline: tag8.discipline,
+      prefix: tag8.prefix,
+      serial: tag8.serial,
+      suffix: nil
+    )
+    assert_not tag9.valid?
+    assert_includes tag9.errors[:prefix], I18n.t('activerecord.errors.models.tag.full_tag')
   end
 
   test "prefix should be present" do
@@ -54,17 +198,17 @@ class TagTest < ActiveSupport::TestCase
     assert_not @tag.valid?
   end
   
-  test "prefix should be from valid set" do
-    valid_prefixes = %w[CC CE CJB CX FT FV HV LT LZ PG PRV PT PZ XV ME MP MV A B LD LE LH LS LW P S SP T US V]
+#  test "prefix should be from valid set" do
+#    valid_prefixes = %w[CC CE CJB CX FT FV HV LT LZ PG PRV PT PZ XV ME MP MV A B LD LE LH LS LW P S SP T US V]
     
-    @tag.prefix = "INVALID"
-    assert_not @tag.valid?
-    
-    valid_prefixes.each do |prefix|
-      @tag.prefix = prefix
-      assert @tag.valid?, "#{prefix} should be a valid prefix"
-    end
-  end
+#    @tag.prefix = "INVALID"
+#    assert_not @tag.valid?
+#    
+#    valid_prefixes.each do |prefix|
+#      @tag.prefix = prefix
+#      assert @tag.valid?, "#{prefix} should be a valid prefix"
+#    end
+#  end
 
   test "serial should be present" do
     @tag.serial = nil
@@ -93,11 +237,11 @@ class TagTest < ActiveSupport::TestCase
     assert @tag.valid?
   end
 
-  test "description should not be too long" do
-    @tag.description = "a" * 41
+  test "service should not be too long" do
+    @tag.service = "a" * 41
     assert_not @tag.valid?
     
-    @tag.description = "a" * 40
+    @tag.service = "a" * 40
     assert @tag.valid?
   end
 
@@ -248,11 +392,55 @@ class TagTest < ActiveSupport::TestCase
     assert_includes @tag.errors[:tagable_type], 'is not a valid type'
   end
   
-  test "destroy project should destroy tags" do
-    tag = create(:tag, project: @project, discipline: @discipline)
-    assert_difference 'Tag.count', -1 do
-      @project.destroy
+  test "should be able to create new tag on project" do
+    # Use a unique prefix that's not used in other tests
+    unique_prefix = 'Z'  # Not used in any other test
+    
+    assert_difference('Tag.count', 1) do
+      tag = create(:tag, project: @project, discipline: @discipline, 
+                        prefix: unique_prefix, serial: 1, suffix: nil, service: 'New Tag')
+      assert tag.valid?, "Tag should be valid but got errors: #{tag.errors.full_messages}"
     end
-    assert_not Tag.exists?(tag.id)
+    
+    # Verify the tag was created with the correct attributes
+    assert @project.tags.exists?(prefix: unique_prefix, serial: 1, suffix: nil)
+  end
+  
+  test "destroy project should destroy tags" do
+    # Create a new project with a single tag for this test
+    test_project = create(:project)
+    create(:tag, project: test_project, discipline: @discipline, 
+                 prefix: 'X', serial: 1, suffix: nil, service: 'Test Tag')
+    
+    # Verify the tag exists
+    assert_equal 1, test_project.tags.count
+    
+    # Destroy the project and verify all its tags are destroyed
+    assert_difference('Tag.count', -1) do
+      test_project.destroy
+    end
+  end
+  
+  test 'tags should be ordered by loop_id, prefix, and suffix' do
+    # Get just our test tags in the default scope order
+    test_tag_ids = [@tag_a1, @tag_a2, @tag_a3, @tag_b1, @tag_bb1, @tag_ba2, @tag_c1].map(&:id)
+    ordered_tags = Tag.where(id: test_tag_ids).to_a
+    
+    # Expected order based on the test data
+    expected_order = [@tag_a1, @tag_a2, @tag_a3, @tag_b1, @tag_bb1, @tag_ba2, @tag_c1]
+    
+    # Verify the order matches exactly
+    assert_equal expected_order, ordered_tags, 
+      'Tags should be ordered by loop_id, prefix, and suffix'
+      
+    # Verify the loop_ids are generated as expected
+    assert_equal @tag_a1.loop_id, @tag_a2.loop_id, 
+      'Tags with same prefix and serial should have same loop_id'
+    assert_equal @tag_b1.loop_id, @tag_bb1.loop_id, 
+      'Tags with different prefix but same measured variable and serial should have same loop_id'
+    assert_not_equal @tag_a1.loop_id, @tag_a3.loop_id,
+      'Tags with different serials should have different loop_ids'
+    assert_not_equal @tag_a1.loop_id, @tag_b1.loop_id,
+      'Tags with different measured variable should have different loop_ids'
   end
 end

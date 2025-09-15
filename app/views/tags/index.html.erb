@@ -27,9 +27,9 @@
       <%= f.search_field :serial_cont,
             class: "search_field",
             placeholder: t('activerecord.attributes.tag.serial') %>
-      <%= f.search_field :description_cont,
+      <%= f.search_field :service_cont,
             class: "search_field",
-            placeholder: t('activerecord.attributes.tag.description') %>
+            placeholder: t('activerecord.attributes.tag.service') %>
       <%= f.search_field :notes_cont,
             class: "search_field",
             placeholder: t('activerecord.attributes.tag.notes') %>
@@ -42,7 +42,7 @@
       <thead>
         <th scope="col"><%= sort_link(@q, :stage) %></th>
         <th scope="col"><%= sort_link(@q, :full_tag) %></th>
-        <th scope="col"><%= sort_link(@q, :description) %></th>
+        <th scope="col"><%= sort_link(@q, :service) %></th>
         <th scope="col"><%= t('activerecord.attributes.tag.notes') %></th>
         <th scope="col" width="150px"><%= t('table.links')%></th>
       </thead>
@@ -51,7 +51,7 @@
           <tr scope="row">
             <td><%= t.stage %></td>
             <td><%= link_to t.full_tag, tag_path(t) %></td>
-            <td><%= highlight t.description, params.dig(:q, :full_tag_or_description_cont)  %></td>
+            <td><%= highlight t.service, params.dig(:q, :full_tag_or_service_cont)  %></td>
             <td><%= t.notes %></td>
             <td>
               <% if policy(t).show? %>

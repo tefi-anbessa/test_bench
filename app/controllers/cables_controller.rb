@@ -19,7 +19,6 @@ class CablesController < ApplicationController
   # GET /cables/new
   def new
     @cable = Cable.new
-    @from_select = Tag.loads.pluck(:full_tag, :description, :tagable_id)
   end
 
   # GET /cables/1/edit

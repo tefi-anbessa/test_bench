@@ -15,7 +15,7 @@
           <%= link_to cable.tag.full_tag, tag_path(cable.tag.id) %>
         </span>
         <span class="col-4 data-field">
-          <%= cable.tag.description %>
+          <%= cable.tag.service %>
         </span>
       </div>
     <% end %>
@@ -37,7 +37,7 @@
                 switchboard_path(cable.circuit.switchboard) %>
         </span>
         <span class="col-1 data-field">
-          <%= cable.circuit.switchboard.tag.description %>:
+          <%= cable.circuit.switchboard.tag.service %>:
         </span>
         <span class="col-1 data-label">
           <%= t('activerecord.models.circuit') %>:
@@ -60,7 +60,7 @@
                 demand_path(cable.circuit.load) %>
         </span>
         <span class="col-4 data-field">
-          <%= cable.circuit.load.loadable.tag.description %>
+          <%= cable.circuit.load.loadable.tag.service %>
         </span>
       </div>
     <% else %>

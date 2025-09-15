@@ -14,7 +14,7 @@ class TagsTest < ApplicationSystemTestCase
     visit tags_url
     click_on "New tag"
 
-    fill_in "Description", with: @tag.description
+    fill_in "Service", with: @tag.service
     fill_in "Discipline", with: @tag.discipline_id
     fill_in "Loop", with: @tag.loop
     fill_in "Notes", with: @tag.notes
@@ -32,7 +32,7 @@ class TagsTest < ApplicationSystemTestCase
     visit tag_url(@tag)
     click_on "Edit this tag", match: :first
 
-    fill_in "Description", with: @tag.description
+    fill_in "Service", with: @tag.service
     fill_in "Discipline", with: @tag.discipline_id
     fill_in "Loop", with: @tag.loop
     fill_in "Notes", with: @tag.notes

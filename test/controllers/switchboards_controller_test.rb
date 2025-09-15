@@ -27,8 +27,7 @@ class SwitchboardsControllerTest < ActionDispatch::IntegrationTest
         incomer_protection: @switchboard.incomer_protection,
         ingress_protection: @switchboard.ingress_protection,
         location: @switchboard.location,
-        neutral_bar_connections: @switchboard.neutral_bar_connections,
-        service: @switchboard.service } }
+        neutral_bar_connections: @switchboard.neutral_bar_connections } }
     end
 
     assert_redirected_to switchboard_url(Switchboard.last)

@@ -75,9 +75,9 @@ class SwitchboardsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def switchboard_params
-      params.require(:switchboard).permit(:location, :service,
-        :ingress_protection, :busbar_rating, :busbar_fault_rating,
-        :busbar_fault_duration, :cable_entry, :incomer_protection,
-        :incomer_metering, :neutral_bar_connections, :earth_bar_connections)
+      params.require(:switchboard).permit(:location, :ingress_protection, 
+        :busbar_rating, :busbar_fault_rating, :busbar_fault_duration, 
+        :cable_entry, :incomer_protection, :incomer_metering, 
+        :neutral_bar_connections, :earth_bar_connections)
     end
 end

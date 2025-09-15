@@ -104,7 +104,7 @@ Tag.find_or_create_by!(
   project: @project,
   discipline: Discipline.find_by!(code: "B")
 ) do |tag|
-  tag.description = "Cabin 2"
+  tag.service = "Cabin 2"
   tag.stage = 0
 end
 
@@ -116,7 +116,7 @@ Tag.find_or_create_by!(
   project: @project,
   discipline: Discipline.find_by!(code: "E")
 ) do |tag|
-  tag.description = "GATEHOUSE SWITCHBOARD"
+  tag.service = "GATEHOUSE SWITCHBOARD"
   tag.stage = 0
 end
 
@@ -128,7 +128,7 @@ Tag.find_or_create_by!(
   project: @project,
   discipline: Discipline.find_by!(code: "E")
 ) do |tag|
-  tag.description = "FEEDER TO GATEHOUSE SWITCHBOARD"
+  tag.service = "FEEDER TO GATEHOUSE SWITCHBOARD"
   tag.stage = 0
 end
 
@@ -150,7 +150,7 @@ unless Tag.count > 10
       project: project,
       discipline: discipline
     ) do |tag|
-      tag.description = Faker::Science.tool
+      tag.service = Faker::Science.tool
       tag.stage = rand(0..3)
       tag.notes = Faker::Lorem.paragraph(sentence_count: 2)
     end
@@ -183,7 +183,7 @@ end
   project: @project,
   discipline: Discipline.find_by!(code: "E")
 ) do |tag|
-  tag.description = "POLE MOUNTED CIRCUIT BREAKER"
+  tag.service = "POLE MOUNTED CIRCUIT BREAKER"
   tag.stage = 0
 end
 
@@ -229,7 +229,7 @@ end
   project: @project,
   discipline: Discipline.find_by!(code: "E")
 ) do |tag|
-  tag.description = "GATEHOUSE SWITCHBOARD"
+  tag.service = "GATEHOUSE SWITCHBOARD"
   tag.stage = 0
 end
 
@@ -273,7 +273,7 @@ end
   project: @project,
   discipline: Discipline.find_by!(code: "E")
 ) do |tag|
-  tag.description = "SOUTH AREA DISTRIBUTION BOARD"
+  tag.service = "SOUTH AREA DISTRIBUTION BOARD"
   tag.stage = 1
 end
 # If it is first pass, create the switchboard

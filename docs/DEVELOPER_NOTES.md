@@ -77,6 +77,9 @@ Set options for select fields in the controller, not in the view. Complete i18n 
 
 ### Form Design
 
+   - Use bootstrap buttons wherever possible for consistent appearance and behavior.
+   - 
+
 ### Icons
 
 ## Known Issues
@@ -116,7 +119,7 @@ Set options for select fields in the controller, not in the view. Complete i18n 
 - [ ] Refactor models to incorporate i18n messages for validations
 - [ ] Refactor error messages partial to use i18n.
 - [ ] Refactor error views to use i18n.
-- [ ] Refactor roles new view and projects edit view to translate resource names with a key value pair in the select field.
+- [x] Refactor roles new view and projects edit view to translate resource names with a key value pair in the select field.
 - [x] Serve bootstrap from local dev or prod
 - [ ] Write more tests for the Demand model
 - [ ] Review all policies and tests for compliance with guidelines
@@ -126,22 +129,22 @@ Set options for select fields in the controller, not in the view. Complete i18n 
 - [x] Improve has_one validation on tagable, possibly include database constraint.
 - [x] Improve has_one validation on demandable, possibly include database constraint.
    - Database constraints deferred due to risk of locking database. Continue with inclusion of orphans on index displays, and manual clean up.
-- [ ] Nest project related resource under projects to improve security around assignment to other than the current project.
+- [ ] Nest routes for project related resource under projects to improve security around assignment to other than the current project.
 - [ ] Revisit the roles policy test. The roles policy is now using the role context from the controller, need to factor this into tests. 
 - [ ] Roles policy is delegating to resource policies for resource instances. Tests need to consider this.
 - [ ] Ensure select for role names does not include restricted roles unless current user has app_owner role.
 
 ## Refactoring Opportunities
-- [ ] Improve role and permissions implementation and workflow.
-- [ ] Refactor models to include a universal "label" attribute to be used when presenting polymorphic associations.
+- [x] Improve role and permissions implementation and workflow.
+- [x] Refactor models to include a universal "label" attribute to be used when presenting polymorphic associations.
 - [ ] Refactor projects controller with improved workflow.
 - [ ] Consider extracting demand calculations into a service object
 - [ ] Add type checking with Sorbet or RBS
 - [ ] Implement caching for frequently accessed demand data
 - [x] Upgrade to Rails 8 (Completed in rails8 branch)
 - [x] Refactor electrical policy classes (CablePolicy, SwitchboardPolicy, MotorPolicy, LightCctPolicy, SocketCctPolicy) to use a shared concern or base class to reduce code duplication
-- [ ] Refactor all views to use pundit policy checks.
-- [ ] Change terminology and implementation from project owner to project manager.
+- [x] Refactor all views to use pundit policy checks.
+- [x] Change terminology and implementation from project owner to project manager.
 - [ ] Refactor projects controller and application controller `def after_sign_in_path_for(resource)to use app/controllers/concerns/current_project_concern.rb to reduce code duplication.
 - [ ] Cable types: 
    - [ ] convert core material to enum.

@@ -104,7 +104,7 @@ class DemandTest < ActiveSupport::TestCase
       project: project,
       discipline: discipline,
       prefix: 'EL',
-      description: 'Test Light Circuit'
+      service: 'Test Light Circuit'
     )
     
     # Create a light_cct with a tag first
@@ -141,7 +141,7 @@ class DemandTest < ActiveSupport::TestCase
       tag_attributes: {
         prefix: 'EL',
         serial: 9998,  # Ensure this is unique
-        description: 'TEST DESTROY DEMAND',
+        service: 'TEST DESTROY DEMAND',
         project: project,
         discipline: discipline,
         stage: 1

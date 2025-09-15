@@ -73,7 +73,7 @@ class TagsControllerTest < ActionController::TestCase
   test "users without team role on current project are forbidden to create tags" do
     sign_in @regular_user
     assert_no_difference("Tag.count") do
-      post :create, params: { tag: { description: @tag.description,
+      post :create, params: { tag: { service: @tag.service,
                                       discipline_id: @tag.discipline_id,
                                       serial: @tag.serial + 1,
                                       notes: @tag.notes,
@@ -88,7 +88,7 @@ class TagsControllerTest < ActionController::TestCase
   test "team members on current project can create tag" do
     sign_in @team_member
     assert_difference("Tag.count", 1) do
-      post :create, params: { tag: { description: @tag.description,
+      post :create, params: { tag: { service: @tag.service,
                                       discipline_id: @tag.discipline_id,
                                       serial: @tag.serial + 1,
                                       notes: @tag.notes,
@@ -116,9 +116,9 @@ class TagsControllerTest < ActionController::TestCase
   # Update action tests
   test "users without team role on current project are forbidden to update tag" do
     sign_in @regular_user
-    original_description = @tag.description
+    original_service = @tag.service
     patch :update, params: { id: @tag.id,
-                              tag: { description: @tag.description + " modified",
+                              tag: { service: @tag.service + " modified",
                               discipline_id: @tag.discipline_id,
                               serial: @tag.serial,
                               notes: @tag.notes,
@@ -126,15 +126,15 @@ class TagsControllerTest < ActionController::TestCase
                               project_id: @tag.project_id,
                               stage: @tag.stage,
                               suffix: @tag.suffix } }
-    assert_equal @tag.description, original_description
+    assert_equal @tag.service, original_service
     assert_forbidden
   end
 
   test "team members on current project can update tag" do
     sign_in @team_member
-    original_description = @tag.description
+    original_service = @tag.service
     patch :update, params: { id: @tag.id,
-                              tag: { description: @tag.description + "modified",
+                              tag: { service: @tag.service + "modified",
                               discipline_id: @tag.discipline_id,
                               serial: @tag.serial,
                               notes: @tag.notes,
@@ -142,7 +142,7 @@ class TagsControllerTest < ActionController::TestCase
                               project_id: @tag.project_id,
                               stage: @tag.stage,
                               suffix: @tag.suffix } }
-    assert_equal @tag.description, original_description
+    assert_equal @tag.service, original_service
     assert_redirected_to tag_url(@tag)
   end
 

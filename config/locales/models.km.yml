@@ -16,7 +16,7 @@ km:
       project:
         code:             "kh Code"
         title:            "kh Title"
-        description:      "kh Description"
+        service:          "kh Service"
       discipline:
         code:             "kh Code"
         name:             "kh Name"
@@ -24,7 +24,7 @@ km:
         prefix:           "kh Prefix"
         serial:           "kh Serial"
         suffix:           "kh Suffix"
-        description:      "kh Description"
+        service:          "kh Service"
         project_phase:    "kh Phase"
         notes:            "kh Notes"
         full_tag:         "kh Full tag"

@@ -13,11 +13,11 @@ FactoryBot.define do
         if switchboard.tag.nil?
           project = create(:project)
           discipline = Discipline.find_or_create_by(code: 'E')
-          switchboard.tag = create(:tag, :unique_tag,
+          switchboard.tag = create(:tag,
             project: project,
             discipline: discipline,
-            prefix: 'SWB',
-            description: "Switchboard #{switchboard.voltage}V #{switchboard.current_rating}A",
+            prefix: 'EX',
+            service: "Switchboard #{switchboard.voltage}V #{switchboard.current_rating}A",
             tagable: switchboard
           )
         end

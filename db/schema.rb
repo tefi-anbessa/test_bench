@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_21_044644) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_15_035205) do
   create_table "cable_types", force: :cascade do |t|
     t.string "conductor_material"
     t.string "conductor_makeup"
@@ -133,7 +133,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_21_044644) do
 
   create_table "switchboards", force: :cascade do |t|
     t.string "location"
-    t.integer "service"
     t.string "ingress_protection"
     t.float "busbar_rating"
     t.float "busbar_fault_rating"
@@ -152,7 +151,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_21_044644) do
     t.string "prefix"
     t.integer "serial"
     t.string "suffix", default: ""
-    t.string "description"
+    t.string "service"
     t.text "notes"
     t.integer "project_id", null: false
     t.integer "stage"
@@ -160,8 +159,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_21_044644) do
     t.datetime "updated_at", null: false
     t.string "tagable_type"
     t.integer "tagable_id"
+    t.string "loop_id", null: false
     t.index ["discipline_id"], name: "index_tags_on_discipline_id"
-    t.index ["prefix", "serial", "suffix"], name: "index_tags_on_full_tag", unique: true
+    t.index ["loop_id"], name: "index_tags_on_loop_id"
+    t.index ["project_id", "discipline_id", "prefix", "serial", "suffix"], name: "index_tags_on_project_and_full_tag", unique: true
     t.index ["project_id"], name: "index_tags_on_project_id"
     t.index ["tagable_type", "tagable_id"], name: "index_tags_on_tagable"
   end

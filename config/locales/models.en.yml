@@ -40,8 +40,8 @@ en:
         serial_help:      "Loop should be 4 digits"
         suffix:           "Suffix"
         suffix_help:      "Suffix should be typically one character, blank if not required"
-        description:      "Description"
-        description_help: "Description should be 40 characters maximum"
+        service:          "Service"
+        service_help:     "Service description (40 characters maximum)"
         stage:            "Project Stage"
         notes:            "Notes"
         full_tag:         "Tag"
@@ -109,7 +109,6 @@ en:
         demandable_help:  "Equipment datasheet"
       switchboard:
         location:         "Location"
-        service:          "Service"
         ingress_protection: "Ingress Protection"
         busbar_rating:    "Busbar Rating"
         busbar_fault_rating:  "Busbar Fault Rating"
@@ -151,4 +150,6 @@ en:
             name:
               blank: "Role must be selected"
               invalid: "%{name} is not a valid role for %{resource}"
+        tag:
+          full_tag: "Full tag must be unique within project and discipline"
 #

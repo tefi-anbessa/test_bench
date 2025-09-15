@@ -7,7 +7,7 @@ FactoryBot.define do
     sequence(:prefix) { |n| PREFIXES[n % PREFIXES.size] }
     sequence(:serial) { |n| n % 10000 }  # 0-9999
     suffix { SUFFIXES.sample }
-    description { "Test #{prefix}-#{'%03d' % serial}#{suffix}" }
+    service { "Test #{prefix}-#{'%03d' % serial}#{suffix}" }
     stage { rand(0..3) }  # 0-3 to match seeds.rb phase
     notes { nil }
     
@@ -22,10 +22,16 @@ FactoryBot.define do
     end
 
     trait :unique_tag do
-      prefix { 'CC' } # default the prefix in cases where it is not specified
-      serial do
-        cc = Tag.where(prefix: prefix).order(serial: :asc).last
-        cc ? cc.serial + 1 : 1
+      prefix { 'CC' }
+      sequence(:serial) do |n|
+        # Find the next available serial for this project, discipline, prefix, and suffix combination
+        last_tag = Tag.where(
+          project: project || Project.first,
+          discipline: discipline || Discipline.first,
+          prefix: prefix
+        ).order(serial: :desc).first
+        
+        last_tag ? last_tag.serial + 1 : n
       end
     end
     

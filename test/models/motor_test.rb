@@ -38,7 +38,7 @@ class MotorTest < ActiveSupport::TestCase
     tag = create(:tag, 
                 prefix: 'KM',
                 serial: 99,
-                description: 'FAN MOTOR',
+                service: 'FAN MOTOR',
                 project: @project,
                 discipline: @discipline
               )
