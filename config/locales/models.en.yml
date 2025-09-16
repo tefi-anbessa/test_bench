@@ -42,7 +42,7 @@ en:
         suffix_help:      "Suffix should be typically one character, blank if not required"
         service:          "Service"
         service_help:     "Service description (40 characters maximum)"
-        stage:            "Project Stage"
+        stage:            "Stage"
         notes:            "Notes"
         full_tag:         "Tag"
         tagable_type:     "Tag Type"
@@ -152,4 +152,6 @@ en:
               invalid: "%{name} is not a valid role for %{resource}"
         tag:
           full_tag: "Full tag must be unique within project and discipline"
+          tagable_type_not_assigned: "Not assigned"
+           
 #

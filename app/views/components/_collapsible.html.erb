@@ -1,0 +1,49 @@
+<%# 
+  Collapsible Component
+  
+  Parameters:
+    - title: The title text for the collapsible header
+    - id: Unique ID for the collapsible section (required)
+    - expanded: Whether the content is initially expanded (default: false)
+    - header_class: Additional CSS classes for the header
+    - body_class: Additional CSS classes for the body/content
+    - show_icon: Whether to show the chevron icon (default: true)
+    - &block: The content to be collapsible
+%>
+<% 
+  id ||= "collapsible-#{SecureRandom.hex(4)}"
+  expanded = local_assigns.fetch(:expanded, false)
+  show_icon = local_assigns.fetch(:show_icon, true)
+  header_class = local_assigns.fetch(:header_class, '')
+  body_class = local_assigns.fetch(:body_class, '')
+%>
+
+<div class="card mb-3">
+  <%= content_tag(:div, 
+    class: ["card-header", header_class].compact.join(' '),
+    data: { 
+      controller: "collapsible",
+      action: "click->collapsible#toggle",
+      bs_toggle: "collapse",
+      bs_target: "##{id}"
+    },
+    role: "button",
+    aria: { expanded: expanded, controls: id }) do %>
+    
+    <div class="d-flex justify-content-between align-items-center">
+      <h6 class="mb-0"><%= title %></h6>
+      
+      <% if show_icon %>
+        <div data-collapsible-target="icon" class="<%= expanded ? 'expanded' : 'collapsed' %>">
+          <%= bootstrap_icon("chevron-down", class: "text-muted") %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+  
+  <div id="<%= id %>" class="collapse <%= 'show' if expanded %>" data-collapsible-target="content">
+    <div class="card-body <%= body_class %>">
+      <%= yield if block_given? %>
+    </div>
+  </div>
+</div>

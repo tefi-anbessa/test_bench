@@ -2,28 +2,46 @@
 import "@hotwired/turbo-rails"
 import "controllers"
 import 'bootstrap'
-import { Dropdown } from 'bootstrap'
-import { Tooltip } from 'bootstrap'
-import { Popover } from 'bootstrap'
-// import '@popperjs/core';
+import { Dropdown, Tooltip, Popover, Collapse } from 'bootstrap'
+window.bootstrap = { Dropdown, Tooltip, Popover, Collapse }
 
 // Initialize Bootstrap components when the page loads
-document.addEventListener('turbo:load', function() {
-  // Initialize dropdowns (they should auto-initialize with data-bs-toggle="dropdown")
-  const dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
-  const dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
-    return new Dropdown(dropdownToggleEl)
+const initializeBootstrapComponents = () => {
+  // Initialize dropdowns
+  document.querySelectorAll('.dropdown-toggle').forEach(dropdownToggleEl => {
+    new Dropdown(dropdownToggleEl)
   })
 
   // Initialize tooltips
-  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-  tooltipTriggerList.forEach(function(tooltipTriggerEl) {
-    new bootstrap.Tooltip(tooltipTriggerEl);
-  });
-
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltipEl => {
+    new Tooltip(tooltipEl)
+  })
+  
   // Initialize popovers
-  var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-  popoverTriggerList.forEach(function(popoverTriggerEl) {
-    new bootstrap.Popover(popoverTriggerEl);
-  });
-});
+  document.querySelectorAll('[data-bs-toggle="popover"]').forEach(popoverEl => {
+    new Popover(popoverEl)
+  })
+  
+  // Initialize collapsibles with explicit state
+  document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(collapseEl => {
+    const target = collapseEl.getAttribute('data-bs-target') || collapseEl.getAttribute('href')
+    if (target) {
+      const targetEl = document.querySelector(target)
+      if (targetEl && !targetEl.hasAttribute('data-bs-collapse-initialized')) {
+        new Collapse(targetEl, { toggle: false })
+        targetEl.setAttribute('data-bs-collapse-initialized', 'true')
+      }
+    }
+  })
+}
+
+// Initialize on page load
+document.addEventListener('turbo:load', initializeBootstrapComponents)
+document.addEventListener('turbo:render', initializeBootstrapComponents)
+
+// For pages that don't use Turbo
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeBootstrapComponents)
+} else {
+  initializeBootstrapComponents()
+}

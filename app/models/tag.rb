@@ -69,51 +69,44 @@ class Tag < ApplicationRecord
     @original_tagable_id = tagable_id
   end
 
-  # Override next to use loop-based ordering with efficient database queries
+  # Get the next tag in the project, ordered by discipline, loop_id, prefix, and suffix
   def next(attribute = :loop_id)
     return super(attribute) unless attribute == :loop_id
     
-    # Find the next tag in the ordered list using a window function
-    next_tag = self.class.find_by_sql([<<-SQL, project_id: project_id, discipline_id: discipline_id, current_id: id])
-      WITH ordered_tags AS (
-        SELECT id, 
-               LAG(id) OVER (ORDER BY loop_id, prefix, suffix) as prev_id,
-               LEAD(id) OVER (ORDER BY loop_id, prefix, suffix) as next_id
-        FROM tags
-        WHERE project_id = :project_id AND discipline_id = :discipline_id
-      )
-      SELECT t.*
-      FROM tags t
-      JOIN ordered_tags ot ON t.id = ot.next_id
-      WHERE ot.id = :current_id
-    SQL
-    
-    next_tag.first || self
+    adjacent_tag('next_id') || self
   end
 
-  # Override prev to use loop-based ordering with efficient database queries
+  # Get the previous tag in the project, ordered by discipline, loop_id, prefix, and suffix
   def prev(attribute = :loop_id)
     return super(attribute) unless attribute == :loop_id
     
-    # Find the previous tag in the ordered list using a window function
-    prev_tag = self.class.find_by_sql([<<-SQL, project_id: project_id, discipline_id: discipline_id, current_id: id])
-      WITH ordered_tags AS (
-        SELECT id, 
-               LAG(id) OVER (ORDER BY loop_id, prefix, suffix) as prev_id,
-               LEAD(id) OVER (ORDER BY loop_id, prefix, suffix) as next_id
-        FROM tags
-        WHERE project_id = :project_id AND discipline_id = :discipline_id
-      )
-      SELECT t.*
-      FROM tags t
-      JOIN ordered_tags ot ON t.id = ot.prev_id
-      WHERE ot.id = :current_id
-    SQL
-    
-    prev_tag.first || self
+    adjacent_tag('prev_id') || self
   end
 
   private
+  
+  # Find adjacent tag (next or previous) based on the given join condition
+  def adjacent_tag(join_column)
+    sql = <<-SQL
+      WITH ordered_tags AS (
+        SELECT id,
+               discipline_id,
+               loop_id,
+               prefix,
+               COALESCE(suffix, '') as suffix_sort,
+               LAG(id) OVER (ORDER BY discipline_id, loop_id, prefix, COALESCE(suffix, '')) as prev_id,
+               LEAD(id) OVER (ORDER BY discipline_id, loop_id, prefix, COALESCE(suffix, '')) as next_id
+        FROM tags
+        WHERE project_id = :project_id
+      )
+      SELECT t.*
+      FROM tags t
+      JOIN ordered_tags ot ON t.id = ot.#{join_column}
+      WHERE ot.id = :current_id
+    SQL
+    
+    self.class.find_by_sql([sql, { project_id: project_id, current_id: id }]).first
+  end
   
   # Prevent re-assigning a tagable to a different tag
   def tagable_not_already_taken

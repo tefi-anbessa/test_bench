@@ -133,6 +133,7 @@ Set options for select fields in the controller, not in the view. Complete i18n 
 - [ ] Revisit the roles policy test. The roles policy is now using the role context from the controller, need to factor this into tests. 
 - [ ] Roles policy is delegating to resource policies for resource instances. Tests need to consider this.
 - [ ] Ensure select for role names does not include restricted roles unless current user has app_owner role.
+- [ ] Develop an application colour theme set.
 
 ## Refactoring Opportunities
 - [x] Improve role and permissions implementation and workflow.
@@ -145,7 +146,7 @@ Set options for select fields in the controller, not in the view. Complete i18n 
 - [x] Refactor electrical policy classes (CablePolicy, SwitchboardPolicy, MotorPolicy, LightCctPolicy, SocketCctPolicy) to use a shared concern or base class to reduce code duplication
 - [x] Refactor all views to use pundit policy checks.
 - [x] Change terminology and implementation from project owner to project manager.
-- [ ] Refactor projects controller and application controller `def after_sign_in_path_for(resource)to use app/controllers/concerns/current_project_concern.rb to reduce code duplication.
+- [ ] Refactor projects controller and application controller setting of current project: `def after_sign_in_path_for(resource)to use app/controllers/concerns/current_project_concern.rb to reduce code duplication.
 - [ ] Cable types: 
    - [ ] convert core material to enum.
    - [ ] convert insulation material to enum.
@@ -156,15 +157,18 @@ Set options for select fields in the controller, not in the view. Complete i18n 
    - [ ] build a ruby structure for ingress protection, convert ingress protection to this type.
    - [ ] convert poles to enum.
    - [ ] convert speed rated to enum.
-- [ ] Refactor tag 'description' to 'service'.
+- [x] Refactor tag 'description' to 'service'.
 - [ ] Redesign tag module:
-   - [ ] base full tag becomes a string object.
+   - [ ] base full tag becomes a virtual field.
    - [ ] builder/parser model for each discipline which creates the string according to the required format, and can parse the string back into the components.
-   - [ ] provide default format for each discipline, e.g. isa5.1.
+   - [ ] provide default format for each discipline, e.g. isa5.1
+   - [ ] add next/previous functionality
+   - [ ] add colour code by discipline
+- [ ] Look at use of hover on buttons, and use turbo to prevent page refresh.
  
 ## Potential Features
 - [ ] Add more comprehensive reporting for demand calculations
-- [ ] Implement bulk import/export for demands
+- [ ] Implement bulk import/export
 - [ ] Add more detailed documentation for the demand calculation formulas
 - [ ] See if pagy can provide user selectable page size
 - [ ] Data revision management
@@ -178,15 +182,16 @@ Set options for select fields in the controller, not in the view. Complete i18n 
    - [ ] Customize error trapping for unknown format
    - [ ] Customize error trapping for forbidden
 - [ ] Improve locale setting, and include language/currency/flag in locale selection.
+- [ ] Add discipline colour sets
 
 ## Architecture Considerations
 - [ ] Move Electrical to a module or namespace.
 - [ ] Consider API versioning strategy
-- [ ] Plan for database scaling as demand data grows
+- [ ] Plan for database scaling as data grows
 
 
 
 ## Notes
-- Keep backward compatibility during the Load → Demand transition
+- [x] Keep backward compatibility during the Load → Demand transition
 - Document any non-obvious electrical calculation formulas
 - Consider adding performance benchmarks for critical paths

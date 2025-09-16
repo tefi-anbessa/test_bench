@@ -1,8 +1,8 @@
 module BootstrapIconHelper
   def icon(name, options = {})
     options = {
-      width: '1em',
-      height: '1em',
+      width: '1rem',
+      height: '1rem',
       fill: 'currentColor'
     }.merge(options)
     
