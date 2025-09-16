@@ -8,28 +8,31 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Index Button -->
-            <%= link_to tags_path, 
+            <%= link_to tags_path,
                   class: "btn btn-sm btn-outline-secondary me-2",
                   title: t('actions.index') do %>
               <%== icon('list-columns-reverse') %>
               <span class="d-none d-md-inline"><%= t('actions.index') %></span>
             <% end %>
-            
+
             <!-- Previous Button -->
             <% prev_tag = @tag.prev %>
             <% if prev_tag.present? %>
               <% disabled = prev_tag == @tag %>
-              <%= link_to tag_path(prev_tag), 
+              <%= link_to tag_path(prev_tag),
                     disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
+                    class: "btn btn-sm btn-outline-secondary
+                      #{'disabled' if disabled}",
                     title: "#{t('actions.previous')}: #{prev_tag.full_tag}" do %>
                 <%== icon('arrow-left') %>
-                <span class="d-none d-md-inline"><%= t('actions.previous') %></span>
+                <span class="d-none d-md-inline">
+                  <%= t('actions.previous') %>
+                </span>
               <% end %>
             <% end %>
           </div>
         </div>
-        
+
         <!-- Center Tag Info -->
         <div class="col text-center">
           <div class="d-flex justify-content-center align-items-center">
@@ -39,7 +42,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Right Navigation and Actions -->
         <div class="col-auto">
           <div class="d-flex align-items-center">
@@ -47,43 +50,50 @@
             <% next_tag = @tag.next %>
             <% if next_tag.present? %>
               <% disabled = next_tag == @tag %>
-              <%= link_to tag_path(next_tag), 
+              <%= link_to tag_path(next_tag),
                     disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary me-2 #{'disabled' if disabled}",
+                    class: "btn btn-sm btn-outline-secondary
+                      me-2 #{'disabled' if disabled}",
                     title: "#{t('actions.next')}: #{next_tag.full_tag}" do %>
-                <span class="d-none d-md-inline"><%= t('actions.next') %></span>
+                <span class="d-none d-md-inline">
+                  <%= t('actions.next') %>
+                </span>
                 <%== icon('arrow-right') %>
               <% end %>
             <% end %>
-            
+
             <!-- Action Buttons -->
-            <div class="btn-group btn-group-sm">
-              <%= link_to edit_tag_path(@tag), 
+            <div class="btn-group btn-group-sm gap-1">
+              <%= link_to edit_tag_path(@tag),
                     class: "btn btn-outline-warning",
                     title: t('actions.edit') do %>
                 <%== icon('pencil-square') %>
-                <span class="d-none d-md-inline"><%= t('actions.edit') %></span>
+                <span class="d-none d-md-inline">
+                  <%= t('actions.edit') %>
+                </span>
               <% end %>
-              
-              <%= link_to @tag, 
-                    method: :delete, 
+
+              <%= link_to @tag,
+                    method: :delete,
                     data: { confirm: t('actions.delete_sure') },
                     class: "btn btn-outline-danger",
                     title: t('actions.delete') do %>
                 <%== icon('trash') %>
-                <span class="d-none d-md-inline"><%= t('actions.delete') %></span>
+                <span class="d-none d-md-inline">
+                  <%= t('actions.delete') %>
+                </span>
               <% end %>
             </div>
           </div>
         </div>
       </div>
     </div>
-    
+
     <div class="card-body">
       <!-- Project & Stage Info -->
       <div class="row mb-3">
         <div class="col-md-6">
-          <%= render 'components/collapsible', 
+          <%= render 'components/collapsible',
                 title: "#{t('activerecord.models.project')}: #{@tag.project.label} - #{t('activerecord.attributes.tag.stage')}: #{@tag.stage}",
                 id: 'project-collapse',
                 expanded: false,
@@ -96,10 +106,10 @@
             </div>
           <% end %>
         </div>
-        
+
         <!-- Discipline Info -->
         <div class="col-md-6">
-          <%= render 'components/collapsible', 
+          <%= render 'components/collapsible',
                 title: "#{t('activerecord.models.discipline')}: #{@tag.discipline.code}",
                 id: 'discipline-collapse',
                 expanded: false,
@@ -110,118 +120,113 @@
           <% end %>
         </div>
       </div>
-      
+
       <!-- Tag Details -->
       <div class="row align-items-start mb-4 g-2">
+        <!-- Prefix -->
         <div class="col-6 col-md-1">
-                  <div class="form-text text-muted small mb-1"><%= Tag.human_attribute_name(:prefix) %></div>
-                  <div class="bg-info-subtle rounded p-1 h-100 d-flex align-items-center small text-truncate shadow-sm" style="height: 1.8rem;"><%= @tag.prefix %></div>
+          <div class="form-text text-muted small mb-1">
+            <%= Tag.human_attribute_name(:prefix) %>
+          </div>
+          <div class="bg-info-subtle rounded p-1 h-100 d-flex align-items-center small text-truncate shadow-sm"
+               style="height: 1.8rem;">
+            <%= @tag.prefix %>
+          </div>
         </div>
+
+        <!-- Serial -->
         <div class="col-6 col-md-1">
-                  <div class="form-text text-muted small mb-1"><%= Tag.human_attribute_name(:serial) %></div>
-                  <div class="bg-info-subtle rounded p-1 h-100 d-flex align-items-center small text-truncate shadow-sm" style="height: 1.8rem;"><%= @tag.serial %></div>
+          <div class="form-text text-muted small mb-1">
+            <%= Tag.human_attribute_name(:serial) %>
+          </div>
+          <div class="bg-info-subtle rounded p-1 h-100 d-flex align-items-center small text-truncate shadow-sm"
+               style="height: 1.8rem;">
+            <%= "%04d" % @tag.serial %>
+          </div>
         </div>
+
+        <!-- Suffix -->
         <div class="col-6 col-md-1">
-                  <div class="form-text text-muted small mb-1"><%= Tag.human_attribute_name(:suffix) %></div>
-                  <div class="bg-info-subtle rounded p-1 h-100 d-flex align-items-center small text-truncate shadow-sm" style="height: 1.8rem;"><%= @tag.suffix.presence %></div>
+          <div class="form-text text-muted small mb-1">
+            <%= Tag.human_attribute_name(:suffix) %>
+          </div>
+          <div class="bg-info-subtle rounded p-1 h-100 d-flex align-items-center small text-truncate shadow-sm"
+               style="height: 1.8rem;">
+            <%= @tag.suffix.presence %>
+          </div>
         </div>
+
+        <!-- Service -->
         <div class="col-6 col-md-4">
-                  <div class="form-text text-muted small mb-1"><%= Tag.human_attribute_name(:service) %></div>
-                  <div class="bg-info-subtle rounded p-1 h-100 d-flex align-items-center small text-truncate shadow-sm" style="height: 1.8rem;"><%= @tag.service %></div>
+          <div class="form-text text-muted small mb-1">
+            <%= Tag.human_attribute_name(:service) %>
+          </div>
+          <div class="bg-info-subtle rounded p-1 h-100 d-flex align-items-center small text-truncate shadow-sm"
+               style="height: 1.8rem;">
+            <%= @tag.service %>
+          </div>
         </div>
+
+        <!-- Notes -->
         <div class="col-12 col-md-5">
-                  <div class="form-text text-muted small mb-1"><%= Tag.human_attribute_name(:notes) %></div>
-                  <div class="bg-info-subtle rounded p-2 small overflow-auto shadow-sm" style="height: 5.4rem;"><%= @tag.notes.presence %></div>
+          <div class="form-text text-muted small mb-1">
+            <%= Tag.human_attribute_name(:notes) %>
+          </div>
+          <div class="bg-info-subtle rounded p-2 small overflow-auto shadow-sm"
+               style="height: 5.4rem;">
+            <%= @tag.notes.presence %>
+          </div>
         </div>
       </div>
 
-      <!-- Prefix Breakdown -->
-      <%= render 'components/collapsible', 
-            title: 'Prefix Breakdown',
-            id: 'prefix-breakdown',
-            expanded: false,
-            header_class: 'py-1' do %>
-        <div class="p-3">
-          <p class="text-muted mb-0">Prefix breakdown details will be displayed here.</p>
-          <!-- Will be populated with prefix character breakdown -->
+      <!-- Row for Prefix Breakdown and Tagable Section -->
+      <div class="row mb-3">
+
+        <!-- Prefix Breakdown -->
+        <div class="col-md-6">
+          <%= render 'components/collapsible',
+                title: 'Prefix Breakdown',
+                id: 'prefix-breakdown',
+                expanded: false,
+                header_class: 'py-1' do %>
+            <div class="p-3">
+              <p class="text-muted mb-0">Prefix breakdown details will be displayed here.</p>
+              <!-- Will be populated with prefix character breakdown -->
+            </div>
+          <% end %>
         </div>
-      <% end %>
-      
-      <!-- Tagable Section -->
-      <%= render 'components/collapsible', 
-            title: "#{t('activerecord.attributes.tag.tagable_type')}:
-             #{@tag.tagable_type.presence || t('activerecord.errors.models.tag.tagable_type_not_assigned')}",
-            id: 'tagable-section',
-            expanded: false,
-            header_class: 'py-1' do %>
-        <div class="p-3">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <p class="mb-0">
-              <%= @tag.tagable_type.presence || t('activerecord.errors.models.tag.tagable_type_not_assigned') %>
-            </p>
-            
-            <% if @tag.tagable_type.present? %>
-              <% if @tag.tagable_id.nil? %>
-                <%= link_to eval("new_tag_#{@tag.tagable_type.tableize.singularize}_path(#{@tag.id})"),
-                      class: "btn btn-sm btn-outline-primary",
-                      title: t('actions.link') do %>
-                  <%== icon('link-45deg') %>
-                  <span class="d-none d-md-inline"><%= t('actions.link') %></span>
+
+        <!-- Tagable Section -->
+        <div class="col-md-6">
+          <div class="row mb-3">
+            <div class="col-12">
+              <div class="d-flex justify-content-end align-items-center">
+                <strong><%= t('activerecord.attributes.tag.tagable_type') %>:</strong>
+                <span class="ms-1">
+                  <% if @tag.tagable_type.blank? %>
+                    <span class="text-muted"><%= t('activerecord.errors.not_assigned') %></span>
+                  <% elsif @tag.tagable_id.blank? %>
+                    <span class="text-muted"><%= @tag.tagable_type %> (<%= t('activerecord.errors.not_assigned') %>)</span>
+                  <% else %>
+                    <%= @tag.tagable_type %>
+                  <% end %>
+                </span>
+
+                <% if @tag.tagable_type.present? && @tag.tagable_id.present? %>
+                  <div class="ms-2">
+                    <%= link_to eval("#{@tag.tagable_type.tableize.singularize}_path(#{@tag.tagable_id})"),
+                          class: "btn btn-sm btn-outline-secondary",
+                          title: t('actions.view') do %>
+                      <%== icon('box-arrow-up-right') %>
+                      <span class="d-none d-md-inline"><%= t('actions.view') %></span>
+                    <% end %>
+                  </div>
                 <% end %>
-              <% else %>
-                <%= link_to eval("#{@tag.tagable_type.tableize.singularize}_path(#{@tag.tagable_id})"),
-                      class: "btn btn-sm btn-outline-secondary",
-                      title: t('actions.view') do %>
-                  <%== icon('box-arrow-up-right') %>
-                  <span class="d-none d-md-inline"><%= t('actions.view') %></span>
-                <% end %>
-              <% end %>
-            <% end %>
+              </div>
+            </div>
           </div>
-          
-          <%# Future provision for tagable card will go here %>
         </div>
-      <% end %>
-    </div>
-  </div>
-  
-  <!-- Navigation Buttons -->
-  <div class="d-flex justify-content-between mb-4">
-    <div>
-      <% prev_tag = @tag.prev %>
-      <% if prev_tag.present? %>
-        <% disabled = prev_tag == @tag %>
-        <%= link_to tag_path(prev_tag), 
-              disabled: disabled,
-              class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
-              title: "#{t('actions.previous')}: #{prev_tag.full_tag}" do %>
-          <%== icon('arrow-left') %>
-          <span class="d-none d-md-inline"><%= t('actions.previous') %></span>
-        <% end %>
-      <% end %>
-    </div>
-    
-    <div>
-      <%= link_to tags_path, 
-            class: "btn btn-sm btn-outline-secondary",
-            title: t('actions.index') do %>
-        <%== icon('list-columns-reverse') %>
-        <span class="d-none d-md-inline"><%= t('actions.index') %></span>
-      <% end %>
-    </div>
-    
-    <div>
-      <% next_tag = @tag.next %>
-      <% if next_tag.present? %>
-        <% disabled = next_tag == @tag %>
-        <%= link_to tag_path(next_tag), 
-              disabled: disabled,
-              class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
-              title: "#{t('actions.next')}: #{next_tag.full_tag}" do %>
-          <span class="d-none d-md-inline"><%= t('actions.next') %></span>
-          <%== icon('arrow-right') %>
-        <% end %>
-      <% end %>
+      </div>
     </div>
   </div>
 </div>

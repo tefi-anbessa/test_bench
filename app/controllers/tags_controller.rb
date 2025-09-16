@@ -20,6 +20,7 @@ class TagsController < ApplicationController
   # GET /tags/new
   def new
     authorize @tag = Tag.new
+    setup_disciplines
   end
 
   # POST /tags or /tags.json
@@ -40,6 +41,7 @@ class TagsController < ApplicationController
   # GET /tags/1/edit
   def edit
     authorize @tag
+    setup_disciplines
   end
 
   # PATCH/PUT /tags/1 or /tags/1.json
@@ -69,12 +71,18 @@ class TagsController < ApplicationController
 
   private
 
+    # [TODO] fix this to allow admin workflow for any project.
     def set_project
       if current_project
         @project = current_project
       else
         redirect_to select_projects_path
       end
+    end
+
+    # Setup disciplines for the form selector
+    def setup_disciplines
+      @disciplines = Discipline.all.select(:id, :code, :name).to_a
     end
 
     def set_tag

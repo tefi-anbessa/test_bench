@@ -1,81 +1,204 @@
 <div class="container">
+  <div class="text-center mb-4">
+    <h5 class="d-inline-block bg-light p-2 rounded">
+      <%= @tag.persisted? ? t('actions.edit') : t('actions.new') %> <%= t('activerecord.models.tag') %>: 
+      <span id="full-tag-preview" class="fw-normal"><%= @tag.full_tag.presence || 'No tag preview available' %></span>
+    </h5>
+  </div>
+  
   <%= bootstrap_form_with(model: @tag, layout: :vertical) do |f| %>
-    <%= render 'shared/error_messages', object: f.object %>
 
-    <div class="d-flex flex-row mb-1">
-      <div class="p-2 me-1 form-field">
-        <%= f.select :project_id,
-              Project.all.collect { |p| [ "#{p.code}: #{p.title}", p.id ] }%>
+    <div class="row mb-4 g-3">
+      <!-- Project -->
+      <div class="col-md-4">
+        <% if @current_project.present? %>
+          <%= f.hidden_field :project_id, value: @current_project.id %>
+          <div class="form-group">
+            <label class="form-label"><%= t('activerecord.models.project') %></label>
+            <div class="form-control-plaintext">
+              <%= "#{@current_project.code}: #{@current_project.title}" %>
+            </div>
+          </div>
+        <% else %>
+          <%= f.select :project_id,
+                Project.all.collect { |p| [ "#{p.code}: #{p.title}", p.id ] },
+                { label: t('activerecord.models.project') },
+                { class: 'form-select' },
+                { required: true } %>
+        <% end %>
       </div>
-      <div class="p-2 me-1 form-field">
-        <%= f.number_field :stage %>
+
+      <!-- Stage -->
+      <div class="col-md-2">
+        <%= f.number_field :stage, 
+              label: Tag.human_attribute_name(:stage),
+              min: 0, 
+              max: 10,
+              help: t('activerecord.attributes.tag.stage_help') %>
       </div>
-      <div class="p-2 me-1 form-field">
-        <%= f.collection_select :discipline_id, Discipline.all, :id, :code%>
+
+      <!-- Discipline -->
+      <div class="col-md-4">
+        <%= f.select :discipline_id,
+              options_for_select(
+                @disciplines.map { |d| 
+                  ["#{t("tag.discipline.#{d.code.downcase}.code", default: d.code)}: #{t("tag.discipline.#{d.code.downcase}.name", default: d.code)}", d.id]
+                },
+                @tag.discipline_id
+              ),
+              { label: t('activerecord.models.discipline') },
+              { class: 'form-select' } %>
       </div>
     </div>
 
-    <div class="d-flex flex-row mb-1">
-      <div class="p-2 me-1 form-field">
-        <%= f.select :prefix, Tag.distinct.pluck(:prefix),
-              include_blank: t('form.new_select') %>
+    <!-- Tag Details -->
+    <div class="row mb-4 g-3">
+      <div class="col-md-2">
+        <%= f.text_field :prefix,
+              label: Tag.human_attribute_name(:prefix),
+              help: t('activerecord.attributes.tag.prefix_help'),
+              required: true %>
       </div>
-      <div class="p-2 me-1 form-field">
-        <%= f.text_field :new_prefix,
-              help: t('activerecord.attributes.tag.prefix_help') %>
+
+      <div class="col-md-2">
+        <div class="form-group">
+          <%= f.text_field :serial,
+                class: 'form-control',
+                pattern: '\d*',
+                inputmode: 'numeric',
+                value: @tag.serial.present? ? @tag.serial.to_s.rjust(4, '0') : '0000',
+                data: { controller: 'numeric-mask', target: 'numeric-mask.input' } %>
+          <small class="form-text text-muted"><%= t('activerecord.attributes.tag.serial_help') %></small>
+        </div>
       </div>
-      <div class="p-2 me-1 form-field">
-        <%= f.number_field :serial,
-              help: t('activerecord.attributes.tag.serial_help') %>
-      </div>
-      <div class="p-2 me-1 form-field">
+
+      <div class="col-md-2">
         <%= f.text_field :suffix,
+              label: Tag.human_attribute_name(:suffix),
               help: t('activerecord.attributes.tag.suffix_help') %>
       </div>
-      <div class="p-2 me-1 data-field">
-        <%= f.text_field :full_tag, disabled: true %>
+
+      <div class="col-md-6">
+        <%= f.text_field :service,
+              label: Tag.human_attribute_name(:service),
+              help: t('activerecord.attributes.tag.service_help'),
+              required: true %>
       </div>
+
     </div>
 
-    <div class="d-flex flex-row mb-1">
-      <div class="p-2 me-1 form-field">
-        <%= f.text_field :service, required: true,
-              help: t('activerecord.attributes.tag.service') %>
-      </div>
-    </div>
-    <div class="d-flex flex-row mb-1">
-      <div class="p-2 me-1 form-field">
+    <!-- Notes -->
+    <div class="row mb-4">
+      <div class="col-12">
         <%= f.text_area :notes,
-              placeholder: t('activerecord.attributes.tag.notes') %>
+              label: Tag.human_attribute_name(:notes),
+              rows: 3,
+              placeholder: t('activerecord.attributes.tag.notes_help') %>
       </div>
     </div>
 
-    <div class="d-flex flex-row mb-1">
-      <div class="p-2 me-1 form-field">
-        <%= f.select :tagable_type, Constants.tagable, include_blank: true %>
+    <!-- Hidden field for full tag preview -->
+    <%= f.hidden_field :full_tag, id: 'tag_full_tag_preview' %>
+
+    <!-- Tagable Type -->
+    <div class="row mb-4">
+      <div class="col-4">
+        <%= f.select :tagable_type,
+              Constants.tagable,
+              { label: Tag.human_attribute_name(:tagable_type), include_blank: true },
+              { class: 'form-select' } %>
       </div>
     </div>
 
-    <div class="d-flex flex-row mb-1">
-      <div class="actions">
-        <%= f.primary do %>
-          <%= yield(:button_text) %>
+    <!-- Form Actions -->
+    <div class="form-actions mt-4">
+      <div class="d-flex justify-content-end gap-2">
+        <%= link_to(@tag.persisted? ? tag_path(@tag) : tags_path, 
+              class: 'btn btn-warning',
+              data: { confirm: t('actions.sure'), turbo: false }) do %>
+          <%= t('actions.discard') %>
+          <%== icon('x-square') %>
+        <% end %>
+        <%= f.button :submit, class: 'btn btn-primary' do %>
+          <%= yield(:button_text) || t('actions.save') %>
           <%== icon('save') %>
         <% end %>
-        <% if @tag.persisted? %>
-          <%= link_to @tag, class: "btn btn-warning actions",
-                  data: { turbo_confirm: t('actions.sure') } do %>
-                  <%= t('actions.discard') %>
-                  <%== icon('x-square') %>
-          <% end %>
-        <% else %>
-          <%= link_to tags_path, class: "btn btn-warning actions",
-                  data: { turbo_confirm: t('actions.sure') }  do %>
-            <%= t('actions.discard') %>
-            <%== icon('x-square') %>
-          <% end %>
-        <% end %>
       </div>
     </div>
+
+    <!-- JavaScript for dynamic updates -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const prefixInput = document.querySelector('#tag_prefix');
+        const newPrefixField = document.getElementById('new-prefix-field');
+        
+        // Toggle new prefix field visibility
+        function toggleNewPrefixField() {
+          if (!prefixInput || !newPrefixField) return;
+          
+          if (prefixInput.value === '') {
+            newPrefixField.style.display = 'block';
+            const newPrefixInput = document.querySelector('#tag_new_prefix');
+            if (newPrefixInput) newPrefixInput.required = true;
+          } else {
+            newPrefixField.style.display = 'none';
+            const newPrefixInput = document.querySelector('#tag_new_prefix');
+            if (newPrefixInput) newPrefixInput.required = false;
+          }
+        }
+        
+        // Update full tag preview
+        function updateFullTagPreview() {
+          if (!prefixInput) return;
+          
+          let prefix = '';
+          if (prefixInput.value === '' && newPrefixField) {
+            const newPrefixInput = document.querySelector('#tag_new_prefix');
+            prefix = newPrefixInput ? newPrefixInput.value : '';
+          } else if (prefixInput.selectedIndex >= 0) {
+            prefix = prefixInput.options[prefixInput.selectedIndex]?.text || '';
+          } else {
+            prefix = prefixInput.value || '';
+          }
+          
+          const serialInput = document.querySelector('#tag_serial');
+          const serial = serialInput ? serialInput.value.padStart(4, '0') : '0000';
+          
+          const suffixInput = document.querySelector('#tag_suffix');
+          const suffix = suffixInput ? (suffixInput.value || '') : '';
+          
+          const fullTag = [prefix, serial, suffix].filter(Boolean).join('');
+          
+          // Update the full tag preview in the header
+          const fullTagPreview = document.getElementById('full-tag-preview');
+          if (fullTagPreview) {
+            fullTagPreview.textContent = fullTag || '<%= j t('activerecord.attributes.tag.full_tag_preview') %>';
+          }
+        }
+        
+        // Initial update
+        updateFullTagPreview();
+        
+        // Add event listeners
+        ['#tag_prefix', '#tag_new_prefix', '#tag_serial', '#tag_suffix'].forEach(selector => {
+          const element = document.querySelector(selector);
+          if (element) {
+            element.addEventListener('input', updateFullTagPreview);
+            element.addEventListener('change', updateFullTagPreview);
+            
+            // Also add change listener for prefix to toggle new prefix field
+            if (selector === '#tag_prefix') {
+              element.addEventListener('change', toggleNewPrefixField);
+            }
+          }
+        });
+        
+        // Initial setup
+        toggleNewPrefixField();
+        updateFullTagPreview();
+      });
+    </script>
+    
+    <%= javascript_include_tag 'tags/form' if File.exist?(Rails.root.join('app', 'assets', 'javascript', 'tags', 'form.js')) %>
   <% end %>
 </div>

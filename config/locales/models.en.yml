@@ -44,6 +44,7 @@ en:
         service_help:     "Service description (40 characters maximum)"
         stage:            "Stage"
         notes:            "Notes"
+        notes_help:       "Record useful design information here"
         full_tag:         "Tag"
         tagable_type:     "Tag Type"
       role:
@@ -153,5 +154,5 @@ en:
         tag:
           full_tag: "Full tag must be unique within project and discipline"
           tagable_type_not_assigned: "Not assigned"
-           
+
 #

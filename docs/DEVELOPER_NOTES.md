@@ -165,6 +165,7 @@ Set options for select fields in the controller, not in the view. Complete i18n 
    - [ ] add next/previous functionality
    - [ ] add colour code by discipline
 - [ ] Look at use of hover on buttons, and use turbo to prevent page refresh.
+- [ ] Improve implementation of Discipline model, including translation.
  
 ## Potential Features
 - [ ] Add more comprehensive reporting for demand calculations

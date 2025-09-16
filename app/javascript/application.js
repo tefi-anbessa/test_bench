@@ -1,5 +1,11 @@
 // Configure your import map in config/importmap.rb. Read more: https://github.com/rails/importmap-rails
 import "@hotwired/turbo-rails"
+import Rails from "@rails/ujs"
+Rails.start()
+
+// Initialize Rails UJS for confirm dialogs
+window.Rails = Rails
+
 import "controllers"
 import 'bootstrap'
 import { Dropdown, Tooltip, Popover, Collapse } from 'bootstrap'
