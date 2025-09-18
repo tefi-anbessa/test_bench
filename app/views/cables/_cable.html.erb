@@ -1,103 +1,126 @@
-<div id="<%= dom_id cable %>">
-  <div class="container text-start">
-    <% if cable.tag.nil? %>
-      <div class="d-flex flex-row mb-1">
-        <span class="col-1 data-label">
-          <% t('show.orphan', model: t("activerecord.models.tag").tableize) %>
-        </span>
-      </div>
-    <% else %>
-      <div class="d-flex flex-row mb-1">
-        <span class="col-1 data-label">
-          <%= t('activerecord.attributes.tag.full_tag') + ':' %>
-        </span>
-        <span class="col-1 data-field">
-          <%= link_to cable.tag.full_tag, tag_path(cable.tag.id) %>
-        </span>
-        <span class="col-4 data-field">
-          <%= cable.tag.service %>
-        </span>
-      </div>
-    <% end %>
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable.cable_type_id') %>:
-      </span>
-      <span class="col-1 data-field">
-        <%= link_to cable.cable_type_id, cable_type_path(cable.cable_type_id) %>
-      </span>
-    </div>
-    <% if cable.circuit.present? %>
-      <div class="d-flex flex-row mb-1">
-        <span class="col-1 data-label">
-          <%= t('activerecord.models.switchboard') %>:
-        </span>
-        <span class="col-1 data-field">
-          <%= link_to cable.circuit.switchboard.tag.full_tag,
-                switchboard_path(cable.circuit.switchboard) %>
-        </span>
-        <span class="col-1 data-field">
-          <%= cable.circuit.switchboard.tag.service %>:
-        </span>
-        <span class="col-1 data-label">
-          <%= t('activerecord.models.circuit') %>:
-        </span>
-        <span class="col-1 data-field">
-          <%= link_to cable.circuit.serial,
-                circuit_path(cable.circuit) %>
-        </span>
+<div id="<%= dom_id cable %>" class="container">
+  <!-- Cable Header -->
+  <div class="mb-4">
+    <h4>
+      <% if cable.tag.present? %>
+        <span class="badge bg-primary"><%= cable.tag.full_tag %></span>
+        <span class="ms-2"><%= cable.tag.service %></span>
       <% else %>
-        <%= t('show.unassigned', model: t('activerecord.models.circuit')) %>
+        <span class="text-muted"><%= t('show.orphan', model: t("activerecord.models.tag").tableize) %></span>
+      <% end %>
+    </h4>
+  </div>
+
+  <!-- Cable Details -->
+  <div class="row g-3">
+    <!-- Left Column -->
+    <div class="col-md-6">
+      <!-- Cable Type Section (Collapsible) -->
+      <div class="card mb-3">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center" 
+             data-bs-toggle="collapse" 
+             href="#cableTypeDetails" 
+             role="button" 
+             aria-expanded="false" 
+             aria-controls="cableTypeDetails">
+          <span class="fw-bold">
+            <%= t('activerecord.models.cable_type') %>: <%= cable.cable_type.description %>
+          </span>
+          <i class="bi bi-chevron-down"></i>
+        </div>
+        
+        <div class="collapse" id="cableTypeDetails">
+          <div class="card-body">
+            <dl class="row mb-0">
+              <dt class="col-sm-5"><%= t('activerecord.attributes.cable_type.conductor_material') %></dt>
+              <dd class="col-sm-7"><%= cable.cable_type.conductor_material %></dd>
+              
+              <dt class="col-sm-5"><%= t('activerecord.attributes.cable_type.conductor_makeup') %></dt>
+              <dd class="col-sm-7"><%= cable.cable_type.conductor_makeup %></dd>
+              
+              <dt class="col-sm-5"><%= t('activerecord.attributes.cable_type.csa') %></dt>
+              <dd class="col-sm-7"><%= cable.cable_type.csa %> mm²</dd>
+              
+              <% if cable.cable_type.insulation.present? %>
+                <dt class="col-sm-5"><%= t('activerecord.attributes.cable_type.insulation') %></dt>
+                <dd class="col-sm-7"><%= cable.cable_type.insulation %></dd>
+              <% end %>
+              
+              <% if cable.cable_type.bedding.present? %>
+                <dt class="col-sm-5"><%= t('activerecord.attributes.cable_type.bedding') %></dt>
+                <dd class="col-sm-7"><%= cable.cable_type.bedding %></dd>
+              <% end %>
+              
+              <% if cable.cable_type.armour.present? %>
+                <dt class="col-sm-5"><%= t('activerecord.attributes.cable_type.armour') %></dt>
+                <dd class="col-sm-7"><%= cable.cable_type.armour %></dd>
+              <% end %>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <!-- Circuit Information -->
+      <% if cable.circuit.present? %>
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title"><%= t('activerecord.models.circuit') %></h5>
+            <dl class="row mb-0">
+              <dt class="col-sm-5"><%= t('activerecord.models.switchboard') %></dt>
+              <dd class="col-sm-7">
+                <%= link_to cable.circuit.switchboard.tag.full_tag, 
+                           switchboard_path(cable.circuit.switchboard) %>
+                <small class="text-muted d-block"><%= cable.circuit.switchboard.tag.service %></small>
+              </dd>
+              
+              <dt class="col-sm-5"><%= t('activerecord.attributes.circuit.serial') %></dt>
+              <dd class="col-sm-7">
+                <%= link_to cable.circuit.serial, circuit_path(cable.circuit) %>
+              </dd>
+              
+              <% if cable.circuit.demand&.present? %>
+                <dt class="col-sm-5"><%= t('activerecord.models.demand') %></dt>
+                <dd class="col-sm-7">
+                  <%= link_to cable.circuit.load.loadable.tag.full_tag, 
+                             demand_path(cable.circuit.load) %>
+                  <small class="text-muted d-block"><%= cable.circuit.load.loadable.tag.service %></small>
+                </dd>
+              <% end %>
+            </dl>
+          </div>
+        </div>
       <% end %>
     </div>
-    <% if cable.circuit.load.present? %>
-      <div class="d-flex flex-row mb-1">
-        <span class="col-1 data-label">
-          <%= t('activerecord.models.demand') %>:
-        </span>
-        <span class="col-1 data-field">
-          <%= link_to cable.circuit.load.loadable.tag.full_tag,
-                demand_path(cable.circuit.load) %>
-        </span>
-        <span class="col-4 data-field">
-          <%= cable.circuit.load.loadable.tag.service %>
-        </span>
+
+    <!-- Right Column -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-light">
+          <h5 class="mb-0"><%= t('cables.show.dimensions') %></h5>
+        </div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-6"><%= t('activerecord.attributes.cable.route_length') %></dt>
+            <dd class="col-sm-6"><%= cable.route_length %> m</dd>
+            
+            <dt class="col-sm-6"><%= t('activerecord.attributes.cable.vertical_allowance') %></dt>
+            <dd class="col-sm-6"><%= cable.vertical_allowance %> m</dd>
+            
+            <dt class="col-sm-6"><%= t('activerecord.attributes.cable.termination_allowance') %></dt>
+            <dd class="col-sm-6"><%= cable.termination_allowance %> m</dd>
+            
+            <dt class="col-sm-6"><%= t('activerecord.attributes.cable.start_mark') %></dt>
+            <dd class="col-sm-6"><%= cable.start_mark %></dd>
+            
+            <% if cable.end_mark.present? %>
+              <dt class="col-sm-6"><%= t('activerecord.attributes.cable.end_mark') %></dt>
+              <dd class="col-sm-6"><%= cable.end_mark %></dd>
+            <% end %>
+          </dl>
+        </div>
       </div>
-    <% else %>
-      <%= t('show.unassigned', model: t('activerecord.models.demand')) %>
-    <% end %>
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable.route_length') %>:
-      </span>
-      <span class="col-1 data-field">
-        <%= cable.route_length %>m
-      </span>
     </div>
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable.vertical_allowance') %>:
-      </span>
-      <span class="col-1 data-field">
-        <%= cable.vertical_allowance %>m
-      </span>
-    </div>
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable.termination_allowance') %>:
-      </span>
-      <span class="col-1 data-field">
-        <%= cable.termination_allowance %>m
-      </span>
-    </div>
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable.start_mark') %>:
-      </span>
-      <span class="col-1 data-field">
-        <%= cable.start_mark %>m
-      </span>
-    </div>
+  </div>
     <div class="d-flex flex-row mb-1">
       <span class="col-1 data-label">
         <%= t('activerecord.attributes.cable.end_mark') %>:

@@ -133,7 +133,7 @@ Set options for select fields in the controller, not in the view. Complete i18n 
 - [ ] Revisit the roles policy test. The roles policy is now using the role context from the controller, need to factor this into tests. 
 - [ ] Roles policy is delegating to resource policies for resource instances. Tests need to consider this.
 - [ ] Ensure select for role names does not include restricted roles unless current user has app_owner role.
-- [ ] Develop an application colour theme set.
+- [ ] System test for tags.
 
 ## Refactoring Opportunities
 - [x] Improve role and permissions implementation and workflow.
@@ -183,7 +183,7 @@ Set options for select fields in the controller, not in the view. Complete i18n 
    - [ ] Customize error trapping for unknown format
    - [ ] Customize error trapping for forbidden
 - [ ] Improve locale setting, and include language/currency/flag in locale selection.
-- [ ] Add discipline colour sets
+- [ ] Develop an application colour theme set. Consider discipline colour coding, also need to consider module colour coding.
 
 ## Architecture Considerations
 - [ ] Move Electrical to a module or namespace.

@@ -3,7 +3,7 @@ require "test_helper"
 class MotorTest < ActiveSupport::TestCase
   def setup
     @project = create(:project)
-    @discipline = create(:discipline, code: 'E', name: 'Electrical')
+    @discipline = create(:discipline, :e)
     @motor = create(:motor, :with_tag, 
                    motor_type: 'Induction',
                    frame_size: '132L',

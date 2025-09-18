@@ -17,7 +17,7 @@ FactoryBot.define do
             project: project,
             discipline: discipline,
             prefix: 'EL',
-            description: "Test Light Cct",
+            service: "Test Light Cct",
             tagable: light_cct
           )
         end

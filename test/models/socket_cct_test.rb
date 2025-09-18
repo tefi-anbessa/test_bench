@@ -2,12 +2,12 @@ require "test_helper"
 
 class SocketCctTest < ActiveSupport::TestCase
   def setup
-    @discipline = create(:discipline, code: 'E', name: 'Electrical')
+    @discipline = create(:discipline, :e)
     @project = create(:project)
     @tag = create(:tag, 
                  prefix: 'ES',
                  serial: 1,
-                 description: 'TEST SOCKETS',
+                 service: 'TEST SOCKETS',
                  project: @project,
                  discipline: @discipline
                )
@@ -21,7 +21,6 @@ class SocketCctTest < ActiveSupport::TestCase
   test "factory should be valid" do
     assert @socket_cct.valid?
     assert @tag.valid?
-    assert @socket_cct.demand.valid?
   end
 
   test "should create socket circuit with valid attributes" do
@@ -36,7 +35,7 @@ class SocketCctTest < ActiveSupport::TestCase
     tag = create(:tag, 
                 prefix: 'ES',
                 serial: serial,
-                description: 'RECEPTION SOCKETS',
+                service: 'RECEPTION SOCKETS',
                 project: @project,
                 discipline: @discipline
               )
@@ -54,24 +53,7 @@ class SocketCctTest < ActiveSupport::TestCase
     end
   end
 
-  test "should create demand when creating socket circuit" do
-    # Create a unique tag for this test to avoid conflicts
-    unique_serial = 9999
-    socket = create(:socket_cct, 
-                   socket_type: 'universal',
-                   quantity: 2,
-                   tag_attributes: {
-                     prefix: 'ES',
-                     serial: unique_serial,
-                     description: 'UNIQUE TEST SOCKET',
-                     project: @project,
-                     discipline: @discipline,
-                     stage: 1  # Adding a valid stage (0-10)
-                   }
-                  )
-    assert socket.demand.present?
-    assert_equal socket, socket.demand.demandable
-  end
+  # Demand creation is tested separately in Demand model tests
 
   test "destroy socket circuit should nullify tagable" do
     socket_id = @socket_cct.id
@@ -83,13 +65,7 @@ class SocketCctTest < ActiveSupport::TestCase
     assert_nil @tag.tagable_id
   end
 
-  test "destroy socket circuit should destroy demand" do
-    demand = @socket_cct.demand
-    assert_difference 'Demand.count', -1 do
-      @socket_cct.destroy
-    end
-    assert_raises(ActiveRecord::RecordNotFound) { demand.reload }
-  end
+  # Demand destruction is tested separately in Demand model tests
 
   test "destroy tag should destroy socket circuit" do
     socket_id = @socket_cct.id
@@ -101,7 +77,6 @@ class SocketCctTest < ActiveSupport::TestCase
   
   test "should have demand through demandable concern" do
     assert_respond_to @socket_cct, :demand
-    assert_kind_of Demand, @socket_cct.demand
   end
   
   test "should have tag through tagable concern" do

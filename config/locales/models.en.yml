@@ -21,7 +21,6 @@ en:
       user:
         user_name:        "User"
         email:            "Email"
-        admin:            "Administrator?"
         password:         "Password"
         password_confirmation:  "Confirm password"
       project:
@@ -153,6 +152,7 @@ en:
               invalid: "%{name} is not a valid role for %{resource}"
         tag:
           full_tag: "Full tag must be unique within project and discipline"
-          tagable_type_not_assigned: "Not assigned"
+          tagable_type:
+            not_assigned: "Not assigned"
 
 #

@@ -1,7 +1,7 @@
 class Tag < ApplicationRecord
   resourcify
   delegated_type :tagable, types: Constants.tagable, optional: true, dependent: :destroy
-  accepts_nested_attributes_for :tagable, update_only: true
+  accepts_nested_attributes_for :tagable
   belongs_to :project
   belongs_to :discipline
 

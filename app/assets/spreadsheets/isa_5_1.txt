@@ -1,4 +1,4 @@
-Measured or Initiating Variable
+Measured Variable
 A - Analysis
 B - Burner, combustion
 C - User's choice
@@ -38,10 +38,10 @@ X - X-axis
 Y - Y-axis
 Z - Z-axis
 
-Second or Succeeding Letters
-Second or succeeding letters indicates a readout or passive function, output function or a modifier function.
+Succeeding Letters
+[Second or succeeding letters indicates a readout or passive function, output function or a modifier function.]
 
-Readout or Passive Function
+Passive Function
 A - Alarm
 B - User's choice
 E - Sensor (primary element)

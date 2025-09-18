@@ -13,21 +13,24 @@ class CableType < ApplicationRecord
   private
   
   def generate_description
-    parts = []
+    parts = [I18n.t("activerecord.models.cable") + ' ']
     parts << "#{csa}mm²" if csa.present?
-    parts << conductor_material.downcase if conductor_material.present?
+    parts << conductor_material if conductor_material.present?
     parts << conductor_makeup if conductor_makeup.present?
+    parts << insulation if insulation.present?
+    parts << armour if armour.present?
+    parts << sheath if sheath.present?
+    parts << temperature_rating if temperature_rating.present?
     
-    cable_type = if insulation.present? && insulation.downcase.include?('pvc') && armour.blank?
-                  'PVC Cable'
-                elsif armour.present? && armour.downcase.include?('swa')
-                  'Steel Wire Armoured Cable'
-                else
-                  'Cable'
-                end
+    description = parts.join(' ').strip
     
-    description = [parts.join(' '), cable_type].reject(&:blank?).join(' ')
-    write_attribute(:description, description) if new_record? || changes.keys.any? { |k| %w[conductor_material conductor_makeup csa insulation armour].include?(k) }
+    # Only update the description if it's a new record or if relevant attributes have changed
+    relevant_attributes = %w[conductor_material conductor_makeup csa insulation 
+                            armour sheath temperature_rating neutral_csa earth_csa]
+    if new_record? || (changes.keys & relevant_attributes).any?
+      write_attribute(:description, description)
+    end
+    
     description
   end
   

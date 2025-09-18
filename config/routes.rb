@@ -19,30 +19,30 @@ Rails.application.routes.draw do
       end
     end
     
+    # Tagable models are shallow nested under tags to allow creation of tags by attaching to an existing tag
     resources :tags, shallow: true do
+      resources :cables, :motors, :light_ccts, :socket_ccts, except: [:index]
       resources :switchboards, except: [:index] do
-        resources :circuits
+        resources :circuits, except: [:index]
       end
-      resources :motors, except: [:index]
-      resources :cables, except: [:index]
-      resources :light_ccts, except: [:index]
-      resources :socket_ccts, except: [:index]
     end
-    
-    resources :motors, only: [:index]
-    resources :switchboards, only: [:index]
-    resources :light_ccts, only: [:index]
-    resources :socket_ccts, only: [:index]
+    # Tagable models also have new and create routes to allow creation of tagable and tag in a single operation
+    # Tagables have index overridden from shallow, there is no sense in nesting a 1:1 relationship.
+    resources :cables, :motors, :light_ccts, :socket_ccts, only: [:index, :new, :create]
+    resources :switchboards, only: [:index, :new, :create] do
+      resources :circuits, only: [:index, :new, :create]
+    end
     resources :cable_types
-    resources :cables, only: [:index]
     
     # Demands routes
     resources :demands
 
+    # Routes for the RBAC system. 
+    # Destroy requires both the role id and the user id to allow rolify to remove the correct HABTM entry.
     resources :users, only: [] do
       resources :roles, only: [:destroy]
     end
-    
+    # Role creation is attached to the index view for global and resource wide roles.
     resources :roles, only: [:index, :new, :create]
   end
 

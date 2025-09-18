@@ -15,12 +15,12 @@ FactoryBot.define do
       after(:build) do |motor, evaluator|
         if motor.tag.nil?
           project = create(:project)
-          discipline = Discipline.find_or_create_by(code: 'E')
+          discipline = create(:discipline, :e)
           motor.tag = create(:tag, :unique_tag,
             project: project,
             discipline: discipline,
             prefix: 'M',
-            description: "#{motor.motor_type} Motor #{motor.frame_size} - #{motor.poles}P",
+            service: "#{motor.motor_type} Motor #{motor.frame_size} - #{motor.poles}P",
             tagable: motor
           )
         end

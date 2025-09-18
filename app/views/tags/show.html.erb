@@ -1,4 +1,5 @@
-<% content_for :title, @tag.full_tag %>
+<% content_for :title, "#{t('activerecord.models.' + @tag.model_name.i18n_key.to_s, 
+      default: @tag.model_name.human)} #{@tag.full_tag}" %>
 <div class="container mt-3">
   <!-- Tag Header Card -->
   <div class="card mb-4">
@@ -35,10 +36,14 @@
 
         <!-- Center Tag Info -->
         <div class="col text-center">
-          <div class="d-flex justify-content-center align-items-center">
-            <div class="mx-3">
-              <span class="badge bg-primary fs-6"><%= @tag.full_tag %></span>
-              <small class="text-muted ms-2"><%= @tag.service %></small>
+          <div class="d-flex flex-column align-items-center">
+            <div class="mt-1">
+              <span class="badge bg-primary fs-6">
+                <%= t('activerecord.models.tag') + ' ' + @tag.full_tag %>
+              </span>
+              <% if @tag.service.present? %>
+                <small class="text-muted ms-2"><%= @tag.service %></small>
+              <% end %>
             </div>
           </div>
         </div>
@@ -204,9 +209,11 @@
                 <strong><%= t('activerecord.attributes.tag.tagable_type') %>:</strong>
                 <span class="ms-1">
                   <% if @tag.tagable_type.blank? %>
-                    <span class="text-muted"><%= t('activerecord.errors.not_assigned') %></span>
+                    <span class="text-muted"><%= 
+                      t('activerecord.errors.models.tag.tagable_type.not_assigned') %></span>
                   <% elsif @tag.tagable_id.blank? %>
-                    <span class="text-muted"><%= @tag.tagable_type %> (<%= t('activerecord.errors.not_assigned') %>)</span>
+                    <span class="text-muted"><%= @tag.tagable_type %> (<%= 
+                      t('activerecord.errors.models.tag.tagable_type.not_assigned') %>)</span>
                   <% else %>
                     <%= @tag.tagable_type %>
                   <% end %>

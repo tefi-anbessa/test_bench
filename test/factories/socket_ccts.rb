@@ -12,13 +12,13 @@ FactoryBot.define do
       after(:build) do |socket_cct, evaluator|
         if socket_cct.tag.nil?
           project = create(:project)
-          discipline = create(:discipline, code: 'E', name: 'Electrical')
+          discipline = create(:discipline, :e)
           socket_cct.tag = create(:tag, 
             project: project,
             discipline: discipline,
             prefix: 'ES',
             serial: rand(1..999),
-            description: "#{socket_cct.socket_type.humanize} Sockets",
+            service: "#{socket_cct.socket_type.humanize} Sockets",
             tagable: socket_cct
           )
         end

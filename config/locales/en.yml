@@ -61,13 +61,21 @@ en:
       destroy:
         notice: "%{resource_name} was successfully deleted."
         alert: "Could not delete %{resource_name}."
-  
-  # Project specific messages
+
+  # Resource specific flash messages
+    tags:
+      tagable_already_assigned: "Tag %{tag} already has a %{resource_name} assigned"
+      tagable_wrong_type: "Tag %{tag} is not a %{resource_name}"
+    tagables:
+      assigned_to: "Tag %{tag} has been assigned to %{resource_name} %{id}"
+      created_and_assigned: "%{resource_name} %{id} has been created and assigned to tag %{tag}"
+
+  # Resource specific messages
   projects:
     none_selected: "No project is currently selected"
     selected: "Project '%{code}' is now selected"
     invalid_selection: "Please select a valid project to continue"
-  
+
   # Pundit authorization messages
   pundit:
     unauthorized: "You are not authorized to perform this action."

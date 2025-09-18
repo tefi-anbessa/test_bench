@@ -1,100 +1,77 @@
 <div id="<%= dom_id cable_type %>">
-  <div class="container text-start">
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable_type.conductor_material') %>:
-      </span>
-      <span class="col-2 data-field">
-        <%= cable_type.conductor_material %>
-      </span>
+  <% 
+    title = capture do 
+      content_tag(:span, t('activerecord.models.cable_type') + ': ', class: 'text-muted me-1') +
+      content_tag(:span, cable_type.description, class: 'me-2')
+    end 
+  %>
+
+  <%= render 'components/collapsible',
+    id: "cable_type_#{cable_type.id}_details",
+    title: title,
+    expanded: false,
+    header_class: 'py-1' do %>
+    
+    <div class="container-fluid">
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.cable_type.conductor_material') %></div>
+        <div class="col-8"><%= cable_type.conductor_material.presence || '-' %></div>
+      </div>
+      
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.cable_type.conductor_makeup') %></div>
+        <div class="col-8"><%= cable_type.conductor_makeup.presence || '-' %></div>
+      </div>
+      
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.cable_type.csa') %></div>
+        <div class="col-8"><%= cable_type.csa.present? ? "#{cable_type.csa} mm²" : '-' %></div>
+      </div>
+      
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.cable_type.neutral_csa') %></div>
+        <div class="col-8"><%= cable_type.neutral_csa.present? ? "#{cable_type.neutral_csa} mm²" : '-' %></div>
+      </div>
+      
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.cable_type.earth_csa') %></div>
+        <div class="col-8"><%= cable_type.earth_csa.present? ? "#{cable_type.earth_csa} mm²" : '-' %></div>
+      </div>
+      
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.cable_type.insulation') %></div>
+        <div class="col-8"><%= cable_type.insulation.presence || '-' %></div>
+      </div>
+      
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.cable_type.bedding') %></div>
+        <div class="col-8"><%= cable_type.bedding.presence || '-' %></div>
+      </div>
+      
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.cable_type.armour') %></div>
+        <div class="col-8"><%= cable_type.armour.presence || '-' %></div>
+      </div>
+      
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.cable_type.sheath') %></div>
+        <div class="col-8"><%= cable_type.sheath.presence || '-' %></div>
+      </div>
+      
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.cable_type.temperature_rating') %></div>
+        <div class="col-8"><%= cable_type.temperature_rating.presence || '-' %></div>
+      </div>
+      
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.cable_type.overall_od') %></div>
+        <div class="col-8"><%= cable_type.overall_od.present? ? "#{cable_type.overall_od} mm" : '-' %></div>
+      </div>
+      
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.cable_type.bedding_od') %></div>
+        <div class="col-8"><%= cable_type.bedding_od.present? ? "#{cable_type.bedding_od} mm" : '-' %></div>
+      </div>
     </div>
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable_type.conductor_makeup') %>:
-      </span>
-      <span class="col-2 data-field">
-        <%= cable_type.conductor_makeup %>
-      </span>
-    </div>
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable_type.csa') %>:
-      </span>
-      <span class="col-2 data-field">
-        <%= cable_type.csa %>mm<sup>2</sup>
-      </span>
-    </div>
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable_type.neutral_csa') %>:
-      </span>
-      <span class="col-2 data-field">
-        <%= cable_type.neutral_csa %>mm<sup>2</sup>
-      </span>
-    </div>
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable_type.earth_csa') %>:
-      </span>
-      <span class="col-2 data-field">
-        <%= cable_type.earth_csa %>mm<sup>2</sup>
-      </span>
-    </div>
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable_type.insulation') %>:
-      </span>
-      <span class="col-2 data-field">
-        <%= cable_type.insulation %>
-      </span>
-    </div>
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable_type.bedding') %>:
-      </span>
-      <span class="col-2 data-field">
-        <%= cable_type.bedding %>
-      </span>
-    </div>
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable_type.armour') %>:
-      </span>
-      <span class="col-2 data-field">
-        <%= cable_type.armour %>
-      </span>
-    </div>
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable_type.sheath') %>:
-      </span>
-      <span class="col-2 data-field">
-        <%= cable_type.sheath %>
-      </span>
-    </div>
-    <div class="d-flex flex-row mb-1">
-        <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable_type.bedding_od') %>:
-      </span>
-      <span class="col-2 data-field">
-        <%= cable_type.bedding_od %>mm
-      </span>
-    </div>
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable_type.overall_od') %>:
-      </span>
-      <span class="col-2 data-field">
-        <%= cable_type.overall_od %>mm
-      </span>
-    </div>
-    <div class="d-flex flex-row mb-1">
-      <span class="col-1 data-label">
-        <%= t('activerecord.attributes.cable_type.temperature_rating') %>:
-      </span>
-      <span class="col-2 data-field">
-        <%= cable_type.temperature_rating %>
-      </span>
-    </div>
-  </div>
+  <% end %>
 </div>

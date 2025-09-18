@@ -316,7 +316,7 @@ end
   serial: 21, 
   suffix: "",
   project: @project,
-  description: "DISTRIBUTION PUMP MOTOR",
+  service: "DISTRIBUTION PUMP MOTOR",
   stage: 1,
   discipline: Discipline.find_by!(code: "E")
 )
@@ -343,7 +343,7 @@ end
   serial: 21, 
   suffix: "",
   project: @project,
-  description: "GATEHOUSE SOCKET OUTLETS",
+  service: "GATEHOUSE SOCKET OUTLETS",
   stage: 1,
   discipline: Discipline.find_by!(code: "E")
 )
@@ -373,7 +373,7 @@ end
   serial: 31, 
   suffix: "",
   project: @project,
-  description: "GATEHOUSE LIGHTING",
+  service: "GATEHOUSE LIGHTING",
   stage: 1,
   discipline: Discipline.find_by!(code: "E")
 )
@@ -404,7 +404,7 @@ ec1 = Tag.find_or_create_by!(
   serial: 1, 
   suffix: "",
   project: @project,
-  description: 'GATEHOUSE SWITCHBOARD FEEDER',
+  service: 'GATEHOUSE SWITCHBOARD FEEDER',
   stage: 1,
   discipline: Discipline.find_by!(code: "E")
 )
@@ -419,7 +419,7 @@ end
   prefix: "EC", 
   serial: 2, 
   suffix: "",
-  description: 'SOUTH AREA DISTRIBUTION BOARD FEEDER',
+  service: 'SOUTH AREA DISTRIBUTION BOARD FEEDER',
   project: @project,
   stage: 1,
   discipline: Discipline.find_by!(code: "E")
@@ -434,14 +434,14 @@ end
   prefix: "EC", 
   serial: 3, 
   suffix: "",
-  description: 'UPS #1 WIRING',
+  service: 'UPS #1 WIRING',
   project: @project,
   stage: 1,
   discipline: Discipline.find_by!(code: "E")
 )
 # Build the tagable cable next
 if @ec3.tagable.nil?
-  ec3.tagable = Cable.create!(cable_type: ct1)
+  @ec3.tagable = Cable.create!(cable_type: @ct1)
 end
 
 # Build the tag E:EC-0004 first
@@ -449,7 +449,7 @@ end
   prefix: "EC", 
   serial: 4, 
   suffix: "",
-  description: 'DISTRIBUTION PUMP MOTOR FEEDER',
+  service: 'DISTRIBUTION PUMP MOTOR FEEDER',
   project: @project,
   stage: 1,
   discipline: Discipline.find_by!(code: "E")
@@ -464,7 +464,7 @@ end
   prefix: "EC", 
   serial: 5, 
   suffix: "",
-  description: 'GATEHOUSE SOCKET OUTLETS WIRING',
+  service: 'GATEHOUSE SOCKET OUTLETS WIRING',
   project: @project,
   stage: 1,
   discipline: Discipline.find_by!(code: "E")
@@ -479,7 +479,7 @@ end
   prefix: "EC", 
   serial: 6, 
   suffix: "",
-  description: 'GATEHOUSE LIGHTING WIRING',
+  service: 'GATEHOUSE LIGHTING WIRING',
   project: @project,
   stage: 1,
   discipline: Discipline.find_by!(code: "E")
@@ -487,4 +487,24 @@ end
 # Build the tagable cable next
 if @ec6.tagable.nil?
   @ec6.tagable = Cable.create!(cable_type: @ct1)
+end
+
+unless Cable.count > 50 do
+  # Build 50 tagged cables
+  tag_params = {
+  prefix: "EC", 
+  suffix: "",
+  project: @project,
+  stage: 1,
+  discipline: Discipline.find_by!(code: "E")
+  }
+  cable_params = {
+    cable_type: @ct1
+  }
+  50.times do |i|
+    n = i+101
+    tag_params[:serial] = n
+    tag_params[:service] = "TEST CABLE #{n}"
+    @tag = Tag.create!(tag_params.merge(tagable: Cable.new(cable_params)))
+  end
 end

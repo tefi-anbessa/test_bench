@@ -17,7 +17,7 @@ FactoryBot.define do
       prefix { 'EC' }
       sequence(:serial) { |n| n + 1000 }
       project { create(:project) }
-      discipline { create(:discipline, code: 'E', name: 'Electrical') }
+      discipline { create(:discipline, :e) }
       description { nil }
       custom_cable_type { nil }
     end
@@ -49,12 +49,26 @@ FactoryBot.define do
         raise "Tag is already associated with another record" if evaluator.tag.tagable.present?
         cable.tag = evaluator.tag
       end
+
+      # Otherwise create a tag by default for this cable
+      if cable.tag.nil?
+        tag_attrs = {
+          prefix: evaluator.prefix,
+          serial: evaluator.serial,
+          discipline: evaluator.discipline,
+          project: evaluator.project,
+          service: evaluator.description
+        }.compact
+
+        cable.tag = create(:tag, **tag_attrs)
+      end
     end
 
     # Trait to automatically create and associate a tag
     trait :with_tag do
       after(:build) do |cable, evaluator|
-        next if evaluator.tag  # Skip if tag was explicitly provided
+        # If a tag was explicitly provided or already created, do nothing
+        next if evaluator.tag || cable.tag.present?
         
         # Create a new tag for this cable
         tag_attrs = {
@@ -62,7 +76,7 @@ FactoryBot.define do
           serial: evaluator.serial,
           discipline: evaluator.discipline,
           project: evaluator.project,
-          description: evaluator.description
+          service: evaluator.description
         }.compact
         
         cable.tag = create(:tag, **tag_attrs)

@@ -2,7 +2,7 @@
 <nav class="navbar bg-body-tertiary">
   <div class="container">
     <ul class="navbar-nav me-auto mb-2 mb-lg-0 flex-row">
-      <% if policy(Cable).new?
+      <% if policy(Cable).new? %>
         <li class="nav-item">
           <%= link_to new_tag_path, class: "btn btn-primary actions",
                 aria: { label: t('actions.new') },

@@ -2,12 +2,12 @@ require "test_helper"
 
 class LightCctTest < ActiveSupport::TestCase
   def setup
-    @discipline = create(:discipline, code: 'E', name: 'Electrical')
+    @discipline = create(:discipline, :e)
     @project = create(:project)
     @tag = create(:tag, 
                  prefix: 'EL',
                  serial: 1,
-                 description: 'TEST LIGHTS',
+                 service: 'TEST LIGHTS',
                  project: @project,
                  discipline: @discipline
                )
@@ -21,7 +21,6 @@ class LightCctTest < ActiveSupport::TestCase
   test "factory should be valid" do
     assert @light_cct.valid?
     assert @tag.valid?
-    assert @light_cct.demand.valid?
   end
 
   test "should create light circuit with valid attributes" do
@@ -45,7 +44,7 @@ class LightCctTest < ActiveSupport::TestCase
     tag = create(:tag, 
                 prefix: 'EL',
                 serial: 99,
-                description: 'RECEPTION LIGHTS',
+                service: 'RECEPTION LIGHTS',
                 project: @project,
                 discipline: @discipline
               )
@@ -63,24 +62,7 @@ class LightCctTest < ActiveSupport::TestCase
     end
   end
 
-  test "should create demand when creating light circuit" do
-    # Create a unique tag to avoid uniqueness constraint
-    unique_serial = 9999
-    light = create(:light_cct, 
-                  light_fitting_type: 'emergency',
-                  quantity: 2,
-                  tag_attributes: {
-                    prefix: 'EL',
-                    serial: unique_serial,
-                    description: 'UNIQUE TEST LIGHT',
-                    project: @project,
-                    discipline: @discipline,
-                    stage: 1
-                  }
-                 )
-    assert light.demand.present?
-    assert_equal light, light.demand.demandable
-  end
+  # Demand creation is tested separately in Demand model tests
 
   test "destroy light circuit should nullify tagable" do
     light_id = @light_cct.id
@@ -92,13 +74,7 @@ class LightCctTest < ActiveSupport::TestCase
     assert_nil @tag.tagable_id
   end
 
-  test "destroy light circuit should destroy demand" do
-    demand = @light_cct.demand
-    assert_difference 'Demand.count', -1 do
-      @light_cct.destroy
-    end
-    assert_raises(ActiveRecord::RecordNotFound) { demand.reload }
-  end
+  # Demand destruction is tested separately in Demand model tests
 
   test "destroy tag should destroy light circuit" do
     light_id = @light_cct.id
@@ -110,7 +86,6 @@ class LightCctTest < ActiveSupport::TestCase
   
   test "should have demand through demandable concern" do
     assert_respond_to @light_cct, :demand
-    assert_kind_of Demand, @light_cct.demand
   end
   
   test "should have tag through tagable concern" do

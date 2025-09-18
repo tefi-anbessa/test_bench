@@ -30,6 +30,12 @@ class CablePolicyTest < ActiveSupport::TestCase
   end
 
   # Scope Tests
+  test 'scope returns all items for admin users' do
+    context = ApplicationPolicy::UserContext.new(@admin, nil)
+    scope = CablePolicy::Scope.new(context, Cable).resolve
+    assert_equal Cable.all, scope
+  end
+  
   test 'scope returns cables for current project' do
     scope = CablePolicy::Scope.new(ApplicationPolicy::UserContext.new(@team_member, @project), Cable).resolve
     assert_includes scope, @cable
@@ -47,7 +53,7 @@ class CablePolicyTest < ActiveSupport::TestCase
     assert policy(@app_owner, nil).index?
   end
 
-  test 'index? requires user to have a project role' do
+  test 'index? requires regular user to have a project role' do
     refute policy(@regular_user, @project).index?
   end
   
@@ -56,6 +62,11 @@ class CablePolicyTest < ActiveSupport::TestCase
   end
   
   # Show Tests
+  test 'show? allows admin users to view in any project' do
+    assert policy(@admin, nil, @cable).show?
+    assert policy(@app_owner, nil, @cable).show?
+  end
+  
   test 'show? allows viewing in current project' do
     assert policy(@team_member, @project, @cable).show?
   end
@@ -70,6 +81,11 @@ class CablePolicyTest < ActiveSupport::TestCase
 
   # New Tests defer to create
   # Create Tests
+  test 'create allows admin users to create in any project' do
+    assert policy(@admin, nil, Cable.new).create?
+    assert policy(@app_owner, nil, Cable.new).create?
+  end
+
   test 'create allows users with electrical designer role' do
     assert policy(@electrical_designer, @project, Cable.new).create?
   end
@@ -82,6 +98,11 @@ class CablePolicyTest < ActiveSupport::TestCase
 
   # Edit Tests defer to update
   # Update Tests
+  test 'update allows admin users to update in any project' do
+    assert policy(@admin, nil, Cable.new).update?
+    assert policy(@app_owner, nil, Cable.new).update?
+  end
+
   test 'update allows users with electrical designer role' do
     assert policy(@electrical_designer, @project, @cable).update?
   end

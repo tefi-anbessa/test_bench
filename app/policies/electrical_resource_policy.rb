@@ -6,6 +6,7 @@
 class ElectricalResourcePolicy < TagPolicy
   class Scope < ApplicationPolicy::Scope
     def resolve
+      return scope.all if user&.is_admin? || user&.is_app_owner?
       return scope.none unless current_project
       scope.joins(:tag).where(tags: { project: current_project })
     end
@@ -32,8 +33,8 @@ class ElectricalResourcePolicy < TagPolicy
   end
 
   def create?
-    return false if user.nil? || current_project.nil?
     return true if user&.is_admin? || user&.is_app_owner?
+    return false if user.nil? || current_project.nil?
     user_has_project_role? && user_has_required_role?
   end
 
@@ -42,8 +43,8 @@ class ElectricalResourcePolicy < TagPolicy
   end
 
   def update?
-    return false if user.nil? || current_project.nil?
     return true if user&.is_admin? || user&.is_app_owner?
+    return false if user.nil? || current_project.nil?
     user_has_project_role? && user_has_required_role?
   end
 

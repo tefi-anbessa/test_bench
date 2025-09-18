@@ -14,8 +14,8 @@ FactoryBot.define do
     # Use default project factory
     project
 
-    # Use find_or_create_by to avoid unique constraint violations
-    discipline { Discipline.find_or_create_by(code: 'E', name: 'Electrical Engineering') }
+    # KISS: Reuse predefined :e discipline trait to avoid duplicates
+    discipline { create(:discipline, :e) }
     
     trait :with_stage do
       stage { rand(1..3) }  # 1-3 to match seeds.rb phase range

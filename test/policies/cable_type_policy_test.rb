@@ -24,6 +24,12 @@ class CableTypePolicyTest < ActiveSupport::TestCase
   end
   
   # Scope Tests
+  test 'scope returns all items for admin users' do
+    context = ApplicationPolicy::UserContext.new(@admin, nil)
+    scope = CableTypePolicy::Scope.new(context, CableType).resolve
+    assert_equal CableType.all, scope
+  end
+
   test 'scope returns cable types for current project' do
     context = ApplicationPolicy::UserContext.new(@electrical_designer, @project)
     scope = CableTypePolicy::Scope.new(context, CableType).resolve
