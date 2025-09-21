@@ -1,57 +1,109 @@
-<%= form_with(model: cable) do |form| %>
-  <% if cable.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(cable.errors.count, "error") %> prohibited this cable from being saved:</h2>
+<div class="container mt-3">
+<% Rails.logger.debug "Debugging tag: #{tag.inspect}" %>
+<% Rails.logger.debug "Debugging cable: #{cable.inspect}" %>
+<% Rails.logger.debug "Local assigns: #{local_assigns.inspect}" %>
+  <div class="card">
+    <div class="card-header p-2">
 
-      <ul>
-        <% cable.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
+      <!-- Center Tag Info -->
+      <div class="col text-center">
+        <div class="d-flex flex-column align-items-center">
+          <div class="mt-1">
+            <span class="badge bg-primary fs-6">
+              <%= cable.persisted? ? t('actions.edit') : t('actions.new') %> 
+              <% if tag.present? && tag.persisted? %>
+                <%= t('activerecord.models.cable') + ' ' + tag.full_tag %>
+                <small class="text-muted ms-2"><%= tag.service %></small>
+              <% else %>
+                <%= t('activerecord.models.cable') %>
+              <% end %>
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
-  <% end %>
 
-  <div>
-    <%= form.label :cable_type_id, style: "display: block" %>
-    <%= form.text_field :cable_type_id %>
-  </div>
+    <%= bootstrap_form_with(model: cable, 
+        layout: :horizontal, 
+        label_col: "col-sm-5", 
+        control_col: "col-sm-7",
+        wrapper_class: 'mb-1',
+        bootstrap: { 
+          form: { class: 'mb-0' },
+          label: { class: 'mb-0' }
+        }) do |f| %>
+      
+      <div class="card-body p-2">
+        <%= render 'shared/error_messages', object: f.object %>
 
-  <div>
-    <%= form.label :from, style: "display: block" %>
-    <%= form.number_field :from %>
-  </div>
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+            <div class="card border-0 shadow-none mb-2">
+            <div class="card-header bg-transparent border-0 p-1">
+              <h6 class="mb-0"><%= t('cables.show.cable_details') %></h6>
+            </div>
+            <div class="card-body p-1">
+              <!-- Cable Type -->
+              <%= f.collection_select :cable_type_id,
+                    CableType.all,
+                    :id,
+                    :description,
+                    { include_blank: true },
+                    { 
+                      class: 'form-select form-select-sm',
+                      wrapper: { class: 'mb-1' },
+                      required: true 
+                    } %>
 
-  <div>
-    <%= form.label :to, style: "display: block" %>
-    <%= form.number_field :to %>
-  </div>
+              <!-- Circuit ID (Temporary) -->
+              <%= f.number_field :circuit_id,
+                    class: 'form-control form-control-sm',
+                    min: 0,
+                    placeholder: 'Temporary: Will be replaced',
+                    wrapper: { class: 'mb-1' } %>
 
-  <div>
-    <%= form.label :route_length, style: "display: block" %>
-    <%= form.text_field :route_length %>
-  </div>
+              <!-- Design lengths -->
+              <%= f.number_field :route_length,
+                    class: 'form-control form-control-sm',
+                    step: '0.1',
+                    min: 0,
+                    wrapper: { class: 'mb-1' } %>
 
-  <div>
-    <%= form.label :vertical_allowance, style: "display: block" %>
-    <%= form.text_field :vertical_allowance %>
-  </div>
+              <%= f.number_field :vertical_allowance,
+                    class: 'form-control form-control-sm',
+                    step: '0.1',
+                    min: 0,
+                    wrapper: { class: 'mb-1' } %>
 
-  <div>
-    <%= form.label :termination_allowance, style: "display: block" %>
-    <%= form.text_field :termination_allowance %>
-  </div>
+              <%= f.number_field :termination_allowance,
+                    class: 'form-control form-control-sm',
+                    step: '0.1',
+                    min: 0,
+                    wrapper: { class: 'mb-1' } %>
 
-  <div>
-    <%= form.label :start_mark, style: "display: block" %>
-    <%= form.number_field :start_mark %>
-  </div>
+              <!-- Installed length -->
+              <%= f.number_field :start_mark,
+                    class: 'form-control form-control-sm',
+                    step: '1',
+                    min: 0,
+                    wrapper: { class: 'mb-1' } %>
 
-  <div>
-    <%= form.label :end_mark, style: "display: block" %>
-    <%= form.number_field :end_mark %>
-  </div>
+              <%= f.number_field :end_mark,
+                    class: 'form-control form-control-sm',
+                    step: '1',
+                    min: 0,
+                    wrapper: { class: 'mb-1' } %>
+            </div>
+            </div>
 
-  <div>
-    <%= form.submit %>
+            <!-- Card Footer with Actions -->
+            <div class="card-footer bg-transparent text-end p-2">
+              <%= link_to t('actions.cancel'), cables_path, class: 'btn btn-sm btn-outline-secondary me-2' %>
+              <%= f.submit t('actions.save'), class: 'btn btn-sm btn-primary' %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
   </div>
-<% end %>
+</div>

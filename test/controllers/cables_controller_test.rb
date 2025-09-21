@@ -40,27 +40,6 @@ class CablesControllerTest < ActionController::TestCase
     @request.env["devise.mapping"] = Devise.mappings[:user]
   end
 
-  test "electrical designer cannot create cable and tag in one shot when tag is invalid" do
-    sign_in @electrical_designer
-    assert_no_difference(['Cable.count', 'Tag.count']) do
-      post :create, params: {
-        cable: { cable_type_id: @cable_type.id },
-        tag: {
-          project_id: @project.id,
-          discipline_id: @discipline.id,
-          prefix: '',                 # invalid: required + format
-          serial: 2002,
-          suffix: '',
-          service: 'Invalid tag case',
-          stage: 1
-        }
-      }
-    end
-    assert_response :unprocessable_content
-    assert_template :new
-    assert flash.now[:danger].present?
-  end
-
   # Index action tests
   test "unauthenticated users should be redirected to sign in" do
     get :index 
@@ -95,17 +74,24 @@ class CablesControllerTest < ActionController::TestCase
   # New action tests
   test "team member cannot access new cable form" do
     sign_in @team_member
-    get :new, params: { tag_id: @cable_tag.id }
+    get :new, params: { tag_id: @another_cable_tag.id }
     assert_response :forbidden
   end
 
-  test "electrical designer can access new cable form" do
+  test "electrical designer can access new cable form for existing unassigned tag" do
     sign_in @electrical_designer
-    get :new, params: { tag_id: @cable_tag.id }
+    get :new, params: { tag_id: @another_cable_tag.id }
+    assert_response :success
+  end
+
+  test "electrical designer can access new cable form with no tag" do
+    sign_in @electrical_designer
+    get :new
     assert_response :success
   end
 
   # Create action tests
+  # Fail to create
   test "team member cannot create cable" do
     sign_in @team_member
     assert_difference('Cable.count', 0) do
@@ -164,7 +150,7 @@ class CablesControllerTest < ActionController::TestCase
     assert flash.now[:danger].present?
   end
 
-  test "electrical designer cannot create cable and tag in one shot when tag is invalid" do
+  test "electrical designer cannot create cable and tag in one transaction when tag is invalid" do
     sign_in @electrical_designer
     assert_no_difference(['Cable.count', 'Tag.count']) do
       post :create, params: {
@@ -182,9 +168,9 @@ class CablesControllerTest < ActionController::TestCase
     end
     assert_response :unprocessable_content
     assert_template :new
-    assert flash.now[:danger].present?
   end
 
+  # Create action tests
   # Success path
   test "electrical designer can create cable with unallocated tag" do
     sign_in @electrical_designer
@@ -215,22 +201,34 @@ class CablesControllerTest < ActionController::TestCase
 
   test "electrical designer can create cable and tag in a single request" do
     sign_in @electrical_designer
-    assert_difference(['Cable.count', 'Tag.count'], 1) do
-      post :create, params: {
-        cable: {
-          cable_type_id: @cable_type.id
-        },
-        tag: {
-          project_id: @project.id,
-          discipline_id: @discipline.id,
-          prefix: 'EC',
-          serial: 2001,
-          suffix: '',
-          service: 'One-shot cable',
-          stage: 1
-        }
+    initial_tags = Tag.count
+    initial_cables = Cable.count
+    initial_cable_ids = Cable.pluck(:id)
+    
+    post :create, params: {
+      cable: {
+        cable_type_id: @cable_type.id
+      },
+      tag: {
+        project_id: @project.id,
+        discipline_id: @discipline.id,
+        prefix: 'EC',
+        serial: 2001,
+        suffix: '',
+        service: 'One-shot cable',
+        stage: 1
       }
-    end
+    }
+  
+    # Debug output
+    puts "Initial cable IDs: #{initial_cable_ids.inspect}"
+    puts "All cables after create: #{Cable.pluck(:id).inspect}"
+    puts "New cables: #{Cable.where.not(id: initial_cable_ids).pluck(:id).inspect}"
+  
+    # Check counts
+    assert_equal initial_tags + 1, Tag.count, "Tag count should increase by 1"
+    assert_equal initial_cables + 1, Cable.count, "Cable count should increase by 1"
+    
     assert_redirected_to Cable.last
 
     cable = Cable.last

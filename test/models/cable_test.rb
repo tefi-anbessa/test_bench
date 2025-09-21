@@ -2,8 +2,23 @@ require "test_helper"
 
 class CableTest < ActiveSupport::TestCase
   def setup
-    @cable = create(:cable)
+    @cable_type = create(:cable_type)
+    @cable = create(:cable, cable_type: @cable_type)
     @tag = @cable.tag
+  end
+
+  test "should not allow cable without tag" do
+    cable = Cable.new
+    refute cable.valid?
+  
+    # Debug output to see what validations are failing
+    puts "Validation errors: #{cable.errors.full_messages}"
+    assert cable.errors[:base].any?
+  
+    # Check both possible places where the error might be
+    assert cable.errors[:tag].any? || 
+           cable.errors[:base].any? { |msg| msg.include?("tag") },
+           "Expected validation error about missing tag"
   end
 
   test "factory should create valid cable with tag" do

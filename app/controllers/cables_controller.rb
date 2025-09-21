@@ -1,12 +1,12 @@
 class CablesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_tag, only: %i[ new create ]
   before_action :set_cable, only: %i[ show edit update destroy ]
+  before_action :setup_form, only: %i[ new edit ]
 
   # GET /cables or /cables.json
   def index
     @q = policy_scope(Cable).ransack(params[:q])
-    @pagy, @cables = pagy(@q.result.includes(:tag), limit: 10)
+    @pagy, @cables = pagy(@q.result.includes(:tag), limit: 20)
     @orphans = @cables.select{ |cable| cable.tag.nil? }
     @link_errors = current_project.tags.where(tagable_type: "Cable", tagable_id: nil)
     @link_incomplete = @link_errors.select{ |tag| tag.tagable_id.nil? }
@@ -21,11 +21,9 @@ class CablesController < ApplicationController
 
   # GET /cables/new
   def new
-    if @tag&.persisted?
-      authorize @cable = Cable.new(tag: @tag)
-    else
-      authorize @cable = Cable.new
-    end
+    authorize @cable = Cable.new()
+    set_tag
+    setup_form
   end
 
   # GET /cables/1/edit
@@ -37,56 +35,43 @@ class CablesController < ApplicationController
   def create
     @cable = Cable.new(cable_params)
     authorize @cable
+    return unless set_tag
 
-    begin
-      if @tag.present?
-        # Guard: tag already linked
-        if @tag.tagable.present?
-          return redirect_with(
-            :danger,
-            t('flash.tags.tagable_already_assigned', tag: @tag.full_tag, resource_name: Cable.model_name.human),
-            @tag
-          )
-        end
-        # Guard: tag type is incompatible
-        if @tag.tagable_type.present? && @tag.tagable_type != "Cable"
-          return redirect_with(
-            :danger,
-            t('flash.tags.tagable_wrong_type', tag: @tag.full_tag, resource_name: Cable.model_name.human),
-            @tag
-          )
-        end
+    # Set project context if creating a new tag
+    if params[:tag].present? && params[:tag][:project_id].blank? && current_project.present?
+      params[:tag][:project_id] = current_project.id
+    end
 
-        ActiveRecord::Base.transaction do
-          @tag.update!(tagable: Cable.new(cable_params))
-          @cable = @tag.tagable
-        end
-
-        # Ensure full_tag is populated for flash text (after_find doesn't run on new instances)
-        tag_label = @tag.reload.full_tag
+    if @tag&.persisted?
+      # Create cable and update tag in one transaction using delegated_type via the delegator (Tag)
+      if @tag.update!(tagable: @cable)
+        @tag.reload
+        return redirect_with(:success,
+          t('flash.tagables.assigned_to', tag: @tag.label, 
+            resource_name: Cable.model_name.human,
+            id: @cable.id), @cable)
+      else
+        setup_form
+        render :new, status: :unprocessable_content
+      end
+    else
+      # Create both in one transaction using delegated_type via the delegator (Tag)
+      @tag = Tag.new(tag_params.merge(tagable: @cable))
+      if @tag.save
+      # Ensure full_tag is populated for flash text
+        @tag.reload
         return redirect_with(
           :success,
-          t('flash.tagables.assigned_to', tag: tag_label, resource_name: Cable.model_name.human, id: @cable.id),
+          t('flash.tagables.created_and_assigned', 
+            resource_name: Cable.model_name.human, 
+            id: @cable.id, 
+            tag: @tag.label),
           @cable
         )
       else
-        # Create both in one shot using delegated_type via the delegator (Tag)
-        ActiveRecord::Base.transaction do
-          @tag = Tag.create!(tag_params.merge(tagable: Cable.new(cable_params)))
-          @cable = @tag.tagable
-        end
-
-        # Ensure full_tag is populated for flash text
-        tag_label = @tag.reload.full_tag
-        return redirect_with(
-          :success,
-          t('flash.tagables.created_and_assigned', resource_name: Cable.model_name.human, id: @cable.id, tag: tag_label),
-          @cable
-        )
+        setup_form
+        render :new, status: :unprocessable_content
       end
-    rescue ActiveRecord::RecordInvalid => e
-      flash.now[:danger] = e.record.errors.full_messages.to_sentence
-      return render :new, status: :unprocessable_content
     end
   end
 
@@ -132,7 +117,58 @@ class CablesController < ApplicationController
     end
 
     def set_tag
-      @tag = Tag.find_by(id: params[:tag_id])
+      # Handle case when creating a new tag
+      if params[:tag].present?
+        @tag = Tag.new(tag_params)
+        
+        # Validate the tag
+        unless @tag.valid?
+          @cable = Cable.new(cable_params) if params[:cable].present? # Initialize cable with any params
+          @tag = Tag.new(tag_params) # Re-initialize with submitted tag params to maintain form state
+          setup_form
+          render :new, status: :unprocessable_content and return false
+        end
+        
+      # Handle case when linking to existing tag through tagable_id association
+      elsif params[:tag_id].present?
+        @tag = Tag.find_by(id: params[:tag_id])
+        if @tag.nil?
+          redirect_to cables_path, danger: 'Tag not found.' and return false
+          # Trap: attempt to link to non-existent tag, not possible within work flows available.
+        end
+        
+        # Guard: tag already linked
+        if @tag.tagable.present?
+          redirect_with(
+            :danger,
+            t('flash.tags.tagable_already_assigned', 
+              tag: @tag.full_tag, 
+              resource_name: Cable.model_name.human),
+            @tag
+          ) and return false
+        end
+      
+        # Guard: tag type is incompatible
+        if @tag.tagable_type.present? && @tag.tagable_type != "Cable"
+          redirect_with(
+              :danger,
+              t('flash.tags.tagable_wrong_type', 
+                tag: @tag.full_tag, 
+                resource_name: Cable.model_name.human),
+              @tag
+            ) and return
+        end
+        # @tag is set to valid tag for cable creation
+
+      # Handle case when using the new form to create a new tag
+      else
+        @tag = Tag.new()
+      end
+    end
+
+    def setup_form
+      @cable_types = policy_scope(CableType)
+      @circuits = policy_scope(Circuit)
     end
 
     # Only allow a list of trusted parameters through.

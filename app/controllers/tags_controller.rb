@@ -8,7 +8,7 @@ class TagsController < ApplicationController
   # GET /tags or /tags.json
   def index
     authorize Tag
-    @q = @project.tags.ransack(params[:q])
+    @q = policy_scope(Tag).ransack(params[:q])
     @pagy, @tags = pagy(@q.result.includes(:discipline, :project), limit: 10)
   end
 

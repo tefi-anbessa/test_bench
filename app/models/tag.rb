@@ -1,7 +1,6 @@
 class Tag < ApplicationRecord
   resourcify
   delegated_type :tagable, types: Constants.tagable, optional: true, dependent: :destroy
-  accepts_nested_attributes_for :tagable
   belongs_to :project
   belongs_to :discipline
 
@@ -83,6 +82,10 @@ class Tag < ApplicationRecord
     adjacent_tag('prev_id') || self
   end
 
+  def label
+    full_tag
+  end
+  
   private
   
   # Find adjacent tag (next or previous) based on the given join condition
