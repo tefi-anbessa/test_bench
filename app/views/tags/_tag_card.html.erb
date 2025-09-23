@@ -1,10 +1,4 @@
-<% 
-  title = capture do 
-    content_tag(:span, t('activerecord.models.tag') + ': ', class: 'text-muted me-1') +
-    content_tag(:span, tag.full_tag, class: 'me-2') + 
-    (tag.service.present? ? content_tag(:span, tag.service, class: 'text-muted') : '').html_safe
-  end 
-%>
+
 
 <%= render 'components/collapsible',
   id: "tag_#{tag.id}_details",

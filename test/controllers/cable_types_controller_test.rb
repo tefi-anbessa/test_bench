@@ -94,16 +94,17 @@ class CableTypesControllerTest < ActionController::TestCase
       post :create, params: { 
         cable_type: { 
           project_id: @project.id,
-          conductor_material: "Copper",
-          conductor_makeup: "Stranded",
-          csa: 4.0,  # Changed from 2.5 to make it unique
-          insulation: "XLPE",
-          bedding: "PVC",
-          armour: "Steel Wire Armour",
-          sheath: "PVC",
-          temperature_rating: "75˚C",
+          conductor_material: "Cu",
+          csa: 4.0,  # Changed from factory value of 2.5 to make it different
+          cores: 3,
           neutral_csa: 4.0,  # Changed to match csa
           earth_csa: 2.5,    # Changed from 1.5
+          insulation: "XLPE",
+          bedding: "PVC",
+          armour: "SWA",
+          sheath: "PVC",
+          temperature_rating: "75˚C",
+          voltage_rating: "600/1000V",
           bedding_od: 12.5,  # Changed from 10.5
           overall_od: 17.2   # Changed from 15.2
         }
@@ -131,7 +132,7 @@ class CableTypesControllerTest < ActionController::TestCase
     sign_in @regular_user
     patch :update, params: {
       id: @cable_type.id,
-      cable_type: { conductor_material: 'Aluminum' }
+      cable_type: { conductor_material: 'Al' }
     }
     assert_forbidden
     assert_equal original_material, @cable_type.reload.conductor_material
@@ -141,10 +142,10 @@ class CableTypesControllerTest < ActionController::TestCase
     sign_in @electrical_designer
     patch :update, params: {
       id: @cable_type.id,
-      cable_type: { conductor_material: 'Aluminum' }
+      cable_type: { conductor_material: 'Al' }
     }
     assert_redirected_to cable_type_path(@cable_type)
-    assert_equal 'Aluminum', @cable_type.reload.conductor_material
+    assert_equal 'Al', @cable_type.reload.conductor_material
   end
 
   # Destroy tests

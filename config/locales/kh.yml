@@ -1,0 +1,93 @@
+kh:
+  flag:     "kh"
+  app_name: "ឧបករណ៍ជំនួយគម្រោង"
+
+  rails:
+    walking: "កំពុងដំណើរការ"
+
+  actions:
+    save:         "រក្សាទុក"
+    set:          "កំណត់"
+    select:       "ជ្រើសរើស"
+    save_change:  "រក្សាការផ្លាស់ប្តូរ"
+    delete:       "លុប"
+    delete_sure:  "តើអ្នកប្រាកដឬទេ? មិនអាចមានការដកហូតបានទេ។"
+    discard:      "បោះបង់ការផ្លាស់ប្តូរ"
+    sure:         "តើអ្នកប្រាកដឬទេ?"
+    show:         "បង្ហាញ"
+    new:          "ថ្មី"
+    edit:         "កែសម្រួល"
+    index:        "បញ្ជី"
+    next:         "បន្ទាប់"
+    previous:     "មុន"
+    grant:        "ផ្តល់"
+    revoke:       "ដកហូត"
+
+  show:
+    orphan: "មិនមាន %{model} ដែលភ្ជាប់ជាមួយ"
+    unassigned: "%{model} មិនទាន់បានចាត់ចែង"
+
+  form:
+    other: "ផ្សេងៗ"
+    new_select: "ទុកចោលប្រសិនបើបន្ថែមជម្រើសថ្មី"
+    undefined: "មិនបានកំណត់"
+    none: "គ្មាន"
+    unknown: "មិនស្គាល់"
+
+  admin: "អ្នកគ្រប់គ្រង"
+
+  menu:
+    toggle: "បើក/បិទម៉ឺនុយ"
+    profile: "ព័ត៌មានផ្ទាល់ខ្លួន"
+    edit: "កែសម្រួល"
+    log_out: "ចាកចេញ"
+    log_in: "ចូលប្រើ"
+    home: "ទំព័រដើម"
+    about: "អំពីយើង"
+    help: "ជំនួយ"
+    contact: "ទំនាក់ទំនង"
+
+  table:
+    links: "តំណភ្ជាប់"
+
+  flash:
+    actions:
+      create:
+        notice: "%{resource_name} ត្រូវបានបង្កើតដោយជោគជ័យ។"
+        alert: "មិនអាចបង្កើត %{resource_name} បានទេ។"
+      update:
+        notice: "%{resource_name} ត្រូវបានធ្វើបច្ចុប្បន្នភាពដោយជោគជ័យ។"
+        alert: "មិនអាចធ្វើបច្ចុប្បន្នភាព %{resource_name} បានទេ។"
+      destroy:
+        notice: "%{resource_name} ត្រូវបានលុបដោយជោគជ័យ។"
+        alert: "មិនអាចលុប %{resource_name} បានទេ។"
+
+  projects:
+    none_selected: "មិនមានគម្រោងដែលបានជ្រើសរើស"
+    selected: "គម្រោង '%{code}' ត្រូវបានជ្រើសរើស"
+    invalid_selection: "សូមជ្រើសរើសគម្រោងដែលត្រឹមត្រូវដើម្បីបន្ត"
+
+  pundit:
+    unauthorized: "អ្នកមិនមានសិទ្ធិអនុវត្តសកម្មភាពនេះទេ។"
+
+  pagination:
+    per_page: "ធាតុក្នុងមួយទំព័រ"
+    per_page_aria: "ជ្រើសរើសចំនួនធាតុក្នុងមួយទំព័រ"
+    apply_page_size: "អនុវត្តទំហំទំព័រ"
+    go: "ទៅ"
+    page_info: "បង្ហាញ %{items} ធាតុក្នុងមួយទំព័រ"
+
+  index:
+    admin: "អ្នកគ្រប់គ្រង"
+    orphans: "%{models} ដែលមិនមានស្លាកភ្ជាប់៖"
+    link_incomplete: "ស្លាកខាងក្រោមត្រូវបានចាត់ថាជា %{models} ប៉ុន្តែមិនទាន់បានចាត់ចែង៖"
+    link_broken: "ស្លាកខាងក្រោមត្រូវបានចាត់ថាជា %{models} ប៉ុន្តែ %{models} មិនមានទេ៖"
+
+  footer:
+    credit: "គេហទំព័រដោយ frankie fusion."
+
+  locales:
+    en: "អង់គ្លេស"
+    kh: "ភាសាខ្មែរ"
+    th: "ថៃ"
+    cn: "ចិន"

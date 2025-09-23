@@ -1,8 +1,7 @@
 <tr scope="row">
-  <td><%= link_to row.id, cable_type_path(row)%></td>
   <td><%= row.conductor_material %></td>
-  <td><%= row.conductor_makeup %></td>
   <td><%= row.csa %></td>
+  <td><%= row.cores %></td>
   <td><%= row.neutral_csa %></td>
   <td><%= row.earth_csa %></td>
   <td><%= row.insulation %></td>
@@ -12,6 +11,7 @@
   <td><%= row.bedding_od %></td>
   <td><%= row.overall_od %></td>
   <td><%= row.temperature_rating %></td>
+  <td><%= row.voltage_rating %></td>
   <td>
     <% if policy(row).show? %>
       <%= link_to cable_type_path(row), class: "btn btn-secondary btn-sm icon-link",

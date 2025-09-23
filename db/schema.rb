@@ -10,27 +10,28 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_15_035205) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_21_102035) do
   create_table "cable_types", force: :cascade do |t|
-    t.string "conductor_material"
-    t.string "conductor_makeup"
+    t.integer "conductor_material"
     t.float "csa"
     t.float "neutral_csa"
     t.float "earth_csa"
-    t.string "insulation"
-    t.string "bedding"
-    t.string "armour"
-    t.string "sheath"
+    t.integer "insulation"
+    t.integer "bedding"
+    t.integer "armour"
+    t.integer "sheath"
     t.decimal "bedding_od", precision: 3, scale: 1
     t.decimal "overall_od", precision: 3, scale: 1
     t.integer "temperature_rating"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "unique_spec"
-    t.text "description", default: "", null: false
+    t.string "code"
+    t.text "notes", default: "", null: false
     t.integer "project_id", null: false
+    t.integer "cores"
+    t.integer "voltage_rating"
+    t.index ["project_id", "code"], name: "index_cable_types_on_project_and_code", unique: true
     t.index ["project_id"], name: "index_cable_types_on_project_id"
-    t.index ["unique_spec"], name: "index_cable_types_on_unique_spec", unique: true
   end
 
   create_table "cables", force: :cascade do |t|

@@ -24,8 +24,8 @@ FactoryBot.define do
 
     # Required attributes
     cable_type { 
-      create(:cable_type, :pvc_flat_twin_earth, 
-        description: "Test Cable Type #{SecureRandom.hex(4)}",
+      create(:cable_type, 
+        notes: "Test Cable Type #{SecureRandom.hex(4)}",
         csa: 1.0 + (SecureRandom.random_number(100) * 0.1)  # Random CSA to ensure uniqueness
       ) 
     }

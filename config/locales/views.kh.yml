@@ -1,0 +1,112 @@
+kh:
+  site:
+    home:
+      title:        "ទំព័រដើម"
+    about:
+      title:        "អំពីយើង"
+    contact:
+      title:        "ទំនាក់ទំនង"
+    help:
+      title:        "ជំនួយ"
+  users:
+    index:
+      title:        "អ្នកប្រើប្រាស់"
+      header:       "បញ្ជីអ្នកប្រើប្រាស់"
+      message:      "ចូលប្រើ"
+      gravatar:     "រូបភាព"
+    show:
+      title:        "អ្នកប្រើប្រាស់"
+      header:       "ព័ត៌មានអ្នកប្រើប្រាស់"
+      message:      "ចូលប្រើ"
+      gravatar:     "រូបភាព"
+  errors:
+    forbidden:
+      title:        "ហាមឃាត់"
+      header:       "អ្នកមិនមានសិទ្ធិ"
+      message:      "អ្នកមិនមានសិទ្ធិអនុវត្តសកម្មភាពនេះទេ។"
+  projects:
+    index:
+      title:            "គម្រោង"
+      header:           "បញ្ជីគម្រោង"
+    select:
+      title:            "ជ្រើសរើសគម្រោង"
+      header:           "ការជ្រើសរើសគម្រោង"
+      select:           "ជ្រើសរើស"
+      no_project:       "គ្មានគម្រោង"
+      no_project_help:  "ជ្រើសរើសដើម្បីធ្វើការខ្វះគម្រោង"
+      no_description:   "គ្មានការពិពណ៌នា"
+      cancel:           "បោះបង់"
+    edit:
+      title:            "កែសម្រួលគម្រោង"
+      header:           "កែសម្រួលគម្រោង: %{project}"
+    new:
+      title:            "គម្រោងថ្មី"
+      header:           "គម្រោងថ្មី"
+    show:
+      title:            "%{code}"
+      header:           "គម្រោង: %{code}"
+  tags:
+    index:
+      title:            "ស្លាក"
+      header:           "បញ្ជីស្លាក"
+    edit:
+      title:            "កែសម្រួល %{tag}"
+      header:           "%{tag}"
+    new:
+      title:            "ស្លាកថ្មី"
+      header:           "ស្លាកថ្មី"
+    show:
+      title:            "ស្លាក %{tag}"
+      header:           "%{tag}"
+  roles:
+    index:
+      title:            "តួនាទី"
+      header:           "បញ្ជីតួនាទី"
+    new:
+      title:            "តួនាទីថ្មី"
+      header:           "ផ្តល់តួនាទីថ្មី"
+      message_global_html: "<small>ទម្រង់នេះអាចដាក់ឱ្យតែតួនាទីទូទៅ និងតួនាទីធនធាន។ ដាក់តួនាទីករណីជាក់លាក់ពីទិដ្ឋភាពធនធាន (បើមាន)។</small>"
+      message_instance_html: "<small>ទម្រង់នេះអាចដាក់ឱ្យតែតួនាទីករណីជាក់លាក់។ ដាក់តួនាទីទូទៅ និងតួនាទីធនធានពីទិដ្ឋភាពបញ្ជីតួនាទី (បើមាន)។</small>"
+    partial:
+      message_html:     "ផ្តល់តួនាទីអ្នកប្រើថ្មីសម្រាប់ %{resource}"
+      no_roles_assigned:  "មិនទាន់មានការផ្តល់តួនាទីណាមួយទេ"
+      existing_roles:  "តួនាទីដែលមានស្រាប់"
+  cable_types:
+    index:
+      title:            "ប្រភេទកាប៊ែល"
+      header:           "ប្រភេទកាប៊ែល"
+    edit:
+      title:            "កែសម្រួលប្រភេទកាប៊ែល"
+      header:           "កែសម្រួលប្រភេទកាប៊ែល"
+    new:
+      title:            "ប្រភេទកាប៊ែលថ្មី"
+      header:           "ប្រភេទកាប៊ែលថ្មី"
+    show:
+      title:            "ប្រភេទកាប៊ែល %{id}"
+      header:           "ប្រភេទកាប៊ែល %{id}"
+  cables:
+    index:
+      title:            "កាប៊ែល"
+      header:           "កាប៊ែល"
+    edit:
+      title:            "កែសម្រួលកាប៊ែល"
+      header:           "កែសម្រួលកាប៊ែល"
+    new:
+      title:            "កាប៊ែលថ្មី"
+      header:           "កាប៊ែលថ្មី"
+    show:
+      title:            "កាប៊ែល %{tag}"
+      header:           "កាប៊ែល: %{tag}"
+  demands:
+    index:
+      title:            "បញ្ជីបន្ទុក"
+      header:           "បញ្ជីបន្ទុក"
+    edit:
+      title:            "កែសម្រួលបន្ទុក"
+      header:           "កែសម្រួលបន្ទុក"
+    new:
+      title:            "បន្ទុកថ្មី"
+      header:           "បន្ទុកថ្មី"
+    show:
+      title:            "បន្ទុក %{tag}"
+      header:           "បន្ទុក: %{tag}"

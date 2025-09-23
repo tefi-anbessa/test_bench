@@ -1,46 +1,24 @@
 # frozen_string_literal: true
-
 FactoryBot.define do
   factory :cable_type do
-    # Required association
-    project
+    project { association :project } 
     
-    conductor_material { 'Copper' }
-    conductor_makeup { '2C+E' }  # Required field
-    csa { 4.0 }  # Cross-sectional area in mm²
-    neutral_csa { 4.0 }
-    earth_csa { 2.5 }
-    insulation { 'PVC' }
+    # Required fields
+    conductor_material { 'Cu' }
+    csa { 2.5 }
+    cores { 3 }
+    
+    # Optional fields with sensible defaults
+    neutral_csa { 2.5 }
+    earth_csa { 1.5 }
+    insulation { 'XLPE' }
     bedding { 'PVC' }
-    armour { 'GSWA' }  # Galvanized Steel Wire Armour
-    sheath { 'XLPE/nylon' }
-    bedding_od { 10.5 }  # Outer diameter in mm
-    overall_od { 12.5 }  # Overall diameter in mm
-    temperature_rating { '75˚C' }  # Using string value from the enum, 75°C for PVC
-
-    # Traits for common cable types
-    trait :pvc_flat_twin_earth do
-      conductor_makeup { '2C+E' }
-      csa { 1.5 }
-      description { 'Flat Twin & Earth Cable' }
-      insulation { 'PVC' }
-      sheath { 'PVC' }
-      armour { nil }
-    end
-
-    trait :swa do
-      conductor_makeup { '3C+E' }
-      csa { 6.0 }
-      description { 'Steel Wire Armoured Cable' }
-      insulation { 'XLPE' }
-      bedding { 'PVC' }
-      armour { 'GSWA' }
-      sheath { 'PVC' }
-    end
-
-    # For testing invalid records
-    trait :invalid do
-      conductor_makeup { nil }
-    end
+    armour { 'SWA' }
+    sheath { 'PVC' }
+    temperature_rating { '75˚C' }
+    voltage_rating { '450/750V' }
+    bedding_od { 10.0 }
+    overall_od { 12.0 }
+    notes { 'Standard power cable' }
   end
 end

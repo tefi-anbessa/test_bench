@@ -52,11 +52,13 @@ en:
         resource_type_help: "Leave blank for global role"
         resource_id:      "Instance"
       cable_type:
-        conductor_material:	Conductor material
-        conductor_makeup:	Conductor makeup
+        conductor_material:	Conductor Material
+        cores:	Conductor Cores
         csa:	CSA
-        csa_units:  sq mm
+        csa_units:  mm²
+        neutral:	Neutral
         neutral_csa:	Neutral CSA
+        earth:	Earth
         earth_csa:	Earth CSA
         insulation:	Insulation
         bedding:	Bedding
@@ -66,6 +68,7 @@ en:
         overall_od:	Overall OD
         od_units: mm
         temperature_rating:	Temperature Rating
+        voltage_rating:	Voltage Rating
       cable:
         cable_type_id:        "Cable Type"
         route_length:         "Route Length"
@@ -74,8 +77,8 @@ en:
         vertical_allowance_help:  "Cable length to be added to plan view, e.g. for riser to switchboard. If routes are 3D modeled, set to zero."
         termination_allowance:  "Termination Allowance"
         termination_allowance_help: "Allowance for cable routing inside boxes"
-        start_mark:           "Start Mark"
-        end_mark:             "End Mark"
+        start_mark:           "Installed Start Mark"
+        end_mark:             "Installed End Mark"
       demand:
         basis:            "Basis"
         bases:

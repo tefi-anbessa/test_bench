@@ -1,0 +1,15 @@
+<!-- Project collapsible card -->
+<div class="card-body">
+	<%= render 'components/collapsible',
+		title: local_assigns[:title],
+		id: 'project-collapse',
+		expanded: false,
+		header_class: 'py-1' do %>
+			<div class="mb-2">
+				<h6 class="mb-1"><%= @cable_type.project.title %></h6>
+				<% if @cable_type.project.description.present? %>
+						<p class="small text-muted mb-0"><%= @cable_type.project.description %></p>
+				<% end %>
+			</div>
+		<% end %>
+</div> 

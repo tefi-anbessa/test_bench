@@ -17,6 +17,7 @@ class CableTypesController < ApplicationController
   # GET /electrical/cable_types/new
   def new
     @cable_type = authorize current_project.cable_types.new
+    setup_form
   end
 
   # POST /electrical/cable_types or /electrical/cable_types.json
@@ -40,6 +41,7 @@ class CableTypesController < ApplicationController
   # GET /electrical/cable_types/1/edit
   def edit
     authorize @cable_type
+    setup_form
   end
 
   # PATCH/PUT /electrical/cable_types/1 or /electrical/cable_types/1.json
@@ -76,12 +78,22 @@ class CableTypesController < ApplicationController
       @cable_type = policy_scope(CableType).find(params[:id])
     end
 
+    def setup_form
+      @projects = policy_scope(Project)
+      @conductor_select = CableType.conductor_materials
+      @csa_select = Constants.electrical.conductor_csa
+      @insulation_select = CableType.insulations
+      @armour_select = CableType.armours
+      @temperature_select = CableType.temperature_ratings
+      @voltage_select = CableType.voltage_ratings
+    end
+
     # Only allow a list of trusted parameters through.
     def cable_type_params
       params.require(:cable_type).permit(
-        :conductor_material, :conductor_makeup, :csa, :neutral_csa, :earth_csa, 
+        :conductor_material, :cores, :csa, :neutral_csa, :earth_csa, 
         :insulation, :bedding, :armour, :sheath, :bedding_od, :overall_od,
-        :temperature_rating, :project_id
+        :temperature_rating, :voltage_rating, :project_id
       )
     end
 end

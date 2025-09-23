@@ -1,7 +1,0 @@
-km:
-  projects:
-    select:
-      no_project:       "គ្មានគម្រោង"
-      no_project_help:  "ជ្រើសរើសដើម្បីធ្វើការខ្វះគម្រោង"
-      no_description:   "គ្មានការពិពណ៌នា"
-      cancel:           "បោះបង់"

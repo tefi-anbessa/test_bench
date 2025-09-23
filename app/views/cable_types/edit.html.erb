@@ -1,6 +1,4 @@
 <% provide(:title, t('.title')) %>
 <% provide(:button_text, t('actions.save')) %>
-<h2 class="m-2">
-  <%= t('.header')%>
-</h2>
-<%= render 'form' %>
+
+<%= render 'form', cable_type: @cable_type %>

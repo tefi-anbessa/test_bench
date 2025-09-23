@@ -32,6 +32,8 @@ en:
     other:        "Other"
     new_select:   "Leave blank when adding new selection"
     undefined:    "Undefined"
+    none:         "None"
+    unknown:      "Unknown"
 
   admin:         "Admin"
 
@@ -79,7 +81,7 @@ en:
   # Pundit authorization messages
   pundit:
     unauthorized: "You are not authorized to perform this action."
-  
+
   pagination:
     per_page: "Items per page"
     per_page_aria: "Select number of items per page"
