@@ -16,13 +16,12 @@
             <% end %>
 
             <!-- Previous Button -->
-            <% prev_cable_type = @cable_type.prev %>
-            <% if prev_cable_type.present? %>
-              <% disabled = prev_cable_type == @cable_type %>
-              <%= link_to cable_type_path(prev_cable_type),
+            <% if @prev.present? %>
+              <% disabled = @prev == @cable_type %>
+              <%= link_to cable_type_path(@prev, q: @ransack_params),
                     disabled: disabled,
                     class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
-                    title: "#{t('actions.previous')}: #{prev_cable_type.label}" do %>
+                    title: "#{t('actions.previous')}: #{@prev.label}" do %>
                 <%== icon('arrow-left') %>
                 <span class="d-none d-md-inline">
                   <%= t('actions.previous') %>
@@ -49,13 +48,12 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <% next_cable_type = @cable_type.next %>
-            <% if next_cable_type.present? %>
-              <% disabled = next_cable_type == @cable_type %>
-              <%= link_to cable_type_path(next_cable_type),
+            <% if @next.present? %>
+              <% disabled = @next == @cable_type %>
+              <%= link_to cable_type_path(@next, q: @ransack_params),
                     disabled: disabled,
                     class: "btn btn-sm btn-outline-secondary me-2 #{'disabled' if disabled}",
-                    title: "#{t('actions.next')}: #{next_cable_type.label}" do %>
+                    title: "#{t('actions.next')}: #{@next.label}" do %>
                 <span class="d-none d-md-inline">
                   <%= t('actions.next') %>
                 </span>

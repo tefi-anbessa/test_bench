@@ -23,6 +23,12 @@ module ApplicationHelper
     current_user&.has_role?(:admin)
   end
 
+  # app/helpers/application_helper.rb
+  def permitted_ransack_params
+    return {} unless params[:q].is_a?(ActionController::Parameters)
+    params[:q].permit!.to_h
+  end
+
   # Maps flash message types to Bootstrap alert classes
   #
   # @param flash_type [String, Symbol] The flash message type (e.g., :success, :danger, :notice, :alert)

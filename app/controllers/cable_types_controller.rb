@@ -6,12 +6,19 @@ class CableTypesController < ApplicationController
   # GET /electrical/cable_types or /electrical/cable_types.json
   def index
     @q = policy_scope(CableType).ransack(params[:q])
-    @pagy, @cable_types = pagy(@q.result.includes(:cables), limit: 10)
+    @q.sorts = 'id asc' if @q.sorts.empty?
+    @pagy, @cable_types = pagy(@q.result, limit: 10)
   end
 
   # GET /electrical/cable_types/1 or /electrical/cable_types/1.json
   def show
     authorize @cable_type
+    @ransack_params = params[:q]&.permit!.to_h || {}
+    
+    Rails.logger.debug "Ransack params in show: #{@ransack_params.inspect}"
+    
+    @next = @cable_type.next(@ransack_params)
+    @prev = @cable_type.prev(@ransack_params)
   end
 
   # GET /electrical/cable_types/new
@@ -93,7 +100,11 @@ class CableTypesController < ApplicationController
       params.require(:cable_type).permit(
         :conductor_material, :cores, :csa, :neutral_csa, :earth_csa, 
         :insulation, :bedding, :armour, :sheath, :bedding_od, :overall_od,
-        :temperature_rating, :voltage_rating, :project_id
+        :temperature_rating, :voltage_rating, :project_id, :notes
       )
+    end
+
+    def ransack_params
+      params.require(:q).permit! if params[:q].present?
     end
 end

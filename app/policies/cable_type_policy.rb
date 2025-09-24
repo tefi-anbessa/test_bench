@@ -5,6 +5,7 @@ class CableTypePolicy < ApplicationPolicy
 
   class Scope < ApplicationPolicy::Scope
     def resolve
+      return scope.all if user&.is_admin? || user&.is_app_owner?
       return scope.none unless @current_project
       scope.where(project: @current_project)
     end

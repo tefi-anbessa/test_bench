@@ -21,6 +21,75 @@ class CableType < ApplicationRecord
     code
   end
 
+  def next(ransack_params)
+    adjacent_record(ransack_params, :next)
+  end
+
+  def prev(ransack_params)
+    adjacent_record(ransack_params, :prev)
+  end
+
+  private
+
+    def sort_columns(ransack_params = {})
+      Array(ransack_params[:s] || 'id asc')
+    end
+
+    def primary_sort_column(ransack_params = {})
+      sort_columns(ransack_params).first.to_s.split(' ').first
+    end
+
+    def primary_sort_direction(ransack_params = {})
+      dir = sort_columns(ransack_params).first.to_s.split(' ').second
+      %w[asc desc].include?(dir) ? dir : 'asc'
+    end
+
+    def adjacent_record(ransack_params, direction)
+      # Convert string sort to array if needed
+      sort_columns = if ransack_params[:s].is_a?(String)
+                       [ransack_params[:s]]
+                     else
+                       Array(ransack_params[:s])
+                     end
+    
+      # Get primary sort column and direction
+      primary_sort = sort_columns.first || 'id asc'
+      column, dir = primary_sort.split(' ')
+      is_next = direction == :next
+      op = is_next ? '>' : '<'
+      rev_op = is_next ? '<' : '>'
+      rev_dir = dir == 'asc' ? 'desc' : 'asc'
+    
+      # Build the base scope with all ransack parameters
+      base_scope = self.class.ransack(ransack_params).result
+    
+      # For the actual query
+      base_scope = base_scope.where(
+        "#{column} #{is_next ? op : rev_op} ?", 
+        self[column]
+      ).or(
+        base_scope.where(
+          "#{column} = ? AND id #{op} ?", 
+          self[column], 
+          id
+        )
+      )
+    
+      # Apply the sort order
+      base_scope = base_scope.reorder(sort_columns.join(', '))
+    
+      # For previous, we need to reverse the primary sort direction
+      unless is_next
+        reversed_sorts = sort_columns.map do |sort|
+          col, d = sort.split(' ')
+          d = (col == column) ? (d == 'asc' ? 'desc' : 'asc') : d
+          "#{col} #{d}"
+        end
+        base_scope = base_scope.reorder(reversed_sorts.join(', '))
+      end
+    
+      base_scope.first
+    end
 
     def generate_code
       # Generate base code using the existing logic
@@ -46,7 +115,6 @@ class CableType < ApplicationRecord
       end
     end
 
-  private
     
     def find_next_sequence_number(base_code)
       # Find all existing codes that start with our base code

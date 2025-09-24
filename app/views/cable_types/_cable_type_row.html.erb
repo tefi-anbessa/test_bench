@@ -14,7 +14,8 @@
   <td><%= row.voltage_rating %></td>
   <td>
     <% if policy(row).show? %>
-      <%= link_to cable_type_path(row), class: "btn btn-secondary btn-sm icon-link",
+      <%= link_to cable_type_path(row, q: permitted_ransack_params), 
+            class: "btn btn-secondary btn-sm icon-link",
             aria: { label: t('actions.show') },
             title: t('actions.show'),
             display: "inline" do %>
