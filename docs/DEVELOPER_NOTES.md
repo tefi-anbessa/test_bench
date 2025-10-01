@@ -19,6 +19,7 @@
 From git commit 6da446f onwards, this project has used Windsurf/Cascade AI to speed up development and improve code quality. The learnings of this process including coding conventions and project peculiarities, etc. have been captured in "Memories" on the Cascade server side.
 
 ### For Developers:
+
 1. When initiating a new session with AI, request it to review the project guiding documentation:
    - `README.md`
    - Project documentation in `docs/`:
@@ -28,7 +29,8 @@ From git commit 6da446f onwards, this project has used Windsurf/Cascade AI to sp
       - `docs/ROLES_AND_PERMISSIONS.md`
 2. Request AI to review the memories and follow the guidance therein. If memories are not available, refer to the duplicated documentation in `docs/AI memories/`.
 
-### Maintenance:
+### Maintenance
+
 - These guidelines and requirements will evolve over time.
 - Any changes should be reflected in the documentation.
 - When modifying role permissions or access controls, ensure both `ROLES_AND_PERMISSIONS.md` and the corresponding policy files are updated.
@@ -54,8 +56,8 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    - Keep pull requests and changes small and focused
 
 4. **Current Focus**:
-   - Projects functionality is the current priority
-   - Dashboard features should be deferred until core functionality is stable
+   - Application functionality is the current priority
+   - Fancy features should be deferred until core functionality is stable
    - Avoid premature optimization or over-engineering
 
 5. **Code Review Guidelines**:
@@ -64,16 +66,50 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    - Prefer simple, maintainable solutions over clever ones
 
 ## Implementation
-Set options for select fields in the controller, not in the view. Complete i18n translations for select fields in the view.
+
+### Constants
+
+- The application implements a constants management system based on this article: [https://dev.to/vladhilko/say-goodbye-to-messy-constants-a-new-approach-to-moving-constants-away-from-your-model-58i1](https://dev.to/vladhilko/say-goodbye-to-messy-constants-a-new-approach-to-moving-constants-away-from-your-model-58i1).
+- The code has been tweaked to allow the hash parsing to end on an array as well as a hash. This allows arrays for floating point numbers (primarily for electrical selectors).
+- Usage: 
+  - Constants.electrical.protection.rating yields an array: [1, 2, 4, 6, 10, 16, 20, 25, 32, 40, 50, 63]
+  - Constants.electrical.protection.device yields a special hash: #<Constant::Model:0x000000012b7b1390 @constant_hash={:MCB=>1, :MCCB=>2}>. It may be necessary to convert this to a basic hash if required with to_h.
+
+### MVC Guidelines
+
+#### Models
+
+- Model classes include all logic pertaining to the object.
+- Model classes should include custom validations were required. Custom validations must include 118n translation of error messages.
+- All resource models should have a label method, which is used to present a human readable identifier, preferably unique, for the model. This can (and in most cases will be) simply a reference to another attribute. It will be used in views as a card header, link id, etc.
+
+#### Controllers
+
+- Controller classes include basic logic for performing CRUD operations on the object.
+   - Controllers are responsible for setting all variables for the view, including select options.
+
+#### Views
+
+- Views should not include complex logical processing.
+   - Conditionals should be controlled by pundit policy calls where applicable.
+   - Conditionals may also use presence or otherwise of variables set in the controller.
+   - Views should include i18n translations for all user facing text, including:
+   flash error messages
+   select options
+
+
+
 
 ### Error Handling
+
    - Errors are categorized as:
       - User data entry errors: These are errors that can be fixed by the user, such as missing required fields or invalid data.
          - Required fields are highlighted by html5 without any additional code. Not sure how to translate these.
-         - Invalid data should be detected in the controller and the form displayed again with error messages. Rails manages standard error messages but translations may need to be provided [HOLD] check this.
+         - Invalid data should be detected in the controller and the form displayed again with flash :danger messages. 
+         - Rails manages standard model validation messages but translations may need to be provided [HOLD] check this.
          - More complex validations of associations use custom error messages with translations.
       - 
-      - Security breach attempts: These are trapped forbidden operations that should not be possible using normal workflows. They are probably direct HTML requests in an attempt to defeat the permissions system. This type of error should log a message to the rails logger, redirect to the custom /403 page, and log out the user. 
+      - Security breach attempts: These are trapped forbidden operations that should not be possible using normal workflows. They are probably direct HTML requests in an attempt to defeat the permissions system. This type of error should log a message to the rails logger, redirect to the custom /403 page, and log out the current user.
 
 ### Form Design
 
@@ -85,6 +121,7 @@ Set options for select fields in the controller, not in the view. Complete i18n 
 ## Known Issues
 
 ### Pagination
+
 - **Issue**: The pagination system is not respecting the `per_page` parameter correctly.
 - **Symptoms**: 
   - The URL updates with the selected `per_page` value
@@ -100,6 +137,7 @@ Set options for select fields in the controller, not in the view. Complete i18n 
   - Add more detailed logging to trace the pagination flow
 
 ## Development Check List
+
 - [x] Build static pages as framework for future displays for casual visitors
 - [x] Build application layout with headers, footers, navigation
 - [x] Build core module with project and tag models
@@ -130,10 +168,13 @@ Set options for select fields in the controller, not in the view. Complete i18n 
 - [x] Improve has_one validation on demandable, possibly include database constraint.
    - Database constraints deferred due to risk of locking database. Continue with inclusion of orphans on index displays, and manual clean up.
 - [ ] Nest routes for project related resource under projects to improve security around assignment to other than the current project.
-- [ ] Revisit the roles policy test. The roles policy is now using the role context from the controller, need to factor this into tests. 
+- [ ] Revisit the roles policy test. The roles policy is now using the role context from the controller, need to factor this into tests.
 - [ ] Roles policy is delegating to resource policies for resource instances. Tests need to consider this.
 - [ ] Ensure select for role names does not include restricted roles unless current user has app_owner role.
-- [ ] System test for tags.
+- [ ] System tests for all resources.
+- [ ] Improve forbidden error logging messages, include user. Consider automatic sign out.
+- [ ] Model tests should include some sort of test of enums.
+- [ ] Complete workflows with admin and no project selected.
 
 ## Refactoring Opportunities
 - [x] Improve role and permissions implementation and workflow.
@@ -184,6 +225,7 @@ Set options for select fields in the controller, not in the view. Complete i18n 
    - [ ] Customize error trapping for forbidden
 - [ ] Improve locale setting, and include language/currency/flag in locale selection.
 - [ ] Develop an application colour theme set. Consider discipline colour coding, also need to consider module colour coding.
+- [ ] Build an IP55 object to allow fully flexible reusable IP code generation.
 
 ## Architecture Considerations
 - [ ] Move Electrical to a module or namespace.

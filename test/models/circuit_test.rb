@@ -54,11 +54,11 @@ class CircuitTest < ActiveSupport::TestCase
     assert other_circuit.valid?
   end
 
-  # TODO: Uncomment when load factory is available
-  # test "should create circuit with load" do
-  #   circuit = create(:circuit, :with_load, switchboard: @switchboard)
-  #   assert circuit.load.present?
-  #   assert_equal circuit, circuit.load.circuit
+  # TODO: Uncomment when demand factory is available
+  # test "should create circuit with demand" do
+  #   circuit = create(:circuit, :with_demand, switchboard: @switchboard)
+  #   assert circuit.demand.present?
+  #   assert_equal circuit, circuit.demand.circuit
   # end
 
   test "should create circuit with cable" do
@@ -133,5 +133,34 @@ class CircuitTest < ActiveSupport::TestCase
     # Test above range (37)
     circuit37 = build(:circuit, switchboard: test_switchboard, serial: 37)
     assert_not circuit37.valid?, "Circuit with serial 37 should not be valid"
+  end
+
+   
+  test "should use switchboard tag and circuit serial for label" do
+    project = create(:project)
+    discipline = Discipline.find_or_create_by(code: 'E') do |d|
+      d.name = 'Electrical' if d.new_record?
+    end
+    
+    tag = create(:tag,
+      prefix: 'EX',
+      serial: 5,
+      suffix: "",
+      project: project,
+      discipline: discipline
+    )
+    
+    assert_difference 'Switchboard.count', 1 do
+      tag.update(tagable: build(:switchboard,
+        location: 'Gatehouse',
+        ingress_protection: 'IP22'
+      ))
+    end
+    switchboard = tag.reload.tagable
+    assert_equal "E:EX-0005", switchboard.label
+    circuit = switchboard.circuits.create(
+      serial: 1
+    )
+    assert_equal "E:EX-0005#01", circuit.label
   end
 end

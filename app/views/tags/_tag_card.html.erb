@@ -1,8 +1,7 @@
 
-
 <%= render 'components/collapsible',
   id: "tag_#{tag.id}_details",
-  title: title,
+  title: [t("activerecord.models.tag"), tag.full_tag].join(": "),
   expanded: false,
   header_class: 'py-1' do %>
   

@@ -1,14 +1,8 @@
 <div id="<%= dom_id cable_type %>">
-  <% 
-    title = capture do 
-      content_tag(:span, t('activerecord.models.cable_type') + ': ', class: 'text-muted me-1') +
-      content_tag(:span, cable_type.description, class: 'me-2')
-    end 
-  %>
 
   <%= render 'components/collapsible',
     id: "cable_type_#{cable_type.id}_details",
-    title: title,
+    title: [t('activerecord.models.cable_type'), cable_type.id].compact.join(' '),
     expanded: false,
     header_class: 'py-1' do %>
     

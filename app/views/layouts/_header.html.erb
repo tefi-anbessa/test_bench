@@ -101,6 +101,13 @@
                       class: "dropdown-item" %>
                   </li>
                 <% end %>
+                <% if policy(:switchboard).index? %>
+                  <li>
+                    <%= link_to t('switchboard', scope: 'activerecord.models').pluralize,
+                      switchboards_path,
+                      class: "dropdown-item" %>
+                  </li>
+                <% end %>
                 <% if policy(:demand).index? %>
                   <li>
                     <%= link_to t('demand', scope: 'activerecord.models').pluralize,

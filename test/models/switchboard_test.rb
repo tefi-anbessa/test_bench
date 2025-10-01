@@ -43,6 +43,7 @@ class SwitchboardTest < ActiveSupport::TestCase
     tag = create(:tag,
       prefix: 'EX',
       serial: 5,
+      suffix: "",
       project: project,
       discipline: discipline
     )
@@ -55,6 +56,7 @@ class SwitchboardTest < ActiveSupport::TestCase
     end
     
     assert tag.reload.tagable.is_a?(Switchboard)
+    assert_equal tag.switchboard.label, "E:EX-0005"
     assert_equal 'Gatehouse', tag.tagable.location
     assert_equal 'IP22', tag.tagable.ingress_protection
   end

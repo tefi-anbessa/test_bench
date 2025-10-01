@@ -1,9 +1,10 @@
-
+<% provide(:title, t('.title')) %>
+<% provide(:button_text, t('actions.save')) %>
 
 <%= render "form", 
   cable: @cable,
-  cable_types: @cable_types,
-  tag: @tag
+  tag: @cable.tag,
+  cable_types: @cable_types
 %>
 
 

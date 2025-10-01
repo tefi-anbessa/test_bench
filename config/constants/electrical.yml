@@ -65,7 +65,7 @@ electrical:
     "Cu": 0  # Copper
     "Al": 1  # Aluminium 
   insulation_materials:
-    "PVC": 0
+    "PVC": 0π
     "XLPE": 1
     "LSZH": 2  # Low Smoke Zero Halogen
     "EPR": 3   # Ethylene Propylene Rubber
@@ -81,8 +81,7 @@ electrical:
     "450/750V": 1
     "600/1000V": 2
     "1.9/3.3kV": 3
-    "3.3/6.6kV": 4
-    "6.6/11kV": 5
+    "3.3/6.6kV": 4π
     "11/33kV": 6
     "33/66kV": 7
     "66/132kV": 8
@@ -111,3 +110,23 @@ electrical:
     "415V":             415.0
     "690V":             690.0
     "1kV":              1000.0
+  ingress_protection:
+    first_digit:
+      no_protection: 0
+      solid_objects_50mm: 1
+      solid_objects_12mm: 2:
+      solid_objects_2_5mm: 3
+      solid_objects_1mm: 4
+      dust_protected: 5
+      dust_tight: 6
+    second_digit:
+      no_protection: 0
+      dripping_water: 1
+      dripping_water_tilted: 2
+      spraying_water: 3
+      splashing_water: 4
+      water_jets: 5
+      powerful_water_jets: 6
+      temporary_immersion: 7
+      continuous_immersion: 8
+      high_pressure_water_jets: 9

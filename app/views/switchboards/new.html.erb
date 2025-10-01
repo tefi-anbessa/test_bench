@@ -1,9 +1,10 @@
-<h1>New switchboard</h1>
-
-<%= render "form", switchboard: @switchboard %>
-
-<br>
-
-<div>
-  <%= link_to "Back to switchboards", switchboards_path %>
-</div>
+<% provide(:title, t('.title')) %>
+<% provide(:button_text, t('actions.save')) %>
+<%= render "form", 
+  switchboard: @switchboard,
+  tag: @tag,
+  circuits: @circuits,
+  voltage_ratings: @voltage_ratings,
+  ip_1: @ip_1,
+  ip_2: @ip_2
+%>

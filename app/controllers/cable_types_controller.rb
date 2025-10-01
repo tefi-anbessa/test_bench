@@ -93,7 +93,7 @@ class CableTypesController < ApplicationController
       params.require(:cable_type).permit(
         :conductor_material, :cores, :csa, :neutral_csa, :earth_csa, 
         :insulation, :bedding, :armour, :sheath, :bedding_od, :overall_od,
-        :temperature_rating, :voltage_rating, :project_id
+        :temperature_rating, :voltage_rating, :project_id, :notes
       )
     end
 end

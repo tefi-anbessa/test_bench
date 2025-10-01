@@ -348,7 +348,7 @@ class TagTest < ActiveSupport::TestCase
     assert_difference 'Cable.count', 1 do
       cable = Cable.create!(
         tag: tag,
-        cable_type: create(:cable_type, :pvc_flat_twin_earth)
+        cable_type: create(:cable_type)
       )
       assert_equal tag.reload.tagable, cable
     end

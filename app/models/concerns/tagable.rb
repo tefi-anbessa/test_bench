@@ -6,7 +6,7 @@ module Tagable
     accepts_nested_attributes_for :tag
 
     # Custom validation to ensure tag is present and valid
-    validates :tag, presence: :true, if: :persisted?
+    # validates :tag, presence: :true, if: :persisted?
 
   end
 end

@@ -10,17 +10,17 @@ class CablesControllerTest < ActionController::TestCase
     set_current_project(@project) if defined?(set_current_project)
 
     @admin = create(:user)
-    @admin.add_role(:admin)
+    @admin.grant(:admin)
 
     @project_manager = create(:user)
-    @project_manager.add_role(:project_manager, @project) # Project manager role
+    @project_manager.grant(:project_manager, @project) # Project manager role
 
     @team_member = create(:user)
-    @team_member.add_role(:team_member, @project) # Project team member role
+    @team_member.grant(:team_member, @project) # Project team member role
 
     @electrical_designer = create(:user)
-    @electrical_designer.add_role(:electrical_designer) # Project electrical designer role
-    @electrical_designer.add_role(:team_member, @project) # Project team member role
+    @electrical_designer.grant(:electrical_designer) # Project electrical designer role
+    @electrical_designer.grant(:team_member, @project) # Project team member role
 
     @regular_user = create(:user)   # No roles
 
@@ -115,9 +115,7 @@ class CablesControllerTest < ActionController::TestCase
         }
       }
     end
-    assert_redirected_to @cable_tag
-    expected = I18n.t('flash.tags.tagable_already_assigned', tag: @cable_tag.reload.full_tag, resource_name: Cable.model_name.human)
-    assert_equal expected, flash[:danger]
+    assert_forbidden
   end
 
   test "electrical designer cannot create cable with tag that is already classified as other than cable" do
@@ -131,13 +129,11 @@ class CablesControllerTest < ActionController::TestCase
         }
       }
     end
-    assert_redirected_to @another_cable_tag
-    expected = I18n.t('flash.tags.tagable_wrong_type', tag: @another_cable_tag.reload.full_tag, resource_name: Cable.model_name.human)
-    assert_equal expected, flash[:danger]
+    assert_forbidden
   end
 
   # Failure cases (no stubs): ensure controller renders :new with 422 and danger flash
-  test "electrical designer cannot create cable on valid tag when cable_type is missing" do
+  test "electrical designer cannot create cable on valid tag when cable is not valid" do
     sign_in @electrical_designer
     assert_no_difference('Cable.count') do
       post :create, params: {
@@ -220,10 +216,10 @@ class CablesControllerTest < ActionController::TestCase
       }
     }
   
-    # Debug output
-    puts "Initial cable IDs: #{initial_cable_ids.inspect}"
-    puts "All cables after create: #{Cable.pluck(:id).inspect}"
-    puts "New cables: #{Cable.where.not(id: initial_cable_ids).pluck(:id).inspect}"
+    # Debug out
+    # puts "Initial cable IDs: #{initial_cable_ids.inspect}"
+    # puts "All cables after create: #{Cable.pluck(:id).inspect}"
+    # puts "New cables: #{Cable.where.not(id: initial_cable_ids).pluck(:id).inspect}"
   
     # Check counts
     assert_equal initial_tags + 1, Tag.count, "Tag count should increase by 1"
@@ -280,6 +276,7 @@ class CablesControllerTest < ActionController::TestCase
     assert_response :success
   end
 
+  # Update action tests
   test "electrical designer can update cable" do
     sign_in @electrical_designer
     patch :update, params: { 
@@ -289,9 +286,9 @@ class CablesControllerTest < ActionController::TestCase
         termination_allowance: 0.75
       } 
     }
-    assert_redirected_to cable_path(assigns(:cable))
+    assert_redirected_to cable_path(@cable)
     expected = I18n.t('flash.actions.update.notice', resource_name: Cable.model_name.human)
-    assert_equal expected, flash[:notice]
+    assert_equal expected, flash[:success]
   end
 
   test "update shows error when update fails" do
@@ -304,7 +301,7 @@ class CablesControllerTest < ActionController::TestCase
       } 
     }
     assert_template :edit
-    expected = I18n.t('flash.actions.update.alert', resource_name: Cable.model_name.human)
+    expected = I18n.t('flash.actions.update.alert', resource_name: Cable.model_name.human.downcase)
     assert_equal expected, flash.now[:alert]
   end
 

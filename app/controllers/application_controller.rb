@@ -3,6 +3,7 @@ class ApplicationController < ActionController::Base
   include Pagy::Backend
   include CurrentProjectConcern
   include Devise::Controllers::StoreLocation
+  include ErrorsHelper
 
   around_action :switch_locale
   before_action :configure_permitted_parameters, if: :devise_controller?

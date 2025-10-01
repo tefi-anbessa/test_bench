@@ -14,6 +14,10 @@ class Circuit < ApplicationRecord
   enum :curve, Constants.electrical.protection.curve.to_h
   enum :elcb, Constants.electrical.protection.elcb.to_h
 
+  def label
+    "#{switchboard.label}##{serial.to_s.rjust(2, '0')}"
+  end
+  
   def self.ransackable_attributes(auth_object = nil)
     ["serial", "device", "poles", "curve", "rating", "elcb", "contactor",
       "notes", "created_at", "updated_at"]

@@ -91,7 +91,7 @@ en:
   cables:
     index:
       title:            "Cables"
-      header:           "Cables"
+      header:           "Cable Schedule"
     edit:
       title:            "Edit Cable"
       header:           "Edit Cable"
@@ -101,6 +101,20 @@ en:
     show:
       title:            "Cable %{tag}"
       header:           "Cable %{tag}"
+
+  switchboards:
+    index:
+      title:            "Switchboards"
+      header:           "Switchboards Schedule"
+    edit:
+      title:            "Edit Switchboard"
+      header:           "Edit Switchboard"
+    new:
+      title:            "New Switchboard"
+      header:           "New Switchboard"
+    show:
+      title:            "Switchboard %{tag}"
+      header:           "Switchboard: %{tag}"
 
   demands:
     index:

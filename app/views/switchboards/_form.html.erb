@@ -1,67 +1,184 @@
-<%= form_with(model: switchboard) do |form| %>
-  <% if switchboard.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(switchboard.errors.count, "error") %> prohibited this switchboard from being saved:</h2>
+<div class="container mt-3">
+  <div class="card">
+    <div class="card-header p-2">
 
-      <ul>
-        <% switchboard.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
+      <!-- Center Tag Info -->
+      <div class="col text-center">
+        <div class="d-flex flex-column align-items-center">
+          <div class="mt-1">
+              <%= switchboard.persisted? ? t('actions.edit') : t('actions.new') %> 
+              <% if switchboard.tag.present? && switchboard.tag.persisted? %>
+                <%= [t('activerecord.models.switchboard'), switchboard.tag.full_tag].join(': ') %>
+                <small class="text-muted ms-2"><%= switchboard.tag.service %></small>
+              <% else %>
+                <%= t('activerecord.models.switchboard') %>
+              <% end %>
+          </div>
+        </div>
+      </div>
     </div>
-  <% end %>
 
-  <div>
-    <%= form.label :location, style: "display: block" %>
-    <%= form.text_field :location %>
-  </div>
+    <%= bootstrap_form_with(model: switchboard, 
+          layout: :horizontal, 
+          label_col: "col-sm-4", 
+          control_col: "col-sm-8",
+          wrapper_class: 'mb-1',
+          bootstrap: { 
+            form: { class: 'mb-0' },
+            label: { class: 'mb-0' }
+          }) do |f| %>
+      
+      <div class="card-body p-2">
+        <%= render 'shared/error_messages', object: f.object %>
 
-  <div>
-    <%= form.label :ingress_protection, style: "display: block" %>
-    <%= form.text_field :ingress_protection %>
-  </div>
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+            <!-- Tag -->
+            <% if switchboard.tag&.persisted? %>
+              <%= render 'tags/tag_card', tag: switchboard.tag %>
+            <% else %>
+            # TODO: Add tag form
+            <% end %>
 
-  <div>
-    <%= form.label :busbar_rating, style: "display: block" %>
-    <%= form.text_field :busbar_rating %>
-  </div>
+            <!-- Switchboard Details -->
+            <div class="row">
+              <%= f.text_field :location,
+                      class: 'form-control form-control-sm',
+                      wrapper: { class: 'mb-1' } %>
+            </div>
+            <div class="card p-2 mb-2" data-controller="ip-rating">
+              <div class="row">
+                <div class="col-4">
+                  <%= f.text_field :ingress_protection,
+                          class: 'form-control form-control-sm',
+                          layout: :vertical,
+                          prepend: 'IP',
+                          data: { 'ip-rating-target': 'output' } %>
+                </div>
+                <div class="col-8">
+                  <div class="row">
+                    <%= f.select :ip_1,
+                        ip_1.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] },
+                        { selected: switchboard.ingress_protection&.first },
+                        { 
+                          class: 'form-select mb-0',
+                          label_col: "col-sm-4",
+                          control_col: "col-sm-3",
+                          data: { 
+                            action: 'change->ip-rating#update',
+                            'ip-rating-target': 'firstDigit' 
+                          } 
+                        } %>
+                  </div>
+                  <div class="row">
+                    <%= f.select :ip_2,
+                        ip_2.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] },
+                        { selected: switchboard.ingress_protection&.last },
+                        { 
+                          class: 'form-select mb-0',
+                          label_col: "col-sm-2",
+                          control_col: "col-sm-10",
+                          data: { 
+                            action: 'change->ip-rating#update',
+                            'ip-rating-target': 'secondDigit' 
+                          } 
+                        } %>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-  <div>
-    <%= form.label :busbar_fault_rating, style: "display: block" %>
-    <%= form.text_field :busbar_fault_rating %>
-  </div>
+            <%= f.select :voltage_rating,
+                options_for_select(
+                  voltage_ratings.keys.map { |k| [k.to_s.titleize, k] },
+                  selected: switchboard.voltage_rating
+                ),
+                { include_blank: true },
+                class: 'form-control form-control-sm',
+                label_col: "col-sm-4",
+                control_col: "col-sm-3",
+                wrapper: { class: 'mb-1' } %>
 
-  <div>
-    <%= form.label :busbar_fault_duration, style: "display: block" %>
-    <%= form.text_field :busbar_fault_duration %>
-  </div>
+            <%= f.number_field :busbar_rating,
+                    class: 'form-control form-control-sm',
+                    step: '10',
+                    min: 0,
+                    append: 'A',
+                    label_col: "col-sm-4",
+                    control_col: "col-sm-3",
+                    wrapper: { class: 'mb-1' } %>
 
-  <div>
-    <%= form.label :cable_entry, style: "display: block" %>
-    <%= form.text_field :cable_entry %>
-  </div>
+            <%= f.number_field :busbar_fault_rating,
+                    class: 'form-control form-control-sm',
+                    step: '100',
+                    min: 0,
+                    append: 'A',
+                    label_col: "col-sm-4",
+                    control_col: "col-sm-3",
+                    wrapper: { class: 'mb-1' } %>
 
-  <div>
-    <%= form.label :incomer_protection, style: "display: block" %>
-    <%= form.text_area :incomer_protection %>
-  </div>
+            <%= f.number_field :busbar_fault_duration,
+                    class: 'form-control form-control-sm',
+                    step: '.05',
+                    min: 0,
+                    append: 's',
+                    label_col: "col-sm-4",
+                    control_col: "col-sm-3",
+                    wrapper: { class: 'mb-1' } %>
 
-  <div>
-    <%= form.label :metering, style: "display: block" %>
-    <%= form.text_area :metering %>
-  </div>
+            <%= f.text_field :cable_entry,
+                    class: 'form-control form-control-sm',
+                    label_col: "col-sm-4",
+                    control_col: "col-sm-3",
+                    wrapper: { class: 'mb-1' } %>
 
-  <div>
-    <%= form.label :neutral_bar_connections, style: "display: block" %>
-    <%= form.text_area :neutral_bar_connections %>
-  </div>
+            <%= f.text_area :incomer_protection,
+                    class: 'form-control form-control-sm',
+                    label_col: "col-sm-4",
+                    control_col: "col-sm-8",
+                    wrapper: { class: 'mb-1' } %>
 
-  <div>
-    <%= form.label :earth_bar_connections, style: "display: block" %>
-    <%= form.text_area :earth_bar_connections %>
-  </div>
+            <%= f.text_area :metering,
+                    class: 'form-control form-control-sm',
+                    label_col: "col-sm-4",
+                    control_col: "col-sm-8",
+                    wrapper: { class: 'mb-1' } %>
 
-  <div>
-    <%= form.submit %>
+            <%= f.text_area :neutral_bar_connections,
+                    class: 'form-control form-control-sm',
+                    label_col: "col-sm-4",
+                    control_col: "col-sm-8",
+                    wrapper: { class: 'mb-1' } %>
+
+            <%= f.text_area :earth_bar_connections,
+                    class: 'form-control form-control-sm',
+                    label_col: "col-sm-4",
+                    control_col: "col-sm-8",
+                    wrapper: { class: 'mb-1' } %>
+
+            <%= f.number_field :circuits,
+                    class: 'form-control form-control-sm',
+                    label_col: "col-sm-4",
+                    control_col: "col-sm-3",
+                    value: circuits,
+                    wrapper: { class: 'mb-1' } %>
+          </div>
+
+          <!-- Card Footer with Actions -->
+          <div class="card-footer bg-transparent text-end p-2">
+            <%= link_to(switchboard.persisted? ? switchboard_path(@switchboard) : switchboards_path,
+                  class: 'btn btn-warning',
+                  data: { confirm: t('actions.sure'), turbo: false }) do %>
+              <%= t('actions.discard') %>
+              <%== icon('x-square') %>
+            <% end %>
+            <%= f.button :submit, class: 'btn btn-primary' do %>
+              <%= yield(:button_text) || t('actions.save') %>
+              <%== icon('save') %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
   </div>
-<% end %>
+</div>

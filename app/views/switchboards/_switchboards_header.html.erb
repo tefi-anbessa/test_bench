@@ -1,0 +1,11 @@
+<thead>
+  <th scope="col"><%= t('activerecord.attributes.tag.full_tag') %></th>
+  <th scope="col"><%= sort_link(@q, :location) %></th>
+  <th scope="col"><%= sort_link(@q, :ingress_protection) %></th>
+  <th scope="col"><%= sort_link(@q, :voltage_rating) %></th>
+  <th scope="col"><%= sort_link(@q, :busbar_rating) %><br>(A)</th>
+  <th scope="col"><%= sort_link(@q, :busbar_fault_rating) %><br>(A)</th>
+  <th scope="col"><%= sort_link(@q, :busbar_fault_duration) %><br>(s)</th>
+  <th scope="col"><%= t("activerecord.attributes.switchboard.circuits") %></th>
+  <th scope="col" width="150px"><%= t('table.links')%></th>
+</thead>

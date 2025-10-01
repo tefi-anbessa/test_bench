@@ -42,6 +42,7 @@ en:
         service:          "Service"
         service_help:     "Service description (40 characters maximum)"
         stage:            "Stage"
+        stage_help:       "Construction stage or phase (0 to 10)"
         notes:            "Notes"
         notes_help:       "Record useful design information here"
         full_tag:         "Tag"
@@ -113,6 +114,9 @@ en:
       switchboard:
         location:         "Location"
         ingress_protection: "Ingress Protection"
+        ip_1:             "1st digit"
+        ip_2:             "2nd digit"
+        voltage_rating:   "Voltage Rating"
         busbar_rating:    "Busbar Rating"
         busbar_fault_rating:  "Busbar Fault Rating"
         busbar_fault_duration:  "Busbar Fault Duration"

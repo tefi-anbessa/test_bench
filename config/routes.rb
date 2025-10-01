@@ -19,19 +19,22 @@ Rails.application.routes.draw do
       end
     end
     
-    # Tagable models are shallow nested under tags to allow creation of tags by attaching to an existing tag
+
+    # Tagable models have top level new and create routes to allow creation of tagable and tag in a single operation
+    # Tagables have index overridden from shallow, there is no sense in nesting a 1:1 relationship.
+    resources :cables, :motors, :light_ccts, :socket_ccts, only: [:index, :new, :create]
+    resources :switchboards, only: [:index, :new, :create] do
+      resources :circuits, only: [:index, :new, :create]
+    end
+
+    # Then define the nested routes
     resources :tags, shallow: true do
       resources :cables, :motors, :light_ccts, :socket_ccts, except: [:index]
       resources :switchboards, except: [:index] do
         resources :circuits, except: [:index]
       end
     end
-    # Tagable models also have new and create routes to allow creation of tagable and tag in a single operation
-    # Tagables have index overridden from shallow, there is no sense in nesting a 1:1 relationship.
-    resources :cables, :motors, :light_ccts, :socket_ccts, only: [:index, :new, :create]
-    resources :switchboards, only: [:index, :new, :create] do
-      resources :circuits, only: [:index, :new, :create]
-    end
+
     resources :cable_types
     
     # Demands routes

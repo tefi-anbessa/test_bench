@@ -34,6 +34,15 @@
   background-color: HoneyDew;
 }
 
+/* Style for text fields
+*/
+.scrollable-box {
+  height: 200px; /* Set the desired height */
+  overflow-y: auto; /* Enable vertical scrolling */
+  border: 1px solid #ccc; /* Optional: Add a border */
+  padding: 10px; /* Optional: Add some padding */
+}
+
 /* Card header styles */
 .card-header.cursor-pointer {
   cursor: pointer;

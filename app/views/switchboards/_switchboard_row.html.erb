@@ -1,0 +1,40 @@
+<tr scope="row">
+<% if row.tag.nil? %>
+  <td class="table-danger"><%= t("index.no_tag", id: row.id) %></td>
+<% else %>
+  <td><%= link_to row.tag.full_tag, tag_path(row.tag) %></td>
+<% end %>
+  <td><%= row.location %></td>
+  <td><%= row.ingress_protection %></td>
+  <td><%= row.voltage_rating %></td>
+  <td><%= row.busbar_rating %></td>
+  <td><%= row.busbar_fault_rating %></td>
+  <td><%= row.busbar_fault_duration %></td>
+  <td><%= row.circuits.count %></td>
+  <td>
+    <% if policy(row).show? %>
+      <%= link_to switchboard_path(row), class: "btn btn-secondary btn-sm icon-link",
+            aria: { label: t('actions.show') },
+            title: t('actions.show'),
+            display: "inline" do %>
+        <%== icon('eye') %>
+      <% end %>
+    <% end %>
+    <% if policy(row).edit? %>
+      <%= link_to edit_switchboard_path(row), class: "btn btn-warning btn-sm icon-link",
+            aria: { label: t('actions.edit') },
+            title: t('actions.edit'),
+            display: "inline"  do %>
+        <%== icon('pencil') %>
+      <% end %>
+    <% end %>
+    <% if policy(row).destroy? %>
+      <%= link_to switchboard_path(row), method: :delete, class: "btn btn-danger btn-sm icon-link",
+            aria: { label: t('actions.delete') },
+            title: t('actions.delete'),
+            display: "inline"  do %>
+        <%== icon('trash') %>
+      <% end %>
+    <% end %>
+  </td>
+</tr>

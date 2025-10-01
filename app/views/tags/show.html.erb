@@ -1,5 +1,4 @@
-<% content_for :title, "#{t('activerecord.models.' + @tag.model_name.i18n_key.to_s, 
-      default: @tag.model_name.human)} #{@tag.full_tag}" %>
+<% content_for :title, "#{t('activerecord.models.tag') + ' ' + @tag.full_tag}" %>
 <div class="container mt-3">
   <!-- Tag Header Card -->
   <div class="card mb-4">
@@ -39,7 +38,7 @@
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
               <span class="badge bg-primary fs-6">
-                <%= t('activerecord.models.tag') + ' ' + @tag.full_tag %>
+                <%= [t('activerecord.models.tag'), @tag.full_tag].join(': ') %>
               </span>
               <% if @tag.service.present? %>
                 <small class="text-muted ms-2"><%= @tag.service %></small>
@@ -95,143 +94,82 @@
     </div>
 
     <div class="card-body">
-      <!-- Project & Stage Info -->
-      <div class="row mb-3">
-        <div class="col-md-6">
-          <%= render 'components/collapsible',
-                title: "#{t('activerecord.models.project')}: #{@tag.project.label} - #{t('activerecord.attributes.tag.stage')}: #{@tag.stage}",
-                id: 'project-collapse',
-                expanded: false,
-                header_class: 'py-1' do %>
-            <div class="mb-2">
-              <h6 class="mb-1"><%= @tag.project.title %></h6>
-              <% if @tag.project.description.present? %>
-                <p class="small text-muted mb-0"><%= @tag.project.description %></p>
-              <% end %>
-            </div>
-          <% end %>
-        </div>
+      <div class="row justify-content-center">
+        <div class="col-sm-12 col-10 col-md-8 col-lg-6 col-xl-4">
 
-        <!-- Discipline Info -->
-        <div class="col-md-6">
-          <%= render 'components/collapsible',
-                title: "#{t('activerecord.models.discipline')}: #{@tag.discipline.code}",
-                id: 'discipline-collapse',
-                expanded: false,
-                header_class: 'py-1' do %>
-            <div class="mb-2">
-              <p class="mb-1"><%= @tag.discipline.name %></p>
-            </div>
-          <% end %>
-        </div>
-      </div>
+          <!-- Project collapsible card -->
+          <div class="row mb-3">
+            <%= render 'projects/project_card', project: @tag.project %>
+          </div>
+
+          <!-- Discipline Info -->
+                  
+          <div class="row mb-1">
+            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.discipline') %></div>
+            <div class="col-8"><%= [@tag.discipline.code, " - ", @tag.discipline.name].join %></div>
+          </div>
 
       <!-- Tag Details -->
-      <div class="row align-items-start mb-4 g-2">
-        <!-- Prefix -->
-        <div class="col-6 col-md-1">
-          <div class="form-text text-muted small mb-1">
-            <%= Tag.human_attribute_name(:prefix) %>
-          </div>
-          <div class="bg-info-subtle rounded p-1 h-100 d-flex align-items-center small text-truncate shadow-sm"
-               style="height: 1.8rem;">
-            <%= @tag.prefix %>
-          </div>
-        </div>
-
-        <!-- Serial -->
-        <div class="col-6 col-md-1">
-          <div class="form-text text-muted small mb-1">
-            <%= Tag.human_attribute_name(:serial) %>
-          </div>
-          <div class="bg-info-subtle rounded p-1 h-100 d-flex align-items-center small text-truncate shadow-sm"
-               style="height: 1.8rem;">
-            <%= "%04d" % @tag.serial %>
-          </div>
-        </div>
-
-        <!-- Suffix -->
-        <div class="col-6 col-md-1">
-          <div class="form-text text-muted small mb-1">
-            <%= Tag.human_attribute_name(:suffix) %>
-          </div>
-          <div class="bg-info-subtle rounded p-1 h-100 d-flex align-items-center small text-truncate shadow-sm"
-               style="height: 1.8rem;">
-            <%= @tag.suffix.presence %>
-          </div>
-        </div>
-
-        <!-- Service -->
-        <div class="col-6 col-md-4">
-          <div class="form-text text-muted small mb-1">
-            <%= Tag.human_attribute_name(:service) %>
-          </div>
-          <div class="bg-info-subtle rounded p-1 h-100 d-flex align-items-center small text-truncate shadow-sm"
-               style="height: 1.8rem;">
-            <%= @tag.service %>
-          </div>
-        </div>
-
-        <!-- Notes -->
-        <div class="col-12 col-md-5">
-          <div class="form-text text-muted small mb-1">
-            <%= Tag.human_attribute_name(:notes) %>
-          </div>
-          <div class="bg-info-subtle rounded p-2 small overflow-auto shadow-sm"
-               style="height: 5.4rem;">
-            <%= @tag.notes.presence %>
-          </div>
-        </div>
+                  
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.full_tag') %></div>
+        <div class="col-8"><%= @tag.full_tag %></div>
       </div>
 
-      <!-- Row for Prefix Breakdown and Tagable Section -->
-      <div class="row mb-3">
+      <!-- Prefix -->        
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.prefix') %></div>
+        <div class="col-8"><%= @tag.prefix %></div>
+      </div>
 
-        <!-- Prefix Breakdown -->
-        <div class="col-md-6">
-          <%= render 'components/collapsible',
-                title: 'Prefix Breakdown',
-                id: 'prefix-breakdown',
-                expanded: false,
-                header_class: 'py-1' do %>
-            <div class="p-3">
-              <p class="text-muted mb-0">Prefix breakdown details will be displayed here.</p>
-              <!-- Will be populated with prefix character breakdown -->
-            </div>
-          <% end %>
+      <!-- Serial -->
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.serial') %></div>
+        <div class="col-8"><%= @tag.serial %></div>
+      </div>
+      
+      <!-- Suffix -->
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.suffix') %></div>
+        <div class="col-8"><%= @tag.suffix %></div>
+      </div>
+      
+      <!-- Service -->
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.service') %></div>
+        <div class="col-8"><%= @tag.service %></div>
+      </div>
+      
+      <!-- Notes -->
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.notes') %></div>
+        <div class="col-8"><%= @tag.notes %></div>
+      </div>
+
+      <!-- Tagable Section -->
+      <div class="row mb-1">
+        <div class="col-4 text-muted">
+          <%= t('activerecord.attributes.tag.tagable_type') %>
         </div>
-
-        <!-- Tagable Section -->
-        <div class="col-md-6">
-          <div class="row mb-3">
-            <div class="col-12">
-              <div class="d-flex justify-content-end align-items-center">
-                <strong><%= t('activerecord.attributes.tag.tagable_type') %>:</strong>
-                <span class="ms-1">
-                  <% if @tag.tagable_type.blank? %>
-                    <span class="text-muted"><%= 
-                      t('activerecord.errors.models.tag.tagable_type.not_assigned') %></span>
-                  <% elsif @tag.tagable_id.blank? %>
-                    <span class="text-muted"><%= @tag.tagable_type %> (<%= 
-                      t('activerecord.errors.models.tag.tagable_type.not_assigned') %>)</span>
-                  <% else %>
-                    <%= @tag.tagable_type %>
-                  <% end %>
-                </span>
-
-                <% if @tag.tagable_type.present? && @tag.tagable_id.present? %>
-                  <div class="ms-2">
-                    <%= link_to eval("#{@tag.tagable_type.tableize.singularize}_path(#{@tag.tagable_id})"),
-                          class: "btn btn-sm btn-outline-secondary",
-                          title: t('actions.view') do %>
-                      <%== icon('box-arrow-up-right') %>
-                      <span class="d-none d-md-inline"><%= t('actions.view') %></span>
-                    <% end %>
-                  </div>
+        <div class="col-8">
+          <span>
+            <% if @tag.tagable_type.present? %>
+              <span class="text-muted"><%= @tag.tagable_type %></span>
+              <% if @tag.tagable.present? %>
+                <%= link_to eval("#{@tag.tagable_type.tableize.singularize}_path(#{@tag.tagable_id})"),
+                    class: "btn btn-sm btn-outline-secondary mb-2",
+                    title: t('actions.view') do %>
+                  <%== icon('box-arrow-up-right') %>
+                  <span class="d-none d-md-inline"><%= t('show.linked', 
+                  model: @tag.tagable_type.tableize.singularize) %></span>
                 <% end %>
-              </div>
-            </div>
-          </div>
+              <% end %>
+            <% else %>
+              <span class="text-muted">
+                <%= t('activerecord.errors.models.tag.tagable_type.not_assigned') %>
+              </span>
+            <% end %>
+          </span>
         </div>
       </div>
     </div>

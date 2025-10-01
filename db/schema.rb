@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_21_102035) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_30_045113) do
   create_table "cable_types", force: :cascade do |t|
     t.integer "conductor_material"
     t.float "csa"
@@ -134,7 +134,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_21_102035) do
 
   create_table "switchboards", force: :cascade do |t|
     t.string "location"
-    t.string "ingress_protection"
     t.float "busbar_rating"
     t.float "busbar_fault_rating"
     t.float "busbar_fault_duration"
@@ -145,6 +144,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_21_102035) do
     t.text "earth_bar_connections"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "voltage_rating"
+    t.string "ingress_protection"
   end
 
   create_table "tags", force: :cascade do |t|
