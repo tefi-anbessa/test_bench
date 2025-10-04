@@ -33,6 +33,9 @@ Rails.application.routes.draw do
       resources :switchboards, except: [:index] do
         resources :circuits, except: [:index]
       end
+      collection do
+        get :schema_data
+      end
     end
 
     resources :cable_types

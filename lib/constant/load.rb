@@ -10,8 +10,16 @@ module Constant
     end
 
     def call
-      Dir.glob(File.join(path, '*.yml')).reduce({}) do |hash, file_path|
-        hash.merge(YAML.load_file(file_path))
+      Dir.glob(File.join(path, '*.yml')).each_with_object({}) do |file_path, hash|
+        begin
+          loaded_data = YAML.load_file(file_path)
+          hash.merge!(loaded_data)
+        rescue Psych::SyntaxError => e
+          raise "YAML syntax error in #{file_path}: #{e.message}"
+        rescue StandardError => e
+          Rails.logger.error "Failed to load constants from #{file_path}: #{e.message}"
+          next
+        end
       end
     end
 

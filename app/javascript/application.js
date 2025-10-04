@@ -30,6 +30,9 @@ const initializeBootstrapComponents = () => {
   
   // Initialize collapsibles with explicit state
   document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(collapseEl => {
+    // Skip elements that have Stimulus controllers - they handle their own Bootstrap initialization
+    if (collapseEl.hasAttribute('data-controller')) return;
+
     const target = collapseEl.getAttribute('data-bs-target') || collapseEl.getAttribute('href')
     if (target) {
       const targetEl = document.querySelector(target)

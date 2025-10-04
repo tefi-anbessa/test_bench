@@ -13,9 +13,6 @@ class Tag < ApplicationRecord
 
   validates :prefix, format: { with: /\A[a-zA-Z]+\z/, message: "only allows letters" }
   validates :prefix, length: { in: 1..6 }
-  attr_accessor :new_prefix, :string
-  validates :new_prefix, length: { in: 1..6, allow_nil: true }
-  before_validation :set_prefix
 
   validates :serial, presence: true, inclusion: { in: 0..9999 }
   validates :suffix, length: { maximum: 5 }
@@ -86,331 +83,224 @@ class Tag < ApplicationRecord
     full_tag
   end
   
-  private
-  
-  # Find adjacent tag (next or previous) based on the given join condition
-  def adjacent_tag(join_column)
-    sql = <<-SQL
-      WITH ordered_tags AS (
-        SELECT id,
-               discipline_id,
-               loop_id,
-               prefix,
-               COALESCE(suffix, '') as suffix_sort,
-               LAG(id) OVER (ORDER BY discipline_id, loop_id, prefix, COALESCE(suffix, '')) as prev_id,
-               LEAD(id) OVER (ORDER BY discipline_id, loop_id, prefix, COALESCE(suffix, '')) as next_id
-        FROM tags
-        WHERE project_id = :project_id
-      )
-      SELECT t.*
-      FROM tags t
-      JOIN ordered_tags ot ON t.id = ot.#{join_column}
-      WHERE ot.id = :current_id
-    SQL
-    
-    self.class.find_by_sql([sql, { project_id: project_id, current_id: id }]).first
+  # Instance method to get the prefix schema and hash for the tag's discipline
+  def prefix_constants
+    Constants.tag.discipline.send(discipline.code.downcase.to_sym) rescue {}
   end
   
-  # Prevent re-assigning a tagable to a different tag
-  def tagable_not_already_taken
-    return unless tagable_id.present? && tagable_type.present?
-    
-    existing_tag = Tag.where(
-      tagable_id: tagable_id,
-      tagable_type: tagable_type
-    ).where.not(id: id).exists?
-    
-    if existing_tag
-      errors.add(:tagable, 'is already associated with another tag')
+  # Class method to get the prefix schema and hash for the tag's discipline
+  def self.discipline_prefix_constants(discipline)
+    discipline_code = normalize_discipline_code(discipline)
+    Constants.tag.discipline.send(discipline_code) rescue {}
+  end
+
+  # Instance method to parse prefix components for form display
+  def prefix_parts
+    return nil unless prefix.present? && prefix.length >= 2
+    parts = {}
+    chars = prefix.chars
+    discipline_schema = Constants.tag.discipline.send(Tag.normalize_discipline_code(discipline_id)) rescue nil
+    return nil unless discipline_schema && discipline_schema[:prefix_schema] == :isa51
+
+    char = chars.shift()
+
+    # Check measured variables if they exist
+    if discipline_schema[:prefix][:measured_variables]&.keys&.map(&:to_s)&.include?(char)
+      parts[:measured_variable] = char
+    else
+      # No valid measured variable character, not a valid isa prefix...
+      return nil
     end
-  end
 
-  # Prevent changing tagable association if it's already set and valid
-  def validate_tagable_assignment
-    return unless tagable_type_changed? || tagable_id_changed?
-    return if tagable_id_was.blank? || tagable_type_was.blank?
-    
-    # Allow changes if the current association is invalid
-    return if tagable_type_was.constantize.where(id: tagable_id_was).none?
-    
-    errors.add(:base, 'Cannot change tagable association once set') 
-  end
+    char = chars.shift()
 
-  # Ensure tagable exists if both type and id are present
-  def validate_tagable_existence
-    return if tagable_id.blank? || tagable_type.blank?
-    
-    begin
-      tagable_class = tagable_type.constantize
-      return if tagable_class.exists?(tagable_id)
+    # Check modifiers if they exist (optional section)
+    if discipline_schema[:prefix][:modifiers]&.keys&.map(&:to_s)&.include?(char)
+      parts[:modifier] = char
+    else
+      parts[:modifier] = nil
+      chars.unshift(char)
+    end
+
+    char = chars.shift()
+
+    # Check functions - either readout or output functions
+    if discipline_schema[:prefix][:readout_functions]&.keys&.map(&:to_s)&.include?(char)
+      parts[:readout_function] = char
+      parts[:output_function] = nil
+    elsif discipline_schema[:prefix][:output_functions]&.keys&.map(&:to_s)&.include?(char)
+      parts[:readout_function] = nil
+      parts[:output_function] = char
+    else
+      # No function character, not a valid isa prefix...
+      return nil
+    end
+
+    # Check modifier functions if they exist (optional section)
+    mf = chars.join
+    if discipline_schema[:prefix][:modifier_functions]&.keys&.map(&:to_s)&.include?(mf)
+      parts[:modifier_function] = mf
+    else
+      parts[:modifier_function] = nil
+    end
+
+    parts
+  end
+  
+  # private
+  
+    # Find adjacent tag (next or previous) based on the given join condition
+    def adjacent_tag(join_column)
+      sql = <<-SQL
+        WITH ordered_tags AS (
+          SELECT id,
+                discipline_id,
+                loop_id,
+                prefix,
+                COALESCE(suffix, '') as suffix_sort,
+                LAG(id) OVER (ORDER BY discipline_id, loop_id, prefix, COALESCE(suffix, '')) as prev_id,
+                LEAD(id) OVER (ORDER BY discipline_id, loop_id, prefix, COALESCE(suffix, '')) as next_id
+          FROM tags
+          WHERE project_id = :project_id
+        )
+        SELECT t.*
+        FROM tags t
+        JOIN ordered_tags ot ON t.id = ot.#{join_column}
+        WHERE ot.id = :current_id
+      SQL
       
-      errors.add(:tagable, 'must exist')
-    rescue NameError
-      errors.add(:tagable_type, 'is not a valid type')
+      self.class.find_by_sql([sql, { project_id: project_id, current_id: id }]).first
     end
-  end
-
-  def self.ransackable_attributes(auth_object = nil)
-    ["prefix", "serial", "suffix", "service", "full_tag", "stage",
-      "notes", "discipline_id", "created_at", "updated_at", "loop_id"]
-  end
-
-
-  def self.ransackable_associations(auth_object = nil)
-    ["discipline", "project", "tagable"]
-  end
-
-  # Returns tags grouped by their loop identifier
-  # @return [Hash] Tags grouped by loop_id
-  def self.grouped_by_loop
-    all.group_by(&:loop_id)
-  end
-
-  # Returns the parsed tag schema for a given discipline
-  # @param discipline_code [String] The discipline code (e.g., 'J' for Instruments, 'E' for Electrical)
-  # @return [Hash] The parsed tag schema for the discipline
-  def self.tag_schema(discipline_code = 'J')
-    @tag_schemas ||= {}
-    @tag_schemas[discipline_code] ||= parse_discipline_schema(discipline_code)
-  end
-
-  # Parses a tag prefix according to the discipline's schema
-  # @param prefix [String] The tag prefix to parse (e.g., 'TE' for Temperature Element)
-  # @param discipline_code [String] The discipline code (defaults to 'J' for Instruments)
-  # @return [Array<Hash>] An array of hashes with information about each character in the prefix
-  def self.parse_tag(prefix, discipline_code = 'J')
-    schema = tag_schema(discipline_code)
-    return [] unless schema && prefix.present?
-
-    result = []
-    current = schema
     
-    prefix.chars.each_with_index do |char, index|
-      if current[:next_chars] && (next_node = current[:next_chars][char])
-        result << {
-          position: index + 1,
-          character: char,
-          name: next_node[:name],
-          type: next_node[:type],
-          description: next_node[:description] || next_node[:name]
-        }
-        current = next_node
-      else
-        # If we can't find the next character in the schema, add what we can
-        result << {
-          position: index + 1,
-          character: char,
-          name: 'Unknown',
-          type: :unknown,
-          description: 'Unknown character in this position'
-        }
+    # Prevent re-assigning a tagable to a different tag
+    def tagable_not_already_taken
+      return unless tagable_id.present? && tagable_type.present?
+      
+      existing_tag = Tag.where(
+        tagable_id: tagable_id,
+        tagable_type: tagable_type
+      ).where.not(id: id).exists?
+      
+      if existing_tag
+        errors.add(:tagable, 'is already associated with another tag')
       end
     end
-    
-    result
-  end
 
-  # Returns the available options for the next character in a tag prefix
-  # @param current_prefix [String] The current prefix (e.g., 'T' for Temperature)
-  # @param discipline_code [String] The discipline code (defaults to 'J' for Instruments)
-  # @return [Array<Hash>] An array of available options for the next character
-  def self.available_options(current_prefix = '', discipline_code = 'J')
-    schema = tag_schema(discipline_code)
-    return [] unless schema
-
-    current = schema
-    
-    # Navigate to the current position in the schema
-    current_prefix.chars.each do |char|
-      break unless current[:next_chars] && (next_node = current[:next_chars][char])
-      current = next_node
+    # Prevent changing tagable association if it's already set and valid
+    def validate_tagable_assignment
+      return unless tagable_type_changed? || tagable_id_changed?
+      return if tagable_id_was.blank? || tagable_type_was.blank?
+      
+      # Allow changes if the current association is invalid
+      return if tagable_type_was.constantize.where(id: tagable_id_was).none?
+      
+      errors.add(:base, 'Cannot change tagable association once set') 
     end
-    
-    return [] unless current[:next_chars]
-    
-    current[:next_chars].map do |char, node|
+
+    # Ensure tagable exists if both type and id are present
+    def validate_tagable_existence
+      return if tagable_id.blank? || tagable_type.blank?
+      
+      begin
+        tagable_class = tagable_type.constantize
+        return if tagable_class.exists?(tagable_id)
+        
+        errors.add(:tagable, 'must exist')
+      rescue NameError
+        errors.add(:tagable_type, 'is not a valid type')
+      end
+    end
+
+    def self.ransackable_attributes(auth_object = nil)
+      ["prefix", "serial", "suffix", "service", "full_tag", "stage",
+        "notes", "discipline_id", "created_at", "updated_at", "loop_id"]
+    end
+
+    def self.ransackable_associations(auth_object = nil)
+      ["discipline", "project", "tagable"]
+    end
+
+    # Returns tags grouped by their loop identifier
+    # @return [Hash] Tags grouped by loop_id
+    def self.grouped_by_loop
+      all.group_by(&:loop_id)
+    end
+
+    def self.schema_for_form(discipline)
+      return {} unless discipline.present?
+
+      discipline_code = normalize_discipline_code(discipline)
+      discipline_data = Constants.tag.discipline.send(discipline_code&.to_sym) rescue nil
+
+      return {} unless discipline_data
+
+      schema_type = discipline_data[:prefix_schema]
+      prefix_data = discipline_data[:prefix]
+
+      case schema_type
+      when :dim1
+        { prefix_schema: :dim1, prefixes: build_prefixes_array(prefix_data) }
+      when :isa51
+        { prefix_schema: :isa51, **build_isa51_form_data(prefix_data) }
+      else
+        { prefix_schema: :none }
+      end
+    end
+
+    # Normalizes discipline input to a code string
+    def self.normalize_discipline_code(discipline)
+      case discipline
+      when Discipline
+        discipline.code.downcase
+      when Integer
+        Discipline.find(discipline).code.downcase
+      else
+        # Check if it's a string that represents an integer ID
+        if discipline.to_s =~ /^\d+$/
+          begin
+            Discipline.find(discipline.to_i).code.downcase
+          rescue ActiveRecord::RecordNotFound
+            discipline.to_s.downcase
+          end
+        else
+          discipline.to_s.downcase
+        end
+      end
+    end
+
+    # Builds form data for :dim1 schema
+    def self.build_prefixes_array(prefix_data)
+      prefix_data.map do |key, value|
+        [key, value] if key.is_a?(String) && key.length == 1
+      end.compact
+    end
+
+    # Builds form data for :isa51 schema
+    def self.build_isa51_form_data(prefix_data)
       {
-        character: char,
-        name: node[:name],
-        type: node[:type],
-        description: node[:description] || node[:name]
+        measured_variables: prefix_data[:measured_variables]&.map { |k, v| [k, v] } || [],
+        modifiers: prefix_data[:modifiers]&.map { |k, v| [k, v] } || [],
+        functions: build_functions_hash(prefix_data),
+        modifier_functions: prefix_data[:modifier_functions]&.map { |k, v| [k, v] } || []
       }
     end
-  end
 
-  # Parses the schema for a specific discipline
-  def self.parse_discipline_schema(discipline_code)
-    discipline = Constants.tag.discipline[discipline_code]
-    return {} unless discipline&.prefix
+    # Builds nested functions hash for :isa51 schema
+    def self.build_functions_hash(prefix_data)
+      functions = {}
 
-    schema = {
-      name: discipline.name,
-      type: :discipline,
-      next_chars: {}
-    }
+      # Readout functions
+      if prefix_data[:readout_functions]
+        functions['Readout Functions'] = prefix_data[:readout_functions].map { |k, v| [k, v] }
+      end
 
-    # Handle different discipline schema formats
-    if discipline.prefix.respond_to?(:measured_variables)
-      # ISA S5.1 format (Instruments)
-      parse_isa_schema(discipline, schema)
-    else
-      # Simple prefix mapping (e.g., Architecture, Electrical)
-      parse_simple_schema(discipline, schema)
+      # Output functions
+      if prefix_data[:output_functions]
+        functions['Output Functions'] = prefix_data[:output_functions].map { |k, v| [k, v] }
+      end
+
+      functions
     end
-
-    schema
-  end
-
-  # Parses ISA S5.1 schema format
-  def self.parse_isa_schema(discipline, schema)
-    prefix = discipline.prefix
-    
-    # First letter (Measured Variables)
-    if prefix.measured_variables
-      prefix.measured_variables.each do |letter, name|
-        schema[:next_chars][letter] = {
-          name: name,
-          type: :measured_variable,
-          description: "Measured variable: #{name}",
-          next_chars: {}
-        }
-      end
-    end
-
-    # Add second letter options (modifiers, readout functions, output functions)
-    add_isa_second_letter_options(schema, prefix)
-    
-    # Add third letter options (when second letter is a modifier)
-    add_isa_third_letter_options(schema, prefix)
-    
-    # Add modifier functions (can appear after any second letter)
-    add_isa_modifier_functions(schema, prefix)
-  end
-  
-  # Adds second letter options (modifiers, readout functions, output functions)
-  def self.add_isa_second_letter_options(schema, prefix)
-    schema[:next_chars].each_value do |first_letter|
-      # Add modifiers (e.g., D for Differential, F for Ratio)
-      if prefix.modifiers
-        prefix.modifiers.each do |letter, name|
-          first_letter[:next_chars][letter] = {
-            name: name,
-            type: :modifier,
-            description: "Modifier: #{name}",
-            next_chars: {}
-          }
-        end
-      end
-      
-      # Add readout functions (e.g., I for Indication, R for Record)
-      if prefix.readout_functions
-        prefix.readout_functions.each do |letter, name|
-          first_letter[:next_chars][letter] ||= {
-            name: name,
-            type: :readout_function,
-            description: "Readout: #{name}",
-            next_chars: {}
-          }
-        end
-      end
-      
-      # Add output functions (e.g., C for Control, V for Valve)
-      if prefix.output_functions
-        prefix.output_functions.each do |letter, name|
-          first_letter[:next_chars][letter] ||= {
-            name: name,
-            type: :output_function,
-            description: "Output: #{name}",
-            next_chars: {}
-          }
-        end
-      end
-    end
-  end
-  
-  # Adds third letter options (when second letter is a modifier)
-  def self.add_isa_third_letter_options(schema, prefix)
-    schema[:next_chars].each_value do |first_letter|
-      first_letter[:next_chars].each do |second_letter, second_data|
-        next unless second_data[:type] == :modifier
-        
-        # Add readout functions as third letter options
-        if prefix.readout_functions
-          prefix.readout_functions.each do |letter, name|
-            next if %w[B N X].include?(letter) # Skip user's choice and unclassified
-            second_data[:next_chars][letter] = {
-              name: name,
-              type: :readout_function,
-              description: "Readout: #{name}",
-              next_chars: {}
-            }
-          end
-        end
-        
-        # Add output functions as third letter options
-        if prefix.output_functions
-          prefix.output_functions.each do |letter, name|
-            next if %w[B N X].include?(letter) # Skip user's choice and unclassified
-            second_data[:next_chars][letter] ||= {
-              name: name,
-              type: :output_function,
-              description: "Output: #{name}",
-              next_chars: {}
-            }
-          end
-        end
-      end
-    end
-  end
-  
-  # Adds modifier functions (can appear after any second letter)
-  def self.add_isa_modifier_functions(schema, prefix)
-    return unless prefix.modifier_functions
-    
-    schema[:next_chars].each_value do |first_letter|
-      first_letter[:next_chars].each_value do |second_letter|
-        prefix.modifier_functions.each do |letter, name|
-          next if %w[B N X].include?(letter) # Skip user's choice and unclassified
-          
-          # Handle multi-character modifiers (e.g., HH, LL)
-          if letter.length > 1
-            # For multi-char modifiers, add them as a sequence
-            current = second_letter
-            letter.chars.each_with_index do |char, index|
-              current[:next_chars][char] ||= {
-                name: index == 0 ? name : "",
-                type: :modifier_function,
-                description: "Modifier: #{name}",
-                next_chars: {}
-              }
-              current = current[:next_chars][char]
-            end
-          else
-            # Single character modifiers
-            second_letter[:next_chars][letter] ||= {
-              name: name,
-              type: :modifier_function,
-              description: "Modifier: #{name}",
-              next_chars: {}
-            }
-          end
-        end
-      end
-    end
-  end
-
-  # Parses simple prefix mapping format
-  def self.parse_simple_schema(discipline, schema)
-    discipline.prefix.each do |key, value|
-      if key.is_a?(String) && key.length == 1
-        schema[:next_chars][key] = {
-          name: value,
-          type: :prefix,
-          next_chars: {}
-        }
-      end
-    end
-  end
 
     def set_loop_id
       self.loop_id = "#{prefix[0].upcase}#{serial.to_s.rjust(4, '0')}" if prefix.present? && serial.present?
@@ -423,11 +313,5 @@ class Tag < ApplicationRecord
 
       # Add suffix if it's present
       self.full_tag += ".#{suffix}" if suffix.present?
-    end
-
-    def set_prefix
-      if self.new_prefix.present? && self.prefix.empty?
-        self.prefix = self.new_prefix
-      end
     end
 end

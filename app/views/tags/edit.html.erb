@@ -1,3 +1,7 @@
 <% provide(:title, t('.title', tag: @tag.full_tag)) %>
 <% provide(:button_text, t('actions.save')) %>
-<%= render 'form', tag: @tag %>
+<%= render 'form', 
+          tag: @tag,
+          project: @project,
+          projects: @projects,
+          disciplines: @disciplines %>

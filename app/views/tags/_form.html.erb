@@ -1,6 +1,6 @@
 <div class="container mt-3">
   <div class="card">
-    <div class="card-header p-2" data-controller="tag" data-tag-model-name-value="<%= t('activerecord.models.tag') %>">
+    <div class="card-header p-2">
       <!-- Center Tag Info -->
       <div class="col text-center">
         <div class="d-flex flex-column align-items-center">
@@ -25,11 +25,8 @@
       layout: :horizontal,
       label_col: "col-sm-4",
       control_col: "col-sm-8",
-      wrapper_class: 'mb-1',
-      bootstrap: {
-        form: { class: 'mb-0' },
-        label: { class: 'mb-0' }
-      }) do |f| %>
+      wrapper: { class: 'mb-1' },
+      data: { controller: 'tag', 'tag-model-name-value': t('activerecord.models.tag') }) do |f| %>
 
       <div class="card-body p-2">
       <%= render 'shared/error_messages', object: f.object %>
@@ -55,8 +52,8 @@
             <!-- Stage -->
             <div class="row">
               <%= f.number_field :stage,
-              label_col: "col-sm-2",
-              control_col: "col-sm-2",
+              label_col: "col-sm-3",
+              control_col: "col-sm-3",
                     min: 0,
                     max: 10,
                     title: t('activerecord.attributes.tag.stage_help') %>
@@ -66,63 +63,59 @@
             <div class="row">
               <%= f.select :discipline_id,
                     options_for_select(
-                      @disciplines.map { |d|
-                        ["#{t("tag.discipline.#{d.code.downcase}.code", default: d.code)}: #{t("tag.discipline.#{d.code.downcase}.name", default: d.code)}", d.id]
+                      disciplines.map { |d|
+                        ["#{t("discipline.#{d.code.downcase.to_sym}.code", 
+                          default: d.code)}: #{t("discipline.#{d.code.downcase.to_sym}.name", 
+                          default: d.code)}", d.id]
                       },
                       tag.discipline_id
                     ),
-                    { class: 'form-select' } %>
+                    { class: 'form-select' },
+                    { data: { action: 'change->tag#updateFormStructure' } } %>
+            </div>
+
+            <!-- Prefix Fields - Dynamic based on discipline schema -->
+            <%= render 'tag_prefix_fields', tag: tag, f: f %>
+
+            <!-- Serial and Suffix -->
+            <div class="row">
+              <%= f.text_field :serial,
+              label_col: "col-sm-3",
+              control_col: "col-sm-3",
+                    title: t('activerecord.attributes.tag.serial_help'),
+                    pattern: '\d*',
+                    inputmode: 'numeric',
+                    value: tag.serial.present? ? tag.serial.to_s.rjust(4, '0') : '0000',
+                    data: { 
+                      controller: 'numeric-mask',
+                      'numeric-mask-target': 'input',
+                      action: 'change->tag#updatePreview input->tag#updatePreview'
+                    },
+                    id: 'tag_serial' %>
             </div>
 
             <div class="row">
-              <div class="col-md-2">
-                <%= f.text_field :prefix,
-                      layout: :vertical,
-                      title: t('activerecord.attributes.tag.prefix_help'),
-                      data: { action: 'change->tag#updatePreview input->tag#updatePreview' },
-                      id: 'tag_prefix',
-                      required: true %>
-              </div>
-
-              <div class="col-md-2">
-                <%= f.text_field :serial,
-                      layout: :vertical,
-                      title: t('activerecord.attributes.tag.serial_help'),
-                      pattern: '\d*',
-                      inputmode: 'numeric',
-                      value: @tag.serial.present? ? @tag.serial.to_s.rjust(4, '0') : '0000',
-                      data: { 
-                        controller: 'numeric-mask',
-                        'numeric-mask-target': 'input',
-                        action: 'change->tag#updatePreview input->tag#updatePreview'
-                      },
-                      id: 'tag_serial' %>
-              </div>
-
-              <div class="col-md-2">
-                <%= f.text_field :suffix,
-                      layout: :vertical,
-                      title: t('activerecord.attributes.tag.suffix_help'),
-                      data: { action: 'change->tag#updatePreview input->tag#updatePreview' },
-                      id: 'tag_suffix' %>
-              </div>
+              <%= f.text_field :suffix,
+              label_col: "col-sm-3",
+              control_col: "col-sm-3",
+                    title: t('activerecord.attributes.tag.suffix_help'),
+                    data: { action: 'change->tag#updatePreview input->tag#updatePreview' },
+                    id: 'tag_suffix' %>
             </div>
 
             <div class="row">
-              <div class="col-md-12">
-                <%= f.text_field :service,
-                label_col: "col-sm-2",
-                control_col: "col-sm-10",
+              <%= f.text_field :service,
+                label_col: "col-sm-3",
+                control_col: "col-sm-9",
                       title: t('activerecord.attributes.tag.service_help'),
                       required: true %>
-              </div>
             </div>
 
             <!-- Notes -->
             <div class="row">
               <%= f.text_area :notes,
-                      label_col: "col-sm-2",
-                      control_col: "col-sm-10",
+                      label_col: "col-sm-3",
+                      control_col: "col-sm-9",
                       rows: 3,
                       placeholder: t('activerecord.attributes.tag.notes_help') %>
             </div>
@@ -143,7 +136,7 @@
 
       <!-- Card Footer with Actions -->
       <div class="card-footer bg-transparent text-end p-2">
-        <%= link_to(tag.persisted? ? tag_path(@tag) : tags_path,
+        <%= link_to(tag.persisted? ? tag_path(tag) : tags_path,
               class: 'btn btn-warning',
               data: { confirm: t('actions.sure'), turbo: false }) do %>
           <%= t('actions.discard') %>

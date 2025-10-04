@@ -25,6 +25,7 @@ class TagsController < ApplicationController
 
   # POST /tags or /tags.json
   def create
+    combine_prefix_parts
     @tag = authorize Tag.new(tag_params)
 
     respond_to do |format|
@@ -32,6 +33,7 @@ class TagsController < ApplicationController
         format.html { redirect_to @tag, notice: "Tag was successfully created." }
         format.json { render :show, status: :created, location: @tag }
       else
+        setup_disciplines 
         format.html { render :new, status: :unprocessable_entity }
         format.json { render json: @tag.errors, status: :unprocessable_entity }
       end
@@ -47,11 +49,13 @@ class TagsController < ApplicationController
   # PATCH/PUT /tags/1 or /tags/1.json
   def update
     authorize @tag
+    combine_prefix_parts
     respond_to do |format|
       if @tag.update(tag_params)
         format.html { redirect_to @tag, notice: "Tag was successfully updated." }
         format.json { render :show, status: :ok, location: @tag }
       else
+        setup_disciplines 
         format.html { render :edit, status: :unprocessable_entity }
         format.json { render json: @tag.errors, status: :unprocessable_entity }
       end
@@ -69,6 +73,17 @@ class TagsController < ApplicationController
     end
   end
 
+  # GET /tags/schema_data
+  def schema_data
+    discipline_id = params[:discipline_id]
+    return render json: {} unless discipline_id.present?
+    schema_data = Tag.schema_for_form(discipline_id)
+    respond_to do |format|
+      format.json { render json: schema_data }
+      format.any { render json: schema_data }
+    end
+  end
+
   private
 
     # [TODO] fix this to allow admin workflow for any project.
@@ -78,11 +93,37 @@ class TagsController < ApplicationController
       else
         redirect_to select_projects_path
       end
+      @projects = policy_scope(Project)
     end
 
     # Setup disciplines for the form selector
     def setup_disciplines
       @disciplines = Discipline.all.select(:id, :code, :name).to_a
+    end
+
+    def combine_prefix_parts
+      return unless isa51_schema?
+      
+      parts = [
+        params[:tag][:measured_variable],
+        params[:tag][:modifier],
+        params[:tag][:function], 
+        params[:tag][:modifier_function]
+      ].compact
+      
+      params[:tag][:prefix] = parts.join('') if parts.any?
+    end
+
+    def isa51_schema?
+      discipline_id = params[:tag][:discipline_id]
+      return false unless discipline_id.present?
+      
+      discipline_data = Constants.tag.discipline.send(
+        Tag.normalize_discipline_code(discipline_id)
+      ) rescue nil
+      
+      return false unless discipline_data
+      discipline_data[:prefix_schema] == :isa51
     end
 
     def set_tag
@@ -96,11 +137,5 @@ class TagsController < ApplicationController
                                   :tagable_type, :tagable_id)
     end
 
-    def new_params
-      # This has been moved to model callback. Check if a new prefix has been added.
-      if params[:tag][:new_prefix].present? && params[:tag][:prefix].empty?
-        params[:tag][:prefix] = params[:tag][:new_prefix]
-      end
-    end
 
 end

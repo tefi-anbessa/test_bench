@@ -114,7 +114,7 @@ electrical:
     first_digit:
       no_protection: 0
       solid_objects_50mm: 1
-      solid_objects_12mm: 2:
+      solid_objects_12mm: 2
       solid_objects_2_5mm: 3
       solid_objects_1mm: 4
       dust_protected: 5

@@ -1,19 +1,19 @@
 tag:
   discipline:
-    'A':
-      name: 'Administration'
-    'B':
-      name: 'Architecture'
+    a:
+      prefix_schema: :none
+    b:
+      prefix_schema: :dim1
       prefix:
         'B': 'Building'
-    'C':
-      name: 'Civil Engineering'
-    'E':
-      name: 'Electrical Engineering'
+    c:
+      prefix_schema: :none
+    e:
+      prefix_schema: :isa51
       prefix:
         measured_variables:
           'E': 'Electrical (voltage)'
-        functions:
+        output_functions:
           'E': 'Equipment'
           'C': 'Cable'
           'M': 'Motor'
@@ -21,10 +21,10 @@ tag:
           'L': 'Light'
           'X': 'Switchboard'
           'JB': 'Junction Box'
-    'I':
-      name: 'Information Tech'
-    'J':
-      name: 'Instrument Engineering'
+    i:
+      prefix_schema: :none
+    j:
+      prefix_schema: :isa51
       prefix:
         measured_variables:
           'A': 'Analysis'
@@ -109,11 +109,11 @@ tag:
           'U': 'Multifunction'
           'X': 'Unclassified'
 
-    'M':
-      name: 'Mechanical Engineering'
-    'P':
-      name: 'Process Engineering'
-    'S':
-      name: 'Structural Engineering'
-    'U':
-      name: 'Multi-Discipline'
+    m:
+      prefix_schema: :none
+    p:
+      prefix_schema: :none
+    s:
+      prefix_schema: :none
+    u:
+      prefix_schema: :none

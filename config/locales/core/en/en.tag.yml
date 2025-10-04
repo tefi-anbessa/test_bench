@@ -1,20 +1,11 @@
 en:
   tag:
-    discipline:
       a:
-        code: 'A'
-        name: 'Administration'
       b:
-        code: 'B'
-        name: 'Architecture'
         prefix:
           'B': 'Building'
       c:
-        code: 'C'
-        name: 'Civil Engineering'
       e:
-        code: 'E'
-        name: 'Electrical Engineering'
         prefix:
           measured_variables:
             'E': 'Electrical (voltage)'
@@ -25,13 +16,11 @@ en:
             'S': 'Socket'
             'L': 'Light'
             'X': 'Switchboard'
-            'JB': 'Junction Box'
+            'J': 'Junction'
+          modifier_functions:
+            'B': 'Box'
       i:
-        code: 'I'
-        name: 'Information Tech'
       j:
-        code: 'J'
-        name: 'Instrument Engineering'
         prefix:
           measured_variables:
             'A': 'Analysis'
@@ -117,14 +106,6 @@ en:
             'X': 'Unclassified'
 
       m:
-        code: 'M'
-        name: 'Mechanical Engineering'
       p:
-        code: 'P'
-        name: 'Process Engineering'
       s:
-        code: 'S'
-        name: 'Structural Engineering'
       u:
-        code: 'U'
-        name: 'Multi-Discipline'

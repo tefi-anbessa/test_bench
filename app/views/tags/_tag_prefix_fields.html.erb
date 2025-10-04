@@ -1,0 +1,18 @@
+<% if tag.present? && tag.prefix.present? %>
+  <% schema = tag.prefix_constants %>
+  <% parts = tag.prefix_parts || {} %>
+<% elsif params.dig(:tag, :discipline_id).present? %>
+  <% schema = Tag.discipline_prefix_constants(params[:tag][:discipline_id]) %>
+  <% parts = {} %>
+<% else %>
+  <% schema = nil %>
+  <% parts = {} %>
+<% end %>
+
+<div data-tag-prefix-container
+     data-current-prefix="<%= tag.prefix %>"
+     data-prefix-parts="<%= parts.to_json %>"
+     data-discipline-id="<%= tag.discipline_id %>"
+     data-has-schema="<%= schema.present? %>">
+  <!-- JavaScript will replace this content -->
+</div>

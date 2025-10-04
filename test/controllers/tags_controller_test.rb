@@ -162,4 +162,16 @@ class TagsControllerTest < ActionController::TestCase
     end
     assert_redirected_to tags_url
   end
+  
+  test "schema_data returns correct JSON for valid discipline" do
+    sign_in @team_member
+    get :schema_data, params: { discipline_id: @discipline.id }
+
+    assert_response :success
+    assert @response.content_type.include?('application/json')
+
+    schema_data = JSON.parse(@response.body)
+    assert_not_nil schema_data
+    assert schema_data.key?('measured_variables') # :isa51 schema
+  end
 end

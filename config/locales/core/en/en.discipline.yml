@@ -1,0 +1,32 @@
+en:
+  discipline:
+    a:
+      code: 'A'
+      name: 'Administration'
+    b:
+      code: 'B'
+      name: 'Architecture'
+    c:
+      code: 'C'
+      name: 'Civil Engineering'
+    e:
+      code: 'E'
+      name: 'Electrical Engineering'
+    i:
+      code: 'I'
+      name: 'Information Tech'
+    j:
+      code: 'J'
+      name: 'Instrument Engineering'    
+    m:
+      code: 'M'
+      name: 'Mechanical Engineering'
+    p:
+      code: 'P'
+      name: 'Process Engineering'
+    s:
+      code: 'S'
+      name: 'Structural Engineering'
+    u:
+      code: 'U'
+      name: 'Multi-Discipline'
