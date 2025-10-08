@@ -155,6 +155,6 @@ class SwitchboardsControllerTest < ActionController::TestCase
     end
     assert_redirected_to switchboards_path
     expected = I18n.t('flash.actions.destroy.notice', resource_name: Switchboard.model_name.human)
-    assert_equal expected, flash[:notice]
+    assert_equal expected, flash[:success]
   end
 end

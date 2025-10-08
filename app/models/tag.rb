@@ -19,7 +19,6 @@ class Tag < ApplicationRecord
   validates :service, length: { maximum: 40 }
   validates :stage, inclusion: { in: 0..10 }
   validate :validate_tagable_assignment, on: :update
-  validate :validate_tagable_existence
 
   # Allow setting tagable_type without tagable_id to indicate intended type
   # Only validate presence of tagable_id if we're setting a non-nil value
@@ -30,7 +29,7 @@ class Tag < ApplicationRecord
                            allow_blank: true
   
   # Ensure a tagable is only associated with one tag
-  validate :tagable_not_already_taken, if: -> { tagable_id.present? && tagable_type.present? }
+  # validate :tagable_not_already_taken, if: -> { tagable_id.present? && tagable_type.present? }
   
   # Ensure tag is unique within the same project and discipline
   validate :validate_tag_uniqueness
@@ -54,7 +53,7 @@ class Tag < ApplicationRecord
     existing = existing.where.not(id: id) if persisted?
     
     if existing.exists?
-      errors.add(:prefix, I18n.t('activerecord.errors.models.tag.full_tag'))
+      errors.add(:base, I18n.t('activerecord.errors.models.tag.unique', tag: label))
     end
   end
 
@@ -103,7 +102,6 @@ class Tag < ApplicationRecord
     return nil unless discipline_schema && discipline_schema[:prefix_schema] == :isa51
 
     char = chars.shift()
-
     # Check measured variables if they exist
     if discipline_schema[:prefix][:measured_variables]&.keys&.map(&:to_s)&.include?(char)
       parts[:measured_variable] = char
@@ -113,7 +111,6 @@ class Tag < ApplicationRecord
     end
 
     char = chars.shift()
-
     # Check modifiers if they exist (optional section)
     if discipline_schema[:prefix][:modifiers]&.keys&.map(&:to_s)&.include?(char)
       parts[:modifier] = char
@@ -123,7 +120,6 @@ class Tag < ApplicationRecord
     end
 
     char = chars.shift()
-
     # Check functions - either readout or output functions
     if discipline_schema[:prefix][:readout_functions]&.keys&.map(&:to_s)&.include?(char)
       parts[:readout_function] = char
@@ -195,20 +191,6 @@ class Tag < ApplicationRecord
       return if tagable_type_was.constantize.where(id: tagable_id_was).none?
       
       errors.add(:base, 'Cannot change tagable association once set') 
-    end
-
-    # Ensure tagable exists if both type and id are present
-    def validate_tagable_existence
-      return if tagable_id.blank? || tagable_type.blank?
-      
-      begin
-        tagable_class = tagable_type.constantize
-        return if tagable_class.exists?(tagable_id)
-        
-        errors.add(:tagable, 'must exist')
-      rescue NameError
-        errors.add(:tagable_type, 'is not a valid type')
-      end
     end
 
     def self.ransackable_attributes(auth_object = nil)

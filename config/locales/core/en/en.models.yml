@@ -35,6 +35,13 @@ en:
       tag:
         prefix:           "Prefix"
         prefix_help:      "Prefix should preferebly be selected from existing list"
+        prefix_parts:
+          measured_variable: "Measured Variable"
+          modifier: "Modifier"
+          function: "Function"
+          readout_function: "Readout Function"
+          output_function: "Output Function"
+          modifier_function: "Modifier Function"
         serial:           "Loop"
         serial_help:      "Loop should be 4 digits"
         suffix:           "Suffix"
@@ -158,7 +165,7 @@ en:
               blank: "Role must be selected"
               invalid: "%{name} is not a valid role for %{resource}"
         tag:
-          full_tag: "Full tag must be unique within project and discipline"
+          unique: "Tag %{tag} already exists"
           tagable_type:
             not_assigned: "Not assigned"
 

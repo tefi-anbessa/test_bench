@@ -9,6 +9,12 @@ export default class extends Controller {
                     this.element.getAttribute('href')
     this.collapseElement = targetId ? document.querySelector(targetId) : null
     
+    if (this.collapseElement) {
+      // Listen for Bootstrap collapse events to update icon when state actually changes
+      this.collapseElement.addEventListener('shown.bs.collapse', this.updateIcon.bind(this))
+      this.collapseElement.addEventListener('hidden.bs.collapse', this.updateIcon.bind(this))
+    }
+    
     // Add click handler
     this.element.addEventListener('click', this.toggle.bind(this))
     
@@ -17,6 +23,10 @@ export default class extends Controller {
   }
 
   disconnect() {
+    if (this.collapseElement) {
+      this.collapseElement.removeEventListener('shown.bs.collapse', this.updateIcon.bind(this))
+      this.collapseElement.removeEventListener('hidden.bs.collapse', this.updateIcon.bind(this))
+    }
     this.element.removeEventListener('click', this.toggle)
   }
 

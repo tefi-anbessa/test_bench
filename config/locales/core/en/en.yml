@@ -23,6 +23,7 @@ en:
     previous:     "Prev"
     grant:        "Grant"
     revoke:       "Revoke"
+    link:         "Link to new %{resource}"
 
   show:
     orphan:       "No associated parent %{model}"
@@ -69,6 +70,7 @@ en:
     tags:
       tagable_already_assigned: "Tag %{tag} already has a %{resource_name} assigned"
       tagable_wrong_type: "Tag %{tag} is not a %{resource_name}"
+      tag_discipline: "Tag discipline code %{discipline} is not valid for %{resource}"
     tagables:
       assigned_to: "Tag %{tag} has been assigned to %{resource_name} %{id}"
       created_and_assigned: "%{resource_name} %{id} has been created and assigned to tag %{tag}"
@@ -82,6 +84,8 @@ en:
   # Pundit authorization messages
   pundit:
     unauthorized: "You are not authorized to perform this action."
+    circuits_destroy: "You are not authorized to destroy circuits."
+    create_tag: "You are not authorized to create tags."
 
   pagination:
     per_page: "Items per page"

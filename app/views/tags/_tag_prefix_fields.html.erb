@@ -1,8 +1,8 @@
 <% if tag.present? && tag.prefix.present? %>
   <% schema = tag.prefix_constants %>
   <% parts = tag.prefix_parts || {} %>
-<% elsif params.dig(:tag, :discipline_id).present? %>
-  <% schema = Tag.discipline_prefix_constants(params[:tag][:discipline_id]) %>
+<% elsif tag.present? && tag.discipline_id.present? %>
+  <% schema = Tag.discipline_prefix_constants(tag.discipline_id) %>
   <% parts = {} %>
 <% else %>
   <% schema = nil %>
@@ -10,9 +10,19 @@
 <% end %>
 
 <div data-tag-prefix-container
-     data-current-prefix="<%= tag.prefix %>"
+     data-form-prefix="<%= f.object_name %>"
+     data-current-prefix="<%= tag&.prefix %>"
      data-prefix-parts="<%= parts.to_json %>"
-     data-discipline-id="<%= tag.discipline_id %>"
-     data-has-schema="<%= schema.present? %>">
+     data-discipline-id="<%= tag&.discipline_id %>"
+     data-has-schema="<%= schema.present? %>"
+     data-tag-target="prefixContainer"
+     data-translations="<%= {
+       prefix: t('activerecord.attributes.tag.prefix'),
+       measured_variable: t('activerecord.attributes.tag.prefix_parts.measured_variable'),
+       modifier: t('activerecord.attributes.tag.prefix_parts.modifier'),
+       function: t('activerecord.attributes.tag.prefix_parts.function'),
+       modifier_function: t('activerecord.attributes.tag.prefix_parts.modifier_function'),
+       select_option: t('form.select_option')
+     }.to_json %>">
   <!-- JavaScript will replace this content -->
 </div>

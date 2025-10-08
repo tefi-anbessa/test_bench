@@ -125,7 +125,7 @@
       <!-- Serial -->
       <div class="row mb-1">
         <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.serial') %></div>
-        <div class="col-8"><%= @tag.serial %></div>
+        <div class="col-8"><%= @tag.serial.to_s.rjust(4, '0') %></div>
       </div>
       
       <!-- Suffix -->
@@ -162,6 +162,18 @@
                   <%== icon('box-arrow-up-right') %>
                   <span class="d-none d-md-inline"><%= t('show.linked', 
                   model: @tag.tagable_type.tableize.singularize) %></span>
+                <% end %>
+              <% else %>
+              <% if policy(@tag.tagable_type.constantize).create? %>
+                <% resource = @tag.tagable_type.tableize.singularize %>
+                  <%= link_to eval("new_tag_#{resource}_path(#{@tag.id})"),
+                      class: "btn btn-sm btn-outline-primary mb-2",
+                      title: t('actions.link', resource: resource) do %>
+                    <%== icon('link') %>
+                    <span class="d-none d-md-inline">
+                      <%= t('actions.link', resource: resource) %>
+                    </span>
+                  <% end %>
                 <% end %>
               <% end %>
             <% else %>

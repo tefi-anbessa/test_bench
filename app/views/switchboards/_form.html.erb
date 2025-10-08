@@ -23,22 +23,23 @@
           label_col: "col-sm-4", 
           control_col: "col-sm-8",
           wrapper_class: 'mb-1',
-          bootstrap: { 
-            form: { class: 'mb-0' },
-            label: { class: 'mb-0' }
-          }) do |f| %>
+          ) do |f| %>
       
       <div class="card-body p-2">
         <%= render 'shared/error_messages', object: f.object %>
 
         <div class="row justify-content-center">
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-            <!-- Tag -->
-            <% if switchboard.tag&.persisted? %>
-              <%= render 'tags/tag_card', tag: switchboard.tag %>
-            <% else %>
-            # TODO: Add tag form
+        
+          <!-- Tag -->
+          <% if tag.persisted? %>
+            <%= render 'tags/tag_card', tag: tag %>
+            <%= hidden_field_tag :tag_id, tag.id %>
+          <% else %>
+            <%= f.fields_for tag do |tag_f| %>
+              <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
             <% end %>
+          <% end %>
 
             <!-- Switchboard Details -->
             <div class="row">
@@ -57,24 +58,24 @@
                 </div>
                 <div class="col-8">
                   <div class="row">
-                    <%= f.select :ip_1,
-                        ip_1.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] },
-                        { selected: switchboard.ingress_protection&.first },
-                        { 
-                          class: 'form-select mb-0',
-                          label_col: "col-sm-4",
-                          control_col: "col-sm-3",
-                          data: { 
-                            action: 'change->ip-rating#update',
-                            'ip-rating-target': 'firstDigit' 
-                          } 
-                        } %>
+                  <%= select_tag :ip_1,
+                    options_for_select(ip_1.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] }, 
+                      switchboard.ingress_protection&.first),
+                    {
+                      class: 'form-select mb-0',
+                      label_col: "col-sm-4",
+                      control_col: "col-sm-3",
+                      data: { 
+                        action: 'change->ip-rating#update',
+                        'ip-rating-target': 'firstDigit' 
+                      } 
+                    } %>
                   </div>
                   <div class="row">
-                    <%= f.select :ip_2,
-                        ip_2.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] },
-                        { selected: switchboard.ingress_protection&.last },
-                        { 
+                    <%= select_tag :ip_2,
+                      options_for_select(ip_2.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] }, 
+                        switchboard.ingress_protection&.last),
+                        {
                           class: 'form-select mb-0',
                           label_col: "col-sm-2",
                           control_col: "col-sm-10",
@@ -101,7 +102,7 @@
 
             <%= f.number_field :busbar_rating,
                     class: 'form-control form-control-sm',
-                    step: '10',
+                    step: '1',
                     min: 0,
                     append: 'A',
                     label_col: "col-sm-4",
@@ -156,13 +157,16 @@
                     control_col: "col-sm-8",
                     wrapper: { class: 'mb-1' } %>
 
-            <%= f.number_field :circuits,
-                    class: 'form-control form-control-sm',
-                    label_col: "col-sm-4",
-                    control_col: "col-sm-3",
-                    value: circuits,
-                    wrapper: { class: 'mb-1' } %>
-          </div>
+            <div class="row mb-1">
+              <label class="col-form-label col-sm-4" for="circuits">
+                <%= t('activerecord.models.circuit').pluralize %>
+              </label>
+              <div class="col-sm-8">
+                <%= number_field_tag :circuits,
+                        class: 'form-control form-control-sm',
+                        value: circuits %>
+              </div>
+            </div>
 
           <!-- Card Footer with Actions -->
           <div class="card-footer bg-transparent text-end p-2">
@@ -172,8 +176,7 @@
               <%= t('actions.discard') %>
               <%== icon('x-square') %>
             <% end %>
-            <%= f.button :submit, class: 'btn btn-primary' do %>
-              <%= yield(:button_text) || t('actions.save') %>
+            <%= f.submit((yield(:button_text) || t('actions.save')), class: 'btn btn-primary') do %>
               <%== icon('save') %>
             <% end %>
           </div>

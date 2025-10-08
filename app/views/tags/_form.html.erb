@@ -10,7 +10,7 @@
               <% if tag.persisted? %>
                 <%= [t('activerecord.models.tag'), tag.full_tag].join(': ') %>
               <% else %>
-                <%= t('activerecord.attributes.tag.full_tag_preview') %>
+                <%= t('activerecord.models.tag') %>
               <% end %>
             </span>
             <% if tag.persisted? && tag.service.present? %>
@@ -21,7 +21,7 @@
       </div>
     </div>
 
-    <%= bootstrap_form_with(model: @tag,
+    <%= bootstrap_form_with(model: tag,
       layout: :horizontal,
       label_col: "col-sm-4",
       control_col: "col-sm-8",
@@ -42,7 +42,10 @@
                       project: @current_project %>
               <% else %>
                 <%= f.select :project_id,
-                      Project.all.collect { |p| [ "#{p.code}: #{p.title}", p.id ] },
+                      options_for_select(
+                        projects.map { |p| ["#{p.code}: #{p.title}", p.id] },
+                        tag.project_id
+                      ),
                       { label: t('activerecord.models.project') },
                       { class: 'form-select' },
                       { required: true } %>
@@ -75,7 +78,7 @@
             </div>
 
             <!-- Prefix Fields - Dynamic based on discipline schema -->
-            <%= render 'tag_prefix_fields', tag: tag, f: f %>
+            <%= render 'tags/tag_prefix_fields', tag: tag, f: f %>
 
             <!-- Serial and Suffix -->
             <div class="row">
@@ -121,7 +124,7 @@
             </div>
 
             <!-- Hidden field for full tag preview -->
-            <%= f.hidden_field :full_tag, id: 'tag_full_tag_preview' %>
+            <%= hidden_field_tag :full_tag, id: 'tag_full_tag_preview' %>
 
             <!-- Tagable Type -->
             <div class="row">
@@ -142,8 +145,7 @@
           <%= t('actions.discard') %>
           <%== icon('x-square') %>
         <% end %>
-        <%= f.button :submit, class: 'btn btn-primary' do %>
-          <%= yield(:button_text) || t('actions.save') %>
+        <%= f.submit((yield(:button_text)), class: 'btn btn-primary') do %>
           <%== icon('save') %>
         <% end %>
       </div>

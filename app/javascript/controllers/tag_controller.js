@@ -1,12 +1,14 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Simple debounce helper
+// Simple debounce helper - compatible with older JavaScript
 function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func.apply(this, args);
+  var timeout;
+  return function() {
+    var context = this;
+    var args = arguments;
+    var later = function() {
+      timeout = null;
+      func.apply(context, args);
     };
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
@@ -14,7 +16,7 @@ function debounce(func, wait) {
 }
 
 export default class extends Controller {
-  static targets = ["preview", "discipline", "prefixContainer"]
+  static targets = ["preview", "discipline", "prefixContainer", "prefixField"]
   static values = {
     defaultText: { type: String, default: 'Tag' },
     modelName: { type: String, default: 'Tag' }
@@ -30,7 +32,7 @@ export default class extends Controller {
     this.setupEventListeners();
 
     // Initial setup - check if discipline is already selected and update form structure
-    const initialDiscipline = this.element.querySelector('[name="tag[discipline_id]"]')?.value ||
+    var initialDiscipline = this.element.querySelector('[name="tag[discipline_id]"]')?.value ||
                             this.element.querySelector('[name*="[discipline_id]"]')?.value;
     if (initialDiscipline) {
       console.log('Initial discipline found:', initialDiscipline);
@@ -59,8 +61,54 @@ export default class extends Controller {
     this.element.removeEventListener('change', this.boundUpdateHandler);
   }
 
-  handleFormUpdate(event) {
-    const target = event.target;
+  updateFormStructure() {
+    // This method fetches and renders the appropriate form fields based on the selected discipline
+    var disciplineSelect = this.element.querySelector('[name="tag[discipline_id]"]') ||
+                          this.element.querySelector('[name*="[discipline_id]"]') ||
+                          this.element.querySelector('select[name*="discipline"]');
+    if (!disciplineSelect || !disciplineSelect.value) return;
+
+    var disciplineId = disciplineSelect.value;
+    
+    // Fetch schema data for this discipline
+    fetch('/tags/schema_data?discipline_id=' + disciplineId, {
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+      },
+      credentials: 'same-origin'
+    })
+    .then(function(response) {
+      if (response.ok) {
+        return response.json();
+      }
+      throw new Error('Network response was not ok');
+    })
+    .then(function(schemaData) {
+      this.renderFormFields(schemaData);
+    }.bind(this))
+    .catch(function(error) {
+      console.error('Error fetching schema data:', error);
+    });
+  }
+
+  async handleFormUpdate(event) {
+    var target = event.target;
+    var prefixContainer = this.element.querySelector('[data-tag-prefix-container]');
+    if (!prefixContainer) return;
+
+    // Get the form prefix from the container
+    var formPrefix = prefixContainer.dataset.formPrefix || 'tag';
+    
+    // Format the form prefix for attribute matching
+    if (formPrefix.endsWith(']')) {
+      // Keep as is
+    } else if (formPrefix.includes('_attributes]')) {
+      formPrefix = formPrefix.replace('_attributes]', ']');
+    } else {
+      formPrefix = 'tag';
+    }
 
     // Handle discipline changes
     if (target.matches('[name*="[discipline_id]"]')) {
@@ -68,172 +116,248 @@ export default class extends Controller {
     }
 
     // Handle prefix field updates (any of the new dynamic fields)
-    if (target.matches('[name*="[prefix]"], [name*="[serial]"], [name*="[suffix]"], [name*="[measured_variable]"], [name*="[modifier]"], [name*="[function]"], [name*="[modifier_function]"]')) {
+    var prefixSelectors = [
+      '[name$="' + formPrefix + '[prefix]"]',
+      '[name$="' + formPrefix + '[serial]"]',
+      '[name$="' + formPrefix + '[suffix]"]',
+      '[name="measured_variable"]',
+      '[name="modifier"]',
+      '[name="function"]',
+      '[name="modifier_function"]',
+      '[name*="' + formPrefix + '[prefix_attributes][prefix]"]',
+      '[name*="' + formPrefix + '[prefix_attributes][serial]"]',
+      '[name*="' + formPrefix + '[prefix_attributes][suffix]"]',
+      '[name*="' + formPrefix + '[tag_attributes][prefix]"]',
+      '[name*="' + formPrefix + '[tag_attributes][serial]"]',
+      '[name*="' + formPrefix + '[tag_attributes][suffix]"]'
+    ];
+
+    if (target.matches(prefixSelectors.join(', '))) {
       this.debouncedUpdatePreview();
     }
-  }
-
-  async updateFormStructure() {
-    // Try multiple selectors to find the discipline field
-    const disciplineSelect = this.element.querySelector('[name="tag[discipline_id]"]') ||
-                           this.element.querySelector('[name*="[discipline_id]"]') ||
-                           this.element.querySelector('select[name*="discipline"]');
-    if (!disciplineSelect) return;
-
-    const disciplineId = disciplineSelect.value;
-    if (!disciplineId) return;
-
-    try {
-      // Fetch schema data for this discipline
-      const response = await fetch(`/tags/schema_data?discipline_id=${disciplineId}`, {
-        headers: {
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-        },
-        credentials: 'same-origin'
-      });
-
-      if (response.ok) {
-        const schemaData = await response.json();
-        this.renderFormFields(schemaData);
-      }
-    } catch (error) {
-      console.error('Error fetching schema data:', error);
+    
+    // Only proceed with AJAX call if this is a discipline change
+    if (!target.matches('[name*="[discipline_id]"]')) {
+      return;
     }
   }
+
   renderFormFields(schemaData) {
     // Find the container for prefix fields within the form
-    const prefixContainer = this.element.querySelector('[data-tag-prefix-container]');
+    var prefixContainer = this.element.querySelector('[data-tag-prefix-container]');
     if (!prefixContainer) return;
 
     // Get current values from data attributes
-    const currentPrefix = prefixContainer.dataset.currentPrefix || '';
-    const prefixParts = JSON.parse(prefixContainer.dataset.prefixParts || '{}');
-    const disciplineId = prefixContainer.dataset.disciplineId || '';
-    const hasSchema = prefixContainer.dataset.hasSchema === 'true';
+    var currentPrefix = prefixContainer.dataset.currentPrefix || '';
+    var prefixParts = JSON.parse(prefixContainer.dataset.prefixParts || '{}');
+    var disciplineId = prefixContainer.dataset.disciplineId || '';
+    var hasSchema = prefixContainer.dataset.hasSchema === 'true';
+    var formPrefix = prefixContainer.dataset.formPrefix || 'tag';
+    
+    // Ensure form prefix is properly formatted for nested attributes
+    if (formPrefix.endsWith(']')) {
+      // If it's already in the format 'parent[child]', use it as is
+    } else if (formPrefix.includes('_attributes]')) {
+      // If it's in the format 'parent[child_attributes]', convert to 'parent[child]'
+      formPrefix = formPrefix.replace('_attributes]', ']');
+    } else {
+      // Default to 'tag' if format is unexpected
+      formPrefix = 'tag';
+    }
 
-    let fieldsHtml = '';
+    // Get translations from data attributes
+    var translations = JSON.parse(prefixContainer.dataset.translations || '{}');
+
+    var fieldsHtml = '';
+    console.log('Schema data received:', schemaData);
+console.log('Functions data:', schemaData.functions);
+console.log('Modifier functions data:', schemaData.modifier_functions);
 
     if (schemaData.prefix_schema === 'dim1' || schemaData.prefixes) {
       // :dim1 schema - simple prefix selection
-      fieldsHtml = `
-        <div class="form-group row mb-1">
-          <label class="col-form-label col-sm-4" for="tag_prefix">Prefix</label>
-          <div class="col-sm-8">
-            <select name="tag[prefix]" class="form-select" id="tag_prefix" data-action="change->tag#updatePreview">
-              <option value="">Select Prefix</option>
-              ${(schemaData.prefixes || []).map(([value, label]) =>
-                `<option value="${value}" ${value === currentPrefix ? 'selected' : ''}>${value}: ${label}</option>`
-              ).join('')}
-            </select>
-          </div>
-        </div>
-      `;
-    } else if (schemaData.prefix_schema === 'isa51' || schemaData.measured_variables) {
+      fieldsHtml = '<div class="form-group row mb-3">' +
+        '<label class="col-form-label col-sm-4" for="' + formPrefix + '_prefix">' + translations.prefix + '</label>' +
+        '<div class="col-sm-8">' +
+        '<select name="' + formPrefix + '[prefix]" class="form-select" id="' + formPrefix + '_prefix" data-action="change->tag#updatePreview">' +
+        '<option value="">' + translations.select_option + '</option>';
+      
+      if (schemaData.prefixes) {
+        for (var i = 0; i < schemaData.prefixes.length; i++) {
+          var option = schemaData.prefixes[i];
+          var selected = option[0] === currentPrefix ? 'selected' : '';
+          fieldsHtml += '<option value="' + option[0] + '" ' + selected + '>' + option[0] + ': ' + option[1] + '</option>';
+        }
+      }
+      fieldsHtml += '</select></div></div>';
+
+    } else if (schemaData.prefix_schema === 'isa51') {
       // :isa51 schema - structured prefix fields
-      fieldsHtml = `
-        <div class="form-group row mb-1">
-          <label class="col-form-label col-sm-4" for="tag_measured_variable">Measured Variable</label>
-          <div class="col-sm-8">
-            <select name="tag[measured_variable]" class="form-select" id="tag_measured_variable" data-action="change->tag#updatePreview">
-              <option value="">Select Variable</option>
-              ${(schemaData.measured_variables || []).map(([value, label]) =>
-                `<option value="${value}" ${value === prefixParts.measured_variable ? 'selected' : ''}>${value}: ${label}</option>`
-              ).join('')}
-            </select>
-          </div>
-        </div>
+      fieldsHtml = '<div class="form-group row mb-3">' +
+        '<label class="col-form-label col-sm-4" for="_measured_variable">' + translations.measured_variable + '</label>' +
+        '<div class="col-sm-8">' +
+        '<select name="measured_variable" class="form-select" id="_measured_variable" data-action="change->tag#updatePreview">'
+        '<option value="">' + translations.select_option + '</option>';
+      
+      if (schemaData.measured_variables) {
+        for (var i = 0; i < schemaData.measured_variables.length; i++) {
+          var option = schemaData.measured_variables[i];
+          var selected = option[0] === prefixParts.measured_variable ? 'selected' : '';
+          fieldsHtml += '<option value="' + option[0] + '" ' + selected + '>' + option[0] + ': ' + option[1] + '</option>';
+        }
+      }
+      fieldsHtml += '</select></div></div>';
+      
+      if (schemaData.modifiers) {
+        // Modifier field
+        fieldsHtml += '<div class="form-group row mb-3">' +
+          '<label class="col-form-label col-sm-4" for="_modifier">' + 
+          translations.modifier + '</label>';
+        fieldsHtml += '<div class="col-sm-8">' +
+          '<select name="modifier" class="form-select" id="_modifier" data-action="change->tag#updatePreview">' +
+          '<option value="">' + translations.select_option + '</option>';
 
-        <div class="form-group row mb-1">
-          <label class="col-form-label col-sm-4" for="tag_modifier">Modifier</label>
-          <div class="col-sm-8">
-            <select name="tag[modifier]" class="form-select" id="tag_modifier" data-action="change->tag#updatePreview">
-              <option value="">Select Modifier</option>
-              ${(schemaData.modifiers || []).map(([value, label]) =>
-                `<option value="${value}" ${value === prefixParts.modifier ? 'selected' : ''}>${value}: ${label}</option>`
-              ).join('')}
-            </select>
-          </div>
-        </div>
+        for (var i = 0; i < schemaData.modifiers.length; i++) {
+          var option = schemaData.modifiers[i];
+          var selected = (option[0] === prefixParts.modifier) ? 'selected' : '';
+          fieldsHtml += '<option value="' + option[0] + '" ' + selected + '>' + 
+            option[0] + ': ' + option[1] + '</option>';
+        }
+      }
+      fieldsHtml += '</select></div></div>';
 
-        <div class="form-group row mb-1">
-          <label class="col-form-label col-sm-4" for="tag_function">Function</label>
-          <div class="col-sm-8">
-            <select name="tag[function]" class="form-select" id="tag_function" data-action="change->tag#updatePreview">
-              <option value="">Select Function</option>
-              ${this.buildGroupedOptions(schemaData.functions || {}, prefixParts)}
-            </select>
-          </div>
-        </div>
+      // Function field
+      fieldsHtml += '<div class="form-group row mb-3">' +
+        '<label class="col-form-label col-sm-4" for="' + '_function">' + 
+        translations.function + '</label>';
+      fieldsHtml += '<div class="col-sm-8">' +
+        '<select name="function" class="form-select" id="_function" data-action="change->tag#updatePreview">' +
+        '<option value="">' + translations.select_option + '</option>';
+    
+      if (schemaData.functions) {
+        var functionsHtml = this.buildGroupedOptions(schemaData.functions, prefixParts);
+        fieldsHtml += functionsHtml;
+      }
+      fieldsHtml += '</select></div></div>';
 
-        <div class="form-group row mb-1">
-          <label class="col-form-label col-sm-4" for="tag_modifier_function">Modifier Function</label>
-          <div class="col-sm-8">
-            <select name="tag[modifier_function]" class="form-select" id="tag_modifier_function" data-action="change->tag#updatePreview">
-              <option value="">Select Modifier Function</option>
-              ${(schemaData.modifier_functions || []).map(([value, label]) =>
-                `<option value="${value}" ${value === prefixParts.modifier_function ? 'selected' : ''}>${value}: ${label}</option>`
-              ).join('')}
-            </select>
-          </div>
-        </div>
-      `;
+      // Modifier function field
+      fieldsHtml += '<div class="form-group row mb-3">' +
+        '<label class="col-form-label col-sm-4" for="_modifier_function">' + 
+        translations.modifier_function + '</label>';
+
+      fieldsHtml += '<div class="col-sm-8">' + 
+        '<select name="modifier_function" class="form-select" id="_modifier_function" data-action="change->tag#updatePreview">' +
+        '<option value="">' + translations.select_option + '</option>';
+      
+      if (schemaData.modifier_functions) {
+        for (var i = 0; i < schemaData.modifier_functions.length; i++) {
+          var option = schemaData.modifier_functions[i];
+          var selected = option[0] === prefixParts.modifier_function ? 'selected' : '';
+          fieldsHtml += '<option value="' + option[0] + '" ' + selected + '>' + 
+            option[0] + ': ' + option[1] + '</option>';
+        }
+      }
+      fieldsHtml += '</select></div></div>';
+      
+    // Add read-only prefix field for ISA51 schema
+      fieldsHtml += '<div class="form-group row mb-3">' +
+        '<label class="col-form-label col-sm-3">' + translations.prefix + '</label>';
+      fieldsHtml += '<div class="col-sm-3">' +
+        '<input type="text" name="' + formPrefix + '[prefix]" class="form-control-plaintext" readonly ' +
+        'value="' + currentPrefix + '" ' +
+        'data-tag-target="prefixField">' +
+        '</div></div>';
+
+
     } else {
       // :none schema - simple text field
-      fieldsHtml = `
-        <div class="form-group row mb-1">
-          <label class="col-form-label col-sm-4" for="tag_prefix">Prefix</label>
-          <div class="col-sm-8">
-            <input type="text"
-                   name="tag[prefix]"
-                   class="form-control"
-                   id="tag_prefix"
-                   value="${currentPrefix}"
-                   placeholder="Enter prefix"
-                   data-action="change->tag#updatePreview input->tag#updatePreview">
-          </div>
-        </div>
-      `;
+      fieldsHtml = '<div class="form-group row mb-3">' +
+        '<label class="col-form-label col-sm-4" for="' + formPrefix + '_prefix">' + translations.prefix + '</label>' +
+        '<div class="col-sm-8">' +
+        '<input type="text" name="' + formPrefix + '[prefix]" class="form-control" id="' + formPrefix + '_prefix" ' +
+        'value="' + currentPrefix + '" placeholder="' + translations.prefix + '" ' +
+        'data-action="change->tag#updatePreview input->tag#updatePreview">' +
+        '</div></div>';
     }
 
     prefixContainer.innerHTML = fieldsHtml;
   }
 
-  buildGroupedOptions(functions, prefixParts = {}) {
-    // Check if this option should be selected (either readout_function or output_function)
-    const selectedValue = prefixParts.readout_function || prefixParts.output_function || '';
-    return Object.entries(functions).map(([group, options]) =>
-      `<optgroup label="${group}">${(options || []).map(([value, label]) =>
-        `<option value="${value}" ${value === selectedValue ? 'selected' : ''}>${value}: ${label}</option>`
-      ).join('')}</optgroup>`
-    ).join('');
+  buildGroupedOptions(functions, prefixParts) {
+    if (!functions || typeof functions !== 'object') return '';
+    
+    // Check both possible function types in prefixParts
+    var selectedValue = prefixParts.readout_function || prefixParts.output_function || '';
+    var optionsHtml = '';
+    
+    for (var group in functions) {
+      if (functions.hasOwnProperty(group)) {
+        optionsHtml += '<optgroup label="' + group + '">';
+        var options = functions[group];
+        if (Array.isArray(options)) {
+          for (var i = 0; i < options.length; i++) {
+            var option = options[i];
+            // Check if this option matches either function type
+            var selected = (option[0] === selectedValue) ? 'selected' : '';
+            optionsHtml += '<option value="' + option[0] + '" ' + selected + '>' + 
+                          option[0] + ': ' + option[1] + '</option>';
+          }
+        }
+        optionsHtml += '</optgroup>';
+      }
+    }
+    return optionsHtml;
   }
 
   updatePreview() {
     try {
-      // Get field values using form elements
-      const prefix = this.buildPrefixFromForm(this.element);
-      const serial = (this.element.elements['tag[serial]']?.value || '').padStart(4, '0');
-      const suffix = this.element.elements['tag[suffix]']?.value || '';
+      // Get the form prefix from the container
+      var prefixContainer = this.element.querySelector('[data-tag-prefix-container]');
+      if (!prefixContainer) return;
+      
+      // Get the form prefix (e.g., 'tag' or 'switchboard[tag_attributes]')
+      var formPrefix = prefixContainer.dataset.formPrefix || 'tag';
+      if (formPrefix.endsWith(']')) {
+        // Already in the format we need
+      } else if (formPrefix.includes('_attributes]')) {
+        formPrefix = formPrefix.replace('_attributes]', ']');
+      } else {
+        formPrefix = 'tag';
+      }
+      
+      // Build the combined prefix from form fields
+      var prefix = this.buildPrefixFromForm(this.element);
+      
+      // Update the prefix field (using the target)
+      if (this.hasPrefixFieldTarget) {
+        this.prefixFieldTarget.value = prefix;
+      }
+      
+      // Get serial and suffix values
+      var serialField = this.element.querySelector('[name$="' + formPrefix + '[serial]"]');
+      var suffixField = this.element.querySelector('[name$="' + formPrefix + '[suffix]"]');
+      var serial = (serialField ? serialField.value : '') || '';
+      var suffix = (suffixField ? suffixField.value : '') || '';
+      
+      // Pad serial to 4 digits
+      serial = serial.padStart ? serial.padStart(4, '0') : serial;
 
       // Build the full tag with proper separators to match the model
-      let fullTag = '';
+      var fullTag = '';
       if (prefix) {
-        fullTag = `${prefix}-${serial}`;
+        fullTag = prefix + '-' + serial;
         if (suffix) {
-          fullTag += `.${suffix}`;
+          fullTag += '.' + suffix;
         }
       }
 
       // Find and update the preview target (in card header)
-      const previewTarget = this.element.closest('.card').querySelector('[data-tag-target="preview"]');
+      var previewTarget = this.element.closest('.card');
       if (previewTarget) {
-        const previewText = fullTag
-          ? `${this.modelNameValue}: ${fullTag}`
-          : this.defaultTextValue;
-
-        previewTarget.textContent = previewText;
+        var previewElement = previewTarget.querySelector('[data-tag-target="preview"]');
+        if (previewElement) {
+          var previewText = fullTag ? this.modelNameValue + ': ' + fullTag : this.defaultTextValue;
+          previewElement.textContent = previewText;
+        }
       }
 
     } catch (error) {
@@ -242,18 +366,41 @@ export default class extends Controller {
   }
 
   buildPrefixFromForm(form) {
+    // Get the form prefix from the container
+    var prefixContainer = this.element.querySelector('[data-tag-prefix-container]');
+    if (!prefixContainer) return '';
+    
+    var formPrefix = prefixContainer.dataset.formPrefix || 'tag';
+    if (formPrefix.endsWith(']')) {
+      // Already in the format we need
+    } else if (formPrefix.includes('_attributes]')) {
+      formPrefix = formPrefix.replace('_attributes]', ']');
+    } else {
+      formPrefix = 'tag';
+    }
+    
+    // Helper function to get field value by name pattern
+    var getFieldValue = function(fieldName) {
+      var field = form.querySelector('[name="' + fieldName + '"]');
+      return field ? field.value : '';
+    };
+    
     // Check if this is an ISA51 form (has measured_variable field)
-    const measuredVariable = form.elements['tag[measured_variable]']?.value || '';
-    const modifier = form.elements['tag[modifier]']?.value || '';
-    const func = form.elements['tag[function]']?.value || '';
-    const modifierFunction = form.elements['tag[modifier_function]']?.value || '';
+    var measuredVariable = getFieldValue('measured_variable');
+    var modifier = getFieldValue('modifier');
+    var func = getFieldValue('function');
+    var modifierFunction = getFieldValue('modifier_function');
 
     if (measuredVariable) {
       // ISA51 schema - combine the fields
-      return [measuredVariable, modifier, func, modifierFunction].filter(Boolean).join('');
+      var parts = [measuredVariable, modifier, func, modifierFunction].filter(function(part) {
+        return part && part.length > 0;
+      });
+      return parts.join('');
     } else {
       // Simple schema - just get the prefix field
-      return form.elements['tag[prefix]']?.value || '';
+      var prefixField = form.querySelector('[name="tag[prefix]"]');
+      return prefixField ? prefixField.value : '';
     }
   }
 }
