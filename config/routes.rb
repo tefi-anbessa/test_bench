@@ -38,6 +38,9 @@ Rails.application.routes.draw do
       end
     end
 
+    # Define top level index routes for circuits, demands, to allow complete load listings.
+    resources :circuits, :demands, only: [:index]
+    
     resources :cable_types
     
     # Demands routes

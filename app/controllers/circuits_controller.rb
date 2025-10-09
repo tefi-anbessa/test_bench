@@ -3,7 +3,11 @@ class CircuitsController < ApplicationController
   before_action :set_circuit, only: [:show, :edit, :update, :destroy]
   
   def index
-    @circuits = policy_scope(@switchboard.circuits).order(:serial)
+    if @switchboard.present?
+      @circuits = policy_scope(@switchboard.circuits).order(:serial)
+    else
+      @circuits = policy_scope(Circuit).order(:serial)
+    end
     authorize @circuits
   end
   
@@ -21,7 +25,7 @@ class CircuitsController < ApplicationController
     authorize @circuit
     
     if @circuit.save
-      redirect_to [@switchboard, @circuit], notice: 'Circuit was successfully created.'
+      redirect_to @circuit, notice: 'Circuit was successfully created.'
     else
       render :new, status: :unprocessable_entity
     end
@@ -53,7 +57,7 @@ class CircuitsController < ApplicationController
     end
     
     def set_switchboard
-      @switchboard = Switchboard.find(params[:switchboard_id])
+      @switchboard = Switchboard.find(params[:switchboard_id]) if params[:switchboard_id].present?
     end
     
     def set_circuit

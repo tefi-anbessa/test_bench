@@ -29,7 +29,7 @@ From git commit 6da446f onwards, this project has used Windsurf/Cascade AI to sp
       - `docs/ROLES_AND_PERMISSIONS.md`
 2. Request AI to review the memories and follow the guidance therein. If memories are not available, refer to the duplicated documentation in `docs/AI memories/`.
 
-### Maintenance
+### Documentation Maintenance
 
 - These guidelines and requirements will evolve over time.
 - Any changes should be reflected in the documentation.
@@ -55,15 +55,15 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    - Get approval for each feature before moving forward
    - Keep pull requests and changes small and focused
 
-4. **Current Focus**:
-   - Application functionality is the current priority
-   - Fancy features should be deferred until core functionality is stable
+4. **Focus**:
+   - Application functionality is always the priority
+   - Format and presentation should be deferred until core functionality is stable
    - Avoid premature optimization or over-engineering
 
 5. **Code Review Guidelines**:
    - Question any added complexity
    - Challenge features that weren't explicitly requested
-   - Prefer simple, maintainable solutions over clever ones
+   - Prefer simple, maintainable solutions over complex ones
 
 ## Implementation
 
@@ -94,8 +94,8 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    - Conditionals should be controlled by pundit policy calls where applicable.
    - Conditionals may also use presence or otherwise of variables set in the controller.
    - Views should include i18n translations for all user facing text, including:
-   flash error messages
-   select options
+      - flash error messages
+      - select options
 
 
 
@@ -105,16 +105,17 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    - Errors are categorized as:
       - User data entry errors: These are errors that can be fixed by the user, such as missing required fields or invalid data.
          - Required fields are highlighted by html5 without any additional code. Not sure how to translate these.
-         - Invalid data should be detected in the controller and the form displayed again with flash :danger messages. 
+         - Invalid data should be detected in the controller and the form displayed again with flash :danger messages.
          - Rails manages standard model validation messages but translations may need to be provided [HOLD] check this.
          - More complex validations of associations use custom error messages with translations.
       - 
-      - Security breach attempts: These are trapped forbidden operations that should not be possible using normal workflows. They are probably direct HTML requests in an attempt to defeat the permissions system. This type of error should log a message to the rails logger, redirect to the custom /403 page, and log out the current user.
+      - Security breach attempts: These are trapped forbidden operations that should not be possible using normal workflows. They are probably direct HTML or JSON requests in an attempt to defeat the permissions system. This type of error should log a message to the rails logger, redirect to the custom /403 page, and log out the current user.
 
 ### Form Design
 
    - Use bootstrap buttons wherever possible for consistent appearance and behavior.
-   - 
+   - Use bootstrap card format wherever applicable, for consistent appearance.
+   - Make use of the reusable collapsible card (with js controller) for ancilliary information relevant to the form but not for modification. e.g. Cable form includes a collapsible card for cable type, showing further details of the cable type.
 
 ### Icons
 
@@ -145,6 +146,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [x] Build user interaction management, using gems devise for authentication, rolify and pundit for authorization
 - [x] Build electrical module with basic data sheet options for electrical tagged items
 - [ ] Enhance electrical module, allowing interconnection of tagged items with cables to model a distribution network
+- [ ] Enhance electrical model with network load calculations
 - [ ] Enhance the existing database models to allow revison control of data
 - [ ] Build a document control module to manage document storage, issue, history including versions
 - [ ] Build a bookkeeping module to manage financial transactions
@@ -175,6 +177,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Improve forbidden error logging messages, include user. Consider automatic sign out.
 - [ ] Model tests should include some sort of test of enums.
 - [ ] Complete workflows with admin and no project selected.
+- [ ] Complete proper ordering by switchboard tag and serial for circuits.
 
 ## Refactoring Opportunities
 - [x] Improve role and permissions implementation and workflow.
@@ -188,10 +191,10 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [x] Refactor all views to use pundit policy checks.
 - [x] Change terminology and implementation from project owner to project manager.
 - [ ] Refactor projects controller and application controller setting of current project: `def after_sign_in_path_for(resource)to use app/controllers/concerns/current_project_concern.rb to reduce code duplication.
-- [ ] Cable types: 
-   - [ ] convert core material to enum.
-   - [ ] convert insulation material to enum.
-   - [ ] add volt rating enum.
+- [x] Cable types: 
+   - [x] convert core material to enum.
+   - [x] convert insulation material to enum.
+   - [x] add volt rating enum.
 - [ ] Motors: 
    - [ ] convert motor type to enum.
    - [ ] convert frame size to enum.
@@ -201,20 +204,18 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [x] Refactor tag 'description' to 'service'.
 - [ ] Redesign tag module:
    - [ ] base full tag becomes a virtual field.
-   - [ ] builder/parser model for each discipline which creates the string according to the required format, and can parse the string back into the components.
-   - [ ] provide default format for each discipline, e.g. isa5.1
-   - [ ] add next/previous functionality
+   - [x] builder/parser model for each discipline which creates the string according to the required format, and can parse the string back into the components.
+   - [x] provide default format for each discipline, e.g. isa5.1
+   - [x] add next/previous functionality
    - [ ] add colour code by discipline
 - [ ] Look at use of hover on buttons, and use turbo to prevent page refresh.
-- [ ] Improve implementation of Discipline model, including translation.
+- [ ] Improve implementation of Discipline model, including translation. Consider using constants hash for each project.
  
 ## Potential Features
 - [ ] Add more comprehensive reporting for demand calculations
 - [ ] Implement bulk import/export
-- [ ] Add more detailed documentation for the demand calculation formulas
 - [ ] See if pagy can provide user selectable page size
 - [ ] Data revision management
-- [ ] Customize devise views
 - [ ] Customize devise users:
    - Allow users to self register through devise, edit their own profile and user name, email, password. 
    - Insert an admin approval in the confirmation process
@@ -236,5 +237,4 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 
 ## Notes
 - [x] Keep backward compatibility during the Load → Demand transition
-- Document any non-obvious electrical calculation formulas
-- Consider adding performance benchmarks for critical paths
+- [ ] Consider adding performance benchmarks for critical paths
