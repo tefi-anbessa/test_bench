@@ -1,0 +1,6 @@
+<% provide(:title, t('.title')) %>
+<% provide(:button_text, t('actions.save')) %>
+<%= render "form", 
+  switchboard: @switchboard,
+  circuit: @circuit
+%>

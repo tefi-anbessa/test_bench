@@ -1,0 +1,90 @@
+<% provide(:title, t('.title')) %>
+<nav class="navbar bg-body-tertiary">
+  <div class="container">
+    <ul class="navbar-nav me-auto mb-2 mb-lg-0 flex-row">
+      <% if policy(Circuit).new? %>
+        <li class="nav-item">
+          <%= link_to new_switchboard_circuit_path(@switchboard), 
+                class: "btn btn-primary actions",
+                data: { turbo: false },
+                aria: { label: t('actions.new') },
+                title: t('actions.new') do %>
+            <%== icon('plus-square-fill') %>
+            <%= [t('actions.new'), t('activerecord.models.circuit')].join(' ') %>
+          <% end %>
+        </li>
+      <% end %>
+      <span class="nav-text ms-3 me-3 h2">
+        <%= t('.header', switchboard: @switchboard.label) %>
+      </span>
+    </ul>
+  </div>
+</nav>
+
+<div class="container">
+  <div class='listing'>
+    <table id='circuits' class='table table-responsive table-condensed table-striped table-hoverable table-bordered'>
+      <thead>
+        <tr>
+          <th><%= t('activerecord.models.circuit') %></th>
+          <th><%= t('activerecord.attributes.circuit.phase') %></th>
+          <th><%= t('activerecord.attributes.circuit.device') %></th>
+          <th><%= t('activerecord.attributes.circuit.rating') %></th>
+          <th><%= t('activerecord.attributes.circuit.curve') %></th>
+          <th><%= t('activerecord.attributes.circuit.poles') %></th>
+          <th><%= t('activerecord.attributes.circuit.elcb') %></th>
+          <th><%= t('activerecord.attributes.circuit.contactor') %></th>
+          <th class="text-center"><%= t('actions.actions') %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @circuits.each do |circuit| %>
+          <tr>
+            <td><%= [circuit.switchboard.tag.label, circuit.serial.to_s.rjust(2, '0')].join(' #') %></td>
+            <td><%= circuit.phase %></td>
+            <td><%= circuit.device %></td>
+            <td><%= circuit.rating %></td>
+            <td><%= circuit.curve %></td>
+            <td><%= circuit.poles %></td>
+            <td><%= circuit.elcb %></td>
+            <td><%= circuit.contactor ? icon('check', height: 'em') : ' ' %></td>
+            <!-- Links -->
+            <td>
+              <% if policy(circuit).show? %>
+                <%= link_to circuit_path(circuit), class: "btn btn-secondary btn-sm icon-link",
+                      aria: { label: t('actions.show') },
+                      title: t('actions.show'),
+                      display: "inline" do %>
+                        <%== icon('eye') %>
+                      <% end %>
+              <% end %>
+                  
+              <% if policy(circuit).edit? %>
+                <%= link_to edit_circuit_path(circuit), class: "btn btn-warning btn-sm icon-link",
+                      aria: { label: t('actions.edit') },
+                      title: t('actions.edit'),
+                      display: "inline"  do %>
+                        <%== icon('pencil') %>
+                      <% end %>
+              <% end %>
+                  
+              <% if policy(circuit).destroy? %>
+                <%= link_to circuit_path(circuit), 
+                      method: :delete,
+                      data: { 
+                        turbo_method: :delete,
+                        turbo_confirm: t('actions.sure')
+                      },
+                      class: "btn btn-danger btn-sm icon-link",
+                      title: t('actions.delete') do %>
+                  <%== icon('trash') %>
+                <% end %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+</div>

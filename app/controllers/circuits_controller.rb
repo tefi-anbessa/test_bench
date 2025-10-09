@@ -1,5 +1,5 @@
 class CircuitsController < ApplicationController
-  before_action :set_switchboard
+  before_action :set_switchboard, only: [:index, :new, :create]
   before_action :set_circuit, only: [:show, :edit, :update, :destroy]
   
   def index
@@ -48,18 +48,21 @@ class CircuitsController < ApplicationController
   end
   
   private
-  
-  def set_switchboard
-    @switchboard = Switchboard.find(params[:switchboard_id])
-  end
-  
-  def set_circuit
-    @circuit = @switchboard.circuits.find(params[:id])
-  end
-  
-  def circuit_params
-    params.require(:circuit).permit(
-      :serial, :phase, :device, :poles, :curve, :rating, :elcb, :contactor, :notes
-    )
-  end
+    def setup_form
+
+    end
+    
+    def set_switchboard
+      @switchboard = Switchboard.find(params[:switchboard_id])
+    end
+    
+    def set_circuit
+      @circuit = Circuit.find(params[:id])
+    end
+    
+    def circuit_params
+      params.require(:circuit).permit(
+        :serial, :phase, :device, :poles, :curve, :rating, :elcb, :contactor, :notes
+      )
+    end
 end

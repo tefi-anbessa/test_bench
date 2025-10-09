@@ -24,6 +24,7 @@ en:
     grant:        "Grant"
     revoke:       "Revoke"
     link:         "Link to new %{resource}"
+    back_to:      "Back to %{model}"
 
   show:
     orphan:       "No associated parent %{model}"
@@ -36,6 +37,8 @@ en:
     undefined:    "Undefined"
     none:         "None"
     unknown:      "Unknown"
+    true:         "☑"
+    false:        "☒"
 
   admin:         "Admin"
 

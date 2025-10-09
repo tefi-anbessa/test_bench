@@ -1,0 +1,111 @@
+<div class="container mt-3">
+  <div class="card">
+    <div class="card-header p-2">
+      <div class="col text-center">
+        <div class="d-flex flex-column align-items-center">
+          <div class="mt-1">
+            <%= circuit.persisted? ? t('actions.edit') : t('actions.new') %> 
+            <%= t('activerecord.models.circuit') %>
+            <% if circuit.persisted? %>
+              <small class="text-muted ms-2">
+                <%= [circuit.switchboard.label, 
+                  circuit.serial.to_s.rjust(2, '0')].join(': ') %>
+              </small>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%= bootstrap_form_with(model: [@switchboard, circuit], 
+          layout: :horizontal, 
+          label_col: "col-sm-4", 
+          control_col: "col-sm-8",
+          wrapper_class: 'mb-1') do |f| %>
+      
+      <div class="card-body p-2">
+        <%= render 'shared/error_messages', object: f.object %>
+
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+            <!-- Basic Information -->
+            <div class="row">
+              <%= f.number_field :serial,
+                    required: true,
+                    min: 1,
+                    max: 36 %>
+            </div>
+
+            <div class="row">
+              <%= f.select :phase, 
+              options_for_select(Circuit.phases.map { |k, v| [k, k] },
+                    selected: circuit.phase),
+                    { include_blank: t("form.none") } %>
+            </div>
+
+            <!-- Protection -->
+            <div class="row">
+              <%= f.select :device, 
+              options_for_select(Circuit.devices.map { |k, v| [k, k] },
+                    selected: circuit.device),
+                    { include_blank: t("form.none") } %>
+            </div>
+
+            <div class="row">
+              <%= f.select :poles,
+                    options_for_select(1..6, circuit.poles),
+                    { include_blank: t("form.none") } %>
+            </div>
+
+            <div class="row">
+              <%= f.select :curve, 
+                    options_for_select(Circuit.curves.map { |k, v| [k, k] },
+                    selected: circuit.curve),
+                    { include_blank: t("form.none") } %>
+            </div>
+
+            <div class="row">
+              <%= f.select :rating, 
+                    options_for_select(Constants.electrical.mcb_rating,
+                    selected: circuit.rating),
+                    { include_blank: t("form.none") } %>
+            </div>
+
+            <div class="row">
+              <%= f.select :elcb, 
+                    options_for_select(Circuit.elcbs.map { |k, v| [k, k] },
+                    selected: circuit.elcb) %>
+            </div>
+
+            <div class="row">
+              <%= f.check_box :contactor, 
+                    label: t('activerecord.attributes.circuit.contactor') %>
+            </div>
+
+            <div class="row">
+              <%= f.text_area :notes,
+                    label: t('activerecord.attributes.circuit.notes'),
+                    rows: 2 %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Footer with Actions -->
+          <div class="card-footer bg-transparent text-end p-2">
+            <%= link_to(circuit, 
+                  class: 'btn btn-warning',
+                  data: { turbo: false }) do %>
+              <%= t('actions.discard') %>
+              <%== icon('x-square') %>
+            <% end %>
+
+            <%= f.button :submit, class: 'btn btn-primary' do %>
+              <%= yield(:button_text) %>
+              <%== icon('save') %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

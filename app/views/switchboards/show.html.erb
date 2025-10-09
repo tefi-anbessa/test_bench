@@ -174,10 +174,22 @@
                     <div class="col-4 text-muted"><%= t('activerecord.attributes.switchboard.earth_bar_connections') %></div>
                     <div class="col-8"><%= @switchboard.earth_bar_connections || '-' %></div>
                   </div>
-                  
+
                   <div class="row mb-1">
                     <div class="col-4 text-muted"><%= t('activerecord.attributes.switchboard.circuits') %></div>
                     <div class="col-8"><%= @switchboard.circuits.count || '-' %></div>
+                  </div>
+                  
+                  <div class="row mb-1">
+                    <div class="col-4 text-muted">
+                      <% text = t('activerecord.attributes.switchboard.circuits') %>
+                      <%= link_to switchboard_circuits_path(@switchboard),
+                        class: "btn btn-sm btn-outline-secondary",
+                        title: text do %>
+                          <%= text %>
+                          <%== icon('box-arrow-in-down-right') %>
+                      <% end %>
+                    </div>
                   </div>
                 </div>
               </div>

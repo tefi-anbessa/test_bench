@@ -159,7 +159,7 @@
                 <%= link_to eval("#{@tag.tagable_type.tableize.singularize}_path(#{@tag.tagable_id})"),
                     class: "btn btn-sm btn-outline-secondary mb-2",
                     title: t('actions.view') do %>
-                  <%== icon('box-arrow-up-right') %>
+                  <%== icon('box-arrow-down-right') %>
                   <span class="d-none d-md-inline"><%= t('show.linked', 
                   model: @tag.tagable_type.tableize.singularize) %></span>
                 <% end %>

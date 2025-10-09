@@ -1,6 +1,7 @@
 class Switchboard < ApplicationRecord
   include Tagable
   include Demandable
+  include TagableNavigation
   has_many :circuits, dependent: :destroy
   enum :voltage_rating, Constants.electrical.voltage_ratings.to_h
 

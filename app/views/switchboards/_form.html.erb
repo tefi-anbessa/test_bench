@@ -27,19 +27,23 @@
       
       <div class="card-body p-2">
         <%= render 'shared/error_messages', object: f.object %>
+        
+        <!-- Tag -->
+        <% if tag.persisted? %>
+          <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+              <%= render 'tags/tag_card', tag: tag %>
+              <%= hidden_field_tag :tag_id, tag.id %>
+            </div>
+          </div>
+        <% else %>
+          <%= f.fields_for tag do |tag_f| %>
+            <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
+          <% end %>
+        <% end %>
 
         <div class="row justify-content-center">
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-        
-          <!-- Tag -->
-          <% if tag.persisted? %>
-            <%= render 'tags/tag_card', tag: tag %>
-            <%= hidden_field_tag :tag_id, tag.id %>
-          <% else %>
-            <%= f.fields_for tag do |tag_f| %>
-              <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
-            <% end %>
-          <% end %>
 
             <!-- Switchboard Details -->
             <div class="row">
@@ -168,17 +172,20 @@
               </div>
             </div>
 
-          <!-- Card Footer with Actions -->
-          <div class="card-footer bg-transparent text-end p-2">
-            <%= link_to(switchboard.persisted? ? switchboard_path(@switchboard) : switchboards_path,
-                  class: 'btn btn-warning',
-                  data: { confirm: t('actions.sure'), turbo: false }) do %>
-              <%= t('actions.discard') %>
-              <%== icon('x-square') %>
-            <% end %>
-            <%= f.submit((yield(:button_text) || t('actions.save')), class: 'btn btn-primary') do %>
-              <%== icon('save') %>
-            <% end %>
+            <!-- Card Footer with Actions -->
+            <div class="card-footer bg-transparent text-end p-2">
+              <%= link_to(switchboard, 
+                    class: 'btn btn-warning',
+                    data: { turbo: false }) do %>
+                <%= t('actions.discard') %>
+                <%== icon('x-square') %>
+              <% end %>
+
+              <%= f.button :submit, class: 'btn btn-primary' do %>
+                <%= yield(:button_text) %>
+                <%== icon('save') %>
+              <% end %>
+            </div>
           </div>
         </div>
       </div>

@@ -1,52 +1,80 @@
-<div id="<%= dom_id switchboard %>">
-  <p>
-    <strong>Location:</strong>
-    <%= switchboard.location %>
-  </p>
+<%= render 'components/collapsible',
+  id: "switchboard_#{switchboard.id}_details",
+  title: t('switchboards.show.header', label: switchboard.label),
+  expanded: false,
+  header_class: 'py-1' do %>
+  
+  <div class="container-fluid">
 
-  <p>
-    <strong>Ingress protection:</strong>
-    <%= switchboard.ingress_protection %>
-  </p>
+    <div class="row mb-1">
+      <% text = t("actions.back_to", model: t("activerecord.models.switchboard")) %>
+      <%= link_to switchboard_path(switchboard), 
+        class: "btn btn-sm btn-outline-secondary me-2",
+        title: text do %>
+        <%== icon('box-arrow-in-up-left') %>
+        <span class="d-none d-md-inline"><%= text %></span>
+      <% end %>
+    </div>
 
-  <p>
-    <strong>Busbar rating:</strong>
-    <%= switchboard.busbar_rating %>
-  </p>
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.switchboard.location') %></div>
+      <div class="col-8"><%= switchboard.location.presence || '-' %></div>
+    </div>
 
-  <p>
-    <strong>Busbar fault rating:</strong>
-    <%= switchboard.busbar_fault_rating %>
-  </p>
-
-  <p>
-    <strong>Busbar fault duration:</strong>
-    <%= switchboard.busbar_fault_duration %>
-  </p>
-
-  <p>
-    <strong>Cable entry:</strong>
-    <%= switchboard.cable_entry %>
-  </p>
-
-  <p>
-    <strong>Incomer protection:</strong>
-    <%= switchboard.incomer_protection %>
-  </p>
-
-  <p>
-    <strong>Incomer metering:</strong>
-    <%= switchboard.metering %>
-  </p>
-
-  <p>
-    <strong>Neutral bar connections:</strong>
-    <%= switchboard.neutral_bar_connections %>
-  </p>
-
-  <p>
-    <strong>Earth bar connections:</strong>
-    <%= switchboard.earth_bar_connections %>
-  </p>
-
-</div>
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.switchboard.ingress_protection') %></div>
+      <div class="col-8"><%= switchboard.ingress_protection.present? ? 
+        ["IP", switchboard.ingress_protection].join(' ') : '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.switchboard.voltage_rating') %></div>
+      <div class="col-8"><%= switchboard.voltage_rating.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.switchboard.busbar_rating') %></div>
+      <div class="col-8"><%= switchboard.busbar_rating.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.switchboard.busbar_fault_rating') %></div>
+      <div class="col-8"><%= switchboard.busbar_fault_rating.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.switchboard.busbar_fault_duration') %></div>
+      <div class="col-8"><%= switchboard.busbar_fault_duration.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.switchboard.cable_entry') %></div>
+      <div class="col-8"><%= switchboard.cable_entry.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.switchboard.incomer_protection') %></div>
+      <div class="col-8"><%= switchboard.incomer_protection.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.switchboard.metering') %></div>
+      <div class="col-8"><%= switchboard.metering.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.switchboard.neutral_bar_connections') %></div>
+      <div class="col-8"><%= switchboard.neutral_bar_connections.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.switchboard.earth_bar_connections') %></div>
+      <div class="col-8"><%= switchboard.earth_bar_connections.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.switchboard.circuits_count') %></div>
+      <div class="col-8"><%= switchboard.circuits.count %></div>
+    </div>
+  </div>
+<% end %>

@@ -39,26 +39,26 @@ en:
       cancel:           "Cancel"
     edit:
       title:            "Edit Project"
-      header:           "Edit Project: %{project}"
+      header:           "Edit Project: %{label}"
     new:
       title:            "New Project"
       header:           "New Project"
     show:
-      title:            "%{code}"
-      header:           "Project: %{code}"
+      title:            "Project"
+      header:           "Project: %{label}"
   tags:
     index:
       title:            "Tags"
       header:           "Tag List"
     edit:
-      title:            "Edit %{tag}"
-      header:           "%{tag}"
+      title:            "Edit Tag"
+      header:           "Edit Tag: %{tag}"
     new:
       title:            "New Tag"
       header:           "New Tag"
     show:
-      title:            "Tag %{tag}"
-      header:           "%{tag}"
+      title:            "Tag"
+      header:           "Tag: %{tag}"
 
   roles:
     index:
@@ -80,13 +80,13 @@ en:
       header:           "Cable Types"
     edit:
       title:            "Edit Cable Type"
-      header:           "Edit Cable Type"
+      header:           "Edit Cable Type: %{label}"
     new:
       title:            "New Cable Type"
       header:           "New Cable Type"
     show:
-      title:            "Cable Type %{id}"
-      header:           "Cable Type %{id}"
+      title:            "Cable Type"
+      header:           "Cable Type: %{label}"
 
   cables:
     index:
@@ -94,13 +94,13 @@ en:
       header:           "Cable Schedule"
     edit:
       title:            "Edit Cable"
-      header:           "Edit Cable"
+      header:           "Edit Cable: %{label}"
     new:
       title:            "New Cable"
       header:           "New Cable"
     show:
-      title:            "Cable %{tag}"
-      header:           "Cable %{tag}"
+      title:            "Cable"
+      header:           "Cable: %{label}"
 
   switchboards:
     index:
@@ -108,13 +108,27 @@ en:
       header:           "Switchboards Schedule"
     edit:
       title:            "Edit Switchboard"
-      header:           "Edit Switchboard"
+      header:           "Edit Switchboard: %{label}"
     new:
       title:            "New Switchboard"
       header:           "New Switchboard"
     show:
-      title:            "Switchboard %{tag}"
-      header:           "Switchboard: %{tag}"
+      title:            "Switchboard"
+      header:           "Switchboard: %{label}"
+
+  circuits:
+    index:
+      title:            "Circuits"
+      header:           "Circuits Schedule"
+    edit:
+      title:            "Edit Circuit"
+      header:           "Edit Circuit: %{label}"
+    new:
+      title:            "New Circuit"
+      header:           "New Circuit"
+    show:
+      title:            "Circuit"
+      header:           "Circuit: %{label}"
 
   demands:
     index:
@@ -122,10 +136,10 @@ en:
       header:           "Load List"
     edit:
       title:            "Edit Load"
-      header:           "Edit Load"
+      header:           "Edit Load: %{label}"
     new:
       title:            "New Load"
       header:           "New Load"
     show:
-      title:            "Load %{tag}"
-      header:           "Load: %{tag}"
+      title:            "Load"
+      header:           "Load: %{label}"

@@ -15,7 +15,7 @@ class Circuit < ApplicationRecord
   enum :elcb, Constants.electrical.protection.elcb.to_h
 
   def label
-    "#{switchboard.label}##{serial.to_s.rjust(2, '0')}"
+    "#{switchboard.label} ##{serial.to_s.rjust(2, '0')}"
   end
   
   def self.ransackable_attributes(auth_object = nil)
