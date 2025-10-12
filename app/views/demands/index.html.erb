@@ -19,33 +19,6 @@
   </div>
 </nav>
 
-<div class = "container">
-  <table id='tags' class='table table-responsive table-condensed table-hoverable table-bordered' >
-    <%= render 'tags/tag_header' %>
-    <tbody>
-      <% unless @link_broken.empty? %>
-        <tr class="table-danger">
-          <td colspan="4">
-            <%= t('index.link_broken', models: t("activerecord.models.demand").tableize) %>
-          </td>
-        </tr>
-        <% @link_broken.each do |tag| %>
-          <%= render 'tags/tag_row', t: tag %>
-        <% end %>
-      <% end %>
-      <% unless @link_incomplete.empty? %>
-        <tr class="table-warning">
-          <td colspan="4">
-            <%= t('index.link_incomplete', models: t("activerecord.models.demand").tableize) %>
-          </td>
-        </tr>
-        <% @link_incomplete.each do |tag| %>
-          <%= render 'tags/tag_row', t: tag %>
-        <% end %>
-      <% end %>
-    </tbody>
-  </table>
-
   <div class = 'listing'>
     <%== pagy_bootstrap_nav(@pagy) %>
     <table id='demands' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >

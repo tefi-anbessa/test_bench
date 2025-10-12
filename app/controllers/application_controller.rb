@@ -5,6 +5,10 @@ class ApplicationController < ActionController::Base
   include Devise::Controllers::StoreLocation
   include ErrorsHelper
 
+  # Custom error handling for trapped bad requests
+  class ConflictError < StandardError; end
+  rescue_from ConflictError, with: :handle_conflict
+
   around_action :switch_locale
   before_action :configure_permitted_parameters, if: :devise_controller?
   
@@ -99,5 +103,18 @@ class ApplicationController < ActionController::Base
     def user_not_authorized
       flash[:danger] = "You are not authorized to perform this action."
       redirect_back_or_to(root_path)
+    end
+
+    def handle_conflict(exception)
+      respond_to do |format|
+        format.html do
+          flash[:alert] = exception.message || "This action conflicts with existing data"
+          redirect_back(fallback_location: root_path)
+        end
+        format.json do
+          render json: { error: exception.message || "Conflict" }, 
+                 status: :conflict
+        end
+      end
     end
 end

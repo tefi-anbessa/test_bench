@@ -86,13 +86,14 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 #### Controllers
 
 - Controller classes include basic logic for performing CRUD operations on the object.
-   - Controllers are responsible for setting all variables for the view, including select options.
+   - Controllers are responsible for setting all variables for the view, generally including select options derived from data.
 
 #### Views
 
 - Views should not include complex logical processing.
    - Conditionals should be controlled by pundit policy calls where applicable.
    - Conditionals may also use presence or otherwise of variables set in the controller.
+   - Views should use model constants such as enums to generate select options directly. Use human_enum_name from app/models/application_record.rb to provide the translations.
    - Views should include i18n translations for all user facing text, including:
       - flash error messages
       - select options
@@ -103,13 +104,34 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 ### Error Handling
 
    - Errors are categorized as:
+      - Unauthenticated access:
+         - Users need to be authenticated by the devise system for all MVC actions.
+         - Errors are handled by the application controller rescue_from Devise::NotAuthenticatedError.
+         - Users are redirected to the sign in page.
+         - Controllers typically use a single before_action :authenticate_user! to implement devise security. 
+         - Controller tests typically include one test to ensure that unauthenticated access is not possible.
+         - Tests can use the test helper method assert_unauthenticated.
+      - Unauthorized access:
+         - These are pundit authorisation failures.
+         - Generally, the workflow should not allow access to unauthorized functions.
+         - However, until the application is thoroughly tested in use, this is considered a lesser error than a security breach attempt.
+         - Errors are processed by the application controller rescue_from Pundit::NotAuthorizedError.
+         - Policy tests should be used to verify that policies meet their objectives, refer to docs/ROLES_AND_PERMISSIONS.md.
+         - Controller tests should also include test of unauthorized access, to ensure that appropriate authorization calls are included in relevant actions.
+         - Controller tests should only test the pass and fail paths, they are not intended to test the policy details.
+         - Tests can use the test helper method assert_unauthorized.
       - User data entry errors: These are errors that can be fixed by the user, such as missing required fields or invalid data.
          - Required fields are highlighted by html5 without any additional code. Not sure how to translate these.
-         - Invalid data should be detected in the controller and the form displayed again with flash :danger messages.
+         - Invalid data should be detected in the controller and the form displayed again with flash :warning messages.
          - Rails manages standard model validation messages but translations may need to be provided [HOLD] check this.
-         - More complex validations of associations use custom error messages with translations.
-      - 
-      - Security breach attempts: These are trapped forbidden operations that should not be possible using normal workflows. They are probably direct HTML or JSON requests in an attempt to defeat the permissions system. This type of error should log a message to the rails logger, redirect to the custom /403 page, and log out the current user.
+         - Model validation messages are displayed on form views using the partial app/views/shared/_error_messages.html.erb
+         - More complex validations of associations use custom error messages with their translations.
+         - Model tests should include test of each validation to ensure that user data entry errors are caught and translated error messages are added to the model object.
+      - Security breach attempts: 
+         - These are trapped forbidden operations that should not be possible using normal workflows.
+         - They are probably direct HTML or JSON requests in an attempt to defeat the permissions system. 
+         - This type of error should log a message to the rails logger, redirect to the custom /403 page, and log out the current user.
+         - Controller tests should include thorough test of each path through the controller to ensure that security breach attempts are trapped.
 
 ### Form Design
 
@@ -118,6 +140,30 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    - Make use of the reusable collapsible card (with js controller) for ancilliary information relevant to the form but not for modification. e.g. Cable form includes a collapsible card for cable type, showing further details of the cable type.
 
 ### Icons
+
+- Bootstrap icons are used as graphical elements to support usability.
+- The gem bootstrap-icons-helper simplifies finding the icons (notoriously difficult with the recommended installation methods).
+- Icons have been copied to app/assets/icons. 
+- If a new icon is required, search in <https://icons.getbootstrap.com>, find the name and use it. (The website doesn't include sorting facilities so it is not easy to find by function unless the name corresponds to the function.)
+- The helper method icon(name) in app/helpers/bootstrap_icon_helper.rb is used to further simplify icon usage.
+- Typical usage is:
+`<%= f.submit((yield(:button_text)), class: 'btn btn-primary') do %>
+          <%== icon('save') %>
+        <% end %>`
+- Important: The double equals is used to prevent html escaping of the icon.
+- Be consistent in icon usage. Preferred icons are:
+  - "list-columns-reverse" for index views
+  - "box-arrow-in-left" for link to previous object same class
+  - "box-arrow-in-right" for link to next object same class
+  - "box-arrow-down-right" for link to child object
+  - "box-arrow-up-left" for link to parent object
+  - "link" for link to open a form for a new child object
+  - "plus" for new buttons to open a form
+  - "pencil" for edit buttons to open a form
+  - "trash" for delete buttons to delete the object
+  - "search" for search buttons on views
+  - "x-square" for Discard Changes buttons on forms
+  - "save" for save buttons on forms
 
 ## Known Issues
 

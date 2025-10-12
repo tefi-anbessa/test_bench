@@ -27,7 +27,7 @@
     <% if d.demandable.nil? %>
       <td><%= d.demandable_type %></td>
     <% else %>
-      <td><%= link_to d.demandable %></td>
+      <td><%= link_to d.demandable_type, d.demandable %></td>
     <% end %>
     <td>
       <% if policy(d).show? %>

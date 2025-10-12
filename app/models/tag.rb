@@ -18,44 +18,27 @@ class Tag < ApplicationRecord
   validates :suffix, length: { maximum: 5 }
   validates :service, length: { maximum: 40 }
   validates :stage, inclusion: { in: 0..10 }
-  validate :validate_tagable_assignment, on: :update
+
+  # Prevent changing tagable association if it's already set and valid
+  validate :validate_tagable_reassignment, on: :update
+  validate :validate_tagable_assignment, on: [:create, :update], 
+                if: -> { tagable_type.present? && tagable_id.present? }
 
   # Allow setting tagable_type without tagable_id to indicate intended type
   # Only validate presence of tagable_id if we're setting a non-nil value
-  validates :tagable_id, presence: { message: 'must be present when setting a tagable' }, 
-                         if: -> { tagable_type.present? && tagable_id_changed? && tagable_id.present? }
-  validates :tagable_type, inclusion: { in: Constants.tagable.map(&:to_s) }, 
+  # validates :tagable_id, presence: { message: 'must be present when setting a tagable' }, 
+  #                       if: -> { tagable_type.present? && tagable_id_changed? && tagable_id.present? }
+  validates :tagable_type, inclusion: { in: Constants.tagable }, 
                            allow_nil: true,
                            allow_blank: true
   
   # Ensure a tagable is only associated with one tag
-  # validate :tagable_not_already_taken, if: -> { tagable_id.present? && tagable_type.present? }
+  validate :tagable_not_already_taken, if: -> { tagable_id.present? && tagable_type.present? }
   
   # Ensure tag is unique within the same project and discipline
+  # This is required because of doubts over using a database uniqueness contraint with suffix, which may be null.
+  # 
   validate :validate_tag_uniqueness
-  
-  # Custom validation to handle suffix uniqueness with NULL values in the database
-  def validate_tag_uniqueness
-    return unless project_id && discipline_id && prefix && serial
-    
-    # Convert empty string to nil for comparison
-    suffix_value = suffix.presence
-    
-    # Check for existing tags with the same combination
-    existing = Tag.where(
-      project_id: project_id,
-      discipline_id: discipline_id,
-      prefix: prefix,
-      serial: serial
-    ).where("COALESCE(suffix, '') = ?", suffix_value.to_s)
-    
-    # Exclude current record from the check if it's persisted
-    existing = existing.where.not(id: id) if persisted?
-    
-    if existing.exists?
-      errors.add(:base, I18n.t('activerecord.errors.models.tag.unique', tag: label))
-    end
-  end
 
   # Track original values to detect changes
   def initialize(*)
@@ -143,7 +126,7 @@ class Tag < ApplicationRecord
     parts
   end
   
-  # private
+  private
   
     # Find adjacent tag (next or previous) based on the given join condition
     def adjacent_tag(join_column)
@@ -167,6 +150,29 @@ class Tag < ApplicationRecord
       
       self.class.find_by_sql([sql, { project_id: project_id, current_id: id }]).first
     end
+  
+    # Custom validation to handle suffix uniqueness with NULL values in the database
+    def validate_tag_uniqueness
+      return unless project_id && discipline_id && prefix && serial
+      
+      # Convert empty string to nil for comparison
+      suffix_value = suffix.presence
+      
+      # Check for existing tags with the same combination
+      existing = Tag.where(
+        project_id: project_id,
+        discipline_id: discipline_id,
+        prefix: prefix,
+        serial: serial
+      ).where("COALESCE(suffix, '') = ?", suffix_value.to_s)
+      
+      # Exclude current record from the check if it's persisted
+      existing = existing.where.not(id: id) if persisted?
+      
+      if existing.exists?
+        errors.add(:base, I18n::t("activerecord.errors.models.tag.taken", tag: label))
+      end
+    end
     
     # Prevent re-assigning a tagable to a different tag
     def tagable_not_already_taken
@@ -183,14 +189,21 @@ class Tag < ApplicationRecord
     end
 
     # Prevent changing tagable association if it's already set and valid
-    def validate_tagable_assignment
+    def validate_tagable_reassignment
       return unless tagable_type_changed? || tagable_id_changed?
       return if tagable_id_was.blank? || tagable_type_was.blank?
       
       # Allow changes if the current association is invalid
       return if tagable_type_was.constantize.where(id: tagable_id_was).none?
       
-      errors.add(:base, 'Cannot change tagable association once set') 
+      errors.add(:base, I18n::t("activerecord.errors.models.tag.change_tagable")) 
+    end
+
+    # Prevent setting tagable association if it's already set and valid
+    def validate_tagable_assignment
+      if (tagable_type.constantize rescue nil)&.where(id: tagable_id)&.none?
+        errors.add(:tagable, :invalid)
+      end
     end
 
     def self.ransackable_attributes(auth_object = nil)
@@ -199,7 +212,7 @@ class Tag < ApplicationRecord
     end
 
     def self.ransackable_associations(auth_object = nil)
-      ["discipline", "project", "tagable"]
+      ["discipline", "project"] + Tag.tagable_types.map { |type| type.underscore.pluralize }
     end
 
     # Returns tags grouped by their loop identifier

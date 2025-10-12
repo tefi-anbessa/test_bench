@@ -33,6 +33,7 @@ Rails.application.routes.draw do
       resources :switchboards, except: [:index] do
         resources :circuits, except: [:index]
       end
+      resources :demands, only: [:new, :create]
       collection do
         get :schema_data
       end
@@ -44,7 +45,7 @@ Rails.application.routes.draw do
     resources :cable_types
     
     # Demands routes
-    resources :demands
+    resources :demands, except: [:new, :create]
 
     # Routes for the RBAC system. 
     # Destroy requires both the role id and the user id to allow rolify to remove the correct HABTM entry.
@@ -58,6 +59,13 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root to: 'site#home'
   
-  # Error handling - only custom 403 page, others use static files in public/
-  get '/403', to: 'errors#forbidden', as: :forbidden
+  # Error handling - custom error pages
+  match '/403', to: 'errors#forbidden', via: :all, as: :forbidden
+  match '/404', to: 'errors#not_found', via: :all, as: :not_found
+  match '/409', to: 'errors#conflict', via: :all, as: :conflict
+  match '/422', to: 'errors#unprocessable_entity', via: :all, as: :unprocessable_entity
+  match '/500', to: 'errors#internal_server_error', via: :all, as: :internal_server_error
+  
+  # Catch-all route for 404s - must be last
+  match '*unmatched', to: 'errors#not_found', via: :all
 end

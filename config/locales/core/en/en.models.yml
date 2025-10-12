@@ -132,6 +132,7 @@ en:
         metering:         "Metering"
         neutral_bar_connections:  "Neutral Bar Connections"
         earth_bar_connections:  "Earth Bar Connections"
+        circuits:         "Circuits"
       circuit:
         serial:           "Serial Number"
         phase:            "Phase Designation"
@@ -165,8 +166,9 @@ en:
               blank: "Role must be selected"
               invalid: "%{name} is not a valid role for %{resource}"
         tag:
-          unique: "Tag %{tag} already exists"
+          taken: "Tag %{tag} already exists"
           tagable_type:
             not_assigned: "Not assigned"
+            change_tagable: "Cannot change tagable association once set"
 
 #

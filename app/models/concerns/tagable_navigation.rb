@@ -1,11 +1,6 @@
 module TagableNavigation
   extend ActiveSupport::Concern
   
-  included do
-    # Ensure we have a tag
-    before_validation :ensure_tag_exists
-  end
-  
   # Get the next record in the project, ordered by discipline, loop_id, prefix, and suffix
   # @param attribute [Symbol] The attribute to order by (default: :loop_id)
   # @return [self] Returns the next record or self if there isn't one
@@ -69,12 +64,5 @@ module TagableNavigation
         model_name: model_class.name
       }
     ]).first
-  end
-  
-  # Ensure the record has a tag
-  def ensure_tag_exists
-    return if tag.present?
-    errors.add(:base, 'must have a tag')
-    throw :abort
   end
 end

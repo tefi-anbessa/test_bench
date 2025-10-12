@@ -60,7 +60,7 @@ class SwitchboardsController < ApplicationController
       if @tag.persisted?
         # Existing tag: Create switchboard and update tag in one transaction using 
         # delegated_type via the delegator (Tag)
-        if @switchboard.valid? && @tag.update(tagable: @switchboard)
+        if @tag.update(tagable: @switchboard)
           @tag.reload
           update_circuits # Create circuits if the :circuits parameter is present
           flash[:success] = t('flash.tagables.assigned_to',
@@ -230,7 +230,7 @@ class SwitchboardsController < ApplicationController
         "Expected type: #{controller_name.classify}, " \
         "User: #{current_user&.id}"
       )
-      trap_forbidden
+      raise ApplicationController::ConflictError, "Forbidden: Invalid tag association"
       return
     end
 end

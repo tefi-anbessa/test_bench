@@ -25,6 +25,17 @@ en:
       title:        "Forbidden"
       header:       "Forbidden"
       message:      "You are not authorized to perform this action."
+    conflict:
+      title:        "Conflict"
+      header:       "Conflict Detected"
+      subheader:    "This action cannot be completed"
+      reason:       "Reason:"
+      resource:     "Resource"
+      user:         "User"
+      roles:        "Roles"
+      show_details: "Show technical details"
+      back_to_home: "Back to Home"
+      go_back:      "Go Back"
   projects:
     index:
       title:            "Projects"
@@ -52,13 +63,13 @@ en:
       header:           "Tag List"
     edit:
       title:            "Edit Tag"
-      header:           "Edit Tag: %{tag}"
+      header:           "Edit Tag: %{label}"
     new:
       title:            "New Tag"
       header:           "New Tag"
     show:
       title:            "Tag"
-      header:           "Tag: %{tag}"
+      header:           "Tag: %{label}"
 
   roles:
     index:
@@ -136,10 +147,10 @@ en:
       header:           "Load List"
     edit:
       title:            "Edit Load"
-      header:           "Edit Load: %{label}"
+      header:           "Edit Load for %{label}"
     new:
       title:            "New Load"
-      header:           "New Load"
+      header:           "New Load for %{label}"
     show:
       title:            "Load"
       header:           "Load: %{label}"

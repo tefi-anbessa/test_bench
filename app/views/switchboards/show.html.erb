@@ -1,5 +1,4 @@
-<% content_for :title, [t('activerecord.models.switchboard'), 
-  @switchboard.tag&.full_tag].join(' ') %>
+<% provide(:title, t('.title')) %>
 <div class="container mt-3">
   <!-- Switchboard Header Card -->
   <div class="card mb-4">
@@ -25,8 +24,8 @@
               <%= link_to switchboard_path(prev_switchboard),
                     disabled: disabled,
                     class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
-                    title: "#{t('actions.previous')}: #{prev_switchboard.tag&.full_tag}" do %>
-                <%== icon('arrow-left') %>
+                    title: "#{t('actions.previous')}: #{prev_switchboard.label}" do %>
+                <%== icon('box-arrow-in-left') %>
                 <span class="d-none d-md-inline">
                   <%= t('actions.previous') %>
                 </span>
@@ -40,8 +39,7 @@
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
               <span class="badge bg-primary fs-6">
-                <%= [t('activerecord.models.switchboard'), 
-                  @switchboard.tag&.full_tag].join(' ') %>
+                <%= t('.header', label: @switchboard.label)%>
               </span>
               <% if @switchboard.tag&.service.present? %>
                 <small class="text-muted ms-2"><%= @switchboard.tag.service %></small>
@@ -60,7 +58,7 @@
               <%= link_to switchboard_path(next_switchboard),
                     disabled: disabled,
                     class: "btn btn-sm btn-outline-secondary me-2 #{'disabled' if disabled}",
-                    title: "#{t('actions.next')}: #{next_switchboard.tag&.full_tag}" do %>
+                    title: "#{t('actions.next')}: #{next_switchboard.label}" do %>
                 <span class="d-none d-md-inline">
                   <%= t('actions.next') %>
                 </span>
@@ -113,7 +111,7 @@
             <% else %>
               <div class="row g-3 mb-3">
                 <div class="alert alert-danger">
-                  <%= t('index.no_tag') %>
+                  <%= t('show.orphan', model: Tag.model_name.human.downcase) %>
                 </div>
               </div>
             <% end %>
@@ -188,6 +186,32 @@
                         title: text do %>
                           <%= text %>
                           <%== icon('box-arrow-in-down-right') %>
+                      <% end %>
+                    </div>
+                  </div>
+
+                  <div class="row mb-1">
+                    <div class="col-4 text-muted">
+                      <% text = t('activerecord.models.demand') %>
+                      <% if @switchboard.demand.present? %>
+                        <%= link_to demand_path(@switchboard.demand),
+                          class: "btn btn-sm btn-outline-secondary",
+                          title: text do %>
+                            <%= text %>
+                            <%== icon('box-arrow-in-down-right') %>
+                        <% end %>
+                      <% else %>
+                      <% text = t("actions.link", resource: t("activerecord.models.demand")) %>
+                        <% if policy(Demand).new? %>
+                          <%= link_to new_tag_demand_path(@switchboard.tag.id),
+                              class: "btn btn-sm btn-outline-primary mb-2",
+                              title: text do %>
+                                <span class="d-none d-md-inline">
+                                  <%= text %>
+                                </span>
+                                <%== icon('link') %>
+                              <% end %>
+                        <% end %>
                       <% end %>
                     </div>
                   </div>

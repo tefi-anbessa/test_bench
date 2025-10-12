@@ -6,7 +6,7 @@ class Switchboard < ApplicationRecord
   enum :voltage_rating, Constants.electrical.voltage_ratings.to_h
 
   def label
-    tag.label
+    tag&.label || I18n::t("show.orphan", model: Tag.model_name.human)
   end
   
   private

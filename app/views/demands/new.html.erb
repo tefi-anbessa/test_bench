@@ -1,8 +1,4 @@
 <% provide(:title, t('.title')) %>
-<% provide(:button_text, t('actions.save')) %>
-<div class="container">
-  <h2>
-    <%= t('.header')%>
-  </h2>
-</div>
-<%= render 'form' %>
+<% provide(:header, t('.header', label: @tag.label)) %>
+<% provide(:button_text, t('actions.save_change')) %>
+<%= render 'form', demand: @demand, tag: @tag %>

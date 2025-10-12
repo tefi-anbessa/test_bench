@@ -128,13 +128,34 @@ class ActiveSupport::TestCase
   # Asserts that the request was explicitly forbidden (403)
   # Verifies:
   # - 403 Forbidden status code
-  # - No redirect (renders 403 page)
+  # - Renders the forbidden error page
+  # - Optionally checks for a specific message in the response
   #
-  # @param message [String] Optional custom assertion message
+  # @param message [String] Optional message to check in response body
   def assert_forbidden(message = nil)
-    assert_response :forbidden, message # 403
+    assert_response :forbidden
+    if @response.media_type == 'text/html' || @response.media_type == 'text/html; charset=utf-8'
+      assert_select 'h1', /403: Forbidden/
+      assert_match(/Access Denied/, @response.body)
+      assert_match(/#{Regexp.escape(message)}/, @response.body) if message
+    end
   end
- 
+
+  # Asserts that the request resulted in a conflict (409)
+  # Verifies:
+  # - 409 Conflict status code
+  # - Renders the conflict error page
+  # - Optionally checks for a specific message in the response
+  #
+  # @param message [String] Optional message to check in response body
+  def assert_conflict(message = nil)
+    assert_response :conflict
+    if @response.media_type == 'text/html' || @response.media_type == 'text/html; charset=utf-8'
+      assert_select 'h1', /409: Conflict/
+      assert_match(/#{Regexp.escape(message)}/, @response.body) if message
+    end
+  end
+  
   # Assigns a role to a user
   def assign_role(user, role, resource = nil)
     user.grant(role, resource)

@@ -154,26 +154,26 @@
         <div class="col-8">
           <span>
             <% if @tag.tagable_type.present? %>
-              <span class="text-muted"><%= @tag.tagable_type %></span>
+            <% text = @tag.tagable_type.tableize.singularize %>
+              
               <% if @tag.tagable.present? %>
-                <%= link_to eval("#{@tag.tagable_type.tableize.singularize}_path(#{@tag.tagable_id})"),
+                <%= link_to eval("#{text}_path(#{@tag.tagable_id})"),
                     class: "btn btn-sm btn-outline-secondary mb-2",
-                    title: t('actions.view') do %>
+                    title: t('show.linked', model: text) do %>
                   <%== icon('box-arrow-down-right') %>
-                  <span class="d-none d-md-inline"><%= t('show.linked', 
-                  model: @tag.tagable_type.tableize.singularize) %></span>
+                  <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
                 <% end %>
               <% else %>
-              <% if policy(@tag.tagable_type.constantize).create? %>
-                <% resource = @tag.tagable_type.tableize.singularize %>
+                <% if policy(@tag.tagable_type.constantize).new? %>
+                  <% resource = @tag.tagable_type.tableize.singularize %>
                   <%= link_to eval("new_tag_#{resource}_path(#{@tag.id})"),
                       class: "btn btn-sm btn-outline-primary mb-2",
                       title: t('actions.link', resource: resource) do %>
-                    <%== icon('link') %>
-                    <span class="d-none d-md-inline">
-                      <%= t('actions.link', resource: resource) %>
-                    </span>
-                  <% end %>
+                        <%== icon('link') %>
+                        <span class="d-none d-md-inline">
+                          <%= t('actions.link', resource: resource) %>
+                        </span>
+                      <% end %>
                 <% end %>
               <% end %>
             <% else %>

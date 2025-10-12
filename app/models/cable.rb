@@ -8,6 +8,10 @@ class Cable < ApplicationRecord
   belongs_to :cable_type
   belongs_to :circuit, optional: true
 
+  def label
+    tag&.label || I18n::t("show.orphan", model: Tag.model_name.human)
+  end
+
   # Validations
   validates :cable_type, presence: true
 

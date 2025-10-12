@@ -91,19 +91,18 @@
         </div>
 
         <!-- Card Footer with Actions -->
-          <div class="card-footer bg-transparent text-end p-2">
-            <%= link_to(circuit, 
-                  class: 'btn btn-warning',
-                  data: { turbo: false }) do %>
-              <%= t('actions.discard') %>
-              <%== icon('x-square') %>
-            <% end %>
+        <div class="card-footer bg-transparent text-end p-2">
+          <%= link_to(circuit, 
+                class: 'btn btn-warning',
+                data: { turbo: false }) do %>
+            <%= t('actions.discard') %>
+            <%== icon('x-square') %>
+          <% end %>
 
-            <%= f.button :submit, class: 'btn btn-primary' do %>
-              <%= yield(:button_text) %>
-              <%== icon('save') %>
-            <% end %>
-          </div>
+          <%= f.button :submit, class: 'btn btn-primary' do %>
+            <%= yield(:button_text) %>
+            <%== icon('save') %>
+          <% end %>
         </div>
       </div>
     <% end %>

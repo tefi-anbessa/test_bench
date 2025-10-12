@@ -9,12 +9,12 @@
       style: "max-width: 300px;"
     ) rescue image_tag("https://via.placeholder.com/300x200?text=HAL+9000", class: "img-fluid mb-4") %>
     
-    <h1 class="display-4 text-danger">403: <%= t('.header') %></h1>
+    <h1 class="display-4 text-warning">403: <%= t('.header') %></h1>
     
     <%= render 'shared/flash' if flash.any? %>
     
     <div class="card mt-4">
-      <div class="card-header bg-danger text-white">
+      <div class="card-header bg-warning text-dark">
         <h2 class="h5 mb-0">Access Denied</h2>
       </div>
       <div class="card-body text-start">

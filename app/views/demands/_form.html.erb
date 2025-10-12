@@ -1,178 +1,126 @@
-<div class="container">
-  <% unless @tag.nil? %>
-    <%= render 'tags/tag_card', tag: @tag %>
-  <% end %>
-  <%= bootstrap_form_with(model: @demand) do |f| %>
-    <%= render 'shared/error_messages', object: f.object %>
-    <%= f.hidden_field :tag_id, value: @tag&.id %>
-    <div class="d-flex flex-row mb-1">
-      <div class="p-2 me-1 form-field">
-        <%= f.select :basis, Demand.bases.keys.collect { |basis| [Demand.human_enum_name(:basis, basis), basis] },
-              layout: :vertical,
-              help: t('activerecord.attributes.demand.basis_help') %>
-      </div>
-      <div class="p-2 me-1 form-field">
-        <%= f.text_area :basis_notes, layout: :vertical,
-            help: t('activerecord.attributes.demand.basis_notes_help') %>
-      </div>
-    </div>
-    <div class="d-flex flex-row mb-1">
-      <div class="p-2 me-1 form-field">
-        <%= f.select :config, Demand.configs.keys.collect { |config| [Demand.human_enum_name(:config, config), config] },
-              layout: :vertical,
-              help: t('activerecord.attributes.demand.config_help') %>
-      </div>
-      <div class="p-2 me-1 form-field">
-        <%= f.select :supply, Constants.electrical.supply.to_h,
-              include_blank: t("form.other"),
-              layout: :vertical, append: "V",
-              help: t('activerecord.attributes.demand.supply_help') %>
-        <%= f.number_field :other_supply, in: 1.0 .. 100000.0, step: 1, append: "V", layout: :vertical %>
+<div class="container mt-3">
+  <div class="card">
+    <div class="card-header p-2">
+      <!-- Center Tag Info -->
+      <div class="col text-center">
+        <div class="d-flex flex-column align-items-center">
+          <div class="mt-1">
+            <%= yield(:header) %>
+            <% if tag.present? && tag.persisted? %>
+              <small class="text-muted ms-2"><%= tag.service %></small>
+            <% end %>
+          </div>
+        </div>
       </div>
     </div>
 
-    <% case @demand.basis %>
-    <% when "summation" %>
-      <div class="d-flex flex-row mb-1">
-        <div class="p-2 me-1 data-field">
-          <%= f.text_field :current,
-                value: number_to_human(f.object.current, precision: 4),
-                disabled: true, append: "A", layout: :vertical %>
-        </div>
-        <div class="p-2 me-1 data-field">
-          <%= f.text_field :power,
-                value: number_to_human(f.object.power, precision: 4),
-                disabled: true, append: "W", layout: :vertical %>
-        </div>
-      </div>
-    <% when "power_pf" %>
-      <div class="d-flex flex-row mb-1">
-        <div class="p-2 me-1 form-field">
-          <%= f.number_field :power, append: "W", layout: :vertical %>
-        </div>
-        <div class="p-2 me-1 form-field">
-          <%= f.number_field :power_factor, in: -1.0 .. 1.0, step: 0.01,
-                layout: :vertical %>
-        </div>
-      </div>
-      <div class="d-flex flex-row mb-1">
-        <div class="p-2 me-1 data-field">
-          <%= f.text_field :current,
-                value: number_to_human(f.object.current, precision: 4),
-                disabled: true, append: "A", layout: :vertical %>
-        </div>
-        <div class="p-2 me-1 data-field">
-          <%= f.text_field :vector,
-                value: number_to_human(f.object.vector, precision: 4),
-                disabled: true, append: "VA", layout: :vertical %>
-        </div>
-      </div>
-    <% when "vector_pf" %>
-      <div class="d-flex flex-row mb-1">
-        <div class="p-2 me-1 form-field">
-          <%= f.number_field :vector, append: "VA", layout: :vertical %>
-        </div>
-        <div class="p-2 me-1 form-field">
-          <%= f.number_field :power_factor,
-                in: -1.0 .. 1.0, step: 0.01, layout: :vertical %>
-        </div>
-      </div>
-      <div class="d-flex flex-row mb-1">
-        <div class="p-2 me-1 data-field">
-          <%= f.text_field :power,
-                value: number_to_human(f.object.power, precision: 4),
-                disabled: true, append: "W", layout: :vertical %>
-        </div>
-        <div class="p-2 me-1 data-field">
-          <%= f.text_field :current,
-                value: number_to_human(f.object.current, precision: 4),
-                disabled: true, append: "A", layout: :vertical %>
-        </div>
-      </div>
-    <% when "current_pf" %>
-      <div class="d-flex flex-row mb-1">
-        <div class="p-2 me-1 form-field">
-          <%= f.number_field :current, append: "A", layout: :vertical %>
-        </div>
-        <div class="p-2 me-1 form-field">
-          <%= f.number_field :power_factor,
-                in: -1.0 .. 1.0, step: 0.01, layout: :vertical %>
-        </div>
-      </div>
-      <div class="d-flex flex-row mb-1">
-        <div class="p-2 me-1 data-field">
-          <%= f.text_field :power,
-                value: number_to_human(f.object.power, precision: 4),
-                disabled: true, append: "W", layout: :vertical %>
-        </div>
-        <div class="p-2 me-1 data-field">
-          <%= f.text_field :vector,
-                value: number_to_human(f.object.vector, precision: 4),
-                disabled: true, append: "VA", layout: :vertical %>
-        </div>
-      </div>
-    <% when "current_power" %>
-      <div class="d-flex flex-row mb-1">
-        <div class="p-2 me-1 form-field">
-          <%= f.number_field :current, disabled: false, append: "A", layout: :vertical %>
-        </div>
-        <div class="p-2 me-1 form-field">
-          <%= f.number_field :power, disabled: false, append: "W", layout: :vertical %>
-        </div>
-      </div>
-      <div class="d-flex flex-row mb-1">
-        <div class="p-2 me-1 data-field">
-          <%= f.text_field :vector,
-                value: number_to_human(f.object.vector, precision: 4),
-                disabled: true, append: "VA", layout: :vertical %>
-        </div>
-        <div class="p-2 me-1 data-field">
-          <%= f.text_field :power_factor,
-                value: number_to_human(f.object.power_factor, precision: 4),
-                disabled: true, layout: :vertical %>
-        </div>
-      </div>
-    <% end %>
-    <div class="d-flex flex-row mb-1">
-      <div class="p-2 me-1 form-field">
-        <%= f.number_field :duty, in: 0.0 .. 1.0, step: 0.01, layout: :vertical,
-              help: t('activerecord.attributes.demand.duty_help') %>
-      </div>
-    </div>
-    <div class="flex-row d-flex">
-      <div class="p-2 me-1 form-field">
-        <%= f.select :demandable_type, Constants.electrical.loadable,
-                      include_blank: true, layout: :vertical %>
-      </div>
-    </div>
+    <%= bootstrap_form_with(model: @demand, 
+        url: tag_demands_path(@tag),
+        layout: :horizontal, 
+        label_col: "col-sm-4", 
+        control_col: "col-sm-8") do |f| %>
 
-    <div class="flex-row d-flex mb-1 actions">
-      <div class="p-2 me-1">
+      <div class="card-body p-2">
+        <%= render 'shared/error_messages', object: f.object %>
+
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+
+            <div class="row">
+              <%= f.select :basis, 
+                    Demand.bases.keys.collect { |basis| [Demand.human_enum_name(:basis, basis), basis] },
+                    help: t('activerecord.attributes.demand.basis_help') %>
+            </div>
+            
+            <div class="row">
+              <%= f.text_area :basis_notes,
+                  help: t('activerecord.attributes.demand.basis_notes_help') %>
+            </div>
+
+            <div class="row">
+              <%= f.select :config, 
+                    Demand.configs.keys.collect { |config| [Demand.human_enum_name(:config, config), config] },
+                    help: t('activerecord.attributes.demand.config_help') %>
+            </div>
+
+            <div class="row">
+              <%= f.select :supply, Constants.electrical.supply.to_h,
+                  include_blank: t("form.other"),
+                  append: "V",
+                  help: t('activerecord.attributes.demand.supply_help') %>
+            </div>
+
+            <% disabled = [:current, :power, :vector, :power_factor] %>
+            <% case @demand.basis %>
+            <% when "summation" %>
+            <% when "power_pf" %>
+              <% disabled.delete(:power) %>
+              <% disabled.delete(:power_factor) %>
+            <% when "vector_pf" %>
+              <% disabled.delete(:vector) %>
+              <% disabled.delete(:power_factor) %>
+            <% when "current_pf" %>
+              <% disabled.delete(:current) %>
+              <% disabled.delete(:power_factor) %>
+            <% when "current_power" %>
+              <% disabled.delete(:current) %>
+              <% disabled.delete(:power) %>
+            <% end %>
+        
+            <div class="row">
+              <%= f.number_field :current,
+                    value: number_to_human(f.object.current, precision: 4),
+                    disabled: disabled.include?(:current), append: "A" %>
+            </div>
+
+            <div class="row">
+              <%= f.number_field :power,
+                    value: number_to_human(f.object.power, precision: 4),
+                    disabled: disabled.include?(:power), append: "W" %>
+            </div>
+
+            <div class="row">
+              <%= f.number_field :power_factor, in: -1.0 .. 1.0, step: 0.01,
+                    disabled: disabled.include?(:power_factor) %>
+            </div>
+
+            <div class="row">
+              <%= f.number_field :vector,
+                    value: number_to_human(f.object.vector, precision: 4),
+                    disabled: disabled.include?(:vector), append: "VA" %>
+            </div>
+
+            <div class="row">
+              <%= f.number_field :duty, in: 0.0 .. 1.0, step: 0.01,
+                    help: t('activerecord.attributes.demand.duty_help') %>
+            </div>
+          </div> <!-- end responsive columns --> 
+        </div>
+      </div> <!-- card body -->
+
+      <!-- Card Footer with Actions -->
+      <div class="card-footer bg-transparent text-end p-2">
+        <% if @demand.persisted? %>
+            <%= link_to demand_path(@demand),
+              class: "btn btn-warning actions",
+              data: { turbo_confirm: t('actions.sure') } do %>
+                <%= t('actions.discard') %>
+                <%== icon('x-square') %>
+              <% end %>
+        <% else %>
+            <%= link_to new_tag_demand_path(@tag),
+              class: "btn btn-warning actions",
+              data: { turbo_confirm: t('actions.sure') } do %>
+                <%= t('actions.discard') %>
+                <%== icon('x-square') %>
+              <% end %>
+        <% end %>
+        <!-- Button to submit form -->
         <%= f.primary do %>
           <%= yield(:button_text) %>
           <%== icon('save') %>
         <% end %>
       </div>
-
-      <% if @demand.persisted? %>
-        <div class="p-2 me-1">
-          <%= link_to demand_path(@demand),
-            class: "btn btn-warning actions",
-            data: { turbo_confirm: t('actions.sure') } do %>
-              <%= t('actions.discard') %>
-              <%== icon('x-square') %>
-            <% end %>
-        </div>
-      <% else %>
-        <div class="p-2 me-1">
-          <%= link_to new_tag_demand_path(@tag),
-            class: "btn btn-warning actions",
-            data: { turbo_confirm: t('actions.sure') } do %>
-              <%= t('actions.discard') %>
-              <%== icon('x-square') %>
-          <% end %>
-        </div>
-      <% end %>
-    </div>
-  <% end %>
-</div>
+    <% end %>
+  </div> <!-- card  -->
+</div> <!-- container  -->

@@ -34,6 +34,18 @@ class Demand < ApplicationRecord
   attribute :power_factor, default: 1.0
   attribute :duty, default: 1.0
 
+  def tag
+    demandable&.tag
+  end
+  
+  def label
+    demandable&.label || I18n.t("show.orphan", 
+                                model: demandable_type.presence&.constantize&.model_name&.human || 
+                                I18n.t("show.default_model")
+                              )
+  end
+
+  
   def conductor_count
     case self.config
     when "dc", "one"

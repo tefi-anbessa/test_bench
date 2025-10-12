@@ -39,6 +39,19 @@ class ErrorsController < ActionController::Base
       format.any { head :forbidden }
     end
   end
+
+  # GET /409
+  # Conflict error page (e.g., resource already exists, business rule violation)
+  def conflict
+    @exception = request.env['action_dispatch.exception']
+    @status_code = :conflict
+    
+    respond_to do |format|
+      format.html { render status: :conflict }
+      format.json { render json: { error: @exception&.message || 'Conflict' }, status: :conflict }
+      format.any { head :conflict }
+    end
+  end
   
   # Other error pages are handled by static files in public/
   # (400.html, 404.html, 422.html, 500.html)

@@ -18,12 +18,12 @@ class DemandPolicy < ElectricalResourcePolicy
     def resolve
         return scope.none unless current_project
       
-        # First, get all taggable IDs from the current project
-        taggable_ids = current_project.tags.pluck(:tagable_type, :tagable_id)
-        return scope.none if taggable_ids.empty?
+        # First, get all tagable IDs from the current project
+        tagable_ids = current_project.tags.pluck(:tagable_type, :tagable_id)
+        return scope.none if tagable_ids.empty?
       
         # Convert to a hash of { type => [ids] }
-        type_to_ids = taggable_ids.each_with_object(Hash.new { |h, k| h[k] = [] }) do |(type, id), hash|
+        type_to_ids = tagable_ids.each_with_object(Hash.new { |h, k| h[k] = [] }) do |(type, id), hash|
           hash[type] << id
         end
       

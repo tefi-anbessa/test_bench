@@ -121,7 +121,7 @@ class TagTest < ActiveSupport::TestCase
       suffix: tag1.suffix
     )
     assert_not tag2.valid?
-    assert_includes tag2.errors[:prefix], I18n.t('activerecord.errors.models.tag.full_tag')
+    assert_includes tag2.errors[:base], I18n.t("activerecord.errors.models.tag.taken", tag: tag2.full_tag)
     
     # Different project, same other attributes should be valid
     tag3 = build(:tag,
@@ -190,7 +190,7 @@ class TagTest < ActiveSupport::TestCase
       suffix: nil
     )
     assert_not tag9.valid?
-    assert_includes tag9.errors[:prefix], I18n.t('activerecord.errors.models.tag.full_tag')
+    assert_includes tag9.errors[:base], I18n.t('activerecord.errors.models.tag.taken', tag: tag9.full_tag)
   end
 
   test "prefix should be present" do
@@ -278,8 +278,8 @@ class TagTest < ActiveSupport::TestCase
   
   test "should validate tagable_type against allowed types" do
     @tag.tagable_type = 'InvalidType'
-    @tag.valid?
-    assert_includes @tag.errors[:tagable_type], 'is not included in the list'
+    refute @tag.valid?
+    assert_includes @tag.errors[:tagable_type], I18n::t("errors.messages.inclusion")
   end
   
   test "should allow creating tagable type with existing tag" do
@@ -307,13 +307,13 @@ class TagTest < ActiveSupport::TestCase
     tag.tagable_id = 999
     tag.save
     assert_not tag.valid?
-    assert_includes tag.errors[:base], 'Cannot change tagable association once set'
+    assert_includes tag.errors[:base], I18n::t("activerecord.errors.models.tag.change_tagable")
 
     #test again using update
     tag.reload
     tag.update(tagable: build(:cable))
     assert_not tag.valid?
-    assert_includes tag.errors[:base], 'Cannot change tagable association once set'
+    assert_includes tag.errors[:base], I18n::t("activerecord.errors.models.tag.change_tagable")
   end
   
   test "should prevent assigning tagable that's already associated with a tag" do
@@ -359,7 +359,7 @@ class TagTest < ActiveSupport::TestCase
     @tag.tagable_id = 9999 # Non-existent ID
     
     assert_not @tag.valid?
-    assert_includes @tag.errors[:tagable], 'must exist'
+    assert_includes @tag.errors[:tagable], I18n::t("errors.messages.invalid")
   end
   
   test "should nullify both type and id when associated record is destroyed" do
@@ -388,8 +388,8 @@ class TagTest < ActiveSupport::TestCase
     @tag.tagable_type = 'NonExistentModel'
     @tag.tagable_id = 1
     
-    assert_not @tag.valid?
-    assert_includes @tag.errors[:tagable_type], 'is not a valid type'
+    refute @tag.valid?
+    assert_includes @tag.errors[:tagable_type], I18n::t("errors.messages.inclusion")
   end
   
   test "should be able to create new tag on project" do

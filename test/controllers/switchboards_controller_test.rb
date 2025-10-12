@@ -19,7 +19,7 @@ class SwitchboardsControllerTest < ActionController::TestCase
     @team_member.grant(:team_member, @project) # Project team member role
 
     @electrical_designer = create(:user)
-    @electrical_designer.grant(:electrical_designer) # Project electrical designer role
+    @electrical_designer.grant(:electrical_designer) # Global electrical designer role
     @electrical_designer.grant(:team_member, @project) # Project team member role
 
     @regular_user = create(:user)   # No roles
@@ -34,6 +34,29 @@ class SwitchboardsControllerTest < ActionController::TestCase
     @switchboard = create(:switchboard, tag: @swbd_tag, location: 'Location 1')
     
     @request.env["devise.mapping"] = Devise.mappings[:user]
+  end
+
+  test "Setup is valid" do
+    assert @project.valid?
+    assert @admin.valid?
+    assert @project_manager.valid?
+    assert @team_member.valid?
+    assert @electrical_designer.valid?
+    assert @regular_user.valid?
+    assert @discipline.valid?
+    assert @swbd_tag.valid?
+    assert @another_swbd_tag.valid?
+    assert @switchboard.valid?
+    assert @project.persisted?
+    assert @admin.persisted?
+    assert @project_manager.persisted?
+    assert @team_member.persisted?
+    assert @electrical_designer.persisted?
+    assert @regular_user.persisted?
+    assert @discipline.persisted?
+    assert @swbd_tag.persisted?
+    assert @another_swbd_tag.persisted?
+    assert @switchboard.persisted?
   end
 
   # Index action tests
@@ -87,6 +110,23 @@ class SwitchboardsControllerTest < ActionController::TestCase
   end
 
   # Create action tests
+  # Success tests
+  test "electrical designer can create switchboard" do
+    sign_in @electrical_designer
+    assert_difference('Switchboard.count', 1) do
+      post :create, params: {
+        tag_id: @another_swbd_tag.id,
+        switchboard: {
+          location: 'Location 3'
+        }
+      }
+    end
+    assert_redirected_to switchboard_path(Switchboard.last)
+    expected = I18n.t('flash.actions.create.notice', resource_name: Switchboard.model_name.human)
+    assert_equal expected, flash[:success]
+  end
+
+  # Create action tests
   # Fail to create
   test "team member cannot create switchboard" do
     sign_in @team_member
@@ -99,6 +139,19 @@ class SwitchboardsControllerTest < ActionController::TestCase
       }
     end
     assert_forbidden
+  end
+
+  test "electrical designer cannot create switchboard on tag already taken" do
+    sign_in @electrical_designer
+    assert_difference('Switchboard.count', 0) do
+      post :create, params: {
+        tag_id: @swbd_tag.id,
+        switchboard: {
+          location: 'Location 3'
+        }
+      }
+    end
+    assert_conflict
   end
 
   # Edit action tests
