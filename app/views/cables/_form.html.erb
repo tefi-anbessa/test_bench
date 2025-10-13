@@ -50,13 +50,48 @@
                       wrapper: { class: 'mb-1' },
                       required: true 
                     } %>
+                    
+            <div data-controller="cable-form" 
+              data-cable-form-id-options-value="<%= @id_options.to_json %>">
 
-            <!-- Circuit ID (Temporary) -->
-            <%= f.number_field :circuit_id,
-                    class: 'form-control form-control-sm',
-                    min: 0,
-                    placeholder: 'Temporary: Will be replaced',
-                    wrapper: { class: 'mb-1' } %>
+
+            <!-- From Section --> 
+            <div class="row">
+              <%= f.select :from_type,
+                options_for_select(@connect_options, selected: @cable.from_type),
+                { include_blank: true },
+                { 
+                  class: 'form-select form-select-sm',
+                  'data-cable-form-target': 'fromType',
+                  'data-action': 'change->cable-form#updateFromOptions'
+                } %> 
+            </div>
+            <div class="row">
+              <%= f.select :from_id, 
+                   options_for_select(@id_options[@cable.from_type] || [], 
+                   selected: @cable.from_id), 
+                   { include_blank: true },
+                   { 'data-cable-form-target': 'fromId' } %>
+            </div>
+
+            <!-- To Section --> 
+            <div class="row">
+              <%= f.select :to_type, 
+                  options_for_select(@connect_options, selected: @cable.to_type),
+                    { include_blank: true },
+                    { 
+                      class: 'form-select form-select-sm', 
+                      'data-cable-form-target': 'toType',
+                      'data-action': 'change->cable-form#updateToOptions'
+                    } %>
+            </div>
+            <div class="row">
+              <%= f.select :to_id,
+                    options_for_select(@id_options[@cable.to_type] || [], 
+                    selected: @cable.to_id), 
+                    { include_blank: true },
+                    { 'data-cable-form-target': 'toId' } %>
+              </div>
 
             <!-- Design lengths -->
             <%= f.number_field :route_length,

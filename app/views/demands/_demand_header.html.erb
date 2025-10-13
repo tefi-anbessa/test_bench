@@ -1,13 +1,15 @@
 <thead>
-  <th scope="col"><%= sort_link(@q, :code, t('activerecord.attributes.tag.full_tag')) %></th>
-  <th scope="col"><%= t('activerecord.attributes.demand.basis') %></th>
-  <th scope="col"><%= t('activerecord.attributes.demand.config') %></th>
-  <th scope="col"><%= t('activerecord.attributes.demand.supply') %></th>
-  <th scope="col"><%= t('activerecord.attributes.demand.power') %></th>
-  <th scope="col"><%= t('activerecord.attributes.demand.vector') %></th>
-  <th scope="col"><%= t('activerecord.attributes.demand.power_factor') %></th>
-  <th scope="col"><%= t('activerecord.attributes.demand.current') %></th>
-  <th scope="col"><%= t('activerecord.attributes.demand.duty') %></th>
-  <th scope="col"><%= t('activerecord.attributes.demand.demandable_type') %></th>
+  <th scope="col"><%= t('activerecord.attributes.tag.full_tag') %></th>
+  <th scope="col"><%= t('activerecord.attributes.demand.circuit') %></th>
+  <th scope="col"><%= t('activerecord.attributes.demand.incomer') %></th>
+  <th scope="col"><%= sort_link(@q, :basis) %></th>
+  <th scope="col"><%= sort_link(@q, :config) %></th>
+  <th scope="col"><%= sort_link(@q, :supply) %></th>
+  <th scope="col"><%= sort_link(@q, :power) %></th>
+  <th scope="col"><%= sort_link(@q, :vector) %></th>
+  <th scope="col"><%= sort_link(@q, :current) %></th>
+  <th scope="col"><%= sort_link(@q, :power_factor) %></th>
+  <th scope="col"><%= sort_link(@q, :duty) %></th>
+  <th scope="col"><%= sort_link(@q, :demandable_type) %></th>
   <th scope="col" width="150px"><%= t('table.links')%></th>
 </thead>

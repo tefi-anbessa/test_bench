@@ -156,7 +156,59 @@
                     <div class="col-4 text-muted"><%= t('activerecord.attributes.circuit.notes') %></div>
                     <div class="col-8"><%= @circuit.notes.presence || '-' %></div>
                   </div>
+
+                  <!-- Feeder Section -->
+                  <div class="row mb-1">
+                    <div class="col-4 text-muted">
+                      <%= t('activerecord.attributes.circuit.feeder') %>
+                    </div>
+                    <div class="col-8">
+                      <% if @circuit.feeder.present? %>
+                        <% text = t("activerecord.models.cable") %>
+                        <div class="d-flex justify-content-between align-items-center">
+                          <span><%= @circuit.feeder.label %></span>
+                          <%= link_to cable_path(@circuit.feeder),
+                                class: "btn btn-sm btn-outline-secondary mb-2",
+                                title: t('show.linked', model: text) do %>
+                                  <%== icon('link-45deg') %>
+                                  <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
+                                <% end %>
+                        </div>
+                      <% else %>
+                        <span class="text-muted">
+                          <%= t('show.unassigned', model: t("activerecord.attributes.circuit.feeder")) %>
+                        </span>
+                      <% end %>
+                    </div>
+                  </div>
+
+                  <!-- Load Section -->
+                  <div class="row mb-1">
+                    <div class="col-4 text-muted">
+                      <%= t('activerecord.attributes.circuit.demand') %>
+                    </div>
+                    <div class="col-8">
+                      <% if @circuit.demand.present? %>
+                        <% text = t("activerecord.models.demand") %>
+                        <div class="d-flex justify-content-between align-items-center">
+                          <span><%= @circuit.demand.label %></span>
+                          <%= link_to demand_path(@circuit.demand),
+                                class: "btn btn-sm btn-outline-secondary mb-2",
+                                title: t('show.linked', model: text) do %>
+                                  <%== icon('link-45deg') %>
+                                  <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
+                                <% end %>
+                        </div>
+                      <% else %>
+                        <span class="text-muted">
+                          <%= t('show.unassigned', model: t("activerecord.attributes.circuit.demand")) %>
+                        </span>
+                      <% end %>
+                    </div>
+                  </div>
+
                 </div>
+
               </div>
             </div>
           </div>

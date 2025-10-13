@@ -24,7 +24,7 @@
                     class: "btn btn-sm btn-outline-secondary
                       #{'disabled' if disabled}",
                     title: "#{t('actions.previous')}: #{prev_tag.full_tag}" do %>
-                <%== icon('arrow-left') %>
+                <%== icon('box-arrow-in-left') %>
                 <span class="d-none d-md-inline">
                   <%= t('actions.previous') %>
                 </span>
@@ -62,7 +62,7 @@
                 <span class="d-none d-md-inline">
                   <%= t('actions.next') %>
                 </span>
-                <%== icon('arrow-right') %>
+                <%== icon('box-arrow-in-right') %>
               <% end %>
             <% end %>
 
@@ -178,7 +178,7 @@
               <% end %>
             <% else %>
               <span class="text-muted">
-                <%= t('activerecord.errors.models.tag.tagable_type.not_assigned') %>
+                <%= t('show.unassigned', model: t("activerecord.attributes.tag.tagable_type")) %>
               </span>
             <% end %>
           </span>

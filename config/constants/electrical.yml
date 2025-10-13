@@ -6,6 +6,9 @@ electrical:
     - Motor
     - Heater
     - Equipment
+  connect_options:
+    - Circuit
+    - Demand
   phase_designation:
     "L1":       1
     "L2":       2

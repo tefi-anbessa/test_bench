@@ -23,7 +23,7 @@
                     disabled: disabled,
                     class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
                     title: "#{t('actions.previous')}: #{prev_cable.tag.full_tag}" do %>
-                <%== icon('arrow-left') %>
+                <%== icon('box-arrow-in-left') %>
                 <span class="d-none d-md-inline">
                   <%= t('actions.previous') %>
                 </span>
@@ -37,7 +37,7 @@
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
               <span class="badge bg-primary fs-6">
-                <%= t('activerecord.models.cable') + ' ' + @cable.tag.full_tag %>
+                <%= t('.header', label: @cable.label) %>
               </span>
               <% if @cable.tag.service.present? %>
                 <small class="text-muted ms-2"><%= @cable.tag.service %></small>
@@ -60,7 +60,7 @@
                 <span class="d-none d-md-inline">
                   <%= t('actions.next') %>
                 </span>
-                <%== icon('arrow-right') %>
+                <%== icon('box-arrow-in-right') %>
               <% end %>
             <% end %>
 
@@ -123,9 +123,62 @@
                     <div class="col-8"><%= @cable.cable_type&.label || '-' %></div>
                   </div>
                   
+                  <!-- From Section -->
                   <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.cable.route_length') %></div>
-                    <div class="col-8"><%= @cable.route_length.present? ? "#{@cable.route_length} m" : '-' %></div>
+                    <div class="col-4 text-muted">
+                      <%= t('activerecord.attributes.cable.from') %>
+                    </div>
+                    <div class="col-8">
+                      <span>
+                        <% if @cable.from_type.present? %>
+                          <% text = @cable.from_type.tableize.singularize %>
+                          <div class="d-flex justify-content-between align-items-center">  
+                            <% if @cable.from.present? %>
+                              <span><%= @cable.from.label %></span>
+                              <%= link_to eval("#{text}_path(#{@cable.from_id})"),
+                                  class: "btn btn-sm btn-outline-secondary mb-2",
+                                  title: t('show.linked', model: text) do %>
+                                    <%== icon('link-45deg') %>
+                                    <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
+                                  <% end %>
+                            <% end %>
+                          </div>
+                        <% else %>
+                          <span class="text-muted">
+                            <%= t('show.unassigned', model: t("activerecord.attributes.cable.from")) %>
+                          </span>
+                        <% end %>
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <!-- To Section -->
+                  <div class="row mb-1">
+                    <div class="col-4 text-muted">
+                      <%= t('activerecord.attributes.cable.to') %>
+                    </div>
+                    <div class="col-8">
+                      <span>
+                        <% if @cable.to_type.present? %>
+                          <% text = @cable.to_type.tableize.singularize %>
+                          <div class="d-flex justify-content-between align-items-center">  
+                            <% if @cable.to.present? %>
+                              <span><%= @cable.to.label %></span>
+                              <%= link_to eval("#{text}_path(#{@cable.to_id})"),
+                                  class: "btn btn-sm btn-outline-secondary mb-2",
+                                  title: t('show.linked', model: text) do %>
+                                    <%== icon('link-45deg') %>
+                                    <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
+                                  <% end %>
+                            <% end %>
+                          </div>
+                        <% else %>
+                          <span class="text-muted">
+                            <%= t('show.unassigned', model: t("activerecord.attributes.cable.to")) %>
+                          </span>
+                        <% end %>
+                      </span>
+                    </div>
                   </div>
                   
                   <div class="row mb-1">

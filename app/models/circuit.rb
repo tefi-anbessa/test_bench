@@ -1,7 +1,7 @@
 class Circuit < ApplicationRecord
   belongs_to :switchboard
   has_one :demand, dependent: :nullify
-  has_one :cable, dependent: :nullify
+  has_one :feeder, as: :from, class_name: 'Cable', dependent: :nullify
   
   # Alias for backward compatibility
   alias_method :load, :demand
@@ -18,6 +18,11 @@ class Circuit < ApplicationRecord
     "#{switchboard.label} ##{serial.to_s.rjust(2, '0')}"
   end
   
+  def demand
+    # Find the demand that this circuit supplies power to
+    feeder&.to if feeder&.to_type == "Demand"
+  end
+
   def self.ransackable_attributes(auth_object = nil)
     ["serial", "device", "poles", "curve", "rating", "elcb", "contactor",
       "notes", "created_at", "updated_at"]

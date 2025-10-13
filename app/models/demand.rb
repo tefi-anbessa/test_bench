@@ -8,7 +8,9 @@ class Demand < ApplicationRecord
 
   # Associations
   belongs_to :circuit, optional: true
-  
+  has_one :incomer, as: :to, class_name: 'Cable'
+  has_one :feeder, as: :from, class_name: 'Cable'
+
   # Enums
   enum :basis, Constants.electrical.load_basis.to_h
   enum :config, Constants.electrical.load_configuration.to_h
@@ -45,7 +47,11 @@ class Demand < ApplicationRecord
                               )
   end
 
-  
+  def circuit
+    # Find the circuit that supplies power to this demand
+    incomer&.from if incomer&.from_type == "Circuit"
+  end
+
   def conductor_count
     case self.config
     when "dc", "one"
@@ -101,7 +107,8 @@ class Demand < ApplicationRecord
 
   def self.ransackable_attributes(auth_object = nil)
     ["circuit", "basis", "basis_notes", "supply", "config", "power", "vector",
-     "power_factor", "current", "duty", "created_at", "updated_at"]
+     "power_factor", "current", "duty", "created_at", "updated_at",
+     "tag_full_tag", "demandable_type"]
   end
 
   def self.ransackable_associations(auth_object = nil)

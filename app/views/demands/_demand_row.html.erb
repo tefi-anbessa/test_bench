@@ -4,30 +4,35 @@
     <% else %>
       <td><%= link_to d.tag.full_tag, tag_path(d.tag) %></td>
     <% end %>
+    <!-- circuit -->
     <td>
-      <% if d.basis.blank? %>
-        Undefined
+      <% if d.circuit.present? %>
+        <%= link_to d.circuit.label, circuit_path(d.circuit) %>
       <% else %>
-        <%= Demand.human_enum_name(:basis, d.basis) %>
+        <%= t('show.unassigned', model: t("activerecord.models.circuit")) %>
       <% end %>
     </td>
+    <!-- incomer -->
     <td>
-      <% if d.config.blank? %>
-        Undefined
+      <% if d.incomer.present? %>
+        <%= link_to d.incomer.label, cable_path(d.incomer) %>
       <% else %>
-        <%= Demand.human_enum_name(:config, d.config) %>
+        <%= t('show.unassigned', model: t("activerecord.models.cable")) %>
       <% end %>
     </td>
-    <td><%= d.supply %></td>
-    <td><%= d.power %></td>
-    <td><%= d.vector %></td>
-    <td><%= d.power_factor %></td>
-    <td><%= d.current %></td>
-    <td><%= d.duty %></td>
-    <% if d.demandable.nil? %>
-      <td><%= d.demandable_type %></td>
-    <% else %>
+    <td><%= Demand.human_enum_name(:basis, d.basis) %></td>
+    <td><%= Demand.human_enum_name(:config, d.config) %></td>
+    <!-- Safe number formatting with nil handling -->
+    <td><%= number_to_human(d.supply, precision: 4, units: { unit: "V", thousand: "kV" }) || '-' %></td>
+    <td><%= number_to_human(d.power, precision: 4, units: { unit: "W", thousand: "kW", million: "MW" }) || '-' %></td>
+    <td><%= number_to_human(d.vector, precision: 4, units: { unit: "VA", thousand: "kVA", million: "MVA" }) || '-' %></td>
+    <td><%= number_to_human(d.current, precision: 4, units: { unit: "A", thousand: "kA" }) || '-' %></td>
+    <td><%= d.power_factor.presence || '-' %></td>
+    <td><%= d.duty.presence || '-' %></td>
+    <% if d.demandable.present? %>
       <td><%= link_to d.demandable_type, d.demandable %></td>
+    <% else %>
+      <td><%= d.demandable_type || '-' %></td>
     <% end %>
     <td>
       <% if policy(d).show? %>

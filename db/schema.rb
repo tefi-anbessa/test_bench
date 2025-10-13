@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_30_045113) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_12_090653) do
   create_table "cable_types", force: :cascade do |t|
     t.integer "conductor_material"
     t.float "csa"
@@ -44,8 +44,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_30_045113) do
     t.integer "end_mark"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "from_type"
+    t.integer "from_id"
+    t.string "to_type"
+    t.integer "to_id"
     t.index ["cable_type_id"], name: "index_cables_on_cable_type_id"
     t.index ["circuit_id"], name: "index_cables_on_circuit_id"
+    t.index ["from_type", "from_id"], name: "index_cables_on_from"
+    t.index ["to_type", "to_id"], name: "index_cables_on_to"
   end
 
   create_table "circuits", force: :cascade do |t|

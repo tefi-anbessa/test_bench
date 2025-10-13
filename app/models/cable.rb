@@ -8,6 +8,9 @@ class Cable < ApplicationRecord
   belongs_to :cable_type
   belongs_to :circuit, optional: true
 
+  belongs_to :from, polymorphic: true, optional: true
+  belongs_to :to, polymorphic: true, optional: true
+
   def label
     tag&.label || I18n::t("show.orphan", model: Tag.model_name.human)
   end
@@ -21,6 +24,6 @@ class Cable < ApplicationRecord
   end
 
   def self.ransackable_associations(auth_object = nil)
-    [:tag, :cable_type, :circuit]
+    [:tag, :cable_type, :circuit, :from, :to]
   end
 end

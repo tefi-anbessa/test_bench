@@ -142,15 +142,35 @@ class CablesController < ApplicationController
     end
 
     def setup_form
+      @cable.from_type ||= Constants.electrical.connect_options.first
+      @cable.to_type ||= Constants.electrical.connect_options.last
       @cable_types = policy_scope(CableType)
-      @circuits = policy_scope(Circuit)
+      # Dynamically build options for all models in constants
+      @id_options = Constants.electrical.connect_options.each_with_object({}) do |model_name, options|
+        model_class = model_name.constantize
+        
+        # Safe policy_scope call with fallback
+        begin
+          scope = policy_scope(model_class)
+          options[model_name] = (scope || []).map { |record| [record.label, record.id] }
+        rescue => e
+          # Fallback to empty array if policy_scope fails
+          Rails.logger.warn "Failed to get policy_scope for #{model_name}: #{e.message}"
+          options[model_name] = []
+        end
+      end
+      
+      # For Stimulus - translated option names
+      @connect_options = Constants.electrical.connect_options.map do |option|
+        [t("activerecord.models.#{option.underscore}"), option]
+      end 
     end
 
     # Only allow a list of trusted parameters through.
     def cable_params
       params.require(:cable).permit(:cable_type_id, :circuit_id, :load_id, 
         :route_length, :vertical_allowance, :termination_allowance,
-        :start_mark, :end_mark)
+        :start_mark, :end_mark, :from_id, :from_type, :to_id, :to_type)
     end
 
     def redirect_with(level, message, location)

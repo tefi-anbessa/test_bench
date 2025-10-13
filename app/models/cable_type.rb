@@ -18,7 +18,7 @@ class CableType < ApplicationRecord
   end
 
   def label
-    code
+    id
   end
 
 
@@ -72,7 +72,7 @@ class CableType < ApplicationRecord
     end
 
     def self.ransackable_attributes(auth_object = nil)
-      ["conductor_material", "csa", "cores", "neutral", "earth", 
+      ["label", "conductor_material", "csa", "cores", "neutral", "earth", 
         "neutral_csa", "earth_csa", "insulation", "bedding", "armour",
         "sheath", "bedding_od", "overall_od", "temperature_rating", "voltage_rating", "code",
         "created_at", "updated_at"]

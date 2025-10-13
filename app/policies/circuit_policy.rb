@@ -8,20 +8,20 @@ class CircuitPolicy < ElectricalResourcePolicy
   def switchboard
     circuit.switchboard
   end
+  
+  # Scope for circuits required to reference the switchboard tag.
+  class Scope < ApplicationPolicy::Scope
+    def resolve
+      return scope.all if user&.is_admin? || user&.is_app_owner?
+      return scope.none unless current_project
+      scope.joins(switchboard: :tag).where(tags: { project: current_project })
+    end
+  end
 
   # Override tag method to use switchboard's tag association
   def tag
     switchboard&.tag
   end
-  
-  class Scope < ApplicationPolicy::Scope
-    def resolve
-      return scope.none unless current_project
-      
-      # Get all circuits where the parent switchboard's tag is associated with the current project
-      scope.joins(switchboard: :tag).where(tags: { project: current_project })
-    end
-  end
-  
+
   # Inherit all other behavior from ElectricalResourcePolicy
 end

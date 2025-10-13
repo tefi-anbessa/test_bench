@@ -1,28 +1,40 @@
   <tr scope="row">
     <% if row.tag.nil? %>
       <td class="table-danger">No tag; ID: <%= row.id %></td>
+      <td><%= "-" %></td>
     <% else %>
-      <td><%= link_to row.tag.full_tag, tag_path(row.tag) %></td>
+      <td><%= link_to row.tag.label, tag_path(row.tag) %></td>
+      <td><%= row.tag.stage %></td>    
     <% end %>
-    <td><%= link_to row.cable_type_id, cable_type_path(row.cable_type_id) %></td>
-    <% if row.circuit.nil? %>
-      <td> "" </td>
-      <td> "" </td>
-      <td> "" </td>
-    <% else %>
-      <td><%= link_to row.circuit.switchboard.tag.full_tag,
-              switchboard_path(row.circuit.switchboard) %></td>
-      <td><%= link_to row.circuit.serial, circuit_path(row.circuit) %></td>
-      <td><%= link_to row.circuit.load.loadable.tag.full_tag, demand_path(row.circuit.load) %></td>
-    <% end %>
+    <td>
+      <% if row.from_type.present? %>
+        <% text = row.from_type.tableize.singularize %>
+        <% if row.from.present? %>
+          <span><%= link_to row.from.label, eval("#{text}_path(row.from_id)") %></span>
+        <% else %>
+          <%= t('show.unassigned', model: text) %>
+        <% end %>
+      <% else %>
+        <%= t('show.unassigned', model: t("activerecord.attributes.cable.from")) %>
+      <% end %>
+    </td>
+   <td>
+      <% if row.to_type.present? %>
+        <% text = row.to_type.tableize.singularize %>
+        <% if row.to.present? %>
+          <span><%= link_to row.to.label, eval("#{text}_path(row.to_id)") %></span>
+        <% else %>
+          <%= t('show.unassigned', model: text) %>
+        <% end %>
+      <% else %>
+        <%= t('show.unassigned', model: t("activerecord.attributes.cable.to")) %>
+      <% end %>
+    </td>
+    <td><%= link_to row.cable_type.label, cable_type_path(row.cable_type_id) %></td>
     <td><%= row.route_length %></td>
-    <td><%= row.vertical_allowance %></td>
-    <td><%= row.termination_allowance %></td>
-    <td><%= row.start_mark %></td>
-    <td><%= row.end_mark %></td>
     <td>
       <% if policy(row).show? %>
-        <%= link_to cable_path(row), class: "btn btn-secondary btn-sm icon-link",
+        <%= link_to cable_path(row), class: "btn btn-outline-info btn-sm icon-link",
             aria: { label: t('actions.show') },
             title: t('actions.show'),
             display: "inline" do %>
@@ -30,7 +42,7 @@
             <% end %>
       <% end %>
         <% if policy(row).edit? %>
-        <%= link_to edit_cable_path(row), class: "btn btn-warning btn-sm icon-link",
+        <%= link_to edit_cable_path(row), class: "btn btn-outline-warning btn-sm icon-link",
               aria: { label: t('actions.edit') },
               title: t('actions.edit'),
               display: "inline"  do %>
@@ -39,7 +51,7 @@
         <% end %>
       <% if policy(row).destroy? %>
         <%= link_to cable_path(row), method: :delete,
-              class: "btn btn-danger btn-sm icon-link",
+              class: "btn btn-outline-danger btn-sm icon-link",
               aria: { label: t('actions.delete') },
               title: t('actions.delete'),
               display: "inline"  do %>

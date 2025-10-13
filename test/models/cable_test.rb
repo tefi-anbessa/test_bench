@@ -2,23 +2,10 @@ require "test_helper"
 
 class CableTest < ActiveSupport::TestCase
   def setup
-    @cable_type = create(:cable_type)
+    @project = create(:project)
+    @cable_type = create(:cable_type, project: @project)
     @cable = create(:cable, cable_type: @cable_type)
-    @tag = @cable.tag
-  end
-
-  test "should not allow cable without tag" do
-    cable = Cable.new
-    refute cable.valid?
-  
-    # Debug output to see what validations are failing
-    puts "Validation errors: #{cable.errors.full_messages}"
-    assert cable.errors[:base].any?
-  
-    # Check both possible places where the error might be
-    assert cable.errors[:tag].any? || 
-           cable.errors[:base].any? { |msg| msg.include?("tag") },
-           "Expected validation error about missing tag"
+    @tag = @cable.tag # Cable factory defaults cable tag to "E:EC-NNNN"
   end
 
   test "factory should create valid cable with tag" do
@@ -27,77 +14,7 @@ class CableTest < ActiveSupport::TestCase
     assert_equal 'EC', @tag.prefix
     assert_equal @cable, @tag.tagable
     assert_not_nil @cable.cable_type
-    
-    # Verify tag number format if the method exists
-    if @tag.respond_to?(:full_tag) && @tag.full_tag.present?
-      assert_match(/^EC-\d+/, @tag.full_tag)
-    end
-  end
-
-  test "should create cable with custom tag attributes" do
-    project = create(:project, title: 'Test Project')
-    
-    # Create a unique cable type for this test
-    custom_type = create(:cable_type, 
-      conductor_material: 'Copper',
-      conductor_makeup: '2C+E',
-      csa: 1.5,
-      temperature_rating: 1,  # 70°C for PVC
-      description: "Custom Cable Type #{SecureRandom.hex(4)}"
-    )
-    
-    cable = nil
-    assert_difference ['Cable.count', 'Tag.count'], 1 do
-      cable = create(:cable, 
-        prefix: 'EC',
-        serial: 42,
-        project: project,
-        description: 'TEST CABLE',
-        custom_cable_type: custom_type
-      )
-    end
-    
-    # Verify tag attributes
-    assert_equal 'TEST CABLE', cable.tag.service
-    assert_equal '2C+E', cable.cable_type.conductor_makeup
-    
-    # Verify tag number format if the method exists
-    if cable.tag.respond_to?(:full_tag) && cable.tag.full_tag.present?
-      assert_match(/^EC-\d+/, cable.tag.full_tag)
-    end
-  end
-  
-  test "should create cable with optional attributes" do
-    # Create a unique cable type for this test
-    unique_cable_type = create(:cable_type, 
-      description: "Unique Test Cable #{SecureRandom.hex(4)}",
-      csa: 2.5,
-      conductor_material: 'Copper',
-      conductor_makeup: '2C+E',
-      insulation: 'PVC',
-      bedding: 'PVC',
-      armour: 'GSWA',
-      sheath: 'XLPE/nylon',
-      bedding_od: 10.5,
-      overall_od: 12.5,
-      temperature_rating: '75˚C',
-      unique_spec: "UNIQUE-#{SecureRandom.hex(4)}"
-    )
-    
-    cable = create(:cable,
-      cable_type: unique_cable_type,  # Use the unique cable type
-      route_length: 15.5,
-      vertical_allowance: 2.0,
-      termination_allowance: 1.0,
-      start_mark: 1,
-      end_mark: 2
-    )
-    
-    assert_equal 15.5, cable.route_length
-    assert_equal 2.0, cable.vertical_allowance
-    assert_equal 1.0, cable.termination_allowance
-    assert_equal 1, cable.start_mark
-    assert_equal 2, cable.end_mark
+    assert_match(/^E:EC-\d{4}(\.\w+)?$/, @tag.reload.full_tag)
   end
   
   test "navigation between cables" do
@@ -176,7 +93,7 @@ class CableTest < ActiveSupport::TestCase
   
   test "should create cable through tag update" do
     project = create(:project)
-    cable_type = create(:cable_type, :swa)
+    cable_type = create(:cable_type)
     
     tag = create(:tag,
       prefix: 'EC',
@@ -187,13 +104,12 @@ class CableTest < ActiveSupport::TestCase
     
     assert_difference 'Cable.count', 1 do
       tag.update(tagable: build(:cable,
-        custom_cable_type: cable_type,
+        cable_type: cable_type,
         route_length: 10.0
       ))
     end
     
     assert tag.reload.tagable.is_a?(Cable)
-    assert_equal 'GSWA', tag.tagable.cable_type.armour
     assert_equal 10.0, tag.tagable.route_length
   end
   

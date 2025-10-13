@@ -67,6 +67,17 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 
 ## Implementation
 
+### Internationalization
+
+- The application has been designed for international use from the outset. 
+- All user facing text is provided with translations for all implemented languages.
+- To date, no need for translation of database content has been identified. It's all engineering speak.
+- The application uses the rails-i18n gem to assist with internationalization. This gem provides translations into  many languages for the core rails features, including model validation, database errors, time and date functions, currency, etc. 
+- For reference, a copy of the en version of the translations is saved in config/locales/rails-i18n gem en for reference/en.yml.ref. This file is not used in the application, it is simply a copy of the en.yml file that is provided by the rails-i18n gem. Check here if you are not sure whether a translation is already provided, and avoid duplicating core translations if possible. Also note that not all language files include all translations! It is a work in progress...
+- The locale setting follows the basic guidelines in [Rails Guides section 2.2](https://guides.rubyonrails.org/i18n.html#setting-the-locale-from-url-params).
+- Changing locale is available in the layout header via a drop down menu.
+
+
 ### Constants
 
 - The application implements a constants management system based on this article: [https://dev.to/vladhilko/say-goodbye-to-messy-constants-a-new-approach-to-moving-constants-away-from-your-model-58i1](https://dev.to/vladhilko/say-goodbye-to-messy-constants-a-new-approach-to-moving-constants-away-from-your-model-58i1).
@@ -80,7 +91,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 #### Models
 
 - Model classes include all logic pertaining to the object.
-- Model classes should include custom validations were required. Custom validations must include 118n translation of error messages.
+- Model classes should include custom validations where required. Custom validations must include i18n translation of custom error messages.
 - All resource models should have a label method, which is used to present a human readable identifier, preferably unique, for the model. This can (and in most cases will be) simply a reference to another attribute. It will be used in views as a card header, link id, etc.
 
 #### Controllers
@@ -202,6 +213,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 
 
 ## Technical Debt
+
 - [ ] Refactor models to incorporate i18n messages for validations
 - [ ] Refactor error messages partial to use i18n.
 - [ ] Refactor error views to use i18n.
@@ -224,8 +236,10 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Model tests should include some sort of test of enums.
 - [ ] Complete workflows with admin and no project selected.
 - [ ] Complete proper ordering by switchboard tag and serial for circuits.
+- [ ] Update index view header lines.
 
 ## Refactoring Opportunities
+
 - [x] Improve role and permissions implementation and workflow.
 - [x] Refactor models to include a universal "label" attribute to be used when presenting polymorphic associations.
 - [ ] Refactor projects controller with improved workflow.
@@ -258,6 +272,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Improve implementation of Discipline model, including translation. Consider using constants hash for each project.
  
 ## Potential Features
+
 - [ ] Add more comprehensive reporting for demand calculations
 - [ ] Implement bulk import/export
 - [ ] See if pagy can provide user selectable page size
@@ -275,6 +290,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Build an IP55 object to allow fully flexible reusable IP code generation.
 
 ## Architecture Considerations
+
 - [ ] Move Electrical to a module or namespace.
 - [ ] Consider API versioning strategy
 - [ ] Plan for database scaling as data grows
@@ -282,5 +298,6 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 
 
 ## Notes
+
 - [x] Keep backward compatibility during the Load → Demand transition
 - [ ] Consider adding performance benchmarks for critical paths

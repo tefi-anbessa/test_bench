@@ -1,48 +1,58 @@
 
 <%= render 'components/collapsible',
   id: "tag_#{tag.id}_details",
-  title: [t("activerecord.models.tag"), tag.full_tag].join(": "),
+  title: t("tags.show.header", label: tag.label),
   expanded: false,
   header_class: 'py-1' do %>
-  
-  <div class="row mb-2">
-    <div class="col-12">
-      <div class="d-flex align-items-center">
-        <span class="text-muted me-2">
-          <%= link_to t('activerecord.models.project'), project_path(tag.project), class: 'text-decoration-none' %>:
-        </span>
-        <span><%= tag.project.title %></span>
-        <span class="ms-3">
-          <span class="text-muted me-1"><%= t('activerecord.attributes.tag.stage') %>:</span>
-          <span><%= tag.stage %></span>
-        </span>
-      </div>
-    </div>
-  </div>
 
-  <div class="row mb-2">
-    <div class="col-12">
-      <div class="d-flex align-items-center">
-        <span class="text-muted me-2">
-          <%= link_to t('activerecord.models.tag'), tag_path(tag), class: 'text-decoration-none' %>:
-        </span>
-        <span><%= tag.full_tag %></span>
-        <% if tag.service.present? %>
-          <span class="ms-2"><%= tag.service %></span>
-        <% end %>
-      </div>
+    <div class="row mb-1">
+      <% text = t("show.linked", model: tag.model_name.human) %>
+      <%= link_to tag_path(tag),
+        class: "btn btn-sm btn-outline-secondary me-2",
+        title: text do %>
+        <%== icon('box-arrow-in-up-left') %>
+        <span class="d-none d-md-inline"><%= text %></span>
+      <% end %>
     </div>
-  </div>
-  
-  <% if tag.notes.present? %>
-    <div class="row">
+
+    <div class="row mb-1">
       <div class="col-12">
-        <div class="d-flex">
-          <span class="text-muted me-2"><%= t('activerecord.attributes.tag.notes') %>:</span>
-          <span><%= tag.notes %></span>
+        <div class="d-flex align-items-center">
+          <span class="text-muted me-2">
+            <%= link_to t('activerecord.models.project'), project_path(tag.project), class: 'text-decoration-none' %>:
+          </span>
+          <span><%= tag.project.title %></span>
+          <span class="ms-3">
+            <span class="text-muted me-1"><%= t('activerecord.attributes.tag.stage') %>:</span>
+            <span><%= tag.stage %></span>
+          </span>
         </div>
       </div>
     </div>
+
+    <div class="row mb-1">
+      <div class="col-12">
+        <div class="d-flex align-items-center">
+          <span class="text-muted me-2">
+            <%= t('activerecord.models.tag') %>:
+          </span>
+          <span><%= tag.label %></span>
+          <% if tag.service.present? %>
+            <span class="ms-2"><%= tag.service %></span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    
+    <% if tag.notes.present? %>
+      <div class="row mb-1">
+        <div class="col-12">
+          <div class="d-flex">
+            <span class="text-muted me-2"><%= t('activerecord.attributes.tag.notes') %>:</span>
+            <span><%= tag.notes %></span>
+          </div>
+        </div>
+      </div>
+    <% end %>
   <% end %>
-<% end %>
 

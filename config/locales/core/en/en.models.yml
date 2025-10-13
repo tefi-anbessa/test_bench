@@ -78,7 +78,8 @@ en:
         temperature_rating:	Temperature Rating
         voltage_rating:	Voltage Rating
       cable:
-        cable_type_id:        "Cable Type"
+        from:                 "From"
+        to:                   "To"
         route_length:         "Route Length"
         route_length_help:    "Route length of cable run, plan view"
         vertical_allowance:   "Vertical Allowance"
@@ -88,6 +89,8 @@ en:
         start_mark:           "Installed Start Mark"
         end_mark:             "Installed End Mark"
       demand:
+        incomer:          "Incomer"
+        feeder:           "Feeder"
         basis:            "Basis"
         bases:
           summation:      "Summation of outgoing feeders"
@@ -142,6 +145,8 @@ en:
         rating:           "Rating (A)"
         elcb:             "ELCB"
         contactor:        "Contactor"
+        feeder:           "Feeder"
+        demand:           "Load"
         notes:            "Notes"
       motor:
         motor_type:       "Motor Type"
