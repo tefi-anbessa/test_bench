@@ -9,7 +9,7 @@ class SwitchboardsController < ApplicationController
     @q = policy_scope(Switchboard).ransack(params[:q])
     @pagy, @switchboards = pagy(@q.result.includes(:tag), limit: 20)
     @orphans = @switchboards.select{ |switchboard| switchboard.tag.nil? }
-    @link_errors = current_project.tags.where(tagable_type: "Switchboard", tagable_id: nil)
+    @link_errors = current_project.tags.select { |tag| tag.tagable_type == "Switchboard" && tag.tagable.nil? }
     @link_incomplete = @link_errors.select{ |tag| tag.tagable_id.nil? }
     @link_broken = @link_errors.select{ |tag| !tag.tagable_id.nil? }
     authorize @switchboards
@@ -24,25 +24,6 @@ class SwitchboardsController < ApplicationController
   def new
     authorize @switchboard = Switchboard.new()
     set_tag
-    if @tag.nil?
-      # @tag is set to nil in set_tag when a security breach attempt is detected.
-      tag_nil
-      return nil
-    end
-    if @tag.persisted?
-      # Occurs when params[tag_id] is present
-      unless @tag.discipline == Discipline.find_by(code: "E")
-        flash[:warning] = t("flash.tags.tag_discipline",
-                            discipline: @tag.discipline.code,
-                            resource: Switchboard.model_name.human)
-        redirect_back_or_to edit_tag_path(@tag)
-        return nil
-      end
-    else
-      @tag.discipline = Discipline.find_by(code: "E")
-      @tag.prefix = "EX"
-      @tag.tagable_type = "Switchboard"
-    end
     setup_form
   end
 
@@ -51,54 +32,60 @@ class SwitchboardsController < ApplicationController
     @switchboard = Switchboard.new(switchboard_params.except(:tag))
     authorize @switchboard
     set_tag
-
-    if @tag.nil?
-      # @tag is set to nil in set_tag when a security breach attempt is detected.
-      tag_nil
-      return nil
+    unless @switchboard.valid?
+      # Catch invalid switchboard params and return to new without further processing 
+      # Placeholder as switchboard presently has no validations...
+      setup_form
+      flash.now[:alert] = t("flash.actions.create.alert",
+                           resource_name: Switchboard.model_name.human.downcase)
+      respond_to do |format|
+        format.html { render :new, status: :unprocessable_content }
+        format.json { render json: @cable.errors, status: :unprocessable_content }
+      end
+      return
+    end
+    if @tag.persisted?
+      # Existing tag: Create switchboard and update tag in one transaction using 
+      # delegated_type via the delegator (Tag)
+      # This relies on @switchboard being valid, it won't save invalid tagable, 
+      # but won't raise an exception either, hence the check above.
+      @tag.update(tagable: @switchboard)
+      flash[:success] = t('flash.tagables.assigned_to',
+                        resource_name: Switchboard.model_name.human,
+                        id: @switchboard.id,
+                        tag: @tag.label)
+      create_success_redirect
+      return
     else
-      if @tag.persisted?
-        # Existing tag: Create switchboard and update tag in one transaction using 
-        # delegated_type via the delegator (Tag)
-        if @tag.update(tagable: @switchboard)
-          @tag.reload
+      if @tag.errors.none?
+        # New tag from tag params:
+        # Create both in one transaction using delegated_type via the delegator (Tag)
+        begin
+          Switchboard.transaction do
+            @tag.save!
+            @tag.update(tagable: @switchboard)
+          end
+
           update_circuits # Create circuits if the :circuits parameter is present
-          flash[:success] = t('flash.tagables.assigned_to',
+          flash[:success] = t('flash.tagables.created_and_assigned',
                             resource_name: Switchboard.model_name.human,
                             id: @switchboard.id,
                             tag: @tag.label)
-          redirect_to @switchboard
+          create_success_redirect
           return
-        else
+        rescue ActiveRecord::RecordInvalid => e
           # Fall through to render :new below
         end
       else
-        unless @tag_invalid
-          # New tag from tag params:
-          # Create both in one transaction using delegated_type via the delegator (Tag)
-          begin
-            Switchboard.transaction do
-              @tag.save!
-              @tag.update(tagable: @switchboard)
-            end
-
-            update_circuits # Create circuits if the :circuits parameter is present
-            flash[:success] = t('flash.tagables.created_and_assigned',
-                              resource_name: Switchboard.model_name.human,
-                              id: @switchboard.id,
-                              tag: @tag.label)
-            redirect_to @switchboard
-            return
-          rescue ActiveRecord::RecordInvalid => e
-            # Fall through to render :new below
-          end
-        end
+        #tag_id was set but trapped in set_tag
+        raise ApplicationController::ConflictError, @tag.errors.first.type
+        return
       end
     end
   
     # If we get here, there was a validation error
     setup_form
-    flash.now[:danger] = t("flash.actions.create.alert",
+    flash.now[:alert] = t("flash.actions.create.alert",
                          resource_name: Switchboard.model_name.human.downcase)
     render :new, status: :unprocessable_content
   end
@@ -115,42 +102,51 @@ class SwitchboardsController < ApplicationController
   # PATCH/PUT /switchboards/1 or /switchboards/1.json
   def update
     authorize @switchboard
-    respond_to do |format|
-      begin
-        if @switchboard.tag&.persisted?
-          # Update existing tag and switchboard
-          Switchboard.transaction do
-            @tag = @switchboard.tag
-            @tag.update!(tag_params)
-            @switchboard.update!(switchboard_params.except(:tag))
-            update_circuits if params[:circuits].present?
-          end
-        else
-          # Create new tag and associate with switchboard
-          authorize Tag, :create?
-          Switchboard.transaction do
-            @tag = Tag.create!(tag_params)
-            @switchboard.update!(switchboard_params.except(:tag))
-            update_circuits if params[:circuits].present?
-          end
+    @tag = @switchboard.tag&.present? ? @switchboard.tag : Tag.new(tag_params.merge(tagable: @switchboard))
+    # Make a dummy switchboard object for checking switchboard params
+    switchboard = Switchboard.new(switchboard_params.except(:tag))
+    unless switchboard.valid?
+      setup_form
+      flash.now[:alert] = t("flash.actions.update.alert",
+                           resource_name: Switchboard.model_name.human.downcase)
+      render :edit, status: :unprocessable_content
+      return
+    end
+    begin
+      if @switchboard.tag&.persisted?
+        # Update existing tag and switchboard
+        Switchboard.transaction do
+          @tag = @switchboard.tag
+          @tag.update!(tag_params)
+          @switchboard.update!(switchboard_params.except(:tag))
+          update_circuits if params[:circuits].present?
         end
-        
-        format.html {  
-          flash[:success] = t("flash.actions.update.notice", resource_name: Switchboard.model_name.human)
-          redirect_to @switchboard 
-        }
+      else
+        # Create new tag and associate with switchboard
+        authorize Tag, :create?
+        Switchboard.transaction do
+          @tag = Tag.create!(tag_params.merge(tagable: @switchboard))
+          @switchboard.update!(switchboard_params.except(:tag))
+          update_circuits if params[:circuits].present?
+        end
+      end
+      flash[:success] = t("flash.actions.update.notice", resource_name: Switchboard.model_name.human)
+      respond_to do |format|
+        format.html { redirect_to @switchboard }
         format.json { render :show, status: :ok, location: @switchboard }
+      end
         
-      rescue ActiveRecord::RecordInvalid => e
-        setup_form
-        flash.now[:alert] = t("flash.actions.update.alert", 
-                            resource_name: Switchboard.model_name.human.downcase)
+    rescue ActiveRecord::RecordInvalid => e
+      setup_form
+      flash.now[:alert] = t("flash.actions.update.alert", 
+                          resource_name: Switchboard.model_name.human.downcase)
+      respond_to do |format|
         format.html { render :edit, status: :unprocessable_entity }
         format.json { render json: @switchboard.errors, status: :unprocessable_entity }
-      rescue Pundit::NotAuthorizedError => e
-        flash[:alert] = e.message
-        redirect_to @switchboard
       end
+    rescue Pundit::NotAuthorizedError => e
+      flash[:danger] = e.message
+      redirect_to @switchboard
     end
   end
 
@@ -180,7 +176,12 @@ class SwitchboardsController < ApplicationController
       @voltage_ratings = Switchboard.voltage_ratings
       @ip_1 = Constants.electrical.ingress_protection.first_digit.to_h
       @ip_2 = Constants.electrical.ingress_protection.second_digit.to_h
-      setup_tag_form
+      unless @tag&.persisted? # Default tag attributes for switchboard
+        @tag.discipline = Discipline.find_by(code: "E")
+        @tag.prefix = "EX"
+        @tag.tagable_type = "Switchboard"
+      end
+      @disciplines = Discipline.all.select(:id, :code, :name).to_a
     end
     
     # Updates the number of circuits for the switchboard
@@ -206,6 +207,13 @@ class SwitchboardsController < ApplicationController
       end
     end
 
+    def create_success_redirect
+      respond_to do |format|
+        format.html { redirect_to @switchboard }
+        format.json { render :show, status: :created, location: @switchboard }
+      end
+    end
+
     # Only allow a list of trusted parameters through.
     def switchboard_params
       params.require(:switchboard).permit(:location, :ingress_protection, :voltage_rating,
@@ -216,21 +224,5 @@ class SwitchboardsController < ApplicationController
           :id, :project_id, :discipline_id, :prefix, :serial, 
           :suffix, :service, :stage, :notes, :tagable_type
         ])
-    end
-
-    def tag_nil
-    # Tag has been set to nil because tagable set tag routine found a tag that cannot be used to attach a tagable:
-    # - not found in the database 
-    # - already assigned to a tagable
-    # - designated to be assigned to a different class than the calling controller.
-    # Workflow should prevent this from being possible through normal use of the application.
-      Rails.logger.warn(
-        "Forbidden: Invalid tag association - " \
-        "Tag: #{@tag&.inspect}, " \
-        "Expected type: #{controller_name.classify}, " \
-        "User: #{current_user&.id}"
-      )
-      raise ApplicationController::ConflictError, "Forbidden: Invalid tag association"
-      return
     end
 end

@@ -36,6 +36,9 @@ en:
       show_details: "Show technical details"
       back_to_home: "Back to Home"
       go_back:      "Go Back"
+      tag_not_found: "The specified tag could not be found"
+      tag_already_assigned: "This tag has already been assigned to another item"
+      tagable_type_mismatch: "This tag has been assigned a different tag type"
   projects:
     index:
       title:            "Projects"

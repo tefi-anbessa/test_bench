@@ -5,12 +5,12 @@ class ApplicationController < ActionController::Base
   include Devise::Controllers::StoreLocation
   include ErrorsHelper
 
+  around_action :switch_locale
+  before_action :configure_permitted_parameters, if: :devise_controller?
+
   # Custom error handling for trapped bad requests
   class ConflictError < StandardError; end
   rescue_from ConflictError, with: :handle_conflict
-
-  around_action :switch_locale
-  before_action :configure_permitted_parameters, if: :devise_controller?
   
   rescue_from Pundit::NotAuthorizedError do |exception|
     @exception = exception
@@ -59,28 +59,28 @@ class ApplicationController < ActionController::Base
 
   protected
 
-  def after_sign_in_path_for(resource)
-    # Get the projects the user has access to
-    projects = policy_scope(Project)
-    
-    case projects.count
-    when 0
-      # No projects available, go to root or another appropriate path
-      root_path
-    when 1
-      # If only one project, set it as current and proceed
-      project = projects.first
-      set_current_project(project)
+    def after_sign_in_path_for(resource)
+      # Get the projects the user has access to
+      projects = policy_scope(Project)
       
-      # Get and clear stored location for the project
-      stored_path = stored_location_for_project
-      clear_stored_location_for_project
-      stored_path || project_path(project)
-    else
-      # Multiple projects available, go to selection
-      select_projects_path
+      case projects.count
+      when 0
+        # No projects available, go to root or another appropriate path
+        root_path
+      when 1
+        # If only one project, set it as current and proceed
+        project = projects.first
+        set_current_project(project)
+        
+        # Get and clear stored location for the project
+        stored_path = stored_location_for_project
+        clear_stored_location_for_project
+        stored_path || project_path(project)
+      else
+        # Multiple projects available, go to selection
+        select_projects_path
+      end
     end
-  end
 
     def default_url_options
       { locale: I18n.locale }
@@ -98,23 +98,33 @@ class ApplicationController < ActionController::Base
       I18n.with_locale(locale, &action)
     end
 
-    private
-
-    def user_not_authorized
-      flash[:danger] = "You are not authorized to perform this action."
-      redirect_back_or_to(root_path)
-    end
+  private
 
     def handle_conflict(exception)
+      # Log security incident
+      Rails.logger.warn(
+        "Security: ConflictError raised - " \
+        "Message: #{exception.message}, " \
+        "Controller: #{controller_name}, " \
+        "Action: #{action_name}, " \
+        "User: #{current_user&.id}"
+      )
+
+      # Handle symbol translation
+      error_message = exception.message
+      if error_message.is_a?(Symbol)
+        error_message = I18n.t("errors.#{error_message}", default: error_message.to_s)
+      end
+
       respond_to do |format|
         format.html do
-          flash[:alert] = exception.message || "This action conflicts with existing data"
-          redirect_back(fallback_location: root_path)
+          flash[:alert] = error_message || I18n.t('errors.conflict.subheader')
+          render 'errors/conflict', status: :conflict
         end
         format.json do
-          render json: { error: exception.message || "Conflict" }, 
-                 status: :conflict
+          render json: { error: error_message || I18n.t('errors.conflict.header') }, 
+                status: :conflict
         end
       end
     end
-end
+  end

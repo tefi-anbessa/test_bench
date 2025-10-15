@@ -115,34 +115,47 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 ### Error Handling
 
    - Errors are categorized as:
-      - Unauthenticated access:
-         - Users need to be authenticated by the devise system for all MVC actions.
-         - Errors are handled by the application controller rescue_from Devise::NotAuthenticatedError.
-         - Users are redirected to the sign in page.
-         - Controllers typically use a single before_action :authenticate_user! to implement devise security. 
-         - Controller tests typically include one test to ensure that unauthenticated access is not possible.
-         - Tests can use the test helper method assert_unauthenticated.
-      - Unauthorized access:
-         - These are pundit authorisation failures.
-         - Generally, the workflow should not allow access to unauthorized functions.
-         - However, until the application is thoroughly tested in use, this is considered a lesser error than a security breach attempt.
-         - Errors are processed by the application controller rescue_from Pundit::NotAuthorizedError.
-         - Policy tests should be used to verify that policies meet their objectives, refer to docs/ROLES_AND_PERMISSIONS.md.
-         - Controller tests should also include test of unauthorized access, to ensure that appropriate authorization calls are included in relevant actions.
-         - Controller tests should only test the pass and fail paths, they are not intended to test the policy details.
-         - Tests can use the test helper method assert_unauthorized.
-      - User data entry errors: These are errors that can be fixed by the user, such as missing required fields or invalid data.
-         - Required fields are highlighted by html5 without any additional code. Not sure how to translate these.
-         - Invalid data should be detected in the controller and the form displayed again with flash :warning messages.
-         - Rails manages standard model validation messages but translations may need to be provided [HOLD] check this.
-         - Model validation messages are displayed on form views using the partial app/views/shared/_error_messages.html.erb
-         - More complex validations of associations use custom error messages with their translations.
-         - Model tests should include test of each validation to ensure that user data entry errors are caught and translated error messages are added to the model object.
-      - Security breach attempts: 
-         - These are trapped forbidden operations that should not be possible using normal workflows.
-         - They are probably direct HTML or JSON requests in an attempt to defeat the permissions system. 
-         - This type of error should log a message to the rails logger, redirect to the custom /403 page, and log out the current user.
-         - Controller tests should include thorough test of each path through the controller to ensure that security breach attempts are trapped.
+
+   #### Unauthenticated access:
+
+      - Users need to be authenticated by the devise system for all MVC actions.
+      - Errors are handled by the application controller rescue_from Devise::NotAuthenticatedError.
+      - Users are redirected to the sign in page.
+      - Controllers typically use a single before_action :authenticate_user! to implement devise security. 
+      - Controller tests typically include one test to ensure that unauthenticated access is not possible.
+      - Tests can use the test helper method assert_unauthenticated.
+
+   #### Unauthorized access:
+
+      - These are pundit authorisation failures.
+      - Generally, the workflow should not allow access to unauthorized functions.
+      - However, until the application is thoroughly tested in use, this is considered a lesser error than a security breach attempt.
+      - Errors are processed by the application controller rescue_from Pundit::NotAuthorizedError.
+      - Rescue includes a flash danger message with the translated standard error message, and redirects to custom error page /403 forbidden.
+      - Policy tests should be used to verify that policies meet their objectives, refer to docs/ROLES_AND_PERMISSIONS.md.
+      - Controller tests should also include tests of unauthorized access, to ensure that appropriate authorization calls are included in relevant actions.
+      - Controller tests should only test the pass and fail paths, they are not intended to test the policy details.
+      - Tests can use the test helper method assert_unauthorized.
+
+   #### User data entry errors: 
+
+      - These are errors that can be fixed by the user, such as missing required fields or invalid data.
+      - Required fields are highlighted by html5 without any additional code. Not sure how to translate these.
+      - Invalid data should be detected in the controller and the form displayed again with flash :alert messages.
+      - Rails manages standard model validation messages but translations may need to be provided [HOLD] check this.
+      - Model validation messages are displayed on form views using the partial app/views/shared/_error_messages.html.erb
+      - More complex validations of associations use custom error messages with their translations.
+      - Model tests should include test of each validation to ensure that user data entry errors are caught and translated error messages are added to the model object.
+
+   #### Security breach attempts: 
+
+      - These are trapped forbidden operations that should not be possible using normal workflows.
+      - They are probably direct HTML or JSON requests in an attempt to defeat the permissions system. 
+      - When a controller detects invalid parameters, custom error class ConflictError should be raised, with a message key specific to the actual error.
+      - ConflictErrors are handled in ApplicationController by rescue_from ConflictError and method handle_conflict. 
+      - handle_conflict logs the error with the message code, and redirects to the custom /409 conflict page, and logs out the current user.
+      - At present, the custom /409 page includes a flash alert with the translated error message. This may not be required in production if it is considered that 409 errors are definitely hacking attempts.
+      - Controller tests should include thorough test of each path through the controller to ensure that security breach attempts are trapped.
 
 ### Form Design
 
@@ -237,6 +250,9 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Complete workflows with admin and no project selected.
 - [ ] Complete proper ordering by switchboard tag and serial for circuits.
 - [ ] Update index view header lines.
+- [ ] Custom error view for not found errors. e.g. Case where admin deletes a record than uses browser back button.
+- [ ] Translation of html5 messages on required fields. Alternatively, suppress html 5 and use client side js.
+
 
 ## Refactoring Opportunities
 
