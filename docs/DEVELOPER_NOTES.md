@@ -286,6 +286,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    - [ ] add colour code by discipline
 - [ ] Look at use of hover on buttons, and use turbo to prevent page refresh.
 - [ ] Improve implementation of Discipline model, including translation. Consider using constants hash for each project.
+- [ ] Consider changing all delete links to use turbo to prevent page refresh.
  
 ## Potential Features
 

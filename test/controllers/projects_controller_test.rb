@@ -4,6 +4,8 @@ class ProjectsControllerTest < ActionController::TestCase
   include Devise::Test::ControllerHelpers
 
   setup do
+    @request.env["devise.mapping"] = Devise.mappings[:user]
+
     @app_owner = create(:user)
     @app_owner.add_role(:app_owner)
 
@@ -135,7 +137,7 @@ class ProjectsControllerTest < ActionController::TestCase
   end
 
   test "cannot access edit form via JSON" do
-    sign_in @project_owner
+    sign_in @project_manager
     get :edit, params: { id: @project.id, format: :json }
     assert_response :not_acceptable
   end
@@ -162,7 +164,7 @@ class ProjectsControllerTest < ActionController::TestCase
   end
 
   test "cannot update project via JSON" do
-    sign_in @project_owner
+    sign_in @project_manager
     patch :update, params: {
       id: @project.id,
       project: {
@@ -175,7 +177,7 @@ class ProjectsControllerTest < ActionController::TestCase
   end
   
   test "shows error flash when project update fails" do
-    sign_in @project_owner
+    sign_in @project_manager
     original_title = @project.title
     patch :update, params: {
       id: @project.id,
@@ -190,7 +192,7 @@ class ProjectsControllerTest < ActionController::TestCase
   end
 
   test "project owner can update their project" do
-    sign_in @project_owner
+    sign_in @project_manager
     patch :update, params: {
       id: @project.id,
       project: {

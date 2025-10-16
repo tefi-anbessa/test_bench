@@ -203,6 +203,8 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
+    mocha (2.7.1)
+      ruby2_keywords (>= 0.0.5)
     msgpack (1.8.0)
     mutex_m (0.3.0)
     nenv (0.3.0)
@@ -325,6 +327,7 @@ GEM
     rexml (3.4.4)
     rolify (6.0.1)
     ruby-progressbar (1.13.0)
+    ruby2_keywords (0.0.5)
     rubyzip (2.4.1)
     sass-rails (6.0.0)
       sassc-rails (~> 2.1, >= 2.1.1)
@@ -423,6 +426,7 @@ DEPENDENCIES
   kredis
   minitest (~> 5.15)
   minitest-reporters (~> 1.5)
+  mocha (~> 2.1)
   mutex_m
   ostruct
   pagy (~> 9.0)

@@ -9,9 +9,9 @@ class ProjectsController < ApplicationController
 
   # GET /projects or /projects.json
   def index
-    @q = Project.ransack(params[:q])
-    @q.result.merge(policy_scope(Project))
-    @pagy, @projects = pagy_with_page_size(@q.result.ordered)
+    @q = policy_scope(Project).ransack(params[:q])
+    @pagy, @projects = pagy(@q.result.ordered, limit: 20)
+    authorize @projects
   end
 
   # GET /projects/1 or /projects/1.json

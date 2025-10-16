@@ -23,6 +23,9 @@ Minitest::Reporters.use!(
 DatabaseCleaner.strategy = :transaction
 DatabaseCleaner.clean_with(:truncation)
 
+# mocha gem for stubbing
+require 'mocha/minitest'
+
 class ActiveSupport::TestCase
   include Devise::Test::IntegrationHelpers
   # Disable fixtures completely
@@ -91,11 +94,12 @@ class ActiveSupport::TestCase
     # post set_projects_url, params: { project_id: project.id }
     @current_project = project
     # Also set in session and cookies if controller test
-    # if defined?(controller) && controller.respond_to?(:session)
-    session[:project_id] = project.id
-    cookies[:project_id] = project.id
-    # end
+    if defined?(controller) && controller.respond_to?(:session)
+      session[:project_id] = project.id
+      cookies[:project_id] = project.id
+    end
   end
+  
   
 
   # Asserts that the request was rejected because the user is not signed in

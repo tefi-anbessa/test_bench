@@ -1,11 +1,11 @@
 <% provide(:title, t('.title')) %>
-<% provide(:header, t('.header', label: @project.model.label)) %>
+<% provide(:header, t('.header', label: @project.label)) %>
 <% provide(:button_text, t('actions.save')) %>
 
 <div class="container mb-3">
   <div class="position-relative">
     <h2 class="text-center mb-0">
-      <%= t('.header', label: @project.model.label) %>
+      <%= t('.header', label: @project.label) %>
     </h2>
   </div>
 </div>

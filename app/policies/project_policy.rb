@@ -15,7 +15,7 @@ class ProjectPolicy < ApplicationPolicy
       else
         # Scope includes the projects where user has any resource specific role
         scope.where(:id => user.roles.where(resource_type: "Project")
-                        .pluck(:resource_id)).uniq
+                        .pluck(:resource_id).uniq)
       end
 
     end

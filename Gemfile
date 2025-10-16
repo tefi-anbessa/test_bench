@@ -113,6 +113,7 @@ group :test do
   gem "capybara", "~> 3.39"
   gem "selenium-webdriver", "~> 4.10"
   gem "webdrivers", "~> 5.3"
+  gem "mocha", "~> 2.1" 
 
   # Test database management
   gem "database_cleaner-active_record"

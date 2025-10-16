@@ -17,13 +17,13 @@
       <% end %>
       <% if @project.persisted? %>
         <%= link_to @project, class: "btn btn-warning actions",
-                data: { turbo_confirm: t('actions.sure') } do %>
+                data: { confirm: t('actions.sure') } do %>
                 <%= t('actions.discard') %>
                 <%== icon('x-square') %>
         <% end %>
       <% else %>
         <%= link_to projects_path, class: "btn btn-warning actions",
-                data: { turbo_confirm: t('actions.sure') }  do %>
+                data: { confirm: t('actions.sure') }  do %>
           <%= t('actions.discard') %>
           <%== icon('x-square') %>
         <% end %>

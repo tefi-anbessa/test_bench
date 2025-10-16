@@ -12,7 +12,7 @@ en:
     select:       "Select"
     save_change:  "Save Changes"
     delete:       "Delete"
-    delete_sure:  "Are you sure? This action cannot be undone."
+    delete_sure:  "Are you sure? Delete cannot be undone."
     discard:      "Discard changes"
     sure:         "Are you sure?"
     show:         "Show"
