@@ -21,6 +21,7 @@ class TagsController < ApplicationController
   def new
     authorize @tag = Tag.new
     setup_disciplines
+    @projects = policy_scope(Project)
   end
 
   # POST /tags or /tags.json
@@ -65,11 +66,17 @@ class TagsController < ApplicationController
   # DELETE /tags/1 or /tags/1.json
   def destroy
     authorize @tag
-    @tag.destroy
-
-    respond_to do |format|
-      format.html { redirect_to tags_path, status: :see_other, notice: "Tag was successfully destroyed." }
-      format.json { head :no_content }
+    if @tag.destroy
+      flash[:success] = I18n.t('flash.actions.destroy.notice', 
+        resource_name: I18n.t('activerecord.models.tag'))
+      respond_to do |format|
+        format.html { redirect_to tags_path, status: :see_other }
+        format.json { head :no_content }
+      end
+    else
+      flash.now[:danger] = I18n.t('flash.actions.destroy.alert', 
+        resource_name: I18n.t('activerecord.models.tag'))
+      render :show, status: :unprocessable_entity
     end
   end
 
@@ -91,7 +98,7 @@ class TagsController < ApplicationController
       if current_project
         @project = current_project
       else
-        redirect_to select_projects_path
+        @project = nil
       end
       @projects = policy_scope(Project)
     end

@@ -215,7 +215,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [x] Internationalise the application
 - [x] Build user interaction management, using gems devise for authentication, rolify and pundit for authorization
 - [x] Build electrical module with basic data sheet options for electrical tagged items
-- [ ] Enhance electrical module, allowing interconnection of tagged items with cables to model a distribution network
+- [x] Enhance electrical module, allowing interconnection of tagged items with cables to model a distribution network
 - [ ] Enhance electrical model with network load calculations
 - [ ] Enhance the existing database models to allow revison control of data
 - [ ] Build a document control module to manage document storage, issue, history including versions

@@ -68,24 +68,27 @@
 
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
-              <%= link_to edit_tag_path(@tag),
-                    class: "btn btn-outline-warning",
-                    title: t('actions.edit') do %>
-                <%== icon('pencil-square') %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.edit') %>
-                </span>
+              <% if policy(@tag).edit? %>
+                <%= link_to edit_tag_path(@tag),
+                      class: "btn btn-outline-warning",
+                      title: t('actions.edit') do %>
+                  <%== icon('pencil-square') %>
+                  <span class="d-none d-md-inline">
+                    <%= t('actions.edit') %>
+                  </span>
+                <% end %>
               <% end %>
-
-              <%= link_to @tag,
-                    method: :delete,
-                    data: { confirm: t('actions.delete_sure') },
-                    class: "btn btn-outline-danger",
-                    title: t('actions.delete') do %>
-                <%== icon('trash') %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.delete') %>
-                </span>
+              <% if policy(@tag).destroy? %>
+                <%= link_to @tag,
+                      method: :delete,
+                      data: { confirm: t('actions.delete_sure') },
+                      class: "btn btn-outline-danger",
+                      title: t('actions.delete') do %>
+                  <%== icon('trash') %>
+                  <span class="d-none d-md-inline">
+                    <%= t('actions.delete') %>
+                  </span>
+                <% end %>
               <% end %>
             </div>
           </div>
@@ -98,19 +101,23 @@
         <div class="col-sm-12 col-10 col-md-8 col-lg-6 col-xl-4">
 
           <!-- Project collapsible card -->
-          <div class="row mb-3">
+          <div class="row mb-1">
             <%= render 'projects/project_card', project: @tag.project %>
           </div>
 
+          <!-- Project stage -->
+          <div class="row mb-1">
+            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.stage') %></div>
+            <div class="col-8"><%= @tag.stage %></div>
+          </div>
+
           <!-- Discipline Info -->
-                  
           <div class="row mb-1">
             <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.discipline') %></div>
             <div class="col-8"><%= [@tag.discipline.code, " - ", @tag.discipline.name].join %></div>
           </div>
 
       <!-- Tag Details -->
-                  
       <div class="row mb-1">
         <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.full_tag') %></div>
         <div class="col-8"><%= @tag.full_tag %></div>
@@ -174,6 +181,10 @@
                           <%= t('actions.link', resource: resource) %>
                         </span>
                       <% end %>
+                <% else %>
+                  <span class="text-muted">
+                    <%= @tag.tagable_type.constantize.model_name.human %>
+                  </span>
                 <% end %>
               <% end %>
             <% else %>

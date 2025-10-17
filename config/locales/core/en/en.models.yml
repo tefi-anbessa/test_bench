@@ -13,8 +13,8 @@ en:
       switchboard:        "Switchboard"
       circuit:            "Circuit"
       motor:              "Motor"
-      socket_cct:         "SocketCct"
-      light_cct:          "LightCct"
+      socket_cct:         "Socket Circuit"
+      light_cct:          "Light Circuit"
     attributes:
       resource:
         id:               "ID"
@@ -154,10 +154,10 @@ en:
         poles:            "Poles"
         ingress_protection:   "Ingress Protection"
         speed_rated:      "Speed At Rated Load"
-      socket_ccts:
+      socket_cct:
         socket_type:      "Socket Type"
         quantity:         "Quantity"
-      light_ccts:
+      light_cct:
         light_fitting_type: "Light Fitting Type"
         light_fitting_type_help:  ""
         quantity:         "Quantity"

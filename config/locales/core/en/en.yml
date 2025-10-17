@@ -14,6 +14,7 @@ en:
     delete:       "Delete"
     delete_sure:  "Are you sure? Delete cannot be undone."
     discard:      "Discard changes"
+    discard_new:  "Discard new"
     sure:         "Are you sure?"
     show:         "Show"
     new:          "New"

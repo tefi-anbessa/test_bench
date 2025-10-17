@@ -50,7 +50,7 @@
         <% @tags.each do |t| %>
           <tr scope="row">
             <td><%= t.stage %></td>
-            <td><%= link_to t.full_tag, tag_path(t) %></td>
+            <td><%= t.full_tag %></td>
             <td><%= highlight t.service, params.dig(:q, :full_tag_or_service_cont)  %></td>
             <td><%= t.notes %></td>
             <td>
@@ -71,10 +71,12 @@
                 <% end %>
               <% end %>
               <% if policy(t).destroy? %>
-                <%= link_to t, method: :delete, class: "btn btn-danger btn-sm icon-link",
-                      aria: { label: t('actions.delete') },
-                      title: t('actions.delete'),
-                      display: "inline"  do %>
+              <%= link_to t, 
+                    data: { method: :delete, confirm: t('actions.delete_sure') },
+                    class: "btn btn-danger btn-sm icon-link",
+                    aria: { label: t('actions.delete') },
+                    title: t('actions.delete'),
+                    display: "inline"  do %>
                   <%== icon('trash') %>
                 <% end %>
             <% end %>

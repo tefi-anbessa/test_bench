@@ -5,14 +5,7 @@
       <div class="col text-center">
         <div class="d-flex flex-column align-items-center">
           <div class="mt-1">
-            <%= tag.persisted? ? t('actions.edit') : t('actions.new') %>
-            <span data-tag-target="preview">
-              <% if tag.persisted? %>
-                <%= [t('activerecord.models.tag'), tag.full_tag].join(': ') %>
-              <% else %>
-                <%= t('activerecord.models.tag') %>
-              <% end %>
-            </span>
+            <%= yield(:header) %>
             <% if tag.persisted? && tag.service.present? %>
               <small class="text-muted ms-2"><%= tag.service %></small>
             <% end %>
@@ -36,19 +29,17 @@
 
             <!-- Project -->
             <div class="col-md-12">
-              <% if @current_project.present? %>
-                <%= f.hidden_field :project_id, value: @current_project.id %>
+              <% if project.present? %>
+                <%= f.hidden_field :project_id, value: project.id %>
                 <%= render 'projects/project_card',
-                      project: @current_project %>
+                      project: project %>
               <% else %>
                 <%= f.select :project_id,
                       options_for_select(
                         projects.map { |p| ["#{p.code}: #{p.title}", p.id] },
                         tag.project_id
                       ),
-                      { label: t('activerecord.models.project') },
-                      { class: 'form-select' },
-                      { required: true } %>
+                      { class: 'form-select', required: true  } %>
               <% end %>
             </div>
 

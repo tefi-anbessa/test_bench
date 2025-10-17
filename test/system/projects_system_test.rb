@@ -55,7 +55,7 @@ class ProjectsTest < ApplicationSystemTestCase
     assert_selector "#project-menu-btn", text: @project.code # Indicates that the current project is set
   end
 
-  test "team member viewing the projects index" do
+  test "team member view the projects index" do
     sign_in @team_member
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
@@ -79,9 +79,13 @@ class ProjectsTest < ApplicationSystemTestCase
     refute_selector "a[href='#{edit_project_path(@project)}']"
     refute_selector "a[href='#{project_path(@project)}'][data-turbo-method='delete']"
     refute_selector "a[href='#{new_project_path}']" # only admin can create new project
+
+    assert_text @project.code
+    assert_text @project.title
+    assert_text @project.description
   end
 
-  test "project manager viewing the projects index" do
+  test "project manager view the projects index" do
     sign_in @project_manager
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
@@ -108,7 +112,7 @@ class ProjectsTest < ApplicationSystemTestCase
     refute_selector "a[href='#{new_project_path}']" # only admin can create new project
   end
 
-  test "admin viewing the projects index" do
+  test "admin view the projects index" do
     sign_in @admin
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
@@ -123,10 +127,10 @@ class ProjectsTest < ApplicationSystemTestCase
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit projects_path
     assert_selector "a[href='#{new_project_path}']" # only admin and app owner can create new project
-    assert_selector "a[href='#{project_path(@project)}'][data-method='delete']" # check for delete link
+    assert_selector "a[href='#{project_path(@project)}'][data-method='delete']" # only app_owner can destroy project
   end
 
-  test "team member viewing the project show view" do
+  test "team member show project" do
     sign_in @team_member
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
@@ -157,7 +161,7 @@ class ProjectsTest < ApplicationSystemTestCase
     assert_text @project.description
   end
 
-  test "project manager viewing the project show view" do
+  test "project manager show project" do
     sign_in @project_manager
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
@@ -168,7 +172,7 @@ class ProjectsTest < ApplicationSystemTestCase
     refute_selector "a[href='#{project_path(@project)}'][data-method='delete']" # delete icon
   end
 
-  test "app owner viewing the project show view" do
+  test "app owner show project" do
     sign_in @app_owner
     visit project_path(@project)
 
@@ -177,10 +181,12 @@ class ProjectsTest < ApplicationSystemTestCase
     assert_selector "a[href='#{project_path(@project)}'][data-method='delete']" # delete icon
   end
 
-  test "admin viewing the project new view" do
+  test "admin create new project" do
     sign_in @admin
     visit projects_path
     click_link(href: new_project_path)
+    assert_current_path new_project_path
+
     assert_text I18n.t("projects.new.header")
     assert_selector "input[name='project[code]']"
     assert_selector "input[name='project[title]']"
@@ -195,14 +201,14 @@ class ProjectsTest < ApplicationSystemTestCase
 
     # Save the new project
     click_button I18n.t('actions.save')
-sleep 0.1  # Give database time to commit
+    sleep 0.1  # Give database time to commit
     new_project = Project.find_by(code: "TT")
     assert_current_path project_path(new_project) 
     assert_text "New Project"
     assert_text I18n.t("flash.actions.create.notice", resource_name: I18n.t("activerecord.models.project"))
   end
 
-  test "project manager viewing the project edit view" do
+  test "project manager edit project" do
     sign_in @project_manager
     visit projects_path
     click_link(href: edit_project_path(@project))
@@ -234,7 +240,7 @@ sleep 0.1  # Give database time to commit
     
   end
 
-  test "App owner destroying a project from the index view" do
+  test "app owner destroy project from the index view" do
     sign_in @app_owner
     visit projects_path
      # Find the actual delete link and inspect its href
@@ -242,7 +248,19 @@ sleep 0.1  # Give database time to commit
       find("a[href='#{project_path(@project)}'][data-method='delete']").click
     end
     assert_current_path projects_path
-    assert_no_selector "a[href='#{project_path(@project)}']"
+    refute_selector "a[href='#{project_path(@project)}']"
+    assert_text I18n.t("flash.actions.destroy.notice", resource_name: I18n.t("activerecord.models.project"))
+  end
+
+  test "app owner destroy project from the show view" do
+    sign_in @app_owner
+    visit project_path(@project)
+     # Find the actual delete link and inspect its href
+    accept_confirm do
+      find("a[href='#{project_path(@project)}'][data-method='delete']").click
+    end
+    assert_current_path projects_path
+    refute_selector "a[href='#{project_path(@project)}']"
     assert_text I18n.t("flash.actions.destroy.notice", resource_name: I18n.t("activerecord.models.project"))
   end
 
