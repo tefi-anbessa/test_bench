@@ -43,7 +43,7 @@ class CablesControllerTest < ActionController::TestCase
   # Index action tests
   test "unauthenticated users should be redirected to sign in" do
     get :index 
-    assert_redirected_to new_user_session_url
+    assert_unauthenticated
   end
 
   test "regular user cannot get index" do
@@ -107,8 +107,7 @@ class CablesControllerTest < ActionController::TestCase
 
   test "electrical designer cannot create cable with tag that is not in the database" do
     sign_in @electrical_designer
-    @another_cable_tag.update(tagable_type: "Motor")
-    assert_difference('Cable.count', 0) do
+    assert_no_difference('Cable.count') do
       post :create, params: {
         tag_id: 99,
         cable: {
@@ -121,7 +120,7 @@ class CablesControllerTest < ActionController::TestCase
 
   test "electrical designer cannot create cable with tag that already has tagable" do
     sign_in @electrical_designer
-    assert_difference('Cable.count', 0) do
+    assert_no_difference('Cable.count') do
       post :create, params: {
         tag_id: @cable_tag.id,
         cable: {
@@ -135,7 +134,7 @@ class CablesControllerTest < ActionController::TestCase
   test "electrical designer cannot create cable with tag that is already classified as other than cable" do
     sign_in @electrical_designer
     @another_cable_tag.update(tagable_type: "Motor")
-    assert_difference('Cable.count', 0) do
+    assert_no_difference('Cable.count') do
       post :create, params: {
         tag_id: @another_cable_tag.id,
         cable: {
@@ -191,21 +190,21 @@ class CablesControllerTest < ActionController::TestCase
         }
       }
     end
-    assert_redirected_to Cable.last
 
-    cable = Cable.last
     @another_cable_tag.reload
+    cable = @another_cable_tag.tagable
+    assert_redirected_to cable
 
-    # Associations are wired correctly
-    assert_equal @another_cable_tag, cable.tag
-    assert_equal cable, @another_cable_tag.tagable
+    # Associations are saved
+    assert cable.persisted?
 
     # Flash message confirms success
-    expected = I18n.t('flash.tagables.assigned_to', tag: @another_cable_tag.full_tag, resource_name: Cable.model_name.human, id: cable.id)
+    expected = I18n.t('flash.tagables.assigned_to', 
+      tag: @another_cable_tag.full_tag, resource_name: Cable.model_name.human, id: cable.id)
     assert_equal expected, flash[:success]
   end
 
-  test "electrical designer can create cable and tag in a single request" do
+  test "electrical designer can create new cable and tag in a single request" do
     sign_in @electrical_designer
     initial_tags = Tag.count
     initial_cables = Cable.count

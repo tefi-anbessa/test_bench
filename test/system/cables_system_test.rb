@@ -1,6 +1,6 @@
 require "application_system_test_case"
 
-class TagsSystemTest < ApplicationSystemTestCase
+class CablesSystemTest < ApplicationSystemTestCase
   include Devise::Test::IntegrationHelpers
   include Warden::Test::Helpers
 

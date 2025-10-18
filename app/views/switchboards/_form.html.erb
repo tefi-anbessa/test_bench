@@ -93,14 +93,13 @@
                 
                 <%= f.select :voltage_rating,
                     options_for_select(
-                      voltage_ratings.keys.map { |k| [k.to_s.titleize, k] },
+                      voltage_ratings.keys.map { |k| [k, k] },
                       selected: switchboard.voltage_rating
                     ),
                     { include_blank: true },
                     class: 'form-control form-control-sm',
                     label_col: "col-sm-4",
-                    control_col: "col-sm-3",
-                    wrapper: { class: 'mb-1' } %>
+                    control_col: "col-sm-3" %>
 
                 <%= f.number_field :busbar_rating,
                         class: 'form-control form-control-sm',
@@ -154,6 +153,12 @@
                         wrapper: { class: 'mb-1' } %>
 
                 <%= f.text_area :earth_bar_connections,
+                        class: 'form-control form-control-sm',
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-8",
+                        wrapper: { class: 'mb-1' } %>
+
+                <%= f.text_area :notes,
                         class: 'form-control form-control-sm',
                         label_col: "col-sm-4",
                         control_col: "col-sm-8",

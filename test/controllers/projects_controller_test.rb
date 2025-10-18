@@ -28,7 +28,7 @@ class ProjectsControllerTest < ActionController::TestCase
   # Index action tests
   test "unauthenticated users should be redirected to sign in" do
     get :index 
-    assert_redirected_to new_user_session_url
+    assert_unauthenticated
   end
 
   test "should get index for any authenticated user" do

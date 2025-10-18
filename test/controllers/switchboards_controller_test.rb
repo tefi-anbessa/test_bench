@@ -62,7 +62,7 @@ class SwitchboardsControllerTest < ActionController::TestCase
   # Index action tests
   test "unauthenticated users should be redirected to sign in" do
     get :index 
-    assert_redirected_to new_user_session_url
+    assert_unauthenticated
   end
 
   test "regular user cannot get index" do
@@ -111,7 +111,7 @@ class SwitchboardsControllerTest < ActionController::TestCase
 
   # Create action tests
   # Success tests
-  test "electrical designer can create switchboard" do
+  test "electrical designer can create switchboard with existing unallocated tag" do
     sign_in @electrical_designer
     assert_difference('Switchboard.count', 1) do
       post :create, params: {
@@ -121,8 +121,40 @@ class SwitchboardsControllerTest < ActionController::TestCase
         }
       }
     end
-    assert_redirected_to switchboard_path(Switchboard.last)
-    assert flash[:success].present?
+    @another_swbd_tag.reload
+    swbd = @another_swbd_tag.tagable
+    assert_redirected_to switchboard_path(swbd)
+    # Flash message confirms success
+    expected = I18n.t('flash.tagables.assigned_to', 
+      tag: @another_swbd_tag.full_tag, resource_name: Switchboard.model_name.human, id: swbd.id)
+    assert_equal expected, flash[:success]
+  end
+
+  test "electrical designer can create new switchboard and tag in a single request" do
+    sign_in @electrical_designer
+    assert_difference('Switchboard.count', 1) do
+      post :create, params: {
+        switchboard: {
+          location: 'Location 3',
+          tag: {
+            project_id: @project.id,
+            discipline_id: @discipline.id,
+            prefix: 'EX',
+            serial: 2001,
+            suffix: '',
+            service: 'One-shot switchboard',
+            stage: 1
+          }
+        }
+      }
+    end
+    swbd_tag = Tag.find_by(prefix: 'EX', serial: 2001)
+    swbd = swbd_tag.tagable
+    assert_redirected_to switchboard_path(swbd)
+    # Flash message confirms success
+    expected = I18n.t('flash.tagables.created_and_assigned', 
+      tag: swbd_tag.full_tag, resource_name: Switchboard.model_name.human, id: swbd.id)
+    assert_equal expected, flash[:success]
   end
 
   # Create action tests
@@ -140,11 +172,38 @@ class SwitchboardsControllerTest < ActionController::TestCase
     assert_forbidden
   end
 
+  test "electrical designer cannot create switchboard with tag that is not in the database" do
+    sign_in @electrical_designer
+    assert_no_difference('Switchboard.count') do
+      post :create, params: {
+        tag_id: 99,
+        switchboard: {
+          location: 'Location 3'
+        }
+      }
+    end
+    assert_conflict
+  end
+
   test "electrical designer cannot create switchboard on tag already taken" do
     sign_in @electrical_designer
-    assert_difference('Switchboard.count', 0) do
+    assert_no_difference('Switchboard.count') do
       post :create, params: {
         tag_id: @swbd_tag.id,
+        switchboard: {
+          location: 'Location 3'
+        }
+      }
+    end
+    assert_conflict
+  end
+
+  test "electrical designer cannot create switchboard with tag that is already classified as other than switchboard" do
+    sign_in @electrical_designer
+    @another_swbd_tag.update(tagable_type: "Motor")
+    assert_no_difference('Switchboard.count') do
+      post :create, params: {
+        tag_id: @another_swbd_tag.id,
         switchboard: {
           location: 'Location 3'
         }

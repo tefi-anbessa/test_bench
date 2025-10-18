@@ -1,90 +1,71 @@
 # Test Bench
 
-A Ruby on Rails application for managing multiple engineering projects.
+A Ruby on Rails application for assisting with multiple engineering projects. The application is primarily intending to improve connectivity for all your engineering and project related data, through all phases of the project lifecycle.
+A single database retains all data for all projects, so data can be shared, but access is managed as required.
+
 ## Users
-- Users are validated using the `devise` gem. Permissions are controlled using the `rolify` and `pundit` gems. 
+
+[HOLD] user registration process is not finalized.
+- Users are validated using the `devise` gem. Permissions are controlled using the `rolify` and `pundit` gems.
 
 ## Projects
-- Projects are the top-level resource. 
-- Projects are uniquely identified by a 2-letter code, e.g. AA, AB, AC, etc.
+
+- Projects are the top-level resource.
+- There is a substantial wall around each project. The role based access control (RBAC) system has a "current project" context, so users are typically working on a single project at any time.
+- Projects may have multiple "stages". (Stages might also be called "phases" but that conflicts with the electrical engineering term.)
+- Stages can be used to partition projects by lifecycle stage, such as FEED, Design, Construction, Commissioning, Operation, etc. In this case, data would transition from one phase to the next, under a revision controlled process.
+- Stages can also be used to segregate projects into cost centres, or phased construction.
 
 ## Disciplines
-- Disciplines can be used to group tags, documents, etc.
-- Disciplines are set across the organization, so all projects share the same set of discipine codes.
-[HOLD] - Disciplines interact with functional role assignments. 
-- Because they are not typically mutable, there is no UI for managing disciplines. They are set by db:seed.
+
+- Each project has a set of disciplines, which are used to define the workflow and schema for the core resources: tags and documents.
+- Typical disciplines for an engineering project would include civil, process, piping, electrical, instruments, communications, etc.
+- [HOLD] - Because they are not typically mutable, there is no UI for managing disciplines. They are set by db:seed.
 
 ## Tags
-- Engineering design elements require a tag to be assigned. 
-- Tags belong to projects, but can be sub-grouped within a project by assigning a project stage (1 to 10).
-- Tags belong to disciplines, e.g. Electrical, Piping, etc.
-- The tag is the link to data sheet and further detailed information. 
-- [TODO - implement flexible tag structure.] Tags are unique within disciplines and projects.
-- [TODO]: Provide an option for tags to be unique only on the project level. Requires coordination of tag prefixes.
-- For a tag to have further information added, it has to be assigned to a tagable type. The information required is generally what is needed to produce a data sheet for procurement.
+
+- Engineering design elements require a tag to be assigned.
+- Tags are the link and provide the label for all design elements, such as buildings, pipes, motors, gauges, etc.
+- Tags have a service description, which succinctly describes the purpose of the design element.
+- [HOLD] Tags belong to projects, but can be sub-grouped within a project by assigning a project stage.
+- Tags belong to disciplines, and the discipline sets the schema for the prefix tagging convention on the project. This allows tag prefixes to be constrained to acceptable values or formats.
+- Tags have a loop number, which is intended to be unique to the function of the tagged item. Note that loop is traditionally an instrument tagging concept, and the in that case the loop is actually the first character of the prefix, followed by a number.
+- Internally, loop is referenced as 'serial' to avoid confusion with loop in a programming context. This should not be visible to users.
+- Tags may have a suffix , useful for when multiple items are required for the same function, e.g. street lights on the same circuit.
+- Tags are required to be unique, but the constraint is over the whole combination of project, discipline, prefix, serial number, and suffix. So, projects don't have to be aware of other project's tags. Disciplines can use the same prefix for different meanings, without knowing about other assignments.
+- The tag is the link to data sheet and other detailed information, such as electrical load data.
+- For a tag to have further information added, it has to be assigned to a type. The information required is generally what is needed to produce a data sheet for procurement.
 - The following tagable types are available: [TODO: keep this list up to date]
-  - Switchboard
-  - Cable
-  - Motor
-  - SocketCct
-  - LightCct
-  - Pipe
-  - Source
-  - Consumer
+  - Switchboard, Cable, Motor, SocketCct, LightCct, Pipe, Source, Consumer
 
 ## Electrical
-- Electrical power distribution can be modeled, mainly for the purpose of producing documentation. 
-- The following tag types are demandable, meaning they can have attached electrical load information: 
-  - Switchboard 
-  - Motor
-  - SocketCct
-  - LightCct
-[TODO: keep this list up to date]
+
+- Electrical power distribution can be modeled, mainly for the purpose of producing documentation.
+- [HOLD] - Electrical load modeling
+- The following tag types can have attached electrical load information: [TODO: keep this list up to date]
+  - Switchboard, Cable, Motor, SocketCct, LightCct
 
 ### Switchboards
-- Switchboards have multiple outgoing circuits, each uniquely identified. 
+
+- Switchboards have multiple outgoing circuits, each uniquely identified.
   - Each circuit can have protection devices and options.
-  - Each circuit can have an assigned load and cable. These are used to evaluate the distribution as a tree data structure.
 - Switchboards are always of load type "summation", meaning they aggregate the loads of their outgoing circuits.
 
 ### Cables
-- Cables are assigned to cable types, which define the cable's properties, such as insulation type, conductor material, etc.
-- Cable type set is specific to the project.
+
+- Cables have a cable type, which defines the cable's properties, such as insulation type, conductor material, etc.
+- Cable type set is specific to the project, but facilities are available to copy between projects.
+- Cables have a "from" assignment and a "to" assignment.
+- Cables can connect switchboard circuits to electrical loads by assigning the circuit as "from" and the load as "to".
 - [TODO - at present cables are only "from" power source (switchboard) to load (motor, socket, light, etc.) Build a more flexible cable model]
 
-## Role Hierarchy and Permissions
+## Role Based Access Control (RBAC)
 
 The application implements a role-based access control (RBAC) system. Refer to docs/ROLES_AND_PERMISSIONS.md for details.
 
-### Development Guidelines
-
-### UI/UX Conventions
-
-#### Forms
-- Use Bootstrap form helpers (`bootstrap_form_with` and `bootstrap_form_for`) consistently throughout the application
-- Follow Rails conventions for form structure and helpers
-
-#### Icons
-- Use the `icon` helper for all Bootstrap Icons
-- Basic usage: `icon('icon-name')`
-- Example with button and spacing: 
-  ```erb
-  <button class="btn btn-primary">
-    <span class="me-1"><%== icon('save') %></span> Save
-  </button>
-  ```
-- The helper automatically adds the `bi` and `bi-[icon-name]` classes
-- For accessibility, the helper includes `aria-hidden="true"` by default
-- Always wrap the icon in a `<span>` if you need to apply margin or other styling
-
-#### Layout
-- Follow Bootstrap's grid system and component structure
-- Use Bootstrap's spacing utilities for consistent margins and padding
-- Maintain responsive design principles
-
 ### Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+[TODO] These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
 #### Prerequisites
 

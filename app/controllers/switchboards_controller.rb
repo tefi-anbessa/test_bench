@@ -65,7 +65,7 @@ class SwitchboardsController < ApplicationController
             @tag.save!
             @tag.update(tagable: @switchboard)
           end
-
+          @tag.reload
           update_circuits # Create circuits if the :circuits parameter is present
           flash[:success] = t('flash.tagables.created_and_assigned',
                             resource_name: Switchboard.model_name.human,
@@ -172,6 +172,12 @@ class SwitchboardsController < ApplicationController
     end
 
     def setup_form
+      if current_project
+        @project = current_project
+      else
+        @project = nil
+      end
+      @projects = policy_scope(Project)
       @circuits = @switchboard.persisted? ? @switchboard.circuits.count : 0
       @voltage_ratings = Switchboard.voltage_ratings
       @ip_1 = Constants.electrical.ingress_protection.first_digit.to_h

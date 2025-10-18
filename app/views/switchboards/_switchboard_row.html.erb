@@ -29,10 +29,12 @@
       <% end %>
     <% end %>
     <% if policy(row).destroy? %>
-      <%= link_to switchboard_path(row), method: :delete, class: "btn btn-danger btn-sm icon-link",
-            aria: { label: t('actions.delete') },
-            title: t('actions.delete'),
-            display: "inline"  do %>
+      <%= link_to switchboard_path(row),
+              data: { method: :delete, confirm: t('actions.delete_sure') },
+              class: "btn btn-danger btn-sm icon-link",
+              aria: { label: t('actions.delete') },
+              title: t('actions.delete'),
+              display: "inline"  do %>
         <%== icon('trash') %>
       <% end %>
     <% end %>
