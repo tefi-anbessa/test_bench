@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_12_090653) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_17_050337) do
   create_table "cable_types", force: :cascade do |t|
     t.integer "conductor_material"
     t.float "csa"
@@ -48,6 +48,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_12_090653) do
     t.integer "from_id"
     t.string "to_type"
     t.integer "to_id"
+    t.text "notes"
     t.index ["cable_type_id"], name: "index_cables_on_cable_type_id"
     t.index ["circuit_id"], name: "index_cables_on_circuit_id"
     t.index ["from_type", "from_id"], name: "index_cables_on_from"
@@ -86,6 +87,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_12_090653) do
     t.float "duty"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "notes"
     t.index ["circuit_id"], name: "index_demands_on_circuit_id"
     t.index ["demandable_type", "demandable_id"], name: "index_demands_on_demandable"
   end
@@ -100,6 +102,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_12_090653) do
     t.integer "quantity"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "notes"
   end
 
   create_table "motors", force: :cascade do |t|
@@ -110,6 +113,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_12_090653) do
     t.float "speed_rated"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "notes"
   end
 
   create_table "projects", force: :cascade do |t|
@@ -136,6 +140,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_12_090653) do
     t.integer "quantity"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "notes"
   end
 
   create_table "switchboards", force: :cascade do |t|
@@ -152,6 +157,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_12_090653) do
     t.datetime "updated_at", null: false
     t.integer "voltage_rating"
     t.string "ingress_protection"
+    t.text "notes"
   end
 
   create_table "tags", force: :cascade do |t|

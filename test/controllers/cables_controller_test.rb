@@ -256,7 +256,8 @@ class CablesControllerTest < ActionController::TestCase
     assert_equal @cable_type, cable.cable_type
 
     # Flash message confirms success
-    assert flash[:success].present?
+    expected = I18n.t('flash.tagables.created_and_assigned', tag: tag.full_tag, resource_name: Cable.model_name.human, id: cable.id)
+    assert_equal expected, flash[:success]
   end
 
   # Edit action tests

@@ -51,7 +51,7 @@ en:
         stage:            "Stage"
         stage_help:       "Construction stage or phase (0 to 10)"
         notes:            "Notes"
-        notes_help:       "Record useful design information here"
+        notes_help:       "Record useful tag related design information here"
         full_tag:         "Tag"
         tagable_type:     "Tag Type"
       role:
@@ -77,6 +77,8 @@ en:
         od_units: mm
         temperature_rating:	Temperature Rating
         voltage_rating:	Voltage Rating
+        notes:                "Notes"
+        notes_help:       "Record useful cable type design information here"
       cable:
         from:                 "From"
         to:                   "To"
@@ -88,6 +90,8 @@ en:
         termination_allowance_help: "Allowance for cable routing inside boxes"
         start_mark:           "Installed Start Mark"
         end_mark:             "Installed End Mark"
+        notes:                "Notes"
+        notes_help:       "Record useful cable related design references here"
       demand:
         incomer:          "Incomer"
         feeder:           "Feeder"
@@ -121,6 +125,8 @@ en:
         demandable_type:  "Load Type"
         demandable:       "Equipment"
         demandable_help:  "Equipment datasheet"
+        notes:            "Notes"
+        notes_help:       "Record additional load related design references here"
       switchboard:
         location:         "Location"
         ingress_protection: "Ingress Protection"
@@ -136,6 +142,7 @@ en:
         neutral_bar_connections:  "Neutral Bar Connections"
         earth_bar_connections:  "Earth Bar Connections"
         circuits:         "Circuits"
+        notes:            "Notes"
       circuit:
         serial:           "Serial Number"
         phase:            "Phase Designation"
@@ -148,19 +155,26 @@ en:
         feeder:           "Feeder"
         demand:           "Load"
         notes:            "Notes"
+        notes_help:       "Record additional circuit related design references here"
       motor:
         motor_type:       "Motor Type"
         frame_size:       "Frame Size"
         poles:            "Poles"
         ingress_protection:   "Ingress Protection"
         speed_rated:      "Speed At Rated Load"
+        notes:            "Notes"
+        notes_help:       "Record additional motor related design references here"
       socket_cct:
         socket_type:      "Socket Type"
         quantity:         "Quantity"
+        notes:            "Notes"
+        notes_help:       "Record additional socket circuit related design references here"
       light_cct:
         light_fitting_type: "Light Fitting Type"
         light_fitting_type_help:  ""
         quantity:         "Quantity"
+        notes:            "Notes"
+        notes_help:       "Record additional light circuit related design references here"
     errors:
       unique: "%{model} %{attribute} has already been taken, must be unique"
       blank: "%{model} %{attribute} is required"

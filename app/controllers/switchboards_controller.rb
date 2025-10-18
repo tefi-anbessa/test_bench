@@ -219,7 +219,7 @@ class SwitchboardsController < ApplicationController
       params.require(:switchboard).permit(:location, :ingress_protection, :voltage_rating,
         :busbar_rating, :busbar_fault_rating, :busbar_fault_duration, 
         :cable_entry, :incomer_protection, :metering, 
-        :neutral_bar_connections, :earth_bar_connections, 
+        :neutral_bar_connections, :earth_bar_connections, :notes,
         tag: [
           :id, :project_id, :discipline_id, :prefix, :serial, 
           :suffix, :service, :stage, :notes, :tagable_type

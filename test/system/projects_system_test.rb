@@ -47,7 +47,10 @@ class ProjectsTest < ApplicationSystemTestCase
       assert_selector "a", text: I18n.t('actions.select')
       click_on I18n.t('actions.select')  # Click on the project select link
     end
-    assert_current_path  select_projects_path
+    assert_current_path select_projects_path
+    assert_text I18n.t("projects.select.header")
+    assert page.title.include?(I18n.t("projects.select.title"))
+
     assert_selector "label.form-check-label", text: @project.code
     choose(@project.code)
     click_on I18n.t('actions.set') # Set the current project
@@ -71,6 +74,9 @@ class ProjectsTest < ApplicationSystemTestCase
       click_on I18n.t('project', scope: 'activerecord.models').pluralize  # Click on the projects index link
     end
     assert_current_path projects_path
+    assert_text I18n.t("projects.index.header")
+    assert page.title.include?(I18n.t("projects.index.title"))
+
     assert_selector "input.search_field"
     assert_selector "a[href*='q%5Bs%5D=code']"
     assert_selector "a[href*='q%5Bs%5D=title']"
@@ -101,6 +107,11 @@ class ProjectsTest < ApplicationSystemTestCase
       click_on I18n.t('project', scope: 'activerecord.models').pluralize  # Click on the project link
     end
     assert_current_path projects_path # project manager has 2 projects
+
+    # only admin can create new project
+    refute_selector "a[href='#{new_project_path}']" 
+
+    # search and header fields
     assert_selector "input.search_field"
     assert_selector "a.sort_link", text: I18n.t('activerecord.attributes.project.code') # alternative pattern
     assert_selector "a.sort_link", text: I18n.t('activerecord.attributes.project.title')
@@ -109,7 +120,6 @@ class ProjectsTest < ApplicationSystemTestCase
     assert_selector "a[href='#{project_path(@project2)}']", count: 2 # one link on code and one on icon in links
     assert_selector "a[href='#{edit_project_path(@project)}']" # edit icon
     refute_selector "a[href='#{project_path(@project)}'][data-turbo-method='delete']" # delete icon
-    refute_selector "a[href='#{new_project_path}']" # only admin can create new project
   end
 
   test "admin view the projects index" do
@@ -147,6 +157,9 @@ class ProjectsTest < ApplicationSystemTestCase
       click_link(href: project_path(@project)) # Click on the project link
     end
     assert_current_path project_path(@project)
+    assert_text I18n.t("projects.show.header", label: @project.code)
+    assert page.title.include?(I18n.t("projects.show.title"))
+
     # Header bar navigation links
     assert_selector "a[href='#{projects_path}']"# Link back to projects index
     refute_selector "a[href='#{edit_project_path(@project)}']" # Link to edit project
@@ -186,8 +199,9 @@ class ProjectsTest < ApplicationSystemTestCase
     visit projects_path
     click_link(href: new_project_path)
     assert_current_path new_project_path
-
     assert_text I18n.t("projects.new.header")
+    assert page.title.include?(I18n.t("projects.new.title"))
+
     assert_selector "input[name='project[code]']"
     assert_selector "input[name='project[title]']"
     assert_selector "textarea[name='project[description]']"
@@ -214,6 +228,8 @@ class ProjectsTest < ApplicationSystemTestCase
     click_link(href: edit_project_path(@project))
     assert_current_path edit_project_path(@project)
     assert_text I18n.t("projects.edit.header", label: @project.label)
+    assert page.title.include?(I18n.t("projects.edit.title"))
+
     assert_selector "input[name='project[code]']"
     assert_selector "input[name='project[title]']"
     assert_selector "textarea[name='project[description]']"

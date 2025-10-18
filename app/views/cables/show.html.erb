@@ -182,6 +182,11 @@
                   </div>
                   
                   <div class="row mb-1">
+                    <div class="col-4 text-muted"><%= t('activerecord.attributes.cable.route_length') %></div>
+                    <div class="col-8"><%= @cable.route_length.present? ? "#{@cable.route_length} m" : '-' %></div>
+                  </div>
+                  
+                  <div class="row mb-1">
                     <div class="col-4 text-muted"><%= t('activerecord.attributes.cable.vertical_allowance') %></div>
                     <div class="col-8"><%= @cable.vertical_allowance.present? ? "#{@cable.vertical_allowance} m" : '-' %></div>
                   </div>
@@ -200,42 +205,13 @@
                     <div class="col-4 text-muted"><%= t('activerecord.attributes.cable.end_mark') %></div>
                     <div class="col-8"><%= @cable.end_mark.presence || '-' %></div>
                   </div>
+                  
+                  <div class="row mb-1">
+                    <div class="col-4 text-muted"><%= t('activerecord.attributes.cable.notes') %></div>
+                    <div class="col-8"><%= @cable.notes.presence || '-' %></div>
+                  </div>
                 </div>
               </div>
-            </div>
-        
-            <% if @cable.circuit.present? %>
-              <div class="col-md-6">
-                <%= render 'components/collapsible',
-                      title: t('cables.show.circuit_details'),
-                      id: 'circuit-details-collapse',
-                      expanded: true,
-                      header_class: 'py-1' do %>
-                      
-                  <dl class="row mb-0">
-                    <dt class="col-sm-4"><%= t('activerecord.models.switchboard') %></dt>
-                    <dd class="col-sm-8">
-                      <%= link_to @cable.circuit.switchboard.tag.full_tag, 
-                            @cable.circuit.switchboard %>
-                      <small class="text-muted d-block"><%= @cable.circuit.switchboard.tag.service %></small>
-                    </dd>
-
-                    <dt class="col-sm-4"><%= t('activerecord.models.circuit') %></dt>
-                    <dd class="col-sm-8">
-                      <%= link_to @cable.circuit.serial, @cable.circuit %>
-                    </dd>
-
-                    <% if @cable.circuit.demand&.present? %>
-                      <dt class="col-sm-4"><%= t('activerecord.models.demand') %></dt>
-                      <dd class="col-sm-8">
-                        <%= link_to @cable.circuit.load.loadable.tag.full_tag, 
-                              @cable.circuit.load %>
-                        <small class="text-muted d-block"><%= @cable.circuit.load.loadable.tag.service %></small>
-                      </dd>
-                    <% end %>
-                  </dl>
-                <% end %>
-              <% end %>
             </div>
           </div>
         </div>

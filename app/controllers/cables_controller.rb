@@ -10,7 +10,7 @@ class CablesController < ApplicationController
     @pagy, @cables = pagy(@q.result.includes(:tag), limit: 20)
     authorize @cables
     @orphans = @cables.select{ |cable| cable.tag.nil? }
-    @link_errors = current_project.tags.select { |tag| tag.tagable_type == "Cable" && tag.tagable.nil? }
+    @link_errors = policy_scope(Tag).select { |tag| tag.tagable_type == "Cable" && tag.tagable.nil? }
     @link_incomplete = @link_errors.select{ |tag| tag.tagable_id.nil? }
     @link_broken = @link_errors.select{ |tag| !tag.tagable_id.nil? }
   end
@@ -67,7 +67,7 @@ class CablesController < ApplicationController
           flash[:success] = t('flash.tagables.created_and_assigned',
                             resource_name: Cable.model_name.human,
                             id: @cable.id,
-                            tag: @tag.label)
+                            tag: @tag.reload.full_tag)
           create_success_redirect
           return
         rescue ActiveRecord::RecordInvalid => e
@@ -166,6 +166,12 @@ class CablesController < ApplicationController
     end
 
     def setup_form
+      if current_project
+        @project = current_project
+      else
+        @project = nil
+      end
+      @projects = policy_scope(Project)
       @cable.from_type ||= Constants.electrical.connect_options.first
       @cable.to_type ||= Constants.electrical.connect_options.last
       @cable_types = policy_scope(CableType)
@@ -208,7 +214,7 @@ class CablesController < ApplicationController
     def cable_params
       params.require(:cable).permit(:cable_type_id, 
         :route_length, :vertical_allowance, :termination_allowance,
-        :start_mark, :end_mark, :from_id, :from_type, :to_id, :to_type, 
+        :start_mark, :end_mark, :from_id, :from_type, :to_id, :to_type, :notes,
         tag: [
           :id, :project_id, :discipline_id, :prefix, :serial, 
           :suffix, :service, :stage, :notes, :tagable_type

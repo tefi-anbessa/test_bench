@@ -1,5 +1,4 @@
-<div class="card mb-3"
-     data-controller="tag"
+<div data-controller="tag"
      data-tag-model-name-value="<%= t('activerecord.models.tag') %>">
   <div class="card-header p-2">
     <!-- Center Tag Info -->
@@ -25,110 +24,103 @@
   <div class="card-body p-2">
     <%= render 'shared/error_messages', object: tag %>
 
-    <div class="row justify-content-center">
-      <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-
-        <!-- Project -->
-        <div class="col-md-12">
-          <% if @current_project.present? %>
-            <%= tag_f.hidden_field :project_id, value: @current_project.id %>
-            <%= render 'projects/project_card',
-                  project: @current_project %>
-          <% else %>
-            <%= tag_f.select :project_id,
-                  options_for_select(
-                    @projects.map { |p| ["#{p.code}: #{p.title}", p.id] },
-                    tag.project_id
-                  ),
-                  { label: t('activerecord.models.project') },
-                  { class: 'form-select' },
-                  { required: true } %>
-          <% end %>
-        </div>
-
-        <!-- Stage -->
-        <div class="row">
-          <%= tag_f.number_field :stage,
-          label_col: "col-sm-3",
-          control_col: "col-sm-3",
-                min: 0,
-                max: 10,
-                title: t('activerecord.attributes.tag.stage_help') %>
-        </div>
-
-        <!-- Discipline -->
-        <div class="row">
-          <%= tag_f.select :discipline_id,
+      <!-- Project -->
+      <div class="col-md-12">
+        <% if @current_project.present? %>
+          <%= tag_f.hidden_field :project_id, value: @current_project.id %>
+          <%= render 'projects/project_card',
+                project: @current_project %>
+        <% else %>
+          <%= tag_f.select :project_id,
                 options_for_select(
-                  @disciplines.map { |d|
-                    ["#{t("discipline.#{d.code.downcase.to_sym}.code",
-                      default: d.code)}: #{t("discipline.#{d.code.downcase.to_sym}.name",
-                      default: d.code)}", d.id]
-                  },
-                  tag.discipline_id
+                  @projects.map { |p| ["#{p.code}: #{p.title}", p.id] },
+                  tag.project_id
                 ),
-                { class: 'form-select' },
-                { data: { action: 'change->tag#updateFormStructure' } } %>
-        </div>
-
-        <!-- Prefix Fields - Dynamic based on discipline schema -->
-        <%= render 'tags/tag_prefix_fields', tag: tag, f: tag_f %>
-
-        <!-- Full tag preview -->
-        <%= hidden_field_tag :full_tag, id: 'tag_full_tag_preview' %>
-
-        <!-- Serial and Suffix -->
-        <div class="row">
-          <%= tag_f.text_field :serial,
-          label_col: "col-sm-3",
-          control_col: "col-sm-3",
-                title: t('activerecord.attributes.tag.serial_help'),
-                pattern: '\d*',
-                inputmode: 'numeric',
-                value: tag.serial.present? ? tag.serial.to_s.rjust(4, '0') : '0000',
-                data: {
-                  controller: 'numeric-mask',
-                  'numeric-mask-target': 'input',
-                  action: 'change->tag#updatePreview input->tag#updatePreview'
-                },
-                id: 'tag_serial' %>
-        </div>
-
-        <div class="row">
-          <%= tag_f.text_field :suffix,
-          label_col: "col-sm-3",
-          control_col: "col-sm-3",
-                title: t('activerecord.attributes.tag.suffix_help'),
-                data: { action: 'change->tag#updatePreview input->tag#updatePreview' },
-                id: 'tag_suffix' %>
-        </div>
-
-        <div class="row">
-          <%= tag_f.text_field :service,
-            label_col: "col-sm-3",
-            control_col: "col-sm-9",
-                  title: t('activerecord.attributes.tag.service_help'),
-                  required: true %>
-        </div>
-
-        <!-- Notes -->
-        <div class="row">
-          <%= tag_f.text_area :notes,
-                  label_col: "col-sm-3",
-                  control_col: "col-sm-9",
-                  rows: 3,
-                  placeholder: t('activerecord.attributes.tag.notes_help') %>
-        </div>
-
-        <!-- Tagable Type -->
-        <div class="row">
-          <%= tag_f.select :tagable_type,
-                Tag.tagable_types,
-                { include_blank: t("form.none") },
-                { class: 'form-select' } %>
-        </div>
+                { class: 'form-select', required: true } %>
+        <% end %>
       </div>
-    </div>
+
+      <!-- Stage -->
+      <div class="row">
+        <%= tag_f.number_field :stage,
+        label_col: "col-sm-3",
+        control_col: "col-sm-3",
+              min: 0,
+              max: 10,
+              title: t('activerecord.attributes.tag.stage_help') %>
+      </div>
+
+      <!-- Discipline -->
+      <div class="row">
+        <%= tag_f.select :discipline_id,
+              options_for_select(
+                @disciplines.map { |d|
+                  ["#{t("discipline.#{d.code.downcase.to_sym}.code",
+                    default: d.code)}: #{t("discipline.#{d.code.downcase.to_sym}.name",
+                    default: d.code)}", d.id]
+                },
+                tag.discipline_id
+              ),
+              { class: 'form-select' },
+              { data: { action: 'change->tag#updateFormStructure' } } %>
+      </div>
+
+      <!-- Prefix Fields - Dynamic based on discipline schema -->
+      <%= render 'tags/tag_prefix_fields', tag: tag, f: tag_f %>
+
+      <!-- Full tag preview -->
+      <%= hidden_field_tag :full_tag, id: 'tag_full_tag_preview' %>
+
+      <!-- Serial and Suffix -->
+      <div class="row">
+        <%= tag_f.text_field :serial,
+        label_col: "col-sm-3",
+        control_col: "col-sm-3",
+              title: t('activerecord.attributes.tag.serial_help'),
+              pattern: '\d*',
+              inputmode: 'numeric',
+              value: tag.serial.present? ? tag.serial.to_s.rjust(4, '0') : '0000',
+              data: {
+                controller: 'numeric-mask',
+                'numeric-mask-target': 'input',
+                action: 'change->tag#updatePreview input->tag#updatePreview'
+              },
+              id: 'tag_serial' %>
+      </div>
+
+      <div class="row">
+        <%= tag_f.text_field :suffix,
+        label_col: "col-sm-3",
+        control_col: "col-sm-3",
+              title: t('activerecord.attributes.tag.suffix_help'),
+              data: { action: 'change->tag#updatePreview input->tag#updatePreview' },
+              id: 'tag_suffix' %>
+      </div>
+
+      <div class="row">
+        <%= tag_f.text_field :service,
+          label_col: "col-sm-3",
+          control_col: "col-sm-9",
+                title: t('activerecord.attributes.tag.service_help'),
+                required: true %>
+      </div>
+
+      <!-- Notes -->
+      <div class="row">
+        <%= tag_f.text_area :notes,
+                label_col: "col-sm-3",
+                control_col: "col-sm-9",
+                rows: 3,
+                placeholder: t('activerecord.attributes.tag.notes_help') %>
+      </div>
+
+      <!-- Tagable Type -->
+      <div class="row">
+        <%= tag_f.select :tagable_type,
+              Tag.tagable_types,
+              { include_blank: t("form.none") },
+              { class: 'form-select' } %>
+      </div>
   </div>
 
   <!-- Tag preview is now handled by the Stimulus controller -->

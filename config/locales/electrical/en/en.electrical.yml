@@ -1,9 +1,6 @@
 en:
   electrical:
     module: "Electrical"
-en:
-  electrical:
-    module: "Electrical"
   ingress_protection:
     first_digit:
       no_protection: "No protection"

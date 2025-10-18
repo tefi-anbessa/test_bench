@@ -110,6 +110,6 @@ class DemandsController < ApplicationController
     # Only allow a list of trusted parameters through.
     def demand_params
       params.require(:demand).permit(:basis, :config, :supply, :power, :current, :power_factor, 
-      :duty, :other_supply, :loadable_type, :loadable_id)
+      :duty, :other_supply, :loadable_type, :loadable_id, :notes)
     end
 end

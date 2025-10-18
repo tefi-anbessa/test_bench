@@ -12,6 +12,8 @@ class CableType < ApplicationRecord
   enum :temperature_rating, Constants.electrical.temperature_rating.each_with_index.to_h
   validates :conductor_material, :cores, :csa, presence: true
   before_save :generate_code
+  # Default scope to sort by id
+  default_scope { order(:id) }
   
   def code
     self[:code].presence || generate_code
@@ -20,7 +22,6 @@ class CableType < ApplicationRecord
   def label
     id
   end
-
 
     def generate_code
       # Generate base code using the existing logic

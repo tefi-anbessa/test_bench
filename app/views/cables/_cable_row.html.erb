@@ -50,7 +50,8 @@
               <% end %>
         <% end %>
       <% if policy(row).destroy? %>
-        <%= link_to cable_path(row), method: :delete,
+        <%= link_to cable_path(row), 
+              data: { method: :delete, confirm: t('actions.delete_sure') },
               class: "btn btn-outline-danger btn-sm icon-link",
               aria: { label: t('actions.delete') },
               title: t('actions.delete'),

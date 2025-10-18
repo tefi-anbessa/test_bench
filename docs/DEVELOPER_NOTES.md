@@ -252,6 +252,8 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Update index view header lines.
 - [ ] Custom error view for not found errors. e.g. Case where admin deletes a record than uses browser back button.
 - [ ] Translation of html5 messages on required fields. Alternatively, suppress html 5 and use client side js.
+- [ ] Complete switchboard controller test.
+- [ ] Complete cable system tests for from and to after switchboard, demand, and circuit tests are working.
 
 
 ## Refactoring Opportunities

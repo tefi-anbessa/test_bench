@@ -65,6 +65,6 @@ class SocketCctsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def socket_cct_params
-      params.require(:socket_cct).permit(:socket_type, :quantity)
+      params.require(:socket_cct).permit(:socket_type, :quantity, :notes)
     end
 end

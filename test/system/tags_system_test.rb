@@ -48,24 +48,32 @@ class TagsSystemTest < ApplicationSystemTestCase
     # Click the tag index link
     click_link(href: tags_path)
     assert_current_path tags_path
+    assert_text I18n.t("tags.index.header")
+    assert page.title.include?(I18n.t("tags.index.title"))
 
+    # team member can create new tag
+    assert_selector "a[href='#{new_tag_path}']" 
+
+    # index search fields and headers
     assert_selector "input[name='q[prefix_cont]']"
     assert_selector "input[name='q[serial_cont]']"
     assert_selector "input[name='q[service_cont]']"
     assert_selector "input[name='q[notes_cont]']"
     assert_selector "a[href*='q%5Bs%5D=stage']"
     assert_selector "a[href*='q%5Bs%5D=service']"
-    assert_selector "a[href='#{new_tag_path}']" # team member can create new tag
-    assert_selector "a[href='#{tag_path(@tag)}']"
-    assert_selector "a[href='#{edit_tag_path(@tag)}']" # team member can edit tag
-    refute_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # team member cannot delete tag
 
+    # index fields
     assert_text @tag.stage
     assert_text @tag.label
     assert_text @tag.service
     assert_text @tag.prefix
     assert_text @tag.serial
     assert_text @tag.stage
+
+    # Links
+    assert_selector "a[href='#{tag_path(@tag)}']"
+    assert_selector "a[href='#{edit_tag_path(@tag)}']" # team member can edit tag
+    refute_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # team member cannot delete tag
   end
 
   test "admin viewing the tags index" do
@@ -88,6 +96,9 @@ class TagsSystemTest < ApplicationSystemTestCase
     visit tags_path
     click_link(href: tag_path(@tag))
     assert_current_path tag_path(@tag)
+    assert_text I18n.t("tags.show.header", label: @tag.label)
+    assert page.title.include?(I18n.t("tags.show.title"))
+
     # Header bar navigation links
     assert_selector "a[href='#{tags_path}']"# Link back to tags index
     assert_selector "a[href='#{edit_tag_path(@tag)}']" # team member can edit tag
@@ -137,6 +148,7 @@ class TagsSystemTest < ApplicationSystemTestCase
     click_link(href: new_tag_path)
     assert_current_path new_tag_path
     assert_text I18n.t("tags.new.header")
+    assert page.title.include?(I18n.t("tags.new.title"))
 
     # Data fields
     assert_selector "input[name='tag[stage]']"
@@ -216,6 +228,7 @@ class TagsSystemTest < ApplicationSystemTestCase
     click_link(href: edit_tag_path(@tag))
     assert_current_path edit_tag_path(@tag)
     assert_text I18n.t("tags.edit.header", label: @tag.reload.label)
+    assert page.title.include?(I18n.t("tags.edit.title"))
 
     # Data fields
     assert_selector "input[name='tag[stage]']"

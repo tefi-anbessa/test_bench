@@ -65,6 +65,6 @@ class LightCctsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def light_cct_params
-      params.require(:light_cct).permit(:light_fitting_type, :quantity)
+      params.require(:light_cct).permit(:light_fitting_type, :quantity, :notes)
     end
 end
