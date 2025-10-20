@@ -39,10 +39,12 @@
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
               <span class="badge bg-primary fs-6">
-                <%= t('.header', label: @circuit.label) %>
+                <%= t('.header', label: [@circuit.switchboard&.label, @circuit.label].join(': ')) %>
               </span>
-              <% if @circuit.demand&.tag&.service.present? %>
-                <small class="text-muted ms-2"><%= @circuit.demand.tag.service %></small>
+              <% if @circuit.switchboard&.tag&.present? %>
+                <small class="text-muted ms-2">
+                  <%= @circuit.switchboard.tag.service %>
+                </small>
               <% end %>
             </div>
           </div>
@@ -113,7 +115,7 @@
                 <div class="card-body p-3">
                   
                 <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= t('activerecord.attributes.circuit.label') %></div>
+                  <div class="col-4 text-muted"><%= t('activerecord.attributes.circuit.serial') %></div>
                   <div class="col-8"><%= @circuit.label.presence || '-' %></div>
                 </div>
                   
@@ -149,7 +151,7 @@
                   
                   <div class="row mb-1">
                     <div class="col-4 text-muted"><%= t('activerecord.attributes.circuit.contactor') %></div>
-                    <div class="col-8"><%= @circuit.contactor.presence || '-' %></div>
+                    <div class="col-8"><%= @circuit.contactor ? t("form.true") : '-' %></div>
                   </div>
                   
                   <div class="row mb-1">

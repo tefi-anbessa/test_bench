@@ -139,7 +139,7 @@ en:
       header:           "Edit Circuit: %{label}"
     new:
       title:            "New Circuit"
-      header:           "New Circuit"
+      header:           "New Circuit for %{label}"
     show:
       title:            "Circuit"
       header:           "Circuit: %{label}"

@@ -18,10 +18,7 @@ class CircuitPolicy < ElectricalResourcePolicy
     end
   end
 
-  # Override tag method to use switchboard's tag association
-  def tag
-    switchboard&.tag
-  end
+
 
   # Inherit all other behavior from ElectricalResourcePolicy
 end

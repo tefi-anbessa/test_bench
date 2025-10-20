@@ -135,9 +135,9 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
       - Policy tests should be used to verify that policies meet their objectives, refer to docs/ROLES_AND_PERMISSIONS.md.
       - Controller tests should also include tests of unauthorized access, to ensure that appropriate authorization calls are included in relevant actions.
       - Controller tests should only test the pass and fail paths, they are not intended to test the policy details.
-      - Tests can use the test helper method assert_unauthorized.
+      - Tests can use the test helper method assert_forbidden.
 
-   #### User data entry errors: 
+   #### User data entry errors:
 
       - These are errors that can be fixed by the user, such as missing required fields or invalid data.
       - Required fields are highlighted by html5 without any additional code. Not sure how to translate these.
@@ -150,12 +150,13 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    #### Security breach attempts: 
 
       - These are trapped forbidden operations that should not be possible using normal workflows.
-      - They are probably direct HTML or JSON requests in an attempt to defeat the permissions system. 
+      - They are probably injected HTML or JSON requests in an attempt to defeat the permissions system. 
       - When a controller detects invalid parameters, custom error class ConflictError should be raised, with a message key specific to the actual error.
       - ConflictErrors are handled in ApplicationController by rescue_from ConflictError and method handle_conflict. 
-      - handle_conflict logs the error with the message code, and redirects to the custom /409 conflict page, and logs out the current user.
+      - handle_conflict logs the error with the message code, redirects to the custom /409 conflict page, and logs out the current user.
       - At present, the custom /409 page includes a flash alert with the translated error message. This may not be required in production if it is considered that 409 errors are definitely hacking attempts.
       - Controller tests should include thorough test of each path through the controller to ensure that security breach attempts are trapped.
+      - Tests can use the test helper method assert_conflict.
 
 ### Form Design
 

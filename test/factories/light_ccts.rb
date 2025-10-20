@@ -1,33 +1,34 @@
 FactoryBot.define do
   factory :light_cct do
+    transient do
+      # Tag can be passed explicitly or will be auto-created
+      tag { nil }
+
+      # Project and discipline can be passed or will use defaults
+      project { nil }      # Will create default if not provided
+      discipline { nil }   # Will create default if not provided
+    end
+
     # Basic attributes
     light_fitting_type { 'standard' }
     quantity { 1 }
-    
-    # Association with tag (required)
-    association :tag, factory: :tag, strategy: :build
-    
-    # Trait to create a light_cct with a properly associated tag
-    trait :with_tag do
-      after(:build) do |light_cct, evaluator|
-        if light_cct.tag.nil?
-          project = create(:project)
-          discipline = create_or_find_by(code: 'E')
-          light_cct.tag = create(:tag, :unique_tag,
-            project: project,
-            discipline: discipline,
-            prefix: 'EL',
-            service: "Test Light Cct",
-            tagable: light_cct
-          )
-        end
-      end
-    end
-    
-    # Validation to ensure tag is present
+
+    # Validation and tag creation
     after(:build) do |light_cct, evaluator|
-      if light_cct.tag.nil?
-        raise ArgumentError, "LightCct factory requires a tag. Use `create(:light_cct, tag: your_tag)` or `create(:light_cct, :with_tag)`"
+      if evaluator.tag
+        # Tag was explicitly provided
+        raise "Tag is already associated with another record" if evaluator.tag.tagable.present?
+        light_cct.tag = evaluator.tag
+      else
+        # Auto-create tag using provided or default project and discipline
+        project = evaluator.project || create(:project)
+        discipline = evaluator.discipline || create(:discipline, :e)
+
+        light_cct.tag = create(:tag,
+          prefix: 'EL',
+          project: project,
+          discipline: discipline
+        )
       end
     end
   end

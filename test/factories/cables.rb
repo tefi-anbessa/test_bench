@@ -11,88 +11,61 @@ FactoryBot.define do
   #
   factory :cable do
     transient do
-      # Allow passing in an existing tag
+      # Tag can be passed explicitly or will be auto-created
       tag { nil }
-      # Or specify tag attributes to create one
-      prefix { 'EC' }
-      sequence(:serial) { |n| n + 1000 }
-      project { create(:project) }
-      discipline { create(:discipline, :e) }
-      description { nil }
-      custom_cable_type { nil }
+
+      # Project and discipline can be passed or will use defaults
+      project { nil }      # Will create default if not provided
+      discipline { nil }   # Will create default if not provided
+
+      from { nil }  # Source object (Circuit, Switchboard, etc.)
+      to { nil }    # Destination object (Demand, Motor, etc.)
     end
 
-    # Required attributes
-    cable_type { 
-      create(:cable_type, 
+    # Required attributes - override with cable_type: your_type if needed
+    cable_type {
+      create(:cable_type,
         notes: "Test Cable Type #{SecureRandom.hex(4)}",
-        csa: 1.0 + (SecureRandom.random_number(100) * 0.1)  # Random CSA to ensure uniqueness
-      ) 
+        csa: 1.0
+      )
     }
-    
+
     # Optional attributes
-    route_length { nil }  # meters
-    vertical_allowance { nil }  # meters
-    termination_allowance { nil }  # meters per end
+    route_length { 10 }  # meters
+    vertical_allowance { 6 }  # meters
+    termination_allowance { 4 }  # meters per end
     start_mark { nil }
     end_mark { nil }
 
     # This callback runs after build but before validation/creation
     after(:build) do |cable, evaluator|
-      # Use custom cable type if provided
-      if evaluator.custom_cable_type
-        cable.cable_type = evaluator.custom_cable_type
-      end
 
-      # If tag was passed in, use it (this will raise if tag is already associated)
+      # Handle tag assignment
       if evaluator.tag
+        # Tag was explicitly provided
         raise "Tag is already associated with another record" if evaluator.tag.tagable.present?
         cable.tag = evaluator.tag
+      else
+        # Auto-create tag using provided or default project and discipline
+        project = evaluator.project || create(:project)
+        discipline = evaluator.discipline || create(:discipline, :e)
+
+        cable.tag = create(:tag,
+          prefix: 'EC',
+          project: project,
+          discipline: discipline
+        )
       end
 
-      # Otherwise create a tag by default for this cable
-      if cable.tag.nil?
-        tag_attrs = {
-          prefix: evaluator.prefix,
-          serial: evaluator.serial,
-          discipline: evaluator.discipline,
-          project: evaluator.project,
-          service: evaluator.description
-        }.compact
-
-        cable.tag = create(:tag, **tag_attrs)
+      # Assign from association if provided
+      if evaluator.from
+        cable.from = evaluator.from
       end
-    end
 
-    # Trait to automatically create and associate a tag
-    trait :with_tag do
-      after(:build) do |cable, evaluator|
-        # If a tag was explicitly provided or already created, do nothing
-        next if evaluator.tag || cable.tag.present?
-        
-        # Create a new tag for this cable
-        tag_attrs = {
-          prefix: evaluator.prefix,
-          serial: evaluator.serial,
-          discipline: evaluator.discipline,
-          project: evaluator.project,
-          service: evaluator.description
-        }.compact
-        
-        cable.tag = create(:tag, **tag_attrs)
+      # Assign to association if provided
+      if evaluator.to
+        cable.to = evaluator.to
       end
     end
-    
-    # Trait for creating a cable with a circuit
-#    trait :with_circuit do
-#      association :circuit, factory: :circuit
-      
-#      after(:build) do |cable|
-#        # Set the project from the circuit's switchboard if not already set
-#        if cable.circuit&.switchboard && !cable.tag&.project
-#          cable.tag.project = cable.circuit.switchboard.project
-#        end
-#      end
-#    end
   end
 end

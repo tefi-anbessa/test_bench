@@ -2,42 +2,46 @@
 
 FactoryBot.define do
   factory :switchboard do
-    # Basic attributes
-    
-    # Association with tag (required)
-    association :tag, factory: :tag, strategy: :build
+    transient do
+      # Tag can be passed explicitly or will be auto-created
+      tag { nil }
 
-    # Trait to create a switchboard with a properly associated tag
-    trait :with_tag do
-      after(:build) do |switchboard, evaluator|
-        if switchboard.tag.nil?
-          project = create(:project)
-          discipline = Discipline.find_or_create_by(code: 'E')
-          switchboard.tag = create(:tag, :unique_tag,
-            project: project,
-            discipline: discipline,
-            prefix: 'EX',
-            service: "Switchboard #{switchboard.voltage}V #{switchboard.current_rating}A",
-            tagable: switchboard
-          )
-        end
-      end
+      # Project and discipline can be passed or will use defaults
+      project { nil }      # Will create default if not provided
+      discipline { nil }   # Will create default if not provided
     end
-    
-    # Validation to ensure tag is present
+
+    # Basic attributes
+
+    # Validation and tag creation
     after(:build) do |switchboard, evaluator|
-      if switchboard.tag.nil?
-        raise ArgumentError, "Switchboard factory requires a tag. Use `create(:switchboard, tag: your_tag)` or `create(:switchboard, :with_tag)`"
+      if evaluator.tag
+        # Tag was explicitly provided
+        raise "Tag is already associated with another record" if evaluator.tag.tagable.present?
+        switchboard.tag = evaluator.tag
+      else
+        # Auto-create tag using provided or default project and discipline
+        project = evaluator.project || create(:project)
+        discipline = evaluator.discipline || create(:discipline, :e)
+
+        switchboard.tag = create(:tag,
+          prefix: 'EX',
+          project: project,
+          discipline: discipline
+        )
       end
     end
-    
+
     trait :with_circuits do
       transient do
         circuits_count { 3 }  # Default to 3 circuits, can be overridden
       end
-      
+
       after(:create) do |switchboard, evaluator|
-        create_list(:circuit, evaluator.circuits_count, switchboard: switchboard)
+        # Create circuits with this switchboard
+        evaluator.circuits_count.times do |i|
+          create(:circuit, switchboard: switchboard, serial: i + 1)
+        end
       end
     end
   end

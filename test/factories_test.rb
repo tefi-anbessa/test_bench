@@ -33,12 +33,12 @@ class FactoriesTest < ActiveSupport::TestCase
         switchboard = create(:switchboard)
         build(:circuit, switchboard: switchboard)
       },
-      :light_cct => -> { build(:light_cct, :with_tag) },
-      :motor => -> { build(:motor, :with_tag) },
-      :socket_cct => -> { build(:socket_cct, :with_tag) },
+      :light_cct => -> { build(:light_cct) },
+      :motor => -> { build(:motor) },
+      :socket_cct => -> { build(:socket_cct) },
       :switchboard => -> { build(:switchboard) },
       :demand => -> { 
-        light_cct = create(:light_cct, :with_tag)
+        light_cct = create(:light_cct)
         build(:demand, demandable: light_cct)
       },
       

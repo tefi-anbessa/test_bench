@@ -37,26 +37,41 @@
           <th><%= t('activerecord.models.circuit') %></th>
           <th><%= t('activerecord.attributes.circuit.phase') %></th>
           <th><%= t('activerecord.attributes.circuit.device') %></th>
+          <th><%= t('activerecord.attributes.circuit.poles') %></th>
           <th><%= t('activerecord.attributes.circuit.rating') %></th>
           <th><%= t('activerecord.attributes.circuit.curve') %></th>
-          <th><%= t('activerecord.attributes.circuit.poles') %></th>
           <th><%= t('activerecord.attributes.circuit.elcb') %></th>
           <th><%= t('activerecord.attributes.circuit.contactor') %></th>
-          <th class="text-center"><%= t('actions.actions') %></th>
+          <th><%= t('activerecord.attributes.circuit.feeder') %></th>
+          <th><%= t('activerecord.attributes.circuit.demand') %></th>
+          <th class="text-center"><%= t('table.links') %></th>
         </tr>
       </thead>
       <tbody>
         <% @circuits.each do |circuit| %>
           <tr>
-            <td><%=link_to circuit.switchboard.label, switchboard_path(circuit.switchboard) %>
-            <%= [":", circuit.serial.to_s.rjust(2, '0')].join(' #') %></td>
+            <td><%= circuit.label %></td>
             <td><%= circuit.phase %></td>
             <td><%= circuit.device %></td>
+            <td><%= circuit.poles %></td>
             <td><%= circuit.rating %></td>
             <td><%= circuit.curve %></td>
-            <td><%= circuit.poles %></td>
             <td><%= circuit.elcb %></td>
-            <td><%= circuit.contactor ? icon('check', height: 'em') : ' ' %></td>
+            <td><%= circuit.contactor ? icon('check', height: '1em') : ' ' %></td>
+            <td>
+              <% if circuit.feeder.present? && policy(circuit.feeder).show? %>
+                <%= link_to circuit.feeder.label, cable_path(circuit.feeder) %>
+              <% else %>
+                <%= t("show.unassigned", model: t("activerecord.attributes.circuit.feeder")) %>
+              <% end %>
+            </td>
+            <td>
+              <% if circuit.demand.present? && policy(circuit.demand).show? %>
+                <%= link_to circuit.demand.label, demand_path(circuit.demand) %>
+              <% else %>
+                <%= t("show.unassigned", model: t("activerecord.models.demand")) %>
+              <% end %>
+            </td>
             <!-- Links -->
             <td>
               <% if policy(circuit).show? %>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_17_050337) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_19_053808) do
   create_table "cable_types", force: :cascade do |t|
     t.integer "conductor_material"
     t.float "csa"
@@ -75,7 +75,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_17_050337) do
   create_table "demands", force: :cascade do |t|
     t.string "demandable_type", null: false
     t.integer "demandable_id", null: false
-    t.integer "circuit_id"
     t.integer "basis"
     t.string "basis_notes"
     t.float "supply"
@@ -88,7 +87,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_17_050337) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "notes"
-    t.index ["circuit_id"], name: "index_demands_on_circuit_id"
     t.index ["demandable_type", "demandable_id"], name: "index_demands_on_demandable"
   end
 
@@ -221,7 +219,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_17_050337) do
   add_foreign_key "cables", "cable_types"
   add_foreign_key "cables", "circuits"
   add_foreign_key "circuits", "switchboards"
-  add_foreign_key "demands", "circuits"
   add_foreign_key "tags", "disciplines"
   add_foreign_key "tags", "projects"
 end

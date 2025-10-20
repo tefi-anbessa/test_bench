@@ -34,13 +34,14 @@ class SwitchboardsSystemTest < ApplicationSystemTestCase
     @swbd_tag1 = create(:tag, project: @project, stage: '1', discipline: @discipline_e, 
       prefix: 'EX', serial: '1', suffix: "i", service: 'TEST SWITCHBOARD E:EX-0001.i', notes: "Lorem ipsum",
       tagable_type: "Switchboard")
-    @switchboard1 = create(:switchboard, location: "LOCATION 1", tag: @swbd_tag1,
+    @switchboard1 = create(:switchboard, :with_circuits, location: "LOCATION 1", tag: @swbd_tag1,
                       ingress_protection: "IP44", voltage_rating: 3, busbar_rating: "100A", 
                       busbar_fault_rating: "100A", busbar_fault_duration: "1s",
                       cable_entry: "Top", incomer_protection: "Isolator 3P", metering: "Metering 3P",
                       neutral_bar_connections: "Neutral Bar Connections 3P", earth_bar_connections: "Earth Bar Connections 3P",
                       notes: "Lorem ipsum")
     @switchboard1.reload
+    @circuit1 = @switchboard1.circuits.first
     @swbd_tag2 = create(:tag, project: @project, stage: '1', discipline: @discipline_e, 
       prefix: 'EX', serial: '2', suffix: "k", service: 'TEST SWITCHBOARD E:EX-0002.i', 
       notes: "Tag with no attached tagable", tagable_type: "Switchboard")
@@ -108,6 +109,7 @@ class SwitchboardsSystemTest < ApplicationSystemTestCase
     assert_text @switchboard1.busbar_fault_rating
     assert_text @switchboard1.busbar_fault_duration
     assert_text @switchboard1.circuits.count
+    assert_equal @switchboard1.circuits.count, 3 # Factory trait :with_circuits creates 3 circuits
 
     # Links
     assert_selector "a[href='#{switchboard_path(@switchboard1)}']"
@@ -211,7 +213,7 @@ class SwitchboardsSystemTest < ApplicationSystemTestCase
     assert_selector "a[href='#{switchboard_path(@switchboard1)}'][data-method='delete']" # admin can delete switchboard
   end
 
-  test "electrical designer view the new tag and new switchboard view" do
+  test "electrical designer view the new tag and new switchboard form" do
     sign_in @electrical_designer
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)

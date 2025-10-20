@@ -48,7 +48,7 @@ class CircuitsControllerTest < ActionController::TestCase
   test "regular user cannot get index" do
     sign_in @regular_user
     get :index
-    assert_unauthorized
+    assert_forbidden
   end
 
   test "should get index for user with role on current project" do
@@ -61,7 +61,7 @@ class CircuitsControllerTest < ActionController::TestCase
   test "user cannot view circuit details without a project role" do
     sign_in @regular_user
     get :show, params: { id: @circuit.id }
-    assert_unauthorized
+    assert_forbidden
   end
 
   test "team member can view project circuit details" do
@@ -74,7 +74,7 @@ class CircuitsControllerTest < ActionController::TestCase
   test "team member cannot access new circuit form" do
     sign_in @team_member
     get :new, params: { switchboard_id: @switchboard.id }
-    assert_unauthorized
+    assert_forbidden
   end
 
   test "electrical designer can access new circuit form for existing switchboard" do
@@ -95,7 +95,7 @@ class CircuitsControllerTest < ActionController::TestCase
         }
       }
     end
-    assert_unauthorized
+    assert_forbidden
   end
 
   test "electrical designer can create circuit" do
@@ -104,18 +104,29 @@ class CircuitsControllerTest < ActionController::TestCase
       post :create, params: {
         switchboard_id: @switchboard.id,
         circuit: {
-          serial: 2
+          serial: 2, 
+          phase: "L1",
+          device: "MCCB",
+          poles: 4,
+          curve: "C",
+          rating: 32,
+          elcb: "other",
+          contactor: false,
+          notes: "CIRCUIT NOTES"
         }
       }
     end
-    assert_redirected_to circuit_url(Circuit.last)
+    new_circuit = Circuit.find_by(switchboard: @switchboard, serial: 2)
+    assert_redirected_to circuit_url(new_circuit)
+    expected = I18n.t('flash.actions.create.notice', resource_name: Circuit.model_name.human)
+    assert_equal expected, flash[:success]
   end
 
   # Edit action tests
   test "team member cannot access edit circuit form" do
     sign_in @team_member
     get :edit, params: { id: @circuit.id }
-    assert_unauthorized
+    assert_forbidden
   end
 
   test "electrical designer can access edit circuit form" do
@@ -131,7 +142,7 @@ class CircuitsControllerTest < ActionController::TestCase
       id: @circuit.id,
       circuit: { serial: 3 }
     }
-    assert_unauthorized
+    assert_forbidden
   end
 
   test "electrical designer can update circuit" do
@@ -152,15 +163,16 @@ class CircuitsControllerTest < ActionController::TestCase
     assert_no_difference('Circuit.count') do
       delete :destroy, params: { id: @circuit.id }
     end
-    assert_unauthorized
+    assert_forbidden
   end
 
   test "admin can destroy circuit" do
     sign_in @admin
+    switchboard = @circuit.switchboard
     assert_difference('Circuit.count', -1) do
       delete :destroy, params: { id: @circuit.id }
     end
-    assert_redirected_to circuits_path
+    assert_redirected_to switchboard_circuits_path(switchboard)
     expected = I18n.t('flash.actions.destroy.notice', resource_name: Circuit.model_name.human)
     assert_equal expected, flash[:success]
   end

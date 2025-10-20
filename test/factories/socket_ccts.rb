@@ -1,34 +1,34 @@
 FactoryBot.define do
   factory :socket_cct do
+    transient do
+      # Tag can be passed explicitly or will be auto-created
+      tag { nil }
+
+      # Project and discipline can be passed or will use defaults
+      project { nil }      # Will create default if not provided
+      discipline { nil }   # Will create default if not provided
+    end
+
     # Basic attributes
     socket_type { 'standard' }
     quantity { 1 }
-    
-    # Association with tag (required)
-    association :tag, factory: :tag, strategy: :build
-    
-    # Trait to create a socket_cct with a properly associated tag
-    trait :with_tag do
-      after(:build) do |socket_cct, evaluator|
-        if socket_cct.tag.nil?
-          project = create(:project)
-          discipline = create(:discipline, :e)
-          socket_cct.tag = create(:tag, 
-            project: project,
-            discipline: discipline,
-            prefix: 'ES',
-            serial: rand(1..999),
-            service: "#{socket_cct.socket_type.humanize} Sockets",
-            tagable: socket_cct
-          )
-        end
-      end
-    end
-    
-    # Validation to ensure tag is present
+
+    # Validation and tag creation
     after(:build) do |socket_cct, evaluator|
-      if socket_cct.tag.nil?
-        raise ArgumentError, "SocketCct factory requires a tag. Use `create(:socket_cct, tag: your_tag)` or `create(:socket_cct, :with_tag)`"
+      if evaluator.tag
+        # Tag was explicitly provided
+        raise "Tag is already associated with another record" if evaluator.tag.tagable.present?
+        socket_cct.tag = evaluator.tag
+      else
+        # Auto-create tag using provided or default project and discipline
+        project = evaluator.project || create(:project)
+        discipline = evaluator.discipline || create(:discipline, :e)
+
+        socket_cct.tag = create(:tag,
+          prefix: 'ES',
+          project: project,
+          discipline: discipline
+        )
       end
     end
   end

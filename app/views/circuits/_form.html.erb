@@ -4,14 +4,10 @@
       <div class="col text-center">
         <div class="d-flex flex-column align-items-center">
           <div class="mt-1">
-            <%= circuit.persisted? ? t('actions.edit') : t('actions.new') %> 
-            <%= t('activerecord.models.circuit') %>
-            <% if circuit.persisted? %>
-              <small class="text-muted ms-2">
-                <%= [circuit.switchboard.label, 
-                  circuit.serial.to_s.rjust(2, '0')].join(': ') %>
-              </small>
-            <% end %>
+            <%= yield(:header) %>
+            <small class="text-muted ms-2">
+              <%= switchboard&.tag&.service || circuit.switchboard&.tag&.service %>
+            </small>
           </div>
         </div>
       </div>
@@ -93,11 +89,11 @@
         <!-- Card Footer with Actions -->
         <div class="card-footer bg-transparent text-end p-2">
           <%= link_to(circuit, 
-                class: 'btn btn-warning',
-                data: { turbo: false }) do %>
-            <%= t('actions.discard') %>
-            <%== icon('x-square') %>
-          <% end %>
+                    class: 'btn btn-warning',
+                    data: { confirm: t('actions.sure'), turbo: false }) do %>
+                <%= t('actions.discard') %>
+                <%== icon('x-square') %>
+              <% end %>
 
           <%= f.button :submit, class: 'btn btn-primary' do %>
             <%= yield(:button_text) %>

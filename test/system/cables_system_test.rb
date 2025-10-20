@@ -338,7 +338,7 @@ File.write('debug_page.html', page.html)
     refute_text "REINSTATED FOR TEST"
   end
 
-  test "admin destroy tag from the index view" do
+  test "admin destroy cable from the index view" do
     sign_in @admin
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
@@ -352,7 +352,7 @@ File.write('debug_page.html', page.html)
     assert_text I18n.t("flash.actions.destroy.notice", resource_name: I18n.t("activerecord.models.cable"))
   end
 
-  test "admin destroy tag from the show view" do
+  test "admin destroy cable from the show view" do
     sign_in @admin
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)

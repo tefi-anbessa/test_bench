@@ -1,10 +1,8 @@
 class Circuit < ApplicationRecord
   belongs_to :switchboard
-  has_one :demand, dependent: :nullify
+
   has_one :feeder, as: :from, class_name: 'Cable', dependent: :nullify
-  
-  # Alias for backward compatibility
-  alias_method :load, :demand
+
   validates :serial, inclusion: { in: 1..36 }
   validates :serial, uniqueness: { scope: :switchboard_id,
     message: "already exists" }
@@ -14,8 +12,13 @@ class Circuit < ApplicationRecord
   enum :curve, Constants.electrical.protection.curve.to_h
   enum :elcb, Constants.electrical.protection.elcb.to_h
 
+  # Provide tag method using parent switchboard's tag association
+  def tag
+    switchboard&.tag
+  end
+
   def label
-    "#{switchboard.label} ##{serial.to_s.rjust(2, '0')}"
+    "##{serial.to_s.rjust(2, '0')}"
   end
   
   def demand

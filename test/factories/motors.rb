@@ -1,36 +1,37 @@
 FactoryBot.define do
   factory :motor do
+    transient do
+      # Tag can be passed explicitly or will be auto-created
+      tag { nil }
+
+      # Project and discipline can be passed or will use defaults
+      project { nil }      # Will create default if not provided
+      discipline { nil }   # Will create default if not provided
+    end
+
     # Basic attributes
     motor_type { 'Induction' }
     frame_size { '100L' }
     ingress_protection { 'IP55' }
     poles { 4 }
     speed_rated { 1500 }
-    
-    # Association with tag (required)
-    association :tag, factory: :tag, strategy: :build
-    
-    # Trait to create a motor with a properly associated tag
-    trait :with_tag do
-      after(:build) do |motor, evaluator|
-        if motor.tag.nil?
-          project = create(:project)
-          discipline = create(:discipline, :e)
-          motor.tag = create(:tag, :unique_tag,
-            project: project,
-            discipline: discipline,
-            prefix: 'M',
-            service: "#{motor.motor_type} Motor #{motor.frame_size} - #{motor.poles}P",
-            tagable: motor
-          )
-        end
-      end
-    end
-    
-    # Validation to ensure tag is present
+
+    # Validation and tag creation
     after(:build) do |motor, evaluator|
-      if motor.tag.nil?
-        raise ArgumentError, "Motor factory requires a tag. Use `create(:motor, tag: your_tag)` or `create(:motor, :with_tag)`"
+      if evaluator.tag
+        # Tag was explicitly provided
+        raise "Tag is already associated with another record" if evaluator.tag.tagable.present?
+        motor.tag = evaluator.tag
+      else
+        # Auto-create tag using provided or default project and discipline
+        project = evaluator.project || create(:project)
+        discipline = evaluator.discipline || create(:discipline, :e)
+
+        motor.tag = create(:tag,
+          prefix: 'M',
+          project: project,
+          discipline: discipline
+        )
       end
     end
   end

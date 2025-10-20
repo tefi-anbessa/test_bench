@@ -7,9 +7,8 @@ class Demand < ApplicationRecord
     required: true
 
   # Associations
-  belongs_to :circuit, optional: true
-  has_one :incomer, as: :to, class_name: 'Cable'
-  has_one :feeder, as: :from, class_name: 'Cable'
+  has_one :incomer, as: :to, class_name: 'Cable', dependent: :nullify
+  has_one :feeder, as: :from, class_name: 'Cable', dependent: :nullify
 
   # Enums
   enum :basis, Constants.electrical.load_basis.to_h

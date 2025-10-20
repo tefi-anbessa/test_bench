@@ -144,7 +144,7 @@ en:
         circuits:         "Circuits"
         notes:            "Notes"
       circuit:
-        serial:           "Serial Number"
+        serial:           "Circuit Number"
         phase:            "Phase Designation"
         device:           "Protection Device"
         poles:            "Poles"

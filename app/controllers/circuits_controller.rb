@@ -1,4 +1,5 @@
 class CircuitsController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_switchboard, only: [:index, :new, :create]
   before_action :set_circuit, only: [:show, :edit, :update, :destroy]
   
@@ -25,8 +26,10 @@ class CircuitsController < ApplicationController
     authorize @circuit
     
     if @circuit.save
-      redirect_to @circuit, notice: 'Circuit was successfully created.'
+      flash[:success] = t("flash.actions.create.notice", resource_name: Circuit.model_name.human)
+      redirect_to @circuit
     else
+      flash.now[:alert] = t("flash.actions.create.alert", resource_name: Circuit.model_name.human)
       render :new, status: :unprocessable_entity
     end
   end
@@ -39,21 +42,26 @@ class CircuitsController < ApplicationController
     authorize @circuit
     
     if @circuit.update(circuit_params)
-      redirect_to [@switchboard, @circuit], notice: 'Circuit was successfully updated.'
+      flash[:success] = t("flash.actions.update.notice", resource_name: Circuit.model_name.human)
+      redirect_to [@switchboard, @circuit]
     else
+      flash.now[:alert] = t("flash.actions.update.alert", resource_name: Circuit.model_name.human)
       render :edit, status: :unprocessable_entity
     end
   end
   
   def destroy
     authorize @circuit
+    switchboard = @circuit.switchboard
     @circuit.destroy
-    redirect_to switchboard_circuits_path(@switchboard), notice: 'Circuit was successfully destroyed.'
+    flash[:success] = t("flash.actions.destroy.notice", resource_name: Circuit.model_name.human)
+    redirect_to switchboard_circuits_path(switchboard)
   end
   
   private
     def setup_form
-
+      @cables = policy_scope(Cable).map { |cable| [cable.label, cable.id] }
+      @demands = policy_scope(Demand).map { |demand| [demand.label, demand.id] }
     end
     
     def set_switchboard

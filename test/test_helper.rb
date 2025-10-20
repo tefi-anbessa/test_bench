@@ -123,6 +123,8 @@ class ActiveSupport::TestCase
   # (This will be updated to use a custom unauthorized page in the future)
   #
   # @param message [String] Optional custom assertion message
+
+  # This is legacy AI code, it confused itself and wrote assert_forbidden which supersedes this.
   def assert_unauthorized(message = nil)
     assert_response :found, message # 302
     assert_redirected_to root_path, message
