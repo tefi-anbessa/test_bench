@@ -175,6 +175,7 @@ class CablesController < ApplicationController
       @cable.from_type ||= Constants.electrical.connect_options.first
       @cable.to_type ||= Constants.electrical.connect_options.last
       @cable_types = policy_scope(CableType)
+      @cable_type_options = @cable_types.map { |ct| ["#{ct.id}: #{ct.code}", ct.id] }
       unless @tag&.persisted? # Default tag attributes for switchboard
         @tag.discipline = Discipline.find_by(code: "E")
         @tag.prefix = "EC"

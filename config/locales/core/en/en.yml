@@ -37,6 +37,8 @@ en:
   form:
     other:        "Other"
     new_select:   "Leave blank when adding new selection"
+    required:     "Selection required:"
+    optional:     "Leave blank for no selection:"
     undefined:    "Undefined"
     none:         "None"
     unknown:      "Unknown"
@@ -61,7 +63,7 @@ en:
 
   # Generic flash messages
   flash:
-    actions:
+    actions: # Deprecation: these translations are nested too deep. Use without actions scope.
       create:
         notice: "%{resource_name} was successfully created."
         alert: "Could not create %{resource_name}."
@@ -71,6 +73,20 @@ en:
       destroy:
         notice: "%{resource_name} was successfully deleted."
         alert: "Could not delete %{resource_name}."
+    create:
+      notice: "%{resource_name} was successfully created."
+      alert: "Could not create %{resource_name}."
+    update:
+      notice: "%{resource_name} was successfully updated."
+      alert: "Could not update %{resource_name}."
+    destroy:
+      notice: "%{resource_name} was successfully deleted."
+      alert: "Could not delete %{resource_name}."
+    assigned: "%{resource_name} was successfully assigned."
+    already_assigned: "%{resource_name} is already assigned. Edit %{resource_name} to change assignment."
+    not_found: "%{resource_name} not found."
+    required: "%{resource_name} is required."
+    
 
   # Resource specific flash messages
     tags:
@@ -89,9 +105,7 @@ en:
 
   # Pundit authorization messages
   pundit:
-    unauthorized: "You are not authorized to perform this action."
-    circuits_destroy: "You are not authorized to destroy circuits."
-    create_tag: "You are not authorized to create tags."
+    unauthorized: "You are not authorized to %{action} %{objects}"
 
   pagination:
     per_page: "Items per page"
@@ -109,8 +123,3 @@ en:
   footer:
     credit:       "Website by frankie fusion. "
 
-  locales:
-    en: "English"
-    km: "Khmer"
-    th: "Thai"
-    cn: "Chinese ()"

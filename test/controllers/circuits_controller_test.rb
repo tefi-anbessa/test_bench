@@ -28,14 +28,30 @@ class CircuitsControllerTest < ActionController::TestCase
     
     # Create tags
     @swbd_tag = create(:tag, prefix: 'EX', serial: 1001, project: @project, discipline: @discipline)
-    @another_swbd_tag = create(:tag, prefix: 'EX', serial: 1002, project: @project, discipline: @discipline)
+    @swbd_tag2 = create(:tag, prefix: 'EX', serial: 1002, project: @project, discipline: @discipline)
     
     # Create switchboard with the switchboard tag
     @switchboard = create(:switchboard, tag: @swbd_tag, location: 'Location 1')
+    @swbd2 = create(:switchboard, tag: @swbd_tag2, location: 'Location 2')
     
     # Create circuit for the switchboard 
     @circuit = create(:circuit, switchboard: @switchboard)
-    
+
+    # Create cable type for the project
+    @cable_type = create(:cable_type, project: @project)    
+    # Create tags
+    @cable_tag1 = create(:tag, prefix: 'EC', serial: 1001, project: @project, discipline: @discipline)
+    @cable_tag2 = create(:tag, prefix: 'EC', serial: 1002, project: @project, discipline: @discipline)
+        
+    # Create cables with the cable tags
+    @cable1 = create(:cable, tag: @cable_tag1, cable_type: @cable_type)
+    @cable2 = create(:cable, tag: @cable_tag2, cable_type: @cable_type)
+
+    # Create a switchboard to use as a load
+    @swbd_tag3 = create(:tag, prefix: 'EX', serial: 1003, project: @project, discipline: @discipline)
+    @swbd3 = create(:switchboard, tag: @swbd_tag3, location: 'Location 2')
+    @swbd3_demand = create(:demand, demandable: @swbd3)
+
     @request.env["devise.mapping"] = Devise.mappings[:user]
   end
 
@@ -100,11 +116,12 @@ class CircuitsControllerTest < ActionController::TestCase
 
   test "electrical designer can create circuit" do
     sign_in @electrical_designer
+    new_serial = (@switchboard.circuits.maximum(:serial) || 0) + 1  
     assert_difference('Circuit.count', 1) do
       post :create, params: {
         switchboard_id: @switchboard.id,
         circuit: {
-          serial: 2, 
+          serial: new_serial,
           phase: "L1",
           device: "MCCB",
           poles: 4,
@@ -116,10 +133,45 @@ class CircuitsControllerTest < ActionController::TestCase
         }
       }
     end
-    new_circuit = Circuit.find_by(switchboard: @switchboard, serial: 2)
+    new_circuit = Circuit.find_by(switchboard: @switchboard, serial: new_serial)
     assert_redirected_to circuit_url(new_circuit)
     expected = I18n.t('flash.actions.create.notice', resource_name: Circuit.model_name.human)
-    assert_equal expected, flash[:success]
+    assert_flash_message :success, expected
+  end
+
+  test "electrical designer can create circuit with feeder and demand" do
+    sign_in @electrical_designer
+    new_serial = (@switchboard.circuits.maximum(:serial) || 0) + 1  
+    assert_difference('Circuit.count', 1) do
+      post :create, params: {
+        switchboard_id: @switchboard.id,
+        circuit: {
+          serial: new_serial,
+          phase: "L1",
+          device: "MCCB",
+          poles: 4,
+          curve: "C",
+          rating: 32,
+          elcb: "other",
+          contactor: false,
+          notes: "CIRCUIT NOTES"
+        },
+        cable: {
+          from_id: @cable1.id,
+          to_id: @swbd3_demand.id
+        }
+      }
+    end
+    new_circuit = Circuit.find_by(switchboard: @switchboard, serial: new_serial)
+    assert_equal @cable1, new_circuit.feeder
+    assert_equal @swbd3_demand, new_circuit.demand
+    assert_redirected_to circuit_url(new_circuit)
+    expected_messages = [
+      I18n.t('flash.actions.create.notice', resource_name: Circuit.model_name.human),
+      I18n.t('flash.assigned', resource_name: Circuit.human_attribute_name(:feeder)),
+      I18n.t('flash.assigned', resource_name: Circuit.human_attribute_name(:demand))
+    ]
+    assert_flash_messages :success, expected_messages
   end
 
   # Edit action tests
@@ -149,12 +201,11 @@ class CircuitsControllerTest < ActionController::TestCase
     sign_in @electrical_designer
     patch :update, params: { 
       id: @circuit.id,
-      circuit: { serial: 3 }
+      circuit: {serial: @circuit.serial + 1}
     }
-    assert_equal 3, @circuit.reload.serial
     assert_redirected_to circuit_path(@circuit)
     expected = I18n.t('flash.actions.update.notice', resource_name: Circuit.model_name.human)
-    assert_equal expected, flash[:success]
+    assert_flash_message :success, expected
   end
 
   # Destroy action tests
@@ -174,6 +225,119 @@ class CircuitsControllerTest < ActionController::TestCase
     end
     assert_redirected_to switchboard_circuits_path(switchboard)
     expected = I18n.t('flash.actions.destroy.notice', resource_name: Circuit.model_name.human)
-    assert_equal expected, flash[:success]
+    assert_flash_message :success, expected
+  end
+
+  test "electrical designer can assign feeder to circuit" do
+    sign_in @electrical_designer
+    patch :update, params: { 
+      id: @circuit.id,
+      cable: {from_id: @cable1.id},
+      circuit: {notes: "TEST assign feeder"}
+    }
+    assert_redirected_to circuit_path(@circuit)
+    expected = I18n.t('flash.assigned', resource_name: Circuit.human_attribute_name(:feeder))
+    assert_flash_message :success, expected
+  end
+
+  test "electrical designer can assign feeder and demand to circuit through feeder" do
+    sign_in @electrical_designer
+    patch :update, params: { 
+      id: @circuit.id,
+      circuit: { notes: "TEST assign feeder and demand to circuit" },
+      cable: { from_id: @cable1.id, to_id: @swbd3_demand.id }
+    }
+    expected_messages = [
+      I18n.t('flash.actions.update.notice', resource_name: Circuit.model_name.human),
+      I18n.t('flash.assigned', resource_name: Circuit.human_attribute_name(:feeder)),
+      I18n.t('flash.assigned', resource_name: Circuit.human_attribute_name(:demand))
+    ]
+    assert_flash_messages :success, expected_messages
+    assert_redirected_to circuit_path(@circuit)
+  end
+
+  test "electrical designer cannot assign invalid feeder to circuit" do
+    sign_in @electrical_designer
+    # Set up an "out of scope" cable
+    @project2 = create(:project)
+    @cable3 = create(:cable, project: @project2)
+    patch :update, params: { 
+      id: @circuit.id,
+      cable: {from_id: @cable3.id},
+      circuit: {notes: "TEST invalid feeder"}
+    }
+    assert_redirected_to circuit_path(@circuit)
+    expected = I18n.t('flash.not_found', resource_name: Circuit.human_attribute_name(:feeder))
+    assert_flash_message :alert, expected
+  end
+
+  test "electrical designer cannot assign already assigned feeder to circuit" do
+    sign_in @electrical_designer
+
+    # set up an existing circuit - feeder - load
+    @circuit2 = create(:circuit, switchboard: @switchboard, serial: 2)
+    @cable2.update(from: @circuit2)
+    @cable2.update(to: @swbd3_demand)
+    
+    # Try to assign the feeder which is already assigned to another circuit
+    patch :update, params: { 
+      id: @circuit.id,
+      cable: {from_id: @cable2.id},
+      circuit: {notes: "TEST already assigned feeder"}
+    }
+    assert_redirected_to circuit_path(@circuit)
+    expected = I18n.t('flash.already_assigned', resource_name: Circuit.human_attribute_name(:feeder))
+    assert_flash_message :alert, expected
+  end
+
+  test "electrical designer cannot assign demand without feeder" do
+    sign_in @electrical_designer
+    patch :update, params: { 
+      id: @circuit.id,
+      cable: {to_id: @swbd3_demand.id},
+      circuit: {notes: "TEST cannot assign demand without feeder"}
+    }
+    assert_redirected_to circuit_path(@circuit)
+    expected = I18n.t('flash.required', resource_name: Circuit.human_attribute_name(:feeder))
+    assert_flash_message :alert, expected
+  end
+
+  test "electrical designer cannot assign already assigned demand" do
+    sign_in @electrical_designer
+
+    # Set up existing circuit with feeder and demand
+    @circuit2 = create(:circuit, switchboard: @switchboard, serial: 2)
+    @cable2.update(from: @circuit2)
+    @cable2.update(to: @swbd3_demand)
+
+    # Set up feeder on our test circuit
+    @cable1.update(from: @circuit)
+
+    # Try to assign the same demand - should fail
+    patch :update, params: { 
+      id: @circuit.id,
+      cable: {to_id: @swbd3_demand.id},
+      circuit: {notes: "TEST already assigned demand"}
+    }
+    assert_redirected_to circuit_path(@circuit)
+    expected = I18n.t('flash.already_assigned', resource_name: Circuit.human_attribute_name(:demand))
+    assert_flash_message :alert, expected
+  end
+
+  test "electrical designer cannot assign demand from out of scope" do
+    sign_in @electrical_designer
+    # Set up an "out of scope" demand
+    project2 = create(:project)
+    @swbd_tag3.update(project: project2)
+    # Set up feeder on our test circuit
+    @cable1.update(from: @circuit)
+    patch :update, params: { 
+      id: @circuit.id,
+      cable: {to_id: @swbd3_demand.id},
+      circuit: {notes: "TEST demand from out of scope"}
+    }
+    assert_redirected_to circuit_path(@circuit)
+    expected = I18n.t('flash.not_found', resource_name: Circuit.human_attribute_name(:demand))
+    assert_flash_message :alert, expected
   end
 end

@@ -217,4 +217,33 @@ class ActionController::TestCase
   #   sign_in(user, scope: :user)
   #   @current_user = user
   # end
+
+  # Helper method to handle flash messages that might be strings or arrays
+  # @param type [Symbol] The flash message type (:success, :alert, etc.)
+  # @param expected_message [String] The expected message content
+  def assert_flash_message(type, expected_message)
+    flash_message = flash[type]
+
+    if flash_message.is_a?(Array)
+      assert_includes flash_message, expected_message,
+        "Expected flash[:#{type}] to include '#{expected_message}', got #{flash_message.inspect}"
+    else
+      assert_equal expected_message, flash_message,
+        "Expected flash[:#{type}] to be '#{expected_message}', got #{flash_message.inspect}"
+    end
+  end
+
+  # Helper method to check that flash contains all expected messages (for arrays)
+  # @param type [Symbol] The flash message type (:success, :alert, etc.)
+  # @param expected_messages [Array] Array of expected message strings
+  def assert_flash_messages(type, expected_messages)
+    flash_message = flash[type]
+
+    assert flash_message.is_a?(Array), "Expected flash[:#{type}] to be an array, got #{flash_message.inspect}"
+
+    expected_messages.each do |expected_message|
+      assert_includes flash_message, expected_message,
+        "Expected flash[:#{type}] to include '#{expected_message}', got #{flash_message.inspect}"
+    end
+  end
 end

@@ -18,54 +18,6 @@ class CableTest < ActiveSupport::TestCase
     assert_match(/^E:EC-\d{4}(\.\w+)?$/, @tag.reload.full_tag)
   end
   
-  test "navigation between cables" do
-    skip "Navigation between cables is not working properly"
-    # Create test cables with different serials but same prefix
-    tag1 = create(:tag, prefix: 'EC', serial: 201, project: @project, discipline: @discipline_e)
-    cable1 = create(:cable, tag: tag1, cable_type: @cable_type)
-
-    tag2 = create(:tag, prefix: 'EC', serial: 202, project: @project, discipline: @discipline_e)
-    cable2 = create(:cable, tag: tag2, cable_type: @cable_type)
-
-    tag3 = create(:tag, prefix: 'EC', serial: 203, project: @project, discipline: @discipline_e)
-    cable3 = create(:cable, tag: tag3, cable_type: @cable_type)
-
-    # Test next/prev navigation
-    assert_equal cable2, cable1.next
-    assert_equal cable3, cable2.next
-    assert_equal cable3, cable3.next  # Returns self when no next
-
-    assert_equal cable1, cable1.prev  # Returns self when no previous
-    assert_equal cable1, cable2.prev
-    assert_equal cable2, cable3.prev
-  end
-  
-  test "navigation with different loop_ids" do
-    skip "Navigation between cables is not working properly"
-
-    # First cable with prefix 'EC'
-    tag1 = create(:tag, prefix: 'EC', serial: 201, project: @project, discipline: @discipline_e)
-    cable1 = create(:cable, tag: tag1, cable_type: @cable_type)
-
-    # Second cable with different prefix will have a different loop_id
-    # due to the first letter of the prefix being different
-    tag2 = create(:tag, prefix: 'FC', serial: 202, project: @project, discipline: @discipline_e)
-    cable2 = create(:cable, tag: tag2, cable_type: @cable_type)
-
-    # Test navigation respects loop_id ordering
-    assert_equal cable2, cable1.next
-    assert_equal cable2, cable2.next  # Returns self when no next
-
-    assert_equal cable1, cable1.prev  # Returns self when no previous
-    assert_equal cable1, cable2.prev
-  end
-  
-  test "navigation with missing tag" do
-    cable = Cable.new
-    assert_equal cable, cable.next  # Returns self when there's no tag
-    assert_equal cable, cable.prev  # Returns self when there's no tag
-  end
-  
   test "should create cable through tag update" do
     tag = create(:tag,
       prefix: 'EC',
@@ -178,15 +130,97 @@ class CableTest < ActiveSupport::TestCase
     demand.destroy
     assert_nil @cable.reload.to_id
   end
-  # 
-  # test "destroy circuit should not destroy cable" do
-  #   cable = create(:cable, :with_circuit)
-  #   circuit = cable.circuit
-  #   
-  #   assert_no_difference 'Cable.count' do
-  #     circuit.destroy
-  #     cable.reload
-  #     assert_nil cable.circuit
-  #   end
-  # end
+
+  test "cable from should be unique" do
+    swbd = create(:switchboard, project: @project, discipline: @discipline_e)
+    circuit = swbd.circuits.create(serial: 1)
+    cable1 = create(:cable,
+      tag: create(:tag, :unique_tag, prefix: "EC", project: @project, discipline: @discipline_e),
+      cable_type: @cable_type
+    )
+
+    cable1.from = circuit
+    cable1.save
+    cable2 = build(:cable,
+      tag: create(:tag, :unique_tag, prefix: "EC", project: @project, discipline: @discipline_e),
+      cable_type: @cable_type,
+      from: cable1.from
+    )
+    assert_no_difference 'Cable.count' do
+      refute cable2.save
+    end
+    refute cable2.valid?
+    assert_includes cable2.errors[:from_id], I18n.t('errors.messages.taken')
+  end
+
+  test "cable to should be unique" do
+    motor_tag = create(:tag, project: @project, discipline: @discipline_e)
+    motor = create(:motor, tag: motor_tag)
+    demand = create(:demand, demandable: motor)
+    cable1 = create(:cable,
+      tag: create(:tag, :unique_tag, prefix: "EC", project: @project, discipline: @discipline_e),
+      cable_type: @cable_type
+    )
+
+    cable1.to = demand
+    cable1.save
+    cable2 = build(:cable,
+      tag: create(:tag, :unique_tag, prefix: "EC", project: @project, discipline: @discipline_e),
+      cable_type: @cable_type,
+      to: demand
+    )
+    assert_no_difference 'Cable.count' do
+      refute cable2.save
+    end
+    refute cable2.valid?
+    assert_includes cable2.errors[:to_id], I18n.t('errors.messages.taken')
+  end
+  
+  test "navigation between cables" do
+    skip "Navigation between cables is not working properly"
+    # Create test cables with different serials but same prefix
+    tag1 = create(:tag, prefix: 'EC', serial: 201, project: @project, discipline: @discipline_e)
+    cable1 = create(:cable, tag: tag1, cable_type: @cable_type)
+
+    tag2 = create(:tag, prefix: 'EC', serial: 202, project: @project, discipline: @discipline_e)
+    cable2 = create(:cable, tag: tag2, cable_type: @cable_type)
+
+    tag3 = create(:tag, prefix: 'EC', serial: 203, project: @project, discipline: @discipline_e)
+    cable3 = create(:cable, tag: tag3, cable_type: @cable_type)
+
+    # Test next/prev navigation
+    assert_equal cable2, cable1.next
+    assert_equal cable3, cable2.next
+    assert_equal cable3, cable3.next  # Returns self when no next
+
+    assert_equal cable1, cable1.prev  # Returns self when no previous
+    assert_equal cable1, cable2.prev
+    assert_equal cable2, cable3.prev
+  end
+  
+  test "navigation with different loop_ids" do
+    skip "Navigation between cables is not working properly"
+
+    # First cable with prefix 'EC'
+    tag1 = create(:tag, prefix: 'EC', serial: 201, project: @project, discipline: @discipline_e)
+    cable1 = create(:cable, tag: tag1, cable_type: @cable_type)
+
+    # Second cable with different prefix will have a different loop_id
+    # due to the first letter of the prefix being different
+    tag2 = create(:tag, prefix: 'FC', serial: 202, project: @project, discipline: @discipline_e)
+    cable2 = create(:cable, tag: tag2, cable_type: @cable_type)
+
+    # Test navigation respects loop_id ordering
+    assert_equal cable2, cable1.next
+    assert_equal cable2, cable2.next  # Returns self when no next
+
+    assert_equal cable1, cable1.prev  # Returns self when no previous
+    assert_equal cable1, cable2.prev
+  end
+  
+  test "navigation with missing tag" do
+    cable = Cable.new
+    assert_equal cable, cable.next  # Returns self when there's no tag
+    assert_equal cable, cable.prev  # Returns self when there's no tag
+  end
 end

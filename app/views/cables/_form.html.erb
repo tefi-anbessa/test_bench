@@ -45,11 +45,9 @@
                 <%= render 'shared/error_messages', object: f.object %>
 
                 <!-- Cable Type -->
-                <%= f.collection_select :cable_type_id,
-                      @cable_types,
-                      :id,  # value method - what gets submitted
-                      lambda { |ct| "#{ct.id}: #{ct.code}" },  # text method - what gets displayed
-                      {},  # options (no include_blank for required field)
+                <%= f.select :cable_type_id,
+                      options_for_select(@cable_type_options, selected: @cable.cable_type_id),
+                      {include_blank: t("form.required")},
                       { 
                         class: 'form-select form-select-sm',
                         required: true 
@@ -63,7 +61,7 @@
                   <div class="row">
                     <%= f.select :from_type,
                       options_for_select(@connect_options, selected: @cable.from_type),
-                      { include_blank: true },
+                      {include_blank: t("form.optional")},
                       { 
                         class: 'form-select form-select-sm',
                         'data-cable-form-target': 'fromType',
@@ -74,7 +72,7 @@
                     <%= f.select :from_id, 
                         options_for_select(@id_options[@cable.from_type] || [], 
                         selected: @cable.from_id), 
-                        { include_blank: true },
+                        {include_blank: t("form.optional")},
                         { 'data-cable-form-target': 'fromId' } %>
                   </div>
 
@@ -82,7 +80,7 @@
                   <div class="row">
                     <%= f.select :to_type, 
                         options_for_select(@connect_options, selected: @cable.to_type),
-                          { include_blank: true },
+                        {include_blank: t("form.optional")},
                           { 
                             class: 'form-select form-select-sm', 
                             'data-cable-form-target': 'toType',
@@ -93,7 +91,7 @@
                     <%= f.select :to_id,
                           options_for_select(@id_options[@cable.to_type] || [], 
                           selected: @cable.to_id), 
-                          { include_blank: true },
+                          {include_blank: t("form.optional")},
                           { 'data-cable-form-target': 'toId' } %>
                   </div>
 

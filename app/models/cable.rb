@@ -17,6 +17,12 @@ class Cable < ApplicationRecord
 
   # Validations
   validates :cable_type, presence: true
+  
+# In Cable model
+validates :from_id, uniqueness: { scope: [:from_type] }, 
+  if: -> { from_type.present? && from_id.present? }
+validates :to_id, uniqueness: { scope: [:to_type] }, 
+  if: -> { to_type.present? && to_id.present? }
 
   def self.ransackable_attributes(auth_object = nil)
     ["route_length", "vertical_allowance", "termination_allowance",

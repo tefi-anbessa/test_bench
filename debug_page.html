@@ -1,0 +1,386 @@
+<html><head lang="en"><style type="text/css">.turbo-progress-bar {
+  position: fixed;
+  display: block;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: #0076ff;
+  z-index: 2147483647;
+  transition:
+    width 300ms ease-out,
+    opacity 150ms 150ms ease-in;
+  transform: translate3d(0, 0, 0);
+}
+</style>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <link rel="stylesheet" href="/assets/application-a0e1a492f53f7d3ced6eec2397d10f6cbd8dcdd06237dde0afd178c7abec4c13.css" data-turbo-track="reload">
+    
+    <script type="importmap" data-turbo-track="reload">{
+  "imports": {
+    "application": "/assets/application-101cb699e7b884137aa0db3d1ce5def37e17c04a25871f078312a90ac5c865a0.js",
+    "@hotwired/turbo-rails": "/assets/turbo.min-c7cbeb51e1c770495211785f9f472d78a5ae61e1675b659a4a3197b671429219.js",
+    "@hotwired/stimulus": "/assets/stimulus.min-9ee583d7d64bfaf202b0cf48971a673d9ed18952ae7927c50015649aebe535b6.js",
+    "@hotwired/stimulus-loading": "/assets/stimulus-loading-d80f0feea68692981b568bbfef0ed4370b56927ae5c663421e8461a466f0618f.js",
+    "@rails/ujs": "https://ga.jspm.io/npm:@rails/ujs@7.1.3/app/assets/javascripts/rails-ujs.esm.js",
+    "bootstrap": "/assets/bootstrap/dist/js/bootstrap.esm-a4054daeb78428f08600170629bd96ed642866940cd6d013e462edb238980852.js",
+    "@popperjs/core": "/assets/@popperjs/core/lib/index-1337ff9f4b257c48f7371d9d5bdcb77b96652fc0e52975f80003a77279e573eb.js",
+    "controllers/application": "/assets/controllers/application-f72b4b4dc43a99ef6a247d3de06025f15a3b4c6f37d35327ae42c5ac7c00cd08.js",
+    "controllers/cable_form_controller": "/assets/controllers/cable_form_controller-12fc0750d72af017544caeaaf55e15074326c386a2f8f065820e082a30416dfa.js",
+    "controllers/collapsible_controller": "/assets/controllers/collapsible_controller-230be2842adbb6ca54b4e2f430540aa6bcdaa84d7c7d91bcd5a460171062a256.js",
+    "controllers/hello_controller": "/assets/controllers/hello_controller-88c9da00e8c549bbad7147478d6fbc4a321e205c03fe7ba1be97ae1e9e7ae678.js",
+    "controllers": "/assets/controllers/index-81f238650da35ac15c2b3cc1acfcf1db2f5c8f26b2c0d9ebde1a2b050c589f81.js",
+    "controllers/ip_rating_controller": "/assets/controllers/ip_rating_controller-0cabe7f3e245410dd595f8ce6649a87ceaf83c37b7e1fc5cf4be547e1128db51.js",
+    "controllers/numeric_mask_controller": "/assets/controllers/numeric_mask_controller-ade9473adcf8c6067137c5045571f20202d2f6a4850265b7ad6862f30fb6142b.js",
+    "controllers/page_size_controller": "/assets/controllers/page_size_controller-327ae203ca3550c5b0321aa66a474b5990186088a66d2d6dcec8ee0c972acdab.js",
+    "controllers/pagination_controller": "/assets/controllers/pagination_controller-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.js",
+    "controllers/tag_controller": "/assets/controllers/tag_controller-8620470fa11cda52d6fad9ae3bbd7785895f4f148e4267d057f935167e047956.js"
+  }
+}</script>
+<link rel="modulepreload" href="/assets/application-101cb699e7b884137aa0db3d1ce5def37e17c04a25871f078312a90ac5c865a0.js">
+<link rel="modulepreload" href="/assets/turbo.min-c7cbeb51e1c770495211785f9f472d78a5ae61e1675b659a4a3197b671429219.js">
+<link rel="modulepreload" href="/assets/stimulus.min-9ee583d7d64bfaf202b0cf48971a673d9ed18952ae7927c50015649aebe535b6.js">
+<link rel="modulepreload" href="/assets/stimulus-loading-d80f0feea68692981b568bbfef0ed4370b56927ae5c663421e8461a466f0618f.js">
+<link rel="modulepreload" href="https://ga.jspm.io/npm:@rails/ujs@7.1.3/app/assets/javascripts/rails-ujs.esm.js">
+<link rel="modulepreload" href="/assets/bootstrap/dist/js/bootstrap.esm-a4054daeb78428f08600170629bd96ed642866940cd6d013e462edb238980852.js">
+<link rel="modulepreload" href="/assets/@popperjs/core/lib/index-1337ff9f4b257c48f7371d9d5bdcb77b96652fc0e52975f80003a77279e573eb.js">
+<link rel="modulepreload" href="/assets/controllers/application-f72b4b4dc43a99ef6a247d3de06025f15a3b4c6f37d35327ae42c5ac7c00cd08.js">
+<link rel="modulepreload" href="/assets/controllers/cable_form_controller-12fc0750d72af017544caeaaf55e15074326c386a2f8f065820e082a30416dfa.js">
+<link rel="modulepreload" href="/assets/controllers/collapsible_controller-230be2842adbb6ca54b4e2f430540aa6bcdaa84d7c7d91bcd5a460171062a256.js">
+<link rel="modulepreload" href="/assets/controllers/hello_controller-88c9da00e8c549bbad7147478d6fbc4a321e205c03fe7ba1be97ae1e9e7ae678.js">
+<link rel="modulepreload" href="/assets/controllers/index-81f238650da35ac15c2b3cc1acfcf1db2f5c8f26b2c0d9ebde1a2b050c589f81.js">
+<link rel="modulepreload" href="/assets/controllers/ip_rating_controller-0cabe7f3e245410dd595f8ce6649a87ceaf83c37b7e1fc5cf4be547e1128db51.js">
+<link rel="modulepreload" href="/assets/controllers/numeric_mask_controller-ade9473adcf8c6067137c5045571f20202d2f6a4850265b7ad6862f30fb6142b.js">
+<link rel="modulepreload" href="/assets/controllers/page_size_controller-327ae203ca3550c5b0321aa66a474b5990186088a66d2d6dcec8ee0c972acdab.js">
+<link rel="modulepreload" href="/assets/controllers/pagination_controller-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.js">
+<link rel="modulepreload" href="/assets/controllers/tag_controller-8620470fa11cda52d6fad9ae3bbd7785895f4f148e4267d057f935167e047956.js">
+<script type="module">import "application"</script>
+        <!--[if lt IE 9]>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/r29/html5.min.js">
+      </script>
+    <![endif]-->
+  <title>Edit Cable | Test Bench</title></head>
+  <body style="padding-top: 56px;">
+    <nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
+  <div class="container-fluid">
+    <div class="nav-item">
+      <a class="navbar-brand" id="logo" href="/?locale=en">
+        <img src="/assets/favicon-2329010196ce0177ea2e69b7cd8f6c5e5ec0eef585316f0efb7c390972d6dc42.ico" width="40" height="40">
+        Test Bench
+</a>    </div>
+
+    <button class="navbar-toggler collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent" data-bs-collapse-initialized="true">
+      <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" aria-label="Roles" href="/en/roles">Roles</a>
+              </li>
+
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" id="project-menu-btn" role="button" aria-expanded="false">
+                      Project: AB
+                  </a>
+                  <ul class="dropdown-menu" aria-labelledby="project-menu-btn">
+                      <li><a class="dropdown-item" href="/en/projects/1">Show AB</a></li>
+                    
+                    <li><a class="dropdown-item" href="/en/projects/select">Select</a></li>
+                    <li><a class="dropdown-item" href="/en/projects">Projects</a></li>
+                  </ul>
+                </li>
+
+            <li class="nav-item">
+              <a class="nav-link" aria-label="Tags" href="/en/tags">Tags</a>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" id="electrical-menu-btn" role="button" aria-expanded="false">
+                Electrical
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="electrical-menu-btn">
+                <li>
+                  <h6 class="dropdown-header"><span class="translation_missing" title="translation missing: en.menu.electrical_resources">Electrical Resources</span></h6>
+                </li>
+                  <li>
+                    <a class="dropdown-item" href="/en/cable_types">Cable Types</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="/en/cables">Cables</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="/en/switchboards">Switchboards</a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="/en/demands">Loads</a>
+                  </li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" id="user-menu-btn" role="button" aria-expanded="false">
+                User35
+              </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="user-menu-btn">
+              <li>
+                <a class="dropdown-item" href="/en/users/6">Profile</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="/en/users/edit">Edit</a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a data-turbo-method="delete" class="dropdown-item" href="/en/users/sign_out">Log out</a>
+              </li>
+            </ul>
+          </li>
+
+        <li class="nav-item dropdown ms-2">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarLocaleSelect" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="flag-icon flag-icon-gb"></span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarLocaleSelect">
+              <li>
+                <span class="flag-icon flag-icon-gb"></span>
+                  <span class="ms-2">English</span>
+              </li>
+              <li>
+                <span class="flag-icon flag-icon-kh"></span>
+                  <a class="ms-2 text-decoration-none" href="/km/cables/1/edit">ភាសាខ្មែរ</a>
+              </li>
+              <li>
+                <span class="flag-icon flag-icon-th"></span>
+                  <a class="ms-2 text-decoration-none" href="/th/cables/1/edit">ไทย</a>
+              </li>
+              <li>
+                <span class="flag-icon flag-icon-cn"></span>
+                  <a class="ms-2 text-decoration-none" href="/cn/cables/1/edit">中文</a>
+              </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+    <div class="container" id="flash-messages">
+      
+    </div>
+    
+<div class="container mt-3">
+  <div class="card">
+    <div class="card-header p-2">
+
+      <!-- Center Tag Info -->
+      <div class="col text-center">
+        <div class="d-flex flex-column align-items-center">
+          <div class="mt-1">
+            Edit Cable: E:EC-0001.i
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form action="/en/cables/1" accept-charset="UTF-8" method="post"><input type="hidden" name="_method" value="patch" autocomplete="off">
+
+      <div class="card-body p-2">
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+
+            <!-- Tag -->
+            <div class="card mb-1">
+                
+
+<div class="card mb-3">
+  <div class="card-header py-1" data-controller="collapsible" data-action="click-&gt;collapsible#toggle" data-bs-toggle="collapse" data-bs-target="#tag_1_details" role="button" aria-expanded="false" aria-controls="tag_1_details">
+    
+    <div class="d-flex justify-content-between align-items-center">
+      <h6 class="mb-0">Tag: E:EC-0001.i</h6>
+      
+        <div data-collapsible-target="icon" class="collapsed">
+          <svg class="bi bi-chevron-down text-muted" viewBox="0 0 16 16" fill="currentColor" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"></path></svg>
+        </div>
+    </div>
+</div>  
+  <div id="tag_1_details" class="collapse " data-collapsible-target="content">
+    <div class="card-body ">
+      
+
+    <div class="row mb-1">
+      <a class="btn btn-sm btn-outline-secondary me-2" title="Show Tag" href="/en/tags/1">
+        <svg width="1rem" height="1rem" fill="currentColor" class="bi bi-box-arrow-in-up-left" viewBox="0 0 16 16" version="1.1" aria-hidden="true"><path fill-rule="evenodd" d="M9.636 13.5a.5.5 0 0 1-.5.5H2.5A1.5 1.5 0 0 1 1 12.5v-10A1.5 1.5 0 0 1 2.5 1h10A1.5 1.5 0 0 1 14 2.5v6.636a.5.5 0 0 1-1 0V2.5a.5.5 0 0 0-.5-.5h-10a.5.5 0 0 0-.5.5v10a.5.5 0 0 0 .5.5h6.636a.5.5 0 0 1 .5.5"></path>
+  <path fill-rule="evenodd" d="M5 5.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1H6.707l8.147 8.146a.5.5 0 0 1-.708.708L6 6.707V10.5a.5.5 0 0 1-1 0z"></path></svg>
+        <span class="d-none d-md-inline">Show Tag</span>
+</a>    </div>
+
+    <div class="row mb-1">
+      <div class="col-12">
+        <div class="d-flex align-items-center">
+          <span class="text-muted me-2">
+            <a class="text-decoration-none" href="/en/projects/1">Project</a>:
+          </span>
+          <span>Project 9</span>
+          <span class="ms-3">
+            <span class="text-muted me-1">Stage:</span>
+            <span>1</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-1">
+      <div class="col-12">
+        <div class="d-flex align-items-center">
+          <span class="text-muted me-2">
+            Tag:
+          </span>
+          <span>E:EC-0001.i</span>
+            <span class="ms-2">TEST CABLE E:EC-0001.i</span>
+        </div>
+      </div>
+    </div>
+    
+      <div class="row mb-1">
+        <div class="col-12">
+          <div class="d-flex">
+            <span class="text-muted me-2">Notes:</span>
+            <span>Lorem ipsum</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+                <input type="hidden" name="tag_id" id="tag_id" value="1" autocomplete="off">
+            </div>
+
+            <!-- Cable Details -->
+            <div class="card mb-1">
+              <div class="card-header p-2">
+                <h5>Cable</h5>
+              </div>
+              
+              <div class="card-body p-2">
+                
+
+                <!-- Cable Type -->
+                <div class="mb-3 row"><label class="col-form-label col-sm-4 required" for="cable_cable_type_id">Cable type</label><div class="col-sm-8"><select class="form-select form-select form-select-sm" required="required" name="cable[cable_type_id]" id="cable_cable_type_id"><option value="">Selection required:</option>
+<option value="1">1: Cu~2.5mm²~3C+N(2.5)+E(1.5)~XLPE~PVC~SWA~PVC~450/750V~75˚C~01</option>
+<option value="2">2: Cu~4.0mm²~3C+N(2.5)+E(1.5)~XLPE~PVC~SWA~PVC~450/750V~75˚C~01</option></select></div></div>
+                    
+                <div data-controller="cable-form" data-cable-form-id-options-value="{&quot;Circuit&quot;:[],&quot;Demand&quot;:[]}">
+
+
+                  <!-- From Section --> 
+                  <div class="row">
+                    <div class="mb-3 row"><label class="col-form-label col-sm-4" for="cable_from_type">From type</label><div class="col-sm-8"><select class="form-select form-select form-select-sm" data-cable-form-target="fromType" data-action="change-&gt;cable-form#updateFromOptions" name="cable[from_type]" id="cable_from_type"><option value="">Leave blank for no selection:</option>
+<option selected="selected" value="Circuit">Circuit</option>
+<option value="Demand">Load</option></select></div></div> 
+                  </div>
+                  <div class="row">
+                    <div class="mb-3 row"><label class="col-form-label col-sm-4" for="cable_from_id">From</label><div class="col-sm-8"><select data-cable-form-target="fromId" class="form-select" name="cable[from_id]" id="cable_from_id"><option value="">Leave blank for no selection:</option>
+</select></div></div>
+                  </div>
+
+                  <!-- To Section --> 
+                  <div class="row">
+                    <div class="mb-3 row"><label class="col-form-label col-sm-4" for="cable_to_type">To type</label><div class="col-sm-8"><select class="form-select form-select form-select-sm" data-cable-form-target="toType" data-action="change-&gt;cable-form#updateToOptions" name="cable[to_type]" id="cable_to_type"><option value="">Leave blank for no selection:</option>
+<option value="Circuit">Circuit</option>
+<option selected="selected" value="Demand">Load</option></select></div></div>
+                  </div>
+                  <div class="row">
+                    <div class="mb-3 row"><label class="col-form-label col-sm-4" for="cable_to_id">To</label><div class="col-sm-8"><select data-cable-form-target="toId" class="form-select" name="cable[to_id]" id="cable_to_id"><option value="">Leave blank for no selection:</option>
+</select></div></div>
+                  </div>
+
+                  <!-- Design lengths -->
+                  <div class="row">
+                    <div class="mb-1 row"><label class="col-form-label col-sm-6" for="cable_route_length">Route Length</label><div class="col-sm-3"><input class="form-control form-control form-control-sm" step="0.1" min="0" type="number" value="55.5" name="cable[route_length]" id="cable_route_length"></div></div>
+                  </div>
+
+                  <div class="row">
+                    <div class="mb-1 row"><label class="col-form-label col-sm-6" for="cable_vertical_allowance">Vertical Allowance</label><div class="col-sm-3"><input class="form-control form-control form-control-sm" step="0.1" min="0" type="number" value="5.5" name="cable[vertical_allowance]" id="cable_vertical_allowance"></div></div>
+                  </div>
+
+                  <div class="row">
+                    <div class="mb-1 row"><label class="col-form-label col-sm-6" for="cable_termination_allowance">Termination Allowance</label><div class="col-sm-3"><input class="form-control form-control form-control-sm" step="0.1" min="0" type="number" value="1.5" name="cable[termination_allowance]" id="cable_termination_allowance"></div></div>
+                  </div> 
+
+                  <!-- Installed length -->
+                  <div class="row">
+                    <div class="mb-1 row"><label class="col-form-label col-sm-6" for="cable_start_mark">Installed Start Mark</label><div class="col-sm-3"><input class="form-control form-control form-control-sm" step="1" min="0" type="number" value="154" name="cable[start_mark]" id="cable_start_mark"></div></div>
+                  </div>
+
+                  <div class="row">
+                    <div class="mb-1 row"><label class="col-form-label col-sm-6" for="cable_end_mark">Installed End Mark</label><div class="col-sm-3"><input class="form-control form-control form-control-sm" step="1" min="0" type="number" value="42" name="cable[end_mark]" id="cable_end_mark"></div></div>
+                          </div>
+
+                  <!-- Notes -->
+                  <div class="row">
+                    <div class="mb-3 row"><label class="col-form-label col-sm-3" for="cable_notes">Notes</label><div class="col-sm-9"><textarea rows="3" placeholder="Record useful tag related design information here" class="form-control" name="cable[notes]" id="cable_notes">test cable for electrical designer</textarea></div></div>
+                  </div>
+                </div> <!-- end div data controller -->
+              </div> <!-- end cable card body -->
+            </div> <!-- end cable card -->
+
+            <!-- Card Footer with Actions -->
+            <div class="card-footer bg-transparent text-end p-2">
+              <a class="btn btn-warning" data-confirm="Are you sure?" data-turbo="false" href="/en/cables/1">
+                Discard changes
+                <svg width="1rem" height="1rem" fill="currentColor" class="bi bi-x-square" viewBox="0 0 16 16" version="1.1" aria-hidden="true"><path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"></path>
+  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"></path></svg>
+</a>              <button name="cable[submit]" type="submit" id="cable_submit" class="btn btn-primary">
+                Save
+                <svg width="1rem" height="1rem" fill="currentColor" class="bi bi-save" viewBox="0 0 16 16" version="1.1" aria-hidden="true"><path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1z"></path></svg>
+</button>            </div>
+          </div> <!-- end responsive columns -->
+        </div> <!-- end row  justify content centre -->
+      </div> <!-- end card body -->
+</form>  </div> <!-- end card -->
+</div> <!-- end container -->
+
+
+
+
+
+    
+    <div class="container-fluid">
+  <footer class="footer border-top">
+    <small>
+      <ul class="footer-links">
+        <li class="nav-item">
+          <a class="nav-link" aria-label="About" href="/en/site/about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" aria-label="Help" href="/en/site/help">Help</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" aria-label="Contact" href="/en/site/contact">Contact</a>
+        </li>
+      </ul>
+      <div class="credits">
+        <i> Website by frankie fusion. </i>
+        <a id="hidden-link" href="https://youtu.be/rVDBZFfDqB8?si=qvqS2soZoCEh63ZN" target="_blank">
+          Walking on
+        </a>
+        <a href="http://rubyonrails.org/"><img alt="Rails logo" src="/assets/rails-c094bc3a4bf50e5bb477109e5cb0d213af27ad75b481c4df249f50974dbeefe6.png" width="30" height="30"></a>
+      </div>
+    </small>
+  </footer>
+</div>
+
+    
+
+  
+
+</body></html>

@@ -176,9 +176,9 @@
               <li>
                 <%= flag_icon(flag_code(locale)) %>
                 <% if I18n.locale == locale %>
-                  <span class="ms-2"><%= t(locale, scope: 'locales') %></span>
+                  <span class="ms-2"><%= t("language", locale: locale) %></span>
                 <% else %>
-                  <%= link_to t(locale, scope: 'locales'),
+                  <%= link_to t("language", locale: locale),
                             url_for(locale: locale),
                             class: "ms-2 text-decoration-none" %>
                 <% end %>

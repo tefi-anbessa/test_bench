@@ -312,8 +312,6 @@ class CablesSystemTest < ApplicationSystemTestCase
     # Edit the data
     find("select[name='cable[cable_type_id]'] option[value='2']").select_option
     fill_in "cable[notes]", with: "REVISED FOR TEST"
-
-File.write('debug_page.html', page.html)
     # Submit the form data
     click_button I18n.t('actions.save')
     sleep 0.5  # Give database time to commit

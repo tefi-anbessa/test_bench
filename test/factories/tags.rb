@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
   factory :tag do
     prefix { 'AA' }  # Default prefix if not provided
     sequence(:serial) { |n| n % 10000 }  # 0-9999
     suffix { '' }    # Default suffix if not provided
-    service { "Test #{prefix}-#{'%03d' % serial}#{suffix}" }
+    service { "Test #{prefix}-#{'%04d' % serial}#{suffix}" }
     stage { rand(0..3) }  # 0-3 to match seeds.rb phase
     notes { nil }
 
@@ -16,17 +18,8 @@ FactoryBot.define do
     end
 
     trait :unique_tag do
-      # Remove fixed prefix to allow customization
-      sequence(:serial) do |n|
-        # Find the next available serial for this project, discipline, prefix, and suffix combination
-        last_tag = Tag.where(
-          project: project || Project.first,
-          discipline: discipline || Discipline.first,
-          prefix: prefix
-        ).order(serial: :desc).first
-
-        last_tag ? last_tag.serial + 1 : n
-      end
+      # Override the serial with a database-aware sequence
+      serial { generate_unique_serial(prefix, project, discipline) }
     end
 
     trait :sequential do
@@ -44,4 +37,27 @@ FactoryBot.define do
       notes { Faker::Lorem.paragraph(sentence_count: 2) }
     end
   end
+end
+
+def generate_unique_serial(prefix, project, discipline)
+  # Find the next available serial for this project, discipline, prefix combination
+  project_id = project&.id || Project.first&.id
+  discipline_id = discipline&.id || Discipline.first&.id
+
+  return 1 unless project_id && discipline_id
+
+  # Find all existing serial numbers for this combination
+  existing_serials = Tag.where(
+    project_id: project_id,
+    discipline_id: discipline_id,
+    prefix: prefix
+  ).pluck(:serial)
+
+  # Find the next available serial number (fill gaps)
+  next_serial = 1
+  while existing_serials.include?(next_serial)
+    next_serial += 1
+  end
+
+  next_serial
 end

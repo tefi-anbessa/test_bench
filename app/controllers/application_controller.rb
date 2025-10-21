@@ -16,10 +16,20 @@ class ApplicationController < ActionController::Base
     @exception = exception
     respond_to do |format|
       format.html do
-        flash[:danger] = I18n.t('pundit.unauthorized')
+        flash[:danger] = I18n.t('pundit.unauthorized',
+          action: exception.query.to_s.humanize.downcase,
+          objects: exception.record&.model_name&.human&.pluralize&.downcase || 'these resources'
+        )
         render 'errors/forbidden', status: :forbidden
       end
-      format.json { render json: { error: I18n.t('pundit.unauthorized') }, status: :forbidden }
+      format.json do
+        render json: {
+          error: I18n.t('pundit.unauthorized',
+            action: exception.query.to_s.humanize.downcase,
+            objects: exception.record&.model_name&.human&.pluralize&.downcase || 'these resources'
+          )
+        }, status: :forbidden
+      end
     end
   end
 

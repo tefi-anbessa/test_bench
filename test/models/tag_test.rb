@@ -120,7 +120,7 @@ class TagTest < ActiveSupport::TestCase
       serial: tag1.serial,
       suffix: tag1.suffix
     )
-    assert_not tag2.valid?
+    refute tag2.valid?
     assert_includes tag2.errors[:base], I18n.t("activerecord.errors.models.tag.taken", tag: tag2.full_tag)
     
     # Different project, same other attributes should be valid
@@ -197,18 +197,6 @@ class TagTest < ActiveSupport::TestCase
     @tag.prefix = ""
     assert_not @tag.valid?
   end
-  
-#  test "prefix should be from valid set" do
-#    valid_prefixes = %w[CC CE CJB CX FT FV HV LT LZ PG PRV PT PZ XV ME MP MV A B LD LE LH LS LW P S SP T US V]
-    
-#    @tag.prefix = "INVALID"
-#    assert_not @tag.valid?
-#    
-#    valid_prefixes.each do |prefix|
-#      @tag.prefix = prefix
-#      assert @tag.valid?, "#{prefix} should be a valid prefix"
-#    end
-#  end
 
   test "serial should be present" do
     @tag.serial = nil

@@ -32,10 +32,7 @@ class CablesControllerTest < ActionController::TestCase
     @another_cable_tag = create(:tag, prefix: 'EC', serial: 1002, project: @project, discipline: @discipline)
     
     # Create cable with the cable tag
-    @cable = create(:cable, 
-                   tag: @cable_tag,
-                   cable_type: @cable_type
-                   )
+    @cable = create(:cable, tag: @cable_tag, cable_type: @cable_type)
     
     @request.env["devise.mapping"] = Devise.mappings[:user]
   end

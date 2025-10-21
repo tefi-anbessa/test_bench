@@ -83,6 +83,32 @@
                     label: t('activerecord.attributes.circuit.notes'),
                     rows: 2 %>
             </div>
+
+            <div class="row">
+              <%= bootstrap_fields @cable  do |c| %>
+                <%= c.select :from_id,
+                      options_for_select(@cables || [], 
+                      selected: circuit.feeder&.id),
+                      { include_blank: t("form.none"),
+                        layout: :horizontal,
+                        label_col: "col-sm-4", 
+                        control_col: "col-sm-8",
+                        label: t('activerecord.attributes.circuit.feeder') } %>
+              <% end %>
+            </div>
+
+            <div class="row">
+              <%= bootstrap_fields @cable  do |c| %>
+                <%= c.select :to_id,
+                      options_for_select(@demands || [], 
+                      selected: circuit.feeder&.to&.id),
+                      { include_blank: t("form.none"),
+                        layout: :horizontal,
+                        label_col: "col-sm-4", 
+                        control_col: "col-sm-8",
+                        label: t('activerecord.attributes.circuit.demand') } %>
+              <% end %>
+            </div>
           </div>
         </div>
 
