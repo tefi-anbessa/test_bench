@@ -40,7 +40,7 @@ class SwitchboardsController < ApplicationController
                            resource_name: Switchboard.model_name.human.downcase)
       respond_to do |format|
         format.html { render :new, status: :unprocessable_content }
-        format.json { render json: @cable.errors, status: :unprocessable_content }
+        format.json { render json: @switchboard.errors, status: :unprocessable_content }
       end
       return
     end

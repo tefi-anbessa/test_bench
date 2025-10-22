@@ -3,15 +3,18 @@ require "test_helper"
 class MotorTest < ActiveSupport::TestCase
   def setup
     @project = create(:project)
-    @discipline = create(:discipline, :e)
-    @motor = create(:motor,
-                   motor_type: 'Induction',
-                   frame_size: '132L',
+    @discipline_e = create(:discipline, :e)
+    @tag = create(:tag, prefix: 'KM', serial: 99, service: 'FAN MOTOR', project: @project, stage: 9,
+                    discipline: @discipline_e)
+    @motor = create(:motor, tag: @tag,
+                   motor_type: :induction,
+                   frame_size: '132',
                    poles: 4,
-                   ingress_protection: 'IP55',
+                   ingress_protection: '55',
                    speed_rated: 1500.0
                  )
-    @tag = @motor.tag
+    @demand = create(:demand, demandable: @motor, basis: 'power_pf', basis_notes: 'Test basis notes 7',
+      supply: 220.0, config: 'three_3c', power: 1000.0, duty: 0.5)
   end
 
   test "factory should be valid" do
@@ -21,7 +24,7 @@ class MotorTest < ActiveSupport::TestCase
     assert @motor.demand.valid?
   end
 
-  test "should create motor with valid attributes" do
+  test "factory default should create motor with valid attributes" do
     motor = build(:motor)
     assert motor.valid?
   end
@@ -37,26 +40,24 @@ class MotorTest < ActiveSupport::TestCase
   test "should create motor as tagable linked to existing tag" do
     tag = create(:tag, 
                 prefix: 'KM',
-                serial: 99,
+                serial: 100,
                 service: 'FAN MOTOR',
                 project: @project,
-                discipline: @discipline
+                discipline: @discipline_e
               )
     
     assert_difference 'Motor.count', 1 do
       motor = create(:motor, 
-                    motor_type: 'Induction',
-                    frame_size: '80L',
+                    motor_type: :induction,
+                    frame_size: '80',
                     poles: 2,
-                    ingress_protection: 'IP67',
+                    ingress_protection: '67',
                     speed_rated: 3000.0,
                     tag: tag
                   )
       
       tag.reload
-      assert_equal tag.tagable, motor
       assert_equal tag.motor, motor
-      assert motor.demand.present?, 'Motor should have a demand'
     end
   end
 

@@ -1,10 +1,8 @@
-<h1><%= t('.header', label: @motor.label) %></h1>
-
-<%= render "form", motor: @motor %>
-
-<br>
-
-<div>
-  <%= link_to "Show this motor", @motor %> |
-  <%= link_to "Back to motors", motors_path %>
-</div>
+<% provide(:title, t('.title')) %>
+<% provide(:header, t('.header', label: @motor.label)) %>
+<% provide(:button_text, t('actions.update')) %>
+<%= render "form",
+  motor: @motor,
+  tag: @tag,
+  voltage_ratings: @voltage_ratings
+%>

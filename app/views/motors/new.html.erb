@@ -1,12 +1,8 @@
-<h1>New motor</h1>
-
 <% provide(:title, t('.title')) %>
 <% provide(:header, t('.header')) %>
-
-<%= render "form", motor: @motor %>
-
-<br>
-
-<div>
-  <%= link_to "Back to motors", motors_path %>
-</div>
+<% provide(:button_text, t('actions.save')) %>
+<%= render "form",
+  motor: @motor,
+  tag: @tag,
+  voltage_ratings: @voltage_ratings
+%>

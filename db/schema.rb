@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_19_053808) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_21_102921) do
   create_table "cable_types", force: :cascade do |t|
     t.integer "conductor_material"
     t.float "csa"
@@ -104,8 +104,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_19_053808) do
   end
 
   create_table "motors", force: :cascade do |t|
-    t.string "motor_type"
-    t.string "frame_size"
+    t.integer "motor_type"
+    t.integer "frame_size"
     t.integer "poles"
     t.string "ingress_protection"
     t.float "speed_rated"

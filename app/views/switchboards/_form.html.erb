@@ -61,7 +61,7 @@
                     <div class="col-4">
                       <div class="row">
                       <%= select_tag :ip_1,
-                        options_for_select(ip_1.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] }, 
+                        options_for_select(@ip_1.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] }, 
                           switchboard.ingress_protection&.first),
                         {
                           class: 'form-select mb-0',
@@ -75,7 +75,7 @@
                       </div>
                       <div class="row">
                         <%= select_tag :ip_2,
-                          options_for_select(ip_2.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] }, 
+                          options_for_select(@ip_2.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] }, 
                             switchboard.ingress_protection&.last),
                             {
                               class: 'form-select mb-0',

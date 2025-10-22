@@ -1,6 +1,9 @@
 class Motor < ApplicationRecord
   include Tagable
   include Demandable
+  include TagableNavigation
+  enum :motor_type, Constants.electrical.motor_type.to_h
+  enum :frame_size, Constants.electrical.frame_size.to_h
 
   def label
     tag&.label || I18n::t("show.orphan", model: Tag.model_name.human)

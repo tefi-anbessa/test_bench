@@ -108,6 +108,13 @@
                       class: "dropdown-item" %>
                   </li>
                 <% end %>
+                <% if policy(:motor).index? %>
+                  <li>
+                    <%= link_to t('motor', scope: 'activerecord.models').pluralize,
+                      motors_path,
+                      class: "dropdown-item" %>
+                  </li>
+                <% end %>
                 <% if policy(:demand).index? %>
                   <li>
                     <%= link_to t('demand', scope: 'activerecord.models').pluralize,
