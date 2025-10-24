@@ -1,271 +1,96 @@
 require "test_helper"
+require_relative "../support/tagable_test_patterns"
 
 class SwitchboardsControllerTest < ActionController::TestCase
+  include TagableTestPatterns
   include Devise::Test::ControllerHelpers
 
   setup do
-
-    @project = create(:project)
-    # Set the current project for all tests that need it
-    set_current_project(@project) if defined?(set_current_project)
-
-    @admin = create(:user)
-    @admin.grant(:admin)
-
-    @project_manager = create(:user)
-    @project_manager.grant(:project_manager, @project) # Project manager role
-
-    @team_member = create(:user)
-    @team_member.grant(:team_member, @project) # Project team member role
-
-    @electrical_designer = create(:user)
-    @electrical_designer.grant(:electrical_designer) # Global electrical designer role
-    @electrical_designer.grant(:team_member, @project) # Project team member role
-
-    @regular_user = create(:user)   # No roles
-
-    @discipline = create(:discipline, code: 'E', name: 'Electrical')
-    
-    # Create tags
-    @swbd_tag = create(:tag, prefix: 'EX', serial: 1001, project: @project, discipline: @discipline)
-    @another_swbd_tag = create(:tag, prefix: 'EX', serial: 1002, project: @project, discipline: @discipline)
-    
-    # Create switchboard with the switchboard tag
-    @switchboard = create(:switchboard, tag: @swbd_tag, location: 'Location 1')
-    
-    @request.env["devise.mapping"] = Devise.mappings[:user]
+    # Set the discipline applicable to the resource, required before setup_common_test_data
+    @resource_discipline = create(:discipline, code: 'E')
+    setup_common_test_data
+    setup_model_specific_data
+    setup_tags_and_resources
   end
 
-  test "Setup is valid" do
-    assert @project.valid?
-    assert @admin.valid?
-    assert @project_manager.valid?
-    assert @team_member.valid?
-    assert @electrical_designer.valid?
-    assert @regular_user.valid?
-    assert @discipline.valid?
-    assert @swbd_tag.valid?
-    assert @another_swbd_tag.valid?
-    assert @switchboard.valid?
-    assert @project.persisted?
-    assert @admin.persisted?
-    assert @project_manager.persisted?
-    assert @team_member.persisted?
-    assert @electrical_designer.persisted?
-    assert @regular_user.persisted?
-    assert @discipline.persisted?
-    assert @swbd_tag.persisted?
-    assert @another_swbd_tag.persisted?
-    assert @switchboard.persisted?
+  def setup_model_specific_data
+    # Switchboards have circuits as child models - create after tags are available
+    # Will be created in setup_tags_and_resources after @assigned_tag exists
   end
 
-  # Index action tests
-  test "unauthenticated users should be redirected to sign in" do
-    get :index 
-    assert_unauthenticated
+  # Common code for all models, but values are model specific
+  def setup_tags_and_resources
+    # Set up a user with edit permissions on this resource.
+    @accredited_team_member = create(:user)
+    @accredited_team_member.grant(:team_member, @project)
+    @accredited_team_member.grant(:electrical_designer)
+    # Set up an existing tag with associated resource for index, show, edit, update, destroy tests
+    @assigned_tag = create(:tag, prefix: 'EX', serial: 1001, project: @project, discipline: @resource_discipline)
+    @resource = create(:switchboard, tag: @assigned_tag)
+    # Set up an unassigned tag for create and update tests
+    @unassigned_tag = create(:tag, prefix: 'EX', serial: 1002, project: @project, discipline: @resource_discipline)
+    # Every model sets a string of the wrong type for testing the type check
+    @wrong_tagable_type = "Motor"
+    # Switchboards have circuits as child models - create after tags are available
+    @switchboard_with_circuits = create(:switchboard, :with_circuits, circuits_count: 3)
   end
 
-  test "regular user cannot get index" do
-    sign_in @regular_user
-    get :index
-    assert_response :forbidden
-  end
-
-  test "should get index for user with role on current project" do
-    sign_in @team_member
-    get :index
-    assert_response :success
-  end
-
-  # Show action tests
-  test "user cannot view switchboard details without a project role" do
-    sign_in @regular_user
-    get :show, params: { id: @switchboard.id }
-    assert_response :forbidden
-  end
-
-  test "team member can view project switchboard details" do
-    sign_in @team_member
-    get :show, params: { id: @switchboard.id }
-    assert_response :success
-  end
-
-  # New action tests
-  test "team member cannot access new switchboard form" do
-    sign_in @team_member
-    get :new, params: { tag_id: @another_swbd_tag.id }
-    assert_response :forbidden
-  end
-
-  test "electrical designer can access new switchboard form for existing unassigned tag" do
-    sign_in @electrical_designer
-    get :new, params: { tag_id: @another_swbd_tag.id }
-    assert_response :success
-  end
-
-  test "electrical designer can access new switchboard form with no tag" do
-    sign_in @electrical_designer
-    get :new
-    assert_response :success
-  end
-
-  # Create action tests
-  # Success tests
-  test "electrical designer can create switchboard with existing unallocated tag" do
-    sign_in @electrical_designer
-    assert_difference('Switchboard.count', 1) do
-      post :create, params: {
-        tag_id: @another_swbd_tag.id,
-        switchboard: {
-          location: 'Location 3'
-        }
+  def params_with_existing_tag
+    {
+      tag_id: @unassigned_tag.id,
+      switchboard: {
+        location: 'Test Location',
+        voltage_rating: '600/1000V',
+        busbar_rating: '600A'
       }
-    end
-    @another_swbd_tag.reload
-    swbd = @another_swbd_tag.tagable
-    assert_redirected_to switchboard_path(swbd)
-    # Flash message confirms success
-    expected = I18n.t('flash.tagables.assigned_to', 
-      tag: @another_swbd_tag.full_tag, resource_name: Switchboard.model_name.human, id: swbd.id)
-    assert_equal expected, flash[:success]
-  end
-
-  test "electrical designer can create new switchboard and tag in a single request" do
-    sign_in @electrical_designer
-    assert_difference('Switchboard.count', 1) do
-      post :create, params: {
-        switchboard: {
-          location: 'Location 3',
-          tag: {
-            project_id: @project.id,
-            discipline_id: @discipline.id,
-            prefix: 'EX',
-            serial: 2001,
-            suffix: '',
-            service: 'One-shot switchboard',
-            stage: 1
-          }
-        }
-      }
-    end
-    swbd_tag = Tag.find_by(prefix: 'EX', serial: 2001)
-    swbd = swbd_tag.tagable
-    assert_redirected_to switchboard_path(swbd)
-    # Flash message confirms success
-    expected = I18n.t('flash.tagables.created_and_assigned', 
-      tag: swbd_tag.full_tag, resource_name: Switchboard.model_name.human, id: swbd.id)
-    assert_equal expected, flash[:success]
-  end
-
-  # Create action tests
-  # Fail to create
-  test "team member cannot create switchboard" do
-    sign_in @team_member
-    assert_difference('Switchboard.count', 0) do
-      post :create, params: {
-        tag_id: @another_swbd_tag.id,
-        switchboard: {
-          location: 'Location 3'
-        }
-      }
-    end
-    assert_forbidden
-  end
-
-  test "electrical designer cannot create switchboard with tag that is not in the database" do
-    sign_in @electrical_designer
-    assert_no_difference('Switchboard.count') do
-      post :create, params: {
-        tag_id: 99,
-        switchboard: {
-          location: 'Location 3'
-        }
-      }
-    end
-    assert_conflict
-  end
-
-  test "electrical designer cannot create switchboard on tag already taken" do
-    sign_in @electrical_designer
-    assert_no_difference('Switchboard.count') do
-      post :create, params: {
-        tag_id: @swbd_tag.id,
-        switchboard: {
-          location: 'Location 3'
-        }
-      }
-    end
-    assert_conflict
-  end
-
-  test "electrical designer cannot create switchboard with tag that is already classified as other than switchboard" do
-    sign_in @electrical_designer
-    @another_swbd_tag.update(tagable_type: "Motor")
-    assert_no_difference('Switchboard.count') do
-      post :create, params: {
-        tag_id: @another_swbd_tag.id,
-        switchboard: {
-          location: 'Location 3'
-        }
-      }
-    end
-    assert_conflict
-  end
-
-  # Edit action tests
-  test "team member cannot access edit switchboard form" do
-    sign_in @team_member
-    get :edit, params: { id: @switchboard.id }
-    assert_forbidden
-  end
-
-  test "electrical designer can access edit switchboard form" do
-    sign_in @electrical_designer
-    get :edit, params: { id: @switchboard.id }
-    assert_response :success
-  end
-
-  # Update action tests
-  test "team member cannot update switchboard" do
-    sign_in @team_member
-    patch :update, params: { 
-      id: @switchboard.id,
-      switchboard: { location: 'Location 2' }
     }
-    assert_forbidden
   end
 
-  test "electrical designer can update switchboard" do
-    sign_in @electrical_designer
-    patch :update, params: { 
-      id: @switchboard.id,
-      switchboard: { location: 'Location 2' }
+  def params_with_new_tag
+    {
+      switchboard: {
+        location: 'Test Location',
+        voltage_rating: '600/1000V',
+        busbar_rating: '600A',
+        tag: {
+          project_id: @project.id,
+          discipline_id: @resource_discipline.id,
+          prefix: 'EX',
+          serial: 2002,
+          suffix: '',
+          service: 'Test switchboard',
+          stage: 1
+        }
+      }
     }
-    assert_equal 'Location 2', @switchboard.reload.location
-    assert_redirected_to switchboard_path(@switchboard)
-    expected = I18n.t('flash.actions.update.notice', resource_name: Switchboard.model_name.human)
-    assert_equal expected, flash[:success]
   end
 
-  # No validations on switchboards: no failing test for update.
-
-
-  # Destroy action tests
-  test "electrical designer cannot destroy switchboard" do
-    sign_in @electrical_designer
-    assert_no_difference('Switchboard.count') do
-      delete :destroy, params: { id: @switchboard.id }
-    end
-    assert_forbidden
+  # Set the minimum required params for a valid resource
+  def valid_resource_params
+    {
+      location: 'Test Location',
+      voltage_rating: '600/1000V',
+      ingress_protection: 'IP55'
+    }
   end
 
-  test "admin can destroy switchboard" do
-    sign_in @admin
-    assert_difference('Switchboard.count', -1) do
-      delete :destroy, params: { id: @switchboard.id }
-    end
-    assert_redirected_to switchboards_path
-    expected = I18n.t('flash.actions.destroy.notice', resource_name: Switchboard.model_name.human)
-    assert_equal expected, flash[:success]
+  # Set invalid resource params for tests
+  def invalid_resource_params
+    { voltage_rating: 999 }  # Invalid voltage rating (enum only allows 0-9)
+  end
+
+  # Nominate an attribute to get changed during update tests
+  def update_attribute_name
+    :location
+  end
+
+  # Nominate a value to update the attribute to
+  def updated_attribute_value
+    'Updated Location'
+  end
+
+  # Override to specify the controller name for this test
+  def controller_name_for_test
+    'switchboards'
   end
 end

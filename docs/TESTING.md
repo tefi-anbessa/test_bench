@@ -34,7 +34,7 @@ During TDD:
 - Aim to keep the test design unchanged while modifying the implementation
 - Be prepared to recognize when:
   - There are syntax or implementation errors
-  - The test design doesn't meet the objective
+  - The test doesn't meet the design objective
 - Know when TDD might not be appropriate
 
 ## Testing Setup
@@ -60,6 +60,8 @@ During TDD:
   - Use traits for common variations of models
   - Avoid testing validations through factory traits
   - Keep factories simple and maintainable
+  - Test test/factories_test.rb will test all found factories and traits automatically.
+  - Add any specialized model tests to test/models_test.rb if required.
 
 ### Controllers
 
@@ -95,8 +97,9 @@ During TDD:
 
 - **Location**: `test/system/`
 - **Testing Approach**:
-  - Test complete user flows
-  - Test critical paths through the application
+  - Test complete user workflows
+  - Test all available paths through the application
+  - Don't try to exhaustively test failure paths, they should be difficult to initiate from system tests if the application is well designed. Rely on controller tests for that.
   - Test JavaScript interactions
   - Test responsive design (if applicable)
   - Test across different browsers (if needed)
@@ -118,6 +121,8 @@ This project uses the following testing tools:
 - **Selenium WebDriver** - Browser automation
 - **Webdrivers** - Browser driver management
 - **SimpleCov** - Code coverage (TODO: Configure)
+- **Mocha** - Mocking framework
+- **Guard** and **Guard-minitest** - Automatic test runner
 
 **Example Test Run Command**:
 ```bash
@@ -133,16 +138,25 @@ rails test test/models/user_test.rb:15
 
 ## Best Practices
 
+### 1. Using Guard
+
+- Guard is configured by Guardfile to automatically run relevant tests when files change.
+- Basic configuration looks at the name of the file that has changed, and runds the corresponding test file. For example, if you modify either `app/models/user.rb` or `test/models/user_test.rb`, Guard will run `test/models/user_test.rb`.
+- Advanced configuration in this application includes:
+  - Any change to test/test_helper.rb will run the full test suite, so take care!
+  - Any change to test/support/tagable_test_patterns.rb or app/controllers/concerns/tagables_controller.rb will run all tagable controller tests.
+- Guard is best run in its own terminal window. It can be started with `bundle exec guard` and stopped with `quit` or `exit`.
+- If Guard gets unresponsive, you can recover it with ctrl c, make sure to exit and restart.
+- Keep guard running and visible most of the time when developing models, controllers and views. Save frequently, and incrementally check that you have not introduced errors.
+- When working with system tests, it is best to deactivate Guard, as system testing is very time consuming. When Guard is deactivated, you can run system tests incrementally with `rails test test/system/test/system/projects_system_test.rb:30`, for example.
+
 ### 1. When to Test
 
 - After modifying any factory, run:
-  ```bash
   rails test test/factories_test.rb
-  ```
+
 - After modifying any model or model test, run:
-  ```bash
   rails test test/models_test.rb
-  ```
 
 ### 2. Using Translations
 
@@ -246,7 +260,7 @@ end
 ### 9. Fixtures and Factories
 
 - Ensure test data respects i18n requirements
-- For translated attributes, use the `mobility` gem or similar
+- [TODO] For translated attributes, use the `mobility` gem or similar
 - Example with Mobility:
   ```ruby
   # In factory

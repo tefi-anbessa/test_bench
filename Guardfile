@@ -16,6 +16,7 @@
 # and, you'll have to watch "config/Guardfile" instead of "Guardfile"
 
 require "active_support/inflector"
+require "json"
 # Defines the matching rules for Guard.
 guard :minitest, all_on_start: false do
   watch(%r{^test/(.*)/?(.*)_test\.rb$})
@@ -23,13 +24,10 @@ guard :minitest, all_on_start: false do
   watch(%r{^test/factories/.*\.rb$}) { 'test/factories_test.rb' }
   watch('config/routes.rb') { interface_tests }
   watch(%r{app/views/layouts/*}) { interface_tests }
-  # watch(%r{^app/models/(.*?)\.rb$}) do |matches|
-  #   ["test/models/#{matches[1]}_test.rb",
-  #    "test/integration/microposts_interface_test.rb"]
-  # end
-  watch(%r{^test/fixtures/(.*?)\.yml$}) do |matches|
-    "test/models/#{matches[1].singularize}_test.rb"
-  end
+
+#  watch(%r{^test/fixtures/(.*?)\.yml$}) do |matches|
+#    "test/models/#{matches[1].singularize}_test.rb"
+#  end
   watch(%r{^app/models/(.*?)\.rb$}) do |matches|
     "test/models/#{matches[1].singularize}_test.rb"
   end
@@ -67,6 +65,14 @@ guard :minitest, all_on_start: false do
     resource_tests('users')
   end
 
+  # Watch tagable test patterns and controller concern for all tagable controller tests
+  watch('test/support/tagable_test_patterns.rb') do
+    tagable_controller_tests
+  end
+  watch('app/controllers/concerns/tagables_controller.rb') do
+    tagable_controller_tests
+  end
+
 
 end
 
@@ -92,4 +98,32 @@ end
 # Returns all tests for the given resource.
 def resource_tests(resource)
   integration_tests(resource) << controller_test(resource)
+end
+
+# Returns all tagable controller tests that use TagableTestPatterns
+def tagable_controller_tests
+  # Dynamically find tagable controller tests that use TagableTestPatterns
+  tagable_tests = []
+
+  # Get all tagable types from the model using Rails runner
+  tagable_types = `cd #{Dir.pwd} && rails runner "puts Tag.tagable_types.to_json"`.strip
+
+  # Parse the JSON response
+  types = JSON.parse(tagable_types)
+
+  # Check each tagable type for corresponding controller test
+  types.each do |tagable_type|
+    controller_name = tagable_type.underscore.pluralize
+    test_file = "test/controllers/#{controller_name}_controller_test.rb"
+
+    if File.exist?(test_file)
+      # Check if the test file actually uses TagableTestPatterns
+      test_content = File.read(test_file)
+      if test_content.include?('TagableTestPatterns')
+        tagable_tests << test_file
+      end
+    end
+  end
+
+  tagable_tests
 end

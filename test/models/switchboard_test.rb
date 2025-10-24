@@ -4,7 +4,8 @@ class SwitchboardTest < ActiveSupport::TestCase
   def setup
     @project = create(:project, title: 'Test Switchboards')
     @discipline_e = create(:discipline, code: 'E')
-    @switchboard = create(:switchboard, project: @project, discipline: @discipline_e)
+    @switchboard = create(:switchboard, project: @project, discipline: @discipline_e, 
+                            voltage_rating: '600/1000V', busbar_rating: 400)
     @tag = @switchboard.tag
   end
 

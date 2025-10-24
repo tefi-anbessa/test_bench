@@ -5,6 +5,9 @@ class Switchboard < ApplicationRecord
   has_many :circuits, dependent: :destroy
   enum :voltage_rating, Constants.electrical.voltage_ratings.to_h
 
+  validates :voltage_rating, presence: true
+  validates :busbar_rating, presence: true
+
   def label
     tag&.label || I18n::t("show.orphan", model: Tag.model_name.human)
   end

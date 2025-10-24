@@ -80,16 +80,17 @@ electrical:
     "ATA": 3    # Aluminium Tape Armour
     "GSWA": 4   # Galvanized Steel Wire Armour
   voltage_ratings:
-    "300/500V": 0
-    "450/750V": 1
-    "600/1000V": 2
-    "1.9/3.3kV": 3
-    "3.3/6.6kV": 4
-    "6.6/11kV": 5
-    "11/33kV": 6
-    "33/66kV": 7
-    "66/132kV": 8
-    "132/220kV": 9
+    other: 0
+    "300/500V": 1
+    "450/750V": 2
+    "600/1000V": 3
+    "1.9/3.3kV": 4
+    "3.3/6.6kV": 5
+    "6.6/11kV": 6
+    "11/33kV": 7
+    "33/66kV": 8
+    "66/132kV": 9
+    "132/220kV": 10
   temperature_rating:
     - "60˚C"
     - "75˚C"

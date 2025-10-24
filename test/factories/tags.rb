@@ -22,15 +22,6 @@ FactoryBot.define do
       serial { generate_unique_serial(prefix, project, discipline) }
     end
 
-    trait :sequential do
-      sequence(:serial) { |n| n % 10000 }  # Ensure within 0-9999 range
-    end
-
-    # Factory for creating tags in sequence (e.g., C-001, C-002, etc.)
-    factory :sequential_tag do
-      sequence(:serial) { |n| n % 10000 }  # Ensure within 0-9999 range
-    end
-
     # Factory for creating a full tag with all attributes
     factory :complete_tag do
       with_stage

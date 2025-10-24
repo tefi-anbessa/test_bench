@@ -39,6 +39,7 @@ en:
       tag_not_found: "The specified tag could not be found"
       tag_already_assigned: "This tag has already been assigned to another item"
       tagable_type_mismatch: "This tag has been assigned a different tag type"
+      invalid_enum: "Invalid enum value"
   projects:
     index:
       title:            "Projects"

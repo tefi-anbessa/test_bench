@@ -11,7 +11,9 @@ FactoryBot.define do
       discipline { nil }   # Will create default if not provided
     end
 
-    # Basic attributes
+    # Default required attributes
+    voltage_rating { '600/1000V' }  # Required field - use common voltage rating
+    busbar_rating { 400 }           # Required field - common busbar rating in Amps
 
     # Validation and tag creation
     after(:build) do |switchboard, evaluator|
