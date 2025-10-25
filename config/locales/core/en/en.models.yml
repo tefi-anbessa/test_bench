@@ -25,6 +25,7 @@ en:
         code:             "Code"
         name:             "Name"
       tag:
+        project:          "Project"
         prefix:           "Prefix"
         prefix_help:      "Prefix should preferebly be selected from existing list"
         prefix_parts:

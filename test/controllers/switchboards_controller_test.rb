@@ -93,4 +93,40 @@ class SwitchboardsControllerTest < ActionController::TestCase
   def controller_name_for_test
     'switchboards'
   end
+
+  # Tests for model specific behaviour
+  # Switchboards controller allows creation of "empty" circuits at the same time as create or update.
+  test "electrical designer can create new switchboard and add circuits" do
+    sign_in @accredited_team_member
+    assert_difference('Switchboard.count', 1) do
+      assert_difference('Circuit.count', 2) do
+        post :create, params: {
+          switchboard: {
+            location: 'Test Location',
+            voltage_rating: '600/1000V',
+            busbar_rating: '600A',
+            tag: {
+              project_id: @project.id,
+              discipline_id: @resource_discipline.id,
+              prefix: 'EX',
+              serial: 2002,
+              suffix: '',
+              service: 'Test switchboard',
+              stage: 1
+            }, 
+          circuits: 2
+          }
+        }
+      end
+    end
+    tag = Tag.find_by(prefix: 'EX', serial: 2002)
+    expected_messages = [
+      I18n.t('flash.tagables.created_and_assigned', 
+        resource_name: Switchboard.model_name.human,
+        id: tag.tagable.id,
+        tag: tag.label),
+      I18n.t('flash.assigned', count: 2, resource_name: Circuit.model_name.human)
+    ]
+    assert_flash_messages :success, expected_messages
+  end
 end

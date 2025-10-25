@@ -5,7 +5,7 @@ class CablesController < ApplicationController
 
   # GET /cables or /cables.json
   def index
-    abstracted_index
+    index_tagable
   end
 
   # GET /cables/1 or /cables/1.json
@@ -13,19 +13,19 @@ class CablesController < ApplicationController
     authorize @cable
   end
 
-  # GET /cables/1/edit
-  def edit
-    abstracted_edit
-  end
-
   # GET /cables/new
   def new
-    abstracted_new
+    new_tagable
   end
 
   # POST /cables or /cables.json
   def create
     create_tagable
+  end
+
+  # GET /cables/1/edit
+  def edit
+    edit_tagable
   end
 
   # PATCH/PUT /cables/1 or /cables/1.json
@@ -35,7 +35,7 @@ class CablesController < ApplicationController
 
   # DELETE /cables/1 or /cables/1.json
   def destroy
-    abstracted_destroy
+    destroy_tagable
   end
 
   private

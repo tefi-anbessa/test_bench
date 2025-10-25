@@ -129,7 +129,9 @@ class CircuitsControllerTest < ActionController::TestCase
           rating: 32,
           elcb: "other",
           contactor: false,
-          notes: "CIRCUIT NOTES"
+          notes: "CIRCUIT NOTES",
+          feeder: true,
+          demand: true
         }
       }
     end
@@ -141,7 +143,7 @@ class CircuitsControllerTest < ActionController::TestCase
 
   test "electrical designer can create circuit with feeder and demand" do
     sign_in @electrical_designer
-    new_serial = (@switchboard.circuits.maximum(:serial) || 0) + 1  
+    new_serial = (@switchboard.circuits.maximum(:serial) || 0) + 1
     assert_difference('Circuit.count', 1) do
       post :create, params: {
         switchboard_id: @switchboard.id,

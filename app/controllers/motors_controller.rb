@@ -4,7 +4,7 @@ class MotorsController < ApplicationController
 
   # GET /motors or /motors.json
   def index
-    abstracted_index
+    index_tagable
   end
 
   # GET /motors/1 or /motors/1.json
@@ -14,12 +14,12 @@ class MotorsController < ApplicationController
 
   # GET /motors/1/edit
   def edit
-    abstracted_edit
+    edit_tagable
   end
 
   # GET /motors/new
   def new
-    abstracted_new
+    new_tagable
   end
 
   # POST /motors or /motors.json
@@ -34,7 +34,7 @@ class MotorsController < ApplicationController
 
   # DELETE /motors/1 or /motors/1.json
   def destroy
-    abstracted_destroy
+    destroy_tagable
   end
 
   private

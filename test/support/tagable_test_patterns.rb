@@ -336,7 +336,7 @@ module TagableTestPatterns
       tag: @unassigned_tag.full_tag,
       resource_name: resource_class.model_name.human,
       id: resource.id)
-    assert_equal expected, flash[:success]
+    assert_flash_message :success, expected
   end
 
   def assert_successful_creation_flash_message(resource, tag)
@@ -344,18 +344,18 @@ module TagableTestPatterns
       tag: tag.full_tag,
       resource_name: resource_class.model_name.human,
       id: resource.id)
-    assert_equal expected, flash[:success]
+    assert_flash_message :success, expected
   end
 
   def assert_successful_update_flash_message
     expected = I18n.t('flash.actions.update.notice',
       resource_name: resource_class.model_name.human)
-    assert_equal expected, flash[:success]
+    assert_flash_message :success, expected
   end
 
   def assert_successful_destroy_flash_message
     expected = I18n.t('flash.actions.destroy.notice',
       resource_name: resource_class.model_name.human)
-    assert_equal expected, flash[:success]
+    assert_flash_message :success, expected
   end
 end

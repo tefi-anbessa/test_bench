@@ -5,7 +5,7 @@ class SwitchboardsController < ApplicationController
 
   # GET /switchboards or /switchboards.json
   def index
-    abstracted_index
+    index_tagable
   end
 
   # GET /switchboards/1 or /switchboards/1.json
@@ -15,7 +15,7 @@ class SwitchboardsController < ApplicationController
 
   # GET /switchboards/new
   def new
-    abstracted_new
+    new_tagable
   end
 
   # POST /switchboards or /switchboards.json
@@ -25,7 +25,7 @@ class SwitchboardsController < ApplicationController
 
   # GET /switchboards/1/edit
   def edit
-    abstracted_edit
+    edit_tagable
   end
 
   # PATCH/PUT /switchboards/1 or /switchboards/1.json
@@ -35,7 +35,7 @@ class SwitchboardsController < ApplicationController
 
   # DELETE /switchboards/1 or /switchboards/1.json
   def destroy
-    abstracted_destroy
+    destroy_tagable
   end
 
   private
@@ -56,33 +56,38 @@ class SwitchboardsController < ApplicationController
     @ip_2 = Constants.electrical.ingress_protection.second_digit.to_h
   end
 
-  def after_create_hook
-    update_circuits if params[:circuits].present?
+  def after_create_hook(switchboard)
+    circuits_count = params.dig(:switchboard, :circuits).presence || params[:circuits].presence
+    update_circuits(switchboard, circuits_count.to_i) if circuits_count
   end
 
-  def after_update_hook
-    update_circuits if params[:circuits].present?
+  def after_update_hook(switchboard)
+    circuits_count = params.dig(:switchboard, :circuits).presence || params[:circuits].presence
+    update_circuits(switchboard, circuits_count.to_i) if circuits_count
   end
 
   # Updates the number of circuits for the switchboard
-  def update_circuits(desired_count = nil)
-    desired_count ||= params.dig(:switchboard, :circuits).presence || params[:circuits].presence
-    return unless desired_count
+  def update_circuits(switchboard, desired_count = nil)
+    return unless desired_count && desired_count > 0
 
-    desired_count = desired_count.to_i
-    current_count = @switchboard.circuits.count
-
-    if desired_count > current_count
+    current_count = switchboard.circuits.count
+    count = desired_count - current_count
+    if count > 0
       authorize Circuit, :create?
-      (desired_count - current_count).times do |i|
-        @switchboard.circuits.create(serial: current_count + i + 1)
+      
+      count.times do |i|
+        switchboard.circuits.create(serial: current_count + i + 1)
       end
-    elsif desired_count < current_count
+      resource_name = Circuit.model_name.human(count: count)
+      flash[:success] << t("flash.assigned", count: count, resource_name: resource_name)
+    elsif count < 0
       authorize Circuit, :destroy?
-      @switchboard.circuits
+      switchboard.circuits
                  .order(serial: :desc)
                  .limit(current_count - desired_count)
                  .destroy_all
+      resource_name = Circuit.model_name.human(count: count*-1)
+      flash[:success] << t("flash.destroyed", count: count*-1, resource_name: resource_name)
     end
   end
 
@@ -91,14 +96,14 @@ class SwitchboardsController < ApplicationController
   end
 
   # Only allow a list of trusted parameters through.
-  def switchboard_params
-    params.require(:switchboard).permit(:location, :ingress_protection, :voltage_rating,
-      :busbar_rating, :busbar_fault_rating, :busbar_fault_duration,
-      :cable_entry, :incomer_protection, :metering,
-      :neutral_bar_connections, :earth_bar_connections, :notes,
-      tag: [
-        :id, :project_id, :discipline_id, :prefix, :serial,
-        :suffix, :service, :stage, :notes, :tagable_type
-      ])
-  end
+    def switchboard_params
+      params.require(:switchboard).permit(:location, :ingress_protection, :voltage_rating,
+        :busbar_rating, :busbar_fault_rating, :busbar_fault_duration, 
+        :cable_entry, :incomer_protection, :metering, 
+        :neutral_bar_connections, :earth_bar_connections, :notes,
+        tag: [
+          :id, :project_id, :discipline_id, :prefix, :serial, 
+          :suffix, :service, :stage, :notes, :tagable_type
+        ])
+    end
 end

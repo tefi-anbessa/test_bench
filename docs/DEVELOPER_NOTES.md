@@ -225,7 +225,6 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Build an asset management module to track assets and link from design to maintenance
 - [ ] Build a maintenance management module 
 
-
 ## Technical Debt
 
 - [ ] Refactor models to incorporate i18n messages for validations
@@ -247,7 +246,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Ensure select for role names does not include restricted roles unless current user has app_owner role.
 - [ ] System tests for all resources.
 - [ ] Improve forbidden error logging messages, include user. Consider automatic sign out.
-- [ ] Model tests should include some sort of test of enums.
+- [ ] Model tests should include test of enums.
 - [ ] Complete workflows with admin and no project selected.
 - [ ] Complete proper ordering by switchboard tag and serial for circuits.
 - [ ] Update index view header lines.
@@ -255,7 +254,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Translation of html5 messages on required fields. Alternatively, suppress html 5 and use client side js.
 - [ ] Complete switchboard controller test.
 - [ ] Complete cable system tests for from and to after switchboard, demand, and circuit tests are working.
-
+- [ ] Use of button text for new and edit forms is mixed. Standardise on save for new, update for edit.
 
 ## Refactoring Opportunities
 
@@ -270,17 +269,17 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [x] Refactor all views to use pundit policy checks.
 - [x] Change terminology and implementation from project owner to project manager.
 - [ ] Refactor projects controller and application controller setting of current project: `def after_sign_in_path_for(resource)to use app/controllers/concerns/current_project_concern.rb to reduce code duplication.
+- [ ] Tags:
+   - [x] Refactor tag 'description' to 'service'.
+   - [ ] Add location attribute to tag, remove from all tagables.
 - [x] Cable types: 
    - [x] convert core material to enum.
    - [x] convert insulation material to enum.
    - [x] add volt rating enum.
 - [ ] Motors: 
-   - [ ] convert motor type to enum.
-   - [ ] convert frame size to enum.
+   - [x] convert motor type to enum.
+   - [x] convert frame size to enum.
    - [ ] build a ruby structure for ingress protection, convert ingress protection to this type.
-   - [ ] convert poles to enum.
-   - [ ] convert speed rated to enum.
-- [x] Refactor tag 'description' to 'service'.
 - [ ] Redesign tag module:
    - [ ] base full tag becomes a virtual field.
    - [x] builder/parser model for each discipline which creates the string according to the required format, and can parse the string back into the components.
@@ -314,7 +313,6 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Move Electrical to a module or namespace.
 - [ ] Consider API versioning strategy
 - [ ] Plan for database scaling as data grows
-
 
 
 ## Notes
