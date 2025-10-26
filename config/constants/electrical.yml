@@ -165,3 +165,22 @@ electrical:
     "500": 500
     "560": 560
     "630": 630
+  light_fitting_type:
+    other: 0
+    general: 1 #AS3000 ai) Light, general
+    outdoor: 2 #AS3000 aii) Light, outdoor > 1000W
+  socket_type:
+    other: 0
+    "10A": 1 #AS3000 bi) Socket, 10A, general, no HVAC room
+    "10A_HVAC": 2 #AS3000 bii) Socket 10A, general, in HVAC room
+    "15A": 3 #AS3000 bi) Socket, 15A, general use
+    "20A": 4 #AS3000 bi) Socket, 20A, general use
+    "32A": 5 #AS3000 biii) Socket 32A, general use
+    "40A": 6 #AS3000 biii) Socket 40A, general use
+    "50A": 7 #AS3000 biii) Socket 50A, general use
+    "63A": 8 #AS3000 biii) Socket 63A, general use
+    "80A": 9 #AS3000 biii) Socket 80A, general use
+    "100A": 10 #AS3000 biii) Socket 100A, general use
+    "125A": 11 #AS3000 biii) Socket 125A, general use
+    
+    

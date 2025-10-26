@@ -34,7 +34,7 @@ class SwitchboardsSystemTest < ApplicationSystemTestCase
     @swbd_tag1 = create(:tag, project: @project, stage: '1', discipline: @discipline_e, 
       prefix: 'EX', serial: '1', suffix: "i", service: 'TEST SWITCHBOARD E:EX-0001.i', notes: "Lorem ipsum",
       tagable_type: "Switchboard")
-    @switchboard1 = create(:switchboard, :with_circuits, location: "LOCATION 1", tag: @swbd_tag1,
+    @switchboard1 = create(:switchboard, :with_circuits, tag: @swbd_tag1,
                       ingress_protection: "IP44", voltage_rating: 3, busbar_rating: "100A", 
                       busbar_fault_rating: "100A", busbar_fault_duration: "1s",
                       cable_entry: "Top", incomer_protection: "Isolator 3P", metering: "Metering 3P",
@@ -88,12 +88,10 @@ class SwitchboardsSystemTest < ApplicationSystemTestCase
     assert page.title.include?(I18n.t("switchboards.index.title"))
 
     # index search fields and headers
-    assert_selector "input[name='q[location_cont]']"
     assert_selector "input[name='q[busbar_rating_cont]']"
     assert_selector "input[name='q[incomer_protection_cont]']"
     assert_selector "input[name='q[metering_cont]']"
     assert_text I18n.t('activerecord.models.tag')
-    assert_selector "a[href*='q%5Bs%5D=location']"
     assert_selector "a[href*='q%5Bs%5D=ingress_protection']"
     assert_selector "a[href*='q%5Bs%5D=voltage_rating']"
     assert_selector "a[href*='q%5Bs%5D=busbar_rating']"
@@ -102,7 +100,6 @@ class SwitchboardsSystemTest < ApplicationSystemTestCase
     assert_text I18n.t('activerecord.attributes.switchboard.circuits')
 
     assert_text @switchboard1.tag.label
-    assert_text @switchboard1.location
     assert_text @switchboard1.ingress_protection
     assert_text @switchboard1.voltage_rating
     assert_text @switchboard1.busbar_rating
@@ -159,7 +156,6 @@ class SwitchboardsSystemTest < ApplicationSystemTestCase
     assert_text @switchboard1.tag.full_tag
 
     # Field labels
-    assert_text I18n.t('activerecord.attributes.switchboard.location')
     assert_text I18n.t('activerecord.attributes.switchboard.ingress_protection')
     assert_text I18n.t('activerecord.attributes.switchboard.voltage_rating')
     assert_text I18n.t('activerecord.attributes.switchboard.busbar_rating')
@@ -173,7 +169,6 @@ class SwitchboardsSystemTest < ApplicationSystemTestCase
     assert_text I18n.t('activerecord.attributes.switchboard.circuits')
 
     # Field data
-    assert_text @switchboard1.location
     assert_text @switchboard1.ingress_protection
     assert_text @switchboard1.voltage_rating
     assert_text @switchboard1.busbar_rating
@@ -233,7 +228,6 @@ class SwitchboardsSystemTest < ApplicationSystemTestCase
     assert_selector "select[name='switchboard[tag][tagable_type]']"
 
     # Data fields, switchboard section
-    assert_selector "input[name='switchboard[location]']"
     assert_selector "select[name='ip_1']"
     assert_selector "select[name='ip_2']"
     assert_selector "input[name='switchboard[ingress_protection]']"
@@ -273,7 +267,6 @@ class SwitchboardsSystemTest < ApplicationSystemTestCase
     fill_in "switchboard[tag][notes]", with: "TAG NOTES NONSENSE"
 
     # Switchboard fields
-    fill_in "switchboard[location]", with: "LOCATION TEST"
     select "4", from: 'ip_1', match: :first
     select "6", from: 'ip_2', match: :first
     select "300/500", from: "switchboard[voltage_rating]", match: :first
@@ -314,7 +307,6 @@ class SwitchboardsSystemTest < ApplicationSystemTestCase
     assert_text @swbd_tag2.label
 
     # Switchboard fields
-    fill_in "switchboard[location]", with: "LOCATION WEST"
     select "3", from: 'ip_1', match: :first
     select "5", from: 'ip_2', match: :first
     select "600/1000", from: "switchboard[voltage_rating]", match: :first
@@ -355,7 +347,6 @@ class SwitchboardsSystemTest < ApplicationSystemTestCase
     assert_text @swbd_tag1.reload.label
 
     # Data fields, switchboard section
-    assert_selector "input[name='switchboard[location]']"
     assert_selector "select[name='ip_1']"
     assert_selector "select[name='ip_2']"
     assert_selector "input[name='switchboard[ingress_protection]']"

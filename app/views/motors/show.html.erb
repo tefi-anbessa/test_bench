@@ -62,7 +62,7 @@
                 <span class="d-none d-md-inline">
                   <%= t('actions.next') %>
                 </span>
-                <%== icon('arrow-right') %>
+                <%== icon('box-arrow-in-right') %>
               <% end %>
             <% end %>
 
@@ -144,7 +144,9 @@
 
                   <div class="row mb-1">
                     <div class="col-4 text-muted"><%= t('activerecord.attributes.motor.speed_rated') %></div>
-                    <div class="col-8"><%= @motor.speed_rated || '-' %></div>
+                    <div class="col-8"><%= @motor.speed_rated.present? ? 
+                                            number_to_human(@motor.speed_rated, precision: 4, units: { unit: "rpm"}) : 
+                                            '-' %></div>
                   </div>
 
                   <div class="row mb-1">
@@ -162,8 +164,8 @@
                             <%= text %>
                             <%== icon('box-arrow-in-down-right') %>
                         <% end %>
-                      <% else %>
-                      <% text = t("actions.link", resource: t("activerecord.models.demand")) %>
+                      <% elsif @motor.tag&.present? %> # Cannot create a new demand without a tag.
+                        <% text = t("actions.link", resource: t("activerecord.models.demand")) %>
                         <% if policy(Demand).new? %>
                           <%= link_to new_tag_demand_path(@motor.tag.id),
                               class: "btn btn-sm btn-outline-primary mb-2",

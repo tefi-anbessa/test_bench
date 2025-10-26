@@ -69,6 +69,34 @@ en:
       title:            "Motor"
       header:           "Motor: %{label}"
 
+  socket_ccts:
+    index:
+      title:            "Socket Circuits"
+      header:           "Socket Circuits Schedule"
+    edit:
+      title:            "Edit Socket Circuit"
+      header:           "Edit Socket Circuit: %{label}"
+    new:
+      title:            "New Socket Circuit"
+      header:           "New Socket Circuit"
+    show:
+      title:            "Socket Circuit"
+      header:           "Socket Circuit: %{label}"
+
+  light_ccts:
+    index:
+      title:            "Light Circuits"
+      header:           "Light Circuits Schedule"
+    edit:
+      title:            "Edit Light Circuit"
+      header:           "Edit Light Circuit: %{label}"
+    new:
+      title:            "New Light Circuit"
+      header:           "New Light Circuit"
+    show:
+      title:            "Light Circuit"
+      header:           "Light Circuit: %{label}"
+
   demands:
     index:
       title:            "Load List"

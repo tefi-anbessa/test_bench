@@ -41,6 +41,8 @@ en:
         suffix_help:      "Suffix should be typically one character, blank if not required"
         service:          "Service"
         service_help:     "Service description (40 characters maximum)"
+        location:         "Location"
+        location_help:    "Physical location of design element"
         stage:            "Stage"
         stage_help:       "Construction stage or phase (0 to 10)"
         notes:            "Notes"

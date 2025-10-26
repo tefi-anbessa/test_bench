@@ -10,7 +10,7 @@ FactoryBot.define do
     end
 
     # Basic attributes
-    socket_type { 'standard' }
+    socket_type { "10A" }
     quantity { 1 }
 
     # Validation and tag creation

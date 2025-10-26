@@ -12,7 +12,7 @@ class LightCctTest < ActiveSupport::TestCase
                  discipline: @discipline
                )
     @light_cct = create(:light_cct, 
-                       light_fitting_type: 'standard',
+                       light_fitting_type: :general,
                        quantity: 4,
                        tag: @tag
                       )
@@ -51,7 +51,7 @@ class LightCctTest < ActiveSupport::TestCase
     
     assert_difference 'LightCct.count', 1 do
       light = create(:light_cct, 
-                    light_fitting_type: :edison_screw,
+                    light_fitting_type: :outdoor,
                     quantity: 2,
                     tag: tag
                    )
@@ -95,6 +95,6 @@ class LightCctTest < ActiveSupport::TestCase
   
   test "should have light_fitting_type attribute" do
     assert_respond_to @light_cct, :light_fitting_type
-    assert_equal 'standard', @light_cct.light_fitting_type
+    assert_equal "general", @light_cct.light_fitting_type
   end
 end

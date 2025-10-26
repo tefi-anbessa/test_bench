@@ -9,8 +9,8 @@
     <td>
       <% if row.from_type.present? %>
         <% text = row.from_type.tableize.singularize %>
-        <% if row.from.present? %>
-          <span><%= link_to row.from.label, eval("#{text}_path(row.from_id)") %></span>
+        <% if row.from.present? && row.from.respond_to?(:long_label) %>
+          <span><%= link_to row.from.long_label, eval("#{text}_path(row.from_id)") %></span>
         <% else %>
           <%= t('show.unassigned', model: text) %>
         <% end %>

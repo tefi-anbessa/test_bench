@@ -14,8 +14,8 @@
       </div>
     </div>
 
-    <%= bootstrap_form_with(model: @demand, 
-        url: tag_demands_path(@tag),
+    <%= bootstrap_form_with(model: demand, 
+        url: demand.persisted? ? demand_path(demand) : tag_demands_path(tag),
         layout: :horizontal, 
         label_col: "col-sm-4", 
         control_col: "col-sm-8") do |f| %>
@@ -51,7 +51,7 @@
             </div>
 
             <% disabled = [:current, :power, :vector, :power_factor] %>
-            <% case @demand.basis %>
+            <% case demand.basis %>
             <% when "summation" %>
             <% when "power_pf" %>
               <% disabled.delete(:power) %>
@@ -100,23 +100,23 @@
 
       <!-- Card Footer with Actions -->
       <div class="card-footer bg-transparent text-end p-2">
-        <% if @demand.persisted? %>
-            <%= link_to demand_path(@demand),
+        <% if demand.persisted? %>
+            <%= link_to demand_path(demand),
               class: "btn btn-warning actions",
-              data: { turbo_confirm: t('actions.sure') } do %>
+              data: { confirm: t('actions.sure'), turbo: false } do %>
                 <%= t('actions.discard') %>
                 <%== icon('x-square') %>
               <% end %>
         <% else %>
-            <%= link_to new_tag_demand_path(@tag),
+            <%= link_to new_tag_demand_path(tag),
               class: "btn btn-warning actions",
-              data: { turbo_confirm: t('actions.sure') } do %>
+                data: { confirm: t('actions.sure'), turbo: false } do %>
                 <%= t('actions.discard') %>
                 <%== icon('x-square') %>
               <% end %>
         <% end %>
         <!-- Button to submit form -->
-        <%= f.primary do %>
+        <%= f.button :submit, class: 'btn btn-primary' do %>
           <%= yield(:button_text) %>
           <%== icon('save') %>
         <% end %>

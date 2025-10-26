@@ -1,27 +1,53 @@
-<div id="<%= dom_id motor %>">
-  <p>
-    <strong>Type:</strong>
-    <%= motor.motor_type %>
-  </p>
+<% motor = object %>
+<%= render 'components/collapsible',
+  id: "motor_#{motor.id}_details",
+  title: t('motors.show.header', label: motor.label),
+  expanded: false,
+  header_class: 'py-1' do %>
+  
+  <div class="container-fluid">
+    <div class="row mb-1">
+      <% text = t("actions.back_to", model: t("activerecord.models.motor")) %>
+      <%= link_to motor_path(motor), 
+          class: "btn btn-sm btn-outline-secondary me-2",
+          title: text do %>
+        <%== icon('box-arrow-in-up-left') %>
+        <span class="d-none d-md-inline"><%= text %></span>
+      <% end %>
+    </div>
 
-  <p>
-    <strong>Frame size:</strong>
-    <%= motor.frame_size %>
-  </p>
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.motor.motor_type') %></div>
+      <div class="col-8"><%= motor.motor_type.present? ? 
+        Motor.human_enum_name(:motor_type, motor.motor_type) : '-' %></div>
+    </div>
 
-  <p>
-    <strong>Poles:</strong>
-    <%= motor.poles %>
-  </p>
-
-  <p>
-    <strong>Ip:</strong>
-    <%= motor.ingress_protection %>
-  </p>
-
-  <p>
-    <strong>Speed rated:</strong>
-    <%= motor.speed_rated %>
-  </p>
-
-</div>
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.motor.frame_size') %></div>
+      <div class="col-8"><%= motor.frame_size.present? ? "frame_#{motor.frame_size}" : '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.motor.poles') %></div>
+      <div class="col-8"><%= motor.poles.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.motor.ingress_protection') %></div>
+      <div class="col-8"><%= motor.ingress_protection.present? ?
+                      ["IP", motor.ingress_protection].join(' ') : '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.motor.speed_rated') %></div>
+      <div class="col-8"><%= motor.speed_rated.present? ? 
+                              number_to_human(motor.speed_rated, precision: 4, units: { unit: "rpm"}) : 
+                              '-' %></div>
+    </div>
+    
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= t('activerecord.attributes.motor.notes') %></div>
+        <div class="col-8"><%= motor.notes.present? ? simple_format(motor.notes) : '-' %></div>
+      </div>
+  </div>
+<% end %>

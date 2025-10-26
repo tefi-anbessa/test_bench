@@ -115,6 +115,20 @@
                       class: "dropdown-item" %>
                   </li>
                 <% end %>
+                <% if policy(:light_cct).index? %>
+                  <li>
+                    <%= link_to t('light_cct', scope: 'activerecord.models').pluralize,
+                      light_ccts_path,
+                      class: "dropdown-item" %>
+                  </li>
+                <% end %>
+                <% if policy(:light_cct).index? %>
+                  <li>
+                    <%= link_to t('socket_cct', scope: 'activerecord.models').pluralize,
+                      socket_ccts_path,
+                      class: "dropdown-item" %>
+                  </li>
+                <% end %>
                 <% if policy(:demand).index? %>
                   <li>
                     <%= link_to t('demand', scope: 'activerecord.models').pluralize,

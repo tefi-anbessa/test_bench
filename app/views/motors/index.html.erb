@@ -44,7 +44,7 @@
     <% end %>
     <%== pagy_bootstrap_nav(@pagy) %>
     <table id='motors' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
-      <%= render "motors_header" %>
+      <%= render "motor_header" %>
       <tbody>
         <% @motors.each do |row| %>
           <%= render 'motor_row', row: row %>

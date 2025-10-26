@@ -20,6 +20,10 @@ class Circuit < ApplicationRecord
   def label
     "##{serial.to_s.rjust(2, '0')}"
   end
+
+  def long_label
+    switchboard.label + " " + label
+  end
   
   def demand
     # Find the demand that this circuit supplies power to

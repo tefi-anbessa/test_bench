@@ -10,7 +10,7 @@ FactoryBot.define do
     end
 
     # Basic attributes
-    light_fitting_type { 'standard' }
+    light_fitting_type { :general }
     quantity { 1 }
 
     # Validation and tag creation

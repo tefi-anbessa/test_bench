@@ -31,7 +31,7 @@ class DemandsControllerTest < ActionController::TestCase
     @another_swbd_tag = create(:tag, prefix: 'EX', serial: 1002, project: @project, discipline: @discipline)
     
     # Create switchboard with the switchboard tag
-    @switchboard = create(:switchboard, tag: @swbd_tag, location: 'Location 1')
+    @switchboard = create(:switchboard, tag: @swbd_tag)
     @demand = create(:demand, demandable: @switchboard)
     
     @request.env["devise.mapping"] = Devise.mappings[:user]

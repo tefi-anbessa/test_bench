@@ -1,70 +1,58 @@
 class SocketCctsController < ApplicationController
+  include TagablesController
   before_action :set_socket_cct, only: %i[ show edit update destroy ]
-
-  # GET /socket_ccts or /socket_ccts.json
+  
   def index
-    @socket_ccts = SocketCct.all
+    index_tagable
   end
 
-  # GET /socket_ccts/1 or /socket_ccts/1.json
   def show
+    authorize @socket_cct
   end
 
-  # GET /socket_ccts/new
   def new
-    @socket_cct = SocketCct.new
+    new_tagable
   end
 
-  # GET /socket_ccts/1/edit
   def edit
+    edit_tagable
   end
 
-  # POST /socket_ccts or /socket_ccts.json
   def create
-    @socket_cct = SocketCct.new(socket_cct_params)
-
-    respond_to do |format|
-      if @socket_cct.save
-        format.html { redirect_to @socket_cct, notice: "Socket cct was successfully created." }
-        format.json { render :show, status: :created, location: @socket_cct }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @socket_cct.errors, status: :unprocessable_entity }
-      end
-    end
+    create_tagable
   end
 
-  # PATCH/PUT /socket_ccts/1 or /socket_ccts/1.json
   def update
-    respond_to do |format|
-      if @socket_cct.update(socket_cct_params)
-        format.html { redirect_to @socket_cct, notice: "Socket cct was successfully updated." }
-        format.json { render :show, status: :ok, location: @socket_cct }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @socket_cct.errors, status: :unprocessable_entity }
-      end
-    end
+    update_tagable
   end
 
-  # DELETE /socket_ccts/1 or /socket_ccts/1.json
   def destroy
-    @socket_cct.destroy
-
-    respond_to do |format|
-      format.html { redirect_to socket_ccts_path, status: :see_other, notice: "Socket cct was successfully destroyed." }
-      format.json { head :no_content }
-    end
+    destroy_tagable
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
+
+    def tag_prefix
+      "ES"  # Electrical Socket
+    end
+
+    def discipline_code
+      "E"  # Electrical
+    end
+
+    def setup_additional_form_data
+      # Socket circuits don't need additional form data
+    end
+
     def set_socket_cct
       @socket_cct = SocketCct.find(params[:id])
     end
 
-    # Only allow a list of trusted parameters through.
     def socket_cct_params
-      params.require(:socket_cct).permit(:socket_type, :quantity, :notes)
+      params.require(:socket_cct).permit(:socket_type, :quantity, :notes,
+        tag: [
+          :id, :project_id, :discipline_id, :prefix, :serial,
+          :suffix, :service, :stage, :notes, :tagable_type
+        ])
     end
 end

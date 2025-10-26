@@ -140,7 +140,7 @@ class TagsController < ApplicationController
     def tag_params
       params.require(:tag).permit(:project_id, :stage, :discipline_id,
                                   :prefix, :new_prefix, :serial, :suffix,
-                                  :service, :notes,
+                                  :service, :location, :notes,
                                   :tagable_type, :tagable_id)
     end
 

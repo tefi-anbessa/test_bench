@@ -105,6 +105,13 @@
                 required: true %>
       </div>
 
+      <div class="row">
+        <%= tag_f.text_field :location,
+                label_col: "col-sm-3",
+                control_col: "col-sm-9",
+                title: t('activerecord.attributes.tag.location_help') %>
+      </div>
+
       <!-- Notes -->
       <div class="row">
         <%= tag_f.text_area :notes,

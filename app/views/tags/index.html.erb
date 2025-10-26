@@ -30,6 +30,9 @@
       <%= f.search_field :service_cont,
             class: "search_field",
             placeholder: t('activerecord.attributes.tag.service') %>
+      <%= f.search_field :location_cont,
+            class: "search_field",
+            placeholder: t('activerecord.attributes.tag.location') %>
       <%= f.search_field :notes_cont,
             class: "search_field",
             placeholder: t('activerecord.attributes.tag.notes') %>
@@ -41,9 +44,11 @@
     <table id='tags' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
       <thead>
         <th scope="col"><%= sort_link(@q, :stage) %></th>
-        <th scope="col"><%= sort_link(@q, :full_tag) %></th>
+        <th scope="col"><%= t('activerecord.attributes.tag.full_tag') %></th>
         <th scope="col"><%= sort_link(@q, :service) %></th>
+        <th scope="col"><%= sort_link(@q, :location) %></th>
         <th scope="col"><%= t('activerecord.attributes.tag.notes') %></th>
+        <th scope="col"><%= sort_link(@q, :tagable_type) %></th>
         <th scope="col" width="150px"><%= t('table.links')%></th>
       </thead>
       <tbody>
@@ -51,8 +56,37 @@
           <tr scope="row">
             <td><%= t.stage %></td>
             <td><%= t.full_tag %></td>
-            <td><%= highlight t.service, params.dig(:q, :full_tag_or_service_cont)  %></td>
-            <td><%= t.notes %></td>
+            <td><%= highlight t.service, params.dig(:q, :service_cont)  %></td>
+            <td><%= highlight t.location, params.dig(:q, :location_cont)  %></td>
+            <td><%= highlight t.notes, params.dig(:q, :notes_cont)  %></td>
+            <td>
+              <% if t.tagable_type.present? %>
+                <% text = t.tagable_type.tableize.singularize %>
+                <%= t.tagable_type.constantize.model_name.human %>
+                <% if t.tagable.present? %>
+                  <%= link_to eval("#{text}_path(#{t.tagable_id})"),
+                      class: "btn btn-sm btn-outline-secondary mb-2 icon-link",
+                      title: t('show.linked', model: text) do %>
+                        <%== icon('box-arrow-down-right') %>
+                      <% end %>
+                <% else %>
+                  <% if policy(t.tagable_type.constantize).new? %>
+                    <% resource = t.tagable_type.tableize.singularize %>
+                    <%= link_to eval("new_tag_#{resource}_path(#{t.id})"),
+                        class: "btn btn-sm btn-outline-primary mb-2 icon-link",
+                        title: t('actions.link', resource: resource) do %>
+                          <%== icon('link') %>
+                        <% end %>
+                  <% else %>
+                    <%= t.tagable_type.constantize.model_name.human %>
+                  <% end %>
+                <% end %>
+              <% else %>
+                <span class="text-muted">
+                  <%= t('show.unassigned', model: t("activerecord.attributes.tag.tagable_type")) %>
+                </span>
+              <% end %>
+            </td>
             <td>
               <% if policy(t).show? %>
                 <%= link_to tag_path(t), class: "btn btn-secondary btn-sm icon-link",

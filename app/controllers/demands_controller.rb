@@ -20,12 +20,6 @@ class DemandsController < ApplicationController
   def new
     @demand = @tag.tagable.build_demand()
     authorize @demand
-    case @tag.prefix
-    when "EX"
-      @demand.basis = "summation"
-    when /[A,K,P]M/
-      @demand.basis = "power_pf"
-    end
   end
 
   def create

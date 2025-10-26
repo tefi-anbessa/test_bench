@@ -5,6 +5,7 @@ class MotorsSystemTest < ApplicationSystemTestCase
   include TagableSystemTestPatterns
   include Devise::Test::IntegrationHelpers
   include Warden::Test::Helpers
+  include ActionView::Helpers::NumberHelper
 
   setup do
     # Set E as the resource discipline for creating tags
@@ -170,7 +171,7 @@ class MotorsSystemTest < ApplicationSystemTestCase
     assert_text "frame_#{@resource.frame_size}"
     assert_text @resource.ingress_protection
     assert_text @resource.poles
-    assert_text @resource.speed_rated
+    assert_text number_to_human(@resource.speed_rated, precision: 4, units: { unit: "rpm"})
     assert_text @resource.notes
   end
 

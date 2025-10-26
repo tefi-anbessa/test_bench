@@ -2,6 +2,8 @@ class SocketCct < ApplicationRecord
   include Tagable
   include Demandable
   
+  enum :socket_type, Constants.electrical.socket_type.to_h
+
   # Validations
   validates :socket_type, presence: true
   validates :quantity, numericality: { only_integer: true, greater_than: 0 }

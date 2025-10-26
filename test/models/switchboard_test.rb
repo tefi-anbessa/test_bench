@@ -24,14 +24,12 @@ class SwitchboardTest < ActiveSupport::TestCase
     switchboard = nil
     assert_difference ['Switchboard.count', 'Tag.count'], 1 do
       switchboard = create(:switchboard,
-        location: 'Gatehouse',
         ingress_protection: '22'
       )
     end
     # Check factory default prefix
     assert_equal 'EX', switchboard.tag.prefix
     assert_match(/E:EX-\d+\.?\w*/, switchboard.tag.reload.full_tag)
-    assert_equal 'Gatehouse', switchboard.location
     assert_equal '22', switchboard.ingress_protection
   end
   
@@ -47,14 +45,12 @@ class SwitchboardTest < ActiveSupport::TestCase
     
     assert_difference 'Switchboard.count', 1 do
       tag.update(tagable: build(:switchboard,
-        location: 'Gatehouse',
         ingress_protection: '22'
       ))
     end
     
     assert tag.reload.tagable.is_a?(Switchboard)
     assert_equal "E:EX-0005", tag.switchboard.label
-    assert_equal 'Gatehouse', tag.tagable.location
     assert_equal '22', tag.tagable.ingress_protection
   end
 

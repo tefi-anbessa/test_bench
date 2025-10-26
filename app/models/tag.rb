@@ -206,15 +206,6 @@ class Tag < ApplicationRecord
       end
     end
 
-    def self.ransackable_attributes(auth_object = nil)
-      ["prefix", "serial", "suffix", "service", "full_tag", "stage",
-        "notes", "discipline_id", "created_at", "updated_at", "loop_id"]
-    end
-
-    def self.ransackable_associations(auth_object = nil)
-      ["discipline", "project"] + Tag.tagable_types.map { |type| type.underscore.pluralize }
-    end
-
     # Returns tags grouped by their loop identifier
     # @return [Hash] Tags grouped by loop_id
     def self.grouped_by_loop
@@ -308,5 +299,14 @@ class Tag < ApplicationRecord
 
       # Add suffix if it's present
       self.full_tag += ".#{suffix}" if suffix.present?
+    end
+
+    def self.ransackable_attributes(auth_object = nil)
+      ["prefix", "serial", "suffix", "service", "location", "stage",
+        "notes", "discipline_id", "created_at", "updated_at", "loop_id"]
+    end
+
+    def self.ransackable_associations(auth_object = nil)
+      ["discipline", "project"] + Tag.tagable_types.map { |type| type.underscore.pluralize }
     end
 end

@@ -223,7 +223,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Build a bookkeeping module to manage financial transactions
 - [ ] Build a process piping module similar to the electrical module, using pipes and fittings to model a process piping network
 - [ ] Build an asset management module to track assets and link from design to maintenance
-- [ ] Build a maintenance management module 
+- [ ] Build a maintenance management module
 
 ## Technical Debt
 
@@ -240,7 +240,6 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [x] Improve has_one validation on tagable, possibly include database constraint.
 - [x] Improve has_one validation on demandable, possibly include database constraint.
    - Database constraints deferred due to risk of locking database. Continue with inclusion of orphans on index displays, and manual clean up.
-- [ ] Nest routes for project related resource under projects to improve security around assignment to other than the current project.
 - [ ] Revisit the roles policy test. The roles policy is now using the role context from the controller, need to factor this into tests.
 - [ ] Roles policy is delegating to resource policies for resource instances. Tests need to consider this.
 - [ ] Ensure select for role names does not include restricted roles unless current user has app_owner role.
@@ -255,13 +254,13 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Complete switchboard controller test.
 - [ ] Complete cable system tests for from and to after switchboard, demand, and circuit tests are working.
 - [ ] Use of button text for new and edit forms is mixed. Standardise on save for new, update for edit.
+- [ ] Demand form live update of calculated values not working.
 
 ## Refactoring Opportunities
 
 - [x] Improve role and permissions implementation and workflow.
 - [x] Refactor models to include a universal "label" attribute to be used when presenting polymorphic associations.
 - [ ] Refactor projects controller with improved workflow.
-- [ ] Consider extracting demand calculations into a service object
 - [ ] Add type checking with Sorbet or RBS
 - [ ] Implement caching for frequently accessed demand data
 - [x] Upgrade to Rails 8 (Completed in rails8 branch)
@@ -276,6 +275,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    - [x] convert core material to enum.
    - [x] convert insulation material to enum.
    - [x] add volt rating enum.
+   - [ ] Add parent/child capability.
 - [ ] Motors: 
    - [x] convert motor type to enum.
    - [x] convert frame size to enum.
@@ -311,6 +311,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 ## Architecture Considerations
 
 - [ ] Move Electrical to a module or namespace.
+- [ ] Nest routes for project related resource under projects to improve security around assignment to other than the current project.
 - [ ] Consider API versioning strategy
 - [ ] Plan for database scaling as data grows
 

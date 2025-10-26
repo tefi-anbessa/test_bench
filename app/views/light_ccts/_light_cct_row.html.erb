@@ -1,34 +1,30 @@
 <tr scope="row">
-<% if row.tag.nil? %>
-  <td class="table-danger"><%= t("index.no_tag", id: row.id) %></td>
+<% if light_cct.tag.nil? %>
+  <td class="table-danger"><%= t("index.no_tag", id: light_cct.id) %></td>
 <% else %>
-  <td><%= link_to row.tag.full_tag, tag_path(row.tag) %></td>
+  <td><%= link_to light_cct.tag.full_tag, tag_path(light_cct.tag) %></td>
 <% end %>
-  <td><%= row.ingress_protection %></td>
-  <td><%= row.voltage_rating %></td>
-  <td><%= row.busbar_rating %></td>
-  <td><%= row.busbar_fault_rating %></td>
-  <td><%= row.busbar_fault_duration %></td>
-  <td><%= row.circuits.count %></td>
+  <td><%= LightCct.human_enum_name(:light_fitting_type, light_cct.light_fitting_type) %></td>
+  <td><%= light_cct.quantity %></td>
   <td>
-    <% if policy(row).show? %>
-      <%= link_to switchboard_path(row), class: "btn btn-secondary btn-sm icon-link",
+    <% if policy(light_cct).show? %>
+      <%= link_to light_cct_path(light_cct), class: "btn btn-secondary btn-sm icon-link",
             aria: { label: t('actions.show') },
             title: t('actions.show'),
             display: "inline" do %>
         <%== icon('eye') %>
       <% end %>
     <% end %>
-    <% if policy(row).edit? %>
-      <%= link_to edit_switchboard_path(row), class: "btn btn-warning btn-sm icon-link",
+    <% if policy(light_cct).edit? %>
+      <%= link_to edit_light_cct_path(light_cct), class: "btn btn-warning btn-sm icon-link",
             aria: { label: t('actions.edit') },
             title: t('actions.edit'),
             display: "inline"  do %>
         <%== icon('pencil') %>
       <% end %>
     <% end %>
-    <% if policy(row).destroy? %>
-      <%= link_to switchboard_path(row),
+    <% if policy(light_cct).destroy? %>
+      <%= link_to light_cct_path(light_cct),
               data: { method: :delete, confirm: t('actions.delete_sure') },
               class: "btn btn-danger btn-sm icon-link",
               aria: { label: t('actions.delete') },

@@ -27,7 +27,7 @@ class TagsSystemTest < ApplicationSystemTestCase
     @regular_user = create(:user)
 
     @tag = create(:tag, project: @project, stage: '1', discipline: @discipline_e, 
-      prefix: 'EC', serial: '1', suffix: "i", service: 'TEST TAG E:EC-0001.i', notes: "Lorem ipsum",
+      prefix: 'EC', serial: '1', suffix: "i", service: 'TEST TAG E:EC-0001.i', location: 'TEST LOCATION', notes: "Lorem ipsum",
       tagable_type: "Cable")
     @tag.reload
     # Set the current project for all tests that need it
@@ -58,6 +58,7 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert_selector "input[name='q[prefix_cont]']"
     assert_selector "input[name='q[serial_cont]']"
     assert_selector "input[name='q[service_cont]']"
+    assert_selector "input[name='q[location_cont]']"
     assert_selector "input[name='q[notes_cont]']"
     assert_selector "a[href*='q%5Bs%5D=stage']"
     assert_selector "a[href*='q%5Bs%5D=service']"
@@ -65,9 +66,10 @@ class TagsSystemTest < ApplicationSystemTestCase
     # index fields
     assert_text @tag.stage
     assert_text @tag.label
-    assert_text @tag.service
     assert_text @tag.prefix
     assert_text @tag.serial
+    assert_text @tag.service
+    assert_text @tag.location
     assert_text @tag.stage
 
     # Links
@@ -117,6 +119,7 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert_text I18n.t('activerecord.attributes.tag.serial')
     assert_text I18n.t('activerecord.attributes.tag.suffix')
     assert_text I18n.t('activerecord.attributes.tag.service')
+    assert_text I18n.t('activerecord.attributes.tag.location')
     assert_text I18n.t('activerecord.attributes.tag.notes')
     assert_text I18n.t('activerecord.attributes.tag.tagable_type')
     assert_text @tag.stage
@@ -126,6 +129,7 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert_text @tag.serial
     assert_text @tag.suffix
     assert_text @tag.service
+    assert_text @tag.location
     assert_text @tag.notes
     assert_text @tag.tagable_type.constantize.model_name.human
   end
@@ -156,6 +160,7 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert_selector "input[name='tag[serial]']"
     assert_selector "input[name='tag[suffix]']"
     assert_selector "input[name='tag[service]']"
+    assert_selector "input[name='tag[location]']"
     assert_selector "textarea[name='tag[notes]']"
     assert_selector "select[name='tag[tagable_type]']"
 
@@ -236,6 +241,7 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert_selector "input[name='tag[serial]']"
     assert_selector "input[name='tag[suffix]']"
     assert_selector "input[name='tag[service]']"
+    assert_selector "input[name='tag[location]']"
     assert_selector "textarea[name='tag[notes]']"
     assert_selector "select[name='tag[tagable_type]']"
 

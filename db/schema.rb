@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_21_102921) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_25_092622) do
   create_table "cable_types", force: :cascade do |t|
     t.integer "conductor_material"
     t.float "csa"
@@ -96,7 +96,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_21_102921) do
   end
 
   create_table "light_ccts", force: :cascade do |t|
-    t.string "light_fitting_type"
+    t.integer "light_fitting_type"
     t.integer "quantity"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -134,7 +134,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_21_102921) do
   end
 
   create_table "socket_ccts", force: :cascade do |t|
-    t.string "socket_type"
+    t.integer "socket_type"
     t.integer "quantity"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -142,7 +142,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_21_102921) do
   end
 
   create_table "switchboards", force: :cascade do |t|
-    t.string "location"
     t.float "busbar_rating"
     t.float "busbar_fault_rating"
     t.float "busbar_fault_duration"
@@ -172,6 +171,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_21_102921) do
     t.string "tagable_type"
     t.integer "tagable_id"
     t.string "loop_id", null: false
+    t.string "location"
     t.index ["discipline_id"], name: "index_tags_on_discipline_id"
     t.index ["loop_id"], name: "index_tags_on_loop_id"
     t.index ["project_id", "discipline_id", "prefix", "serial", "suffix"], name: "index_tags_on_project_and_full_tag", unique: true

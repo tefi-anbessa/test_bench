@@ -1,12 +1,7 @@
-<h1>New light cct</h1>
-
 <% provide(:title, t('.title')) %>
 <% provide(:header, t('.header')) %>
-
-<%= render "form", light_cct: @light_cct %>
-
-<br>
-
-<div>
-  <%= link_to "Back to light ccts", light_ccts_path %>
-</div>
+<% provide(:button_text, t('actions.save')) %>
+<%= render "form",
+  light_cct: @light_cct,
+  tag: @tag
+%>
