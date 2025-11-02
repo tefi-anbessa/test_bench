@@ -9,6 +9,8 @@ class CircuitsControllerTest < ActionController::TestCase
     # Set the current project for all tests that need it
     set_current_project(@project) if defined?(set_current_project)
 
+    @discipline = create(:discipline, project: @project, code: :elec, label: "E", name: 'Electrical')
+
     @admin = create(:user)
     @admin.grant(:admin)
 
@@ -23,16 +25,14 @@ class CircuitsControllerTest < ActionController::TestCase
     @electrical_designer.grant(:team_member, @project) # Project team member role
 
     @regular_user = create(:user)   # No roles
-
-    @discipline = create(:discipline, code: 'E', name: 'Electrical')
     
     # Create tags
-    @swbd_tag = create(:tag, prefix: 'EX', serial: 1001, project: @project, discipline: @discipline)
-    @swbd_tag2 = create(:tag, prefix: 'EX', serial: 1002, project: @project, discipline: @discipline)
+    @swbd_tag = create(:tag, prefix: 'EX', serial: 1001, discipline: @discipline)
+    @swbd_tag2 = create(:tag, prefix: 'EX', serial: 1002, discipline: @discipline)
     
     # Create switchboard with the switchboard tag
-    @switchboard = create(:switchboard, tag: @swbd_tag, location: 'Location 1')
-    @swbd2 = create(:switchboard, tag: @swbd_tag2, location: 'Location 2')
+    @switchboard = create(:switchboard, tag: @swbd_tag)
+    @swbd2 = create(:switchboard, tag: @swbd_tag2)
     
     # Create circuit for the switchboard 
     @circuit = create(:circuit, switchboard: @switchboard)
@@ -40,16 +40,16 @@ class CircuitsControllerTest < ActionController::TestCase
     # Create cable type for the project
     @cable_type = create(:cable_type, project: @project)    
     # Create tags
-    @cable_tag1 = create(:tag, prefix: 'EC', serial: 1001, project: @project, discipline: @discipline)
-    @cable_tag2 = create(:tag, prefix: 'EC', serial: 1002, project: @project, discipline: @discipline)
+    @cable_tag1 = create(:tag, prefix: 'EC', serial: 1001, discipline: @discipline)
+    @cable_tag2 = create(:tag, prefix: 'EC', serial: 1002, discipline: @discipline)
         
     # Create cables with the cable tags
     @cable1 = create(:cable, tag: @cable_tag1, cable_type: @cable_type)
     @cable2 = create(:cable, tag: @cable_tag2, cable_type: @cable_type)
 
     # Create a switchboard to use as a load
-    @swbd_tag3 = create(:tag, prefix: 'EX', serial: 1003, project: @project, discipline: @discipline)
-    @swbd3 = create(:switchboard, tag: @swbd_tag3, location: 'Location 2')
+    @swbd_tag3 = create(:tag, prefix: 'EX', serial: 1003, discipline: @discipline)
+    @swbd3 = create(:switchboard, tag: @swbd_tag3)
     @swbd3_demand = create(:demand, demandable: @swbd3)
 
     @request.env["devise.mapping"] = Devise.mappings[:user]

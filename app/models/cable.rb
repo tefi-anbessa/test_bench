@@ -15,6 +15,10 @@ class Cable < ApplicationRecord
     tag&.label || I18n::t("show.orphan", model: Tag.model_name.human)
   end
 
+  def self.required_role
+    :electrical_designer
+  end
+
   # Validations
   validates :cable_type, presence: true
   

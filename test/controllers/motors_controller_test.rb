@@ -1,5 +1,5 @@
 require "test_helper"
-require_relative "../support/tagable_test_patterns"
+require_relative "../helpers/tagable_test_patterns"
 
 class MotorsControllerTest < ActionController::TestCase
   include TagableTestPatterns
@@ -7,7 +7,7 @@ class MotorsControllerTest < ActionController::TestCase
 
   setup do
     # Set the discipline applicable to the resource, required before setup_common_test_data
-    @resource_discipline = create(:discipline, code: 'E')
+    @resource_discipline_code = :elec
     setup_common_test_data
     setup_model_specific_data
     setup_tags_and_resources
@@ -22,7 +22,7 @@ class MotorsControllerTest < ActionController::TestCase
     # Set up a user with edit permissions on this resource.
     @accredited_team_member = create(:user)
     @accredited_team_member.grant(:team_member, @project)
-    @accredited_team_member.grant(:electrical_designer)
+    @accredited_team_member.grant(Motor.required_role)
     # Set up an existing tag with associated resource for index, show, edit, update, destroy tests
     @assigned_tag = create(:tag, prefix: 'PM', serial: 1001, project: @project, discipline: @resource_discipline)
     @resource = create(:motor, tag: @assigned_tag)
@@ -54,7 +54,6 @@ class MotorsControllerTest < ActionController::TestCase
         ingress_protection: 'IP55',
         speed_rated: 1500.0,
         tag: {
-          project_id: @project.id,
           discipline_id: @resource_discipline.id,
           prefix: 'KM',
           serial: 2002,

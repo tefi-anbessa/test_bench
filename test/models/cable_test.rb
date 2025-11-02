@@ -3,7 +3,7 @@ require "test_helper"
 class CableTest < ActiveSupport::TestCase
   def setup
     @project = create(:project)
-    @discipline_e = create(:discipline, :e)
+    @discipline_e = create(:discipline, :elec)
     @cable_type = create(:cable_type, project: @project)
     @tag = create(:tag, prefix: "EC", serial: 1, project: @project, discipline: @discipline_e)
     @cable = create(:cable, tag: @tag, cable_type: @cable_type)
@@ -54,7 +54,7 @@ class CableTest < ActiveSupport::TestCase
   
   test "should require cable_type" do
     cable = build(:cable,
-      tag: create(:tag, project: @project, discipline: create(:discipline, :e)),
+      tag: create(:tag, project: @project, discipline: create(:discipline, :elec)),
       cable_type: nil
     )
 

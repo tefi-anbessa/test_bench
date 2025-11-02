@@ -12,7 +12,14 @@ module CurrentProjectConcern
       if project
         @current_project = project
         session[:project_id] = project.id
-        cookies.signed[:project_id] = project.id
+        cookie_name = "project_id_user_#{current_user.id}"
+        cookies.signed[cookie_name] = {
+          value: project.id,
+          expires: 1.year.from_now,
+          httponly: true,
+          secure: Rails.env.production?,
+          same_site: :lax
+        }
       else
         @current_project = nil
         session.delete(:project_id)
@@ -33,8 +40,16 @@ module CurrentProjectConcern
     
     # Load project from session or cookie
     def load_current_project
-      project_id = session[:project_id].to_i || cookies.signed[:project_id].to_i 
-      Project.find_by(id: project_id) if project_id.present?
+      # If session already has current project, reload from there
+      if session[:project_id].present?
+        return Project.find_by(id: session[:project_id])
+      end
+      # If project cookie for current user is present, reload using the cookie
+      if current_user && (cookie = cookies.signed["project_id_user_#{current_user.id}"])
+        return Project.find_by(id: cookie)
+      end
+      # No session or cookies, return nil
+      nil
     end
     
     # Require a project to be selected

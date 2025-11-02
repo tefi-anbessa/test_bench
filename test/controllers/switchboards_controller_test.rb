@@ -1,5 +1,5 @@
 require "test_helper"
-require_relative "../support/tagable_test_patterns"
+require_relative "../helpers/tagable_test_patterns"
 
 class SwitchboardsControllerTest < ActionController::TestCase
   include TagableTestPatterns
@@ -7,7 +7,7 @@ class SwitchboardsControllerTest < ActionController::TestCase
 
   setup do
     # Set the discipline applicable to the resource, required before setup_common_test_data
-    @resource_discipline = create(:discipline, code: 'E')
+    @resource_discipline_code = :elec
     setup_common_test_data
     setup_model_specific_data
     setup_tags_and_resources
@@ -23,12 +23,12 @@ class SwitchboardsControllerTest < ActionController::TestCase
     # Set up a user with edit permissions on this resource.
     @accredited_team_member = create(:user)
     @accredited_team_member.grant(:team_member, @project)
-    @accredited_team_member.grant(:electrical_designer)
+    @accredited_team_member.grant(Switchboard.required_role)
     # Set up an existing tag with associated resource for index, show, edit, update, destroy tests
-    @assigned_tag = create(:tag, prefix: 'EX', serial: 1001, project: @project, discipline: @resource_discipline)
+    @assigned_tag = create(:tag, prefix: 'EX', serial: 1001, discipline: @resource_discipline)
     @resource = create(:switchboard, tag: @assigned_tag)
     # Set up an unassigned tag for create and update tests
-    @unassigned_tag = create(:tag, prefix: 'EX', serial: 1002, project: @project, discipline: @resource_discipline)
+    @unassigned_tag = create(:tag, prefix: 'EX', serial: 1002, discipline: @resource_discipline)
     # Every model sets a string of the wrong type for testing the type check
     @wrong_tagable_type = "Motor"
     # Switchboards have circuits as child models - create after tags are available
@@ -39,7 +39,6 @@ class SwitchboardsControllerTest < ActionController::TestCase
     {
       tag_id: @unassigned_tag.id,
       switchboard: {
-        location: 'Test Location',
         voltage_rating: '600/1000V',
         busbar_rating: '600A'
       }
@@ -49,11 +48,9 @@ class SwitchboardsControllerTest < ActionController::TestCase
   def params_with_new_tag
     {
       switchboard: {
-        location: 'Test Location',
         voltage_rating: '600/1000V',
         busbar_rating: '600A',
         tag: {
-          project_id: @project.id,
           discipline_id: @resource_discipline.id,
           prefix: 'EX',
           serial: 2002,
@@ -68,9 +65,8 @@ class SwitchboardsControllerTest < ActionController::TestCase
   # Set the minimum required params for a valid resource
   def valid_resource_params
     {
-      location: 'Test Location',
       voltage_rating: '600/1000V',
-      ingress_protection: 'IP55'
+      busbar_rating: '600A'
     }
   end
 
@@ -81,12 +77,12 @@ class SwitchboardsControllerTest < ActionController::TestCase
 
   # Nominate an attribute to get changed during update tests
   def update_attribute_name
-    :location
+    :ingress_protection
   end
 
   # Nominate a value to update the attribute to
   def updated_attribute_value
-    'Updated Location'
+    '11'
   end
 
   # Override to specify the controller name for this test
@@ -102,11 +98,9 @@ class SwitchboardsControllerTest < ActionController::TestCase
       assert_difference('Circuit.count', 2) do
         post :create, params: {
           switchboard: {
-            location: 'Test Location',
             voltage_rating: '600/1000V',
             busbar_rating: '600A',
             tag: {
-              project_id: @project.id,
               discipline_id: @resource_discipline.id,
               prefix: 'EX',
               serial: 2002,

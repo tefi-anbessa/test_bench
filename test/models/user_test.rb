@@ -12,6 +12,7 @@ class UserTest < ActiveSupport::TestCase
   test "name should be present" do
     @user.name = ""
     assert_not @user.valid?
+    assert_includes @user.errors[:name], I18n.t("errors.messages.blank")
   end
 
   test "email should be present" do

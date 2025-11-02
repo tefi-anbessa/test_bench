@@ -40,22 +40,23 @@ FactoryBot.define do
     # This callback runs after build but before validation/creation
     after(:build) do |cable, evaluator|
 
-      # Handle tag assignment
-      if evaluator.tag
-        # Tag was explicitly provided
-        raise "Tag is already associated with another record" if evaluator.tag.tagable.present?
-        cable.tag = evaluator.tag
-      else
-        # Auto-create tag using provided or default project and discipline
-        project = evaluator.project || create(:project)
-        discipline = evaluator.discipline || create(:discipline, :e)
+    # Handle tag assignment
+    if evaluator.tag
+      # Tag was explicitly provided
+      tag = evaluator.tag.is_a?(Tag) ? evaluator.tag : Tag.find(evaluator.tag)
+      raise "Tag is already associated with another record" if tag.tagable.present?
+      cable.tag = tag
+    else
+      # Auto-create tag using provided or default project and discipline
+      project = evaluator.project || create(:project)
+      discipline = evaluator.discipline || create(:discipline, :elec)
 
-        cable.tag = create(:tag,
-          prefix: 'EC',
-          project: project,
-          discipline: discipline
-        )
-      end
+      cable.tag = create(:tag,
+        prefix: 'EC',
+        project: project,
+        discipline: discipline
+      )
+    end
 
       # Assign from association if provided
       if evaluator.from

@@ -73,7 +73,7 @@ class SwitchboardsController < ApplicationController
     current_count = switchboard.circuits.count
     count = desired_count - current_count
     if count > 0
-      authorize Circuit, :create?
+      authorize switchboard.circuits.build(), :create?
       
       count.times do |i|
         switchboard.circuits.create(serial: current_count + i + 1)
@@ -81,7 +81,7 @@ class SwitchboardsController < ApplicationController
       resource_name = Circuit.model_name.human(count: count)
       flash[:success] << t("flash.assigned", count: count, resource_name: resource_name)
     elsif count < 0
-      authorize Circuit, :destroy?
+      authorize switchboard.circuits.build(), :destroy?
       switchboard.circuits
                  .order(serial: :desc)
                  .limit(current_count - desired_count)
@@ -97,7 +97,7 @@ class SwitchboardsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
     def switchboard_params
-      params.require(:switchboard).permit(:location, :ingress_protection, :voltage_rating,
+      params.require(:switchboard).permit(:ingress_protection, :voltage_rating,
         :busbar_rating, :busbar_fault_rating, :busbar_fault_duration, 
         :cable_entry, :incomer_protection, :metering, 
         :neutral_bar_connections, :earth_bar_connections, :notes,

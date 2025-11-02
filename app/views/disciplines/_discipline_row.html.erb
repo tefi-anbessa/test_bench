@@ -1,0 +1,35 @@
+<tr scope="row">
+  <td><%= discipline.label %></td>
+  <td><%= discipline.code %></td>
+  <td><%= discipline.name %></td>
+  <td><%= discipline.prefix_schema %></td>
+  <td><%= discipline.sort_order %></td>
+  <td>
+    <% if policy(discipline).show? %>
+      <%= link_to discipline_path(discipline), class: "btn btn-secondary btn-sm icon-link",
+            aria: { label: t('actions.show') },
+            title: t('actions.show'),
+            display: "inline" do %>
+        <%== icon('eye') %>
+      <% end %>
+    <% end %>
+    <% if policy(discipline).edit? %>
+      <%= link_to edit_discipline_path(discipline), class: "btn btn-warning btn-sm icon-link",
+            aria: { label: t('actions.edit') },
+            title: t('actions.edit'),
+            display: "inline"  do %>
+        <%== icon('pencil') %>
+      <% end %>
+    <% end %>
+    <% if policy(discipline).destroy? %>
+      <%= link_to discipline_path(discipline),
+              data: { method: :delete, confirm: t('actions.delete_sure') },
+              class: "btn btn-danger btn-sm icon-link",
+              aria: { label: t('actions.delete') },
+              title: t('actions.delete'),
+              display: "inline"  do %>
+        <%== icon('trash') %>
+      <% end %>
+    <% end %>
+  </td>
+</tr>

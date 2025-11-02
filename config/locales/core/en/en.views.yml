@@ -52,29 +52,41 @@ en:
       no_project_help:  "Select this to work outside of any project"
       no_description:   "No description"
       cancel:           "Cancel"
-    edit:
-      title:            "Edit Project"
-      header:           "Edit Project: %{label}"
     new:
       title:            "New Project"
       header:           "New Project"
     show:
       title:            "Project"
       header:           "Project: %{label}"
+    edit:
+      title:            "Edit Project"
+      header:           "Edit Project: %{label}"
+  disciplines:
+    index:
+      title:            "Disciplines"
+      header:           "Disciplines Index"
+    new:
+      title:            "New Discipline"
+      header:           "New Discipline"
+    show:
+      title:            "Discipline"
+      header:           "Discipline: %{label}"
+    edit:
+      title:            "Edit Discipline"
+      header:           "Edit Discipline: %{label}"
   tags:
     index:
       title:            "Tags"
       header:           "Tag List"
-    edit:
-      title:            "Edit Tag"
-      header:           "Edit Tag: %{label}"
     new:
       title:            "New Tag"
       header:           "New Tag"
     show:
       title:            "Tag"
       header:           "Tag: %{label}"
-
+    edit:
+      title:            "Edit Tag"
+      header:           "Edit Tag: %{label}"
   roles:
     index:
       title:            "Roles"

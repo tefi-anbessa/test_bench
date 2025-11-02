@@ -1,7 +1,7 @@
 class TagsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_project
-  before_action :set_tag, only: %i[ show edit update destroy ]
+  before_action :set_tag
 #  before_action :new_params, only: %i[ create update ]
 #  after_action :verify_authorized
 
@@ -9,7 +9,7 @@ class TagsController < ApplicationController
   def index
     authorize Tag
     @q = policy_scope(Tag).ransack(params[:q])
-    @pagy, @tags = pagy(@q.result.includes(:discipline, :project), limit: 10)
+    @pagy, @tags = pagy(@q.result.includes(discipline: :project), limit: 20)
   end
 
   # GET /tags/1 or /tags/1.json
@@ -134,14 +134,16 @@ class TagsController < ApplicationController
     end
 
     def set_tag
-      @tag = Tag.find(params[:id])
+      if params[:id].present?
+        @tag = Tag.find(params[:id])
+      else
+        @tag = Tag.new
+      end
     end
 
     def tag_params
-      params.require(:tag).permit(:project_id, :stage, :discipline_id,
-                                  :prefix, :new_prefix, :serial, :suffix,
-                                  :service, :location, :notes,
-                                  :tagable_type, :tagable_id)
+      params.require(:tag).permit(:discipline_id, :stage, :prefix, :serial, :suffix,
+                                  :service, :location, :notes, :tagable_type, :tagable_id)
     end
 
 

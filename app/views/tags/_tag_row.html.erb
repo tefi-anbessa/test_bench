@@ -5,19 +5,23 @@
       <td><%= t.location %></td>
       <td><%= t.notes %></td>
       <td>
-        <%= link_to tag_path(t), class: "btn btn-secondary btn-sm icon-link",
-              aria: { label: t('actions.show') },
-              title: t('actions.show'),
-              display: "inline" do %>
-          <%== icon('eye') %>
+        <% if policy(t).show? %>
+          <%= link_to tag_path(t), class: "btn btn-secondary btn-sm icon-link",
+                aria: { label: t('actions.show') },
+                title: t('actions.show'),
+                display: "inline" do %>
+            <%== icon('eye') %>
+          <% end %>
         <% end %>
-        <%= link_to edit_tag_path(t), class: "btn btn-warning btn-sm icon-link",
-              aria: { label: t('actions.edit') },
-              title: t('actions.edit'),
-              display: "inline"  do %>
-          <%== icon('pencil') %>
+        <% if policy(t).edit? %>
+          <%= link_to edit_tag_path(t), class: "btn btn-warning btn-sm icon-link",
+                aria: { label: t('actions.edit') },
+                title: t('actions.edit'),
+                display: "inline"  do %>
+            <%== icon('pencil') %>
+          <% end %>
         <% end %>
-        <% if current_user && current_user.admin? %>
+        <% if policy(t).destroy? %>
           <%= link_to t, method: :delete, class: "btn btn-danger btn-sm icon-link",
                 aria: { label: t('actions.delete') },
                 title: t('actions.delete'),

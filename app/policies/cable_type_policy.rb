@@ -5,41 +5,52 @@ class CableTypePolicy < ApplicationPolicy
 
   class Scope < ApplicationPolicy::Scope
     def resolve
-      return scope.none unless @current_project
-      scope.where(project: @current_project)
+      if current_project.present? && user_has_project_role?(current_project)
+        scope.joins(:project).where(project_id: current_project.id)
+      elsif user&.is_admin? || user&.is_app_owner?
+        scope.all
+      else
+        scope.none
+      end
     end
   end
 
   def index?
-    # Admin and app_owner can view anything
-    return true if user&.is_admin? || user&.is_app_owner?
-    
-    # Others can only view if they have a project role
-    current_project.present? && user_has_project_role?
+    # Protect against url injection
+    return false if user.nil?
+    if current_project.present?
+      user_has_project_role?(current_project)
+    else
+      # Admin and app_owner can view when current project is nil
+      user&.is_admin? || user&.is_app_owner?
+    end
   end
 
   def show?
-    # Admin and app_owner can view anything
-    return true if user&.is_admin? || user&.is_app_owner?
-    
-    # Others can only view if they have a project role and the cable type belongs to the current project
-    return false unless user && current_project && cable_type
-    user_has_project_role? && cable_type.project == current_project
+    # Protect against url injection
+    return false if user.nil?
+    if current_project.present?
+      user_has_project_role?(current_project) && record.project == current_project
+    else
+      # Admin and app_owner can view when current project is nil
+      user&.is_admin? || user&.is_app_owner?
+    end
   end
   
   def new?
     create?
   end
-  
+
   def create?
     # Protect against url injection
-    return false if user.nil? || current_project.nil?
-
-    # Admin and app_owner can create
-    return true if user.is_admin? || user.is_app_owner?
-    
-    # Other than admins, only electrical designers in the project can create cable types
-    return user.has_role?(:electrical_designer) && user_has_project_role?
+    return false if user.nil?
+    if current_project.present?
+       (user_has_project_role?(current_project) && 
+        user.has_role?(CableType.required_role)) || user.is_admin? || user.is_app_owner?
+    else
+      # Admin and app_owner can create when current project is nil
+      user&.is_admin? || user&.is_app_owner?
+    end
   end
   
   def edit?

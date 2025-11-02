@@ -1,0 +1,119 @@
+<div class="container mt-3">
+  <div class="card">
+    <div class="card-header p-2">
+      <!-- Center Tag Info -->
+      <div class="col text-center">
+        <div class="d-flex flex-column align-items-center">
+          <div class="mt-1">
+            <%= yield(:header) %>
+            <% if discipline.present? && discipline.persisted? %>
+              <small class="text-muted ms-2"><%= discipline.name %></small>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%= bootstrap_form_with(model: discipline, 
+        url: project_disciplines_path(project),
+        layout: :horizontal, 
+        label_col: "col-sm-4", 
+        control_col: "col-sm-8") do |f| %>
+
+      <div class="card-body p-2">
+        <%= render 'shared/error_messages', object: f.object %>
+
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+
+            <!-- Project -->
+            <div class="col-md-12">
+              <% if project.present? %>
+                <%= f.hidden_field :project_id, value: project.id %>
+                <%= render 'projects/project_card',
+                      project: project %>
+              <% else %>
+                <%= f.select :project_id,
+                      options_for_select(
+                        @projects.map { |p| ["#{p.code}: #{p.title}", p.id] },
+                        discipline.project_id
+                      ),
+                      { class: 'form-select', required: true  } %>
+              <% end %>
+            </div>
+
+            <!-- Code -->
+            <div class="row">
+              <%= f.text_field :code,
+                label_col: "col-sm-3",
+                control_col: "col-sm-9",
+                      title: t('activerecord.help.discipline.code'),
+                      required: true %>
+            </div>
+
+            <!-- Name -->
+            <div class="row">
+              <%= f.text_field :name,
+                label_col: "col-sm-3",
+                control_col: "col-sm-9",
+                      title: t('activerecord.help.discipline.name'),
+                      required: true %>
+            </div>
+
+            <!-- Label -->
+            <div class="row">
+              <%= f.text_field :label,
+                label_col: "col-sm-3",
+                control_col: "col-sm-9",
+                      title: t('activerecord.help.discipline.label'),
+                      required: true %>
+            </div>
+
+            <!-- prefix schema -->
+            <div class="row">
+              <%= f.text_area :prefix_schema,
+                      label_col: "col-sm-3",
+                      control_col: "col-sm-9",
+                      rows: 3,
+                      placeholder: t('activerecord.help.discipline.prefix_schema') %>
+            </div>
+
+            <!-- Sort order -->
+            <div class="row">
+              <%= f.number_field :sort_order,
+              label_col: "col-sm-3",
+              control_col: "col-sm-3",
+                    min: 0,
+                    max: 1000,
+                    title: t('activerecord.help.discipline.sort_order') %>
+            </div>
+          </div> <!-- end responsive columns --> 
+        </div>
+      </div> <!-- card body -->
+
+      <!-- Card Footer with Actions -->
+      <div class="card-footer bg-transparent text-end p-2">
+        <% if discipline.persisted? %>
+            <%= link_to discipline_path(discipline),
+              class: "btn btn-warning actions",
+              data: { confirm: t('actions.sure'), turbo: false } do %>
+                <%= t('actions.discard') %>
+                <%== icon('x-square') %>
+              <% end %>
+        <% else %>
+            <%= link_to project_disciplines_path(project),
+              class: "btn btn-warning actions",
+                data: { confirm: t('actions.sure'), turbo: false } do %>
+                <%= t('actions.discard') %>
+                <%== icon('x-square') %>
+              <% end %>
+        <% end %>
+        <!-- Button to submit form -->
+        <%= f.button :submit, class: 'btn btn-primary' do %>
+          <%= yield(:button_text) %>
+          <%== icon('save') %>
+        <% end %>
+      </div>
+    <% end %>
+  </div> <!-- card  -->
+</div> <!-- container  -->

@@ -70,25 +70,16 @@ class ApplicationController < ActionController::Base
   protected
 
     def after_sign_in_path_for(resource)
-      # Get the projects the user has access to
-      projects = policy_scope(Project)
-      
-      case projects.count
-      when 0
-        # No projects available, go to root or another appropriate path
-        root_path
-      when 1
-        # If only one project, set it as current and proceed
-        project = projects.first
+      project = load_current_project
+      # If the current user's project cookie is set,
+      # save it to session, update @current_project, and go to project dashboard.
+      if project
         set_current_project(project)
-        
-        # Get and clear stored location for the project
-        stored_path = stored_location_for_project
-        clear_stored_location_for_project
-        stored_path || project_path(project)
+        return project_path(project)
       else
-        # Multiple projects available, go to selection
-        select_projects_path
+      # If no project cookie is set, set @current_project to nil and go to projects index.
+        set_current_project(nil)
+        return projects_path
       end
     end
 
@@ -137,4 +128,4 @@ class ApplicationController < ActionController::Base
         end
       end
     end
-  end
+end

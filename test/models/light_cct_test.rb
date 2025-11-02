@@ -2,7 +2,7 @@ require "test_helper"
 
 class LightCctTest < ActiveSupport::TestCase
   def setup
-    @discipline = create(:discipline, :e)
+    @discipline = create(:discipline, :elec)
     @project = create(:project)
     @tag = create(:tag, 
                  prefix: 'EL',
@@ -23,21 +23,27 @@ class LightCctTest < ActiveSupport::TestCase
     assert @tag.valid?
   end
 
-  test "should create light circuit with valid attributes" do
+  test "factory default should create light circuit with valid attributes" do
     light = build(:light_cct)
     assert light.valid?
   end
 
-  test "should require light_fitting_type" do
-    light = build(:light_cct, light_fitting_type: nil)
-    assert_not light.valid?
-    assert_includes light.errors[:light_fitting_type], "can't be blank"
+  test "light_fitting_type must be present" do
+    @light_cct.light_fitting_type = nil
+    assert_not @light_cct.valid?
+    assert_includes @light_cct.errors[:light_fitting_type], I18n.t("errors.messages.blank")
+  end
+
+  test "quantity must be present" do
+    @light_cct.quantity = nil
+    assert_not @light_cct.valid?
+    assert_includes @light_cct.errors[:quantity], I18n.t("errors.messages.not_a_number")
   end
 
   test "should require quantity to be greater than 0" do
-    light = build(:light_cct, quantity: 0)
-    assert_not light.valid?
-    assert_includes light.errors[:quantity], "must be greater than 0"
+    @light_cct.quantity = 0
+    assert_not @light_cct.valid?
+    assert_includes @light_cct.errors[:quantity], I18n.t("errors.messages.greater_than", count: 0)
   end
 
   test "should create light circuit as tagable linked to existing tag" do

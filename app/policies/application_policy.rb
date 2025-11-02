@@ -29,6 +29,19 @@ class ApplicationPolicy
     def resolve
       raise NoMethodError, "You must define #resolve in #{self.class}"
     end
+
+    private
+
+      def user_has_project_role?(project)
+        return false if user.nil?
+        if project.present?
+          # Check if user has any role on the specified project
+          user.roles.where(resource: project).exists? || user.is_admin? || user.is_app_owner?
+        else
+          # If project is nil, only admin and app_owner have a role.
+          user.is_admin? || user.is_app_owner?
+        end
+      end
   end
 
   attr_reader :user_context, :record, :user, :current_project
@@ -72,10 +85,14 @@ class ApplicationPolicy
 
   private
 
-    def user_has_project_role?(project = nil)
-      project ||= current_project
-      return false if user.nil? || project.nil?
-      # Check if user has any role on the specified project
-      user.roles.where(resource: project).exists?
+    def user_has_project_role?(project)
+      return false if user.nil?
+      if project.present?
+        # Check if user has any role on the specified project
+        user.roles.where(resource: project).exists? || user.is_admin? || user.is_app_owner?
+      else
+        # If project is nil, only admin and app_owner have a role.
+        user.is_admin? || user.is_app_owner?
+      end
     end
 end

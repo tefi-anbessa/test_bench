@@ -4,44 +4,77 @@ class CableTypeTest < ActiveSupport::TestCase
   def setup
     @project = create(:project)
     @cable_type = create(:cable_type, project: @project)
+    
   end
 
-  test "factory should be valid" do
+  test "setup should be valid" do
+    assert @project.valid?
     assert @cable_type.valid?
   end
 
-  test "should create new cable type with required attributes" do
+  test "factory default should create valid cable type" do
+    cable_type = create(:cable_type)
+    assert cable_type.valid?
+  end
+  
+  test "factory should create new cable type with all required attributes" do
     assert_difference 'CableType.count', 1 do
-      create(:cable_type,
-            project: @project,
-             conductor_material: "Cu",
-             cores: 2,
-             csa: 4)
+      @ct = create(:cable_type, 
+          conductor_material: "Cu",
+          csa: 2.5,
+          cores: 3,
+          neutral_csa: 2.5,
+          earth_csa: 1.5,
+          insulation: "XLPE",
+          bedding: "PVC",
+          armour: "GSWA",
+          sheath: "PVC",
+          voltage_rating: "450/750V",
+          temperature_rating: "75˚C",
+          bedding_od: 10,
+          overall_od: 12,
+          project: @project)
     end
+    assert @ct.valid?
+    assert_equal "Cu", @ct.conductor_material
+    assert_equal 2.5, @ct.csa
+    assert_equal 3, @ct.cores
+    assert_equal 2.5, @ct.neutral_csa
+    assert_equal 1.5, @ct.earth_csa
+    assert_equal "XLPE", @ct.insulation
+    assert_equal "PVC", @ct.bedding
+    assert_equal "GSWA", @ct.armour
+    assert_equal "PVC", @ct.sheath
+    assert_equal "450/750V", @ct.voltage_rating
+    assert_equal "75˚C", @ct.temperature_rating
+    assert_equal 10, @ct.bedding_od
+    assert_equal 12, @ct.overall_od
+    assert_equal @project, @ct.project
   end
 
   test "should require conductor_material" do
     cable_type = build(:cable_type, conductor_material: nil)
     refute cable_type.valid?
-    assert_includes cable_type.errors[:conductor_material], "can't be blank"
+    assert_includes cable_type.errors[:conductor_material], I18n.t('errors.messages.blank')
   end
 
   test "should require cores" do
     cable_type = build(:cable_type, cores: nil)
     refute cable_type.valid?
-    assert_includes cable_type.errors[:cores], "can't be blank"
+    assert_includes cable_type.errors[:cores], I18n.t('errors.messages.blank')
   end
 
   test "should require csa" do
     cable_type = build(:cable_type, csa: nil, project: @project)
     refute cable_type.valid?
-    assert_includes cable_type.errors[:csa], "can't be blank"
+    assert_includes cable_type.errors[:csa], I18n.t('errors.messages.blank')
   end
   
   test "should require project" do
     cable_type = build(:cable_type, project: nil)
     refute cable_type.valid?
-    assert_includes cable_type.errors[:project], "must exist"
+    puts "Errors: #{cable_type.errors.messages.inspect}"
+    assert_includes cable_type.errors[:project], I18n.t('errors.messages.required')
   end
 
   test "should allow same specifications in different projects" do

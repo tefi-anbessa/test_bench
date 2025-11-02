@@ -17,38 +17,47 @@ class ProjectTest < ActiveSupport::TestCase
 
   test "code should be present" do
     @project.code = ""
-    assert_not @project.valid?
+    refute @project.valid?
+    assert_includes @project.errors[:code], I18n.t("errors.messages.blank")
   end
 
   test "code should be 2 upper case characters" do
     @project.code = "aa"
-    assert_not @project.valid?
+    refute @project.valid?
+    assert_includes @project.errors[:code], I18n.t("errors.messages.invalid")
     @project.code = "A"
-    assert_not @project.valid?
+    assert_includes @project.errors[:code], I18n.t("errors.messages.invalid")
+    refute @project.valid?
     @project.code = "A" * 3
-    assert_not @project.valid?
+    refute @project.valid?
+    assert_includes @project.errors[:code], I18n.t("errors.messages.wrong_length", count: 2)
     @project.code = "Aa"
-    assert_not @project.valid?
+    refute @project.valid?
     @project.code = "A1"
-    assert_not @project.valid?
+    refute @project.valid?
     @project.code = "A!"
-    assert_not @project.valid?
+    refute @project.valid?
+    @project.code = "A"
+    assert_includes @project.errors[:code], I18n.t("errors.messages.invalid")
   end
 
   test "code should be unique" do
     project = create(:project, code: 'ZZ')
     duplicate_project = build(:project, code: 'ZZ')
-    assert_not duplicate_project.valid?
+    refute duplicate_project.valid?
+    assert_includes duplicate_project.errors[:code], I18n.t("errors.messages.taken")
   end
 
   test "title should be present" do
     @project.title = "     "
-    assert_not @project.valid?
+    refute @project.valid?
+    assert_includes @project.errors[:title], I18n.t("errors.messages.blank")
   end
 
   test "title should not be too long" do
     @project.title = "a" * 256
-    assert_not @project.valid?
+    refute @project.valid?
+    assert_includes @project.errors[:title], I18n.t("errors.messages.too_long", count: 50)
   end
   
   test "description can be blank" do

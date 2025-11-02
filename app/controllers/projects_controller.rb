@@ -109,7 +109,7 @@ class ProjectsController < ApplicationController
       set_current_project(nil)
       # Clear any stored location for project to prevent redirect loops
       # clear_stored_location_for_project
-      redirect_to stored_location_for_project || root_path,
+      redirect_to stored_location_for_project || projects_path,
                   notice: I18n.t('projects.none_selected')
     elsif @project
       # Set the project in both cookie (signed for security) and session

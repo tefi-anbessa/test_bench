@@ -255,6 +255,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Complete cable system tests for from and to after switchboard, demand, and circuit tests are working.
 - [ ] Use of button text for new and edit forms is mixed. Standardise on save for new, update for edit.
 - [ ] Demand form live update of calculated values not working.
+- [ ] Cable types with no current project.
 
 ## Refactoring Opportunities
 
@@ -297,9 +298,10 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] See if pagy can provide user selectable page size
 - [ ] Data revision management
 - [ ] Customize devise users:
-   - Allow users to self register through devise, edit their own profile and user name, email, password. 
-   - Insert an admin approval in the confirmation process
-   - Disable destroy, because the [future] change history will have links to users making changes. We may need to historise user name changes as well, that's a future problem. The revision management system may well include some sort of active/inactive status features. 
+   - [ ] Add policy for users
+   - [ ] Allow users to self register through devise, edit their own profile and user name, email, password. 
+   - [ ] Insert an admin approval in the confirmation process
+   - [ ] Disable destroy, because the [future] change history will have links to users making changes. We may need to historise user name changes as well, that's a future problem. The revision management system may well include some sort of active/inactive status features.
 - [ ] Customize error trapping:
    - [ ] Customize error trapping for Pundit::NotAuthorizedError
    - [ ] Customize error trapping for unknown format

@@ -252,7 +252,7 @@ class ProjectsControllerTest < ActionController::TestCase
     sign_in @team_member
     post :set, params: { project_id: @project.id }
     assert_redirected_to project_url(@project)
-    assert_equal @project.id, cookies.signed[:project_id]
+    assert_equal @project.id, cookies.signed["project_id_user_#{@team_member.id}"]
     assert_equal @project.id, session[:project_id]
   end
 
@@ -261,7 +261,7 @@ class ProjectsControllerTest < ActionController::TestCase
     sign_in @regular_user
     post :set, params: { project_id: 'none' }
     assert_nil session[:project_id]
-    assert_redirected_to root_url
+    assert_redirected_to projects_url
   end
 
   test "regular user can call set with invalid project" do

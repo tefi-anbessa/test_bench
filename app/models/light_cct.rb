@@ -11,6 +11,10 @@ class LightCct < ApplicationRecord
     tag&.label || I18n::t("show.orphan", model: Tag.model_name.human)
   end
 
+  def self.required_role
+    :electrical_designer
+  end
+
   private
 
     def self.ransackable_attributes(auth_object = nil)

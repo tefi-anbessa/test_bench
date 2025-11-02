@@ -1,23 +1,20 @@
 class Tag < ApplicationRecord
   resourcify
   delegated_type :tagable, types: Constants.tagable, optional: true, dependent: :destroy
-  belongs_to :project
   belongs_to :discipline
-
-  attribute :full_tag, :string
-  after_find :set_full_tag
-  before_validation :set_loop_id, on: [:create, :update]
+  delegate :project, to: :discipline
 
   # Default scope to sort by loop_id, then by full_tag
   default_scope { order(:loop_id, :prefix, :suffix) }
 
-  validates :prefix, format: { with: /\A[a-zA-Z]+\z/, message: "only allows letters" }
+  validates :prefix, format: { with: /\A[a-zA-Z]+\z/, message: :only_letters }
   validates :prefix, length: { in: 1..6 }
 
-  validates :serial, presence: true, inclusion: { in: 0..9999 }
+  validates :serial, presence: true
+  validates :serial, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 9999 }
   validates :suffix, length: { maximum: 5 }
   validates :service, length: { maximum: 40 }
-  validates :stage, inclusion: { in: 0..10 }
+  validates :stage, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 10 }
 
   # Prevent changing tagable association if it's already set and valid
   validate :validate_tagable_reassignment, on: :update
@@ -33,12 +30,34 @@ class Tag < ApplicationRecord
                            allow_blank: true
   
   # Ensure a tagable is only associated with one tag
-  validate :tagable_not_already_taken, if: -> { tagable_id.present? && tagable_type.present? }
+  validate :tagable_not_already_associated, if: -> { tagable_id.present? && tagable_type.present? }
   
-  # Ensure tag is unique within the same project and discipline
+  # Ensure tag is unique within the same discipline
   # This is required because of doubts over using a database uniqueness contraint with suffix, which may be null.
-  # 
   validate :validate_tag_uniqueness
+
+
+  def full_tag
+    return self[:full_tag] if persisted? || self[:full_tag].present?
+    
+    # Same logic as the database expression
+    "#{prefix.to_s}#{serial.to_s.rjust(4, '0')}#{suffix.to_s}"
+  end
+
+  def loop_id
+    return self[:loop_id] if persisted? || self[:loop_id].present?
+    
+    # Same logic as the database expression
+    "#{prefix.to_s.first.upcase}#{serial.to_s.rjust(4, '0')}"
+  end
+
+  def label
+    full_tag
+  end
+
+  def long_label
+    discipline.label + ": " + full_tag
+  end
 
   # Track original values to detect changes
   def initialize(*)
@@ -47,22 +66,18 @@ class Tag < ApplicationRecord
     @original_tagable_id = tagable_id
   end
 
-  # Get the next tag in the project, ordered by discipline, loop_id, prefix, and suffix
+  # Get the next tag in the discipline, ordered by loop_id, prefix, and suffix
   def next(attribute = :loop_id)
     return super(attribute) unless attribute == :loop_id
     
     adjacent_tag('next_id') || self
   end
 
-  # Get the previous tag in the project, ordered by discipline, loop_id, prefix, and suffix
+  # Get the previous tag in the discipline, ordered by loop_id, prefix, and suffix
   def prev(attribute = :loop_id)
     return super(attribute) unless attribute == :loop_id
     
     adjacent_tag('prev_id') || self
-  end
-
-  def label
-    full_tag
   end
   
   # Instance method to get the prefix schema and hash for the tag's discipline
@@ -130,17 +145,18 @@ class Tag < ApplicationRecord
   
     # Find adjacent tag (next or previous) based on the given join condition
     def adjacent_tag(join_column)
+      return nil unless discipline_id
+      
       sql = <<-SQL
         WITH ordered_tags AS (
           SELECT id,
-                discipline_id,
                 loop_id,
                 prefix,
                 COALESCE(suffix, '') as suffix_sort,
-                LAG(id) OVER (ORDER BY discipline_id, loop_id, prefix, COALESCE(suffix, '')) as prev_id,
-                LEAD(id) OVER (ORDER BY discipline_id, loop_id, prefix, COALESCE(suffix, '')) as next_id
+                LAG(id) OVER (ORDER BY loop_id, prefix, COALESCE(suffix, '')) as prev_id,
+                LEAD(id) OVER (ORDER BY loop_id, prefix, COALESCE(suffix, '')) as next_id
           FROM tags
-          WHERE project_id = :project_id
+          WHERE discipline_id = :discipline_id
         )
         SELECT t.*
         FROM tags t
@@ -148,34 +164,31 @@ class Tag < ApplicationRecord
         WHERE ot.id = :current_id
       SQL
       
-      self.class.find_by_sql([sql, { project_id: project_id, current_id: id }]).first
+      self.class.find_by_sql([sql, { discipline_id: discipline_id, current_id: id }]).first
     end
   
     # Custom validation to handle suffix uniqueness with NULL values in the database
     def validate_tag_uniqueness
-      return unless project_id && discipline_id && prefix && serial
+      return unless discipline_id && prefix && serial
       
       # Convert empty string to nil for comparison
       suffix_value = suffix.presence
       
-      # Check for existing tags with the same combination
-      existing = Tag.where(
-        project_id: project_id,
+      # Check for existing tags with the same combination within the same discipline
+      existing = self.class.where(
         discipline_id: discipline_id,
         prefix: prefix,
         serial: serial
       ).where("COALESCE(suffix, '') = ?", suffix_value.to_s)
       
-      # Exclude current record from the check if it's persisted
+      # Exclude self from the check if this is an update
       existing = existing.where.not(id: id) if persisted?
       
-      if existing.exists?
-        errors.add(:base, I18n::t("activerecord.errors.models.tag.taken", tag: label))
-      end
+      errors.add(:base, I18n.t("errors.messages.taken")) if existing.any?
     end
     
     # Prevent re-assigning a tagable to a different tag
-    def tagable_not_already_taken
+    def tagable_not_already_associated
       return unless tagable_id.present? && tagable_type.present?
       
       existing_tag = Tag.where(
@@ -184,7 +197,9 @@ class Tag < ApplicationRecord
       ).where.not(id: id).exists?
       
       if existing_tag
-        errors.add(:tagable, 'is already associated with another tag')
+        errors.add(:tagable, I18n::t("activerecord.errors.messages.already_associated", 
+          child: tagable_type.constantize.model_name.human,
+          parent: self.class.model_name.human))
       end
     end
 
@@ -288,22 +303,9 @@ class Tag < ApplicationRecord
       functions
     end
 
-    def set_loop_id
-      self.loop_id = "#{prefix[0].upcase}#{serial.to_s.rjust(4, '0')}" if prefix.present? && serial.present?
-    end
-
-    def set_full_tag
-      # Set the full_tag on the instance using self.full_tag
-      discipline = Discipline.find(self.discipline_id).code
-      self.full_tag = "#{discipline}:#{prefix}-#{serial.to_s.rjust(4, '0')}"
-
-      # Add suffix if it's present
-      self.full_tag += ".#{suffix}" if suffix.present?
-    end
-
     def self.ransackable_attributes(auth_object = nil)
-      ["prefix", "serial", "suffix", "service", "location", "stage",
-        "notes", "discipline_id", "created_at", "updated_at", "loop_id"]
+      ["discipline_id", "prefix", "serial", "suffix", "full_tag", "loop_id", "service", "location", "stage",
+        "notes", "created_at", "updated_at"]
     end
 
     def self.ransackable_associations(auth_object = nil)

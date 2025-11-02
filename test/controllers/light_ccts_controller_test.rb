@@ -1,5 +1,5 @@
 require "test_helper"
-require_relative "../support/tagable_test_patterns"
+require_relative "../helpers/tagable_test_patterns"
 
 class LightCctsControllerTest < ActionController::TestCase
   include TagableTestPatterns
@@ -7,7 +7,7 @@ class LightCctsControllerTest < ActionController::TestCase
 
   setup do
     # Set the discipline applicable to the resource, required before setup_common_test_data
-    @resource_discipline = create(:discipline, code: 'E')
+    @resource_discipline_code = :elec
     setup_common_test_data
     setup_model_specific_data
     setup_tags_and_resources
@@ -22,7 +22,7 @@ class LightCctsControllerTest < ActionController::TestCase
     # Set up a user with edit permissions on this resource.
     @accredited_team_member = create(:user)
     @accredited_team_member.grant(:team_member, @project)
-    @accredited_team_member.grant(:electrical_designer)
+    @accredited_team_member.grant(LightCct.required_role)
     # Set up an existing tag with associated resource for index, show, edit, update, destroy tests
     @assigned_tag = create(:tag, prefix: 'EL', serial: 1001, project: @project, discipline: @resource_discipline)
     @resource = create(:light_cct, tag: @assigned_tag)
@@ -48,7 +48,6 @@ class LightCctsControllerTest < ActionController::TestCase
         light_fitting_type: :general,
         quantity: 2,
         tag: {
-          project_id: @project.id,
           discipline_id: @resource_discipline.id,
           prefix: 'KL',
           serial: 2002,

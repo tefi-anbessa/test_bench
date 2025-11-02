@@ -87,7 +87,7 @@ gem "pundit"
 group :development, :test do
 # Rails defaults:
   # Use sqlite3 as the database for Active Record
-  gem "sqlite3", "~> 2.0", ">= 2.1.0"
+  gem "pg"
 
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
@@ -130,5 +130,5 @@ end
 
 # Added gems
 group :production do
-  gem "pg",         "1.3.5"
+  gem "pg"
 end

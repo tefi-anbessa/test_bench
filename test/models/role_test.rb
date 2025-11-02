@@ -18,14 +18,14 @@ class RoleTest < ActiveSupport::TestCase
   end
 
   test "should create project role" do
-    role = create(:role, :project_project_manager, resource: @project)
+    role = create(:role, name: :project_manager, resource: @project)
     assert_equal 'project_manager', role.name
     assert_equal 'Project', role.resource_type
     assert_equal @project.id, role.resource_id
   end
 
   test "should create resource role with factory" do
-    role = create(:resource_role, resource: @project, name: 'team_member')
+    role = create(:resource_role, resource: @project, name: :team_member)
     assert_equal 'team_member', role.name
     assert_equal 'Project', role.resource_type
     assert_equal @project.id, role.resource_id
@@ -45,7 +45,7 @@ class RoleTest < ActiveSupport::TestCase
   test "should not allow invalid resource types" do
     role = build(:role, resource_type: 'InvalidModel')
     assert_not role.valid?
-    assert_includes role.errors[:resource_type], 'is not included in the list'
+    assert_includes role.errors[:resource_type], I18n.t("errors.messages.inclusion")
   end
   
   # rolify gem manages role duplicates, so this test is not valid
@@ -78,14 +78,14 @@ class RoleTest < ActiveSupport::TestCase
     project2 = create(:project)
     
     # Create roles with valid project roles (only two per project)
-    role1 = create(:role, name: 'project_manager', resource_type: 'Project', resource_id: project1.id)
-    role2 = create(:role, name: 'team_member', resource_type: 'Project', resource_id: project1.id)
+    role1 = create(:role, name: :project_manager, resource_type: 'Project', resource_id: project1.id)
+    role2 = create(:role, name: :team_member, resource_type: 'Project', resource_id: project1.id)
     
     # Create a global role
-    global_role = create(:role, name: 'admin', resource_type: nil, resource_id: nil)
+    global_role = create(:role, name: :admin, resource_type: nil, resource_id: nil)
     
     # Create a role for a different project
-    other_project_role = create(:role, name: 'project_manager', resource_type: 'Project', resource_id: project2.id)
+    other_project_role = create(:role, name: :project_manager, resource_type: 'Project', resource_id: project2.id)
     
     # Get all roles in default scope order
     roles = Role.all.to_a

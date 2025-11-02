@@ -1,7 +1,8 @@
 require 'test_helper'
+require_relative '../helpers/policy_test_helpers.rb'
 
 class CableTypePolicyTest < ActiveSupport::TestCase
-  include PolicyHelpers
+  include PolicyTestHelpers
   # Setup test data
   setup do 
     # Create projects and common test users

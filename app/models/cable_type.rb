@@ -23,29 +23,33 @@ class CableType < ApplicationRecord
     id
   end
 
-    def generate_code
-      # Generate base code using the existing logic
-      parts = []
-      parts << conductor_material
-      parts << "#{csa}mm²"
-      parts << "#{cores}C" + 
-        (neutral_csa.present? ? "+N(#{neutral_csa})" : "") + 
-        (earth_csa.present? ? "+E(#{earth_csa})" : "")
-      parts << insulation if insulation.present?
-      parts << bedding if bedding.present?
-      parts << armour if armour.present?
-      parts << sheath if sheath.present?
-      parts << voltage_rating if voltage_rating.present?
-      parts << temperature_rating if temperature_rating.present?
-      
-      base_code = parts.join('~')
-      sequence_number = find_next_sequence_number(base_code)
-      new_code = "#{base_code}~#{sequence_number.to_s.rjust(2, '0')}"
-      # Only update the code if it's a new record or if relevant attributes have changed
-      if new_record? || (changes.keys & relevant_attributes_for_code).any?
-        self.code = new_code
-      end
+  def self.required_role
+    :electrical_designer
+  end
+
+  def generate_code
+    # Generate base code using the existing logic
+    parts = []
+    parts << conductor_material
+    parts << "#{csa}mm²"
+    parts << "#{cores}C" + 
+      (neutral_csa.present? ? "+N(#{neutral_csa})" : "") + 
+      (earth_csa.present? ? "+E(#{earth_csa})" : "")
+    parts << insulation if insulation.present?
+    parts << bedding if bedding.present?
+    parts << armour if armour.present?
+    parts << sheath if sheath.present?
+    parts << voltage_rating if voltage_rating.present?
+    parts << temperature_rating if temperature_rating.present?
+    
+    base_code = parts.join('~')
+    sequence_number = find_next_sequence_number(base_code)
+    new_code = "#{base_code}~#{sequence_number.to_s.rjust(2, '0')}"
+    # Only update the code if it's a new record or if relevant attributes have changed
+    if new_record? || (changes.keys & relevant_attributes_for_code).any?
+      self.code = new_code
     end
+  end
 
   private
     

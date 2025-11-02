@@ -1,107 +1,115 @@
 require 'test_helper'
+require_relative '../helpers/resource_policy_test'
 
 class ProjectPolicyTest < ActiveSupport::TestCase
-  include PolicyHelpers
+  include PolicyTestHelpers
 
   def setup
     setup_policy_test
   end
-
-  # Helper to create user context for policy
-  def user_context(user, project = nil)
-    user ? ApplicationPolicy::UserContext.new(user, project) : nil
+  
+  # Helper to create policy with user and project context
+  def policy(user, project, record = nil)
+    user_context = ApplicationPolicy::UserContext.new(user, project)
+    ProjectPolicy.new(user_context, record || Project)
   end
 
   # Scope tests
   test 'scope for app owner includes all projects' do
-    projects = ProjectPolicy::Scope.new(user_context(@app_owner), Project).resolve
-    assert_includes projects, @project
-    assert_includes projects, @other_project
+    context = ApplicationPolicy::UserContext.new(@app_owner, @project)
+    scope = ProjectPolicy::Scope.new(context, Project).resolve
+    assert_includes scope, @project
+    assert_includes scope, @other_project
   end
 
   test 'scope for admin includes all projects' do
-    projects = ProjectPolicy::Scope.new(user_context(@admin), Project).resolve
-    assert_includes projects, @project
-    assert_includes projects, @other_project
+    context = ApplicationPolicy::UserContext.new(@admin, @project)
+    scope = ProjectPolicy::Scope.new(context, Project).resolve
+    assert_includes scope, @project
+    assert_includes scope, @other_project
   end
 
   test 'scope for users only includes projects where they have a role' do
-    projects = ProjectPolicy::Scope.new(user_context(@team_member), Project).resolve
-    assert_includes projects, @project
-    refute_includes projects, @other_project
+    context = ApplicationPolicy::UserContext.new(@team_member, @project)
+    scope = ProjectPolicy::Scope.new(context, Project).resolve
+    assert_includes scope, @project
+    refute_includes scope, @other_project
   end
 
   test 'scope for regular user does not include projects where they have no role' do
-    projects = ProjectPolicy::Scope.new(user_context(@regular_user), Project).resolve
-    refute_includes projects, @project
+    context = ApplicationPolicy::UserContext.new(@regular_user, @project)
+    scope = ProjectPolicy::Scope.new(context, Project).resolve
+    refute_includes scope, @project
   end
 
   # Index tests
   test 'index? allows any authenticated user' do
-    assert ProjectPolicy.new(user_context(@app_owner), Project).index?
-    assert ProjectPolicy.new(user_context(@regular_user), Project).index?
+    assert policy(@admin, @project).index?
+    assert policy(@app_owner, @project).index?
+    assert policy(@regular_user, @project).index?
   end
 
   test 'index? denies unauthenticated users' do
-    refute ProjectPolicy.new(nil, Project).index?
+    refute policy(nil, @project).index?
   end
   
   # Show tests
-  test 'show? allows any authenticated user with project access' do
-    assert ProjectPolicy.new(user_context(@app_owner), @project).show?
-    assert ProjectPolicy.new(user_context(@team_member), @project).show?
+  test 'show? allows any authenticated user with project role' do
+    assert policy(@team_member, @project, @project).show?
+    assert policy(@app_owner, @project, @project).show?
   end
 
   test 'show? denies users without project role' do
-    refute ProjectPolicy.new(user_context(@regular_user), @project).show?
+    refute policy(@regular_user, @project, @project).show?
   end
 
   test 'show? denies unauthenticated users' do
-    refute ProjectPolicy.new(nil, @project).show?
+    refute policy(nil, @project, @project).show?
   end
 
   # New Tests defer to create
   # Create tests
   test 'create only allows app owners or admins' do
-    assert ProjectPolicy.new(user_context(@app_owner), Project).create?
-    assert ProjectPolicy.new(user_context(@admin), Project).create?
+    assert policy(@admin, @project, build(:project)).create?
+    assert policy(@app_owner, @project, build(:project)).create?
   end
 
   test 'create denies users other than admins or app owners' do
-    refute ProjectPolicy.new(user_context(@regular_user), Project).create?
-    refute ProjectPolicy.new(user_context(@project_manager), Project).create?
-    refute ProjectPolicy.new(user_context(nil), Project).create?
+    refute policy(@project_manager, @project, build(:project)).create?
+    refute policy(@team_member, @project, build(:project)).create?
+    refute policy(@regular_user, @project, build(:project)).create?
   end
 
   # Edit tests defer to update
   # Update tests
   test 'update allows project manager' do
-    assert ProjectPolicy.new(user_context(@project_manager), @project).update?
+    assert policy(@project_manager, @project, @project).update?
   end
 
   test 'update allows app owner and admin' do
-    assert ProjectPolicy.new(user_context(@app_owner), @project).update?
-    assert ProjectPolicy.new(user_context(@admin), @project).update?
+    assert policy(@admin, @project, @project).update?
+    assert policy(@app_owner, @project, @project).update?
   end
 
-  test 'update denies user other than project owner, app owner and admin' do
-    refute ProjectPolicy.new(user_context(@regular_user), @project).update?
-    refute ProjectPolicy.new(user_context(@team_member), @project).update?
-    refute ProjectPolicy.new(user_context(nil), @project).update?
+  test 'update denies user other than project manager, app owner and admin' do
+    refute policy(@team_member, @project, @project).update?
+    refute policy(@regular_user, @project, @project).update?
+    refute policy(nil, @project, @project).update?
   end
 
   # Destroy tests
   test 'destroy allows app owner' do
-    assert ProjectPolicy.new(user_context(@app_owner), @project).destroy?
+    assert policy(@app_owner, @project, @project).destroy?
   end
 
   test 'destroy denies project manager, team members and regular users' do
-    refute ProjectPolicy.new(user_context(@project_manager), @project).destroy?
-    refute ProjectPolicy.new(user_context(@team_member), @project).destroy?
-    refute ProjectPolicy.new(user_context(@regular_user), @project).destroy?
+    refute policy(@admin, @project, @project).destroy?
+    refute policy(@project_manager, @project, @project).destroy?
+    refute policy(@team_member, @project, @project).destroy?
+    refute policy(@regular_user, @project, @project).destroy?
   end
 
   test 'destroy denies unauthenticated users' do
-    refute ProjectPolicy.new(user_context(nil), @project).destroy?
+    refute policy(nil, @project, @project).destroy?
   end
 end

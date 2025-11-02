@@ -10,7 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_25_092622) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_01_061421) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
+
   create_table "cable_types", force: :cascade do |t|
     t.integer "conductor_material"
     t.float "csa"
@@ -36,7 +39,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_25_092622) do
 
   create_table "cables", force: :cascade do |t|
     t.integer "cable_type_id", null: false
-    t.integer "circuit_id"
     t.decimal "route_length", precision: 4, scale: 1
     t.decimal "vertical_allowance", precision: 3, scale: 1
     t.decimal "termination_allowance", precision: 3, scale: 1
@@ -50,7 +52,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_25_092622) do
     t.integer "to_id"
     t.text "notes"
     t.index ["cable_type_id"], name: "index_cables_on_cable_type_id"
-    t.index ["circuit_id"], name: "index_cables_on_circuit_id"
     t.index ["from_type", "from_id"], name: "index_cables_on_from"
     t.index ["to_type", "to_id"], name: "index_cables_on_to"
   end
@@ -93,6 +94,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_25_092622) do
   create_table "disciplines", force: :cascade do |t|
     t.string "code"
     t.string "name"
+    t.bigint "project_id", null: false
+    t.jsonb "prefix_schema"
+    t.string "label", comment: "Short 2-3 character code for display"
+    t.string "module_name", comment: "Associated module for extended functionality"
+    t.integer "sort_order", default: 100, comment: "Display order in UI (lower numbers first)"
+    t.text "notes"
+    t.index ["project_id", "code"], name: "index_disciplines_on_project_id_and_code", unique: true
+    t.index ["project_id", "label"], name: "index_disciplines_on_project_id_and_label", unique: true
+    t.index ["project_id"], name: "index_disciplines_on_project_id"
+    t.index ["sort_order"], name: "index_disciplines_on_sort_order"
   end
 
   create_table "light_ccts", force: :cascade do |t|
@@ -164,25 +175,23 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_25_092622) do
     t.string "suffix", default: ""
     t.string "service"
     t.text "notes"
-    t.integer "project_id", null: false
     t.integer "stage"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "tagable_type"
     t.integer "tagable_id"
-    t.string "loop_id", null: false
     t.string "location"
+    t.virtual "full_tag", type: :string, as: "(((COALESCE(prefix, ''::character varying))::text || lpad((serial)::text, 4, '0'::text)) || (COALESCE(suffix, ''::character varying))::text)", stored: true
+    t.virtual "loop_id", type: :string, as: "(upper(\"left\"((COALESCE(prefix, ''::character varying))::text, 1)) || lpad((serial)::text, 4, '0'::text))", stored: true
+    t.index ["discipline_id", "full_tag"], name: "index_tags_on_discipline_and_full_tag", unique: true
     t.index ["discipline_id"], name: "index_tags_on_discipline_id"
     t.index ["loop_id"], name: "index_tags_on_loop_id"
-    t.index ["project_id", "discipline_id", "prefix", "serial", "suffix"], name: "index_tags_on_project_and_full_tag", unique: true
-    t.index ["project_id"], name: "index_tags_on_project_id"
     t.index ["tagable_type", "tagable_id"], name: "index_tags_on_tagable"
   end
 
   create_table "users", force: :cascade do |t|
     t.string "name", null: false
     t.string "email", default: "", null: false
-    t.boolean "admin", default: false
     t.string "encrypted_password", default: "", null: false
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
@@ -217,8 +226,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_25_092622) do
 
   add_foreign_key "cable_types", "projects"
   add_foreign_key "cables", "cable_types"
-  add_foreign_key "cables", "circuits"
   add_foreign_key "circuits", "switchboards"
+  add_foreign_key "disciplines", "projects"
   add_foreign_key "tags", "disciplines"
-  add_foreign_key "tags", "projects"
 end

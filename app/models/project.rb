@@ -1,13 +1,14 @@
 class Project < ApplicationRecord
   resourcify
   before_save { self.code = code.upcase }
-  has_many :tags, dependent: :destroy
+  has_many :disciplines, dependent: :destroy
+  has_many :tags, through: :disciplines
   has_many :cable_types, dependent: :destroy
 
   VALID_CODE_REGEX = /[A-Z][A-Z]/
   validates :code,        presence: true, length: { is: 2},
                           format: { with: VALID_CODE_REGEX },
-                          uniqueness: { message: "%{model} code %{value} already exists" }
+                          uniqueness: true
   validates :title, presence: true, length: { maximum: 50 }
 
 
@@ -20,7 +21,7 @@ class Project < ApplicationRecord
   end
 
   def self.ransackable_associations(auth_object = nil)
-    [ :tags ]
+    [ :disciplines, :tags, :cable_types ]
   end
 
   # Default scope for ordering projects

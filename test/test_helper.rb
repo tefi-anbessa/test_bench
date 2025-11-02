@@ -1,3 +1,8 @@
+#
+####### REMINDER: GUARD RUNS THE FULL SUITE OF TESTS WHEN IT DETECTS UPDATE OF THIS FILE #########
+# You may want to exit guard before saving...
+#
+
 require "test_helper"
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
@@ -88,20 +93,16 @@ class ActiveSupport::TestCase
     @current_project
   end
   
-  # Sets the current project in the session and cookies to match application behavior
-  # @param project [Project] The project to set as current
+
   def set_current_project(project)
-    # post set_projects_url, params: { project_id: project.id }
     @current_project = project
-    # Also set in session and cookies if controller test
-    if defined?(controller) && controller.respond_to?(:session)
-      session[:project_id] = project.id
-      cookies[:project_id] = project.id
-    end
+    # For controller tests, we need to set the instance variable that the controller will use
+    @controller.instance_variable_set(:@current_project, project) if defined?(@controller)
+    # Also set in session and cookies for integration tests
+    session[:project_id] = project.id if session
+    cookies.signed[:project_id] = project.id if respond_to?(:cookies)
   end
   
-  
-
   # Asserts that the request was rejected because the user is not signed in
   # Verifies:
   # - 302 Found status code
@@ -203,13 +204,6 @@ class ActionController::TestCase
     
     # Set default locale for tests
   #  I18n.locale = I18n.default_locale
-  end
-  
-  # Helper to set current project in session and cookies to match CurrentProjectConcern
-  def set_current_project(project)
-    @current_project = project
-    session[:project_id] = project.id
-    cookies.signed[:project_id] = project.id
   end
   
   ## Sign in helper that ensures the user is properly set in the session

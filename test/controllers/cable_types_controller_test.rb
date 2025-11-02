@@ -12,17 +12,17 @@ class CableTypesControllerTest < ActionController::TestCase
     @admin = create(:user)
     @regular_user = create(:user)
     @team_member = create(:user)
-    @electrical_designer = create(:user)
+    @accredited_user = create(:user)
     
     # Add global admin role
     @admin.grant(:admin)
 
     # Add project-specific team member roles
     @team_member.grant(:team_member, @project)
-    @electrical_designer.grant(:team_member, @project)
+    @accredited_user.grant(:team_member, @project)
 
     # Add global functional role
-    @electrical_designer.grant(:electrical_designer)
+    @accredited_user.grant(CableType.required_role)
   
     # Set up request environment
 #    @request.env['HTTP_REFERER'] = 'http://test.host/'
@@ -36,8 +36,14 @@ class CableTypesControllerTest < ActionController::TestCase
   end
 
   # Index tests
-  test "any authenticated user can view index" do
+  test "regular user cannot view index" do
     sign_in(@regular_user)
+    get :index
+    assert_forbidden
+  end
+
+  test "any user with project role can view index" do
+    sign_in(@team_member)
     # @request.session[:project_id] = @project.id
     get :index
     assert_response :success
@@ -45,41 +51,42 @@ class CableTypesControllerTest < ActionController::TestCase
   end
 
   # Show tests
-  # TODO: Properly test the authorize call in the show action
-  # Currently, the test only verifies RecordNotFound from policy_scope
-  # We should also test the actual authorization in the show action
-  test "team member cannot show cable type on different project" do
-    sign_in(@team_member)
-    @project2 = create(:project)
-    @cable_type2 = create(:cable_type, project: @project2)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      get :show, params: { id: @cable_type2.id }
-    end
-  end
-
   test "regular user cannot show cable type on current project" do
     sign_in(@regular_user)
     get :show, params: { id: @cable_type.id }
     assert_forbidden
   end
 
+  test "team member cannot show cable type on different project" do
+    sign_in(@team_member)
+    @project2 = create(:project)
+    @cable_type2 = create(:cable_type, project: @project2)
+    get :show, params: { id: @cable_type2.id }
+    assert_forbidden
+  end
+
+  test "team member can show cable type on current project" do
+    sign_in(@team_member)
+    get :show, params: { id: @cable_type.id }
+    assert_response :success
+  end
+
   # New tests
-  test "regular user cannot access new form" do
-    sign_in @regular_user
-#    @request.session[:project_id] = @project.id
+  test "team member cannot access new form" do
+    sign_in @team_member
     get :new
     assert_forbidden
   end
 
   test "electrical designer can access new form" do
-    sign_in @electrical_designer
+    sign_in @accredited_user
     get :new
     assert_response :success
   end
 
   # Create tests
-  test "regular user cannot create cable type" do
-    sign_in @regular_user
+  test "team member cannot create cable type" do
+    sign_in @team_member
     assert_no_difference('CableType.count') do
       post :create, params: {
         cable_type: attributes_for(:cable_type, project_id: @project.id)
@@ -89,7 +96,7 @@ class CableTypesControllerTest < ActionController::TestCase
   end
 
   test "electrical designer can create cable type" do
-    sign_in @electrical_designer
+    sign_in @accredited_user
     assert_difference('CableType.count') do
       post :create, params: { 
         cable_type: { 
@@ -114,22 +121,22 @@ class CableTypesControllerTest < ActionController::TestCase
   end
 
   # Edit tests
-  test "regular user cannot edit cable type" do
-    sign_in @regular_user
+  test "team member cannot edit cable type" do
+    sign_in @team_member
     get :edit, params: { id: @cable_type.id }
     assert_forbidden
   end
 
   test "electrical designer can edit cable type" do
-    sign_in @electrical_designer
+    sign_in @accredited_user
     get :edit, params: { id: @cable_type.id }
     assert_response :success
   end
 
   # Update tests
-  test "regular user cannot update cable type" do
+  test "team member cannot update cable type" do
     original_material = @cable_type.conductor_material
-    sign_in @regular_user
+    sign_in @team_member
     patch :update, params: {
       id: @cable_type.id,
       cable_type: { conductor_material: 'Al' }
@@ -139,7 +146,7 @@ class CableTypesControllerTest < ActionController::TestCase
   end
 
   test "electrical designer can update cable type" do
-    sign_in @electrical_designer
+    sign_in @accredited_user
     patch :update, params: {
       id: @cable_type.id,
       cable_type: { conductor_material: 'Al' }
@@ -149,8 +156,8 @@ class CableTypesControllerTest < ActionController::TestCase
   end
 
   # Destroy tests
-  test "regular user cannot destroy cable type" do
-    sign_in @regular_user
+  test "electrical designer cannot destroy cable type" do
+    sign_in @accredited_user
     assert_no_difference('CableType.count') do
       delete :destroy, params: { id: @cable_type.id }
     end

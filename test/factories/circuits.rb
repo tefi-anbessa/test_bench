@@ -35,7 +35,7 @@ FactoryBot.define do
       else
         # Auto-create switchboard using provided or default project
         project = evaluator.project || create(:project)
-        switchboard_tag = create(:tag, prefix: 'EX', project: project, discipline: create(:discipline, :e))
+        switchboard_tag = create(:tag, prefix: 'EX', project: project, discipline: create(:discipline, :elec))
         circuit.switchboard = create(:switchboard, tag: switchboard_tag)
       end
     end
@@ -68,7 +68,7 @@ FactoryBot.define do
       after(:create) do |circuit, evaluator|
         # Use circuit's switchboard project for the cable
         cable_project = circuit.switchboard.tag&.project || create(:project)
-        cable_discipline = circuit.switchboard.tag&.discipline || create(:discipline, :e)
+        cable_discipline = circuit.switchboard.tag&.discipline || create(:discipline, :elec)
         create(:cable, from: circuit, project: cable_project, discipline: cable_discipline)
       end
     end

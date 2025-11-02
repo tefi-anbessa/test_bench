@@ -9,6 +9,9 @@ module TagableTestPatterns
     @project = create(:project)
     set_current_project(@project)
 
+    # Create resource discipline using the code provided by the tagable controller test
+    @resource_discipline = create(:discipline, code: @resource_discipline_code, project: @project)
+
     @regular_user = create(:user)   # No roles
 
     @admin = create(:user)
@@ -25,11 +28,13 @@ module TagableTestPatterns
     @request.env["devise.mapping"] = Devise.mappings[:user]
   end
 
-  # Common test patterns that work for all tagable controllers
+  # Common test patterns used for all tagable controller tests
 
   def test_common_setup_is_valid
     assert @project.valid?
     assert @project.persisted?
+    assert @resource_discipline.valid?
+    assert @resource_discipline.persisted?
     assert @admin.valid?
     assert @admin.persisted?
     assert @project_manager.valid?
@@ -44,8 +49,6 @@ module TagableTestPatterns
 
   # Check validity of instance variables that are required but values are set in model specific setup
   def test_model_specific_general_setup_is_valid
-    assert @resource_discipline.valid?
-    assert @resource_discipline.persisted?
     assert @accredited_team_member
     assert @accredited_team_member.persisted?
     assert @assigned_tag.valid?
@@ -145,7 +148,7 @@ module TagableTestPatterns
   def test_cannot_create_with_tag_that_is_not_in_the_database
     sign_in @accredited_team_member
     assert_no_difference("#{resource_class}.count") do
-      post :create, params: params_with_existing_tag.merge(tag_id: 99)
+      post :create, params: params_with_existing_tag.deep_merge(tag_id: 9999)
     end
     assert_conflict
   end
@@ -153,7 +156,7 @@ module TagableTestPatterns
   def test_cannot_create_with_already_assigned_tag
     sign_in @accredited_team_member
     assert_no_difference("#{resource_class}.count") do
-      post :create, params: params_with_existing_tag.merge(tag_id: @assigned_tag.id)
+      post :create, params: params_with_existing_tag.deep_merge(tag_id: @assigned_tag.id)
     end
     assert_conflict
   end
@@ -162,7 +165,7 @@ module TagableTestPatterns
     sign_in @accredited_team_member
     @unassigned_tag.update(tagable_type: wrong_tagable_type)
     assert_no_difference("#{resource_class}.count") do
-      post :create, params: params_with_existing_tag.merge(tag_id: @unassigned_tag.id)
+      post :create, params: params_with_existing_tag.deep_merge(tag_id: @unassigned_tag.id)
     end
     assert_conflict
   end

@@ -7,6 +7,7 @@ class CableTypesController < ApplicationController
   def index
     @q = policy_scope(CableType).ransack(params[:q])
     @pagy, @cable_types = pagy(@q.result.includes(:cables), limit: 10)
+    authorize @cable_types
   end
 
   # GET /electrical/cable_types/1 or /electrical/cable_types/1.json
@@ -75,7 +76,7 @@ class CableTypesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_cable_type
-      @cable_type = policy_scope(CableType).find(params[:id])
+      @cable_type = CableType.find(params[:id])
     end
 
     def setup_form

@@ -3,9 +3,8 @@ class Circuit < ApplicationRecord
 
   has_one :feeder, as: :from, class_name: 'Cable', dependent: :nullify
 
-  validates :serial, inclusion: { in: 1..36 }
-  validates :serial, uniqueness: { scope: :switchboard_id,
-    message: "already exists" }
+  validates :serial, numericality: { in: 1..36 }
+  validates :serial, uniqueness: { scope: :switchboard_id }
   enum :phase, Constants.electrical.phase_designation.to_h
   enum :device, Constants.electrical.protection.device.to_h
   validates :poles, inclusion: { in: 1..6 }, allow_nil: true
@@ -23,6 +22,10 @@ class Circuit < ApplicationRecord
 
   def long_label
     switchboard.label + " " + label
+  end
+
+  def self.required_role
+    :electrical_designer
   end
   
   def demand

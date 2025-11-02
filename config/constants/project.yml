@@ -12,3 +12,90 @@ tagable:
   - Pipe
   - Source
   - Consumer
+
+# Standard engineering disciplines available in the system
+# These will be available to all projects
+#
+# Fields:
+#   code:       Symbol identifier (used internally)
+#   label:      Short 2-3 character code (for display)
+#   name:       Full name of the discipline
+#   module:     Optional: Associated Ruby module for extended functionality
+#   sort_order: Display order in UI (lower numbers first)
+
+disciplines:
+
+  - code: :admin
+    label: A
+    name: Administration
+    prefix_schema: :default
+    module: Administration
+    sort_order: 10
+
+  - code: :arch
+    label: B
+    name: Architecture
+    prefix_schema: :default
+    module: Architecture
+    sort_order: 20
+
+  - code: :process
+    label: PR
+    name: Process
+    prefix_schema: :default
+    module: Process
+    sort_order: 30
+
+  - code: :elec
+    label: E
+    name: Electrical
+    prefix_schema: :default
+    module: Electrical
+    sort_order: 10
+
+  - code: :inst
+    label: J
+    name: Instrumentation
+    prefix_schema: :isa51
+    module: Instrumentation
+    sort_order: 40
+
+  - code: :it
+    label: IT
+    name: Information Technology & Communications
+    prefix_schema: :default
+    module: It
+    sort_order: 50
+
+  - code: :mech
+    label: M
+    name: Mechanical
+    prefix_schema: :default
+    module: Mechanical
+    sort_order: 60
+
+  - code: :piping
+    label: PI
+    name: Piping
+    module: Piping
+    sort_order: 70
+
+  - code: :civil
+    label: C
+    name: Civil
+    prefix_schema: :default
+    module: Civil
+    sort_order: 80
+
+  - code: :struct
+    label: S
+    name: Structural
+    prefix_schema: :default
+    module: Structural
+    sort_order: 90
+
+  - code: :hvac
+    label: HV
+    name: Heating Ventilation Air Conditioning
+    module: Hvac
+    sort_order: 100

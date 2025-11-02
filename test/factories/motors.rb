@@ -25,7 +25,7 @@ FactoryBot.define do
       else
         # Auto-create tag using provided or default project and discipline
         project = evaluator.project || create(:project)
-        discipline = evaluator.discipline || create(:discipline, :e)
+        discipline = evaluator.discipline || create(:discipline, :elec)
 
         motor.tag = create(:tag,
           prefix: 'M',

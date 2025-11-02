@@ -28,7 +28,7 @@ class Demand < ApplicationRecord
   validates :power_factor, 
     numericality: { in: -1.0..1.0 }, 
     allow_nil: true,
-    exclusion: { in: [0.0], message: "Power factor of zero will cause calculation errors" }
+    exclusion: { in: [0.0], message: I18n.t("activerecord.errors.messages.attributes.demand.power_factor.zero_pf") }
     
   validates :duty, numericality: { in: 0.0..1.0 }, allow_nil: true
   
@@ -44,6 +44,10 @@ class Demand < ApplicationRecord
                                 model: demandable_type.presence&.constantize&.model_name&.human || 
                                 I18n.t("show.default_model")
                               )
+  end
+
+  def self.required_role
+    :electrical_designer
   end
 
   def circuit
@@ -101,7 +105,8 @@ class Demand < ApplicationRecord
     return unless demandable?
     return if demandable.respond_to?(:tag) && demandable.tag.present?
     
-    errors.add(:base, 'Demandable must have a tag')
+    errors.add(:base, message: I18n.t("activerecord.errors.messages.attributes.demand.demandable.tag_association",
+                                       model: demandable_type.constantize.model_name.human))
   end
 
   def self.ransackable_attributes(auth_object = nil)

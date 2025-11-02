@@ -1,4 +1,4 @@
-class CablePolicy < ElectricalResourcePolicy
+class CablePolicy < ResourcePolicy
   # Returns the cable record
   def cable
     record
@@ -9,7 +9,11 @@ class CablePolicy < ElectricalResourcePolicy
     cable.tag
   end
   
-  # No need to override Scope as it's already defined in ElectricalResourcePolicy
+  def self.required_role
+    :electrical_designer
+  end
+
+  # No need to override Scope as it's already defined in ResourcePolicy
   
   # No need to override edit?/update? as the parent implementation is sufficient
   

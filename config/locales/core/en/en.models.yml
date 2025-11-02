@@ -54,10 +54,22 @@ en:
         resource_type:    "Resource"
         resource_type_help: "Leave blank for global role"
         resource_id:      "Instance"
-
+    help:
+      discipline:
+        code:             "symbol, maximum 12 characters"
+        name:             "descriptive name, maximum 50 characters"
+        label:            "display label, maximum 12 characters"
+        sort_order:       "sort order"
+        prefix_schema:    "prefix schema help tba"  # [TODO]
+        module_name:      "ignore: not implemented"  # [TODO]
+        notes:            "additional information"
     errors:
-      unique: "%{model} %{attribute} has already been taken, must be unique"
-      blank: "%{model} %{attribute} is required"
+      messages:
+        invalid_symbol: "%{model} %{attribute} must be a valid Ruby symbol (letters, numbers, underscores, starting with a letter or underscore)"
+        unique: "%{model} %{attribute} has already been taken, must be unique"
+        custom_required: "%{model} %{attribute} is required"
+        already_associated: "%{child} is already associated with another %{parent}"
+        only_letters: "must contain only letters"
       models:
         role:
           attributes:

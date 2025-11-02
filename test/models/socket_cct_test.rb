@@ -2,7 +2,7 @@ require "test_helper"
 
 class SocketCctTest < ActiveSupport::TestCase
   def setup
-    @discipline = create(:discipline, :e)
+    @discipline = create(:discipline, :elec)
     @project = create(:project)
     @tag = create(:tag, 
                  prefix: 'ES',
@@ -12,7 +12,7 @@ class SocketCctTest < ActiveSupport::TestCase
                  discipline: @discipline
                )
     @socket_cct = create(:socket_cct, 
-                        socket_type: 'standard',
+                        socket_type: '10A',
                         quantity: 8,
                         tag: @tag
                        )
@@ -26,6 +26,29 @@ class SocketCctTest < ActiveSupport::TestCase
   test "should create socket circuit with valid attributes" do
     socket = build(:socket_cct)
     assert socket.valid?
+  end
+
+  test "socket circuit label should be tag label" do
+    assert_equal @socket_cct.label, @tag.label
+    assert_equal @socket_cct.long_label, @tag.long_label
+  end
+
+  test "socket circuit type must be present" do
+    @socket_cct.socket_type = nil
+    refute @socket_cct.valid?
+    assert_includes @socket_cct.errors[:socket_type], I18n.t("errors.messages.blank")
+  end
+
+  test "socket circuit quantity must be present" do
+    @socket_cct.quantity = nil
+    refute @socket_cct.valid?
+    assert_includes @socket_cct.errors[:quantity], I18n.t("errors.messages.not_a_number")
+  end
+
+  test "socket circuit quantity must be greater than 0" do
+    @socket_cct.quantity = 0
+    refute @socket_cct.valid?
+    assert_includes @socket_cct.errors[:quantity], I18n.t("errors.messages.greater_than", count: 0)
   end
 
   test "should create socket circuit as tagable linked to existing tag" do
@@ -42,7 +65,7 @@ class SocketCctTest < ActiveSupport::TestCase
     
     assert_difference 'SocketCct.count', 1 do
       socket = create(:socket_cct, 
-                     socket_type: 'standard',
+                     socket_type: '15A',
                      quantity: 4,
                      tag: tag
                     )
@@ -86,6 +109,6 @@ class SocketCctTest < ActiveSupport::TestCase
   
   test "should have socket_type attribute" do
     assert_respond_to @socket_cct, :socket_type
-    assert_equal 'standard', @socket_cct.socket_type
+    assert_equal '10A', @socket_cct.socket_type
   end
 end

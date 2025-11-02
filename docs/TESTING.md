@@ -144,10 +144,10 @@ rails test test/models/user_test.rb:15
 - Basic configuration looks at the name of the file that has changed, and runds the corresponding test file. For example, if you modify either `app/models/user.rb` or `test/models/user_test.rb`, Guard will run `test/models/user_test.rb`.
 - Advanced configuration in this application includes:
   - Any change to test/test_helper.rb will run the full test suite, so take care!
-  - Any change to test/support/tagable_test_patterns.rb or app/controllers/concerns/tagables_controller.rb will run all tagable controller tests.
+  - Any change to test/helpers/tagable_test_patterns.rb or app/controllers/concerns/tagables_controller.rb will run all tagable controller tests.
 - Guard is best run in its own terminal window. It can be started with `bundle exec guard` and stopped with `quit` or `exit`.
 - If Guard gets unresponsive, you can recover it with ctrl c, make sure to exit and restart.
-- Keep guard running and visible most of the time when developing models, controllers and views. Save frequently, and incrementally check that you have not introduced errors.
+- Keep guard running and visible most of the time when developing models, controllers and views. Save frequently, thereby incrementally checking that you have not introduced errors.
 - When working with system tests, it is best to deactivate Guard, as system testing is very time consuming. When Guard is deactivated, you can run system tests incrementally with `rails test test/system/test/system/projects_system_test.rb:30`, for example.
 
 ### 1. When to Test

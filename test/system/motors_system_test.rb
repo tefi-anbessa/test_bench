@@ -1,5 +1,5 @@
 require "application_system_test_case"
-require_relative "../support/tagable_system_test_patterns"
+require_relative "../helpers/tagable_system_test_patterns"
 
 class MotorsSystemTest < ApplicationSystemTestCase
   include TagableSystemTestPatterns

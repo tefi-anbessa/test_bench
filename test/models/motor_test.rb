@@ -3,7 +3,7 @@ require "test_helper"
 class MotorTest < ActiveSupport::TestCase
   def setup
     @project = create(:project)
-    @discipline_e = create(:discipline, :e)
+    @discipline_e = create(:discipline, :elec)
     @tag = create(:tag, prefix: 'KM', serial: 99, service: 'FAN MOTOR', project: @project, stage: 9,
                     discipline: @discipline_e)
     @motor = create(:motor, tag: @tag,
@@ -27,6 +27,18 @@ class MotorTest < ActiveSupport::TestCase
   test "factory default should create motor with valid attributes" do
     motor = build(:motor)
     assert motor.valid?
+  end
+
+  test "motor type must be present" do
+    @motor.motor_type = nil
+    refute @motor.valid?
+    assert_includes @motor.errors[:motor_type], I18n.t("errors.messages.blank")
+  end
+
+  test "frame size must be present" do
+    @motor.frame_size = nil
+    refute @motor.valid?
+    assert_includes @motor.errors[:frame_size], I18n.t("errors.messages.blank")
   end
 
   # Note: The Motor model currently doesn't have any validations.

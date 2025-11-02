@@ -3,8 +3,8 @@ require "test_helper"
 class SwitchboardTest < ActiveSupport::TestCase
   def setup
     @project = create(:project, title: 'Test Switchboards')
-    @discipline_e = create(:discipline, code: 'E')
-    @switchboard = create(:switchboard, project: @project, discipline: @discipline_e, 
+    @discipline_e = create(:discipline, code: :elec, project: @project)
+    @switchboard = create(:switchboard, discipline: @discipline_e, 
                             voltage_rating: '600/1000V', busbar_rating: 400)
     @tag = @switchboard.tag
   end
@@ -17,7 +17,24 @@ class SwitchboardTest < ActiveSupport::TestCase
     swbd = create(:switchboard)
     assert swbd.valid?
     assert swbd.tag.valid?
-    
+    assert_equal swbd.label, swbd.tag.label
+  end
+
+  test "voltage rating must be present" do
+    @switchboard.voltage_rating = nil
+    refute @switchboard.valid?
+    assert_includes @switchboard.errors[:voltage_rating], I18n.t("errors.messages.blank")
+  end
+
+  test "busbar rating must be present" do
+    @switchboard.busbar_rating = nil
+    refute @switchboard.valid?
+    assert_includes @switchboard.errors[:busbar_rating], I18n.t("errors.messages.blank")
+  end
+
+  test "switchboard label should be tag label" do
+    assert_equal @switchboard.label, @tag.label
+    assert_equal @switchboard.long_label, @tag.long_label
   end
 
   test "should create switchboard with custom tag attributes" do
@@ -29,28 +46,27 @@ class SwitchboardTest < ActiveSupport::TestCase
     end
     # Check factory default prefix
     assert_equal 'EX', switchboard.tag.prefix
-    assert_match(/E:EX-\d+\.?\w*/, switchboard.tag.reload.full_tag)
+    assert_match(/EX\d+\.?\w*/, switchboard.tag.reload.full_tag)
     assert_equal '22', switchboard.ingress_protection
   end
   
-  test "should create switchboard through tag update" do
+  test "should create new switchboard through tag update" do
     tag = create(:tag,
       prefix: 'EX',
       serial: 5,
-      suffix: "",
-      project: @project,
+      suffix: "X",
       stage: 9,
       discipline: @discipline_e
     )
     
     assert_difference 'Switchboard.count', 1 do
-      tag.update(tagable: build(:switchboard,
+      tag.update(tagable: create(:switchboard, tag: tag,
         ingress_protection: '22'
       ))
     end
     
-    assert tag.reload.tagable.is_a?(Switchboard)
-    assert_equal "E:EX-0005", tag.switchboard.label
+    assert tag.tagable.class == Switchboard
+    assert_equal "EX0005X", tag.switchboard.label
     assert_equal '22', tag.tagable.ingress_protection
   end
 

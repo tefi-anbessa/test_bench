@@ -66,7 +66,7 @@ guard :minitest, all_on_start: false do
   end
 
   # Watch tagable test patterns and controller concern for all tagable controller tests
-  watch('test/support/tagable_test_patterns.rb') do
+  watch('test/helpers/tagable_test_patterns.rb') do
     tagable_controller_tests
   end
   watch('app/controllers/concerns/tagables_controller.rb') do

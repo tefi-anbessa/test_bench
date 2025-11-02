@@ -1,5 +1,5 @@
 require "test_helper"
-require_relative "../support/tagable_test_patterns"
+require_relative "../helpers/tagable_test_patterns"
 
 class CablesControllerTest < ActionController::TestCase
   include TagableTestPatterns
@@ -7,7 +7,7 @@ class CablesControllerTest < ActionController::TestCase
 
   setup do
     # Set the discipline applicable to the resource, required before setup_common_test_data
-    @resource_discipline = create(:discipline, code: 'E')
+    @resource_discipline_code = :elec
     setup_common_test_data
     setup_model_specific_data
     setup_tags_and_resources
@@ -46,7 +46,6 @@ class CablesControllerTest < ActionController::TestCase
       cable: {
         cable_type_id: @cable_type.id,
         tag: {
-          project_id: @project.id,
           discipline_id: @resource_discipline.id,
           prefix: 'EC',
           serial: 2001,

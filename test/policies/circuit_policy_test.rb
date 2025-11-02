@@ -1,124 +1,26 @@
-require 'test_helper'
+require_relative '../helpers/resource_policy_test'
 
 class CircuitPolicyTest < ActiveSupport::TestCase
-  include PolicyHelpers
-  
+  include ResourcePolicyTest
   def setup
-    setup_policy_test
-    
-    # Create electrical discipline
-    @e = create(:discipline, :e)
-    
-    # Create a switchboard and circuit with a tag associated with the project
-    @switchboard = create(:switchboard, tag: create(:tag, :unique_tag, prefix: "EX", discipline: @e, project: @project))
-    @circuit = create(:circuit, switchboard: @switchboard)
-    
-    # Create a switchboard and circuit in another project
-    @other_switchboard = create(:switchboard, tag: create(:tag, :unique_tag, prefix: "EX", discipline: @e, 
-                                    project: @other_project))
-    @other_circuit = create(:circuit, switchboard: @other_switchboard)
-
-    # Add electrical_designer role
-    @electrical_designer = create(:user)
-    @electrical_designer.grant(:team_member, @project)
-    @electrical_designer.grant(:electrical_designer)
+    setup_resource_policy_test
   end
   
-  # Helper to create policy with user and project context
-  def policy(user, project, record = nil)
-    user_context = ApplicationPolicy::UserContext.new(user, project)
-    CircuitPolicy.new(user_context, record || @circuit)
+  def resource_class
+    Circuit
   end
 
-  # Scope Tests
-  test 'scope returns circuits for current project' do
-    scope = CircuitPolicy::Scope.new(ApplicationPolicy::UserContext.new(@team_member, @project), Circuit).resolve
-    assert_includes scope, @circuit
-    refute_includes scope, @other_circuit
+  def create_resource(tag:)
+    # Use circuit factory to create circuit with tag association, using default prefix and unique serial.
+    create(:circuit, switchboard: create(:switchboard, tag: tag))
   end
 
-  test 'scope returns empty when no project is selected' do
-    scope = CircuitPolicy::Scope.new(ApplicationPolicy::UserContext.new(@team_member, nil), Circuit).resolve
-    assert_empty scope
+  def new_resource(discipline:)
+    # Use circuit factory to build new circuit belonging to switchboard with tag association, using default prefix and unique serial.
+    build(:circuit, switchboard: create(:switchboard, tag: create(:tag, discipline: discipline)))
   end
 
-  # Index Tests
-  test 'index? is available to admin and app_owner without current project' do
-    assert policy(@admin, nil).index?
-    assert policy(@app_owner, nil).index?
-  end
-
-  test 'index? is available to users with a project role' do
-    assert policy(@team_member, @project).index?
-  end
-
-  test 'index? requires user to have a project role' do
-    refute policy(@regular_user, @project).index?
-  end
-  
-  test 'index? denies when no project is selected' do
-    refute policy(@team_member, nil).index?
-  end
-  
-  # Show Tests
-  test 'show? allows viewing in current project' do
-    assert policy(@team_member, @project, @switchboard).show?
-  end
-  
-  test 'show? denies viewing in other projects' do
-    refute policy(@team_member, @project, @other_switchboard).show?
-  end
-  
-  test 'show? denies when no project is selected' do
-    refute policy(@team_member, nil, @switchboard).show?
-  end
-
-  # New Tests defer to create
-  # Create Tests
-  test 'create allows users with electrical designer role' do
-    assert policy(@electrical_designer, @project, Circuit.new).create?
-  end
-
-  test 'create denies users without electrical designer role' do
-    refute policy(@regular_user, @project, Circuit.new).create?
-    refute policy(@team_member, @project, Circuit.new).create?
-    refute policy(nil, @project, Circuit.new).create?
-  end
-
-  # Edit Tests defer to update
-  # Update Tests
-  test 'update allows users with electrical designer role' do
-    assert policy(@electrical_designer, @project, @circuit).update?
-  end
-
-  test 'update denies users without electrical designer role' do
-    refute policy(@regular_user, @project, @circuit).update?
-    refute policy(@team_member, @project, @circuit).update?
-    refute policy(nil, @project, @circuit).update?
-  end
-
-  # Destroy Tests
-  # Uses default ApplicationPolicy behavior (admin and app_owner only)
-  test 'destroy allows admin and app_owner' do
-    assert policy(@admin, @project, @circuit).destroy?
-    assert policy(@app_owner, @project, @circuit).destroy?
-  end
-
-  test 'destroy denies non-admin users' do
-    
-    # Electrical designers cannot destroy
-    refute policy(@electrical_designer, @project, @circuit).destroy?
-    
-    # Regular users cannot destroy
-    refute policy(@regular_user, @project, @circuit).destroy?
-    
-    # Project owners cannot destroy
-    refute policy(@project_owner, @project, @circuit).destroy?
-    
-    # Team members cannot destroy
-    refute policy(@team_member, @project, @circuit).destroy?
-    
-    # Unauthenticated users cannot destroy
-    refute policy(nil, @project, @circuit).destroy?
+  def self.required_role
+    :electrical_designer
   end
 end

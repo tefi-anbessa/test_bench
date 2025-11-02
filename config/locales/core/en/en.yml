@@ -74,6 +74,7 @@ en:
       destroy:
         notice: "%{resource_name} was successfully deleted."
         alert: "Could not delete %{resource_name}."
+    # Prefer these translations without actions scope.
     create:
       notice: "%{resource_name} was successfully created."
       alert: "Could not create %{resource_name}."
@@ -94,7 +95,6 @@ en:
     not_found: "%{resource_name} not found."
     required: "%{resource_name} is required."
     
-
   # Resource specific flash messages
     tags:
       tagable_already_assigned: "Tag %{tag} already has a %{resource_name} assigned"

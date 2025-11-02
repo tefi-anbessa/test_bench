@@ -22,7 +22,7 @@
               <%= link_to cable_path(prev_cable),
                     disabled: disabled,
                     class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
-                    title: "#{t('actions.previous')}: #{prev_cable.tag.full_tag}" do %>
+                    title: "#{t('actions.previous')}: #{prev_cable.label}" do %>
                 <%== icon('box-arrow-in-left') %>
                 <span class="d-none d-md-inline">
                   <%= t('actions.previous') %>
@@ -56,7 +56,7 @@
               <%= link_to cable_path(next_cable),
                     disabled: disabled,
                     class: "btn btn-sm btn-outline-secondary me-2 #{'disabled' if disabled}",
-                    title: "#{t('actions.next')}: #{next_cable.tag.full_tag}" do %>
+                    title: "#{t('actions.next')}: #{next_cable.label}" do %>
                 <span class="d-none d-md-inline">
                   <%= t('actions.next') %>
                 </span>

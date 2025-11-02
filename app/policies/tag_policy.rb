@@ -5,52 +5,78 @@ class TagPolicy < ApplicationPolicy
 
   class Scope < ApplicationPolicy::Scope
     def resolve
-      return scope.none unless @current_project
-      scope.where(project: @current_project)
+      if current_project.present? && user_has_project_role?(current_project)
+        scope.joins(:discipline).where(disciplines: { project_id: current_project.id })
+      elsif user&.is_admin? || user&.is_app_owner?
+        scope.all
+      else
+        scope.none
+      end
     end
-
   end
 
   def index?
-    # Admin and app_owner can view index
-    return true if user&.is_admin? || user&.is_app_owner?
-    # Any user with a role on the project can view tag index
-    current_project.present? && user_has_project_role?
+    # Protect against url injection
+    return false if user.nil?
+    if current_project.present?
+      user_has_project_role?(current_project)
+    else
+      # Admin and app_owner can view when current project is nil
+      user&.is_admin? || user&.is_app_owner?
+    end
   end
 
   def show?
-    # Admin and app_owner can view anything
-    return true if user&.is_admin? || user&.is_app_owner?
-    
-    # Others can only view if they have a project role and the cable type belongs to the current project
-    return false unless user && current_project && tag
-    user_has_project_role? && tag.project == current_project
+    # Protect against url injection
+    return false if user.nil?
+    if current_project.present?
+      user_has_project_role?(current_project) && tag.discipline&.project == current_project
+    else
+      # Admin and app_owner can view when current project is nil
+      user&.is_admin? || user&.is_app_owner?
+    end
   end
 
   def new?
-    create?
+    # Protect against url injection
+    return false if user.nil?
+    if current_project.present?
+      # Any user with project role can view tags form
+      user_has_project_role?(current_project)
+    else
+      # Admin and app_owner can view form when current project is nil
+      user&.is_admin? || user&.is_app_owner?
+    end
   end
 
   def create?
     # Protect against url injection
-    return false if user.nil? || current_project.nil?
-    # Admin and app_owner can create
-    return true if user&.is_admin? || user&.is_app_owner?
-    # Any user with a role on the project can create tags
-    current_project.present? && user_has_project_role?
+    return false if user.nil?
+
+    if current_project.present?
+      user_has_project_role?(current_project) && tag.discipline&.project == current_project
+    else
+      # Admin and app_owner can view when current project is nil
+      user&.is_admin? || user&.is_app_owner?
+    end
   end
 
   def edit?
+    # This policy is delegated to update, and is therefore not tested. 
+    # If the policy is changed, be sure to write policy tests
     update?
   end
 
   def update?
     # Protect against url injection
-    return false if user.nil? || current_project.nil?
-    # Admin and app_owner can update
-    return true if user&.is_admin? || user&.is_app_owner?
-    # Any user with a role on the project can update tags
-    current_project.present? && user_has_project_role?
+    return false if user.nil?
+
+    if current_project.present?
+      user_has_project_role?(current_project) && tag.discipline&.project == current_project
+    else
+      # Admin and app_owner can view when current project is nil
+      user&.is_admin? || user&.is_app_owner?
+    end
   end
   
   def destroy?

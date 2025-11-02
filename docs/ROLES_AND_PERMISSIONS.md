@@ -1,17 +1,21 @@
 # Roles and Permissions Guide
 
 ## Overview
+
 This document outlines the role-based access control (RBAC) system implemented in the application. 
 
 ## Roles
+
 The application RBAC system uses the rolify gem for role management.
 
 ### Constraints
-The permitted roles are constrained by a constant hash built from `config/constants/role.yml`. Assignment of a role name other than those permitted in the constant set up will result in a permissions error. Details are in the implementation section.
+
+The roles are constrained by a constant hash built from `config/constants/role.yml`. Assignment of a role name other than those permitted in the constant set up will result in a permissions error. Details are in the implementation section.
 
 ### Hierarchy
 
 #### System Roles (Global)
+
 1. **App Owner**
    - Full system access
    - Can manage all resources and users
@@ -23,10 +27,12 @@ The permitted roles are constrained by a constant hash built from `config/consta
    - Cannot modify App Owner accounts
 
 #### Resource Wide Roles
+
 - The RBAC system caters for resource wide roles, but none have been implemented to date.
 - A resource wide role would give a user access to all instances of a resource, e.g. all projects or all tags.
 
 #### Resource Instance Roles
+
 - Permissions are primarily managed through the project resource, with users requiring a role on a specific project to interact with that project's data.
 
 1. **Project Owner**
@@ -40,6 +46,7 @@ The permitted roles are constrained by a constant hash built from `config/consta
    - Cannot manage team members
 
 #### Functional Roles (Global or Resource scoped)
+
 1. **Electrical Designer**
    - Required, in addition to project team member role, for content modifying actions on electrical resources.
 
@@ -49,50 +56,54 @@ The permitted roles are constrained by a constant hash built from `config/consta
 ### Role Assignment
 
 #### New Users
+
 - New users are created without any roles by default
 - An administrator must explicitly assign appropriate roles to each new user
 
 #### User Interface
+
 - The user interface for granting and revoking global and resource wide roles is the new roles form, available from the roles index if authorised.
 - It is only accessible to admins and app_owner.
 - The user interface for instance specific roles is a sub_form on the resource instance edit page, present only if the user has the required permissions to grant or revoke roles on that instance.
 
 ## Permissions and Scopes
+
 The application RBAC system uses the pundit gem for permissions and scopes.
 
 ### Policies
+
 - Pundit uses policy objects, one for each resource to be managed.
 - Policies provide a boolean permission for each action in a resource's controller.
 - Policies also provide a scope object which enables restricting the list of resources available to a user.
-- By design, pundit policies use the signed in user (current user) and the resource being managed to determine permissions. 
-- Policy permission logic will check the current user's assigned roles to determine access to actions on resource. 
+- By design, pundit policies use the signed in user (current user) and the resource being managed to determine permissions.
+- Policy permission logic will check the current user's assigned roles to determine access to actions on resource.
 - This application has extended pundit to include the current project as a context for permissions. This is used to limit visibility to only include resource instances that belong to the current project, and to ensure that users are assigned to the current project team before allowing actions.
 - Permissions are generally managed through the project resource. A user must have a role on a project to perform actions on resources within that project. A functional role may also be required depending on the resource and action.
 - Index and show actions are generally available to any user with any role on the current project.
 - Content modification actions (new/create and edit/update) are usually available only to users with a role on the current project, and a functional role appropriate to the resource and action.
 
 #### Destroy Action Rules
+
 - The application uses a revision control system for most data.
 - Deletion of data is restricted to admins, and only used for database repairs or similar, to preserve the data history.
 - Only `app_owner` can destroy projects due to the significant impact of this action.
-- **Exception for Roles**: 
+- **Exception for Roles**:
  - Although internally treated as a resource, with rolify rules and a pundit policy, the role model is core to the machinery of the RBAC and is not a user available resource.
  - Roles are destroyed when revoked without history tracking.
  - Role destruction permissions are resource-specific.
-
 
 ## PERMISSIONS AND SCOPE FOR ROLE MODEL
 
 - Permissions for the role model are a special case, because they to a large extent control assignment of other permissions.
 - User with :app_owner role is effectively a super admin, and can assign any role to any user, access all view and model resources and complete any task. This would typically be somone who has access to console commands, such as a developer or sysadmin. This role should be used with care for security, and limited to a core of trusted systems personnel.
 - User with :admin role also can access all view and model resources and complete any task. User with :admin role is typically responsible for most other role assignments, but cannot assign :app_owner and :admin roles.  This role should also be used with care for security.
-- User with :project_owner role can assign roles to users, specific to their own project.
-- Scope for admin and app_owner roles includes all roles. 
+- User with :project_manager role can assign roles to users, specific to their own project.
+- Scope for admin and app_owner roles includes all roles.
 - Scope for other users includes all of their own roles, plus all roles linked to the current project.
 
 ### Permission Matrix for Role Model
 
-| Action                         | App Owner | Admin | Project Owner   | Team Member        |
+| Action                         | App Owner | Admin | Project Manager | Team Member        |
 |--------------------------------|-----------|-------|-----------------|--------------------|
 | View global and resource roles | ✓         | ✓     | ✓               | ✓                  |
 | Grant global :app_owner role   | ✓         | x     | x               | x                  |
@@ -102,12 +113,12 @@ The application RBAC system uses the pundit gem for permissions and scopes.
 | Grant other global roles       | ✓         | ✓     | x               | x                  |
 | Revoke other global roles      | ✓         | ✓     | x               | x                  |
 | View resource specific roles   | ✓         | ✓     | ✓               | ✓ (in project team)|
-| Grant :project_owner role      | ✓         | ✓     | x               | x                  |
-| Revoke :project_owner role     | ✓         | ✓     | x               | x                  |
+| Grant :project_manager role    | ✓         | ✓     | x               | x                  |
+| Revoke :project_manager role   | ✓         | ✓     | x               | x                  |
 | Grant other permitted roles    |           |       |                 | x                  |
-| on project instance            | ✓         | ✓     | ✓ (own project) | x                  |
+|  on project instance           | ✓         | ✓     | ✓ (own project) | x                  |
 | Revoke other permitted roles   |           |       |                 | x                  |
-| on project instance            | ✓         | ✓     | ✓ (own project) | x                  |
+|  on project instance           | ✓         | ✓     | ✓ (own project) | x                  |
 |--------------------------------|-----------|-------|-----------------|--------------------|
 
 ## PERMISSIONS AND SCOPE FOR PROJECT MODEL
@@ -115,18 +126,18 @@ The application RBAC system uses the pundit gem for permissions and scopes.
 - Permissions for the project model are another special case, because they control permissions to most subsidiary resources.
 - Only a user with :admin or :app_owner role can create a new project.
 - Only a user with :app_owner role can delete a project, because this would result in destruction of all subsidiary data.
-- User with :project_owner role can edit the project title, description, and metrics for the project instance where the role is held.
+- User with :project_manager role can edit the project title, description, and metrics for the project instance where the role is held.
 - Scope for the project model includes all projects for which the user has any role. This is used in listing available projects for current project selection
 
 ### Permission Matrix for Project Model
 
-| Action                         | App Owner | Admin | Project Owner | Team Member         |
-|--------------------------------|-----------|-------|---------------|---------------------|
-| View Project                   | ✓         | ✓     | ✓ (own)       | ✓ (in project team) |
-| Create Project                 | ✓         | ✓     | x             | x                   |
-| Edit Project                   | ✓         | ✓     | ✓ (own)       | x                   |
-| Delete Project                 | ✓         | x     | x             | x                   |
-|--------------------------------|-----------|-------|---------------|---------------------|
+| Action                         | App Owner | Admin | Project Manager | Team Member         |
+|--------------------------------|-----------|-------|-----------------|---------------------|
+| View Project                   | ✓         | ✓     | ✓ (own)         | ✓ (in project team) |
+| Create Project                 | ✓         | ✓     | x               | x                   |
+| Edit Project                   | ✓         | ✓     | ✓ (own)         | x                   |
+| Delete Project                 | ✓         | x     | x               | x                   |
+|--------------------------------|-----------|-------|-----------------|---------------------|
 
 
 ## PERMISSIONS AND SCOPE FOR TAG MODEL
@@ -137,7 +148,7 @@ The application RBAC system uses the pundit gem for permissions and scopes.
 
 ### Permission Matrix for Tag Model
 
-| Action                         | App Owner | Admin | Project Owner     | Team Member       |
+| Action                         | App Owner | Admin | Project Manager   | Team Member       |
 |                                |           |       | (current project) | (current project) |
 |--------------------------------|-----------|-------|-------------------|-------------------|
 | View Tag                       | ✓         | ✓     | ✓                 | ✓                 |
@@ -156,7 +167,7 @@ The application RBAC system uses the pundit gem for permissions and scopes.
 
 ### Permission Matrix for Electrical Models
 
-| Action                         | App Owner | Admin | Project Owner     | Team Member       | Electrical |
+| Action                         | App Owner | Admin | Project Manager   | Team Member       | Electrical |
 |                                |           |       | (current project) | (current project) | Designer   |
 |--------------------------------|-----------|-------|-------------------|-------------------|------------|
 | View Cable Type                | ✓         | ✓     | ✓                 | ✓                 | ✓          |
@@ -165,20 +176,22 @@ The application RBAC system uses the pundit gem for permissions and scopes.
 | Delete Cable Type              | ✓         | ✓     | x                 | x                 | x          |
 |--------------------------------|-----------|-------|-------------------|-------------------|------------|
 
-
 ## Implementation Guidance
-- Read the gem documentation for rolify (https://github.com/RolifyCommunity/rolify) and pundit (https://github.com/varvet/pundit) to understand them.
+
+- Read the gem documentation for [rolify](https://github.com/RolifyCommunity/rolify) and [pundit](https://github.com/varvet/pundit) to understand them.
 
 ### Rolify
+
 - To control access to any resource, start by adding "resourcify" to the model class.
 - Take care with this decision, as resourcfiy will require a lot of work to implement.
-- Prefer to inherit roles and permissions from existing resources wherever possible. 
+- Prefer to inherit roles and permissions from existing resources wherever possible.
 - Most resources can inherit from Project.
-- Update the constants definition in config/constants/role.yml to add any new roles, or modify availabilty of roles to specific resources. 
+- Update the constants definition in config/constants/role.yml to add any new roles, or modify availabilty of roles to specific resources.
 - This constant hash determines what role name options are available in the role assignment forms, and is also used to validate role assignments before application, for security.
 - Methods for listing valid roles of different types, and for checking role validity for a resource are provided in the Role class.
 
 ### Pundit
+
 - When adding a new resource (resourcified or not) and controller, consider whether a new Pundit policy is required.
 - Pundit policies determine access to controller actions based on the logged in user, the role/s assigned to the user, and the current project.
 - Note that including the current project in the pundit context is not rails/pundit convention, it is an extension for this application.
@@ -187,16 +200,18 @@ The application RBAC system uses the pundit gem for permissions and scopes.
 ### Synonyms
 
 Rolify provides various synonyms or short cut names for the role methods. The following synonyms are preferred in the implementation:
+
  - grant is a synonym for add_role and is preferred. 
  - revoke is a synonym for remove_role and is preferred. 
  - is_[:name]? is a synonym for has_role?[:name]
 
 ### Assigning and Revoking Roles
+
 Only to be used within the roles controller and test setup:
 
 ```ruby
 # Make a user a project owner (only App Owner can do this)
-user.grant(:project_owner, project)
+user.grant(:project_manager, project)
 
 # Make a user a team member
 user.grant(:team_member, project)
@@ -215,6 +230,7 @@ user.revoke(:admin) if current_user.app_owner?
 ```
 
 ### Checking Permissions Using Pundit Methods
+
 ```ruby
 # In controllers
 authorize @project
@@ -229,6 +245,7 @@ def edit?
   user.is_app_owner? || user.is_admin? || user.is_project_owner?(@project)
 end
 ```
+
 ### Using Scopes
 
 ```ruby

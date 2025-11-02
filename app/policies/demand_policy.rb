@@ -1,4 +1,4 @@
-class DemandPolicy < ElectricalResourcePolicy
+class DemandPolicy < ResourcePolicy
   # Returns the demand record
   def demand
     record
@@ -6,7 +6,7 @@ class DemandPolicy < ElectricalResourcePolicy
   
   # Get the demandable object (Motor, LightCct, etc.)
   def demandable
-    demand.demandable
+    demand&.demandable
   end
   
   # Override tag method to use demandable's tag association
@@ -16,33 +16,54 @@ class DemandPolicy < ElectricalResourcePolicy
   
   class Scope < ApplicationPolicy::Scope
     def resolve
-        return scope.none unless current_project
-      
-        # First, get all tagable IDs from the current project
-        tagable_ids = current_project.tags.pluck(:tagable_type, :tagable_id)
-        return scope.none if tagable_ids.empty?
-      
-        # Convert to a hash of { type => [ids] }
-        type_to_ids = tagable_ids.each_with_object(Hash.new { |h, k| h[k] = [] }) do |(type, id), hash|
-          hash[type] << id
-        end
-      
-        # Build a single query with OR conditions for each type
-        query = type_to_ids.map do |type, ids|
-          scope.where(demandable_type: type, demandable_id: ids)
-        end.reduce(:or) || scope.none
-      
-        # Execute the combined query
-        query
+      if current_project.present? && user_has_project_role?(current_project)
+        # Get all demandables that belong to the current project through their tags
+
+         scope.joins('INNER JOIN tags ON demands.demandable_type = tags.tagable_type AND 
+            demands.demandable_id = tags.tagable_id')
+            .joins('INNER JOIN disciplines ON tags.discipline_id = disciplines.id')
+            .where(disciplines: { project_id: current_project.id })
+      elsif user&.is_admin? || user&.is_app_owner?
+        scope.all
+      else
+        scope.none
       end
-  end
-  
-
-  def show?
-    return true if user&.is_admin? || user&.is_app_owner?
-    return false unless user && current_project && record
-    user_has_project_role? && record.demandable.tag.project == current_project
+    end
   end
 
-  # Inherit all other behavior from ElectricalResourcePolicy
+  def new?
+    # Protect against url injection
+    return false if user.nil?
+    if current_project.present?
+      user_is_accredited?(current_project) 
+    else
+      # Admin and app_owner can create when current project is nil
+      user&.is_admin? || user&.is_app_owner?
+    end
+  end
+
+  def create?
+    # Protect against url injection
+    return false if user.nil?
+    if current_project.present?
+      user_is_accredited?(current_project) && 
+        demandable&.tag&.discipline&.project == current_project
+    else
+      # Admin and app_owner can create when current project is nil
+      user&.is_admin? || user&.is_app_owner?
+    end
+  end
+
+  def update?
+    # Protect against url injection
+    return false if user.nil?
+    if current_project.present?
+      user_is_accredited?(current_project) && 
+        demandable&.tag&.discipline&.project == current_project
+    else
+      # Admin and app_owner can create when current project is nil
+      user&.is_admin? || user&.is_app_owner?
+    end
+  end
+  # Inherit all other behavior from ResourcePolicy
 end

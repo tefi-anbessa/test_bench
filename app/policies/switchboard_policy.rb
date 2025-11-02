@@ -1,4 +1,4 @@
-class SwitchboardPolicy < ElectricalResourcePolicy
+class SwitchboardPolicy < ResourcePolicy
   # Returns the switchboard record
   def switchboard
     record
@@ -9,7 +9,7 @@ class SwitchboardPolicy < ElectricalResourcePolicy
     switchboard.tag
   end
   
-  # No need to override Scope as it's already defined in ElectricalResourcePolicy
+  # No need to override Scope as it's already defined in ResourcePolicy
   
   # No need to override edit?/update? as the parent implementation is sufficient
   

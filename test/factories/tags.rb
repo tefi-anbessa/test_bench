@@ -6,41 +6,42 @@ FactoryBot.define do
     sequence(:serial) { |n| n % 10000 }  # 0-9999
     suffix { '' }    # Default suffix if not provided
     service { "Test #{prefix}-#{'%04d' % serial}#{suffix}" }
-    stage { rand(0..3) }  # 0-3 to match seeds.rb phase
+    stage { 0 }  # Default stage to 0
     notes { nil }
+    discipline
 
-    # Require project and discipline to be passed in explicitly
-    # project - must be provided
-    # discipline - must be provided
+    # Allow passing project through to discipline
+    transient do
+      project { nil }
+    end
 
-    trait :with_stage do
-      stage { rand(1..3) }  # 1-3 to match seeds.rb phase range
+    # Initialize discipline with project if provided
+    after(:build) do |tag, evaluator|
+      if evaluator.project && !evaluator.discipline
+        tag.discipline = build(:discipline, project: evaluator.project)
+      end
     end
 
     trait :unique_tag do
       # Override the serial with a database-aware sequence
-      serial { generate_unique_serial(prefix, project, discipline) }
+      after(:build) do |tag, _evaluator|
+        tag.serial = generate_unique_serial(tag.prefix, tag.discipline)
+      end
     end
 
     # Factory for creating a full tag with all attributes
     factory :complete_tag do
-      with_stage
       notes { Faker::Lorem.paragraph(sentence_count: 2) }
     end
   end
 end
 
-def generate_unique_serial(prefix, project, discipline)
-  # Find the next available serial for this project, discipline, prefix combination
-  project_id = project&.id || Project.first&.id
-  discipline_id = discipline&.id || Discipline.first&.id
-
-  return 1 unless project_id && discipline_id
+def generate_unique_serial(prefix, discipline)
+  return 1 unless discipline
 
   # Find all existing serial numbers for this combination
   existing_serials = Tag.where(
-    project_id: project_id,
-    discipline_id: discipline_id,
+    discipline_id: discipline.id,
     prefix: prefix
   ).pluck(:serial)
 

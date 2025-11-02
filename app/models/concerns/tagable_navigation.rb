@@ -31,35 +31,33 @@ module TagableNavigation
     
     sql = <<-SQL
       WITH ordered_tags AS (
-        SELECT id,
-               discipline_id,
-               loop_id,
-               prefix,
-               COALESCE(suffix, '') as suffix_sort,
-               tagable_type,
-               LAG(id) OVER (
-                 PARTITION BY tagable_type 
-                 ORDER BY discipline_id, loop_id, prefix, COALESCE(suffix, '')
-               ) as prev_id,
-               LEAD(id) OVER (
-                 PARTITION BY tagable_type 
-                 ORDER BY discipline_id, loop_id, prefix, COALESCE(suffix, '')
-               ) as next_id
-        FROM tags
-        WHERE project_id = :project_id
-          AND tagable_type = :model_name
+        SELECT t.id,
+              t.discipline_id,
+              t.loop_id,
+              t.prefix,
+              COALESCE(t.suffix, '') as suffix_sort,
+              t.tagable_type,
+              LAG(t.id) OVER (
+                PARTITION BY t.tagable_type 
+                ORDER BY d.project_id, t.discipline_id, t.loop_id, t.prefix, COALESCE(t.suffix, '')
+              ) as prev_id,
+              LEAD(t.id) OVER (
+                PARTITION BY t.tagable_type 
+                ORDER BY d.project_id, t.discipline_id, t.loop_id, t.prefix, COALESCE(t.suffix, '')
+              ) as next_id
+        FROM tags t
+        INNER JOIN disciplines d ON t.discipline_id = d.id
+        WHERE d.project_id = :project_id
+          AND t.tagable_type = :model_name
       )
-      SELECT #{model_class.table_name}.*
-      FROM #{model_class.table_name}
-      JOIN tags ON #{model_class.table_name}.id = tags.tagable_id AND tags.tagable_type = :model_name
-      JOIN ordered_tags ot ON tags.id = ot.#{column}
-      WHERE ot.id = :current_tag_id
+      SELECT * FROM ordered_tags
+      WHERE id = :current_tag_id
     SQL
     
     model_class.find_by_sql([
       sql, 
       { 
-        project_id: tag.project_id, 
+        project_id: tag.discipline.project_id, 
         current_tag_id: tag.id,
         model_name: model_class.name
       }

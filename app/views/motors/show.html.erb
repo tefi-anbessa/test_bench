@@ -164,7 +164,7 @@
                             <%= text %>
                             <%== icon('box-arrow-in-down-right') %>
                         <% end %>
-                      <% elsif @motor.tag&.present? %> # Cannot create a new demand without a tag.
+                      <% elsif @motor.tag&.present? %> <!-- Cannot create a new demand without a tag. -->
                         <% text = t("actions.link", resource: t("activerecord.models.demand")) %>
                         <% if policy(Demand).new? %>
                           <%= link_to new_tag_demand_path(@motor.tag.id),

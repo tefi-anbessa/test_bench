@@ -2,57 +2,69 @@ require "test_helper"
 
 class DemandTest < ActiveSupport::TestCase
   setup do
-    project = create(:project)
-    discipline = create(:discipline, code: 'E', name: 'Electrical')
-    tag = create(:tag, :unique_tag, project: project, discipline: discipline, prefix: 'EL')
-    @light_cct = create(:light_cct, tag: tag)
+    @project = create(:project)
+    @discipline = create(:discipline, code: 'E', name: 'Electrical', project: @project)
+    @tag = create(:tag, :unique_tag, discipline: @discipline, prefix: 'EL')
+    @light_cct = create(:light_cct, tag: @tag)
+    @demand = create(:demand, demandable: @light_cct)
+  end
+
+  # Factory tests
+  test "setup should be valid" do
+    assert @project.valid?
+    assert @discipline.valid?
+    assert @tag.valid?
+    assert @light_cct.valid?
+    assert @demand.valid?
+  end
+
+  test "factory default should create demand with valid attributes" do
+    demand = build(:demand)
+    assert demand.valid?
   end
 
   # Test validations
-  test "should require basis" do
-    demand = build(:demand, basis: nil, demandable: @light_cct)
-    assert_not demand.valid?, "Demand should not be valid without basis. Errors: #{demand.errors.full_messages}"
-    assert_includes demand.errors[:basis], "can't be blank"
+  test "basis must be present" do
+    @demand.basis = nil
+    refute @demand.valid?, "Demand should not be valid without basis. Errors: #{@demand.errors.full_messages}"
+    assert_includes @demand.errors[:basis], I18n.t("errors.messages.blank")
   end
 
-  test "should require config" do
-    demand = build(:demand, config: nil, demandable: @light_cct)
-    assert_not demand.valid?
-    assert_includes demand.errors[:config], "can't be blank"
+  test "config must be present" do
+    @demand.config = nil
+    refute @demand.valid?, "Demand should not be valid without config. Errors: #{@demand.errors.full_messages}"
+    assert_includes @demand.errors[:config], I18n.t("errors.messages.blank")
   end
 
-  test "should validate power factor range" do
-    demand = build(:demand, :power_pf_basis, power_factor: -1.1, demandable: @light_cct)
-    assert_not demand.valid?, "Demand with power factor -1.1 should not be valid. Errors: #{demand.errors.full_messages}"
+  test "power factor must be in range" do
+    @demand.power_factor = -1.1
+    refute @demand.valid?, "Demand with power factor -1.1 should not be valid. Errors: #{@demand.errors.full_messages}"
+    assert_includes @demand.errors[:power_factor], I18n.t("errors.messages.in", count: -1.0..1.0)
     
-    demand.power_factor = 1.1
-    assert_not demand.valid?, "Demand with power factor 1.1 should not be valid. Errors: #{demand.errors.full_messages}"
-    
-    demand.power_factor = 0.8
-    assert demand.valid?, "Demand with power factor 0.8 should be valid. Errors: #{demand.errors.full_messages}"
+    @demand.power_factor = 1.1
+    refute @demand.valid?, "Demand with power factor 1.1 should not be valid. Errors: #{@demand.errors.full_messages}"
+    assert_includes @demand.errors[:power_factor], I18n.t("errors.messages.in", count: -1.0..1.0)
+
+    @demand.power_factor = 0.8
+    assert @demand.valid?
   end
 
-  test "should validate power factor not zero" do
-    demand = build(:demand, :power_pf_basis, power_factor: 0.0, demandable: @light_cct)
-    assert_not demand.valid?, "Demand with power factor 0.0 should not be valid. Errors: #{demand.errors.full_messages}"
-    assert_includes demand.errors[:power_factor], "Power factor of zero will cause calculation errors"
+  test "power factor must not be zero" do
+    @demand.power_factor = 0.0
+    refute @demand.valid?, "Demand with power factor 0.0 should not be valid. Errors: #{@demand.errors.full_messages}"
+    assert_includes @demand.errors[:power_factor], I18n.t("activerecord.errors.messages.attributes.demand.power_factor.zero_pf")
   end
 
-  test "should validate duty range" do
-    demand = build(:demand, :power_pf_basis, duty: -0.1, demandable: @light_cct)
-    assert_not demand.valid?, "Demand with duty -0.1 should not be valid. Errors: #{demand.errors.full_messages}"
+  test "duty must be in range" do
+    @demand.duty = -0.1
+    refute @demand.valid?, "Demand with duty -0.1 should not be valid. Errors: #{@demand.errors.full_messages}"
+    assert_includes @demand.errors[:duty], I18n.t("errors.messages.in", count: 0.0..1.0)
     
-    demand.duty = 1.1
-    assert_not demand.valid?, "Demand with duty 1.1 should not be valid. Errors: #{demand.errors.full_messages}"
+    @demand.duty = 1.1
+    refute @demand.valid?, "Demand with duty 1.1 should not be valid. Errors: #{@demand.errors.full_messages}"
     
-    demand.duty = 0.5
-    assert demand.valid?, "Demand with duty 0.5 should be valid. Errors: #{demand.errors.full_messages}"
-  end
-
-  test "non-standard supply should override blank" do
-    demand = build(:demand, :power_pf_basis, supply: "", other_supply: "250.0", demandable: @light_cct)
-    assert demand.valid?, "Demand with other_supply should be valid. Errors: #{demand.errors.full_messages}"
-    assert_equal 250.0, demand.supply
+    @demand.duty = 0.5
+    assert @demand.valid?
   end
 
   # Test delegated type functionality
@@ -94,15 +106,10 @@ class DemandTest < ActiveSupport::TestCase
   end
 
   # Test that the demand is destroyed when demandable is destroyed
-  test "should require demandable to have a tag" do
-    # Create a project and discipline for the tag
-    project = create(:project)
-    discipline = Discipline.find_or_create_by(code: 'E')
-    
+  test "should require demandable to have a tag" do    
     # Create a tag without a tagable
     tag = create(:tag, :unique_tag,
-      project: project,
-      discipline: discipline,
+      discipline: @discipline,
       prefix: 'EL',
       service: 'Test Light Circuit'
     )
@@ -117,8 +124,11 @@ class DemandTest < ActiveSupport::TestCase
     demand = build(:demand, demandable: demandable.reload)
     
     # Should not be valid because demandable has no tag
-    assert_not demand.valid?, "Demand should not be valid with demandable without a tag"
-    assert_includes demand.errors[:base], "Demandable must have a tag"
+    refute demand.valid?, "Demand should not be valid with demandable without a tag"
+    # puts "Demand errors: #{demand.errors.full_messages}"
+    assert_includes demand.errors[:base], 
+          I18n.t("activerecord.errors.messages.attributes.demand.demandable.tag_association",
+                  model: demandable.class.model_name.human)
     
     # Now assign the tag and it should be valid
     tag.update_columns(tagable_id: demandable.id, tagable_type: 'LightCct')
@@ -136,13 +146,12 @@ class DemandTest < ActiveSupport::TestCase
     
     # Create a new light_cct with a unique tag
     light_cct = create(:light_cct, 
-      light_fitting_type: 'standard',
+      light_fitting_type: :general,
       quantity: 4,
       tag_attributes: {
         prefix: 'EL',
         serial: 9998,  # Ensure this is unique
         service: 'TEST DESTROY DEMAND',
-        project: project,
         discipline: discipline,
         stage: 1
       }
@@ -158,7 +167,7 @@ class DemandTest < ActiveSupport::TestCase
     )
     
     # Verify the demand was created and associated
-    assert_not_nil light_cct.demand, "LightCct should have a demand"
+    refute_nil light_cct.demand, "LightCct should have a demand"
     assert_equal demand.id, light_cct.demand.id, "Demand should be associated with light_cct"
     
     # Get the current demand count

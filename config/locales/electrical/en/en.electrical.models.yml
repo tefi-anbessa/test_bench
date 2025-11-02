@@ -152,3 +152,11 @@ en:
         quantity:         "Quantity"
         notes:            "Notes"
         notes_help:       "Record additional light circuit related design references here"
+    errors:
+      messages:
+        attributes:
+          demand:
+            power_factor:
+              zero_pf: "Power factor of zero will cause calculation errors"
+            demandable:
+              tag_association: "%{model} must have a tag to associate with load"
