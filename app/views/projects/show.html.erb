@@ -7,7 +7,7 @@
         <%= link_to projects_path,
               class: "icon-link btn btn-sm btn-secondary actions",
               title: t('actions.index') do %>
-          <%== icon('list-columns-reverse') %>
+          <%== bs_icon('list-columns-reverse') %>
           <%= t('actions.index') %>
         <% end %>
       </li>
@@ -17,7 +17,7 @@
           <%= link_to edit_project_path(@project),
                 class: "icon-link btn btn-sm btn-warning actions",
                 title: t('actions.edit') do %>
-                <%== icon('pencil') %>
+                <%== bs_icon('pencil') %>
                 <%= t('actions.edit') %>
           <% end %>
         </li>
@@ -29,7 +29,7 @@
                 class: "icon-link btn btn-sm btn-danger actions",
                 title: t('actions.delete'),
                 data: { confirm: "Are you sure? Delete cannot be undone." } do %>
-            <%== icon('trash') %>
+            <%== bs_icon('trash') %>
             <%= t('actions.delete') %>
           <% end %>
         </li>
@@ -39,7 +39,7 @@
         <%= link_to @project.prev("code"),
               class: "icon-link btn btn-sm btn-secondary actions",
               title: t('actions.previous') do %>
-          <%== icon('arrow-left') %>
+          <%== bs_icon('arrow-left') %>
           <%= t('actions.previous') %>
         <% end %>
       </li>
@@ -53,7 +53,7 @@
               class: "icon-link btn btn-sm btn-secondary actions",
               title: t('actions.next') do %>
           <%= t('actions.next') %>
-          <%== icon('arrow-right') %>
+          <%== bs_icon('arrow-right') %>
         <% end %>
       </li>
     </ul>
@@ -66,3 +66,5 @@
       </div>
     </div>
   </div>
+
+  <%= render 'disciplines/disciplines', object: @project %>

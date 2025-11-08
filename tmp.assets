@@ -1,0 +1,14 @@
+config/locales/README.md:- Choose a flag for the new language from the flag icons in app/assets/images/flags. This icon is presented in the application header for selecting locale, in case the user does not recognise the language of the text.
+config/environments/production.rb:  # Cache assets for far-future expiry since they are all digest stamped.
+config/environments/production.rb:  # config.asset_host = "http://assets.example.com"
+config/environments/development.rb:  config.assets.debug = true
+config/application.rb:    config.autoload_lib(ignore: %w[assets tasks])
+config/importmap.rb:pin "@rails/ujs", to: "https://ga.jspm.io/npm:@rails/ujs@7.1.3/app/assets/javascripts/rails-ujs.esm.js"
+config/initializers/assets.rb:# All assets in app/assets are automatically included by Propshaft.
+config/initializers/assets.rb:# using config.assets.paths << Rails.root.join('path/to/assets')
+config/initializers/assets.rb:Rails.application.config.assets.paths << Rails.root.join("node_modules")
+config/initializers/assets.rb:Rails.application.config.assets.paths << Rails.root.join("vendor", "stylesheets")
+config/initializers/assets.rb:# Precompile Bootstrap Icons assets
+config/initializers/assets.rb: Rails.application.config.assets.precompile += %w(
+config/initializers/pagy.rb:# Sprockets need to look into the pagy javascripts dir, so add it to the assets paths
+config/initializers/pagy.rb:# Rails.application.config.assets.paths << Pagy.root.join('javascripts')

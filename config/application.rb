@@ -26,6 +26,7 @@ module TestBench
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
     # Added for i18n installation
     # Path to search for translation files
     config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
@@ -33,5 +34,7 @@ module TestBench
     # Permitted locales available for the application
     I18n.available_locales = [:en, :km ,:th, :cn]
     # end i18n
+    config.assets.paths << Rails.root.join('node_modules')
+    # config.assets.pipeline = :propshaft
   end
 end

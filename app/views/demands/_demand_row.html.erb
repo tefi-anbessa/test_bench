@@ -40,7 +40,7 @@
               aria: { label: t('actions.show') },
               title: t('actions.show'),
               display: "inline" do %>
-          <%== icon('eye') %>
+          <%== bs_icon('eye') %>
         <% end %>
       <% end %>
       <% if policy(d).edit? %>
@@ -48,7 +48,7 @@
               aria: { label: t('actions.edit') },
               title: t('actions.edit'),
               display: "inline"  do %>
-          <%== icon('pencil') %>
+          <%== bs_icon('pencil') %>
         <% end %>
       <% end %>
       <% if policy(d).destroy? %>
@@ -56,7 +56,7 @@
               aria: { label: t('actions.delete') },
               title: t('actions.delete'),
               display: "inline"  do %>
-          <%== icon('trash') %>
+          <%== bs_icon('trash') %>
         <% end %>
       <% end %>
     </td>

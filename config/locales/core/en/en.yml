@@ -52,8 +52,8 @@ en:
     toggle:       "Toggle navigation"
     profile:      "Profile"
     edit:         "Edit"
-    log_out:      "Log out"
-    log_in:       "Log in"
+    log_out:      "Sign out"
+    log_in:       "Sign in"
     home:         "Home"
     about:        "About"
     help:         "Help"
@@ -109,6 +109,7 @@ en:
     none_selected: "No project is currently selected"
     selected: "Project '%{code}' is now selected"
     invalid_selection: "Please select a valid project to continue"
+    all_projects:     "All Projects" # for nil current project selection
 
   # Pundit authorization messages
   pundit:

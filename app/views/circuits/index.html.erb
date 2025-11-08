@@ -10,7 +10,7 @@
                   data: { turbo: false },
                   aria: { label: t('actions.new') },
                   title: t('actions.new') do %>
-              <%== icon('plus-square-fill') %>
+              <%== bs_icon('plus-square-fill') %>
               <%= [t('actions.new'), t('activerecord.models.circuit')].join(' ') %>
             <% end %>
           </li>
@@ -57,7 +57,7 @@
             <td><%= circuit.rating %></td>
             <td><%= circuit.curve %></td>
             <td><%= circuit.elcb %></td>
-            <td><%= circuit.contactor ? icon('check', height: '1em') : ' ' %></td>
+            <td><%= circuit.contactor ? bs_icon('check', height: '1em') : ' ' %></td>
             <td>
               <% if circuit.feeder.present? && policy(circuit.feeder).show? %>
                 <%= link_to circuit.feeder.label, cable_path(circuit.feeder) %>
@@ -79,7 +79,7 @@
                       aria: { label: t('actions.show') },
                       title: t('actions.show'),
                       display: "inline" do %>
-                        <%== icon('eye') %>
+                        <%== bs_icon('eye') %>
                       <% end %>
               <% end %>
                   
@@ -88,7 +88,7 @@
                       aria: { label: t('actions.edit') },
                       title: t('actions.edit'),
                       display: "inline"  do %>
-                        <%== icon('pencil') %>
+                        <%== bs_icon('pencil') %>
                       <% end %>
               <% end %>
                   
@@ -101,7 +101,7 @@
                       },
                       class: "btn btn-danger btn-sm icon-link",
                       title: t('actions.delete') do %>
-                  <%== icon('trash') %>
+                  <%== bs_icon('trash') %>
                 <% end %>
               <% end %>
             </td>

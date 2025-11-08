@@ -33,6 +33,7 @@ class DisciplinesController < ApplicationController
   def create
     @discipline = @project.disciplines.build(discipline_params)
     authorize @discipline
+    process_prefix_schema
 
     if @discipline.save
       flash[:success] = I18n.t('flash.actions.create.notice', resource_name: I18n.t('activerecord.models.discipline'))
@@ -55,9 +56,12 @@ class DisciplinesController < ApplicationController
 
   # PATCH/PUT /disciplines/1
   def update
+    process_prefix_schema
+    @discipline.assign_attributes(discipline_params)
     authorize @discipline
+    process_prefix_schema
     
-    if @discipline.update(discipline_params)
+    if @discipline.save
       flash[:success] = I18n.t('flash.actions.update.notice', resource_name: I18n.t('activerecord.models.discipline'))
       redirect_to @discipline
     else
@@ -90,9 +94,58 @@ class DisciplinesController < ApplicationController
       @project = @discipline.project
     end
     
+    def process_prefix_schema
+      return unless params[:discipline][:prefix_schema].present? || 
+                    params[:discipline][:use_standard_schema] == 'true'
+
+      if params[:discipline][:use_standard_schema] == 'true'
+        @discipline.prefix_schema = {
+      'name' => params[:discipline][:schema],
+      'standard' => true
+        }
+      else
+        begin
+          custom_schema = JSON.parse(params[:discipline][:prefix_schema])
+          schema_name = custom_schema['name']
+      
+          # Ensure we have a valid schema name
+          unless schema_name.present?
+            @discipline.errors.add(:prefix_schema, I18n.t('errors.messages.blank'))
+            return
+          end
+      
+          # Prevent custom schemas from using standard schema names
+          if Constants.prefix_schemata.key?(schema_name.to_sym)
+            @discipline.errors.add(:prefix_schema, I18n.t('errors.messages.reserved'))
+            return
+          end
+
+          @discipline.prefix_schema = {
+            'name' => schema_name,
+            'type' => params[:discipline][:schema_type],
+            'standard' => false,
+            'schema' => custom_schema
+          }
+        rescue JSON::ParserError
+          @discipline.errors.add(:prefix_schema, I18n.t('errors.messages.invalid'))
+        end
+      end
+    end
+
     # Only allow a list of trusted parameters through.
     def discipline_params
-      params.require(:discipline).permit(:code, :label, :name, :prefix_schema, :module_name, 
-        :sort_order, :notes, :project_id)
+      params.require(:discipline).permit(
+        :code, :label, :name, :module_name, 
+        :sort_order, :notes, :project_id,
+        :use_standard_schema,
+        :schema_type,
+        :custom_schema_name,
+        prefix_schema: { 
+          name: {}, 
+          type: {}, 
+          standard: {}, 
+          schema: {} 
+        }
+      )
     end
 end

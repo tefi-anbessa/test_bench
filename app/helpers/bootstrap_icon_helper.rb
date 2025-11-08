@@ -1,5 +1,5 @@
 module BootstrapIconHelper
-  def icon(name, options = {})
+  def bs_icon(name, options = {})
     options = {
       width: '1rem',
       height: '1rem',

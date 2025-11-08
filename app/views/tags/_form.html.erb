@@ -37,7 +37,7 @@
                 <%= f.select :project_id,
                       options_for_select(
                         projects.map { |p| ["#{p.code}: #{p.title}", p.id] },
-                        tag.project_id
+                        tag.discipline.project_id
                       ),
                       { class: 'form-select', required: true  } %>
               <% end %>
@@ -58,9 +58,7 @@
               <%= f.select :discipline_id,
                     options_for_select(
                       disciplines.map { |d|
-                        ["#{t("discipline.#{d.code.downcase.to_sym}.code", 
-                          default: d.code)}: #{t("discipline.#{d.code.downcase.to_sym}.name", 
-                          default: d.code)}", d.id]
+  ["#{t("discipline.#{d.code.downcase.to_sym}.label")}: #{t("discipline.#{d.code.downcase.to_sym}.name")}", d.id]
                       },
                       tag.discipline_id
                     ),
@@ -141,10 +139,10 @@
               class: 'btn btn-warning',
               data: { confirm: t('actions.sure'), turbo: false }) do %>
           <%= t('actions.discard') %>
-          <%== icon('x-square') %>
+          <%== bs_icon('x-square') %>
         <% end %>
         <%= f.submit((yield(:button_text)), class: 'btn btn-primary') do %>
-          <%== icon('save') %>
+          <%== bs_icon('save') %>
         <% end %>
       </div>
 

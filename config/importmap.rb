@@ -11,3 +11,5 @@ pin_all_from "app/javascript/controllers", under: "controllers"
 # Bootstrap and dependencies
 pin "bootstrap", to: "bootstrap/dist/js/bootstrap.esm.js"
 pin "@popperjs/core", to: "@popperjs/core/lib/index.js"
+
+pin "jsoneditor", to: "jsoneditor/dist/jsoneditor.min.js" # in vendor/javascript

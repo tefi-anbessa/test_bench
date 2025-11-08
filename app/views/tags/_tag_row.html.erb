@@ -1,33 +1,67 @@
-    <tr scope="row">
-      <td><%= t.stage %></td>
-      <td><%= t.full_tag %></td>
-      <td><%= t.service %></td>
-      <td><%= t.location %></td>
-      <td><%= t.notes %></td>
-      <td>
-        <% if policy(t).show? %>
-          <%= link_to tag_path(t), class: "btn btn-secondary btn-sm icon-link",
-                aria: { label: t('actions.show') },
-                title: t('actions.show'),
-                display: "inline" do %>
-            <%== icon('eye') %>
-          <% end %>
+<tr scope="row">
+  <% unless @project.present? %>
+    <td><%= t.project.label %></td>
+  <% end %>
+  <td><%= t.stage %></td>
+  <td><%= t.discipline.label %></td>
+  <td><%= t.full_tag %></td>
+  <td><%= t.service %></td>
+  <td><%= t.location %></td>
+  <td><%= t.notes %></td>
+  <td>
+    <% if t.tagable_type.present? %>
+      <% text = t.tagable_type.tableize.singularize %>
+      <%= t.tagable_type.constantize.model_name.human %>
+      <% if t.tagable.present? %>
+        <%= link_to eval("#{text}_path(#{t.tagable_id})"),
+            class: "btn btn-sm btn-outline-secondary mb-2 icon-link",
+            title: t('show.linked', model: text) do %>
+              <%== bs_icon('box-arrow-down-right') %>
+            <% end %>
+      <% else %>
+        <% if policy(t.tagable_type.constantize).new? %>
+          <% resource = t.tagable_type.tableize.singularize %>
+          <%= link_to eval("new_tag_#{resource}_path(#{t.id})"),
+              class: "btn btn-sm btn-outline-primary mb-2 icon-link",
+              title: t('actions.link', resource: resource) do %>
+                <%== bs_icon('link') %>
+              <% end %>
+        <% else %>
+          <%= t.tagable_type.constantize.model_name.human %>
         <% end %>
-        <% if policy(t).edit? %>
-          <%= link_to edit_tag_path(t), class: "btn btn-warning btn-sm icon-link",
-                aria: { label: t('actions.edit') },
-                title: t('actions.edit'),
-                display: "inline"  do %>
-            <%== icon('pencil') %>
-          <% end %>
-        <% end %>
-        <% if policy(t).destroy? %>
-          <%= link_to t, method: :delete, class: "btn btn-danger btn-sm icon-link",
-                aria: { label: t('actions.delete') },
-                title: t('actions.delete'),
-                display: "inline"  do %>
-            <%== icon('trash') %>
-          <% end %>
-        <% end %>
-      </td>
-    </tr>
+      <% end %>
+    <% else %>
+      <span class="text-muted">
+        <%= t('show.unassigned', model: t("activerecord.attributes.tag.tagable_type")) %>
+      </span>
+    <% end %>
+  </td>
+  <td>
+    <% if policy(t).show? %>
+      <%= link_to tag_path(t), class: "btn btn-secondary btn-sm icon-link",
+            aria: { label: t('actions.show') },
+            title: t('actions.show'),
+            display: "inline" do %>
+        <%== bs_icon('eye') %>
+      <% end %>
+    <% end %>
+    <% if policy(t).edit? %>
+      <%= link_to edit_tag_path(t), class: "btn btn-warning btn-sm icon-link",
+            aria: { label: t('actions.edit') },
+            title: t('actions.edit'),
+            display: "inline"  do %>
+        <%== bs_icon('pencil') %>
+      <% end %>
+    <% end %>
+    <% if policy(t).destroy? %>
+    <%= link_to t, 
+          data: { method: :delete, confirm: t('actions.delete_sure') },
+          class: "btn btn-danger btn-sm icon-link",
+          aria: { label: t('actions.delete') },
+          title: t('actions.delete'),
+          display: "inline"  do %>
+        <%== bs_icon('trash') %>
+      <% end %>
+    <% end %>
+  </td>
+</tr>

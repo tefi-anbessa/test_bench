@@ -1,8 +1,8 @@
 <thead>
-  <th scope="col"><%= sort_link(@q, :label) %></th>
-  <th scope="col"><%= sort_link(@q, :code) %></th>
-  <th scope="col"><%= sort_link(@q, :name) %></th>
-  <th scope="col"><%= sort_link(@q, :prefix_schema) %></th>
-  <th scope="col"><%= sort_link(@q, :sort_order) %></th>
-  <th scope="col" width="150px"><%= t('table.links')%></th>
+  <tr>
+    <th><%= sort_link(@q, :label, request.query_parameters.merge(disciplines_expanded: '1')) %></th>
+    <th><%= sort_link(@q, :name, request.query_parameters.merge(disciplines_expanded: '1')) %></th>
+    <th><%= sort_link(@q, :prefix_schema, request.query_parameters.merge(disciplines_expanded: '1')) %></th>
+    <th class="text-end"><%= t('table.links') %></th>
+  </tr>
 </thead>

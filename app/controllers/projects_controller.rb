@@ -16,7 +16,9 @@ class ProjectsController < ApplicationController
 
   # GET /projects/1 or /projects/1.json
   def show
-    @project = Project.find(params[:id])
+    @project = Project.includes(:disciplines).find(params[:id])
+    @q = @project.disciplines.ransack(params[:q])
+    @pagy, @disciplines = pagy(@q.result, items: 10)
     authorize @project
     
     respond_to do |format|

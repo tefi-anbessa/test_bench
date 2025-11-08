@@ -13,12 +13,11 @@
         </div>
       </div>
     </div>
-
-    <%= bootstrap_form_with(model: discipline, 
-        url: project_disciplines_path(project),
-        layout: :horizontal, 
-        label_col: "col-sm-4", 
-        control_col: "col-sm-8") do |f| %>
+<%= bootstrap_form_with(model: discipline,
+      url: discipline.persisted? ? discipline_path(discipline) : project_disciplines_path(project),
+      layout: :horizontal, 
+      label_col: "col-sm-4", 
+      control_col: "col-sm-8") do |f| %>
 
       <div class="card-body p-2">
         <%= render 'shared/error_messages', object: f.object %>
@@ -70,23 +69,8 @@
             </div>
 
             <!-- prefix schema -->
-            <div class="row">
-              <%= f.text_area :prefix_schema,
-                      label_col: "col-sm-3",
-                      control_col: "col-sm-9",
-                      rows: 3,
-                      placeholder: t('activerecord.help.discipline.prefix_schema') %>
-            </div>
+            <%= render 'prefix_schema_fields', form: f %>
 
-            <!-- Sort order -->
-            <div class="row">
-              <%= f.number_field :sort_order,
-              label_col: "col-sm-3",
-              control_col: "col-sm-3",
-                    min: 0,
-                    max: 1000,
-                    title: t('activerecord.help.discipline.sort_order') %>
-            </div>
           </div> <!-- end responsive columns --> 
         </div>
       </div> <!-- card body -->
@@ -98,20 +82,20 @@
               class: "btn btn-warning actions",
               data: { confirm: t('actions.sure'), turbo: false } do %>
                 <%= t('actions.discard') %>
-                <%== icon('x-square') %>
+                <%== bs_icon('x-square') %>
               <% end %>
         <% else %>
             <%= link_to project_disciplines_path(project),
               class: "btn btn-warning actions",
                 data: { confirm: t('actions.sure'), turbo: false } do %>
                 <%= t('actions.discard') %>
-                <%== icon('x-square') %>
+                <%== bs_icon('x-square') %>
               <% end %>
         <% end %>
         <!-- Button to submit form -->
         <%= f.button :submit, class: 'btn btn-primary' do %>
           <%= yield(:button_text) %>
-          <%== icon('save') %>
+          <%== bs_icon('save') %>
         <% end %>
       </div>
     <% end %>

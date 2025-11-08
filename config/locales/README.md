@@ -55,7 +55,7 @@
 
 ## File Structure
 
-```
+```plaintext
 config/locales/
 ├── core/
 │   ├── en/                 # English language
@@ -85,19 +85,22 @@ config/locales/
 ## Usage
 
 ### Translation Keys
+
 - Use nested namespaces that match the application structure
 - Keep keys in snake_case
 - Group related translations under common namespaces
 
-
 ### Best Practices
+
 - Keep translations close to where they're used
 - Avoid duplication by using YAML references (`<<: *anchor_name`)
 - Use descriptive keys that indicate where they're used
 - Add comments for context when the meaning isn't obvious
 
 ### Maintenance
+
 When updating translations:
+
 1. Be sure to update all language versions.
 2. Keep the .yml structure exactly consistent between language files.
 3. Never alter keys without thorough retesting, it is not always obvious where translations are used.

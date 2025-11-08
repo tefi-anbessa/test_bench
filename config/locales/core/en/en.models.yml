@@ -24,8 +24,18 @@ en:
       discipline:
         code:             "Code"
         name:             "Name"
+        label:            "Label"
+        sort_order:       "Sort Order"
+        prefix_schema:    "Prefix Schema"
+        schema_name:      "Schema"
+        prefix_schema_keys:
+          type:             "Type"
+          schema:           "Schema"
+        module_name:      "Module Name"
+        notes:            "Notes"
       tag:
         project:          "Project"
+        discipline:       "Discipline"
         prefix:           "Prefix"
         prefix_help:      "Prefix should preferebly be selected from existing list"
         prefix_parts:

@@ -1,21 +1,20 @@
 <% provide(:title, t('.title')) %>
 <nav class="navbar bg-body-tertiary">
-  <div class="container">
-    <ul class="navbar-nav me-auto mb-2 mb-lg-0 flex-row">
+  <div class="container d-flex justify-content-between align-items-center">
+    <h4 class="ms-1">
+      <%= t('.header', project: @project.present? ? @project.label : t('projects.all_projects')) %>
+    </h4>
+    
     <% if policy(@tag).new? %>
-      <li class="nav-item">
-        <%= link_to new_tag_path, class: "btn btn-primary actions",
+      <div class=me-1>
+        <%= link_to new_tag_path, class: "btn btn-outline-primary", 
               aria: { label: t('actions.new') },
-              title: t('actions.new')  do %>
-          <%== icon('plus-square-fill') %>
-          <%= t('actions.new') + " " + t('activerecord.models.tag') %>
+              title: t('actions.new') do %>
+          <%== bs_icon('plus-square-fill') %>
+          <%= [t('actions.new'), t('activerecord.models.tag')].join(' ') %>
         <% end %>
-      </li>
+      </div>
     <% end %>
-      <span class="nav-text ms-3 me-3 h2">
-        <%= t('.header')%>
-      </span>
-    </ul>
   </div>
 </nav>
 <div class = "container">
@@ -37,85 +36,15 @@
             class: "search_field",
             placeholder: t('activerecord.attributes.tag.notes') %>
       <%= f.button nil, class: "btn btn-primary btn-sm", action: :submit do %>
-        <%== icon('search') %>
+        <%== bs_icon('search') %>
       <% end %>
     <% end %>
     <%== pagy_bootstrap_nav(@pagy) %>
     <table id='tags' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
-      <thead>
-        <th scope="col"><%= sort_link(@q, :stage) %></th>
-        <th scope="col"><%= t('activerecord.attributes.tag.full_tag') %></th>
-        <th scope="col"><%= sort_link(@q, :service) %></th>
-        <th scope="col"><%= sort_link(@q, :location) %></th>
-        <th scope="col"><%= t('activerecord.attributes.tag.notes') %></th>
-        <th scope="col"><%= sort_link(@q, :tagable_type) %></th>
-        <th scope="col" width="150px"><%= t('table.links')%></th>
-      </thead>
+    <%= render 'tag_header' %>
       <tbody>
         <% @tags.each do |t| %>
-          <tr scope="row">
-            <td><%= t.stage %></td>
-            <td><%= t.full_tag %></td>
-            <td><%= highlight t.service, params.dig(:q, :service_cont)  %></td>
-            <td><%= highlight t.location, params.dig(:q, :location_cont)  %></td>
-            <td><%= highlight t.notes, params.dig(:q, :notes_cont)  %></td>
-            <td>
-              <% if t.tagable_type.present? %>
-                <% text = t.tagable_type.tableize.singularize %>
-                <%= t.tagable_type.constantize.model_name.human %>
-                <% if t.tagable.present? %>
-                  <%= link_to eval("#{text}_path(#{t.tagable_id})"),
-                      class: "btn btn-sm btn-outline-secondary mb-2 icon-link",
-                      title: t('show.linked', model: text) do %>
-                        <%== icon('box-arrow-down-right') %>
-                      <% end %>
-                <% else %>
-                  <% if policy(t.tagable_type.constantize).new? %>
-                    <% resource = t.tagable_type.tableize.singularize %>
-                    <%= link_to eval("new_tag_#{resource}_path(#{t.id})"),
-                        class: "btn btn-sm btn-outline-primary mb-2 icon-link",
-                        title: t('actions.link', resource: resource) do %>
-                          <%== icon('link') %>
-                        <% end %>
-                  <% else %>
-                    <%= t.tagable_type.constantize.model_name.human %>
-                  <% end %>
-                <% end %>
-              <% else %>
-                <span class="text-muted">
-                  <%= t('show.unassigned', model: t("activerecord.attributes.tag.tagable_type")) %>
-                </span>
-              <% end %>
-            </td>
-            <td>
-              <% if policy(t).show? %>
-                <%= link_to tag_path(t), class: "btn btn-secondary btn-sm icon-link",
-                      aria: { label: t('actions.show') },
-                      title: t('actions.show'),
-                      display: "inline" do %>
-                  <%== icon('eye') %>
-                <% end %>
-              <% end %>
-              <% if policy(t).edit? %>
-                <%= link_to edit_tag_path(t), class: "btn btn-warning btn-sm icon-link",
-                      aria: { label: t('actions.edit') },
-                      title: t('actions.edit'),
-                      display: "inline"  do %>
-                  <%== icon('pencil') %>
-                <% end %>
-              <% end %>
-              <% if policy(t).destroy? %>
-              <%= link_to t, 
-                    data: { method: :delete, confirm: t('actions.delete_sure') },
-                    class: "btn btn-danger btn-sm icon-link",
-                    aria: { label: t('actions.delete') },
-                    title: t('actions.delete'),
-                    display: "inline"  do %>
-                  <%== icon('trash') %>
-                <% end %>
-            <% end %>
-            </td>
-          </tr>
+          <%= render 'tag_row', t: t %>
         <% end %>
       </tbody>
     </table>

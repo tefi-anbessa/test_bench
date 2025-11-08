@@ -11,6 +11,12 @@ import 'bootstrap'
 import { Dropdown, Tooltip, Popover, Collapse } from 'bootstrap'
 window.bootstrap = { Dropdown, Tooltip, Popover, Collapse }
 
+// Import JSONEditor from vendor/javascript
+import 'jsoneditor'
+const JSONEditor = window.JSONEditor
+// Make it available globally if needed
+window.JSONEditor = JSONEditor
+
 // Initialize Bootstrap components when the page loads
 const initializeBootstrapComponents = () => {
   // Initialize dropdowns

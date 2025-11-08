@@ -190,12 +190,12 @@
                 role="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false">
-                <%= flag_icon(flag_code(locale)) %>
+                <!--= flag_icon(flag_code(locale)) -->
           </a>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarLocaleSelect">
             <% I18n.available_locales.each do |locale| %>
               <li>
-                <%= flag_icon(flag_code(locale)) %>
+                <!--= flag_icon(flag_code(locale)) -->
                 <% if I18n.locale == locale %>
                   <span class="ms-2"><%= t("language", locale: locale) %></span>
                 <% else %>

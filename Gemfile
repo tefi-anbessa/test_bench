@@ -10,7 +10,12 @@ gem "rails", "~> 8.0.0"
 # Use Propshaft for the asset pipeline [https://github.com/rails/propshaft]
 gem "propshaft"
 
-# Use the Puma web server [https://github.com/puma/puma]
+# Use cssbundling-rails gem for pre-processing sass and scss
+# gem "cssbundling-rails"
+# gem "jsbundling-rails"
+gem "dartsass-rails"
+
+# Use the Puma web server [https://github.com/puma/puma] in dev
 gem "puma", ">= 6.0.0"
 
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
@@ -57,7 +62,10 @@ gem "faker"
 gem 'rails-i18n', '~> 8.0'
 
 # use gem 'flag-icons-rails' for internationalisation
-gem 'flag-icons-rails'
+# gem 'flag-icons-rails'
+# Update to gem 'rails_icons' to avoid dependency on sass-rails.
+gem 'rails_icons', '~> 1.4'
+# Try out gem 'flag_icon' for associating country codes with language codes.
 
 # Use ransack for search and sort functionality.
 gem 'ransack'

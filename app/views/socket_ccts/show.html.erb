@@ -12,7 +12,7 @@
               <%= link_to socket_ccts_path,
                     class: "btn btn-sm btn-outline-secondary me-2",
                     title: t('actions.index') do %>
-                <%== icon('list-columns-reverse') %>
+                <%== bs_icon('list-columns-reverse') %>
                 <span class="d-none d-md-inline"><%= t('actions.index') %></span>
               <% end %>
             <% end %>
@@ -42,7 +42,7 @@
                 <%= link_to edit_socket_cct_path(@socket_cct),
                       class: "btn btn-outline-warning",
                       title: t('actions.edit') do %>
-                  <%== icon('pencil-square') %>
+                  <%== bs_icon('pencil-square') %>
                   <span class="d-none d-md-inline">
                     <%= t('actions.edit') %>
                   </span>
@@ -55,7 +55,7 @@
                       data: { confirm: t('actions.delete_sure') },
                       class: "btn btn-outline-danger",
                       title: t('actions.delete') do %>
-                  <%== icon('trash') %>
+                  <%== bs_icon('trash') %>
                   <span class="d-none d-md-inline">
                     <%= t('actions.delete') %>
                   </span>
@@ -111,7 +111,7 @@
                           class: "btn btn-sm btn-outline-secondary",
                           title: text do %>
                             <%= text %>
-                            <%== icon('box-arrow-in-down-right') %>
+                            <%== bs_icon('box-arrow-in-down-right') %>
                         <% end %>
                       <% else %>
                       <% text = t("actions.link", resource: t("activerecord.models.demand")) %>
@@ -122,7 +122,7 @@
                                 <span class="d-none d-md-inline">
                                   <%= text %>
                                 </span>
-                                <%== icon('link') %>
+                                <%== bs_icon('link') %>
                               <% end %>
                         <% end %>
                       <% end %>

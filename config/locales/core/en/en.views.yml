@@ -64,7 +64,7 @@ en:
   disciplines:
     index:
       title:            "Disciplines"
-      header:           "Disciplines Index"
+      header:           "Disciplines for %{project}"
     new:
       title:            "New Discipline"
       header:           "New Discipline"
@@ -77,7 +77,7 @@ en:
   tags:
     index:
       title:            "Tags"
-      header:           "Tag List"
+      header:           "Tag List for %{project}"
     new:
       title:            "New Tag"
       header:           "New Tag"

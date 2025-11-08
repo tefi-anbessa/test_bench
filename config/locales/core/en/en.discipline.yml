@@ -1,32 +1,50 @@
+# The discipline model has standardised content available, with translations.
+# Custom content is not translated.
 en:
   discipline:
-    a:
-      code: 'A'
+    admin:
+      label: 'A'
       name: 'Administration'
-    b:
-      code: 'B'
+    arch:
+      label: 'B'
       name: 'Architecture'
-    c:
-      code: 'C'
+    civil:
+      label: 'C'
       name: 'Civil Engineering'
-    e:
-      code: 'E'
+    elec:
+      label: 'E'
       name: 'Electrical Engineering'
-    i:
-      code: 'I'
-      name: 'Information Tech'
-    j:
-      code: 'J'
-      name: 'Instrument Engineering'    
-    m:
-      code: 'M'
+    inst:
+      label: 'J'
+      name: 'Instrument Engineering'
+    it:
+      label: 'I'
+      name: 'Information Tech'    
+    mech:
+      label: 'M'
       name: 'Mechanical Engineering'
-    p:
-      code: 'P'
+    process:
+      label: 'P'
       name: 'Process Engineering'
-    s:
-      code: 'S'
+    struct:
+      label: 'S'
       name: 'Structural Engineering'
-    u:
-      code: 'U'
+    multi:
+      label: 'U'
       name: 'Multi-Discipline'
+  prefix_schema:
+    key:
+      custom: "Custom"
+      default: "Default"
+      isa51: "ISA-5.1"
+      dim1: "1 Dimension"
+      dim2: "2 Dimensions"
+      alternate_inst: "Alternate ISA 5.1"
+    type:
+      default: "Default"
+      isa51: "ISA-5.1"
+      dim1: "1 Dimension"
+      dim2: "2 Dimensions"
+    messages:
+      sure: "Are you sure? Changing schema will discard any existing customizations."
+      initialize: "Initialize from Template"

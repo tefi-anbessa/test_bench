@@ -1,8 +1,13 @@
 <thead>
-  <th scope="col"><%= t('activerecord.attributes.tag.stage') %></th>
-  <th scope="col"><%= t('activerecord.attributes.tag.full_tag') %></th>
-  <th scope="col"><%= t('activerecord.attributes.tag.service') %></th>
-  <th scope="col"><%= t('activerecord.attributes.tag.location') %></th>
+  <% unless @project.present? %>
+    <th scope="col"><%= sort_link(@q, :project_id, t("activerecord.models.project")) %></th>
+  <% end %>
+  <th scope="col"><%= sort_link(@q, :stage) %></th>
+  <th scope="col"><%= sort_link(@q, :discipline_id) %></th>
+  <th scope="col"><%= sort_link(@q, :full_tag) %></th>
+  <th scope="col"><%= sort_link(@q, :service) %></th>
+  <th scope="col"><%= sort_link(@q, :location) %></th>
   <th scope="col"><%= t('activerecord.attributes.tag.notes') %></th>
+  <th scope="col"><%= sort_link(@q, :tagable_type) %></th>
   <th scope="col" width="150px"><%= t('table.links')%></th>
 </thead>

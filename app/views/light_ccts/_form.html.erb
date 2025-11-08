@@ -78,12 +78,12 @@
                     class: 'btn btn-warning',
                     data: { confirm: t('actions.sure'), turbo: false }) do %>
                 <%= t('actions.discard') %>
-                <%== icon('x-square') %>
+                <%== bs_icon('x-square') %>
               <% end %>
 
               <%= f.button :submit, class: 'btn btn-primary' do %>
                 <%= yield(:button_text) %>
-                <%== icon('save') %>
+                <%== bs_icon('save') %>
               <% end %>
             </div> <!-- end card footer -->
           </div> <!-- end responsive columns -->

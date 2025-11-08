@@ -12,7 +12,7 @@
               <%= link_to switchboard_circuits_path(@circuit.switchboard),
                     class: "btn btn-sm btn-outline-secondary me-2",
                     title: t('actions.index') do %>
-                <%== icon('list-columns-reverse') %>
+                <%== bs_icon('list-columns-reverse') %>
                 <span class="d-none d-md-inline"><%= t('actions.index') %></span>
               <% end %>
             <% end %>
@@ -25,7 +25,7 @@
                     disabled: disabled,
                     class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
                     title: "#{t('actions.previous')}: #{prev_circuit.label}" do %>
-                <%== icon('box-arrow-in-left') %>
+                <%== bs_icon('box-arrow-in-left') %>
                 <span class="d-none d-md-inline">
                   <%= t('actions.previous') %>
                 </span>
@@ -64,7 +64,7 @@
                 <span class="d-none d-md-inline">
                   <%= t('actions.next') %>
                 </span>
-                <%== icon('box-arrow-in-right') %>
+                <%== bs_icon('box-arrow-in-right') %>
               <% end %>
             <% end %>
 
@@ -74,7 +74,7 @@
                 <%= link_to edit_circuit_path(@circuit),
                       class: "btn btn-outline-warning",
                       title: t('actions.edit') do %>
-                  <%== icon('pencil-square') %>
+                  <%== bs_icon('pencil-square') %>
                   <span class="d-none d-md-inline">
                     <%= t('actions.edit') %>
                   </span>
@@ -87,7 +87,7 @@
                       data: { confirm: t('actions.delete_sure') },
                       class: "btn btn-outline-danger",
                       title: t('actions.delete') do %>
-                  <%== icon('trash') %>
+                  <%== bs_icon('trash') %>
                   <span class="d-none d-md-inline">
                     <%= t('actions.delete') %>
                   </span>
@@ -172,7 +172,7 @@
                           <%= link_to cable_path(@circuit.feeder),
                                 class: "btn btn-sm btn-outline-secondary mb-2",
                                 title: t('show.linked', model: text) do %>
-                                  <%== icon('link-45deg') %>
+                                  <%== bs_icon('link-45deg') %>
                                   <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
                                 <% end %>
                         </div>
@@ -197,7 +197,7 @@
                           <%= link_to demand_path(@circuit.demand),
                                 class: "btn btn-sm btn-outline-secondary mb-2",
                                 title: t('show.linked', model: text) do %>
-                                  <%== icon('link-45deg') %>
+                                  <%== bs_icon('link-45deg') %>
                                   <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
                                 <% end %>
                         </div>

@@ -141,3 +141,16 @@ label.required:after {
 mark {
   background-color: yellow;
 }
+
+// JSONEditor Styles
+
+.jsoneditor {
+  border: 1px solid #ced4da !important;
+  border-radius: 0.25rem;
+  min-height: 400px;
+
+  .jsoneditor-menu {
+    background-color: #f8f9fa !important;
+    border-bottom: 1px solid #ced4da !important;
+  }
+}

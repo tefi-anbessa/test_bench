@@ -24,11 +24,11 @@
     <div class="actions">
       <button type="submit" class="btn btn-primary">
         <%= yield(:button_text) %>
-        <%== icon('save') %>
+        <%== bs_icon('save') %>
       </button>
       <%= link_to (session[:project_return_to] || root_path), 
                  class: 'btn btn-warning ms-2' do %>
-        <span class="me-1"><%== icon('x-square') %></span> <%= t('.cancel') %>
+        <span class="me-1"><%== bs_icon('x-square') %></span> <%= t('.cancel') %>
       <% end %>
     </div>
   <% end %>

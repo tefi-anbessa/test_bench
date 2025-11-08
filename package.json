@@ -4,6 +4,7 @@
     "bootstrap": "^5.3.2",
     "bootstrap-icons": "^1.13.1",
     "copyfiles": "^2.4.1",
-    "jquery": "^3.7.1"
+    "jquery": "^3.7.1",
+    "jsoneditor": "^10.4.2"
   }
 }

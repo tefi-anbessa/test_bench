@@ -9,13 +9,13 @@
               data: { turbo: false },
               aria: { label: t('actions.new') },
               title: t('actions.new') do %>
-          <%== icon('plus-square-fill') %>
+          <%== bs_icon('plus-square-fill') %>
           <%= [t('actions.new'), t('activerecord.models.discipline')].join(' ') %>
         <% end %>
       </li>
     <% end %>
       <span class="nav-text ms-3 me-3 h2">
-        <%= t('.header')%>
+        <%= t('.header', project: @project.label)%>
       </span>
     </ul>
   </div>

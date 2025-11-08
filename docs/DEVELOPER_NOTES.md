@@ -237,6 +237,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Review all models for compliance with guidelines
 - [x] Clean up old Load model references after migration
 - [ ] The project was originally written for Rails 7 but got hibernated. On reawakening, it was upgraded to Rails 8. It has never been deployed to production, so Rails 8 upgrade is not yet officially declared complete.
+- [ ] The transition to rails 8 should have changed over the asset pipeline to use propshaft. This has not been done properly, needs to be rectified.
 - [x] Improve has_one validation on tagable, possibly include database constraint.
 - [x] Improve has_one validation on demandable, possibly include database constraint.
    - Database constraints deferred due to risk of locking database. Continue with inclusion of orphans on index displays, and manual clean up.
@@ -256,6 +257,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Use of button text for new and edit forms is mixed. Standardise on save for new, update for edit.
 - [ ] Demand form live update of calculated values not working.
 - [ ] Cable types with no current project.
+- [ ] Refine the collapsibles component to retain state after refresh operations (e.g. sorting links with ransack). Make a generalised solution, maybe use turbo.
 
 ## Refactoring Opportunities
 

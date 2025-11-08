@@ -36,21 +36,6 @@ class Tag < ApplicationRecord
   # This is required because of doubts over using a database uniqueness contraint with suffix, which may be null.
   validate :validate_tag_uniqueness
 
-
-  def full_tag
-    return self[:full_tag] if persisted? || self[:full_tag].present?
-    
-    # Same logic as the database expression
-    "#{prefix.to_s}#{serial.to_s.rjust(4, '0')}#{suffix.to_s}"
-  end
-
-  def loop_id
-    return self[:loop_id] if persisted? || self[:loop_id].present?
-    
-    # Same logic as the database expression
-    "#{prefix.to_s.first.upcase}#{serial.to_s.rjust(4, '0')}"
-  end
-
   def label
     full_tag
   end

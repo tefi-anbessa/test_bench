@@ -155,12 +155,12 @@
                 class: 'btn btn-warning',
                 data: { confirm: t('actions.sure'), turbo: false }) do %>
             <%= t('actions.discard') %>
-            <%== icon('x-square') %>
+            <%== bs_icon('x-square') %>
           <% end %>
 
           <%= f.button :submit, class: 'btn btn-primary' do %>
             <%= yield(:button_text) || t('actions.save') %>
-            <%== icon('save') %>
+            <%== bs_icon('save') %>
           <% end %>
         </div>
       </div>

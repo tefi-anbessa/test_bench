@@ -13,19 +13,19 @@
     <div class="actions">
       <%= f.primary do %>
         <%= yield(:button_text) %>
-        <%== icon('save') %>
+        <%== bs_icon('save') %>
       <% end %>
       <% if @project.persisted? %>
         <%= link_to @project, class: "btn btn-warning actions",
                 data: { confirm: t('actions.sure') } do %>
                 <%= t('actions.discard') %>
-                <%== icon('x-square') %>
+                <%== bs_icon('x-square') %>
         <% end %>
       <% else %>
         <%= link_to projects_path, class: "btn btn-warning actions",
                 data: { confirm: t('actions.sure') }  do %>
           <%= t('actions.discard') %>
-          <%== icon('x-square') %>
+          <%== bs_icon('x-square') %>
         <% end %>
       <% end %>
     </div>

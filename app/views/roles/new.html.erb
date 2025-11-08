@@ -53,7 +53,7 @@
                       class: "btn btn-outline-secondary",
                       data: { turbo_confirm: t('actions.sure') } do %>
                   <%= t('actions.cancel') %>
-                  <%== icon('x-square') %>
+                  <%== bs_icon('x-square') %>
                 <% end %>
                 
                 <%= button_tag type: 'submit', 
@@ -62,7 +62,7 @@
                       title: t('actions.grant'),
                       data: { toggle: 'tooltip', placement: 'top' } do %>
                   <%= t('actions.grant') %>
-                  <%== icon('save') %>
+                  <%== bs_icon('save') %>
                 <% end %>
               </div>
             </div>

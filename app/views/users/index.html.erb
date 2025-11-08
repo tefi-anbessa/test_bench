@@ -6,7 +6,7 @@
         <%= link_to new_user_registration_path, class: "btn btn-primary actions",
               aria: { label: t('actions.new') },
               title: t('actions.new')  do %>
-          <%== icon('plus-square-fill') %>
+          <%== bs_icon('plus-square-fill') %>
           <%= t('actions.new') + " " + t('activerecord.models.user') %>
         <% end %>
       </li>
@@ -21,7 +21,7 @@
     <%= search_form_for @q do |f| %>
       <%= f.search_field :name_or_email_cont, class: "search_field" %>
       <%= f.button nil, class: "btn btn-primary btn-sm", action: :submit do %>
-        <%== icon('search') %>
+        <%== bs_icon('search') %>
       <% end %>
     <% end %>
     <%== pagy_bootstrap_nav(@pagy) %>
@@ -45,20 +45,20 @@
                     aria: { label: t('actions.show') },
                     title: t('actions.show'),
                     display: "inline" do %>
-                <%== icon('eye') %>
+                <%== bs_icon('eye') %>
               <% end %>
               <%= link_to edit_user_registration_path(u), class: "btn btn-warning btn-sm icon-link",
                     aria: { label: t('actions.edit') },
                     title: t('actions.edit'),
                     display: "inline"  do %>
-                <%== icon('pencil') %>
+                <%== bs_icon('pencil') %>
               <% end %>
               <% if current_user&.is_admin? %>
                 <%= link_to u, method: :delete, class: "btn btn-danger btn-sm icon-link",
                       aria: { label: t('actions.delete') },
                       title: t('actions.delete'),
                       display: "inline"  do %>
-                  <%== icon('trash') %>
+                  <%== bs_icon('trash') %>
                 <% end %>
               <% end %>
             </td>

@@ -78,13 +78,15 @@ puts "Current project: #{current_project.id.inspect}"
   test "project manager can create discipline" do
     sign_in @project_manager
     assert_difference('Discipline.count', 1) do
-      post :create, params: { project_id: @project.id,
+      post :create, params: { 
+        project_id: @project.id,
         discipline: {
-          code: :process,
-          label: 'PR',
-          name: 'Process',
-          prefix_schema: :default,
-          module_name: 'Process'
+          code: 'PIP',
+          label: 'PIP',
+          name: 'Piping',
+          module_name: 'Piping',
+          use_standard_schema: 'true',
+          schema_type: 'default'  # Using one of the standard schema types
         }
       }
     end

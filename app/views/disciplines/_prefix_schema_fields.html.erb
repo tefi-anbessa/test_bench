@@ -1,0 +1,47 @@
+
+<div class="card mb-4" 
+     data-controller="prefix-schema"
+     data-prefix-schema-schemata-value="<%= Constants.prefix_schemata.to_json %>"
+     data-prefix-schema-messages-value="<%= {
+       sure: t('prefix_schema.messages.sure'),
+       initialize: t('prefix_schema.messages.')
+     }.to_json %>"
+     data-action="submit@window->prefix-schema#beforeSubmit">
+  
+  <div class="card-header">
+    <%= t('activerecord.attributes.discipline.prefix_schema') %>
+  </div>
+  
+  <div class="card-body">
+    <div data-prefix-schema-target="schemaKey" class="mb-3">
+      <%= form.select :schema_key,
+          options_for_select(Constants.prefix_schemata.keys.map { |k| [k.to_s.humanize, k] }, 
+          @discipline.prefix_schema&.dig('key')),
+          { include_blank: t("form.required") }, 
+          { class: "form-select", 
+      data: { action: "change->prefix-schema#handleSchemaKeyChange" } } %>
+    </div>
+
+    <div data-prefix-schema-target="customSchemaFields" style="display: none;">
+      <div class="mb-3">
+        <label class="form-label">
+          <%= t('prefix_schema.messages.initialize') %>
+        </label>
+        <select class="form-select" 
+                data-action="change->prefix-schema#initializeFromTemplate">
+          <option value="">-- Select a template --</option>
+          <% Constants.prefix_schemata.keys.each do |key| %>
+            <option value="<%= key %>"><%= key.to_s.titleize %></option>
+          <% end %>
+        </select>
+      </div>
+    
+      <div class="mb-3">
+        <div id="jsoneditor" data-prefix-schema-target="editorContainer"></div>
+        <%= form.hidden_field :prefix_schema, 
+            value: @discipline.prefix_schema.to_json,
+            data: { "prefix-schema-target": "schemaInput" } %>
+      </div>
+    </div>
+  </div>
+</div>

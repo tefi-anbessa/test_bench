@@ -15,7 +15,7 @@ module ApplicationHelper
   # Can be controversial!
   def flag_code(locale)
     codes = {en: :gb, km: :kh}
-    flag_code = codes[locale] || locale
+    codes[locale] || locale
   end
   
   # Check if current user is an admin

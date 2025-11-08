@@ -1,0 +1,20 @@
+<% project = object %>
+<%= render 'components/collapsible',
+  id: "disciplines_index",
+  title: t('disciplines.index.header', project: @project.label),
+  expanded: params[:disciplines_expanded] == '1',
+  header_class: 'py-1' do %>
+  
+    <div class="container-fluid">
+      <div class="table-responsive">
+        <table class="table table-sm table-striped">
+          <%= render 'disciplines/disciplines_header', q: @q %>
+          <tbody>
+            <% @disciplines.each do |discipline| %>
+              <%= render 'disciplines/discipline_row', discipline: discipline %>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% end %>

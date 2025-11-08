@@ -7,7 +7,7 @@
         <%= link_to new_project_path, class: "btn btn-primary actions",
               aria: { label: t('actions.new') },
               title: t('actions.new')  do %>
-          <%== icon('plus-square-fill') %>
+          <%== bs_icon('plus-square-fill') %>
           <%= t('actions.new') + " " + t('activerecord.models.project') %>
         <% end %>
       </div>
@@ -23,7 +23,7 @@
     <%= search_form_for @q do |f| %>
       <%= f.search_field :code_or_title_or_description_cont, class: "search_field" %>
       <%= f.button nil, class: "btn btn-primary btn-sm", action: :submit do %>
-        <%== icon('search') %>
+        <%== bs_icon('search') %>
       <% end %>
     <% end %>
     
@@ -56,7 +56,7 @@
                       aria: { label: t('actions.show') },
                       title: t('actions.show'),
                       display: "inline" do %>
-                  <%== icon('eye') %>
+                  <%== bs_icon('eye') %>
                 <% end %>
               <% end %>
 
@@ -65,7 +65,7 @@
                       aria: { label: t('actions.edit') },
                       title: t('actions.edit'),
                       display: "inline"  do %>
-                  <%== icon('pencil') %>
+                  <%== bs_icon('pencil') %>
                 <% end %>
               <% end %>
 
@@ -76,7 +76,7 @@
                     aria: { label: t('actions.delete') },
                     title: t('actions.delete'),
                     display: "inline"  do %>
-                  <%== icon('trash') %>
+                  <%== bs_icon('trash') %>
                 <% end %>
               <% end %>
             </td>
