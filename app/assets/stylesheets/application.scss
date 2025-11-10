@@ -1,16 +1,13 @@
 
 @use "rails_bootstrap_forms";
-// Bootstrap is imported separately in bootstrap.scss
 
 // Import JSON Editor styles from vendor/stylesheets
-@use 'jsoneditor/dist/jsoneditor.min.css';
+@use 'jsoneditor.min.css' as *;
 
-@import "rails_bootstrap_forms";
-// Import Bootstrap from the local assets directory
-@import "bootstrap/scss/bootstrap";
+@use "bootstrap.min.css" as *;
 
 // JSON Editor icon path
 // $jsoneditor-img-path: 'jsoneditor/dist/img/' !default;
 
 // Custom styles
-@import "custom";
+@use "custom" as *;

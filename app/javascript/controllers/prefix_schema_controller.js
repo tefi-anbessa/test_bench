@@ -1,5 +1,7 @@
 
 import { Controller } from "@hotwired/stimulus"
+// Import JSONEditor as a module
+import JSONEditor from "jsoneditor"
 
 export default class extends Controller {
   static targets = ["editorContainer", "schemaInput", "schemaKey", "customSchemaFields"]

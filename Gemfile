@@ -57,7 +57,7 @@ gem "ostruct"
 gem "mutex_m"
 
 # Added gems +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-gem 'bootstrap', '~> 5.3.0'
+gem 'bootstrap', '~> 5.3.5'
 gem "faker"
 gem 'rails-i18n', '~> 8.0'
 

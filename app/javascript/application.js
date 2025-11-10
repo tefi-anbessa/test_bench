@@ -8,30 +8,29 @@ window.Rails = Rails
 
 import "controllers"
 import 'bootstrap'
-import { Dropdown, Tooltip, Popover, Collapse } from 'bootstrap'
-window.bootstrap = { Dropdown, Tooltip, Popover, Collapse }
+// Bootstrap components are already available via the window.bootstrap object
+// when using the pre-built bundle
 
 // Import JSONEditor from vendor/javascript
-import 'jsoneditor'
-const JSONEditor = window.JSONEditor
+import { JSONEditor } from 'jsoneditor'
 // Make it available globally if needed
-window.JSONEditor = JSONEditor
+// window.JSONEditor = JSONEditor
 
 // Initialize Bootstrap components when the page loads
 const initializeBootstrapComponents = () => {
   // Initialize dropdowns
   document.querySelectorAll('.dropdown-toggle').forEach(dropdownToggleEl => {
-    new Dropdown(dropdownToggleEl)
+    new bootstrap.Dropdown(dropdownToggleEl)
   })
 
   // Initialize tooltips
   document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltipEl => {
-    new Tooltip(tooltipEl)
+    new bootstrap.Tooltip(tooltipEl)
   })
   
   // Initialize popovers
   document.querySelectorAll('[data-bs-toggle="popover"]').forEach(popoverEl => {
-    new Popover(popoverEl)
+    new bootstrap.Popover(popoverEl)
   })
   
   // Initialize collapsibles with explicit state
@@ -43,7 +42,7 @@ const initializeBootstrapComponents = () => {
     if (target) {
       const targetEl = document.querySelector(target)
       if (targetEl && !targetEl.hasAttribute('data-bs-collapse-initialized')) {
-        new Collapse(targetEl, { toggle: false })
+        new bootstrap.Collapse(targetEl, { toggle: false })
         targetEl.setAttribute('data-bs-collapse-initialized', 'true')
       }
     }
