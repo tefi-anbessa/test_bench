@@ -13,7 +13,9 @@
 
 ### Level 3
 
-- All filenames should be prefaced by the language code. The only exception is where translations are provided from an external source, they may keep the origin naming convention. (E.g. devise.en.yml, devise.km.yml)
+- Language conversion .yml files reside at level 3.
+- Filenames should be prefaced by the language code. 
+- The only exception is that where translations are provided from an external source, they may keep the origin naming convention. (E.g. devise.en.yml, devise.km.yml)
 
 #### Core Functions
 
@@ -24,11 +26,11 @@
   - models: the models.yml files include the activerecord translations that rails uses by default for validation messages, labels for fields, field help, etc.
   - a devise.yml file for translations required for the devise gem, externally provided. Translations are available for many languages at github.
   - a rolify.yml file for translations associated with the Role Based Access Control (RBAC) system.
-  - a tag.yml file for translations associated with the tag prefix system.
+  - a discipline.yml file for translations of some "standard" disciplines, along with translations for the tag prefix schema and parsing system.
 
 #### Extension Modules
 
-- At level 3, extension modules should provide their own translation files for views, models, constants, and any other resources that require translations.
+- At level 3, extension modules should provide their own translation files for views, models, constants, special messages, and any other resources that require translations.
 
 ## Adding a New Module
 
@@ -64,12 +66,12 @@ config/locales/
 │   │   ├── en.views.yml    # View translations - headers, tiles, messages
 │   │   ├── en.discipline.yml # Discipline names and codes
 │   │   ├── en.rolify.yml   # RBAC role translations
-│   │   └── en.tag.yml      # Tag system translations
+│   │   └── en.discipline.yml      # Discipline translations
 │   └── km/                 # Khmer language
 │       ├── km.yml
 │       ├── km.models.yml
 │       ├── km.views.yml
-│       └── km.tag.yml      # Tag system translations
+│       └── km.discipline.yml      # Discipline translations
 └── [module]/
     ├── en/                         # English language for module
     │   ├── en.[module].yml         # Module-specific translations if required
@@ -104,4 +106,4 @@ When updating translations:
 1. Be sure to update all language versions.
 2. Keep the .yml structure exactly consistent between language files.
 3. Never alter keys without thorough retesting, it is not always obvious where translations are used.
-4. Update this README if you introduce new organizational patterns.
+4. Update this document if you introduce new organizational patterns.

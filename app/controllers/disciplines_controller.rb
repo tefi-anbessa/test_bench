@@ -33,6 +33,18 @@ class DisciplinesController < ApplicationController
   def create
     @discipline = @project.disciplines.build(discipline_params)
     authorize @discipline
+    if params[:discipline][:copy_from_standard].present?
+      if (standard = Constants.disciplines.find { |d| d[:code].to_s == params[:discipline][:copy_from_standard] })
+        @discipline.assign_attributes(
+          code: standard[:code],
+          name: standard[:name],
+          module_name: standard[:module],
+          sort_order: standard[:sort_order],
+          prefix_schema: standard[:prefix_schema]
+        )
+      end
+    end
+
     if @discipline.save
       flash[:success] = I18n.t('flash.create.notice', resource_name: I18n.t('activerecord.models.discipline'))
       redirect_to @discipline

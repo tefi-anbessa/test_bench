@@ -22,7 +22,7 @@ From git commit 6da446f onwards, this project has used Windsurf/Cascade AI to sp
 
 Windsurf IDE has introduced a new feature called "AI Rules". These are rules that are applied to the code by the AI. The rules are defined in the .windsurf/rules directory.
 
-Progressively build a set of rules to implement these guidelines.
+Progressively build the set of rules to implement these guidelines.
 
 ### For Developers:
 
@@ -78,11 +78,11 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - The application has been designed for international use from the outset. 
 - All user facing text is provided with translations for all implemented languages.
 - To date, no need for translation of database content has been identified. It's all engineering speak.
-- The application uses the rails-i18n gem to assist with internationalization. This gem provides translations into  many languages for the core rails features, including model validation, database errors, time and date functions, currency, etc. 
+- The application uses the rails-i18n gem to assist with internationalization. This gem provides translations into  many languages for the core rails features, including model validation, database errors, time and date functions, currency, etc.
 - For reference, a copy of the en version of the translations is saved in config/locales/rails-i18n gem en for reference/en.yml.ref. This file is not used in the application, it is simply a copy of the en.yml file that is provided by the rails-i18n gem. Check here if you are not sure whether a translation is already provided, and avoid duplicating core translations if possible. Also note that not all language files include all translations! It is a work in progress...
 - The locale setting follows the basic guidelines in [Rails Guides section 2.2](https://guides.rubyonrails.org/i18n.html#setting-the-locale-from-url-params).
 - Changing locale is available in the layout header via a drop down menu.
-
+- The storage of translation files is detailed in the [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) file.
 
 ### Constants
 
@@ -176,10 +176,10 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - The gem bootstrap-icons-helper simplifies finding the icons (notoriously difficult with the recommended installation methods).
 - Icons have been copied to app/assets/icons. 
 - If a new icon is required, search in <https://icons.getbootstrap.com>, find the name and use it. (The website doesn't include sorting facilities so it is not easy to find by function unless the name corresponds to the function.)
-- The helper method icon(name) in app/helpers/bootstrap_icon_helper.rb is used to further simplify icon usage.
+- The helper method bs_icon(name) in app/helpers/bootstrap_icon_helper.rb is used to further simplify icon usage.
 - Typical usage is:
 `<%= f.submit((yield(:button_text)), class: 'btn btn-primary') do %>
-          <%== icon('save') %>
+          <%== bs_icon('save') %>
         <% end %>`
 - Important: The double equals is used to prevent html escaping of the icon.
 - Be consistent in icon usage. Preferred icons are:
@@ -195,6 +195,9 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
   - "search" for search buttons on views
   - "x-square" for Discard Changes buttons on forms
   - "save" for save buttons on forms
+- Flag icons are used to assist with locale/language selection.
+  - The gem rails-icons is used with the library 'flags' to provide the icons.
+  
 
 ## Known Issues
 
@@ -238,12 +241,11 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Refactor error views to use i18n.
 - [x] Refactor roles new view and projects edit view to translate resource names with a key value pair in the select field.
 - [x] Serve bootstrap from local dev or prod
-- [ ] Write more tests for the Demand model
 - [ ] Review all policies and tests for compliance with guidelines
 - [ ] Review all models for compliance with guidelines
 - [x] Clean up old Load model references after migration
 - [ ] The project was originally written for Rails 7 but got hibernated. On reawakening, it was upgraded to Rails 8. It has never been deployed to production, so Rails 8 upgrade is not yet officially declared complete.
-- [ ] The transition to rails 8 should have changed over the asset pipeline to use propshaft. This has not been done properly, needs to be rectified.
+- [x] The transition to rails 8 should have changed over the asset pipeline to use propshaft. This has not been done properly, needs to be rectified.
 - [x] Improve has_one validation on tagable, possibly include database constraint.
 - [x] Improve has_one validation on demandable, possibly include database constraint.
    - Database constraints deferred due to risk of locking database. Continue with inclusion of orphans on index displays, and manual clean up.
@@ -258,12 +260,14 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Update index view header lines.
 - [ ] Custom error view for not found errors. e.g. Case where admin deletes a record than uses browser back button.
 - [ ] Translation of html5 messages on required fields. Alternatively, suppress html 5 and use client side js.
-- [ ] Complete switchboard controller test.
+- [ ] Complete discipline system tests.
+- [x] Complete switchboard controller test.
 - [ ] Complete cable system tests for from and to after switchboard, demand, and circuit tests are working.
 - [ ] Use of button text for new and edit forms is mixed. Standardise on save for new, update for edit.
 - [ ] Demand form live update of calculated values not working.
 - [ ] Cable types with no current project.
-- [ ] Refine the collapsibles component to retain state after refresh operations (e.g. sorting links with ransack). Make a generalised solution, maybe use turbo.
+- [x] Refine the collapsibles component to retain state after refresh operations (e.g. sorting links with ransack). Make a generalised solution, maybe use turbo.
+- [ ] Fix the page size js controller.
 
 ## Refactoring Opportunities
 
@@ -271,7 +275,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [x] Refactor models to include a universal "label" attribute to be used when presenting polymorphic associations.
 - [ ] Refactor projects controller with improved workflow.
 - [ ] Add type checking with Sorbet or RBS
-- [ ] Implement caching for frequently accessed demand data
+- [ ] Implement caching for frequently accessed data
 - [x] Upgrade to Rails 8 (Completed in rails8 branch)
 - [x] Refactor electrical policy classes (CablePolicy, SwitchboardPolicy, MotorPolicy, LightCctPolicy, SocketCctPolicy) to use a shared concern or base class to reduce code duplication
 - [x] Refactor all views to use pundit policy checks.
@@ -279,7 +283,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Refactor projects controller and application controller setting of current project: `def after_sign_in_path_for(resource)to use app/controllers/concerns/current_project_concern.rb to reduce code duplication.
 - [ ] Tags:
    - [x] Refactor tag 'description' to 'service'.
-   - [ ] Add location attribute to tag, remove from all tagables.
+   - [x] Add location attribute to tag, remove from all tagables.
 - [x] Cable types: 
    - [x] convert core material to enum.
    - [x] convert insulation material to enum.
@@ -290,20 +294,20 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    - [x] convert frame size to enum.
    - [ ] build a ruby structure for ingress protection, convert ingress protection to this type.
 - [ ] Redesign tag module:
-   - [ ] base full tag becomes a virtual field.
+   - [x] base full tag becomes a virtual field.
    - [x] builder/parser model for each discipline which creates the string according to the required format, and can parse the string back into the components.
    - [x] provide default format for each discipline, e.g. isa5.1
    - [x] add next/previous functionality
    - [ ] add colour code by discipline
 - [ ] Look at use of hover on buttons, and use turbo to prevent page refresh.
-- [ ] Improve implementation of Discipline model, including translation. Consider using constants hash for each project.
+- [x] Improve implementation of Discipline model, including translation. Consider using constants hash for each project.
 - [ ] Consider changing all delete links to use turbo to prevent page refresh.
- 
+- [ ] Replace devise views with bespoke views in the style of the rest of the application.
+
 ## Potential Features
 
 - [ ] Add more comprehensive reporting for demand calculations
 - [ ] Implement bulk import/export
-- [ ] See if pagy can provide user selectable page size
 - [ ] Data revision management
 - [ ] Customize devise users:
    - [ ] Add policy for users
@@ -324,7 +328,6 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Nest routes for project related resource under projects to improve security around assignment to other than the current project.
 - [ ] Consider API versioning strategy
 - [ ] Plan for database scaling as data grows
-
 
 ## Notes
 

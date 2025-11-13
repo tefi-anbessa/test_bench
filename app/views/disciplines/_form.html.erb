@@ -17,7 +17,8 @@
       url: discipline.persisted? ? discipline_path(discipline) : project_disciplines_path(project),
       layout: :horizontal, 
       label_col: "col-sm-4", 
-      control_col: "col-sm-8") do |f| %>
+      control_col: "col-sm-8",
+      html: { novalidate: true }) do |f| %>
 
       <div class="card-body p-2">
         <%= render 'shared/error_messages', object: f.object %>
@@ -40,6 +41,20 @@
                       { class: 'form-select', required: true  } %>
               <% end %>
             </div>
+
+            <!-- Copy from standard -->
+            <% unless discipline.persisted? %>
+              <div class="mb-1">
+                <%= f.select :copy_from_standard,
+                      options_for_select(
+                        Constants.disciplines.map { |d| 
+                          [t("discipline.#{d[:code]}.name", default: d[:name]), d[:code]] 
+                        }
+                      ),
+                      { include_blank: t('form.new_select') },
+                      { class: "form-select" } %>
+              </div>
+<% end %>
 
             <!-- Code -->
             <div class="row">

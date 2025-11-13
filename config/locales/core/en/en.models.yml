@@ -33,6 +33,7 @@ en:
           schema:           "Schema"
         module_name:      "Module Name"
         notes:            "Notes"
+        copy_from_standard: "Copy from Standard" # Form label
       tag:
         project:          "Project"
         discipline:       "Discipline"

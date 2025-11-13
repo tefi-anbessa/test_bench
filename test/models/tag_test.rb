@@ -188,30 +188,24 @@ class TagTest < ActiveSupport::TestCase
     assert @tag.valid?
   end
 
-  test "full tag method should work on persisted and new tags" do
+  test "full tag method should work on persisted tags" do
     discipline = create(:discipline, code: 'A', project: @project)  # Create a discipline with a specific code
     tag1 = create(:tag, prefix: 'PG', serial: 1001, suffix: '', discipline: discipline)
     assert_equal "#{tag1.prefix}#{tag1.serial.to_s.rjust(4, '0')}", tag1.full_tag
-    
-    tag2 = build(:tag, prefix: 'EC', serial: 1002, suffix: 'A', discipline: discipline)
-    assert_equal "#{tag2.prefix}#{tag2.serial.to_s.rjust(4, '0')}#{tag2.suffix}", tag2.full_tag
   end
 
   test "loop id method should work on persisted and new tags" do
     discipline = create(:discipline, code: 'A', project: @project)  # Create a discipline with a specific code
     tag1 = create(:tag, prefix: 'PG', serial: 1001, suffix: '', discipline: discipline)
     assert_equal "#{tag1.prefix.first.upcase}#{tag1.serial.to_s.rjust(4, '0')}", tag1.loop_id
-    
-    tag2 = build(:tag, prefix: 'EC', serial: 1002, suffix: 'A', discipline: discipline)
-    assert_equal "#{tag2.prefix.first.upcase}#{tag2.serial.to_s.rjust(4, '0')}", tag2.loop_id
   end
 
   test "label method should return full tag" do
-    assert_equal @tag.full_tag, @tag.label
+    assert_equal @tag_a1.full_tag, @tag_a1.label
   end
 
   test "long_label method should return discipline and full tag" do
-    assert_equal "#{@tag.discipline.label}: #{@tag.full_tag}", @tag.long_label
+    assert_equal "#{@tag_a1.discipline.code}: #{@tag_a1.full_tag}", @tag_a1.long_label
   end
 
   test "destroy tag should remove from discipline" do

@@ -7,32 +7,19 @@ FactoryBot.define do
     name { "Discipline #{code}" }
     module_name { name.parameterize.underscore.camelize }
     sort_order { 100 }
-    prefix_schema { { name: :default } }
+    prefix_schema { { name: 'default' } }
 
-    # Standard disciplines from Constants
-    Constants.disciplines.each do |disc|
-      trait(disc[:code]) do
-        code { disc[:code].to_s }
-        name { disc[:name] }
-        module_name { disc[:module] }
-        sort_order { disc[:sort_order] }
-        prefix_schema { disc[:prefix_schema] }
-      end
-    end
     # For specific discipline types
     trait :elec do
       code { :elec }
       name { 'Electrical' }
+      prefix_schema { { name: 'dim1' } }
     end
-    
-    trait :mech do
-      code { :mech }
-      name { 'Mechanical' }
-    end
-    
+
     trait :inst do
       code { :inst }
-      name { 'Instrumentation' }
+      name { 'Electrical' }
+      prefix_schema { { name: 'isa51' } }
     end
   end
 end

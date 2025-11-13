@@ -41,7 +41,7 @@ class Tag < ApplicationRecord
   end
 
   def long_label
-    discipline.label + ": " + full_tag
+    "#{discipline.code}: #{full_tag}"
   end
 
   # Track original values to detect changes
