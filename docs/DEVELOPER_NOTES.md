@@ -18,6 +18,12 @@
 
 From git commit 6da446f onwards, this project has used Windsurf/Cascade AI to speed up development and improve code quality. The learnings of this process including coding conventions and project peculiarities, etc. have been captured in "Memories" on the Cascade server side.
 
+### AI Rules
+
+Windsurf IDE has introduced a new feature called "AI Rules". These are rules that are applied to the code by the AI. The rules are defined in the .windsurf/rules directory.
+
+Progressively build a set of rules to implement these guidelines.
+
 ### For Developers:
 
 1. When initiating a new session with AI, request it to review the project guiding documentation:

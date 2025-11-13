@@ -59,15 +59,6 @@
                       required: true %>
             </div>
 
-            <!-- Label -->
-            <div class="row">
-              <%= f.text_field :label,
-                label_col: "col-sm-3",
-                control_col: "col-sm-9",
-                      title: t('activerecord.help.discipline.label'),
-                      required: true %>
-            </div>
-
             <!-- prefix schema -->
             <%= render 'prefix_schema_fields', form: f %>
 

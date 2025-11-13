@@ -132,10 +132,15 @@
                     <div class="col-8"><%= @discipline.label %></div>
                   </div>
 
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.discipline.prefix_schema') %></div>
-                    <div class="col-8"><%= @discipline.prefix_schema&.[]('name') %></div>
-                  </div>
+                  <% if @discipline.prefix_schema.present? %>
+                    <%= render 'disciplines/prefix_schema_card', 
+                      object: @discipline.prefix_schema %>
+                  <% else %>
+                    <div class="row mb-1">
+                      <div class="col-4 text-muted"><%= t('activerecord.attributes.discipline.prefix_schema') %></div>
+                      <div class="col-8"><%= '-' %></div>
+                    </div>
+                  <% end %>
 
                   <div class="row mb-1">
                     <div class="col-4 text-muted"><%= t('activerecord.attributes.discipline.module_name') %></div>

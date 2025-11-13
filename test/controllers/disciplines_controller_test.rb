@@ -40,11 +40,7 @@ class DisciplinesControllerTest < ActionController::TestCase
 
   test "should get index for any user with project role" do
     sign_in @team_member
-puts "Session project_id: #{session[:project_id].inspect}"
-puts "Current project: #{@controller.current_project.inspect}" if @controller.respond_to?(:current_project)
-puts "Current project (@): #{@current_project.id.inspect}"
-puts "Current project: #{current_project.id.inspect}"
-  get :index, params: { project_id: @project.id }
+    get :index, params: { project_id: @project.id }
     assert_response :success
   end
 
@@ -82,11 +78,9 @@ puts "Current project: #{current_project.id.inspect}"
         project_id: @project.id,
         discipline: {
           code: 'PIP',
-          label: 'PIP',
           name: 'Piping',
           module_name: 'Piping',
-          use_standard_schema: 'true',
-          schema_type: 'default'  # Using one of the standard schema types
+          prefix_schema: "name: default"
         }
       }
     end
@@ -100,8 +94,7 @@ puts "Current project: #{current_project.id.inspect}"
         discipline: {
         code: ':' + 'a'*13,  # Invalid: name max length is 12
         name: 'Process',
-        label: 'PR',
-        prefix_schema: :default,
+        prefix_schema: {"name": "default"},
         module_name: 'Process'
       }
     }

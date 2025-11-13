@@ -68,4 +68,7 @@ Rails.application.routes.draw do
   
   # Catch-all route for 404s - must be last
   match '*unmatched', to: 'errors#not_found', via: :all
+
+  # Handle Chrome DevTools JSON request
+get "/.well-known/appspecific/com.chrome.devtools.json", to: proc { [200, { "Content-Type" => "application/json" }, []] }
 end

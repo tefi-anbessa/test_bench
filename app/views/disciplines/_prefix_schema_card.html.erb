@@ -1,25 +1,11 @@
-<div id="<%= dom_id prefix_schema %>">
-
-  <%= render 'components/collapsible',
-    id: "prefix_schema[:name]}",
-    title: t("activerecord.attributes.prefix_schema_keys.name", label: prefix_schema['name']),
-    expanded: false,
-    header_class: 'py-1' do %>
-    
-    <div class="row mb-1">
-      <div class="col-4 text-muted"><%= t('activerecord.attributes.prefix_schema_keys.name') %></div>
-      <div class="col-8"><%= prefix_schema['name'] %></div>
-    </div>
-    
-    <div class="row mb-1">
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t('activerecord.attributes.prefix_schema_keys.type') %></div>
-        <div class="col-8"><%= prefix_schema['type'] %></div>
-      </div>
-      
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t('activerecord.attributes.prefix_schema_keys.schema') %></div>
-        <div class="col-8"><%= prefix_schema['schema'] %></div>
+<% schema = object %>
+<%= render 'components/collapsible',
+  id: "#{schema['name']}",
+  title: [t("activerecord.attributes.discipline.prefix_schema"), schema['name']].join(': '),
+  expanded: false,
+  header_class: 'py-1' do %>
+    <div class="bg-light p-3 rounded">
+      <pre class="mb-0"><code class="language-json"><%= JSON.pretty_generate(schema.presence || {}) %></code></pre>
     </div>
   <% end %>
 </div>

@@ -5,7 +5,18 @@
   expanded: params[:disciplines_expanded] == '1',
   header_class: 'py-1' do %>
   
-    <div class="container-fluid">
+    <div class="container-fluid"><% if policy(Discipline).new? %>
+      <li class="nav-item">
+        <%= link_to new_project_discipline_path(@project),
+              class: "btn btn-primary actions",
+              data: { turbo: false },
+              aria: { label: t('actions.new') },
+              title: t('actions.new') do %>
+          <%== bs_icon('plus-square-fill') %>
+          <%= [t('actions.new'), t('activerecord.models.discipline')].join(' ') %>
+        <% end %>
+      </li>
+    <% end %>
       <div class="table-responsive">
         <table class="table table-sm table-striped">
           <%= render 'disciplines/disciplines_header', q: @q %>

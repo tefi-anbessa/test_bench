@@ -1,6 +1,9 @@
+prefix_parser_keys:
+  - default
+  - isa51
+  - dim1
+  - dim2
 prefix_schemata:
-  custom:
-    type: 'custom'
   default:
     type: 'default'
   isa51:

@@ -12,7 +12,7 @@ import 'bootstrap'
 // when using the pre-built bundle
 
 // Import JSONEditor from vendor/javascript
-import { JSONEditor } from 'jsoneditor'
+// import { JSONEditor } from 'jsoneditor'
 // Make it available globally if needed
 // window.JSONEditor = JSONEditor
 

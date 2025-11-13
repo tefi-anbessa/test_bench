@@ -27,7 +27,7 @@ en:
         label:            "Label"
         sort_order:       "Sort Order"
         prefix_schema:    "Prefix Schema"
-        schema_name:      "Schema"
+        default_prefix_schema_name: "user_defined"
         prefix_schema_keys:
           type:             "Type"
           schema:           "Schema"
@@ -37,7 +37,6 @@ en:
         project:          "Project"
         discipline:       "Discipline"
         prefix:           "Prefix"
-        prefix_help:      "Prefix should preferebly be selected from existing list"
         prefix_parts:
           measured_variable: "Measured Variable"
           modifier: "Modifier"
@@ -46,17 +45,11 @@ en:
           output_function: "Output Function"
           modifier_function: "Modifier Function"
         serial:           "Loop"
-        serial_help:      "Loop should be 4 digits"
         suffix:           "Suffix"
-        suffix_help:      "Suffix should be typically one character, blank if not required"
         service:          "Service"
-        service_help:     "Service description (40 characters maximum)"
         location:         "Location"
-        location_help:    "Physical location of design element"
         stage:            "Stage"
-        stage_help:       "Construction stage or phase (0 to 10)"
         notes:            "Notes"
-        notes_help:       "Record useful tag related design information here"
         full_tag:         "Tag"
         tagable_type:     "Tag Type"
       role:
@@ -65,17 +58,25 @@ en:
         resource_type_help: "Leave blank for global role"
         resource_id:      "Instance"
     help:
+      tag: 
+        prefix:           "Build prefix using discipline specific schema"
+        serial:           "Loop should be 4 digits"
+        suffix:           "Suffix should be typically one character, blank if not required"
+        service:          "Service description (40 characters maximum)"
+        location:         "Physical location of design element"
+        stage:            "Construction stage or phase (0 to 10)"
+        notes:            "Record useful tag related design information here"
       discipline:
-        code:             "symbol, maximum 12 characters"
-        name:             "descriptive name, maximum 50 characters"
-        label:            "display label, maximum 12 characters"
-        sort_order:       "sort order"
-        prefix_schema:    "prefix schema help tba"  # [TODO]
+        code:             "Symbol, maximum 12 characters"
+        name:             "Descriptive name, maximum 50 characters"
+        label:            "Display label, maximum 12 characters"
+        sort_order:       "Sort order"
+        prefix_schema:    "Select a standard schema or define a custom schema. Custom schema must have a unique name, set to project code + discipline code"
         module_name:      "ignore: not implemented"  # [TODO]
-        notes:            "additional information"
+        notes:            "Additional information"
     errors:
       messages:
-        invalid_symbol: "%{model} %{attribute} must be a valid Ruby symbol (letters, numbers, underscores, starting with a letter or underscore)"
+        invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
         unique: "%{model} %{attribute} has already been taken, must be unique"
         custom_required: "%{model} %{attribute} is required"
         already_associated: "%{child} is already associated with another %{parent}"
@@ -91,5 +92,10 @@ en:
           tagable_type:
             not_assigned: "Not assigned"
             change_tagable: "Cannot change tagable association once set"
+      jsonb_fields:
+        blank: "%{field} can't be blank"
+        invalid: "%{field} is invalid"
+        included: "%{field} must be included in the allowed list"
+        taken: "%{field} has already been taken"
 
 #

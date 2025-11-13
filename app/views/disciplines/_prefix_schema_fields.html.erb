@@ -1,47 +1,102 @@
-
 <div class="card mb-4" 
      data-controller="prefix-schema"
-     data-prefix-schema-schemata-value="<%= Constants.prefix_schemata.to_json %>"
-     data-prefix-schema-messages-value="<%= {
-       sure: t('prefix_schema.messages.sure'),
-       initialize: t('prefix_schema.messages.')
-     }.to_json %>"
-     data-action="submit@window->prefix-schema#beforeSubmit">
+     data-prefix-schema-schemata-value='<%= Constants.prefix_schemata.to_json %>'
+     data-prefix-schema-messages-value='<%= {
+       sure: t("prefix_schema.messages.sure"),
+       initialize: t("prefix_schema.messages.initialize")
+     }.to_json %>'
+     data-prefix-schema-initial-selection-value='<%= @prefix_schema_selection %>'
+     data-prefix-schema-initial-schema-value='<%= @discipline.prefix_schema.to_json if @discipline.prefix_schema.present? %>'
+     data-prefix-schema-default-name-value='<%= @default_prefix_schema_name %>'>
   
   <div class="card-header">
     <%= t('activerecord.attributes.discipline.prefix_schema') %>
   </div>
   
   <div class="card-body">
-    <div data-prefix-schema-target="schemaKey" class="mb-3">
+    <!-- Schema Selector -->
+    <div class="mb-3" data-prefix-schema-target="schemaKey">
       <%= form.select :schema_key,
-          options_for_select(Constants.prefix_schemata.keys.map { |k| [k.to_s.humanize, k] }, 
-          @discipline.prefix_schema&.dig('key')),
+          options_for_select(@prefix_schema_options, @prefix_schema_selection),
           { include_blank: t("form.required") }, 
-          { class: "form-select", 
-      data: { action: "change->prefix-schema#handleSchemaKeyChange" } } %>
+          { 
+            class: "form-select",
+            data: { action: "change->prefix-schema#handleSchemaKeyChange" }
+          } %>
     </div>
 
-    <div data-prefix-schema-target="customSchemaFields" style="display: none;">
-      <div class="mb-3">
-        <label class="form-label">
-          <%= t('prefix_schema.messages.initialize') %>
-        </label>
-        <select class="form-select" 
-                data-action="change->prefix-schema#initializeFromTemplate">
-          <option value="">-- Select a template --</option>
-          <% Constants.prefix_schemata.keys.each do |key| %>
-            <option value="<%= key %>"><%= key.to_s.titleize %></option>
-          <% end %>
-        </select>
+    <!-- Schema Type Selector (for custom schemas) -->
+    <div data-prefix-schema-target="schemaTypeSelector" class="mb-3" style="display: none;">
+      <%= form.select :schema_type,
+          options_for_select(
+            @prefix_schema_types.map { |type| [t("prefix_schema.types.#{type}", default: type.to_s.humanize), type] },
+            @discipline.prefix_schema&.dig('type')
+          ),
+          { include_blank: t("form.required"), label: t('prefix_schema.type') },
+          { data: { action: "change->prefix-schema#handleSchemaTypeChange" } }
+      %>
+    </div>
+
+    <!-- Schema Viewer (for viewing existing schemas) -->
+    <div data-prefix-schema-target="schemaViewer" class="mb-3" style="display: none;">
+      <div class="form-group">
+        <label class="form-label"><%= t('prefix_schema.viewing_schema') %></label>
+        <pre class="bg-light p-3 rounded" style="max-height: 300px; overflow: auto;">
+          <code data-prefix-schema-target="schemaViewerContent"></code>
+        </pre>
       </div>
+    </div>
     
-      <div class="mb-3">
-        <div id="jsoneditor" data-prefix-schema-target="editorContainer"></div>
-        <%= form.hidden_field :prefix_schema, 
-            value: @discipline.prefix_schema.to_json,
-            data: { "prefix-schema-target": "schemaInput" } %>
+    <!-- Help text for schema selection -->
+    <div class="mb-3">
+      <small class="form-text text-muted">
+        <%= t('activerecord.help.discipline.prefix_schema') %>
+      </small>
+    </div>
+
+    <!-- Custom Schema Editor -->
+    <div data-prefix-schema-target="customSchemaFields" class="mb-3" style="display: none;">
+      <!-- Template Selector -->
+      <div data-prefix-schema-target="templateSelector" class="mb-3">
+        <%= form.select :template,
+            [
+              [t('prefix_schema.select_template'), ''],
+              *Constants.prefix_schemata.keys.map { |k| [k.to_s.titleize, k] }
+            ],
+            { label: t('prefix_schema.messages.initialize') },
+            { 
+              class: 'form-select',
+              data: { action: "change->prefix-schema#initializeFromTemplate" }
+            }
+        %>
       </div>
+      
+      <small class="form-text text-muted">
+        <%= t('prefix_schema.template_help') %>
+      </small>
+      
+      <!-- Schema Editor -->
+      <div class="form-group" data-prefix-schema-target="schemaEditorWrapper">
+        <%# Using a regular textarea without the form builder to avoid automatic required attribute %>
+        <label for="discipline_prefix_schema_editor" class="form-label"><%= t('prefix_schema.custom_schema') %></label>
+        <textarea id="discipline_prefix_schema_editor"
+                class="form-control font-monospace"
+                rows="10"
+                data-prefix-schema-target="schemaEditor"
+                data-action="input->prefix-schema#updateSchemaInput"
+                <%= 'required' if form.object.class.validators_on(:prefix_schema).any? { |v| v.is_a?(ActiveModel::Validations::PresenceValidator) } %>>
+          <%= @discipline.prefix_schema.present? ? JSON.pretty_generate(@discipline.prefix_schema) : '' %>
+        </textarea>
+        <small class="form-text text-muted">
+          <%= t('prefix_schema.schema_help') %>
+        </small>
+      </div>
+      
+      <!-- Hidden input that will be submitted with the form -->
+      <%= form.hidden_field :prefix_schema, 
+                          value: @discipline.prefix_schema.present? ? @discipline.prefix_schema.to_json : '',
+                          data: { prefix_schema_target: 'schemaInput' },
+                          required: form.object.class.validators_on(:prefix_schema).any? { |v| v.is_a?(ActiveModel::Validations::PresenceValidator) } %>
     </div>
   </div>
 </div>

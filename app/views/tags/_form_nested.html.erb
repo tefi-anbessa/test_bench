@@ -47,7 +47,7 @@
         control_col: "col-sm-3",
               min: 0,
               max: 10,
-              title: t('activerecord.attributes.tag.stage_help') %>
+              title: t('activerecord.help.tag.stage') %>
       </div>
 
       <!-- Discipline -->
@@ -76,7 +76,7 @@
         <%= tag_f.text_field :serial,
         label_col: "col-sm-3",
         control_col: "col-sm-3",
-              title: t('activerecord.attributes.tag.serial_help'),
+              title: t('activerecord.help.tag.serial'),
               pattern: '\d*',
               inputmode: 'numeric',
               value: tag.serial.present? ? tag.serial.to_s.rjust(4, '0') : '0000',
@@ -92,7 +92,7 @@
         <%= tag_f.text_field :suffix,
         label_col: "col-sm-3",
         control_col: "col-sm-3",
-              title: t('activerecord.attributes.tag.suffix_help'),
+              title: t('activerecord.help.tag.suffix'),
               data: { action: 'change->tag#updatePreview input->tag#updatePreview' },
               id: 'tag_suffix' %>
       </div>
@@ -101,7 +101,7 @@
         <%= tag_f.text_field :service,
           label_col: "col-sm-3",
           control_col: "col-sm-9",
-                title: t('activerecord.attributes.tag.service_help'),
+                title: t('activerecord.help.tag.service'),
                 required: true %>
       </div>
 
@@ -109,7 +109,7 @@
         <%= tag_f.text_field :location,
                 label_col: "col-sm-3",
                 control_col: "col-sm-9",
-                title: t('activerecord.attributes.tag.location_help') %>
+                title: t('activerecord.help.tag.location') %>
       </div>
 
       <!-- Notes -->
@@ -118,7 +118,7 @@
                 label_col: "col-sm-3",
                 control_col: "col-sm-9",
                 rows: 3,
-                placeholder: t('activerecord.attributes.tag.notes_help') %>
+                placeholder: t('activerecord.help.tag.notes') %>
       </div>
 
       <!-- Tagable Type -->

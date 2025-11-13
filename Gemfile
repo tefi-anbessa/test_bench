@@ -90,6 +90,7 @@ gem 'bootstrap-icons-helper'
 gem "rolify"
 gem "pundit"
 
+
 # End of added gems +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 group :development, :test do
