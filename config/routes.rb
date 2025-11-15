@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  namespace :electrical do
+      # Add your routes here
+    end
   scope "(:locale)", locale: /#{I18n.available_locales.join("|")}/ do
     get 'site/home'
     get 'site/help'

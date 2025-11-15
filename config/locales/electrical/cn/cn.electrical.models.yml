@@ -1,0 +1,162 @@
+en:
+  activerecord:
+    models:
+      cable_type:         "Cable Type"
+      cable:              "Cable"
+      demand:             "Load"
+      switchboard:        "Switchboard"
+      circuit:            "Circuit"
+      motor:              "Motor"
+      socket_cct:         "Socket Circuit"
+      light_cct:          "Light Circuit"
+    attributes:
+      cable_type:
+        conductor_material:	Conductor Material
+        cores:	Conductor Cores
+        csa:	CSA
+        csa_units:  mm²
+        neutral:	Neutral
+        neutral_csa:	Neutral CSA
+        earth:	Earth
+        earth_csa:	Earth CSA
+        insulation:	Insulation
+        bedding:	Bedding
+        armour:	Armour
+        sheath:	Sheath
+        bedding_od:	Bedding OD
+        overall_od:	Overall OD
+        od_units: mm
+        temperature_rating:	Temperature Rating
+        voltage_rating:	Voltage Rating
+        notes:                "Notes"
+        notes_help:       "Record useful cable type design information here"
+      cable:
+        from:                 "From"
+        to:                   "To"
+        route_length:         "Route Length"
+        route_length_help:    "Route length of cable run, plan view"
+        vertical_allowance:   "Vertical Allowance"
+        vertical_allowance_help:  "Cable length to be added to plan view, e.g. for riser to switchboard. If routes are 3D modeled, set to zero."
+        termination_allowance:  "Termination Allowance"
+        termination_allowance_help: "Allowance for cable routing inside boxes"
+        start_mark:           "Installed Start Mark"
+        end_mark:             "Installed End Mark"
+        notes:                "Notes"
+        notes_help:       "Record useful cable related design references here"
+      demand:
+        incomer:          "Incomer"
+        feeder:           "Feeder"
+        basis:            "Basis"
+        bases:
+          summation:      "Summation of outgoing feeders"
+          power_pf:       "Calculate current from power and power factor"
+          vector_pf:      "Calculate current from vector and power factor"
+          current_pf:     "Calculate power, vector from current and power factor"
+          current_power:  "Calculate vector, power factor from current and power"
+        basis_help:       "Defines which load parameters are given and which are calculated"
+        basis_notes:      "Load Basis Notes"
+        basis_notes_help: "Record references for derivation of the load parameters"
+        config:           "Configuration"
+        configs:
+          dc:             "DC"
+          one:            "AC L-N 1 phase"
+          two_120:        "AC L-N 2 phase 120˚"
+          two_180:        "AC L-N 2 phase 180˚"
+          three_3c:       "AC L-L 3 phase 3 wire"
+          three_4c:       "AC L-N 3 phase 4 wire"
+        config_help:      "Select the power system for the load"
+        supply:           "Supply (V)"
+        supply_help:      "Select the supply voltage for the load. Leave blank for other supply."
+        power:            "Power (W)"
+        vector:           "Vector (VA)"
+        power_factor:     "Power Factor"
+        current:          "Current (A)"
+        duty:             "Duty"
+        duty_help:        "Proportional ON time for the load, for total load estimates"
+        demandable_type:  "Load Type"
+        demandable:       "Equipment"
+        demandable_help:  "Equipment datasheet"
+        notes:            "Notes"
+        notes_help:       "Record additional load related design references here"
+      switchboard:
+        location:         "Location"
+        ingress_protection: "Ingress Protection"
+        ip_1:             "1st digit"
+        ip_2:             "2nd digit"
+        voltage_rating:   "Voltage Rating"
+        busbar_rating:    "Busbar Rating"
+        busbar_fault_rating:  "Busbar Fault Rating"
+        busbar_fault_duration:  "Busbar Fault Duration"
+        cable_entry:      "Cable Entry"
+        incomer_protection: "Incomer Protection"
+        metering:         "Metering"
+        neutral_bar_connections:  "Neutral Bar Connections"
+        earth_bar_connections:  "Earth Bar Connections"
+        circuits:         "Circuits"
+        notes:            "Notes"
+      circuit:
+        serial:           "Circuit Number"
+        phase:            "Phase Designation"
+        device:           "Protection Device"
+        poles:            "Poles"
+        curve:            "Curve"
+        rating:           "Rating (A)"
+        elcb:             "ELCB"
+        contactor:        "Contactor"
+        feeder:           "Feeder"
+        demand:           "Load"
+        notes:            "Notes"
+        notes_help:       "Record additional circuit related design references here"
+      motor:
+        motor_type:       "Motor Type"
+        motor_types:
+          induction:      "Induction"
+          synchronous:    "Synchronous"
+          dc:             "DC"
+          servo:          "Servo"
+          stepper:        "Stepper"
+          brushless_dc:   "Brushless DC"
+          universal:      "Universal"
+          other:          "Other"
+        frame_size:       "Frame Size"
+        poles:            "Poles"
+        ingress_protection:   "Ingress Protection"
+        speed_rated:      "Speed At Rated Load"
+        notes:            "Notes"
+        notes_help:       "Record additional motor related design references here"
+      socket_cct:
+        socket_type:      "Socket Type"
+        socket_types:
+          other: "Other"
+          "10A": "10A: AS3000 bi) Socket, 10A, general, no HVAC room"
+          "10A_HVAC": "10A_HVAC: AS3000 bii) Socket 10A, general, in HVAC room"
+          "15A": "15A: AS3000 bi) Socket, 15A, general use"
+          "20A": "20A: AS3000 bi) Socket, 20A, general use"
+          "32A": "32A: AS3000 biii) Socket 32A, general use"
+          "40A": "40A: AS3000 biii) Socket 40A, general use"
+          "50A": "50A: AS3000 biii) Socket 50A, general use"
+          "63A": "63A: AS3000 biii) Socket 63A, general use"
+          "80A": "80A: AS3000 biii) Socket 80A, general use"
+          "100A": "100A: AS3000 biii) Socket 100A, general use"
+          "125A": "125A: AS3000 biii) Socket 125A, general use"
+        quantity:         "Quantity"
+        notes:            "Notes"
+        notes_help:       "Record additional socket circuit related design references here"
+      light_cct:
+        light_fitting_type: "Light Fitting Type"
+        light_fitting_types:
+          other: "Other"
+          general: "General: AS3000 ai) Light, general"
+          outdoor: "Outdoor > 1000W: AS3000 aii) Light, outdoor > 1000W"
+        light_fitting_type_help:  "AS3000 load classes"
+        quantity:         "Quantity"
+        notes:            "Notes"
+        notes_help:       "Record additional light circuit related design references here"
+    errors:
+      messages:
+        attributes:
+          demand:
+            power_factor:
+              zero_pf: "Power factor of zero will cause calculation errors"
+            demandable:
+              tag_association: "%{model} must have a tag to associate with load"

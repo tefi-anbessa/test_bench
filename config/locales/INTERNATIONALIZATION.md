@@ -14,7 +14,7 @@
 ### Level 3
 
 - Language conversion .yml files reside at level 3.
-- Filenames should be prefaced by the language code. 
+- Filenames should be prefaced by the language code.
 - The only exception is that where translations are provided from an external source, they may keep the origin naming convention. (E.g. devise.en.yml, devise.km.yml)
 
 #### Core Functions
@@ -34,7 +34,7 @@
 
 ## Adding a New Module
 
-- Copy and paste the dummy folder config/locales/new to locales, and rename it with the name of the new module.
+- Copy and paste the dummy folder config/locales/new_module to locales, and rename it with the name of the new module.
 - This simply provides a sub-folder for each language.
 - Copy the xx/views.yml and xx/models.yml files from another module base language to set the format.
 - Replace the content with the required attributes for the new module for the base language, ensuring the keys are consistent with the new code.

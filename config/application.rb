@@ -8,6 +8,8 @@ Bundler.require(*Rails.groups)
 
 module TestBench
   class Application < Rails::Application
+# Autoload module directories
+config.autoload_paths += %W(#{config.root}/app/electrical #{config.root}/app/electrical/**/)
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.0
 
