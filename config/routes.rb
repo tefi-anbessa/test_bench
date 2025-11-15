@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  namespace :instrumentation do
+      # Add your routes here
+    end
   namespace :electrical do
       # Add your routes here
     end

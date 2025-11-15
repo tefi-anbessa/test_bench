@@ -268,6 +268,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Cable types with no current project.
 - [x] Refine the collapsibles component to retain state after refresh operations (e.g. sorting links with ransack). Make a generalised solution, maybe use turbo.
 - [ ] Fix the page size js controller.
+- [ ] Write thoroughtests for the tag parser and builder.
 
 ## Refactoring Opportunities
 

@@ -61,18 +61,10 @@ module ProjectAssistant
         # Check language directory exists
         assert_directory "config/locales/#{@module_name}/#{lang}"
         
-        # Check models and views subdirectories exist
-        @locale_dirs.each do |file_type|
-          assert_directory "config/locales/#{@module_name}/#{lang}/#{file_type}"
-        end
-        
-        # Check general translations file
-        assert_file "config/locales/#{@module_name}/#{lang}.#{@module_name}.yml"
-        
-        # Check models and views translation files
-        @locale_dirs.each do |file_type|
-          assert_file "config/locales/#{@module_name}/#{lang}.#{@module_name}.#{file_type}.yml"
-        end
+        # Check all YAML files exist directly in the language directory
+        assert_file "config/locales/#{@module_name}/#{lang}/#{lang}.#{@module_name}.yml"
+        assert_file "config/locales/#{@module_name}/#{lang}/#{lang}.#{@module_name}.models.yml"
+        assert_file "config/locales/#{@module_name}/#{lang}/#{lang}.#{@module_name}.views.yml"
       end
 
       # Test template files

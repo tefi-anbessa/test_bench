@@ -12,71 +12,56 @@ module ProjectAssistant
       # Check for existing module structure
       if should_abort?("app/#{@module_name}") || 
          should_abort?("test/#{@module_name}") ||
-         should_abort?("app/models/#{@module_name}.rb")
+         should_abort?("app/models/#{@module_name}.rb") ||
+         should_abort?("config/locales/#{@module_name}")
         return
       end
 
-      # Create app directory structure
+      # Create app folder structure
       %w[controllers helpers models policies views].each do |dir|
         dir_path = File.join(destination_root, "app", @module_name, dir)
-        empty_directory(dir_path) unless File.directory?(dir_path)
+        empty_directory(dir_path)
         keep_file = File.join(dir_path, ".keep")
         create_file(keep_file, verbose: false) unless File.exist?(keep_file)
       end
 
-      # Create test directory structure
+      # Create test folder structure
       %w[controllers factories models policies system].each do |dir|
         dir_path = File.join(destination_root, "test", @module_name, dir)
-        empty_directory(dir_path) unless File.directory?(dir_path)
+        empty_directory(dir_path)
         keep_file = File.join(dir_path, ".keep")
         create_file(keep_file, verbose: false) unless File.exist?(keep_file)
       end
 
-      # Create locales directory
-      dest_dir = File.join(destination_root, 'config', 'locales', @module_name)
-      
-      if File.exist?(dest_dir)
-        if Rails.env.test?
-          puts "[TEST] Would prompt to overwrite locale directory: #{dest_dir}"
-          # In test environment, proceed without asking
-        else
-          return unless yes?("Locale directory #{dest_dir} already exists. Overwrite? [y/N]")
-        end
-      else
-        empty_directory(dest_dir, verbose: false)
-      end
-      
-      # Create YAML files for each available locale
+      # Create locales folder
+      dir_path = File.join(destination_root, 'config', 'locales', @module_name)
+      empty_directory(dir_path)
+
+      # Create locales subfolder for each language
       I18n.available_locales.each do |locale|
         lang = locale.to_s
-        
-        # Create language subdirectory
-        lang_dir = File.join(dest_dir, lang)
-        empty_directory(lang_dir) unless File.directory?(lang_dir)
+        dir_path = File.join(destination_root, 'config', 'locales', @module_name, lang)
+        empty_directory(dir_path)
         
         # Create [locale].[module_name].yml for general translations
-        general_file = File.join(dest_dir, "#{lang}.#{@module_name}.yml")
-        create_file(general_file, <<~YAML, verbose: false) unless File.exist?(general_file)
+        general_file = File.join(dir_path, "#{lang}.#{@module_name}.yml")
+        create_file(general_file, <<~YAML) unless File.exist?(general_file)
           # General translations for #{@module_name} module in #{lang}
           #{lang}:
             #{@module_name}:
         YAML
-        
-        # Create [locale].[module_name].models.yml and [locale].[module_name].views.yml
+
+        # Create translation files
         %w[models views].each do |file_type|
-          file_path = File.join(dest_dir, "#{lang}.#{@module_name}.#{file_type}.yml")
-          create_file(file_path, <<~YAML, verbose: false) unless File.exist?(file_path)
+          file_path = File.join(dir_path, "#{lang}.#{@module_name}.#{file_type}.yml")
+          create_file(file_path, <<~YAML) unless File.exist?(file_path)
             # #{@module_name} #{file_type} translations for #{lang}
             #{lang}:
-              #{file_type}:
-                #{@module_name}:
+              #{@module_name}:
           YAML
-          
-          # Create language-specific subdirectories for models and views
-          file_type_dir = File.join(lang_dir, file_type)
-          empty_directory(file_type_dir) unless File.directory?(file_type_dir)
         end
       end
+
       # Base model
       template "base.rb.erb", "app/#{@module_name}/base.rb"
       template "module.rb.erb", "app/models/#{@module_name}.rb"

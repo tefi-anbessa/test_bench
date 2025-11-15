@@ -37,6 +37,8 @@
 - Copy and paste the dummy folder config/locales/new_module to locales, and rename it with the name of the new module.
 - This simply provides a sub-folder for each language.
 - Copy the xx/views.yml and xx/models.yml files from another module base language to set the format.
+ALTERNATIVELY:
+- Use the module generator rails g project_assistant:module new_module_name. This sets up the locales file structure ready for adding translations.
 - Replace the content with the required attributes for the new module for the base language, ensuring the keys are consistent with the new code.
 - Ensure that testing covers at least the key selection for the new code.
 - Copy and paste the files to the other language folders and replace the translations without affecting the keys.
