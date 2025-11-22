@@ -96,7 +96,7 @@ class ProjectsControllerTest < ActionController::TestCase
       }
     end
     assert_redirected_to project_url(Project.last)
-    assert_equal I18n.t('flash.actions.create.notice', resource_name: I18n.t('activerecord.models.project')), flash[:success]
+    assert_equal I18n.t('flash.create.notice', resource_name: I18n.t('activerecord.models.project')), flash[:success]
   end
 
   test "cannot create project via JSON" do

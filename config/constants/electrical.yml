@@ -1,14 +1,14 @@
 electrical:
   loadable:
-    - Switchboard
-    - SocketCct
-    - LightCct
-    - Motor
-    - Heater
-    - Equipment
+    - Electrical::Switchboard
+    - Electrical::SocketCct
+    - Electrical::LightCct
+    - Electrical::Motor
+    - Electrical::Heater
+    - Electrical::Equipment
   connect_options:
-    - Circuit
-    - Demand
+    - Electrical::Circuit
+    - Electrical::Demand
   phase_designation:
     "L1":       1
     "L2":       2

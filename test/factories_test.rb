@@ -26,20 +26,64 @@ class FactoriesTest < ActiveSupport::TestCase
         create(:complete_tag, project: project, discipline: discipline)
       },
       
-      # Electrical components
-      :cable_type => -> { build(:cable_type) },
-      :cable => -> { build(:cable) },
-      :circuit => -> { 
-        switchboard = create(:switchboard)
-        build(:circuit, switchboard: switchboard)
+      # Electrical components (legacy)
+      :cable_type => :skip,
+      :cable => :skip,
+      :circuit => :skip,
+      :light_cct => :skip,
+      :motor => :skip,
+      :socket_cct => :skip,
+      :switchboard => :skip,
+      :demand => :skip,
+      
+      # Electrical components (namespaced)
+      :electrical_cable_type => -> { 
+        project = create(:project)
+        build(:electrical_cable_type, project: project) 
       },
-      :light_cct => -> { build(:light_cct) },
-      :motor => -> { build(:motor) },
-      :socket_cct => -> { build(:socket_cct) },
-      :switchboard => -> { build(:switchboard) },
-      :demand => -> { 
-        light_cct = create(:light_cct)
-        build(:demand, demandable: light_cct)
+      :electrical_cable => -> { 
+        project = create(:project)
+        discipline = create(:discipline, :elec, project: project)
+        tag = create(:tag, prefix: 'EC', project: project, discipline: discipline)
+        cable_type = create(:electrical_cable_type, project: project)
+        build(:electrical_cable, tag: tag, electrical_cable_type: cable_type)
+      },
+      :electrical_switchboard => -> { 
+        project = create(:project)
+        discipline = create(:discipline, :elec, project: project)
+        tag = create(:tag, prefix: 'EX', project: project, discipline: discipline)
+        build(:electrical_switchboard, tag: tag)
+      },
+      :electrical_circuit => -> {
+        project = create(:project)
+        discipline = create(:discipline, :elec, project: project)
+        switchboard_tag = create(:tag, prefix: 'EX', project: project, discipline: discipline)
+        switchboard = create(:electrical_switchboard, tag: switchboard_tag)
+        build(:electrical_circuit, electrical_switchboard: switchboard)
+      },
+      :electrical_light_cct => -> {
+        project = create(:project)
+        discipline = create(:discipline, :elec, project: project)
+        tag = create(:tag, prefix: 'EL', project: project, discipline: discipline)
+        build(:electrical_light_cct, tag: tag)
+      },
+      :electrical_motor => -> {
+        project = create(:project)
+        discipline = create(:discipline, :elec, project: project)
+        tag = create(:tag, prefix: 'M', project: project, discipline: discipline)
+        build(:electrical_motor, tag: tag)
+      },
+      :electrical_socket_cct => -> {
+        project = create(:project)
+        discipline = create(:discipline, :elec, project: project)
+        tag = create(:tag, prefix: 'ES', project: project, discipline: discipline)
+        build(:electrical_socket_cct, tag: tag)
+      },
+      :electrical_demand => -> {
+        project = create(:project)
+        discipline = create(:discipline, :elec, project: project)
+        light_cct = create(:electrical_light_cct, project: project, discipline: discipline)
+        build(:electrical_demand, demandable: light_cct)
       },
       
       # Roles and permissions

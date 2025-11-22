@@ -1,0 +1,34 @@
+<% light_cct = object %>
+<%= render 'components/collapsible',
+  id: "light_cct_#{light_cct.id}_details",
+  title: t('light_ccts.show.header', label: light_cct.label),
+  expanded: false,
+  header_class: 'py-1' do %>
+  
+  <div class="container-fluid">
+    <div class="row mb-1">
+      <% text = t("actions.back_to", model: t("activerecord.models.light_cct")) %>
+      <%= link_to light_cct, 
+          class: "btn btn-sm btn-outline-secondary me-2",
+          title: text do %>
+        <%== bootstrap_icon('box-arrow-in-up-left') %>
+        <span class="d-none d-md-inline"><%= text %></span>
+      <% end %>
+    </div>
+
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= @light_cct.class.human_attribute_name(:light_fitting_type) %></div>
+      <div class="col-8"><%= Electrical::LightCct.human_enum_name(:light_fitting_type, light_cct.light_fitting_type) %></div>
+    </div>
+
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= @light_cct.class.human_attribute_name(:quantity) %></div>
+      <div class="col-8"><%= light_cct.quantity %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= @light_cct.class.human_attribute_name(:notes) %></div>
+      <div class="col-8"><%= light_cct.notes.present? ? simple_format(light_cct.notes) : '-' %></div>
+    </div>
+  </div>
+<% end %>

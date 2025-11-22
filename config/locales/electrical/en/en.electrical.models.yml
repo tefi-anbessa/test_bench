@@ -1,16 +1,16 @@
 en:
   activerecord:
     models:
-      cable_type:         "Cable Type"
-      cable:              "Cable"
-      demand:             "Load"
-      switchboard:        "Switchboard"
-      circuit:            "Circuit"
-      motor:              "Motor"
-      socket_cct:         "Socket Circuit"
-      light_cct:          "Light Circuit"
+      electrical/cable_type:         "Cable Type"
+      electrical/cable:              "Cable"
+      electrical/demand:             "Load"
+      electrical/switchboard:        "Switchboard"
+      electrical/circuit:            "Circuit"
+      electrical/motor:              "Motor"
+      electrical/socket_cct:         "Socket Circuit"
+      electrical/light_cct:          "Light Circuit"
     attributes:
-      cable_type:
+      electrical/cable_type:
         conductor_material:	Conductor Material
         cores:	Conductor Cores
         csa:	CSA
@@ -29,21 +29,16 @@ en:
         temperature_rating:	Temperature Rating
         voltage_rating:	Voltage Rating
         notes:                "Notes"
-        notes_help:       "Record useful cable type design information here"
-      cable:
+      electrical/cable:
         from:                 "From"
         to:                   "To"
         route_length:         "Route Length"
-        route_length_help:    "Route length of cable run, plan view"
         vertical_allowance:   "Vertical Allowance"
-        vertical_allowance_help:  "Cable length to be added to plan view, e.g. for riser to switchboard. If routes are 3D modeled, set to zero."
         termination_allowance:  "Termination Allowance"
-        termination_allowance_help: "Allowance for cable routing inside boxes"
         start_mark:           "Installed Start Mark"
         end_mark:             "Installed End Mark"
         notes:                "Notes"
-        notes_help:       "Record useful cable related design references here"
-      demand:
+      electrical/demand:
         incomer:          "Incomer"
         feeder:           "Feeder"
         basis:            "Basis"
@@ -53,9 +48,7 @@ en:
           vector_pf:      "Calculate current from vector and power factor"
           current_pf:     "Calculate power, vector from current and power factor"
           current_power:  "Calculate vector, power factor from current and power"
-        basis_help:       "Defines which load parameters are given and which are calculated"
         basis_notes:      "Load Basis Notes"
-        basis_notes_help: "Record references for derivation of the load parameters"
         config:           "Configuration"
         configs:
           dc:             "DC"
@@ -64,22 +57,16 @@ en:
           two_180:        "AC L-N 2 phase 180˚"
           three_3c:       "AC L-L 3 phase 3 wire"
           three_4c:       "AC L-N 3 phase 4 wire"
-        config_help:      "Select the power system for the load"
         supply:           "Supply (V)"
-        supply_help:      "Select the supply voltage for the load. Leave blank for other supply."
         power:            "Power (W)"
         vector:           "Vector (VA)"
         power_factor:     "Power Factor"
         current:          "Current (A)"
         duty:             "Duty"
-        duty_help:        "Proportional ON time for the load, for total load estimates"
         demandable_type:  "Load Type"
         demandable:       "Equipment"
-        demandable_help:  "Equipment datasheet"
         notes:            "Notes"
-        notes_help:       "Record additional load related design references here"
-      switchboard:
-        location:         "Location"
+      electrical/switchboard:
         ingress_protection: "Ingress Protection"
         ip_1:             "1st digit"
         ip_2:             "2nd digit"
@@ -94,7 +81,7 @@ en:
         earth_bar_connections:  "Earth Bar Connections"
         circuits:         "Circuits"
         notes:            "Notes"
-      circuit:
+      electrical/circuit:
         serial:           "Circuit Number"
         phase:            "Phase Designation"
         device:           "Protection Device"
@@ -106,8 +93,7 @@ en:
         feeder:           "Feeder"
         demand:           "Load"
         notes:            "Notes"
-        notes_help:       "Record additional circuit related design references here"
-      motor:
+      electrical/motor:
         motor_type:       "Motor Type"
         motor_types:
           induction:      "Induction"
@@ -123,8 +109,7 @@ en:
         ingress_protection:   "Ingress Protection"
         speed_rated:      "Speed At Rated Load"
         notes:            "Notes"
-        notes_help:       "Record additional motor related design references here"
-      socket_cct:
+      electrical/socket_cct:
         socket_type:      "Socket Type"
         socket_types:
           other: "Other"
@@ -141,22 +126,46 @@ en:
           "125A": "125A: AS3000 biii) Socket 125A, general use"
         quantity:         "Quantity"
         notes:            "Notes"
-        notes_help:       "Record additional socket circuit related design references here"
-      light_cct:
+      electrical/light_cct:
         light_fitting_type: "Light Fitting Type"
         light_fitting_types:
           other: "Other"
           general: "General: AS3000 ai) Light, general"
           outdoor: "Outdoor > 1000W: AS3000 aii) Light, outdoor > 1000W"
-        light_fitting_type_help:  "AS3000 load classes"
         quantity:         "Quantity"
         notes:            "Notes"
-        notes_help:       "Record additional light circuit related design references here"
+    help:
+      electrical/cable_type:
+        notes:       "Record useful cable type design information here"
+      electrical/cable:
+        route_length:    "Route length of cable run, plan view"
+        vertical_allowance:  "Cable length to be added to plan view, e.g. for riser to switchboard. If routes are 3D modeled, set to zero."
+        termination_allowance: "Allowance for cable routing inside boxes"
+        notes:       "Record useful cable related design references here"
+      electrical/demand:
+        basis:       "Defines which load parameters are given and which are calculated"
+        basis_notes: "Record references for derivation of the load parameters"
+        config:      "Select the power system for the load"
+        supply:      "Select the supply voltage for the load. Leave blank for other supply."
+        duty:        "Proportional ON time for the load, for total load estimates"
+        demandable:  "Equipment datasheet"
+        notes:       "Record additional load related design references here"
+      electrical/switchboard:
+      electrical/circuit:
+        notes:       "Record additional circuit related design references here"
+      electrical/motor:
+        notes:       "Record additional motor related design references here"
+      electrical/socket_cct:
+        socket_type:      "AS3000 load classes"
+        notes:       "Record additional socket circuit related design references here"
+      electrical/light_cct:
+        light_fitting_type:  "AS3000 load classes"
+        notes:       "Record additional light circuit related design references here"
     errors:
       messages:
-        attributes:
-          demand:
-            power_factor:
-              zero_pf: "Power factor of zero will cause calculation errors"
-            demandable:
-              tag_association: "%{model} must have a tag to associate with load"
+      attributes:
+        electrical/demand:
+          power_factor:
+            zero_pf: "Power factor of zero will cause calculation errors"
+          demandable:
+            tag_association: "%{model} must have a tag to associate with load"

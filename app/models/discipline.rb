@@ -92,7 +92,8 @@ class Discipline < ApplicationRecord
       
       if schema_type.blank?
         errors.add(:prefix_schema, :blank, 
-              field: I18n.t('activerecord.attributes.discipline.prefix_schema_keys.type'))
+              message: I18n.t('activerecord.errors.jsonb_fields.blank',
+                field: I18n.t('activerecord.attributes.discipline.prefix_schema_keys.type')))
       end
       
       if schema_type.present? && Constants.respond_to?(:prefix_parser_keys)

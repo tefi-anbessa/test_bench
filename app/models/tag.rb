@@ -33,7 +33,8 @@ class Tag < ApplicationRecord
   validate :tagable_not_already_associated, if: -> { tagable_id.present? && tagable_type.present? }
   
   # Ensure tag is unique within the same discipline
-  # This is required because of doubts over using a database uniqueness contraint with suffix, which may be null.
+  # This is required because of doubts over using a database uniqueness contraint with 
+  # suffix, which may be null.
   validate :validate_tag_uniqueness
 
   def label
@@ -78,52 +79,76 @@ class Tag < ApplicationRecord
 
   # Instance method to parse prefix components for form display
   def prefix_parts
-    return nil unless prefix.present? && prefix.length >= 2
+    return nil unless prefix.present? && prefix.length >= 2 && discipline.prefix_schema.present?
     parts = {}
     chars = prefix.chars
-    discipline_schema = Constants.tag.discipline.send(Tag.normalize_discipline_code(discipline_id)) rescue nil
-    return nil unless discipline_schema && discipline_schema[:prefix_schema] == :isa51
-
-    char = chars.shift()
-    # Check measured variables if they exist
-    if discipline_schema[:prefix][:measured_variables]&.keys&.map(&:to_s)&.include?(char)
-      parts[:measured_variable] = char
+    if discipline.custom_schema?
+      parser = discipline.prefix_schema['type'].to_sym
+      schema = discipline.prefix_schema.with_indifferent_access
     else
-      # No valid measured variable character, not a valid isa prefix...
-      return nil
+      parser = Constants.prefix_schemata[discipline.prefix_schema['name'].to_sym][:type].to_sym
+      schema = Constants.prefix_schemata[discipline.prefix_schema['name'].to_sym].with_indifferent_access
     end
 
-    char = chars.shift()
-    # Check modifiers if they exist (optional section)
-    if discipline_schema[:prefix][:modifiers]&.keys&.map(&:to_s)&.include?(char)
-      parts[:modifier] = char
-    else
-      parts[:modifier] = nil
-      chars.unshift(char)
-    end
+    case parser
+    when :isa51
+      char = chars.shift()
+      # Check measured variables if they exist
+      if schema[:measured_variables]&.keys&.map(&:to_s)&.include?(char)
+        parts[:measured_variable] = char
+      else
+        # No valid measured variable character, not a valid isa prefix...
+        return nil
+      end
 
-    char = chars.shift()
-    # Check functions - either readout or output functions
-    if discipline_schema[:prefix][:readout_functions]&.keys&.map(&:to_s)&.include?(char)
-      parts[:readout_function] = char
-      parts[:output_function] = nil
-    elsif discipline_schema[:prefix][:output_functions]&.keys&.map(&:to_s)&.include?(char)
-      parts[:readout_function] = nil
-      parts[:output_function] = char
-    else
-      # No function character, not a valid isa prefix...
-      return nil
-    end
+      char = chars.shift()
+      # Check modifiers if they exist (optional section)
+      if schema[:modifiers]&.keys&.map(&:to_s)&.include?(char)
+        parts[:modifier] = char
+      else
+        parts[:modifier] = nil
+        chars.unshift(char)
+      end
 
-    # Check modifier functions if they exist (optional section)
-    mf = chars.join
-    if discipline_schema[:prefix][:modifier_functions]&.keys&.map(&:to_s)&.include?(mf)
-      parts[:modifier_function] = mf
-    else
-      parts[:modifier_function] = nil
-    end
+      char = chars.shift()
+      # Check functions - either readout or output functions
+      if schema[:readout_functions]&.keys&.map(&:to_s)&.include?(char)
+        parts[:readout_function] = char
+        parts[:output_function] = nil
+      elsif schema[:output_functions]&.keys&.map(&:to_s)&.include?(char)
+        parts[:readout_function] = nil
+        parts[:output_function] = char
+      else
+        # No function character, not a valid isa prefix...
+        return nil
+      end
 
-    parts
+      # Check modifier functions if they exist (optional section)
+      mf = chars.join # remaining characters
+      if schema[:modifier_functions]&.keys&.map(&:to_s)&.include?(mf)
+        parts[:modifier_function] = mf
+      else
+        parts[:modifier_function] = nil
+      end
+
+      return parts
+    when :dim1
+      if schema[:prefixes]&.keys&.map(&:to_s)&.include?(chars)
+        parts[:prefix] = chars
+      else
+        # Not a valid prefix in the standard list.
+        return nil
+      end 
+      return parts
+    when :dim2
+      parts[:part1] = schema[:part1].keys.map(&:to_s).find { |p| prefix.start_with?(p) }
+      return nil unless parts[:part1] # not a valid dim2 prefix
+      parts[:part2] = prefix[parts[:part1].length..-1]
+      unless parts[:part2].present? && schema[:part2]&.key?(parts[:part2].to_sym)
+        parts[:part2] = nil # return valid part 1 and nil part 2
+      end
+      return parts
+    end
   end
   
   private

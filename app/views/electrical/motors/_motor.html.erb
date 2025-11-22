@@ -1,0 +1,52 @@
+<% motor = object %>
+<%= render 'components/collapsible',
+  id: "motor_#{motor.id}_details",
+  title: t('motors.show.header', label: motor.label),
+  expanded: false,
+  header_class: 'py-1' do %>
+  
+  <div class="container-fluid">
+    <div class="row mb-1">
+      <% text = t("actions.back_to", model: t("activerecord.models.motor")) %>
+      <%= link_to motor, 
+          class: "btn btn-sm btn-outline-secondary me-2",
+          title: text do %>
+        <%== bs_icon('box-arrow-in-up-left') %>
+        <span class="d-none d-md-inline"><%= text %></span>
+      <% end %>
+    </div>
+
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= motor.human_attribute_name(:motor_type) %></div>
+      <div class="col-8"><%= Motor.human_enum_name(:motor_type, motor.motor_type) %></div>
+    </div>
+
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= motor.human_attribute_name(:frame_size) %></div>
+      <div class="col-8"><%= motor.frame_size.present? ? "frame_#{motor.frame_size}" : '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= motor.human_attribute_name(:poles) %></div>
+      <div class="col-8"><%= motor.poles.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= motor.human_attribute_name(:ingress_protection) %></div>
+      <div class="col-8"><%= motor.ingress_protection.present? ?
+                      ["IP", motor.ingress_protection].join(' ') : '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= motor.human_attribute_name(:speed_rated) %></div>
+      <div class="col-8"><%= motor.speed_rated.present? ? 
+                              number_to_human(motor.speed_rated, precision: 4, units: { unit: "rpm"}) : 
+                              '-' %></div>
+    </div>
+    
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= motor.human_attribute_name(:notes) %></div>
+        <div class="col-8"><%= motor.notes.present? ? simple_format(motor.notes) : '-' %></div>
+      </div>
+  </div>
+<% end %>

@@ -10,11 +10,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_01_061421) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_15_024322) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
-  create_table "cable_types", force: :cascade do |t|
+  create_table "disciplines", force: :cascade do |t|
+    t.string "code"
+    t.string "name"
+    t.bigint "project_id", null: false
+    t.jsonb "prefix_schema"
+    t.string "label", comment: "Short 2-3 character code for display"
+    t.string "module_name", comment: "Associated module for extended functionality"
+    t.integer "sort_order", default: 100, comment: "Display order in UI (lower numbers first)"
+    t.text "notes"
+    t.index ["project_id", "code"], name: "index_disciplines_on_project_id_and_code", unique: true
+    t.index ["project_id", "label"], name: "index_disciplines_on_project_id_and_label", unique: true
+    t.index ["project_id"], name: "index_disciplines_on_project_id"
+    t.index ["sort_order"], name: "index_disciplines_on_sort_order"
+  end
+
+  create_table "electrical_cable_types", force: :cascade do |t|
     t.integer "conductor_material"
     t.float "csa"
     t.float "neutral_csa"
@@ -33,12 +48,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_01_061421) do
     t.integer "project_id", null: false
     t.integer "cores"
     t.integer "voltage_rating"
-    t.index ["project_id", "code"], name: "index_cable_types_on_project_and_code", unique: true
-    t.index ["project_id"], name: "index_cable_types_on_project_id"
+    t.index ["project_id", "code"], name: "index_electrical_cable_types_on_project_and_code", unique: true
+    t.index ["project_id"], name: "index_electrical_cable_types_on_project_id"
   end
 
-  create_table "cables", force: :cascade do |t|
-    t.integer "cable_type_id", null: false
+  create_table "electrical_cables", force: :cascade do |t|
+    t.integer "electrical_cable_type_id", null: false
     t.decimal "route_length", precision: 4, scale: 1
     t.decimal "vertical_allowance", precision: 3, scale: 1
     t.decimal "termination_allowance", precision: 3, scale: 1
@@ -51,13 +66,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_01_061421) do
     t.string "to_type"
     t.integer "to_id"
     t.text "notes"
-    t.index ["cable_type_id"], name: "index_cables_on_cable_type_id"
-    t.index ["from_type", "from_id"], name: "index_cables_on_from"
-    t.index ["to_type", "to_id"], name: "index_cables_on_to"
+    t.index ["electrical_cable_type_id"], name: "index_electrical_cables_on_electrical_cable_type_id"
+    t.index ["from_type", "from_id"], name: "index_electrical_cables_on_from"
+    t.index ["to_type", "to_id"], name: "index_electrical_cables_on_to"
   end
 
-  create_table "circuits", force: :cascade do |t|
-    t.integer "switchboard_id", null: false
+  create_table "electrical_circuits", force: :cascade do |t|
+    t.integer "electrical_switchboard_id", null: false
     t.integer "serial"
     t.integer "phase"
     t.integer "device"
@@ -69,12 +84,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_01_061421) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["switchboard_id", "serial"], name: "index_circuits_on_switchboard_id_and_serial", unique: true
-    t.index ["switchboard_id"], name: "index_circuits_on_switchboard_id"
+    t.index ["electrical_switchboard_id", "serial"], name: "index_electrical_circuits_on_switchboard_id_and_serial", unique: true
+    t.index ["electrical_switchboard_id"], name: "index_electrical_circuits_on_electrical_switchboard_id"
   end
 
-  create_table "demands", force: :cascade do |t|
-    t.string "demandable_type", null: false
+  create_table "electrical_demands", force: :cascade do |t|
     t.integer "demandable_id", null: false
     t.integer "basis"
     t.string "basis_notes"
@@ -88,25 +102,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_01_061421) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "notes"
-    t.index ["demandable_type", "demandable_id"], name: "index_demands_on_demandable"
+    t.string "demandable_type"
+    t.index ["demandable_type", "demandable_id"], name: "index_electrical_demands_on_demandable"
   end
 
-  create_table "disciplines", force: :cascade do |t|
-    t.string "code"
-    t.string "name"
-    t.bigint "project_id", null: false
-    t.jsonb "prefix_schema"
-    t.string "label", comment: "Short 2-3 character code for display"
-    t.string "module_name", comment: "Associated module for extended functionality"
-    t.integer "sort_order", default: 100, comment: "Display order in UI (lower numbers first)"
-    t.text "notes"
-    t.index ["project_id", "code"], name: "index_disciplines_on_project_id_and_code", unique: true
-    t.index ["project_id", "label"], name: "index_disciplines_on_project_id_and_label", unique: true
-    t.index ["project_id"], name: "index_disciplines_on_project_id"
-    t.index ["sort_order"], name: "index_disciplines_on_sort_order"
-  end
-
-  create_table "light_ccts", force: :cascade do |t|
+  create_table "electrical_light_ccts", force: :cascade do |t|
     t.integer "light_fitting_type"
     t.integer "quantity"
     t.datetime "created_at", null: false
@@ -114,7 +114,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_01_061421) do
     t.text "notes"
   end
 
-  create_table "motors", force: :cascade do |t|
+  create_table "electrical_motors", force: :cascade do |t|
     t.integer "motor_type"
     t.integer "frame_size"
     t.integer "poles"
@@ -122,6 +122,30 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_01_061421) do
     t.float "speed_rated"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "notes"
+  end
+
+  create_table "electrical_socket_ccts", force: :cascade do |t|
+    t.integer "socket_type"
+    t.integer "quantity"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "notes"
+  end
+
+  create_table "electrical_switchboards", force: :cascade do |t|
+    t.float "busbar_rating"
+    t.float "busbar_fault_rating"
+    t.float "busbar_fault_duration"
+    t.string "cable_entry"
+    t.text "incomer_protection"
+    t.text "metering"
+    t.text "neutral_bar_connections"
+    t.text "earth_bar_connections"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "voltage_rating"
+    t.string "ingress_protection"
     t.text "notes"
   end
 
@@ -142,30 +166,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_01_061421) do
     t.index ["name", "resource_type", "resource_id"], name: "index_roles_on_name_and_resource_type_and_resource_id"
     t.index ["name"], name: "index_roles_on_name"
     t.index ["resource_type", "resource_id"], name: "index_roles_on_resource"
-  end
-
-  create_table "socket_ccts", force: :cascade do |t|
-    t.integer "socket_type"
-    t.integer "quantity"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.text "notes"
-  end
-
-  create_table "switchboards", force: :cascade do |t|
-    t.float "busbar_rating"
-    t.float "busbar_fault_rating"
-    t.float "busbar_fault_duration"
-    t.string "cable_entry"
-    t.text "incomer_protection"
-    t.text "metering"
-    t.text "neutral_bar_connections"
-    t.text "earth_bar_connections"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.integer "voltage_rating"
-    t.string "ingress_protection"
-    t.text "notes"
   end
 
   create_table "tags", force: :cascade do |t|
@@ -224,9 +224,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_01_061421) do
     t.index ["user_id"], name: "index_users_roles_on_user_id"
   end
 
-  add_foreign_key "cable_types", "projects"
-  add_foreign_key "cables", "cable_types"
-  add_foreign_key "circuits", "switchboards"
   add_foreign_key "disciplines", "projects"
+  add_foreign_key "electrical_cable_types", "projects"
+  add_foreign_key "electrical_cables", "electrical_cable_types"
+  add_foreign_key "electrical_circuits", "electrical_switchboards"
   add_foreign_key "tags", "disciplines"
 end

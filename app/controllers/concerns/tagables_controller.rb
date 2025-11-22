@@ -11,13 +11,15 @@ module TagablesController
 
     # Main abstracted methods
     # GET /index - abstracted index action with proper authorization
+    # This method will set the resources instance variable (e.g., @motors, @switchboards)
+    # in accordance with the policy scope for the resource, ransack seach params, and pagy.
     def index_tagable
-      resource_class = controller_name.classify.constantize
-
       @q = policy_scope(resource_class).ransack(params[:q])
       @pagy, @resources = pagy(@q.result.includes(:tag), limit: 20)
 
       # Set the resources instance variable (e.g., @motors, @switchboards)
+      # At present, orphans will only be visible to admins, as other users 
+      # have their scope set by current_project, and orphans do not have a project.
       resources_var_name = "@#{controller_name}"
       instance_variable_set(resources_var_name, @resources)
       # Orphans are resources without a parent tag so are unusable.
@@ -25,9 +27,9 @@ module TagablesController
 
       # Find any tags that have tagable_type for this resource but do not have valid tagable.
       @link_errors = policy_scope(Tag).select { |tag| tag.tagable_type == controller_name.classify && tag.tagable.nil? }
-      # These tags are marked with tagable type for this resource but not yet assigned: normal.
+      # These tags are marked with tagable type for this resource but not yet assigned (normal WIP).
       @link_incomplete = @link_errors.select{ |tag| tag.tagable_id.nil? }
-      # These tags are linked to missing resources, tagable needs to be nullified: broken.
+      # These tags are linked to missing resources, tagable needs to be nullified (broken).
       @link_broken = @link_errors.select{ |tag| !tag.tagable_id.nil? }
 
       authorize @resources, :index?
@@ -35,11 +37,8 @@ module TagablesController
 
     # GET /new - abstracted new action
     def new_tagable
-      resource_class = controller_name.classify.constantize
-      resource_var = resource_class.new()
-      instance_variable_set("@#{resource_name}", resource_var)
-
-      @resource = resource_var
+      @resource = resource_class.new()
+      instance_variable_set(resource_var_name, @resource)
       authorize @resource, :new?
       set_tag
       setup_form
@@ -48,10 +47,8 @@ module TagablesController
   # POST /switchboards 
     def create_tagable
       # For create action, we need to create a new resource
-      resource_class = controller_name.classify.constantize
-
       begin
-        @resource = resource_class.new(send("#{resource_name}_params").except(:tag))
+        @resource = resource_class.new(resource_params.except(:tag))
       rescue ArgumentError => _
         # Handle invalid enum values as a conflict
         raise ApplicationController::ConflictError, :invalid_enum
@@ -59,8 +56,8 @@ module TagablesController
 
       authorize @resource, :create?
       unless @resource.valid?
-        flash.now[:alert] = t("flash.actions.create.alert",
-                          resource_name: @resource.class.model_name.human.downcase)
+        flash.now[:alert] = t("flash.create.alert",
+                          resource_name: @resource.model_name.human.downcase)
         failed_to_save
         return
       end
@@ -82,30 +79,30 @@ module TagablesController
 
     # GET /edit 
     def edit_tagable
-      @resource = instance_variable_get("@#{resource_name}")
+      @resource = instance_variable_get(resource_var_name)
       authorize @resource, :edit?
 
       # Allow edit of resource without a tag as a way to rescue orphans
-      @tag = @resource.tag&.present? ? @resource.tag : Tag.new(tagable_type: controller_name.classify)
+      @tag = @resource.tag&.present? ? @resource.tag : Tag.new(tagable_type: controller_path.classify)
       setup_form
     end
 
     # PATCH/PUT /switchboards/1 
     def update_tagable
-      @resource = instance_variable_get("@#{resource_name}")
+      @resource = instance_variable_get(resource_var_name)
 
       # Make a dummy resource object for checking params
       begin
         dummy_resource = @resource.dup
-        dummy_resource.assign_attributes(send("#{resource_name}_params").except(:tag))
+        dummy_resource.assign_attributes(resource_params.except(:tag))
       rescue ArgumentError => _
         # Handle invalid enum values as a conflict
         raise ApplicationController::ConflictError, :invalid_enum
       end
 
       unless dummy_resource.valid?
-        flash.now[:alert] = t("flash.actions.update.alert",
-                            resource_name: @resource.class.model_name.human.downcase)
+        flash.now[:alert] = t("flash.update.alert",
+                            resource_name: @resource.model_name.human.downcase)
         failed_to_save
         return
       end
@@ -115,8 +112,8 @@ module TagablesController
       @tag = @resource.tag&.present? ? @resource.tag : Tag.new(tag_params.merge(tagable: @resource))
 
       unless @tag.valid?
-        flash.now[:alert] = t("flash.actions.update.alert",
-                            resource_name: @tag.class.model_name.human.downcase)
+        flash.now[:alert] = t("flash.update.alert",
+                            resource_name: @tag.model_name.human.downcase)
         failed_to_save
         return
       end
@@ -135,17 +132,23 @@ module TagablesController
 
     # DELETE /:id - abstracted destroy action
     def destroy_tagable
-      @resource = instance_variable_get("@#{resource_name}")
+      @resource = instance_variable_get(resource_var_name)
       authorize @resource, :destroy?
-      @resource.destroy
+      if @resource.destroy
+        respond_to do |format|
+          format.html do
+            flash[:success] = t('flash.destroy.notice',
+                              resource_name: @resource.model_name.human)
+            redirect_to send("#{resource_path.to_s}_path"), 
+                        status: :see_other
+          end
+          format.json { head :no_content }
+        end
 
-      respond_to do |format|
-        format.html {
-          flash[:success] = t('flash.actions.destroy.notice',
-            resource_name: @resource.class.model_name.human)
-          redirect_to send("#{controller_name}_path"), status: :see_other
-        }
-        format.json { head :no_content }
+      else
+        flash.now[:alert] = t("flash.destroy.alert",
+                            resource_name: @resource.model_name.human.downcase)
+        failed_to_save
       end
     end
 
@@ -189,8 +192,8 @@ module TagablesController
         raise ApplicationController::ConflictError, @tag.instance_variable_get(:@custom_error)
         return
       else
-        flash.now[:alert] = t("flash.actions.create.alert",
-                          resource_name: @tag.class.model_name.human.downcase)
+        flash.now[:alert] = t("flash.create.alert",
+                          resource_name: @tag.model_name.human.downcase)
         failed_to_save
         return
       end
@@ -201,7 +204,7 @@ module TagablesController
       begin
         @tag.update(tagable: @resource)
         flash[:success] = [t('flash.tagables.assigned_to',
-                          resource_name: @resource.class.model_name.human,
+                          resource_name: @resource.model_name.human,
                           id: @resource.id,
                           tag: @tag.label)]
         after_create_hook(@resource)
@@ -209,8 +212,8 @@ module TagablesController
         return
       rescue ActiveRecord::RecordInvalid => _
         # Should not reach here - @tag and @resource have been validated
-        flash.now[:alert] = t("flash.actions.create.alert",
-                          resource_name: @resource.class.model_name.human.downcase)
+        flash.now[:alert] = t("flash.create.alert",
+                          resource_name: @resource.model_name.human.downcase)
         failed_to_save
       end
     end
@@ -224,7 +227,7 @@ module TagablesController
         end
         @tag.reload
         flash[:success] = [t('flash.tagables.created_and_assigned',
-                          resource_name: @resource.class.model_name.human,
+                          resource_name: @resource.model_name.human,
                           id: @resource.id,
                           tag: @tag.label)]
         after_create_hook(@resource)
@@ -232,22 +235,9 @@ module TagablesController
         return
       rescue ActiveRecord::RecordInvalid => _
         # Should not reach here - @tag and @resource have been validated
-        flash.now[:alert] = t("flash.actions.create.alert",
-                          resource_name: @resource.class.model_name.human.downcase)
+        flash.now[:alert] = t("flash.create.alert",
+                          resource_name: @resource.model_name.human.downcase)
         failed_to_save
-      end
-    end
-
-    def failed_to_save
-      # If we get here, there was a validation error preventing save
-      # Ensure the resource variable is set for the view before setup_form
-      resource_var_name = "@#{resource_name}"
-      instance_variable_set(resource_var_name, @resource) unless instance_variable_get(resource_var_name)
-      return_action = @resource.persisted? ? :edit : :new
-      setup_form
-      respond_to do |format|
-        format.html { render return_action, status: :unprocessable_content }
-        format.json { render json: @resource.errors, status: :unprocessable_content }
       end
     end
 
@@ -257,17 +247,17 @@ module TagablesController
         @resource.class.transaction do
           @tag = @resource.tag
           @tag.update!(tag_params) # This is a relic. The form doesn't have tag fields if the tag is persisted.
-          @resource.update!(send("#{resource_name}_params").except(:tag))
+          @resource.update!(resource_params.except(:tag))
         end
-        flash[:success] = [t("flash.actions.update.notice", 
-          resource_name: @resource.class.model_name.human)]
+        flash[:success] = [t("flash.update.notice", 
+          resource_name: @resource.model_name.human)]
         after_update_hook(@resource)
         redirect_after_save
         return
-      rescue ActiveRecord::RecordInvalid => e
+      rescue ActiveRecord::RecordInvalid
         # Should not reach here - @tag and @resource have been validated
-        flash.now[:alert] = t("flash.actions.update.alert",
-                          resource_name: @resource.class.model_name.human.downcase)
+        flash.now[:alert] = t("flash.update.alert",
+                          resource_name: @resource.model_name.human.downcase)
         failed_to_save
       end
     end
@@ -276,19 +266,19 @@ module TagablesController
     def create_tag_for_orphan_resource
       begin
         @resource.class.transaction do
+          @resource.update!(resource_params.except(:tag))
           @tag = Tag.create!(tag_params.merge(tagable: @resource))
-          @resource.update!(send("#{resource_name}_params").except(:tag))
         end
-        flash[:success] = [t("flash.tagables.assigned_to.notice", 
-          resource_name: @resource.class.model_name.human,
+        flash[:success] = [t("flash.tagables.assigned_to", 
+          resource_name: @resource.model_name.human,
           id: @resource.id,
           tag: @tag.label)]
         after_update_hook(@resource)
         redirect_after_save
-      rescue ActiveRecord::RecordInvalid => e
+      rescue ActiveRecord::RecordInvalid
         # Should not reach here - @tag and @resource have been validated
-        flash.now[:alert] = t("flash.actions.update.alert",
-                          resource_name: @resource.class.model_name.human.downcase)
+        flash.now[:alert] = t("flash.actions.alert",
+                          resource_name: @resource.model_name.human.downcase)
         failed_to_save
         return
       end
@@ -313,6 +303,20 @@ module TagablesController
       setup_additional_form_data
     end
 
+    def failed_to_save
+      # If we get here, there was a validation error preventing save
+      # Ensure the resource variable is set for the view before setup_form
+      # @resource must have been set in one of the calling actions
+      resource_var_name = "@#{@resource.model_name.element}"
+      instance_variable_set(resource_var_name, @resource) unless instance_variable_get(resource_var_name)
+      return_action = @resource.persisted? ? :edit : :new
+      setup_form
+      respond_to do |format|
+        format.html { render return_action, status: :unprocessable_content }
+        format.json { render json: @resource.errors, status: :unprocessable_content }
+      end
+    end
+
     def redirect_after_save
       respond_to do |format|
         format.html { redirect_to @resource }
@@ -320,8 +324,34 @@ module TagablesController
       end
     end
 
-    def resource_name
-      controller_name.singularize.to_sym
+    # controller_path returns the namespaced controller class, e.g. Electrical::CablesController
+    # classify.constantize converts this to a model class, e.g. Electrical::Cable
+    # Use this for creating a new resource matching the calling controller 
+    def resource_class
+      controller_path.classify.constantize
+    end
+
+    # The resource_class provides the model_name methods, e.g. electrical_cables
+    # Use resource_path for redirecting to the index action of the calling controller
+    def resource_path
+      resource_class.model_name.route_key.to_sym
+    end
+
+    # Provide the instance variable name expected by resource forms, e.g. @cable
+    def resource_var_name
+      "@#{resource_class.model_name.element}"
+    end
+
+    # Provide the strong parameters name used in resource controllers, which are based on the 
+    # model class element, e.g. cable_params
+    def resource_params
+      method_name = "#{resource_class.model_name.element}_params"
+      if respond_to?(method_name, true)
+        send(method_name)
+      else
+        raise NotImplementedError, 
+              "Controller must implement `#{method_name}` method for strong parameters"
+      end
     end
 
     # Override to specify model-specific tag prefix
@@ -331,7 +361,7 @@ module TagablesController
 
     # Override to specify model-specific discipline code
     def discipline_code
-      "E"  # Electrical by default
+      "null"  # Null by default
     end
 
     # Override to specify model-specific form setup
@@ -351,14 +381,15 @@ module TagablesController
 
     def tag_params
       # Get the tag parameters from the nested structure
-      tag_source = if params[controller_name.singularize.to_sym].present?
-                    params[controller_name.singularize.to_sym][:tag] || {}
-                  else
-                    params[:tag] || {}
-                  end
+      return nil if params[:tag_id].present?
+      if params[:tag].present?
+        tag_source = params[:tag]
+      elsif params.dig(resource_class.model_name.param_key, :tag).present?
+        tag_source = params[resource_class.model_name.param_key][:tag]
+      else
+        tag_source = {}
+      end
 
-      # If tag_source is already an ActionController::Parameters, use it directly
-      # Otherwise, convert it to ActionController::Parameters
       tag_params = tag_source.is_a?(ActionController::Parameters) ?
                   tag_source :
                   ActionController::Parameters.new(tag_source)

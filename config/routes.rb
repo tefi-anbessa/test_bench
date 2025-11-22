@@ -1,10 +1,5 @@
 Rails.application.routes.draw do
-  namespace :instrumentation do
-      # Add your routes here
-    end
-  namespace :electrical do
-      # Add your routes here
-    end
+
   scope "(:locale)", locale: /#{I18n.available_locales.join("|")}/ do
     get 'site/home'
     get 'site/help'
@@ -20,38 +15,42 @@ Rails.application.routes.draw do
     
     resources :projects do
       resources :disciplines, shallow: true
+      namespace :electrical do
+        resources :cable_types, shallow: true
+      end
       collection do
         get "select"
         post "set"
       end
     end
     
-    # Tagable models have top level new and create routes to allow creation of tagable and tag in a single operation
-    # Tagables have index overridden from shallow, there is no sense in nesting a 1:1 relationship.
-    resources :cables, :motors, :light_ccts, :socket_ccts, only: [:index, :new, :create]
-    resources :switchboards, only: [:index, :new, :create] do
-      resources :circuits, only: [:index, :new, :create]
+    # Tagable models have top level new and create routes to allow creation 
+    # of tagable and tag in a single operation
+    # Tagables override index from the shallow nesting under tags, 
+    # there is no sense in nesting a 1:1 relationship.
+    namespace :electrical do
+      # Provide for admins to list cable_types full catalog outwith project context
+      resources :cable_types, only: [:index]
+      resources :cables, :motors, :light_ccts, 
+                :socket_ccts, only: [:index, :new, :create]
+      resources :switchboards, only: [:index, :new, :create] do
+        resources :circuits, only: [:index, :new, :create]
+      end
+      # Define top level index routes for circuits, demands, to allow complete load listings.
+      resources :circuits, :demands, only: [:index]
     end
-
-    # Then define the shallow nested routes
+    
+    # Then define the shallow nested routes which require the tag
     resources :tags, shallow: true do
-      resources :cables, :motors, :light_ccts, :socket_ccts, except: [:index]
-      resources :switchboards, except: [:index] do
-        resources :circuits, except: [:index]
-      end
-      resources :demands, only: [:new, :create]
-      collection do
-        get :schema_data
+      namespace :electrical do
+        resources :cables, :motors, :light_ccts, 
+                  :socket_ccts, except: [:index]
+        resources :switchboards, except: [:index] do
+          resources :circuits, except: [:index]
+        end
+        resources :demands, except: [:index]
       end
     end
-
-    # Define top level index routes for circuits, demands, to allow complete load listings.
-    resources :circuits, :demands, only: [:index]
-    
-    resources :cable_types
-    
-    # Demands routes
-    resources :demands, except: [:new, :create]
 
     # Routes for the RBAC system. 
     # Destroy requires both the role id and the user id to allow rolify to remove the correct HABTM entry.
@@ -76,5 +75,5 @@ Rails.application.routes.draw do
   match '*unmatched', to: 'errors#not_found', via: :all
 
   # Handle Chrome DevTools JSON request
-get "/.well-known/appspecific/com.chrome.devtools.json", to: proc { [200, { "Content-Type" => "application/json" }, []] }
+  get "/.well-known/appspecific/com.chrome.devtools.json", to: proc { [200, { "Content-Type" => "application/json" }, []] }
 end

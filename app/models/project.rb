@@ -3,7 +3,7 @@ class Project < ApplicationRecord
   before_save { self.code = code.upcase }
   has_many :disciplines, dependent: :destroy
   has_many :tags, through: :disciplines
-  has_many :cable_types, dependent: :destroy
+  has_many :electrical_cable_types, class_name: 'Electrical::CableType', dependent: :destroy
 
   VALID_CODE_REGEX = /[A-Z][A-Z]/
   validates :code,        presence: true, length: { is: 2},
@@ -21,7 +21,7 @@ class Project < ApplicationRecord
   end
 
   def self.ransackable_associations(auth_object = nil)
-    [ :disciplines, :tags, :cable_types ]
+    [ :disciplines, :tags, :electrical_cable_types ]
   end
 
   # Default scope for ordering projects

@@ -3,6 +3,7 @@ require "rails/generators/named_base"
 
 module ProjectAssistant
   class ModuleGenerator < Rails::Generators::NamedBase
+    desc "Create file structure, templates and config entries for a new module in Project Assistant app"
     source_root File.expand_path("templates", __dir__)
 
     def create_module_structure
@@ -10,24 +11,35 @@ module ProjectAssistant
       @module_class = name.camelize
 
       # Check for existing module structure
-      if should_abort?("app/#{@module_name}") || 
-         should_abort?("test/#{@module_name}") ||
-         should_abort?("app/models/#{@module_name}.rb") ||
-         should_abort?("config/locales/#{@module_name}")
-        return
+      paths_to_check = [
+        # App directories
+        *%w[controllers helpers models policies views].map { |dir| "app/#{dir}/#{@module_name}" },
+        # Test directories
+        *%w[controllers factories models policies system].map { |dir| "test/#{dir}/#{@module_name}" },
+        # Module files
+        "app/models/#{@module_name}.rb",
+        "app/models/#{@module_name}/base.rb",
+        # Locales
+        "config/locales/#{@module_name}"
+      ]
+
+      paths_to_check.each do |path|
+        if should_abort?(path)
+          return
+        end
       end
 
-      # Create app folder structure
+      # Create app folder structure with module subfolders
       %w[controllers helpers models policies views].each do |dir|
-        dir_path = File.join(destination_root, "app", @module_name, dir)
+        dir_path = File.join(destination_root, "app", dir, @module_name)
         empty_directory(dir_path)
         keep_file = File.join(dir_path, ".keep")
         create_file(keep_file, verbose: false) unless File.exist?(keep_file)
       end
 
-      # Create test folder structure
+      # Create test folder structure with module subfolders
       %w[controllers factories models policies system].each do |dir|
-        dir_path = File.join(destination_root, "test", @module_name, dir)
+        dir_path = File.join(destination_root, "test", dir, @module_name)
         empty_directory(dir_path)
         keep_file = File.join(dir_path, ".keep")
         create_file(keep_file, verbose: false) unless File.exist?(keep_file)
@@ -62,27 +74,22 @@ module ProjectAssistant
         end
       end
 
-      # Base model
-      template "base.rb.erb", "app/#{@module_name}/base.rb"
+      # Base model and module files
+      template "base.rb.erb", "app/models/#{@module_name}/base.rb"
       template "module.rb.erb", "app/models/#{@module_name}.rb"
-
-      # Autoload paths
-      inject_into_file "config/application.rb", 
-        after: "class Application < Rails::Application\n" do
-        <<~RUBY
-          # Autoload module directories
-          config.autoload_paths += %W(\#{config.root}/app/#{@module_name} \#{config.root}/app/#{@module_name}/**/)
-        RUBY
-      end
 
       # Routes
       route "namespace :#{@module_name} do\n    # Add your routes here\n  end"
+
+      # Add FactoryBot configuration
+      application "config.factory_bot.definition_file_paths << Rails.root.join('test', '#{@module_name.underscore}', 'factories')"
     end
     
     private
     
     def should_abort?(path)
       full_path = Rails.root.join(path)
+      
       if File.exist?(full_path)
         if Rails.env.test?
           puts "[TEST] Would prompt to overwrite: #{full_path}"

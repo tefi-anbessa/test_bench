@@ -1,0 +1,94 @@
+<div class="container mt-3">
+  <div class="card">
+    <div class="card-header p-2">
+      <!-- Center Header Info -->
+      <div class="col text-center">
+        <div class="d-flex flex-column align-items-center">
+          <div class="mt-1">
+            <%= yield(:header) %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%= bootstrap_form_with(model: socket_cct,
+          layout: :horizontal,
+          label_col: "col-sm-4",
+          control_col: "col-sm-8",
+          wrapper_class: 'mb-1',
+          ) do |f| %>
+
+      <div class="card-body p-2">
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+
+            <!-- Tag -->
+            <div class="card mb-1">
+              <% if tag.persisted? %>
+                <%= render 'tags/tag_card', tag: tag %>
+                <%= hidden_field_tag :tag_id, tag.id %>
+              <% else %>
+                <%= f.fields_for tag do |tag_f| %>
+                  <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
+                <% end %>
+              <% end %>
+            </div>
+
+            <!-- Socket Circuit Details -->
+            <div class="card mb-1">
+              <div class="card-header p-2">
+                <h5><%= socket_cct.model_name.human %></h5>
+              </div>
+
+              <div class="card-body p-2">
+                <%= render 'shared/error_messages', object: f.object %>
+
+                <%= f.select :socket_type,
+                  options_for_select(
+                    socket_cct.class.socket_types.map { |k, _v| 
+                      [socket_cct.class.human_enum_name(:socket_type, k), k] 
+                    },
+                    selected: socket_cct.socket_type
+                    ),
+                    { include_blank: t('form.required') },
+                    class: 'form-control form-control-sm',
+                    label_col: "col-sm-4",
+                    control_col: "col-sm-8" %>
+
+                <%= f.number_field :quantity,
+                        class: 'form-control form-control-sm',
+                        min: 1,
+                        max: 1000,
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-8",
+                        wrapper: { class: 'mb-1' } %>
+
+                <%= f.text_area :notes,
+                        class: 'form-control form-control-sm',
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-8",
+                        wrapper: { class: 'mb-1' },
+                        rows: 3 %>
+              </div> <!-- end socket circuit card body -->
+            </div> <!-- end socket circuit card -->
+
+            <!-- Card Footer with Actions -->
+            <div class="card-footer bg-transparent text-end p-2">
+              <%= link_to(socket_cct.persisted? ? socket_cct : electrical_socket_ccts_path,
+                    class: 'btn btn-warning',
+                    data: { confirm: t('actions.sure'), turbo: false }) do %>
+                <%= t('actions.discard') %>
+                <%== bs_icon('x-square') %>
+              <% end %>
+
+              <%= f.button :submit, class: 'btn btn-primary' do %>
+                <%= yield(:button_text) %>
+                <%== bs_icon('save') %>
+              <% end %>
+            </div> <!-- end card footer -->
+          </div> <!-- end responsive columns -->
+        </div> <!-- end row -->
+      </div> <!-- end card body -->
+    <% end %>
+  </div> <!-- end card -->
+</div> <!-- end container -->

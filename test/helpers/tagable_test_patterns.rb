@@ -118,7 +118,7 @@ module TagableTestPatterns
 
     @unassigned_tag.reload
     created_resource = @unassigned_tag.tagable
-    assert_redirected_to resource_path(created_resource)
+    assert_redirected_to created_resource
     assert_successful_assignment_flash_message(created_resource)
   end
 
@@ -132,7 +132,7 @@ module TagableTestPatterns
     # Find the created resource and tag
     created_tag = Tag.find_by(params_with_new_tag[resource_name][:tag])
     created_resource = created_tag.tagable
-    assert_redirected_to resource_path(created_resource)
+    assert_redirected_to created_resource
     assert_successful_creation_flash_message(created_resource, created_tag)
   end
 
@@ -163,7 +163,7 @@ module TagableTestPatterns
 
   def test_cannot_create_with_wrong_tagable_type
     sign_in @accredited_team_member
-    @unassigned_tag.update(tagable_type: wrong_tagable_type)
+    @unassigned_tag.update(tagable_type: @wrong_tagable_type)
     assert_no_difference("#{resource_class}.count") do
       post :create, params: params_with_existing_tag.deep_merge(tag_id: @unassigned_tag.id)
     end
@@ -239,13 +239,14 @@ module TagableTestPatterns
   def test_team_member_cannot_update
     sign_in @team_member
     original_value = @resource.send(update_attribute_name)
-    patch :update, params: update_params(original_value)
+    patch :update, params: update_params
     assert_forbidden
+    assert_equal original_value, @resource.reload.send(update_attribute_name)
   end
 
   def test_accredited_team_member_can_update
     sign_in @accredited_team_member
-    patch :update, params: update_params(updated_attribute_value)
+    patch :update, params: update_params
     assert_equal updated_attribute_value, @resource.reload.send(update_attribute_name)
     assert_redirected_to resource_path(@resource)
     assert_successful_update_flash_message
@@ -272,23 +273,26 @@ module TagableTestPatterns
   # Helper methods
 
   def resource_class
-    # Extract the controller name from the test class name
-    test_class_name = self.class.name
-    resource_name = test_class_name.gsub('ControllerTest', '')
-    resource_name.classify.constantize
+    @resource.class
   end
 
   def resource_name
-    resource_class.to_s.underscore.to_sym
+    # Convert class name to underscored symbol
+    # e.g., "Electrical::Cable" -> :electrical_cable
+    @resource.model_name.param_key.to_sym
   end
 
   def resource_path(resource)
-    send("#{resource_name}_path", resource)
+    # Use the underscored resource name for path helpers
+    # e.g., :electrical_cable -> :electrical_cable_path
+    path_helper = "#{resource.model_name.singular_route_key}_path"
+    send(path_helper, resource)
   end
 
   def resource_index_path
-    # Use resource name to construct the index path
-    send("#{resource_name}s_path")
+    # Handle both namespaced and non-namespaced resources
+    path_helper = "#{resource_name.to_s.pluralize}_path".to_sym
+    send(path_helper)
   end
 
   # These methods must be implemented by the including test class
@@ -308,11 +312,6 @@ module TagableTestPatterns
     { tag_id: @assigned_tag.id, resource_name => valid_resource_params }
   end
 
-  def wrong_tagable_type
-    # Return a different tagable type for testing
-    (resource_class.to_s == "Motor") ? "Switchboard" : "Motor"
-  end
-
   def valid_resource_params
     raise NotImplementedError, "Including class must implement valid_resource_params"
   end
@@ -321,8 +320,8 @@ module TagableTestPatterns
     raise NotImplementedError, "Including class must implement updated_attribute_value"
   end
 
-  def update_params(new_value)
-    { id: @resource.id, resource_name => { update_attribute_name => new_value } }
+  def update_params
+    raise NotImplementedError, "Including class must implement update_params"
   end
 
   def setup_model_specific_data

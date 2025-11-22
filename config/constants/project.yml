@@ -3,15 +3,15 @@
 # One designation for each type of tag requiring a data sheet. Name must be the model class name.
 tagable:
   # electrical
-  - Switchboard
-  - Cable
-  - Motor
-  - SocketCct
-  - LightCct
+  - Electrical::Switchboard
+  - Electrical::Cable
+  - Electrical::Motor
+  - Electrical::SocketCct
+  - Electrical::LightCct
   # piping
-  - Pipe
-  - Source
-  - Consumer
+  - Piping::Pipe
+  - Piping::Source
+  - Piping::Consumer
 
 # Standard engineering disciplines available in the system
 # These will be available to all projects

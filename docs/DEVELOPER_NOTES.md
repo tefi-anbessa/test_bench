@@ -268,7 +268,9 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Cable types with no current project.
 - [x] Refine the collapsibles component to retain state after refresh operations (e.g. sorting links with ransack). Make a generalised solution, maybe use turbo.
 - [ ] Fix the page size js controller.
-- [ ] Write thoroughtests for the tag parser and builder.
+- [ ] Write thorough tests for the tag parser and builder.
+- [ ] Cable types routing should be nested under projects.
+- [ ] Cable types controller should be revised to suit nesting and protect against current project setting.
 
 ## Refactoring Opportunities
 

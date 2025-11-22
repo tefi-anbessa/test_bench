@@ -1,3 +1,6 @@
+# frozen_string_literal: true
 module Electrical
-  # Module configuration and shared methods go here
+  def self.table_name_prefix
+    'electrical_'
+  end
 end

@@ -1,0 +1,76 @@
+<% switchboard = object %>
+<%= render 'components/collapsible',
+  id: "switchboard_#{switchboard.id}_details",
+  title: t('switchboards.show.header', label: switchboard.label),
+  expanded: false,
+  header_class: 'py-1' do %>
+  
+  <div class="container-fluid">
+
+    <div class="row mb-1">
+      <% text = t("actions.back_to", model: switchboard.model_name.human) %>
+      <%= link_to switchboard, 
+        class: "btn btn-sm btn-outline-secondary me-2",
+        title: text do %>
+        <%== bs_icon('box-arrow-in-up-left') %>
+        <span class="d-none d-md-inline"><%= text %></span>
+      <% end %>
+    </div>
+
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= switchboard.class.human_attribute_name(:ingress_protection) %></div>
+      <div class="col-8"><%= switchboard.ingress_protection.present? ? 
+        ["IP", switchboard.ingress_protection].join(' ') : '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= switchboard.class.human_attribute_name(:voltage_rating) %></div>
+      <div class="col-8"><%= switchboard.voltage_rating %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= switchboard.class.human_attribute_name(:busbar_rating) %></div>
+      <div class="col-8"><%= switchboard.busbar_rating %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= switchboard.class.human_attribute_name(:busbar_fault_rating) %></div>
+      <div class="col-8"><%= switchboard.busbar_fault_rating.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= switchboard.class.human_attribute_name(:busbar_fault_duration) %></div>
+      <div class="col-8"><%= switchboard.busbar_fault_duration.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= switchboard.class.human_attribute_name(:cable_entry) %></div>
+      <div class="col-8"><%= switchboard.cable_entry.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= switchboard.class.human_attribute_name(:incomer_protection) %></div>
+      <div class="col-8"><%= switchboard.incomer_protection.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= switchboard.class.human_attribute_name(:metering) %></div>
+      <div class="col-8"><%= switchboard.metering.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= switchboard.class.human_attribute_name(:neutral_bar_connections) %></div>
+      <div class="col-8"><%= switchboard.neutral_bar_connections.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= switchboard.class.human_attribute_name(:earth_bar_connections) %></div>
+      <div class="col-8"><%= switchboard.earth_bar_connections.presence || '-' %></div>
+    </div>
+    
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.switchboard.circuits') %></div>
+      <div class="col-8"><%= switchboard.electrical_circuits.count %></div>
+    </div>
+  </div>
+<% end %>

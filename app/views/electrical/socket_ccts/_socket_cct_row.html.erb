@@ -1,0 +1,37 @@
+<tr scope="row">
+  <% if socket_cct.tag.nil? %>
+    <td class="table-danger"><%= t("index.no_tag", id: socket_cct.id) %></td>
+  <% else %>
+    <td><%= link_to socket_cct.tag.full_tag, tag_path(socket_cct.tag) %></td>
+  <% end %>
+  <td><%= socket_cct.socket_type %></td>
+  <td><%= socket_cct.quantity %></td>
+  <td>
+    <% if policy(socket_cct).show? %>
+      <%= link_to socket_cct, class: "btn btn-secondary btn-sm icon-link",
+            aria: { label: t('actions.show') },
+            title: t('actions.show'),
+            display: "inline" do %>
+        <%== bs_icon('eye') %>
+      <% end %>
+    <% end %>
+    <% if policy(socket_cct).edit? %>
+      <%= link_to edit_electrical_socket_cct_path(socket_cct), class: "btn btn-warning btn-sm icon-link",
+            aria: { label: t('actions.edit') },
+            title: t('actions.edit'),
+            display: "inline"  do %>
+        <%== bs_icon('pencil') %>
+      <% end %>
+    <% end %>
+    <% if policy(socket_cct).destroy? %>
+      <%= link_to socket_cct,
+              data: { method: :delete, confirm: t('actions.delete_sure') },
+              class: "btn btn-danger btn-sm icon-link",
+              aria: { label: t('actions.delete') },
+              title: t('actions.delete'),
+              display: "inline"  do %>
+        <%== bs_icon('trash') %>
+      <% end %>
+    <% end %>
+  </td>
+</tr>

@@ -42,16 +42,16 @@ module ProjectAssistant
     test "creates all required directories and files" do
       run_generator [@module_name]
 
-      # Test app directory structure
+      # Test app directory structure - now under app/<dir>/<module_name>/
       @app_dirs.each do |dir|
-        assert_directory "app/#{@module_name}/#{dir}"
-        assert_file "app/#{@module_name}/#{dir}/.keep"
+        assert_directory "app/#{dir}/#{@module_name}"
+        assert_file "app/#{dir}/#{@module_name}/.keep"
       end
 
-      # Test test directory structure
+      # Test test directory structure - now under test/<dir>/<module_name>/
       @test_dirs.each do |dir|
-        assert_directory "test/#{@module_name}/#{dir}"
-        assert_file "test/#{@module_name}/#{dir}/.keep"
+        assert_directory "test/#{dir}/#{@module_name}"
+        assert_file "test/#{dir}/#{@module_name}/.keep"
       end
 
       # Test locale files with language folders and correct naming
@@ -67,19 +67,16 @@ module ProjectAssistant
         assert_file "config/locales/#{@module_name}/#{lang}/#{lang}.#{@module_name}.views.yml"
       end
 
-      # Test template files
-      assert_file "app/#{@module_name}/base.rb"
+      # Test template files - base.rb is now under models/<module_name>/
+      assert_file "app/models/#{@module_name}/base.rb"
       assert_file "app/models/#{@module_name}.rb"
     end
 
-    test "adds autoload paths to application.rb" do
+    test "adds factory_bot configuration to application.rb" do
       run_generator [@module_name]
       assert_file "config/application.rb" do |content|
-        expected = <<~RUBY
-          # Autoload module directories
-          config.autoload_paths += %W(\#{config.root}/app/#{@module_name} \#{config.root}/app/#{@module_name}/**/)
-        RUBY
-        assert_includes content, expected.strip
+        expected = "config.factory_bot.definition_file_paths << Rails.root.join('test', '#{@module_name.underscore}', 'factories')"
+        assert_includes content, expected
       end
     end
 
@@ -90,6 +87,15 @@ module ProjectAssistant
         # Just check for the namespace and comment, ignore indentation
         assert_match(/namespace :#{@module_name}/, content)
         assert_match(/# Add your routes here/, content)
+      end
+    end
+    
+    test "adds_factory_bot_configuration" do
+      run_generator [@module_name]
+      
+      assert_file "config/application.rb" do |content|
+        expected = "config.factory_bot.definition_file_paths << Rails.root.join('test', '#{@module_name.underscore}', 'factories')"
+        assert_match(/#{Regexp.escape(expected)}/, content)
       end
     end
   end

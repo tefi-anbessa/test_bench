@@ -1,0 +1,28 @@
+require 'test_helper'
+require_relative '../../helpers/resource_policy_test'
+module Electrical
+  class CircuitPolicyTest < ActiveSupport::TestCase
+    include ResourcePolicyTest
+    def setup
+      setup_resource_policy_test
+    end
+    
+    def resource_class
+      Electrical::Circuit
+    end
+
+    def create_resource(tag:)
+      # Use circuit factory to create circuit with tag association, using default prefix and unique serial.
+      create(:electrical_circuit, electrical_switchboard: create(:electrical_switchboard, tag: tag))
+    end
+
+    def new_resource(discipline:)
+      # Use circuit factory to build new circuit belonging to switchboard with tag association, using default prefix and unique serial.
+      build(:electrical_circuit, electrical_switchboard: create(:electrical_switchboard, tag: create(:tag, discipline: discipline)))
+    end
+
+    def self.required_role
+      :electrical_designer
+    end
+  end
+end

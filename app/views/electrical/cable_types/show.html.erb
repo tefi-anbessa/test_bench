@@ -1,0 +1,181 @@
+<% provide(:title, t('.title', id: @cable_type.id)) %>
+<!-- Centred container for cable type show card -->
+<div class="container mt-3 mx-auto">
+  <!-- Cable Type Header Card -->
+  <div class="card mb-4">
+    <div class="card-header p-2">
+      <div class="row align-items-center">
+        <!-- Left Navigation -->
+        <div class="col-auto">
+          <div class="d-flex align-items-center">
+            <!-- Index Button -->
+            <% if project_selected? %>
+              <%= link_to project_electrical_cable_types_path(current_project), 
+                class: "btn btn-sm btn-outline-secondary me-2",
+                title: t('actions.index') do %>
+                <%== bs_icon('list-columns-reverse') %>
+                <span class="d-none d-mds-inline"><%= t('actions.index') %></span>
+              <% end %>
+            <% else %>
+              <%= link_to t('cable_type', scope: 'activerecord.models').pluralize,
+                electrical_cable_types_path,
+                class: "btn btn-sm btn-outline-secondary me-2",
+                title: t('actions.index') do %>
+                <%== bs_icon('list-columns-reverse') %>
+                <span class="d-none d-mds-inline"><%= t('actions.index') %></span>
+              <% end %>
+            <% end %>
+            <!-- Previous Button -->
+            <% prev_cable_type = @cable_type.prev %>
+            <% if prev_cable_type.present? %>
+              <% disabled = prev_cable_type == @cable_type %>
+              <%= link_to electrical_cable_type_path(prev_cable_type),
+                    disabled: disabled,
+                    class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
+                    title: "#{t('actions.previous')}: #{prev_cable_type.label}" do %>
+                <%== bs_icon('arrow-left') %>
+                <span class="d-none d-md-inline">
+                  <%= t('actions.previous') %>
+                </span>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Center Tag Info -->
+        <div class="col text-center">
+          <div class="d-flex flex-column align-items-center">
+            <div class="mt-1">
+              <% @cable_type.code %>
+                <%= [t('activerecord.models.cable_type'), 
+                  @cable_type&.id].compact.join(' ') %>
+                  <small class="text-muted"><%= @cable_type.label %></small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Navigation and Actions -->
+        <div class="col-auto">
+          <div class="d-flex align-items-center">
+            <!-- Next Button -->
+            <% next_cable_type = @cable_type.next %>
+            <% if next_cable_type.present? %>
+              <% disabled = next_cable_type == @cable_type %>
+              <%= link_to electrical_cable_type_path(next_cable_type),
+                    disabled: disabled,
+                    class: "btn btn-sm btn-outline-secondary me-2 #{'disabled' if disabled}",
+                    title: "#{t('actions.next')}: #{next_cable_type.label}" do %>
+                <span class="d-none d-md-inline">
+                  <%= t('actions.next') %>
+                </span>
+                <%== bs_icon('arrow-right') %>
+              <% end %>
+            <% end %>
+
+            <!-- Action Buttons -->
+            <div class="btn-group btn-group-sm gap-1">
+              <% if policy(@cable_type).edit? %>
+                <%= link_to edit_electrical_cable_type_path(@cable_type),
+                      class: "btn btn-outline-warning",
+                      title: t('actions.edit') do %>
+                  <%== bs_icon('pencil-square') %>
+                  <span class="d-none d-md-inline">
+                    <%= t('actions.edit') %>
+                  </span>
+                <% end %>
+              <% end %>
+
+              <% if policy(@cable_type).destroy? %>
+                <%= link_to @cable_type,
+                      method: :delete,
+                      data: { confirm: t('actions.delete_sure') },
+                      class: "btn btn-outline-danger",
+                      title: t('actions.delete') do %>
+                  <%== bs_icon('trash') %>
+                  <span class="d-none d-md-inline">
+                    <%= t('actions.delete') %>
+                  </span>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>  <!-- end of card header -->
+
+    <div class="card-body">
+      <div class="row justify-content-center">
+      <div class="col-sm-12 col-10 col-md-8 col-lg-6 col-xl-4">
+
+          <!-- Project collapsible card -->
+          <%= render 'projects/project_card', project: @cable_type.project %>
+      
+
+          <!-- Cable Type Details Inner Card -->
+              <div class="table-responsive">
+                <table class="table table-sm mb-0" style="width: auto;">
+                  <tbody>
+                    <tr>
+                      <th><%= @cable_type.class.human_attribute_name(:conductor_material) %></th>
+                      <td><%= @cable_type&.conductor_material %></td>
+                    </tr>
+                    <tr>
+                      <th><%= @cable_type.class.human_attribute_name(:csa) %></th>
+                      <td><%= @cable_type&.csa %></td>
+                    </tr>
+                    <tr>
+                      <th><%= @cable_type.class.human_attribute_name(:cores) %></th>
+                      <td><%= @cable_type&.cores %></td>
+                    </tr>
+                    <tr>
+                      <th><%= @cable_type.class.human_attribute_name(:neutral_csa) %></th>
+                      <td><%= @cable_type&.neutral_csa %></td>
+                    </tr>
+                    <tr>
+                      <th><%= @cable_type.class.human_attribute_name(:earth_csa) %></th>
+                      <td><%= @cable_type&.earth_csa %></td>
+                    </tr>
+                    <tr>
+                      <th><%= @cable_type.class.human_attribute_name(:insulation) %></th>
+                      <td><%= @cable_type&.insulation %></td>
+                    </tr>
+                    <tr>
+                      <th><%= @cable_type.class.human_attribute_name(:bedding) %></th>
+                      <td><%= @cable_type&.bedding %></td>
+                    </tr>
+                    <tr>
+                      <th><%= @cable_type.class.human_attribute_name(:armour) %></th>
+                      <td><%= @cable_type&.armour %></td>
+                    </tr>
+                    <tr>
+                      <th><%= @cable_type.class.human_attribute_name(:sheath) %></th>
+                      <td><%= @cable_type&.sheath %></td>
+                    </tr>
+                    <tr>
+                      <th><%= @cable_type.class.human_attribute_name(:bedding_od) %></th>
+                      <td><%= @cable_type&.bedding_od %></td>
+                    </tr>
+                    <tr>
+                      <th><%= @cable_type.class.human_attribute_name(:overall_od) %></th>
+                      <td><%= @cable_type&.overall_od %></td>
+                    </tr>
+                    <tr>
+                      <th><%= @cable_type.class.human_attribute_name(:temperature_rating) %></th>
+                      <td><%= @cable_type&.temperature_rating %></td>
+                    </tr>
+                    <tr>
+                      <th><%= @cable_type.class.human_attribute_name(:voltage_rating) %></th>
+                      <td><%= @cable_type&.voltage_rating %></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <%= @cable_type.class.human_attribute_name(:notes) %>
+              <div class="scrollable-box">
+                <%= @cable_type&.notes %>
+              </div>
+        </div>
+      </div>
+    
+  </div>
+</div>

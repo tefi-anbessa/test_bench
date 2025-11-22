@@ -218,7 +218,7 @@ class TagTest < ActiveSupport::TestCase
   
   # Tagable validation tests
   test "should allow setting tagable_type without tagable_id" do
-    @tag.tagable_type = 'Cable'
+    @tag.tagable_type = 'Electrical::Cable'
     @tag.tagable_id = nil
     assert @tag.valid?
   end
@@ -231,21 +231,21 @@ class TagTest < ActiveSupport::TestCase
   
   test "should allow creating tagable type with existing tag" do
     # First create a tag with type but no tagable
-    tag = create(:tag, :unique_tag, prefix: 'EC', project: @project, discipline: @discipline, 
-              tagable_type: 'Cable', tagable_id: nil)
+    tag = create(:tag, :unique_tag, prefix: 'EC', discipline: @discipline, 
+              tagable_type: 'Electrical::Cable', tagable_id: nil)
     assert tag.valid?
     
     # Now create a cable using this tag
-    assert_difference 'Cable.count', 1 do
-      cable = create(:cable, tag: tag)
+    assert_difference 'Electrical::Cable.count', 1 do
+      cable = create(:electrical_cable, tag: tag)
       assert_equal tag.reload.tagable, cable
     end
   end
   
   test "should prevent changing tagable association once set" do
     # Create a cable with a tag
-    tag = create(:tag, :unique_tag, prefix: 'EC', project: @project, discipline: @discipline)
-    cable = create(:cable, tag: tag)
+    tag = create(:tag, :unique_tag, prefix: 'EC', discipline: @discipline)
+    cable = create(:electrical_cable, tag: tag)
     assert_equal cable, tag.tagable
     # motor = create(:motor, tag: tag)
     # refute tag.valid?
@@ -258,17 +258,17 @@ class TagTest < ActiveSupport::TestCase
 
     #test again using update
     tag.reload
-    tag.update(tagable: build(:cable))
+    tag.update(tagable: build(:electrical_cable))
     refute tag.valid?
     assert_includes tag.errors[:base], I18n::t("activerecord.errors.models.tag.change_tagable")
   end
   
   test "should prevent assigning tagable that's already associated with a tag" do
     # Create a cable with a tag
-    tag = create(:tag, :unique_tag, prefix: 'EC', project: @project, discipline: @discipline)
-    cable = create(:cable, tag: tag)
+    tag = create(:tag, :unique_tag, prefix: 'EC', discipline: @discipline)
+    cable = create(:electrical_cable, tag: tag)
     # Create a new tag with no association
-    new_tag = create(:tag, :unique_tag, prefix: 'EC', project: @project, discipline: @discipline)
+    new_tag = create(:tag, :unique_tag, prefix: 'EC', discipline: @discipline)
 
     # Try to associate the new tag with existing tagable by assignment
     new_tag.tagable = cable
@@ -294,21 +294,21 @@ class TagTest < ActiveSupport::TestCase
   
   test "should allow creating tagable with existing tag" do
     # First create a tag with type but no tagable
-    tag = create(:tag, project: @project, discipline: @discipline, 
-              tagable_type: 'Cable', tagable_id: nil)
+    tag = create(:tag, discipline: @discipline, 
+              tagable_type: 'Electrical::Cable', tagable_id: nil)
     
     # Now create a cable using this tag
-    assert_difference 'Cable.count', 1 do
-      cable = Cable.create!(
+    assert_difference 'Electrical::Cable.count', 1 do
+      cable = Electrical::Cable.create!(
         tag: tag,
-        cable_type: create(:cable_type)
+        electrical_cable_type: create(:electrical_cable_type)
       )
       assert_equal tag.reload.tagable, cable
     end
   end
   
   test "should validate tagable existence" do
-    @tag.tagable_type = 'Cable'
+    @tag.tagable_type = 'Electrical::Cable'
     @tag.tagable_id = 9999 # Non-existent ID
     
     refute @tag.valid?
@@ -316,19 +316,19 @@ class TagTest < ActiveSupport::TestCase
   end
   
   test "should nullify both type and id when associated record is destroyed" do
-    tag = create(:tag, :unique_tag, prefix: 'EC', project: @project, discipline: @discipline)
-    cable = create(:cable, tag: tag)
+    tag = create(:tag, :unique_tag, prefix: 'EC', discipline: @discipline)
+    cable = create(:electrical_cable, tag: tag)
     
     # Store the cable id before destruction
     cable_id = cable.id
     
     # Destroy the cable - should trigger dependent: :nullify
-    assert_difference('Cable.count', -1) do
+    assert_difference('Electrical::Cable.count', -1) do
       cable.destroy
     end
     
     # Verify cable is actually destroyed
-    assert_raises(ActiveRecord::RecordNotFound) { Cable.find(cable_id) }
+    assert_raises(ActiveRecord::RecordNotFound) { Electrical::Cable.find(cable_id) }
     
     # Verify tag's associations are nullified
     tag.reload

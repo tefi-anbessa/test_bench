@@ -1,0 +1,57 @@
+<% provide(:title, t('.title')) %>
+<nav class="navbar bg-body-tertiary">
+  <div class="container">
+    <ul class="navbar-nav me-auto mb-2 mb-lg-0 flex-row">
+    <% if policy(Electrical::Motor).new? %>
+      <li class="nav-item">
+        <%= link_to new_electrical_motor_path,
+              class: "btn btn-primary actions",
+              data: { turbo: false },
+              aria: { label: t('actions.new') },
+              title: t('actions.new') do %>
+          <%== bs_icon('plus-square-fill') %>
+          <%= [t('actions.new'), t('activerecord.models.motor')].join(' ') %>
+        <% end %>
+      </li>
+    <% end %>
+      <span class="nav-text ms-3 me-3 h2">
+        <%= t('.header')%>
+      </span>
+    </ul>
+  </div>
+</nav>
+<div class = "container">
+  <div class = 'listing'>
+    <%= search_form_for @q do |f| %>
+      <%= f.search_field :motor_type_cont,
+            class: "search_field",
+            placeholder: t('activerecord.attributes.motor.motor_type') %>
+      <%= f.search_field :frame_size_cont,
+            class: "search_field",
+            placeholder: t('activerecord.attributes.motor.frame_size') %>
+      <%= f.search_field :poles_eq,
+            class: "search_field",
+            placeholder: t('activerecord.attributes.motor.poles') %>
+      <%= f.search_field :ingress_protection_cont,
+            class: "search_field",
+            placeholder: t('activerecord.attributes.motor.ingress_protection') %>
+      <%= f.search_field :speed_rated_eq,
+            class: "search_field",
+            placeholder: t('activerecord.attributes.motor.speed_rated') %>
+      <%= f.button nil, class: "btn btn-primary btn-sm", action: :submit do %>
+        <%== bs_icon('search') %>
+      <% end %>
+    <% end %>
+    <%== pagy_bootstrap_nav(@pagy) %>
+    <table id='motors' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
+      <%= render "motor_header" %>
+      <tbody>
+        <% @motors.each do |row| %>
+          <%= render 'motor_row', row: row %>
+        <% end %>
+      </tbody>
+    </table>
+    <%== pagy_bootstrap_nav(@pagy) %>
+    <%== pagy_info(@pagy) %>
+  </div>
+</div>

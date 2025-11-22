@@ -87,52 +87,58 @@
                 <li>
                   <h6 class="dropdown-header"><%= t('menu.electrical_resources') %></h6>
                 </li>
-                <% if policy(:cable_type).index? %>
+                <% if policy(Electrical::CableType).index? %>
                   <li>
-                    <%= link_to t('cable_type', scope: 'activerecord.models').pluralize,
-                      cable_types_path,
-                      class: "dropdown-item" %>
+                    <% if project_selected? %>
+                      <%= link_to t('cable_type', scope: 'activerecord.models').pluralize,
+                        project_electrical_cable_types_path(project_id: current_project.id),
+                        class: "dropdown-item" %>
+                    <% else %>
+                      <%= link_to t('cable_type', scope: 'activerecord.models').pluralize,
+                        electrical_cable_types_path,
+                        class: "dropdown-item" %>
+                    <% end %>
                   </li>
                 <% end %>
-                <% if policy(:cable).index? %>
+                <% if policy(Electrical::Cable).index? %>
                   <li>
                     <%= link_to t('cable', scope: 'activerecord.models').pluralize,
-                      cables_path,
+                      electrical_cables_path,
                       class: "dropdown-item" %>
                   </li>
                 <% end %>
-                <% if policy(:switchboard).index? %>
+                <% if policy(Electrical::Switchboard).index? %>
                   <li>
                     <%= link_to t('switchboard', scope: 'activerecord.models').pluralize,
-                      switchboards_path,
+                      electrical_switchboards_path,
                       class: "dropdown-item" %>
                   </li>
                 <% end %>
-                <% if policy(:motor).index? %>
+                <% if policy(Electrical::Motor).index? %>
                   <li>
                     <%= link_to t('motor', scope: 'activerecord.models').pluralize,
-                      motors_path,
+                      electrical_motors_path,
                       class: "dropdown-item" %>
                   </li>
                 <% end %>
-                <% if policy(:light_cct).index? %>
+                <% if policy(Electrical::LightCct).index? %>
                   <li>
                     <%= link_to t('light_cct', scope: 'activerecord.models').pluralize,
-                      light_ccts_path,
+                      electrical_light_ccts_path,
                       class: "dropdown-item" %>
                   </li>
                 <% end %>
-                <% if policy(:light_cct).index? %>
+                <% if policy(Electrical::SocketCct).index? %>
                   <li>
                     <%= link_to t('socket_cct', scope: 'activerecord.models').pluralize,
-                      socket_ccts_path,
+                      electrical_socket_ccts_path,
                       class: "dropdown-item" %>
                   </li>
                 <% end %>
-                <% if policy(:demand).index? %>
+                <% if policy(Electrical::Demand).index? %>
                   <li>
                     <%= link_to t('demand', scope: 'activerecord.models').pluralize,
-                      demands_path,
+                      electrical_demands_path,
                       class: "dropdown-item" %>
                   </li>
                 <% end %>

@@ -1,0 +1,146 @@
+<div class="container mt-3">
+  <div class="card">
+    <div class="card-header p-2">
+
+      <!-- Center Tag Info -->
+      <div class="col text-center">
+        <div class="d-flex flex-column align-items-center">
+          <div class="mt-1">
+            <%= yield(:header) %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%= bootstrap_form_with(model: motor,
+          layout: :horizontal,
+          label_col: "col-sm-4",
+          control_col: "col-sm-8",
+          wrapper_class: 'mb-1',
+          ) do |f| %>
+
+      <div class="card-body p-2">
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+
+            <!-- Tag -->
+            <%= f.fields_for tag do |tag_f| %>
+              <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
+            <% end %>
+
+            <!-- Motor Details -->
+            <div class="card mb-1">
+              <div class="card-header p-2">
+                <h5><%= t('activerecord.models.motor') %></h5>
+              </div>
+
+              <div class="card-body p-2">
+                <%= render 'shared/error_messages', object: f.object %>
+
+                <%= f.select :motor_type,
+                    options_for_select(
+                      Electrical::Motor.motor_types.keys.collect { |k| [Electrical::Motor.human_enum_name(:motor_type, k), k] },
+                      selected: motor.motor_type
+                    ),
+                    { include_blank: t('form.required') },
+                    class: 'form-control form-control-sm',
+                    label_col: "col-sm-4",
+                    control_col: "col-sm-3" %>
+
+                <%= f.select :frame_size,
+                    options_for_select(
+                      Constants.electrical.frame_size.map { |k, v| [k, k] },
+                      selected: motor.frame_size
+                    ),
+                    { include_blank: t('form.optional') },
+                    class: 'form-control form-control-sm',
+                    label_col: "col-sm-4",
+                    control_col: "col-sm-3" %>
+
+                <%= f.number_field :poles,
+                        class: 'form-control form-control-sm',
+                        min: 1,
+                        max: 20,
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-3",
+                        wrapper: { class: 'mb-1' } %>
+
+                <div class="card p-2 mb-2" data-controller="ip-rating">
+                  <div class="row">
+                    <div class="col-4">
+                      <%= f.text_field :ingress_protection,
+                              class: 'form-control form-control-sm',
+                              layout: :vertical,
+                              prepend: 'IP',
+                              data: { 'ip-rating-target': 'output' } %>
+                    </div>
+                    <div class="col-4">
+                      <div class="row">
+                      <%= select_tag :ip_1,
+                        options_for_select(@ip_1.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] },
+                          motor.ingress_protection&.first),
+                        {
+                          class: 'form-select mb-0',
+                          label_col: "col-sm-4",
+                          control_col: "col-sm-3",
+                          data: {
+                            action: 'change->ip-rating#update',
+                            'ip-rating-target': 'firstDigit'
+                          }
+                        } %>
+                      </div>
+                      <div class="row">
+                        <%= select_tag :ip_2,
+                          options_for_select(@ip_2.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] },
+                            motor.ingress_protection&.last),
+                            {
+                              class: 'form-select mb-0',
+                              label_col: "col-sm-2",
+                              control_col: "col-sm-10",
+                              data: {
+                                action: 'change->ip-rating#update',
+                                'ip-rating-target': 'secondDigit'
+                              }
+                            } %>
+                      </div>
+                    </div>
+                  </div>
+                </div> <!-- end ip Card -->
+
+                <%= f.number_field :speed_rated,
+                        class: 'form-control form-control-sm',
+                        step: '0.1',
+                        min: 0,
+                        append: 'rpm',
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-3",
+                        wrapper: { class: 'mb-1' } %>
+
+                <%= f.text_area :notes,
+                        class: 'form-control form-control-sm',
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-8",
+                        wrapper: { class: 'mb-1' } %>
+              </div> <!-- end motor card body -->
+            </div> <!-- end motor card -->
+
+            <!-- Card Footer with Actions -->
+            <div class="card-footer bg-transparent text-end p-2">
+              <%= link_to(motor.persisted? ? motor : electrical_motors_path,
+                    class: 'btn btn-warning',
+                    data: { confirm: t('actions.sure'), turbo: false }) do %>
+                <%= t('actions.discard') %>
+                <%== bs_icon('x-square') %>
+              <% end %>
+
+              <%= f.button :submit, class: 'btn btn-primary' do %>
+                <%= yield(:button_text) %>
+                <%== bs_icon('save') %>
+              <% end %>
+            </div> <!-- end card footer -->
+          </div> <!-- end responsive columns -->
+        </div> <!-- end row -->
+      </div> <!-- end card body -->
+    <% end %>
+  </div> <!-- end card -->
+</div> <!-- end container -->
