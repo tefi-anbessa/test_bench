@@ -1,7 +1,6 @@
 module Electrical
   class MotorsController < ApplicationController
     include TagablesController
-    before_action :set_motor, only: %i[ show edit update destroy ]
 
     # GET /motors or /motors.json
     def index
@@ -10,7 +9,7 @@ module Electrical
 
     # GET /motors/1 or /motors/1.json
     def show
-      authorize @motor
+      show_tagable
     end
 
     # GET /motors/1/edit
@@ -55,13 +54,8 @@ module Electrical
       @ip_2 = Constants.electrical.ingress_protection.second_digit.to_h
     end
 
-    # Use callbacks to share common setup or constraints between actions.
-    def set_motor
-      @motor = Electrical::Motor.find(params[:id])
-    end
-
     # Only allow a list of trusted parameters through.
-    def motor_params
+    def resource_params
       params.require(:electrical_motor).permit(:motor_type, :frame_size, :poles, :ingress_protection, :speed_rated,
         :notes,
         tag: [

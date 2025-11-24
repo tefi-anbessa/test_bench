@@ -3,11 +3,15 @@ module TagablesController
 
   included do
     before_action :authenticate_user!
+    before_action :set_resource, only: %i[ show edit update destroy ]
   end
 
   # Configuration methods that subclasses should override
   private
 
+    def set_resource
+      @resource = resource_class.find(params[:id])
+    end
 
     # Main abstracted methods
     # GET /index - abstracted index action with proper authorization
@@ -35,10 +39,15 @@ module TagablesController
       authorize @resources, :index?
     end
 
+    # GET /show - abstracted show action
+    def show_tagable
+      authorize @resource, :show?
+      instance_variable_set(resource_var_name, @resource)
+    end
+
     # GET /new - abstracted new action
     def new_tagable
       @resource = resource_class.new()
-      instance_variable_set(resource_var_name, @resource)
       authorize @resource, :new?
       set_tag
       setup_form
@@ -79,7 +88,6 @@ module TagablesController
 
     # GET /edit 
     def edit_tagable
-      @resource = instance_variable_get(resource_var_name)
       authorize @resource, :edit?
 
       # Allow edit of resource without a tag as a way to rescue orphans
@@ -89,7 +97,7 @@ module TagablesController
 
     # PATCH/PUT /switchboards/1 
     def update_tagable
-      @resource = instance_variable_get(resource_var_name)
+      authorize @resource, :update?
 
       # Make a dummy resource object for checking params
       begin
@@ -106,13 +114,12 @@ module TagablesController
         failed_to_save
         return
       end
-      authorize @resource, :update?
 
       # Tagable allows a new tag to be created via update, as a way to rescue orphans
       @tag = @resource.tag&.present? ? @resource.tag : Tag.new(tag_params.merge(tagable: @resource))
 
       unless @tag.valid?
-        flash.now[:alert] = t("flash.update.alert",
+        flash.now[:alert] = t("flash.create.alert",
                             resource_name: @tag.model_name.human.downcase)
         failed_to_save
         return
@@ -132,7 +139,6 @@ module TagablesController
 
     # DELETE /:id - abstracted destroy action
     def destroy_tagable
-      @resource = instance_variable_get(resource_var_name)
       authorize @resource, :destroy?
       if @resource.destroy
         respond_to do |format|
@@ -285,6 +291,7 @@ module TagablesController
     end
 
     def setup_form
+      instance_variable_set(resource_var_name, @resource)
       if current_project
         @project = current_project
       else
@@ -307,8 +314,6 @@ module TagablesController
       # If we get here, there was a validation error preventing save
       # Ensure the resource variable is set for the view before setup_form
       # @resource must have been set in one of the calling actions
-      resource_var_name = "@#{@resource.model_name.element}"
-      instance_variable_set(resource_var_name, @resource) unless instance_variable_get(resource_var_name)
       return_action = @resource.persisted? ? :edit : :new
       setup_form
       respond_to do |format|
@@ -344,15 +349,15 @@ module TagablesController
 
     # Provide the strong parameters name used in resource controllers, which are based on the 
     # model class element, e.g. cable_params
-    def resource_params
-      method_name = "#{resource_class.model_name.element}_params"
-      if respond_to?(method_name, true)
-        send(method_name)
-      else
-        raise NotImplementedError, 
-              "Controller must implement `#{method_name}` method for strong parameters"
-      end
-    end
+#    def resource_params
+#      method_name = "#{resource_class.model_name.element}_params"
+#      if respond_to?(method_name, true)
+#        send(method_name)
+#      else
+#        raise NotImplementedError, 
+#              "Controller must implement `#{method_name}` method for strong parameters"
+#      end
+#    end
 
     # Override to specify model-specific tag prefix
     def tag_prefix

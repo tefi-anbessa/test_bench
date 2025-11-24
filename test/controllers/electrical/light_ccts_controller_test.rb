@@ -14,20 +14,6 @@ module Electrical
     end
 
     def setup_model_specific_data
-      # Light circuits don't need additional setup like cable types
-    end
-
-    # Common code for all models, but values are model specific
-    def setup_tags_and_resources
-      # Set up a user with edit permissions on this resource.
-      @accredited_team_member = create(:user)
-      @accredited_team_member.grant(:team_member, @project)
-      @accredited_team_member.grant(LightCct.required_role)
-      # Set up an existing tag with associated resource for index, show, edit, update, destroy tests
-      @assigned_tag = create(:tag, prefix: 'EL', serial: 1001, project: @project, discipline: @resource_discipline)
-      @resource = create(:electrical_light_cct, tag: @assigned_tag)
-      # Set up an unassigned tag for create and update tests
-      @unassigned_tag = create(:tag, prefix: 'EL', serial: 1002, project: @project, discipline: @resource_discipline)
       # Every model sets a string of the wrong type for testing the type check
       @wrong_tagable_type = "Electrical::Motor"
     end

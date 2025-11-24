@@ -9,37 +9,11 @@ module Electrical
       # Set the discipline applicable to the resource, required before setup_common_test_data
       @resource_discipline_code = :elec
       setup_common_test_data
-      setup_model_specific_data
       setup_tags_and_resources
+      setup_model_specific_data
     end
 
     def setup_model_specific_data
-      # Switchboards have circuits as child models - create after tags are available
-      # Will be created in setup_tags_and_resources after @assigned_tag exists
-    end
-
-    # Common code for all models, but values are model specific
-    def setup_tags_and_resources
-      # Set up a user with edit permissions on this resource.
-      @accredited_team_member = create(:user)
-      @accredited_team_member.grant(:team_member, @project)
-      @accredited_team_member.grant(Electrical::Switchboard.required_role)
-      # Set up an existing tag with associated resource for index, show, edit, update, destroy tests
-      @assigned_tag = create(:tag, prefix: 'EX', serial: 1001, discipline: @resource_discipline)
-      @resource = create(:electrical_switchboard, tag: @assigned_tag,
-          voltage_rating: '600/1000V',
-          busbar_rating: 200.0,
-          busbar_fault_rating: 2000.0,
-          busbar_fault_duration: 0.5,
-          cable_entry: 'Bottom',
-          incomer_protection: 'Isolator 4P',
-          metering: 'None',
-          neutral_bar_connections: 'None',
-          earth_bar_connections: 'None',
-          ingress_protection: '20',
-          notes: 'Test switchboard')
-      # Set up an unassigned tag for create and update tests
-      @unassigned_tag = create(:tag, prefix: 'EX', serial: 1002, discipline: @resource_discipline)
       # Every model sets a string of the wrong type for testing the type check
       @wrong_tagable_type = "Electrical::Motor"
       # Switchboards have circuits as child models - create after tags are available

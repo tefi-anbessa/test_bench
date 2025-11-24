@@ -10,7 +10,7 @@ module TagableTestPatterns
     set_current_project(@project)
 
     # Create resource discipline using the code provided by the tagable controller test
-    @resource_discipline = create(:discipline, code: @resource_discipline_code, project: @project)
+    @resource_discipline = create(:discipline, code: resource_class.discipline_code, project: @project)
 
     @regular_user = create(:user)   # No roles
 
@@ -28,8 +28,20 @@ module TagableTestPatterns
     @request.env["devise.mapping"] = Devise.mappings[:user]
   end
 
-  # Common test patterns used for all tagable controller tests
+  # Common code for all models, but values are model specific
+  def setup_tags_and_resources
+    # Set up a user with edit permissions on this resource.
+    @accredited_team_member = create(:user)
+    @accredited_team_member.grant(:team_member, @project)
+    @accredited_team_member.grant(resource_class.required_role)
+    # Set up an existing tag with associated resource for index, show, edit, update, destroy tests
+    @assigned_tag = create(:tag, serial: 1001, discipline: @resource_discipline)
+    @resource = create(resource_class.model_name.singular, tag: @assigned_tag)
+    # Set up an unassigned tag for create and update tests
+    @unassigned_tag = create(:tag, serial: 1002,  discipline: @resource_discipline)
+  end
 
+  # Common test patterns used for all tagable controller tests
   def test_common_setup_is_valid
     assert @project.valid?
     assert @project.persisted?
@@ -128,7 +140,6 @@ module TagableTestPatterns
     assert_difference("#{resource_class}.count", 1) do
       post :create, params: params_with_new_tag
     end
-
     # Find the created resource and tag
     created_tag = Tag.find_by(params_with_new_tag[resource_name][:tag])
     created_resource = created_tag.tagable
@@ -204,7 +215,6 @@ module TagableTestPatterns
   def test_cannot_create_both_with_invalid_resource
     skip "Invalid resource params not defined" unless invalid_resource_params.present?
     sign_in @accredited_team_member
-
     if invalid_resource_params.keys.any? { |key| resource_class.defined_enums.key?(key.to_s) }
       # Invalid enum values should return conflict response
       assert_no_difference("#{resource_class}.count") do
@@ -273,13 +283,13 @@ module TagableTestPatterns
   # Helper methods
 
   def resource_class
-    @resource.class
+   self.class.name.sub('ControllerTest', '').singularize.constantize
   end
 
   def resource_name
     # Convert class name to underscored symbol
     # e.g., "Electrical::Cable" -> :electrical_cable
-    @resource.model_name.param_key.to_sym
+    resource_class.model_name.param_key.to_sym
   end
 
   def resource_path(resource)
@@ -326,10 +336,6 @@ module TagableTestPatterns
 
   def setup_model_specific_data
     # Override in including class for model-specific setup (e.g., cable_types)
-  end
-
-  def setup_tags_and_resources
-    # Override in including class to create tags and resources with specific attributes
   end
 
   # Flash message helpers

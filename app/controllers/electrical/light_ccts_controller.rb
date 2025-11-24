@@ -1,7 +1,6 @@
 module Electrical
   class LightCctsController < ApplicationController
     include TagablesController
-    before_action :set_light_cct, only: %i[ show edit update destroy ]
 
     # GET /light_ccts or /light_ccts.json
     def index
@@ -10,7 +9,7 @@ module Electrical
 
     # GET /light_ccts/1 or /light_ccts/1.json
     def show
-      authorize @light_cct
+      show_tagable
     end
 
     # GET /light_ccts/1/edit
@@ -40,10 +39,6 @@ module Electrical
 
     private
 
-    def set_light_cct
-      @light_cct = LightCct.find(params[:id])
-    end
-
     # Light circuit-specific configuration
     def tag_prefix
       "EL"  # Electrical Lighting
@@ -58,7 +53,7 @@ module Electrical
     end
 
     # Only allow a list of trusted parameters through.
-    def light_cct_params
+    def resource_params
       params.require(:electrical_light_cct).permit(:light_fitting_type, :quantity, :notes,
         tag: [
           :id, :project_id, :discipline_id, :prefix, :serial,

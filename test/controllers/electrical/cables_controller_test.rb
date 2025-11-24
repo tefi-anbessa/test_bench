@@ -15,23 +15,9 @@ module Electrical
     end
 
     def setup_model_specific_data
-      @cable_type = create(:electrical_cable_type, project: @project)
-    end
-
-    # Common code for all models, but values are model specific
-    def setup_tags_and_resources
-      # Set up a user with edit permissions on this resource. 
-      @accredited_team_member = create(:user)
-      @accredited_team_member.grant(:team_member, @project)
-      @accredited_team_member.grant(:electrical_designer)
-      # Set up an existing tag with associated resource for index, show, edit, update, destroy tests
-      @assigned_tag = create(:tag, prefix: 'EC', serial: 1001, discipline: @resource_discipline)
-      @resource = create(:electrical_cable, tag: @assigned_tag, 
-        electrical_cable_type: @cable_type)
-      # Set up an unassigned tag for create and update tests
-      @unassigned_tag = create(:tag, prefix: 'EC', serial: 1002, discipline: @resource_discipline)
       # Every model sets a string of the wrong type for testing the type check
       @wrong_tagable_type = "Electrical::Switchboard"
+      @cable_type = create(:electrical_cable_type, project: @project)
     end
 
     def params_with_existing_tag

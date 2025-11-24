@@ -1,14 +1,13 @@
 module Electrical
   class SocketCctsController < ApplicationController
     include TagablesController
-    before_action :set_socket_cct, only: %i[ show edit update destroy ]
     
     def index
       index_tagable
     end
 
     def show
-      authorize @socket_cct
+      show_tagable
     end
 
     def new
@@ -45,11 +44,7 @@ module Electrical
         # Socket circuits don't need additional form data
       end
 
-      def set_socket_cct
-        @socket_cct = Electrical::SocketCct.find(params[:id])
-      end
-
-      def socket_cct_params
+      def resource_params
         params.require(:electrical_socket_cct).permit(:socket_type, :quantity, :notes,
           tag: [
             :id, :project_id, :discipline_id, :prefix, :serial,

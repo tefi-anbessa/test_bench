@@ -1,9 +1,6 @@
-
 module Electrical
   class SwitchboardsController < ApplicationController
     include TagablesController
-    
-    before_action :set_switchboard, only: %i[show edit update destroy]
 
     # GET /switchboards or /switchboards.json
     def index
@@ -12,7 +9,7 @@ module Electrical
 
     # GET /switchboards/1 or /switchboards/1.json
     def show
-      authorize @switchboard
+      show_tagable
     end
 
     # GET /switchboards/new
@@ -93,12 +90,8 @@ module Electrical
       end
     end
 
-    def set_switchboard
-      @switchboard = Electrical::Switchboard.find(params[:id])
-    end
-
     # Only allow a list of trusted parameters through.
-      def switchboard_params
+      def resource_params
         params.require(:electrical_switchboard).permit(:ingress_protection, :voltage_rating,
           :busbar_rating, :busbar_fault_rating, :busbar_fault_duration, 
           :cable_entry, :incomer_protection, :metering, 

@@ -4,7 +4,7 @@ require "rails/generators/named_base"
 module ProjectAssistant
   class ModuleGenerator < Rails::Generators::NamedBase
     desc "Create file structure, templates and config entries for a new module in Project Assistant app"
-    source_root File.expand_path("templates", __dir__)
+    source_root File.expand_path('module/templates', __dir__)
 
     def create_module_structure
       # [TODO] These are available from the NamedBase generator so superfluous here.

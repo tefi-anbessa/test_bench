@@ -1,8 +1,6 @@
 module Electrical
   class CablesController < ApplicationController
     include TagablesController
-    
-    before_action :set_cable, only: %i[show edit update destroy]
 
     # GET electrical/cables or /electrical/cables.json
     def index
@@ -11,7 +9,7 @@ module Electrical
 
     # GET electrical/cables/1 or /electrical/cables/1.json
     def show
-      authorize @cable
+      show_tagable
     end
 
     # GET electrical/cables/new
@@ -40,10 +38,6 @@ module Electrical
     end
 
     private
-    
-      def set_cable
-        @cable = Electrical::Cable.find(params[:id])
-      end
 
       # Cable-specific configuration
       def tag_prefix
@@ -87,7 +81,7 @@ module Electrical
       end
 
       # Only allow a list of trusted parameters through.
-      def cable_params
+      def resource_params
         params.require(:electrical_cable).permit(:electrical_cable_type_id,
           :route_length, :vertical_allowance, :termination_allowance,
           :start_mark, :end_mark, :from_id, :from_type, :to_id, :to_type, :notes,

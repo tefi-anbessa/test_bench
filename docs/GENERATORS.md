@@ -161,12 +161,13 @@ The tag model provides the following functionality:
 * The generate command for a tagable will typically look like:
 
   ```bash
-  rails g project_assistant:tagable module:tagable_name field:type:required field:type:index field:enum field:enum_translated...
+  rails g project_assistant:tagable module_name:tagable_name field:type:required field:type:index field:enum field:enum_translated...
   ```
 
 * The name of the tagable type should be prefixed with its namespace module, as shown in the example. (The generator should never be used to create a tagable type in the core application.)
 * Following the name, all fields to be included in the model should be specified with their rails type. This mostly follows the standard model or scaffold generator format.
   * The generator is not setup to handle ```:references``` for relationships between models. These should be coded manually, before migrating.
+  * Standard rails column types are: :string, :text, :integer, :float, :decimal, :datetime, :timestamp, :time, :date, :binary, :boolean.
   * Use the ```:enum``` type to specify an enumerated field (without translations - such as numeric options or international standard codes). This is not a standard rails generator type. The generator will set integer type in the migration, and will create a framework for the enum in the model, views, and constants files for the module. The allowable values for the enum will need to be set manually. The form will be set to use the constants hash directly as the options for the associated select field, and show views will not translate the field.
   * Use the ```:enum_translated``` type to specify an enumerated field (with translations). This is not a standard rails generator type. The generator will set integer type in the migration, and will create a framework for the enum in the model, views, constants, and locales files for the module. The allowable values and translations for the enum will need to be set manually. The form will be set to use the translated enum values as the options for the associated select field, and show views will translate the field.
   * If a field should be indexed, for frequent or complex searches, it should be specified with the ```:index``` option after the type. This is standard rails generator format.
@@ -181,35 +182,68 @@ The tag model provides the following functionality:
 #### Files
 
 * The generator will create these files:
-  * A database migration file to build the database table with the requested fields:
-    * ```db/migrate/#{timestamp}_create#{module_name}_#{tagable_name}.rb```
-  * A model definition file with presence validations for the required fields, and ransackable attributes and associations for searching and sorting:
-    * ```app/models/#{module_name}/#{tagable_name}.rb```
-  * A policy file matching the module pattern (typically defers all policy checks to the tag policy):
-    * ```app/policies/#{module_name}/#{tagable_name}_policy.rb```
-  * A controller file with the standard RESTful actions deferring to the tagables controller, and safe parameters set to the defined fields:
-    * ```app/controllers/#{module_name}/#{tagable_name.pluralize}_controller.rb```
-  * A helper file with module defined but no content:
-    * ```app/helpers/#{module_name}/#{tagable_name.pluralize}_helper.rb```
-  * A full suite of views built from templates and the specified fields:
-    * ```app/views/#{module_name}/#{tagable_name.pluralize}/_form.html.erb```
-    * ```app/views/#{module_name}/#{tagable_name.pluralize}/new.html.erb```
-    * ```app/views/#{module_name}/#{tagable_name.pluralize}/edit.html.erb```
-    * ```app/views/#{module_name}/#{tagable_name.pluralize}/index.html.erb```
-    * ```app/views/#{module_name}/#{tagable_name.pluralize}/show.html.erb```
-    * ```app/views/#{module_name}/#{tagable_name.pluralize}/_#{tagable_name}.html.erb```
-    * ```app/views/#{module_name}/#{tagable_name.pluralize}/_#{tagable_name}_header.html.erb```
-    * ```app/views/#{module_name}/#{tagable_name.pluralize}/_#{tagable_name}_row.html.erb```
-  * A factory file with fields defined (but no default values):
-    * ```test/factories/#{module_name}/#{tagable_name.pluralize}.rb```
-  * A model test file with tests for ensuring the tagable link is correct, and for presence of required fields:
-    * ```test/models/#{module_name}/#{tagable_name}_test.rb```
-  * A policy test file with setup, which defers tests to the resource_policy_test helper:
-    * ```test/policies/#{module_name}/#{tagable_name}_policy_test.rb```
-  * A controller test file with setup, which defers tests to the tagable_test_patterns helper:
-    * ```test/controllers/#{module_name}/#{tagable_name.pluralize}_controller_test.rb```
-  * A system test file with template content:
-    * ```test/system/#{module_name}/#{tagable_name.pluralize}_system_test.rb```
+
+##### Migration
+
+* A database migration file to build the database table with the requested fields:
+  * ```db/migrate/#{timestamp}_create#{module_name}_#{tagable_name}.rb```
+
+##### Model
+
+* A model definition file with presence validations for the required fields, including tagable module, and ransackable attributes and associations for searching and sorting:
+  * ```app/models/#{module_name}/#{tagable_name}.rb```
+
+##### Policy
+
+* A policy file matching the module pattern (typically defers all policy checks to the tag policy):
+  * ```app/policies/#{module_name}/#{tagable_name}_policy.rb```
+
+##### Controller
+
+* A controller file with the standard RESTful actions deferring to the tagables controller, and safe parameters set to the defined fields:
+  * ```app/controllers/#{module_name}/#{tagable_name.pluralize}_controller.rb```
+
+##### Helper
+
+* A helper file with module defined but no content:
+  * ```app/helpers/#{module_name}/#{tagable_name.pluralize}_helper.rb```
+
+##### Views
+
+* A full suite of views built from templates and the specified fields:
+  * ```app/views/#{module_name}/#{tagable_name.pluralize}/_form.html.erb```
+  * ```app/views/#{module_name}/#{tagable_name.pluralize}/new.html.erb```
+  * ```app/views/#{module_name}/#{tagable_name.pluralize}/edit.html.erb```
+  * ```app/views/#{module_name}/#{tagable_name.pluralize}/index.html.erb```
+  * ```app/views/#{module_name}/#{tagable_name.pluralize}/show.html.erb```
+  * ```app/views/#{module_name}/#{tagable_name.pluralize}/_#{tagable_name}.html.erb```
+  * ```app/views/#{module_name}/#{tagable_name.pluralize}/_#{tagable_name}_header.html.erb```
+  * ```app/views/#{module_name}/#{tagable_name.pluralize}/_#{tagable_name}_row.html.erb```
+
+##### Factories
+
+* A factory file with fields defined (but no default values):
+  * ```test/factories/#{module_name}/#{tagable_name.pluralize}.rb```
+
+##### Model Tests
+
+* A model test file with tests for ensuring the tagable link is correct, and for presence of required fields:
+  * ```test/models/#{module_name}/#{tagable_name}_test.rb```
+
+##### Policy Tests
+
+* A policy test file with setup, which defers tests to the resource_policy_test helper:
+  * ```test/policies/#{module_name}/#{tagable_name}_policy_test.rb```
+
+##### Controller Tests
+
+* A controller test file with setup, which defers tests to the tagable_test_patterns helper:
+  * ```test/controllers/#{module_name}/#{tagable_name.pluralize}_controller_test.rb```
+
+##### System Tests
+
+* A system test file with template content:
+  * ```test/system/#{module_name}/#{tagable_name.pluralize}_system_test.rb```
 
 #### Edits
 
