@@ -286,7 +286,10 @@ class RolesControllerTest < ActionController::TestCase
     assert_no_changes -> { @regular_user.has_role?(:admin) } do
       delete :destroy, params: { id: admin_role.id, user_id: @regular_user.id, role_return_path: roles_path }
     end
-    assert_equal I18n.t('pundit.unauthorized'), flash[:danger]
+    assert_equal I18n.t('pundit.unauthorized', 
+      objects: I18n.t('activerecord.models.role').downcase.pluralize, 
+      action: ('destroy?')
+    ), flash[:danger]
     assert_response :forbidden
   end
 

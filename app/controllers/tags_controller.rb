@@ -81,6 +81,7 @@ class TagsController < ApplicationController
     end
   end
 
+  # legacy code
   # GET /tags/schema_data
   def schema_data
     discipline_id = params[:discipline_id]

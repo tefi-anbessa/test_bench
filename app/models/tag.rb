@@ -7,6 +7,7 @@ class Tag < ApplicationRecord
   # Default scope to sort by loop_id, then by full_tag
   default_scope { order(:loop_id, :prefix, :suffix) }
 
+  validates :prefix, presence: true
   validates :prefix, format: { with: /\A[a-zA-Z]+\z/, message: :only_letters }
   validates :prefix, length: { in: 1..6 }
 
@@ -79,7 +80,7 @@ class Tag < ApplicationRecord
 
   # Instance method to parse prefix components for form display
   def prefix_parts
-    return nil unless prefix.present? && prefix.length >= 2 && discipline.prefix_schema.present?
+    return nil unless prefix.present? && prefix.length >= 2 && discipline&.prefix_schema.present?
     parts = {}
     chars = prefix.chars
     if discipline.custom_schema?

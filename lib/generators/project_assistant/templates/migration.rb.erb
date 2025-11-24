@@ -1,0 +1,22 @@
+# frozen_string_literal: true
+
+class Create<%= @module_name.camelize %><%= @tagable_class.pluralize %> < ActiveRecord::Migration[<%= ActiveRecord::Migration.current_version %>]
+  def change
+    create_table :<%= "#{@module_name}_#{@tagable_name.pluralize}" do |t|
+      <%- @fields.each do |field| -%>
+      t.<%= field[:type] %> :<%= field[:name] %><%= ', null: false' if field[:required] %>
+      <%- end -%>
+      t.references :tag, null: false, foreign_key: true
+      t.references :project, null: false, foreign_key: true
+      t.references :discipline, null: false, foreign_key: true
+      t.integer :stage
+
+      t.timestamps
+
+      <%- @fields.select { |f| f[:index] || f[:uniq] }.each do |field| -%>
+      t.index :<%= field[:name] %><%= ', unique: true' if field[:uniq] %>
+      <%- end -%>
+      t.index :stage
+    end
+  end
+end

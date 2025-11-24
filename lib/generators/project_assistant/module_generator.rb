@@ -7,6 +7,7 @@ module ProjectAssistant
     source_root File.expand_path("templates", __dir__)
 
     def create_module_structure
+      # [TODO] These are available from the NamedBase generator so superfluous here.
       @module_name = name.underscore
       @module_class = name.camelize
 
@@ -34,7 +35,7 @@ module ProjectAssistant
         dir_path = File.join(destination_root, "app", dir, @module_name)
         empty_directory(dir_path)
         keep_file = File.join(dir_path, ".keep")
-        create_file(keep_file, verbose: false) unless File.exist?(keep_file)
+        create_file(keep_file, verbose: false) 
       end
 
       # Create test folder structure with module subfolders
@@ -78,17 +79,43 @@ module ProjectAssistant
       template "base.rb.erb", "app/models/#{@module_name}/base.rb"
       template "module.rb.erb", "app/models/#{@module_name}.rb"
 
-      # Routes
-      route "namespace :#{@module_name} do\n    # Add your routes here\n  end"
+      # Add two routes namespaces 
+      # [TODO verify if the first set of routes is really needed. 
+      # They arose because of a conflict on index routes, but that may have been a special case]
+      # Update routes.rb for first insertion point
+      routes_file = File.join(destination_root, 'config/routes.rb')
+      if File.exist?(routes_file)
+        routes_content = File.read(routes_file)
+        routes_content.sub!(/# NAMESPACE INSERTION POINT 1 FOR GENERATOR/, 
+                         "namespace :#{@module_name} do\n    # Add #{@module_name.underscore} routes here with only: [:index, :new, :create]\n  end")
+        File.write(routes_file, routes_content)
+        
+        # Second insertion point under tags
+        routes_content = File.read(routes_file)
+        routes_content.sub!(/# NAMESPACE INSERTION POINT 2 FOR GENERATOR/,
+                         "namespace :#{@module_name} do\n      # Add #{@module_name.underscore} routes here with except: [:index]\n    end")
+        File.write(routes_file, routes_content)
+      end
 
       # Add FactoryBot configuration
-      application "config.factory_bot.definition_file_paths << Rails.root.join('test', '#{@module_name.underscore}', 'factories')"
+      application "config.factory_bot.definition_file_paths << File.join(destination_root, 'test', '#{@module_name.underscore}', 'factories')"
+    
+      # Constants
+      template "module.yml", "config/constants/#{@module_name}.yml"
+
+      # Update tagable.yml
+      tagable_file = File.join(destination_root, 'config/constants/tagable.yml')
+      if File.exist?(tagable_file)
+        content = File.read(tagable_file)
+        content.sub!(/^(tagable:\n)/, "\\1  # #{@module_name}:\n")
+        File.write(tagable_file, content)
+      end
     end
     
     private
     
     def should_abort?(path)
-      full_path = Rails.root.join(path)
+      full_path = File.join(destination_root, path)
       
       if File.exist?(full_path)
         if Rails.env.test?

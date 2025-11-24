@@ -53,6 +53,39 @@ class ErrorsController < ActionController::Base
     end
   end
   
-  # Other error pages are handled by static files in public/
-  # (400.html, 404.html, 422.html, 500.html)
+  # GET /404
+  # Not found error page
+  def not_found
+    @status_code = :not_found
+    
+    respond_to do |format|
+      format.html { render status: :not_found }
+      format.json { render json: { error: 'Not Found' }, status: :not_found }
+      format.any { head :not_found }
+    end
+  end
+
+  # GET /500
+  # Internal server error page
+  def internal_server_error
+    @status_code = :internal_server_error
+    
+    respond_to do |format|
+      format.html { render status: :internal_server_error }
+      format.json { render json: { error: 'Internal Server Error' }, status: :internal_server_error }
+      format.any { head :internal_server_error }
+    end
+  end
+  
+  # GET /422
+  # Unprocessable entity error page
+  def unprocessable_entity
+    @status_code = :unprocessable_entity
+    
+    respond_to do |format|
+      format.html { render status: :unprocessable_entity }
+      format.json { render json: { error: 'Unprocessable Entity' }, status: :unprocessable_content }
+      format.any { head :unprocessable_content }
+    end
+  end
 end

@@ -84,15 +84,16 @@ en:
         only_letters: "must contain only letters"
       models:
         role:
-          attributes:
+          attribute:
             name:
               blank: "Role must be selected"
               invalid: "%{name} is not a valid role for %{resource}"
         tag:
+          base:
           taken: "Tag %{tag} already exists"
-          tagable_type:
-            not_assigned: "Not assigned"
-            change_tagable: "Cannot change tagable association once set"
+        tagable_type:
+          not_assigned: "Not assigned"
+          change_tagable: "Cannot change tagable association once set"
       jsonb_fields:
         blank: "%{field} can't be blank"
         invalid: "%{field} is invalid"

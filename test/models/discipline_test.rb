@@ -157,5 +157,4 @@ class DisciplineTest < ActiveSupport::TestCase
       test_project.destroy
     end
   end
-
 end

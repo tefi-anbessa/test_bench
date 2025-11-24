@@ -26,8 +26,17 @@ module ProjectAssistant
 
       File.write(File.join(destination_root, 'config', 'routes.rb'), <<~RUBY)
         Rails.application.routes.draw do
+          # NAMESPACE INSERTION POINT 1 FOR GENERATOR
+          resources :tags, shallow: true do
+            # NAMESPACE INSERTION POINT 2 FOR GENERATOR
+          end
         end
       RUBY
+
+      # Add tagable.yml setup:
+      FileUtils.mkdir_p(File.join(destination_root, 'config', 'constants'))
+      File.write(File.join(destination_root, 'config', 'constants', 'tagable.yml'), "tagable:\n")
+
     end
 
     test "generator runs without errors" do
@@ -75,7 +84,7 @@ module ProjectAssistant
     test "adds factory_bot configuration to application.rb" do
       run_generator [@module_name]
       assert_file "config/application.rb" do |content|
-        expected = "config.factory_bot.definition_file_paths << Rails.root.join('test', '#{@module_name.underscore}', 'factories')"
+        expected = "config.factory_bot.definition_file_paths << File.join(destination_root, 'test', '#{@module_name.underscore}', 'factories')"
         assert_includes content, expected
       end
     end
@@ -86,17 +95,35 @@ module ProjectAssistant
       assert_file "config/routes.rb" do |content|
         # Just check for the namespace and comment, ignore indentation
         assert_match(/namespace :#{@module_name}/, content)
-        assert_match(/# Add your routes here/, content)
+        assert_match(/# Add #{@module_name.underscore} routes here with only: \[:index, :new, :create\]/, content)
       end
+    end
+    
+    test "updates routes with module namespace" do
+      run_generator [@module_name]
+      routes_content = File.read(File.join(destination_root, 'config', 'routes.rb'))
+      assert_match(/namespace :#{@module_name} do\n\s+# Add #{@module_name} routes here with only: \[:index, :new, :create\]\n\s+end/, routes_content)
+      assert_match(/namespace :#{@module_name} do\n\s+# Add #{@module_name} routes here with except: \[:index\]\n\s+end/m, routes_content)
     end
     
     test "adds_factory_bot_configuration" do
       run_generator [@module_name]
       
       assert_file "config/application.rb" do |content|
-        expected = "config.factory_bot.definition_file_paths << Rails.root.join('test', '#{@module_name.underscore}', 'factories')"
+        expected = "config.factory_bot.definition_file_paths << File.join(destination_root, 'test', '#{@module_name.underscore}', 'factories')"
         assert_match(/#{Regexp.escape(expected)}/, content)
       end
+    end
+
+    test "creates constants file" do
+      run_generator [@module_name]
+      assert_file "config/constants/#{@module_name}.yml"
+    end
+
+    test "updates constants tagable.yml with module comment" do
+      run_generator [@module_name] 
+      content = File.read(File.join(destination_root, 'config', 'constants', 'tagable.yml'))
+      assert_includes content, "# #{@module_name}:", "Should include module comment in tagable.yml"
     end
   end
 end

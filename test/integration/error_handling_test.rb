@@ -7,11 +7,25 @@ class ErrorHandlingTest < ActionDispatch::IntegrationTest
     @user = create(:user)
     @admin = create(:user, :admin)
     @project = create(:project)
-    @cable_type = create(:cable_type)
-    @cable_tag = create(:tag, tagable_type: 'Cable')
-    @switchboard_tag = create(:tag, tagable_type: 'Switchboard')
-    @switchboard = create(:switchboard, tag: @switchboard_tag)
+    @discipline = create(:discipline, project: @project)
+    @cable_type = create(:electrical_cable_type)
+    @cable_tag = create(:tag, :unique_tag, prefix: 'EC', discipline: @discipline)
+    @switchboard_tag = create(:tag, :unique_tag, prefix: 'EX', discipline: @discipline)
+    @switchboard = create(:electrical_switchboard, tag: @switchboard_tag)
     sign_in @user
+  end
+
+  test "setup is valid" do
+    assert @user.valid?
+    assert @admin.valid?
+    assert @admin.has_role?(:admin)
+    assert @project.valid?
+    assert @discipline.valid?
+    assert @cable_type.valid?
+    assert @cable_tag.valid?
+    assert @switchboard_tag.valid?
+    assert @switchboard.valid?
+    assert_equal @switchboard.tag, @switchboard_tag
   end
 
   # Test that unauthorized access to destroy action shows the custom 403 page
@@ -19,22 +33,33 @@ class ErrorHandlingTest < ActionDispatch::IntegrationTest
     assert_no_difference('Project.count') do
       delete project_path(@project)
     end
-    assert_redirected_to '/403'
-    follow_redirect!
     assert_forbidden
   end
 
   # Test that conflict error shows the custom conflict page
   test "shows custom conflict page for tag already associated" do
-    # Create another switchboard with the same tag
-    
-    assert_no_difference('Cable.count') do
-      post switchboards_path, params: {
+    sign_out @user
+    sign_in @admin
+    # Try to create another switchboard with the same tag
+    assert_no_difference('Electrical::Switchboard.count') do
+      post electrical_switchboards_path, params: {
         tag_id: @switchboard_tag.id,
-        switchboard: { cable_type_id: @cable_type.id }
+        electrical_switchboard: {
+          voltage_rating: '600/1000V',
+          busbar_rating: 200.0,
+          busbar_fault_rating: 2000.0,
+          busbar_fault_duration: 0.5,
+          cable_entry: 'Bottom',
+          incomer_protection: 'Isolator 4P',
+          metering: 'None',
+          neutral_bar_connections: 'None',
+          earth_bar_connections: 'None',
+          ingress_protection: '20',
+          notes: 'Test switchboard'
+        }
       }
+
     end
-    
     assert_conflict
   end
 
@@ -54,7 +79,7 @@ class ErrorHandlingTest < ActionDispatch::IntegrationTest
       # Override the exception handling to test the error page directly
       def test_error_with_handling
         test_error
-      rescue => e
+      rescue => _e
         render file: Rails.public_path.join('500.html'), 
                status: :internal_server_error,
                layout: false

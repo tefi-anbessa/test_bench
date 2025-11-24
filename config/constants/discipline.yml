@@ -1,18 +1,3 @@
-# Do not change the indices! Insert any new element at the end.
-# The index is saved in the tag table enum, changing the index of a type will change all existing tags.
-# One designation for each type of tag requiring a data sheet. Name must be the model class name.
-tagable:
-  # electrical
-  - Electrical::Switchboard
-  - Electrical::Cable
-  - Electrical::Motor
-  - Electrical::SocketCct
-  - Electrical::LightCct
-  # piping
-  - Piping::Pipe
-  - Piping::Source
-  - Piping::Consumer
-
 # Standard engineering disciplines available in the system
 # These will be available to all projects
 #
@@ -21,7 +6,7 @@ tagable:
 #   label:      Short 2-3 character code (for display)
 #   name:       Full name of the discipline
 #   module:     Optional: Associated Ruby module for extended functionality
-#   sort_order: Display order in UI (lower numbers first)
+#   sort_order: [deprecated] Display order in UI (lower numbers first)
 
 disciplines:
 

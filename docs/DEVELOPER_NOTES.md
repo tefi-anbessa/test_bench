@@ -24,7 +24,7 @@ Windsurf IDE has introduced a new feature called "AI Rules". These are rules tha
 
 Progressively build the set of rules to implement these guidelines.
 
-### For Developers:
+### Developers Using AI
 
 1. When initiating a new session with AI, request it to review the project guiding documentation:
    - `README.md`
@@ -75,22 +75,22 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 
 ### Internationalization
 
-- The application has been designed for international use from the outset. 
+- The application has been designed for international use from the outset.
 - All user facing text is provided with translations for all implemented languages.
-- To date, no need for translation of database content has been identified. It's all engineering speak.
-- The application uses the rails-i18n gem to assist with internationalization. This gem provides translations into  many languages for the core rails features, including model validation, database errors, time and date functions, currency, etc.
-- For reference, a copy of the en version of the translations is saved in config/locales/rails-i18n gem en for reference/en.yml.ref. This file is not used in the application, it is simply a copy of the en.yml file that is provided by the rails-i18n gem. Check here if you are not sure whether a translation is already provided, and avoid duplicating core translations if possible. Also note that not all language files include all translations! It is a work in progress...
+- To date, the only need for translation of database content identified is for discipline names. This is included as a potential feature below. 
+- The application heavily uses the rails-i18n gem to assist with internationalization. This gem provides translations into many languages for the core rails features, including model validation, database errors, time and date functions, currency, etc.
+- For reference, a copy of the en version of the translations is saved in config/locales/rails-i18n gem en for reference/en.yml.ref. This file is not used in the application, it is simply a copy of the en.yml file that is provided by the rails-i18n gem. Check in this file if you are not sure whether a translation is already provided, and avoid duplicating core translations if possible. Also note that not all language files include all translations! It is a work in progress...
 - The locale setting follows the basic guidelines in [Rails Guides section 2.2](https://guides.rubyonrails.org/i18n.html#setting-the-locale-from-url-params).
 - Changing locale is available in the layout header via a drop down menu.
 - The storage of translation files is detailed in the [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) file.
 
 ### Constants
 
-- The application implements a constants management system based on this article: [https://dev.to/vladhilko/say-goodbye-to-messy-constants-a-new-approach-to-moving-constants-away-from-your-model-58i1](https://dev.to/vladhilko/say-goodbye-to-messy-constants-a-new-approach-to-moving-constants-away-from-your-model-58i1).
-- The code has been tweaked to allow the hash parsing to end on an array as well as a hash. This allows arrays for floating point numbers (primarily for electrical selectors).
-- Usage: 
-  - Constants.electrical.protection.rating yields an array: [1, 2, 4, 6, 10, 16, 20, 25, 32, 40, 50, 63]
-  - Constants.electrical.protection.device yields a special hash: #<Constant::Model:0x000000012b7b1390 @constant_hash={:MCB=>1, :MCCB=>2}>. It may be necessary to convert this to a basic hash if required with to_h.
+- Constants in Rails applications are the subject of much debate in the forums. The understanding of what should be constant varies widely.
+- The context for this application includes:
+   - engineering and scientific constants that are indepedent of the application, such as standard ratings for circuit breakers, cable sizes, etc.
+   - Role Based Access Control (RBAC) system configuration.
+- Refer to docs/CONSTANTS.md for details on the constants management system implemented for this application.
 
 ### MVC Guidelines
 
@@ -112,11 +112,30 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    - Conditionals may also use presence or otherwise of variables set in the controller.
    - Views should use model constants such as enums to generate select options directly. Use human_enum_name from app/models/application_record.rb to provide the translations.
    - Views should include i18n translations for all user facing text, including:
-      - flash error messages
-      - select options
-
-
-
+      - Model names. {Example: @tag = Tag.first}
+         - Use @tag.model_name.human in most cases
+         - Use Tag.model_name.human if a model instance is not available
+         - Use of I18n::t('activerecord.models.tag') is also acceptable and may be faster.
+      - Attribute labels. {Example: @tag = Tag.first}
+         - In forms, use bootstrap_form fields, which automatically wrap with a translated label.
+         - Use @tag.class.human_attribute_name(:prefix) in other cases.
+         - Use Tag.human_attribute_name(:prefix) if a model instance is not available.
+         - Use of I18n::t('activerecord.attributes.tag.prefix') is also acceptable and may be faster.
+      - Attribute help text. {Example: @tag = Tag.first}
+         - In bootstrap_form fields, use help: I18n::t('activerecord.help.tag.prefix') option.
+         - Use I18n::t('activerecord.help.tag.prefix') if required in other cases.
+      - Select options
+         - If select options are derived from data, they should be built as an instance variable (hash or array) in the controller, and passed to the view. Options derived from data won't generally have translations available.
+         - If select options are built from enums (which mostly will be built in turn from Constants), and don't require translation, just use the Constants array or hash directly in the view.
+         - If select options are built from enums, and require translation, use something like:
+         ```demand.class.configs.keys.collect { |config| [demand.class.human_enum_name(:config, config), config] },```
+         directly in the view.
+      - Flash messages
+         - Flash messages should be generated and translated in the controller, and the standard layout will display them. Normally nothing is required in views.
+         - Complex forms may require further flash processing.
+         
+      - Messages
+         - Occasionally, bespoke explanatory messages are required. Translations should be provided in the appropriate views.yml file.
 
 ### Error Handling
 
@@ -269,7 +288,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [x] Refine the collapsibles component to retain state after refresh operations (e.g. sorting links with ransack). Make a generalised solution, maybe use turbo.
 - [ ] Fix the page size js controller.
 - [ ] Write thorough tests for the tag parser and builder.
-- [ ] Cable types routing should be nested under projects.
+- [x] Cable types routing should be nested under projects.
 - [ ] Cable types controller should be revised to suit nesting and protect against current project setting.
 
 ## Refactoring Opportunities
@@ -327,8 +346,8 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 
 ## Architecture Considerations
 
-- [ ] Move Electrical to a module or namespace.
-- [ ] Nest routes for project related resource under projects to improve security around assignment to other than the current project.
+- [x] Move Electrical to a module or namespace.
+- [x] Nest routes for project related resource under projects to improve security around assignment to other than the current project.
 - [ ] Consider API versioning strategy
 - [ ] Plan for database scaling as data grows
 

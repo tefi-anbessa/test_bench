@@ -132,8 +132,13 @@ class TagTest < ActiveSupport::TestCase
   test "prefix should be present" do
     @tag.prefix = ""
     refute @tag.valid?
-    assert_includes @tag.errors[:prefix], I18n.t("errors.messages.too_short", count: 1)
-    assert_includes @tag.errors[:prefix], I18n.t("activerecord.errors.messages.only_letters")
+    assert_includes @tag.errors[:prefix], I18n.t("errors.messages.blank")
+  end
+
+  test "prefix should only include letters" do
+    @tag.prefix = "--"
+    refute @tag.valid?
+    assert_includes @tag.errors[:prefix], I18n.t("active_record.errors.messages.only_letters")
   end
 
   test "serial should be present" do
@@ -315,7 +320,7 @@ class TagTest < ActiveSupport::TestCase
     assert_includes @tag.errors[:tagable], I18n::t("errors.messages.invalid")
   end
   
-  test "should nullify both type and id when associated record is destroyed" do
+  test "should nullify both type and id when associated tagable is destroyed" do
     tag = create(:tag, :unique_tag, prefix: 'EC', discipline: @discipline)
     cable = create(:electrical_cable, tag: tag)
     
@@ -381,5 +386,25 @@ class TagTest < ActiveSupport::TestCase
       'Tags with different serials should have different loop_ids'
     refute_equal @tag_a1.loop_id, @tag_b1.loop_id,
       'Tags with different measured variable should have different loop_ids'
+  end
+
+  # Tag prefix parser tests
+  test "tag prefix parser isa51 should be correct" do
+    @discipline.prefix_schema = { name: 'ab_elec', type: 'isa51' }
+    tag = create(:tag, discipline: @discipline, prefix: 'AFL')
+    parts = tag.prefix_parts
+    assert_equal 'A', parts[:measured_variable]
+    assert_equal 'F', parts[:modifiers]
+    assert_equal 'L', parts[:readout_functions]
+    assert_nil parts[:output_functions]
+    assert_nil parts[:modifier_functions]
+
+    tag = create(:tag, discipline: @discipline, prefix: 'WAHH')
+    parts = tag.prefix_parts
+    assert_equal 'W', parts[:measured_variable]
+    assert_equal 'A', parts[:readout_functions]
+    assert_equal 'HH', parts[:modifier_functions]
+    assert_nil parts[:modifiers]
+    assert_nil parts[:output_functions]
   end
 end
