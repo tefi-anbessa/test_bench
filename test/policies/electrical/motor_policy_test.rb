@@ -20,9 +20,5 @@ module Electrical
       # Use motor factory to build new motor with tag association, using default prefix and unique serial.
       build(:electrical_motor, tag: create(:tag, discipline: discipline))
     end
-
-    def self.required_role
-      :electrical_designer
-    end
   end
 end

@@ -1,0 +1,17 @@
+module <%= module_name %>
+  class <%= tagable_name %>Policy < ResourcePolicy
+    # Returns the resource record
+    def <%= singular_name %>
+      record
+    end
+    
+    # Override tag method to use resource's tag association
+    def tag
+      <%= singular_name %>.tag
+    end
+    
+    # Inherit Scope from ResourcePolicy
+    
+    # Inherit all actions from ResourcePolicy
+  end
+end

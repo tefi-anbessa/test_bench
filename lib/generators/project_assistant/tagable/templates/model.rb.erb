@@ -1,0 +1,29 @@
+module <%= module_name %>
+  class <%= tagable_name %> < Base
+    include Tagable
+    include TagableNavigation
+    
+# enum declarations
+    <%- @fields.select { |f| %w[enum enum_translated].include?(f[:type]) }.each do |field| -%>
+    enum <%= field[:name] %>: ['stub'] 
+    #!!! Define enum options in Constants file config/constants/<%= module_name.underscore %>.yml
+    # and replace ['stub'] with Constants.<%= module_name.underscore %>.<%= field[:name] %>
+    <%- end -%>
+    
+# Presence validation for required fields.
+    <%- @fields.select { |f| f[:options].include?('required') }.each do |field| -%>
+    validates :<%= field[:name] %>, presence: true
+    <%- end -%>
+    
+    private
+
+    def self.ransackable_attributes(auth_object = nil)
+      [<%= (@fields.map { |f| ":#{f[:name]}" } + 
+      [':created_at', ':updated_at']).join(', ') %>]
+    end
+
+    def self.ransackable_associations(auth_object = nil)
+      [ :tag ]
+    end
+  end
+end

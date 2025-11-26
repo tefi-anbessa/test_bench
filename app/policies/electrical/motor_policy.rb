@@ -9,10 +9,6 @@ module Electrical
     def tag
       motor.tag
     end
-
-    def self.required_role
-      :electrical_designer
-    end
     
     # No need to override Scope as it's already defined in ResourcePolicy
     
