@@ -2,8 +2,9 @@ require "rails/generators/named_base"
 
 module ProjectAssistant
   class TagableGenerator < Rails::Generators::NamedBase
+    include Rails::Generators::ResourceHelpers
     source_root File.expand_path("tagable/templates", __dir__)
-    RAILS_FIELD_TYPES = %w[ string text integer bigint float decimal datetime timestamp time date binary boolean primary_key references ].freeze
+    RAILS_FIELD_TYPES = %w[ string text integer bigint float decimal datetime timestamp time date binary boolean primary_key jsonb ].freeze
     SPECIAL_FIELD_TYPES = %w[enum enum_translated].freeze
     VALID_FIELD_TYPES = (RAILS_FIELD_TYPES + SPECIAL_FIELD_TYPES).freeze
     VALID_OPTIONS = %w[required index uniq].freeze
@@ -65,6 +66,10 @@ module ProjectAssistant
     
     def create_policy_file
       template "policy.rb.erb", "app/policies/#{file_path}_policy.rb"
+    end
+    
+    def create_factory_file
+      template "factory.rb.erb", "test/factories/#{controller_file_path}.rb"
     end
 
   end

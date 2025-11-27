@@ -1,15 +1,13 @@
 FactoryBot.define do
-  factory :electrical_motor, class: 'Electrical::Motor' do
+  factory :<%=singular_table_name%>, class: <%=class_name%> do
     # Tag can be passed explicitly or will be auto-created
     transient do
       tag { nil }
     end
-    # Basic attributes
-    motor_type { :induction }
-    frame_size { '100' }
-    ingress_protection { 'IP55' }
-    poles { 4 }
-    speed_rated { 1500 }
+    # Attributes
+    <%@fields.each do |field|-%>
+      <%=field[:name]%> {  } <%= "# Provide default value for required field" if field[:options].include?("required") %>
+    <%- end %>
     
     after(:build) do |model, evaluator|
       if evaluator.tag

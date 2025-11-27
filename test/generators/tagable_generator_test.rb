@@ -12,6 +12,13 @@ module ProjectAssistant
     setup do
       @module_name = "Electrical"
       @tagable_name = "Motor"
+      # Generator::NamedBase methods not available in test environment
+      @file_name = "#{@module_name.underscore}_#{@tagable_name.underscore}" # electrical_motor
+      @table_name = "#{@module_name.underscore}_#{@tagable_name.underscore.pluralize}" # electrical_motors
+      @class_name = "#{@module_name}::#{@tagable_name}" # Electrical::Motor
+      @folder_name = "#{@module_name.underscore}" # electrical
+      @singular_name = "#{@tagable_name.underscore}" # motor
+      @plural_name = "#{@tagable_name.underscore.pluralize}" # motors
       # Set up a dummy Rails app
 #      app_root = File.join(destination_root, "dummy")
 #      FileUtils.mkdir_p(app_root)
@@ -30,17 +37,17 @@ module ProjectAssistant
         end
       RUBY
       )
-       # First generate a module (silently)
-       capture(:stdout) do
-         ProjectAssistant::ModuleGenerator.start([@module_name], 
-          destination_root: destination_root)
-       end
-       @args = ["#{@module_name}::#{@tagable_name}", 
-       'name:string:required', 
-       'description:text',
-       'selector:enum',
-       'sort_order:integer:index',
-       'code:string:uniq'
+      # First generate a module (silently)
+      capture(:stdout) do
+        ProjectAssistant::ModuleGenerator.start([@module_name], 
+        destination_root: destination_root)
+      end
+      @args = ["#{@module_name}::#{@tagable_name}", 
+        'name:string:required', 
+        'description:text',
+        'selector:enum',
+        'sort_order:integer:index',
+        'code:string:uniq'
       ]
       puts "\n=== Setup complete ==="
     end
@@ -53,7 +60,7 @@ module ProjectAssistant
     test "generator runs without errors" do
       puts "\n=== Starting generator test ==="
       assert_nothing_raised do
-        puts "Running generator with #{@module_name}::#{@tagable_name}"
+        puts "Running generator with #{@class_name}"
         run_generator @args
         puts "=== Generator completed successfully ==="
       end
@@ -83,7 +90,7 @@ module ProjectAssistant
     test "creates model" do
       run_generator @args
       assert_file File.join(destination_root, 'app', 'models', 
-        "#{@module_name}", "#{@tagable_name}.rb") do |content|
+        "#{@module_name.underscore}", "#{@tagable_name.underscore}.rb") do |content|
         assert_match(/module #{@module_name}/, content)
         assert_match(/class #{@tagable_name} < Base/, content)
         assert_match(/validates :name, presence: true/, content)
@@ -108,21 +115,45 @@ module ProjectAssistant
       run_generator(@args)
 
       migration_dir = File.join(destination_root, "db/migrate")
-      table_name = "#{@module_name.underscore}_#{@tagable_name.underscore.pluralize}"
+      
       # Find the migration file
-      migration_file = Dir.glob(File.join(migration_dir, "*_create_#{table_name.singularize}.rb")).first
+      migration_file = Dir.glob(File.join(migration_dir, "*_create_#{@file_name}.rb")).first
       migration_name = "Create#{@module_name}#{@tagable_name}"
       assert_file migration_file do |migration|
         # Check fields are created, with null: false for required fields.
         assert_match(/class\s+#{migration_name}/, migration)
-        assert_match(/create_table\s+:#{table_name}/, migration)
+        assert_match(/create_table\s+:#{@table_name}/, migration)
         assert_match(/t\.string\s+:name.*null: false/m, migration)
         assert_match(/t\.text\s+:description/m, migration)  
         assert_match(/t\.integer\s+:selector/m, migration)
         assert_match(/t\.integer\s+:sort_order/m, migration)
         assert_match(/t\.string\s+:code/m, migration)
-        assert_match(/add_index\s+:#{table_name},\s+:sort_order/m, migration)
-        assert_match(/add_index\s+:#{table_name},\s+:code,\s+unique: true/m, migration)
+        assert_match(/add_index\s+:#{@table_name},\s+:sort_order/m, migration)
+        assert_match(/add_index\s+:#{@table_name},\s+:code,\s+unique: true/m, migration)
+      end
+    end
+
+    test "creates policy" do
+      run_generator(@args)
+      policy_file = File.join(destination_root, 'app', 'policies', @folder_name, 
+        "#{@singular_name}_policy.rb")
+      assert_file policy_file do |content|
+        assert_match(/module\s+#{@module_name}/, content)
+        assert_match(/class\s+#{@tagable_name}Policy\s+<\s+ResourcePolicy/m, content)
+        assert_match(/def\s+#{@singular_name}/, content)
+        assert_match(/^\s*def\s+tag\s*\n\s+motor\.tag\s*\n/m, content)
+      end
+    end
+
+    test "creates factory" do
+      run_generator(@args)
+      factory_file = File.join(destination_root, 'test', 'factories', @folder_name, 
+        "#{@plural_name}.rb")
+      assert_file factory_file do |content|
+        assert_match(/factory\s+:#{@file_name}/, content)
+        assert_match(/class:\s+#{@class_name}/, content)
+        assert_match(/name\s+\{\s*\}\s*# Provide default value for required field/, content)
+        assert_match(/description\s+\{\s*\}/, content)
       end
     end
   end
