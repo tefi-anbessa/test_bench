@@ -1,5 +1,6 @@
 class TagsController < ApplicationController
   before_action :authenticate_user!
+  before_action :require_project!, only: %i[ new create ]
   before_action :set_project
   before_action :set_tag
 #  before_action :new_params, only: %i[ create update ]

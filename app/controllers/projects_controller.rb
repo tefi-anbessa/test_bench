@@ -2,7 +2,7 @@ class ProjectsController < ApplicationController
   include PageSizeable
   include RolesHelper
   
-  before_action :get_project, only: %i[ show update destroy ]
+  before_action :get_project, only: %i[ show edit update destroy ]
   before_action :set_project, only: %i[ set ]
   before_action :authenticate_user!
   before_action :ensure_html_format, except: [:show] # or any actions where you want to allow
@@ -52,7 +52,6 @@ class ProjectsController < ApplicationController
 
   # GET /projects/1/edit
   def edit
-    @project = Project.find(params[:id])
     authorize @project
     
     # Set up role assignment form if user has permission
@@ -116,12 +115,11 @@ class ProjectsController < ApplicationController
     elsif @project
       # Set the project in both cookie (signed for security) and session
       set_current_project(@project)
-      
+      saved_path = stored_location_for_project
       # Clear any stored location for project to prevent redirect loops
       clear_stored_location_for_project
-      
-      redirect_to stored_location_for_project || @project,
-                  notice: I18n.t('projects.selected', code: @project.code)
+      flash[:success] = I18n.t('projects.selected', code: @project.code)
+      redirect_to saved_path || projects_path
     else
       # If invalid project is selected
       redirect_to select_projects_path,

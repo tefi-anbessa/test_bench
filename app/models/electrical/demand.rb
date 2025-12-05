@@ -25,7 +25,7 @@ module Electrical
     validates :power_factor, 
       numericality: { in: -1.0..1.0 }, 
       allow_nil: true,
-      exclusion: { in: [0.0], message: I18n.t("activerecord.errors.messages.attributes.demand.power_factor.zero_pf") }
+      exclusion: { in: [0.0], message: I18n.t("activerecord.errors.attributes.electrical/demand.power_factor.zero_pf") }
       
     validates :duty, numericality: { in: 0.0..1.0 }, allow_nil: true
     

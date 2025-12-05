@@ -1,16 +1,8 @@
 <thead>
-  <th scope="col"><%= sort_link(@q, :conductor_material) %></th>
-  <th scope="col"><%= sort_link(@q, :csa) %><br>(mm<sup>2</sup>)</th>
-  <th scope="col"><%= sort_link(@q, :cores) %></th>
-  <th scope="col"><%= t('activerecord.attributes.cable_type.neutral_csa') %><br>(mm<sup>2</sup>)</th>
-  <th scope="col"><%= t('activerecord.attributes.cable_type.earth_csa') %><br>(mm<sup>2</sup>)</th>
-  <th scope="col"><%= sort_link(@q, :insulation) %></th>
-  <th scope="col"><%= sort_link(@q, :bedding) %></th>
-  <th scope="col"><%= sort_link(@q, :armour) %></th>
-  <th scope="col"><%= sort_link(@q, :sheath) %></th>
-  <th scope="col"><%= t('activerecord.attributes.cable_type.bedding_od') %><br>(mm)</th>
-  <th scope="col"><%= t('activerecord.attributes.cable_type.overall_od') %><br>(mm)</th>
-  <th scope="col"><%= sort_link(@q, :temperature_rating) %></th>
-  <th scope="col"><%= sort_link(@q, :voltage_rating) %></th>
+  <% unless current_project %>
+    <th scope = "col"><%= sort_link(@q, "#{Project.model_name.human}", :project_id) %>
+  <% end %>
+  <th scope="col"><%= sort_link(@q, :id) %></th>
+  <th scope="col"><%= sort_link(@q, :code) %></th>
   <th scope="col" width="150px"><%= t('table.links')%></th>
 </thead>

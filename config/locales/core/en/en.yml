@@ -26,7 +26,14 @@ en:
     grant:        "Grant"
     revoke:       "Revoke"
     link:         "Link to new %{resource}"
-    back_to:      "Back to %{model}"
+    jump_to:      "Jump to %{model}"
+
+  index:
+    admin:            "Admin"
+    orphans:          "The following %{models} do not have an associated tag:"
+    link_incomplete:  "The following tags are listed as %{models} but are not yet assigned:"
+    link_broken:      "The following tags are listed as %{models} but the %{models} do not exist:"
+    all:              "All Accessible %{models}"
 
   show:
     orphan:       "No associated parent %{model}"
@@ -111,6 +118,7 @@ en:
     none_selected: "No project is currently selected"
     selected: "Project '%{code}' is now selected"
     invalid_selection: "Please select a valid project to continue"
+    required: "A current project is required for this action. Please select a project to continue."
     all_projects:     "All Projects" # for nil current project selection
 
   # Pundit authorization messages
@@ -124,12 +132,6 @@ en:
     go: "Go"
     page_info: "Showing %{items} items per page"
 
-  index:
-    admin:        "Admin"
-    orphans:      "The following %{models} do not have an associated tag:"
-    link_incomplete:  "The following tags are listed as %{models} but are not yet assigned:"
-    link_broken:      "The following tags are listed as %{models} but the %{models} do not exist:"
-
   footer:
-    credit:       "Website by frankie fusion. "
+    credit:           "Website by frankie fusion. "
 

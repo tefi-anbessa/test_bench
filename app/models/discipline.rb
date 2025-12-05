@@ -14,16 +14,6 @@ class Discipline < ApplicationRecord
   validate :validate_prefix_schema
 
   default_scope { order(project_id: :asc, sort_order: :asc) }
-  # This method will automatically convert code to a symbol when read
-  def code
-    return nil if self[:code].nil? || self[:code].empty?
-    self[:code].to_sym
-  end
-
-  # This ensures the code is stored as a string in the database
-  def code=(value)
-    self[:code] = value.to_s
-  end
 
   def custom_schema?
     prefix_schema.present? && !Constants.prefix_schemata.key?(prefix_schema['name']&.to_sym)

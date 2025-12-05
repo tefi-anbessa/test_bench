@@ -90,11 +90,11 @@
                   </span>
                 <% end %>
               <% end %>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            </div> <!-- button group -->
+          </div> <!-- d-flex align-items-center -->
+        </div> <!-- right navigation and actions -->
+      </div> <!-- row align-items-center -->
+    </div> <!-- card header -->
 
     <div class="card-body">
       <div class="row justify-content-center">
@@ -117,90 +117,113 @@
             <div class="col-8"><%= [@tag.discipline.code, " - ", @tag.discipline.name].join %></div>
           </div>
 
-      <!-- Tag Details -->
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.full_tag') %></div>
-        <div class="col-8"><%= @tag.full_tag %></div>
-      </div>
+          <!-- Tag Details -->
+          <div class="row mb-1">
+            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.full_tag') %></div>
+            <div class="col-8"><%= @tag.full_tag %></div>
+          </div>
 
-      <!-- Prefix -->        
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.prefix') %></div>
-        <div class="col-8"><%= @tag.prefix %></div>
-      </div>
+          <!-- Prefix -->        
+          <div class="row mb-1">
+            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.prefix') %></div>
+            <div class="col-8"><%= @tag.prefix %></div>
+          </div>
 
-      <!-- Serial -->
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.serial') %></div>
-        <div class="col-8"><%= @tag.serial.to_s.rjust(4, '0') %></div>
-      </div>
-      
-      <!-- Suffix -->
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.suffix') %></div>
-        <div class="col-8"><%= @tag.suffix %></div>
-      </div>
-      
-      <!-- Service -->
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.service') %></div>
-        <div class="col-8"><%= @tag.service %></div>
-      </div>
-      
-      <!-- Location -->
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.location') %></div>
-        <div class="col-8"><%= @tag.location %></div>
-      </div>
-      
-      <!-- Notes -->
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.notes') %></div>
-        <div class="col-8"><%= @tag.notes %></div>
-      </div>
+          <!-- Serial -->
+          <div class="row mb-1">
+            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.serial') %></div>
+            <div class="col-8"><%= @tag.serial.to_s.rjust(4, '0') %></div>
+          </div>
+          
+          <!-- Suffix -->
+          <div class="row mb-1">
+            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.suffix') %></div>
+            <div class="col-8"><%= @tag.suffix %></div>
+          </div>
+          
+          <!-- Service -->
+          <div class="row mb-1">
+            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.service') %></div>
+            <div class="col-8"><%= @tag.service %></div>
+          </div>
+          
+          <!-- Location -->
+          <div class="row mb-1">
+            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.location') %></div>
+            <div class="col-8"><%= @tag.location %></div>
+          </div>
+          
+          <!-- Notes -->
+          <div class="row mb-1">
+            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.notes') %></div>
+            <div class="col-8"><%= @tag.notes %></div>
+          </div>
 
-      <!-- Tagable Section -->
-      <div class="row mb-1">
-        <div class="col-4 text-muted">
-          <%= t('activerecord.attributes.tag.tagable_type') %>
-        </div>
-        <div class="col-8">
-          <span>
-            <% if @tag.tagable_type.present? %>
-            <% text = @tag.tagable_type.tableize.singularize %>
-              
-              <% if @tag.tagable.present? %>
-                <%= link_to eval("#{text}_path(#{@tag.tagable_id})"),
-                    class: "btn btn-sm btn-outline-secondary mb-2",
-                    title: t('show.linked', model: text) do %>
-                  <%== bs_icon('box-arrow-down-right') %>
-                  <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
-                <% end %>
-              <% else %>
-                <% if policy(@tag.tagable_type.constantize).new? %>
-                  <% resource = @tag.tagable_type.tableize.singularize %>
-                  <%= link_to eval("new_tag_#{resource}_path(#{@tag.id})"),
-                      class: "btn btn-sm btn-outline-primary mb-2",
-                      title: t('actions.link', resource: resource) do %>
-                        <%== bs_icon('link') %>
-                        <span class="d-none d-md-inline">
-                          <%= t('actions.link', resource: resource) %>
-                        </span>
-                      <% end %>
-                <% else %>
-                  <span class="text-muted">
-                    <%= @tag.tagable_type.constantize.model_name.human %>
-                  </span>
-                <% end %>
-              <% end %>
+          <!-- Tagable Section -->
+          <% if (@tag.tagable.present? rescue false) %>
+            <% partial = "#{@tag.tagable.class.model_name.plural}/card" %>
+            <% if lookup_context.exists?(partial, [], true) %>
+              <!-- Show a collapsible card for tagable. -->
+              <div class="row g-3 mb-1">
+                <%= render partial, object: @tag.tagable %>
+              </div>
             <% else %>
-              <span class="text-muted">
-                <%= t('show.unassigned', model: t("activerecord.attributes.tag.tagable_type")) %>
-              </span>
+              <!-- Show a link to tagable. -->
+              <div class="row mb-1">
+                <div class="col-4 text-muted">
+                  <%= t('activerecord.attributes.tag.tagable_type') %>
+                </div>
+                <div class="col-8">
+                  <% text = @tag.tagable.class.model_name.human %>
+                  <%= link_to @tag.tagable,
+                        class: "btn btn-sm btn-outline-secondary mb-2",
+                        title: t('show.linked', model: text) do %>
+                          <%== bs_icon('box-arrow-down-right') %>
+                          <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
+                      <% end %>
+                </div>
+              </div>
             <% end %>
-          </span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+          <% else %> <!-- valid tagable not present -->
+            <div class="row mb-1">
+              <div class="col-4 text-muted">
+                <%= t('activerecord.attributes.tag.tagable_type') %>
+              </div>
+              <div class="col-8">
+                <% if @tag.tagable_type.present? %>
+                  <% if Tag.tagable_types.include?(@tag.tagable_type) %>
+                    <% text = @tag.tagable_type.constantize.model_name.name.sub('::', ' ') %>
+                    <% if policy(@tag.tagable_type.constantize).new? %>
+                      <!-- Setup a link to create the tagable. -->
+                      <% resource = @tag.tagable_type.constantize.model_name.singular %>
+                      <%= link_to eval("new_tag_#{resource}_path(#{@tag.id})"),
+                            class: "btn btn-sm btn-outline-primary mb-2",
+                            title: t('actions.link', resource: text) do %>
+                              <%== bs_icon('link') %>
+                              <span class="d-none d-md-inline">
+                                <%= t('actions.link', resource: text) %>
+                              </span>
+                            <% end %>
+                    <% else %>        <!-- policy: no permission -->
+                      <span class="text-muted">
+                        <%= text %>
+                      </span>
+                    <% end %>         <!-- policy -->
+                  <% else %>        <!-- invalid tagable_type -->
+                    <span class="text-muted">
+                      <%= t("activerecord.errors.models.tagable_type.invalid", tagable_type: @tag.tagable_type) %>
+                    </span>
+                  <% end %>         <!-- valid tagable_type -->
+                <% else %>          <!-- tagable_type not present? -->
+                  <span class="text-muted">
+                    <%= t('show.unassigned', model: t("activerecord.attributes.tag.tagable_type")) %>
+                  </span>
+                <% end %>           <!-- tagable_type.present? -->
+              </div> <!-- col -->
+            </div> <!-- row -->
+          <% end %>         <!-- tagable.present? -->
+        </div> <!-- responsive columns -->
+      </div> <!-- row -->
+    </div> <!-- card body -->
+  </div> <!-- card -->
+</div> <!-- container -->

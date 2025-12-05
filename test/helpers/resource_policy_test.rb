@@ -37,12 +37,19 @@ module ResourcePolicyTest
 
     # Helper to be overridden by subclasses
     def resource_class
-      raise NotImplementedError, "Resource test classes must implement resource_class"
+      self.class.to_s.sub('PolicyTest', '').constantize
     end
 
-    # Helper to be overridden by subclasses
+    # Helper to create resource with tag association for tagable models.
+    # Other models need to implement their own create_resource method.
     def create_resource(tag: @tag, **attributes)
-      raise NotImplementedError, "Resource test classes must implement create_resource"
+      create(resource_class.model_name.param_key, tag: tag, **attributes)
+    end
+
+    # Helper to build resource with tag association for tagable models.
+    # Other models need to implement their own new_resource method.
+    def new_resource(discipline:)
+      build(resource_class.model_name.param_key, tag: create(:tag, discipline: discipline))
     end
 
     # Helper to create policy with user and project context

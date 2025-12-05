@@ -58,7 +58,7 @@ class DemandTest < ActiveSupport::TestCase
   test "power factor must not be zero" do
     @demand.power_factor = 0.0
     refute @demand.valid?, "Demand with power factor 0.0 should not be valid. Errors: #{@demand.errors.full_messages}"
-    assert_includes @demand.errors[:power_factor], I18n.t("activerecord.errors.messages.attributes.demand.power_factor.zero_pf")
+    assert_includes @demand.errors[:power_factor], I18n.t("activerecord.errors.attributes.electrical/demand.power_factor.zero_pf")
   end
 
   test "duty must be in range" do

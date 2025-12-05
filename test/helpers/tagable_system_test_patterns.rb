@@ -2,17 +2,12 @@ module TagableSystemTestPatterns
   extend ActiveSupport::Concern
 
   def setup_common_tagable_data
-    # Each system test must:
-    # 1. Create its core discipline (e.g., @respource_discipline = create(:discipline, code: 'E'))
-    # 2. Create any other required disciplines (e.g., @discipline_a = create(:discipline, code: 'A'))
-    # 3. Create credentialed users with appropriate roles (see below)
 
     # Create project
     @project = create(:project)
 
-    # Set current project for all tests
-    set_current_project(@project) if defined?(set_current_project)
-    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    # Create resource discipline using the class discipline_code
+    @resource_discipline = create(:discipline, code: resource_class.discipline_code, project: @project)
 
     # Create users with roles
     # No credentials for project
@@ -32,11 +27,152 @@ module TagableSystemTestPatterns
     @team_member = create(:user)
     @team_member.grant(:team_member, @project)
 
-    # Each system test must create its own credentialed users
-    # Example for electrical:
-    # @electrical_designer = create(:user)
-    # @electrical_designer.grant(:team_member, @project)
-    # @electrical_designer.grant(:electrical_designer)
+    # Set up a user with edit permissions on this resource.
+    @accredited_team_member = create(:user)
+    @accredited_team_member.grant(:team_member, @project)
+    @accredited_team_member.grant(resource_class.required_role)
+
+    # Set up an existing tag with associated resource for index, show, edit, update, destroy tests
+    @assigned_tag = create(:tag, serial: 1001, discipline: @resource_discipline)
+    @resource = create(resource_class.model_name.singular, tag: @assigned_tag)
+    
+    # Set up an unassigned tag for create and update tests
+    @unassigned_tag = create(:tag, serial: 1002,  discipline: @resource_discipline)
+  end
+
+  # Helper methods
+
+  def resource_class
+   self.class.name.sub('SystemTest', '').singularize.constantize
+  end
+
+  def field_types
+    if @show_fields.present?
+      @field_types ||= @show_fields.each_with_object({}) do |field, hash|
+        if resource_class.defined_enums.key?(field)
+          hash[field] = :enum
+        else
+          hash[field] = resource_class.attribute_types[field]&.type
+        end
+      end
+    else
+      puts "Model system test must define variable @show_fields"
+    end
+  end
+
+  def module_name
+    resource_class.name.split('::').first
+  end
+
+  def index_path
+    send("#{resource_class.model_name.route_key}_path")
+  end
+
+  def resource_path(resource)
+    send("#{resource_class.model_name.singular_route_key}_path", resource)
+  end
+
+  def new_resource_path
+    send("new_#{resource_class.model_name.singular_route_key}_path")
+  end
+
+  def edit_resource_path(resource)
+    send("edit_#{resource_class.model_name.singular_route_key}_path", resource)
+  end
+
+  def view_key
+    resource_class.model_name.route_key.gsub('_', '.')
+  end
+
+  # Tests
+
+  def team_member_navigating_to_index
+    sign_in @team_member
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit root_url
+    # Click the electrical drop down link
+    id_label = "#{module_name.underscore}-menu-btn"
+    resource_label = resource_class.model_name.human.pluralize
+    find("\##{id_label}").click
+    
+    within "[aria-labelledby='#{id_label}']" do
+      assert_selector "a", text: resource_label
+      click_on resource_label
+    end
+    assert_current_path send("#{resource_class.model_name.route_key}_path") 
+    index_assertions
+    refute_selector "a[href='#{new_resource_path}']" # Link to new resource
+    assert_selector "a[href='#{resource_path(@resource)}']" # Link to resource show view
+    refute_selector "a[href='#{edit_resource_path(@resource)}']" # team member cannot edit resource
+    refute_selector "a[href='#{resource_path(@resource)}'][data-method='delete']" # team member cannot delete resource
+  end
+
+  # Common assertions
+  def index_assertions
+    text = [@project.class.model_name.human, @project.label].join(': ')
+    assert_text I18n.t("#{view_key}.index.header", project: text)
+    assert page.title.include?(I18n.t("#{view_key}.index.title"))
+
+    # Ransack search fields
+    @search_fields.each do |field|
+      assert_selector "input[name='q[#{field}_cont]']"
+    end
+
+    # Ransack sort headers
+    assert_selector "a[href*='q%5Bs%5D=tag']"
+    @index_fields.each do |field|
+      assert_selector "a[href*='q%5Bs%5D=#{field}']"
+    end
+    
+    # Data
+    @index_fields.each do |field|
+      assert_text @resource.send(field)
+    end
+  end
+
+  def show_assertions
+    assert_text I18n.t("#{view_key}.show.header", label: @resource.label)
+    assert page.title.include?(I18n.t("#{view_key}.show.title"))
+
+    # Tag collapsible card
+    tag_card_assertions
+
+    # Field labels
+    @show_fields.each do |field|
+      assert_text resource_class.human_attribute_name(field)
+    end
+
+    # Field data 
+    @show_fields.each do |field|
+      value = @resource.send(field)
+      case field_types[field]
+      when :enum
+        if I18n.exists?("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field.pluralize}.#{value}")
+          assert_text resource_class.human_enum_name(field, value)
+        else
+          assert_text value.to_s
+        end
+      when :float, :decimal
+        assert_text number_to_human(value, precision: 4, units: { unit: field == :speed_rated ? "rpm" : "" }).strip
+      when :boolean
+        assert_selector "input[type='checkbox'][checked='#{value}']", visible: false
+      when :date, :datetime
+        assert_text I18n.l(value, format: :default)
+      else # string, text, integer, etc.
+        assert_text value
+      end
+    end
+  end
+
+  def tag_card_assertions
+    # Find the specific tag card header using the correct ID pattern
+    within "div[data-bs-target='#tag_#{@resource.tag.id}_details']" do
+      assert_text I18n.t('tags.show.header', label: @resource.tag.label)
+    end
+
+    # Verify it's collapsed by default
+    assert_selector "div[data-bs-target='#tag_#{@resource.tag.id}_details'][aria-expanded='false']", visible: true
   end
 
   # Common navigation helpers
@@ -77,15 +213,28 @@ module TagableSystemTestPatterns
     end
   end
 
-  # Tag fields for show view
+  # Tag fields for form
   def tag_form_assertions(tag = nil)
     # Field labels
     assert_text I18n.t('activerecord.attributes.tag.project')
     assert_text I18n.t('activerecord.attributes.tag.stage')
+    assert_text I18n.t('activerecord.attributes.tag.discipline')
+    assert_text I18n.t('activerecord.attributes.tag.prefix')
     assert_text I18n.t('activerecord.attributes.tag.serial')
     assert_text I18n.t('activerecord.attributes.tag.suffix')
     assert_text I18n.t('activerecord.attributes.tag.service')
+    assert_text I18n.t('activerecord.attributes.tag.location')
     assert_text I18n.t('activerecord.attributes.tag.notes')
+
+    # Data fields
+    assert_selector "input[name='tag[stage]']"
+    assert_selector "select[name='tag[discipline_id]']"
+    assert_selector "input[name='tag[serial]']"
+    assert_selector "input[name='tag[suffix]']"
+    assert_selector "input[name='tag[service]']"
+    assert_selector "input[name='tag[location]']"
+    assert_selector "textarea[name='tag[notes]']"
+    assert_selector "select[name='tag[tagable_type]']"
     
     if tag.present?
       # Data
@@ -94,6 +243,7 @@ module TagableSystemTestPatterns
       assert_text tag.serial
       assert_text tag.suffix
       assert_text tag.service
+      assert_text tag.location
       assert_text tag.notes
     end
   end

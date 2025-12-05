@@ -1,0 +1,138 @@
+<div class="container mt-3">
+  <div class="card">
+    <div class="card-header p-2">
+
+      <!-- Center Tag Info -->
+      <div class="col text-center">
+        <div class="d-flex flex-column align-items-center">
+          <div class="mt-1">
+            <%%= yield(:header) %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%%= bootstrap_form_with(model: <%= singular_name %>,
+          layout: :horizontal,
+          label_col: "col-sm-4",
+          control_col: "col-sm-8",
+          wrapper_class: 'mb-1',
+          ) do |f| %>
+
+      <div class="card-body p-2">
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-10 col-lg-8 col-xl-6">        # Adjust to fit requirements
+
+            <!-- Tag -->
+            <%%= f.fields_for tag do |tag_f| %>
+              <%%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
+            <%% end %>
+
+            <!-- <%= human_name %> Details -->
+            <div class="card mb-1">
+              <div class="card-header p-2">
+                <h5><%%= t('activerecord.models.<%= singular_name %>') %></h5>
+              </div>
+
+              <div class="card-body p-2">
+                <%%= render 'shared/error_messages', object: f.object %>
+
+<%- @fields.each do |field| -%>
+  <%- case field[:type] -%>
+    <%- when "string" -%>
+                <%%= f.text_field :<%= field[:name] %>,
+                        class: 'form-control form-control-sm',
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-8" %>
+
+    <%- when "text" -%>
+                <%%= f.text_area :<%= field[:name] %>,
+                        class: 'form-control form-control-sm',
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-8" %>
+
+    <%- when "integer", "bigint" -%>
+                <%%= f.number_field :<%= field[:name] %>,
+                        class: 'form-control form-control-sm',
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-8"%>
+
+    <%- when "float", "decimal" -%>
+                <%%= f.number_field :<%= field[:name] %>,
+                        class: 'form-control form-control-sm',
+                        step: 0.01,                             # Customize as required
+                        label_col: "col-sm-4"
+                        control_col: "col-sm-8"%>
+
+    <%- when "datetime", "timestamp", "time", "date" -%>
+                <%%= f.datetime_select :<%= field[:name] %>,     # Customize as required
+                        class: 'form-control form-control-sm',
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-8"%>
+
+    <%- when "datetime", "timestamp", "time", "date" -%>
+                <%%= f.datetime_select :<%= field[:name] %>,     # Customize as required
+                        class: 'form-control form-control-sm',
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-8"%>
+
+    <%- when "boolean" -%>
+                <%%= f.check_box :<%= field[:name] %>,     # Customize as required
+                        class: 'form-control form-control-sm',
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-8"%>
+
+    <%- when "jsonb" -%>                                    # [TODO: Add JSONB editor]
+                <%%= f.text_area :<%= field[:name] %>,
+                        class: 'form-control form-control-sm',
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-8" %>
+
+    <%- when "enum" -%>
+                <%% required = field[:options].include? ('required') %>
+                <%%= f.select :<%= field[:name] %>,
+                    options_for_select(
+                      <%= class_name%>.<%= field[:name].pluralize %>.keys,
+                      selected: <%= singular_name %>.<%= field[:name] %>
+                    ),
+                    { include_blank: required ? t('form.required') : t('form.optional') },
+                    class: 'form-control form-control-sm' %>
+
+    <%- when "enum_translated" -%>
+                <%% required = field[:options].include? ('required') %>
+                <%%= f.select :<%= field[:name] %>,
+                    options_for_select(
+                      <%= class_name%>.<%= field[:name].pluralize %>.keys.collect do |k| 
+                      [<%= class_name %>.human_enum_name(:<%= field[:name] %>, k), k] },
+                      selected: <%= singular_name %>.<%= field[:name] %>
+                    ),
+                    { include_blank: required ? t('form.required') : t('form.optional') },
+                    class: 'form-control form-control-sm' %>
+  <%- end -%>
+<%- end -%>
+                
+              </div> <!-- end <%= singular_name %> card body -->
+            </div> <!-- end <%= singular_name %> card -->
+
+            <!-- Card Footer with Actions -->
+            <div class="card-footer bg-transparent text-end p-2">
+              <%%= link_to(<%= singular_name %>.persisted? ? 
+              <%= singular_name %> : 
+              <%= plural_route_name %>_path,
+                    class: 'btn btn-warning',
+                    data: { confirm: t('actions.sure'), turbo: false }) do %>
+                <%%= t('actions.discard') %>
+                <%%== bs_icon('x-square') %>
+              <%% end %>
+
+              <%%= f.button :submit, class: 'btn btn-primary' do %>
+                <%%= yield(:button_text) %>
+                <%%== bs_icon('save') %>
+              <%% end %>
+            </div> <!-- end card footer -->
+          </div> <!-- end responsive columns -->
+        </div> <!-- end row -->
+      </div> <!-- end card body -->
+    <%% end %> <!-- end bootstrap_form_with -->
+  </div> <!-- end card -->
+</div> <!-- end container -->

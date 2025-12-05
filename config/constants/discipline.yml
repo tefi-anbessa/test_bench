@@ -3,84 +3,84 @@
 #
 # Fields:
 #   code:       Symbol identifier (used internally)
-#   label:      Short 2-3 character code (for display)
+#   label:      Short 1-3 character code (for display)
 #   name:       Full name of the discipline
 #   module:     Optional: Associated Ruby module for extended functionality
 #   sort_order: [deprecated] Display order in UI (lower numbers first)
 
 disciplines:
 
-  - code: :admin
+  - code: "admin"
     label: A
     name: Administration
     prefix_schema: { name: 'default' }
     module: Administration
     sort_order: 10
 
-  - code: :arch
+  - code: "arch"
     label: B
     name: Architecture
     prefix_schema: { name: 'default' }
     module: Architecture
     sort_order: 20
 
-  - code: :process
+  - code: "process"
     label: PR
     name: Process
     prefix_schema: { name: 'default' }
     module: Process
     sort_order: 30
 
-  - code: :elec
+  - code: "elec"
     label: E
     name: Electrical
     prefix_schema: { name: 'default' }
     module: Electrical
     sort_order: 10
 
-  - code: :inst
+  - code: "inst"
     label: J
     name: Instrumentation
     prefix_schema: { name: 'isa51' }
     module: Instrumentation
     sort_order: 40
 
-  - code: :it
+  - code: "it"
     label: IT
     name: Information Technology & Communications
     prefix_schema: { name: 'default' }
     module: It
     sort_order: 50
 
-  - code: :mech
+  - code: "mech"
     label: M
     name: Mechanical
     prefix_schema: { name: 'default' }
     module: Mechanical
     sort_order: 60
 
-  - code: :piping
+  - code: "piping"
     label: PI
     name: Piping
     prefix_schema: { name: 'default' }
     module: Piping
     sort_order: 70
 
-  - code: :civil
+  - code: "civil"
     label: C
     name: Civil
     prefix_schema: { name: 'default' }
     module: Civil
     sort_order: 80
 
-  - code: :struct
+  - code: "struct"
     label: S
     name: Structural
     prefix_schema: { name: 'default' }
     module: Structural
     sort_order: 90
 
-  - code: :hvac
+  - code: "hvac"
     label: HV
     name: Heating Ventilation Air Conditioning
     prefix_schema: { name: 'default' }

@@ -138,7 +138,7 @@ class TagTest < ActiveSupport::TestCase
   test "prefix should only include letters" do
     @tag.prefix = "--"
     refute @tag.valid?
-    assert_includes @tag.errors[:prefix], I18n.t("active_record.errors.messages.only_letters")
+    assert_includes @tag.errors[:prefix], I18n.t("activerecord.errors.models.tag.attributes.prefix.only_letters")
   end
 
   test "serial should be present" do
@@ -280,7 +280,7 @@ class TagTest < ActiveSupport::TestCase
     new_tag.save
     refute new_tag.valid?
     assert_includes new_tag.errors[:tagable], 
-        I18n::t("activerecord.errors.messages.already_associated", 
+        I18n::t("activerecord.errors.custom_messages.already_associated", 
               child: cable.class.model_name.human,
               parent: tag.class.model_name.human)
     assert_equal cable, tag.reload.tagable
@@ -290,7 +290,7 @@ class TagTest < ActiveSupport::TestCase
     new_tag.update(tagable: cable)
     refute new_tag.valid?
     assert_includes new_tag.errors[:tagable], 
-        I18n::t("activerecord.errors.messages.already_associated", 
+        I18n::t("activerecord.errors.custom_messages.already_associated", 
               child: cable.class.model_name.human,
               parent: tag.class.model_name.human)
     assert_equal cable, tag.reload.tagable
@@ -390,21 +390,21 @@ class TagTest < ActiveSupport::TestCase
 
   # Tag prefix parser tests
   test "tag prefix parser isa51 should be correct" do
-    @discipline.prefix_schema = { name: 'ab_elec', type: 'isa51' }
+    @discipline.prefix_schema = { name: 'isa51' }
     tag = create(:tag, discipline: @discipline, prefix: 'AFL')
     parts = tag.prefix_parts
     assert_equal 'A', parts[:measured_variable]
-    assert_equal 'F', parts[:modifiers]
-    assert_equal 'L', parts[:readout_functions]
-    assert_nil parts[:output_functions]
-    assert_nil parts[:modifier_functions]
+    assert_equal 'F', parts[:modifier]
+    assert_equal 'L', parts[:readout_function]
+    assert_nil parts[:output_function]
+    assert_nil parts[:modifier_function]
 
     tag = create(:tag, discipline: @discipline, prefix: 'WAHH')
     parts = tag.prefix_parts
     assert_equal 'W', parts[:measured_variable]
-    assert_equal 'A', parts[:readout_functions]
-    assert_equal 'HH', parts[:modifier_functions]
-    assert_nil parts[:modifiers]
-    assert_nil parts[:output_functions]
+    assert_equal 'A', parts[:readout_function]
+    assert_equal 'HH', parts[:modifier_function]
+    assert_nil parts[:modifier]
+    assert_nil parts[:output_function]
   end
 end

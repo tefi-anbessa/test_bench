@@ -139,10 +139,10 @@ The tag model provides the following functionality:
   * Run the generator with the following command:
 
     ```bash
-    rails g project_assistant:module <module_name>
+    rails g project_assistant:module <ModuleName>
     ```
 
-  <module_name> should be provided as CamelCase but will be converted to snake_case for file names and CamelCase for class or module names within the generator.
+  * ```ModuleName``` should be provided as CamelCase but will be converted to snake_case for file names and CamelCase for class or module names within the generator.
 * If prompted, it means the generator has found an existing folder, and will ask if you want to proceed.
   * If you are sure that the existing folder does not contain anything that needs to be retained, respond with 'y'.
   * If you are not sure, respond with 'n'. The generator will abort.
@@ -161,7 +161,7 @@ The tag model provides the following functionality:
 * The generate command for a tagable will typically look like:
 
   ```bash
-  rails g project_assistant:tagable module_name:tagable_name field:type:required field:type:index field:enum field:enum_translated...
+  rails g project_assistant:tagable ModuleName:TagableName field:type:required field:type:index field:enum field:enum_translated...
   ```
 
 * The name of the tagable type should be prefixed with its namespace module, as shown in the example. (The generator should never be used to create a tagable type in the core application.)
@@ -190,7 +190,11 @@ The tag model provides the following functionality:
 
 ##### Model
 
-* A model definition file with presence validations for the required fields, including tagable module, and ransackable attributes and associations for searching and sorting:
+* A model definition file including:
+  * include tagable module
+  * enum declarations for any enum fields
+  * presence validations for the required fields
+  * ransackable attributes and associations for searching and sorting
   * ```app/models/#{module_name}/#{tagable_name}.rb```
 
 ##### Policy

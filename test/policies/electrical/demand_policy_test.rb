@@ -7,10 +7,6 @@ module Electrical
       setup_resource_policy_test
     end
 
-    def resource_class
-      Electrical::Demand
-    end
-
     def create_resource(tag:)
       # Uses demand factory to create demand with tag association, using default prefix and unique serial.
       create(:electrical_demand, demandable: create(:electrical_motor, tag: tag))
@@ -21,8 +17,6 @@ module Electrical
       build(:electrical_demand, demandable: create(:electrical_motor, tag: create(:tag, discipline: discipline)))
     end
 
-    def self.required_role
-      :electrical_designer
-    end
+    # All remaining setup and tests have been abstracted to ResourcePolicyTest and PolicyTestHelpers.
   end
 end

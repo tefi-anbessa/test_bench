@@ -5,18 +5,18 @@
       <!-- Center Label Info -->
       <div class="col text-center">
         <div class="d-flex flex-column align-items-center">
-          <div class="mt-1">
+          <div class="mt-1 h5">
               <%= cable_type.persisted? ? t('actions.edit') : t('actions.new') %> 
               <% if cable_type.present? && cable_type.persisted? %>
                 <%= [t('activerecord.models.cable_type'), cable_type.label].join(': ') %>
-                <small class="text-muted ms-2"><%= cable_type.label %></small>
+                <small class="text-muted ms-2"><%= cable_type.long_label %></small>
               <% else %>
                 <%= t('activerecord.models.cable_type') %>
               <% end %>
           </div>
         </div>
       </div>
-    </div>
+    </div> <!-- end of card header -->
 
     <%= bootstrap_form_with(model: cable_type,
             layout: :horizontal,
@@ -28,20 +28,21 @@
               label: { class: 'mb-0' }
             }) do |f| %>
 
-      <div class="card-body p-3 mx-auto" style="max-width: 30rem;">
+      <div class="card-body p-3 mx-auto">
         <%= render 'shared/error_messages', object: f.object %>
         <div class="row justify-content-center">
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
             <!-- Project card -->
-            <% if cable_type.project.present? %>
+            <% if @project && @project.persisted? %>
               <%= render 'projects/project_card',
-                    project: cable_type.project %>
+                    project: @project %>
+              <%= f.hidden_field :project_id, value: @project.id %>
             <% else %>
               <!-- Project select field -->
-              <div class="card-body p-3 mx-auto">
+              <div class="row">
                 <%= f.select :project_id,
-                    @projects.map { |p| [p.label, p.id] },
+                    @projects.map { |p| [p.code, p.id] },
                     { wrapper: { class: 'mb-1' },
                       class: 'form-select' } %>
               </div>

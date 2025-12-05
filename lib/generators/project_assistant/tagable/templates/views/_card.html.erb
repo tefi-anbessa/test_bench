@@ -1,0 +1,48 @@
+<%% resource = object %>
+<%%= render 'components/collapsible',
+  id: "#{<%= table_name %>}_#{resource.id}_details",
+  title: t("<%= i18n_scope.pluralize %>.show.header", label: resource.label),
+  expanded: false,
+  header_class: 'py-1' do %>
+  
+    <div class="container-fluid">
+      <div class="row mb-1">
+        <%% text = t("actions.jump_to", model: t("activerecord.models.<%= i18n_scope %>")) %>
+        <%%= link_to resource, 
+            class: "btn btn-sm btn-outline-secondary me-2",
+            title: text do %>
+          <%%== bs_icon('box-arrow-in-up-left') %>
+          <span class="d-none d-md-inline"><%%= text %></span>
+        <%% end %>
+      </div>
+<%- @fields.each do |field| -%>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%%= resource.class.human_attribute_name(:<%= field[:name] %>) %></div>
+  <%- case field[:type] -%>
+  <%- when "string", "enum", "integer", "bigint", "decimal" -%>
+        <div class="col-8"><%%= resource.<%= field[:name] %> || '-' %></div>
+
+  <%- when "float" -%>
+        <div class="col-8"><%%= number_to_human(resource.<%= field[:name] %>, 
+          precision: 4, 
+          units: { unit: "x", thousand: "kx", million: "Mx" }) || '-' %></div>
+
+  <%- when "enum_translated" -%>
+        <div class="col-8"><%%= resource.class.human_enum_name(:<%= field[:name] %>, resource.<%= field[:name] %>) %></div>
+
+  <%- when "text", "jsonb" -%> # TODO: Add json formatting
+        <div class="col-8"><%%= simple_format(resource.<%= field[:name] %> || '-') %></div>
+
+  <%- when "datetime", "timestamp", "time", "date" -%> # Default to time_tag
+        <div class="col-8"><%%= time_tag(resource.<%= field[:name] %> || '-') %></div>
+
+  <%- when "binary" -%> # TODO: Add binary field support
+        <div class="col-8"><%%= 'PLACEHOLDER FOR BINARY FIELD' %></div>
+
+  <%- else -%> # Fallback to show whatever content is in the field.
+        <div class="col-8"><%%= resource.<%= field[:name] %> || '-' %></div>
+  <%- end -%>
+      </div> <!>
+<%- end -%>
+    </div> <!-- end container-fluid -->
+<%% end %>

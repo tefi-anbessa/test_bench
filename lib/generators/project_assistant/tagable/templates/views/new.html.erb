@@ -1,0 +1,7 @@
+<%% provide(:title, t('.title')) %>
+<%% provide(:header, t('.header')) %>
+<%% provide(:button_text, t('actions.save')) %>
+<%%= render "form",
+  <%= singular_name %>: @<%= singular_name %>,
+  tag: @tag
+%>

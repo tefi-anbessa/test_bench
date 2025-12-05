@@ -14,8 +14,7 @@ module Electrical
     end
 
     def setup_model_specific_data
-      # Every model sets a string of the wrong type for testing the type check
-      @wrong_tagable_type = "Electrical::Switchboard"
+      # Setup for model functions unrelated to tags
     end
 
     def params_with_existing_tag

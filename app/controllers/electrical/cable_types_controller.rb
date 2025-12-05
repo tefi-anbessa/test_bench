@@ -1,12 +1,16 @@
 module Electrical
   class CableTypesController < ApplicationController
     before_action :authenticate_user!
-    before_action :require_project!
     before_action :set_cable_type, only: %i[show edit update destroy]
+    before_action :set_project, only: %i[index new create]
 
     # GET /electrical/cable_types or /electrical/cable_types.json
-    def index
-      @q = policy_scope(Electrical::CableType).ransack(params[:q])
+    def index 
+      if @project
+        @q = policy_scope(@project.electrical_cable_types).ransack(params[:q])
+      else
+        @q = policy_scope(Electrical::CableType).ransack(params[:q])
+      end
       @pagy, @cable_types = pagy(@q.result.includes(:electrical_cables), limit: 10)
       authorize @cable_types
     end
@@ -18,13 +22,23 @@ module Electrical
 
     # GET /electrical/cable_types/new
     def new
-      @cable_type = authorize current_project.electrical_cable_types.new
+      if @project
+        @cable_type =  @project.electrical_cable_types.new
+      else
+        @cable_type =  Electrical::CableType.new
+      end
+      authorize @cable_type
       setup_form
     end
 
     # POST /electrical/cable_types or /electrical/cable_types.json
     def create
-      @cable_type = authorize current_project.electrical_cable_types.new(cable_type_params)
+      if @project
+        @cable_type = @project.electrical_cable_types.new(cable_type_params)
+      else
+        @cable_type = Electrical::CableType.new(cable_type_params)
+      end
+      authorize @cable_type
 
       respond_to do |format|
         if @cable_type.save
@@ -68,9 +82,10 @@ module Electrical
       authorize @cable_type
       project = @cable_type.project
       @cable_type.destroy
+      flash[:success] = t('flash.destroy.notice', resource_name: t('activerecord.models.cable_type'))
       respond_to do |format|
         format.html { redirect_to project_electrical_cable_types_path(project),
-          status: :see_other, notice: "Cable type was successfully destroyed." }
+          status: :see_other }
         format.json { head :no_content }
       end
     end
@@ -79,6 +94,14 @@ module Electrical
       # Use callbacks to share common setup or constraints between actions.
       def set_cable_type
         @cable_type = Electrical::CableType.find(params[:id])
+      end
+
+      def set_project
+        if params[:project_id].present?
+          @project = Project.find(params[:project_id])
+        else
+          @project = current_project
+        end
       end
 
       def setup_form

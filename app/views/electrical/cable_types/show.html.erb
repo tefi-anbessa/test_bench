@@ -14,15 +14,14 @@
                 class: "btn btn-sm btn-outline-secondary me-2",
                 title: t('actions.index') do %>
                 <%== bs_icon('list-columns-reverse') %>
-                <span class="d-none d-mds-inline"><%= t('actions.index') %></span>
+                <span class="d-none d-md-inline"><%= t('actions.index') %></span>
               <% end %>
             <% else %>
-              <%= link_to t('cable_type', scope: 'activerecord.models').pluralize,
-                electrical_cable_types_path,
+              <%= link_to electrical_cable_types_path,
                 class: "btn btn-sm btn-outline-secondary me-2",
                 title: t('actions.index') do %>
                 <%== bs_icon('list-columns-reverse') %>
-                <span class="d-none d-mds-inline"><%= t('actions.index') %></span>
+                <span class="d-none d-md-inline"><%= t('actions.index') %></span>
               <% end %>
             <% end %>
             <!-- Previous Button -->
@@ -39,17 +38,16 @@
                 </span>
               <% end %>
             <% end %>
-          </div>
-        </div>
+          </div> <!-- # d-flex align-items-center -->
+        </div> <!-- # col auto -->
 
         <!-- Center Tag Info -->
         <div class="col text-center">
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
-              <% @cable_type.code %>
-                <%= [t('activerecord.models.cable_type'), 
-                  @cable_type&.id].compact.join(' ') %>
-                  <small class="text-muted"><%= @cable_type.label %></small>
+              <%= [@cable_type.class.model_name.human, 
+                @cable_type&.id].compact.join(' ') %>
+                <small class="text-muted"><%= @cable_type.long_label %></small>
             </div>
           </div>
         </div>

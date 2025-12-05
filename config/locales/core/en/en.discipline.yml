@@ -10,25 +10,25 @@ en:
       name: 'Architecture'
     civil:
       label: 'C'
-      name: 'Civil Engineering'
+      name: 'Civil'
     elec:
       label: 'E'
-      name: 'Electrical Engineering'
+      name: 'Electrical'
     inst:
       label: 'J'
-      name: 'Instrument Engineering'
+      name: 'Instrument'
     it:
       label: 'I'
       name: 'Information Tech'    
     mech:
       label: 'M'
-      name: 'Mechanical Engineering'
+      name: 'Mechanical'
     process:
       label: 'P'
-      name: 'Process Engineering'
+      name: 'Process'
     struct:
       label: 'S'
-      name: 'Structural Engineering'
+      name: 'Structural'
     multi:
       label: 'U'
       name: 'Multi-Discipline'

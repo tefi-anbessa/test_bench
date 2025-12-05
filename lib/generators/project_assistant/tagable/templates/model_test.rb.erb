@@ -1,0 +1,35 @@
+require "test_helper"
+require_relative "../../helpers/tagable_model_patterns"
+module <%= module_name %>
+  class <%= tagable_name %>Test < ActiveSupport::TestCase
+    include TagableModelPatterns
+
+    def setup
+      setup_common_test_data
+      setup_model_specific_data
+    end
+    
+    def setup_model_specific_data
+      @resource = create(<%= singular_table_name %>, tag: @tag)
+      # Insert model specific test setup here, including relationships with other models.
+      # E.g. setup electrical_demand for electrical models.
+    end
+
+    test "model specific setup should be valid" do
+      # Insert validity test of model specific test setup here, including relationships with other models.
+      # E.g. electrical_demand for electrical models.
+    end
+
+<%- @fields.select { |f| f[:options].include?('required') }.each do |field| -%>
+    test "<%= field[:name] %> must be present" do
+      @resource.<%= field[:name] %> = nil
+      refute @resource.valid?
+      assert_includes @resource.errors[:<%= field[:name] %>], I18n.t("errors.messages.blank")
+    end
+<%- end -%>
+
+    # Insert model specific tests here.
+    # E.g. test electrical_demand for electrical models.
+
+  end
+end

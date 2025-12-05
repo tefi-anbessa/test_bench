@@ -66,17 +66,6 @@ class Tag < ApplicationRecord
     
     adjacent_tag('prev_id') || self
   end
-  
-  # Instance method to get the prefix schema and hash for the tag's discipline
-  def prefix_constants
-    Constants.tag.discipline.send(discipline.code.downcase.to_sym) rescue {}
-  end
-  
-  # Class method to get the prefix schema and hash for the tag's discipline
-  def self.discipline_prefix_constants(discipline)
-    discipline_code = normalize_discipline_code(discipline)
-    Constants.tag.discipline.send(discipline_code) rescue {}
-  end
 
   # Instance method to parse prefix components for form display
   def prefix_parts
@@ -208,7 +197,7 @@ class Tag < ApplicationRecord
       ).where.not(id: id).exists?
       
       if existing_tag
-        errors.add(:tagable, I18n::t("activerecord.errors.messages.already_associated", 
+        errors.add(:tagable, I18n::t("activerecord.errors.custom_messages.already_associated", 
           child: tagable_type.constantize.model_name.human,
           parent: self.class.model_name.human))
       end
@@ -220,12 +209,13 @@ class Tag < ApplicationRecord
       return if tagable_id_was.blank? || tagable_type_was.blank?
       
       # Allow changes if the current association is invalid
+      return unless self.class.tagable_types.include?(tagable_type_was)
       return if tagable_type_was.constantize.where(id: tagable_id_was).none?
       
       errors.add(:base, I18n::t("activerecord.errors.models.tag.change_tagable")) 
     end
 
-    # Prevent setting tagable association if it's already set and valid
+    # Prevent setting tagable association to an invalid resource
     def validate_tagable_assignment
       if (tagable_type.constantize rescue nil)&.where(id: tagable_id)&.none?
         errors.add(:tagable, :invalid)

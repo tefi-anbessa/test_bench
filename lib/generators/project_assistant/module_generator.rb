@@ -107,8 +107,10 @@ module ProjectAssistant
       tagable_file = File.join(destination_root, 'config/constants/tagable.yml')
       if File.exist?(tagable_file)
         content = File.read(tagable_file)
-        content.sub!(/^(tagable:\n)/, "\\1  # #{@module_name}:\n")
+        content.sub!(/^(tagable:\n)/, "\\1  # #{@module_class}\n")
         File.write(tagable_file, content)
+      else
+        say_status :error, "Tagable file not found: #{tagable_file}", :red
       end
     end
     

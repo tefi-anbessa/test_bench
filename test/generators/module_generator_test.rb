@@ -123,7 +123,7 @@ module ProjectAssistant
     test "updates constants tagable.yml with module comment" do
       run_generator [@module_name] 
       content = File.read(File.join(destination_root, 'config', 'constants', 'tagable.yml'))
-      assert_includes content, "# #{@module_name}:", "Should include module comment in tagable.yml"
+      assert_includes content, "# #{@module_class}", "Should include module comment in tagable.yml"
     end
   end
 end

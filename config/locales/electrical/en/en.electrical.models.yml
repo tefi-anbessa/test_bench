@@ -11,6 +11,7 @@ en:
       electrical/light_cct:          "Light Circuit"
     attributes:
       electrical/cable_type:
+        id: ID
         conductor_material:	Conductor Material
         cores:	Conductor Cores
         csa:	CSA
@@ -162,7 +163,7 @@ en:
         light_fitting_type:  "AS3000 load classes"
         notes:       "Record additional light circuit related design references here"
     errors:
-      messages:
+      custom_messages:
       attributes:
         electrical/demand:
           power_factor:

@@ -31,8 +31,8 @@
                 </span>
               <% end %>
             <% end %>
-          </div>
-        </div>
+          </div> <!-- end d-flex align-items-center -->
+        </div> <!-- end left column -->
 
         <!-- Center Tag Info -->
         <div class="col text-center">
@@ -45,8 +45,8 @@
                 <small class="text-muted ms-2"><%= @motor.tag.service %></small>
               <% end %>
             </div>
-          </div>
-        </div>
+          </div> <!-- end d-flex align-items-center -->
+        </div> <!-- end centre column -->
 
         <!-- Right Navigation and Actions -->
         <div class="col-auto">
@@ -93,101 +93,96 @@
               <% end %>
             </div>
           </div>
-        </div>
+        </div> <!-- end right column -->
       </div>
     </div>
 
+    <div class="card-body">
 
-    <div class="d-flex flex-column justify-content-center">
-      <div class="card-body">
-
-        <div class="row justify-content-center">
-          <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-            <!-- Tag Card -->
-            <% if @motor.tag.present? %>
-              <div class="row g-3 mb-3">
-                  <%= render 'tags/tag_card', tag: @motor.tag %>
-              </div>
-            <% else %>
-              <div class="row g-3 mb-3">
-                <div class="alert alert-danger">
-                  <%= t('show.orphan', model: Tag.model_name.human.downcase) %>
-                </div>
-              </div>
-            <% end %>
-
-            <!-- Motor Details Card -->
-            <div class="row">
-              <div class="card mb-4">
-                <div class="card-header py-1">
-                  <h4 class="mb-0"><%= t('show.details', model: @motor.model_name.human) %></h4>
-                </div>
-
-                <div class="card-body p-3">
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:motor_type) %></div>
-                    <div class="col-8"><%= @motor.class.human_enum_name(:motor_type, @motor.motor_type) %></div>
-                  </div>
-
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:frame_size) %></div>
-                    <div class="col-8"><%= "frame_#{@motor.frame_size}" %></div>
-                  </div>
-
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:poles) %></div>
-                    <div class="col-8"><%= @motor.poles || '-' %></div>
-                  </div>
-
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:ingress_protection) %></div>
-                    <div class="col-8"><%= @motor.ingress_protection.present? ?
-                      ["IP", @motor.ingress_protection].join(' ') : '-' %></div>
-                  </div>
-
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:speed_rated) %></div>
-                    <div class="col-8"><%= @motor.speed_rated.present? ? 
-                                            number_to_human(@motor.speed_rated, precision: 4, units: { unit: "rpm"}) : 
-                                            '-' %></div>
-                  </div>
-
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:notes) %></div>
-                    <div class="col-8"><%= @motor.notes.present? ? simple_format(@motor.notes) : '-' %></div>
-                  </div>
-
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted">
-                      <% text = t('activerecord.models.demand') %>
-                      <% if @motor.electrical_demand.present? %>
-                        <%= link_to @motor.electrical_demand,
-                          class: "btn btn-sm btn-outline-secondary",
-                          title: text do %>
-                            <%= text %>
-                            <%== bs_icon('box-arrow-in-down-right') %>
-                        <% end %>
-                      <% elsif @motor.tag&.present? %> <!-- Cannot create a new demand without a tag. -->
-                        <% text = t("actions.link", resource: t("activerecord.models.demand")) %>
-                        <% if policy(Electrical::Demand).new? %>
-                          <%= link_to new_tag_electrical_demand_path(@motor.tag.id),
-                              class: "btn btn-sm btn-outline-primary mb-2",
-                              title: text do %>
-                                <span class="d-none d-md-inline">
-                                  <%= text %>
-                                </span>
-                                <%== bs_icon('link') %>
-                              <% end %>
-                        <% end %>
-                      <% end %>
-                    </div>
-                  </div>
-                </div>
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+          <!-- Tag Card -->
+          <% if @motor.tag.present? %>
+            <div class="row g-3 mb-3">
+                <%= render 'tags/card', tag: @motor.tag %>
+            </div>
+          <% else %>
+            <div class="row g-3 mb-3">
+              <div class="alert alert-danger">
+                <%= t('show.orphan', model: Tag.model_name.human.downcase) %>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+          <% end %>
+
+          <!-- Motor Details Card -->
+          <div class="card mb-4">
+            <div class="card-header py-1">
+              <h4 class="mb-0"><%= t('show.details', model: @motor.model_name.human) %></h4>
+            </div> <!-- end inner card header -->
+
+            <div class="card-body p-3">
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:motor_type) %></div>
+                <div class="col-8"><%= @motor.class.human_enum_name(:motor_type, @motor.motor_type) %></div>
+              </div>
+
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:frame_size) %></div>
+                <div class="col-8"><%= "frame_#{@motor.frame_size}" %></div>
+              </div>
+
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:poles) %></div>
+                <div class="col-8"><%= @motor.poles || '-' %></div>
+              </div>
+
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:ingress_protection) %></div>
+                <div class="col-8"><%= @motor.ingress_protection.present? ?
+                ["IP", @motor.ingress_protection].join(' ') : '-' %></div>
+              </div>
+
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:speed_rated) %></div>
+                <div class="col-8"><%= @motor.speed_rated.present? ? 
+                                        number_to_human(@motor.speed_rated, precision: 4, units: { unit: "rpm"}) : 
+                                        '-' %></div>
+              </div>
+
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:notes) %></div>
+                <div class="col-8"><%= @motor.notes.present? ? simple_format(@motor.notes) : '-' %></div>
+              </div>
+
+              <div class="row mb-1">
+                <div class="col-4 text-muted">
+                  <% text = t('activerecord.models.demand') %>
+                  <% if @motor.electrical_demand.present? %>
+                    <%= link_to @motor.electrical_demand,
+                      class: "btn btn-sm btn-outline-secondary",
+                      title: text do %>
+                        <%= text %>
+                        <%== bs_icon('box-arrow-in-down-right') %>
+                    <% end %>
+                  <% elsif @motor.tag&.present? %> <!-- Cannot create a new demand without a tag. -->
+                    <% text = t("actions.link", resource: t("activerecord.models.demand")) %>
+                    <% if policy(Electrical::Demand).new? %>
+                      <%= link_to new_tag_electrical_demand_path(@motor.tag.id),
+                          class: "btn btn-sm btn-outline-primary mb-2",
+                          title: text do %>
+                            <span class="d-none d-md-inline">
+                              <%= text %>
+                            </span>
+                            <%== bs_icon('link') %>
+                          <% end %>
+                    <% end %>
+                  <% end %>
+                </div> <!-- end column -->
+              </div> <!-- end demand row -->
+            </div> <!-- end inner card body -->
+          </div> <!-- end inner card -->
+        </div> <!-- end responsive columns -->
+      </div> <!-- justify-content-center -->
+    </div> <!-- end outer card body -->
+  </div> <!-- end card -->
+</div> <!-- end container -->

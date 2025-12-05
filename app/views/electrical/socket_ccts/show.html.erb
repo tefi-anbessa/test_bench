@@ -74,7 +74,7 @@
             <!-- Tag Card -->
             <% if @socket_cct.tag.present? %>
               <div class="row g-3 mb-3">
-                  <%= render 'tags/tag_card', tag: @socket_cct.tag %>
+                  <%= render 'tags/card', tag: @socket_cct.tag %>
               </div>
             <% else %>
               <div class="row g-3 mb-3">

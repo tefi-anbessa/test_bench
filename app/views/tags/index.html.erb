@@ -41,10 +41,10 @@
     <% end %>
     <%== pagy_bootstrap_nav(@pagy) %>
     <table id='tags' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
-    <%= render 'tag_header' %>
+    <%= render 'header' %>
       <tbody>
         <% @tags.each do |t| %>
-          <%= render 'tag_row', t: t %>
+          <%= render 'row', t: t %>
         <% end %>
       </tbody>
     </table>

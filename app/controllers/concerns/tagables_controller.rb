@@ -3,6 +3,7 @@ module TagablesController
 
   included do
     before_action :authenticate_user!
+    before_action :require_project!, only: %i[ new create edit update ]
     before_action :set_resource, only: %i[ show edit update destroy ]
   end
 
@@ -30,7 +31,7 @@ module TagablesController
       @orphans = @resources.select{ |resource| resource.tag.nil? }
 
       # Find any tags that have tagable_type for this resource but do not have valid tagable.
-      @link_errors = policy_scope(Tag).select { |tag| tag.tagable_type == controller_name.classify && tag.tagable.nil? }
+      @link_errors = policy_scope(Tag).select { |tag| tag.tagable_type == controller_path.classify && tag.tagable.nil? }
       # These tags are marked with tagable type for this resource but not yet assigned (normal WIP).
       @link_incomplete = @link_errors.select{ |tag| tag.tagable_id.nil? }
       # These tags are linked to missing resources, tagable needs to be nullified (broken).
@@ -171,12 +172,10 @@ module TagablesController
           return false
         elsif @tag.tagable.present?
           # Tag already assigned to a tagable
-          @tag = Tag.new
           @tag.instance_variable_set(:@custom_error, :tag_already_assigned)
           return false
-        elsif @tag.tagable_type&.present? && @tag.tagable_type != controller_name.classify
+        elsif @tag.tagable_type&.present? && @tag.tagable_type != resource_class.name
           # Tag designated for different controller type
-          @tag = Tag.new
           @tag.instance_variable_set(:@custom_error, :tagable_type_mismatch)
           return false
         end
@@ -252,7 +251,7 @@ module TagablesController
       begin
         @resource.class.transaction do
           @tag = @resource.tag
-          @tag.update!(tag_params) # This is a relic. The form doesn't have tag fields if the tag is persisted.
+          @tag.update!(tag_params) 
           @resource.update!(resource_params.except(:tag))
         end
         flash[:success] = [t("flash.update.notice", 
@@ -292,28 +291,21 @@ module TagablesController
 
     def setup_form
       instance_variable_set(resource_var_name, @resource)
-      if current_project
-        @project = current_project
-      else
-        @project = nil
-      end
       @projects = policy_scope(Project)
       @disciplines = policy_scope(Discipline)
+      
+      # Set tag type and discipline according to the resource defaults (if not already set,
+      # which could be the case when re-rendering because of parameter errors).
+      @tag.tagable_type ||= controller_path.classify
+      @tag.discipline ||= Discipline.find_by(code: resource_class.discipline_code)
 
-      # Set default tag attributes if tag is not persisted
-      unless @tag&.persisted?
-        @tag ||= Tag.new(tagable_type: controller_name.classify)
-        @tag.discipline ||= Discipline.find_by(code: discipline_code)
-        @tag.prefix ||= tag_prefix
-      end
       # Hook for model-specific form setup
       setup_additional_form_data
     end
 
     def failed_to_save
       # If we get here, there was a validation error preventing save
-      # Ensure the resource variable is set for the view before setup_form
-      # @resource must have been set in one of the calling actions
+      # @resource has been set in the calling action
       return_action = @resource.persisted? ? :edit : :new
       setup_form
       respond_to do |format|
@@ -359,16 +351,6 @@ module TagablesController
 #      end
 #    end
 
-    # Override to specify model-specific tag prefix
-    def tag_prefix
-      controller_name.classify.upcase[0..1]  # Default: first 2 letters of model name
-    end
-
-    # Override to specify model-specific discipline code
-    def discipline_code
-      "null"  # Null by default
-    end
-
     # Override to specify model-specific form setup
     def setup_additional_form_data
       # Override in subclass for model-specific setup
@@ -402,7 +384,7 @@ module TagablesController
       # Permitted parameters
       tag_params.permit(
         :project_id, :discipline_id, :prefix, :serial, :suffix,
-        :service, :stage, :notes, :tagable_id, :tagable_type
+        :service, :stage, :location, :notes, :tagable_id, :tagable_type
       )
     end
 end

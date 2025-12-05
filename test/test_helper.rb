@@ -93,14 +93,28 @@ class ActiveSupport::TestCase
     @current_project
   end
   
-
+  # Set the current project for tests
   def set_current_project(project)
     @current_project = project
     # For controller tests, we need to set the instance variable that the controller will use
     @controller.instance_variable_set(:@current_project, project) if defined?(@controller)
     # Also set in session and cookies for integration tests
-    session[:project_id] = project.id if session
-    cookies.signed[:project_id] = project.id if respond_to?(:cookies)
+    if project.present?
+      session[:project_id] = project.id if session
+      if respond_to?(:cookies)
+        cookie_name = "project_id_user_#{current_user&.id}"
+        cookies.signed[cookie_name] = {
+          value: project.id,
+          expires: 1.year.from_now,
+          httponly: true,
+          secure: Rails.env.production?,
+          same_site: :lax
+        }
+      end
+    else
+      session.delete(:project_id) if session
+      cookies.delete("project_id_user_#{current_user&.id}") if respond_to?(:cookies)
+    end
   end
   
   # Asserts that the request was rejected because the user is not signed in

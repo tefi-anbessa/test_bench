@@ -73,27 +73,39 @@ en:
         label:            "Display label, maximum 12 characters"
         sort_order:       "Sort order"
         prefix_schema:    "Select a standard schema or define a custom schema. Custom schema must have a unique name, set to project code + discipline code"
-        module_name:      "ignore: not implemented"  # [TODO]
+        module_name:      "ignore: not implemented"
         notes:            "Additional information"
     errors:
-      messages:
+      custom_messages:
         invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
         unique: "%{model} %{attribute} has already been taken, must be unique"
         custom_required: "%{model} %{attribute} is required"
         already_associated: "%{child} is already associated with another %{parent}"
-        only_letters: "must contain only letters"
+        record_invalid: "Record is invalid"
       models:
         role:
-          attribute:
+          attributes:
             name:
               blank: "Role must be selected"
               invalid: "%{name} is not a valid role for %{resource}"
+        project:
+        discipline:
+          attributes:
+            code:
+              invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
         tag:
           base:
           taken: "Tag %{tag} already exists"
+          attributes:
+            prefix: 
+              only_letters: "must contain only letters"
         tagable_type:
           not_assigned: "Not assigned"
           change_tagable: "Cannot change tagable association once set"
+          invalid: "Invalid type %{tagable_type}"
+      attributes:
+        code:
+          invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
       jsonb_fields:
         blank: "%{field} can't be blank"
         invalid: "%{field} is invalid"

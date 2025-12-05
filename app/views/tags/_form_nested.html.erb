@@ -1,9 +1,9 @@
 <div data-controller="tag"
      data-tag-model-name-value="<%= t('activerecord.models.tag') %>">
   <div class="card-header p-2">
-    <!-- Center Tag Info -->
-    <div class="col text-center">
-      <div class="d-flex flex-column align-items-center">
+    <!-- Left Tag Header -->
+    <div class="col text-left">
+      <div class="d-flex flex-column align-items-left">
         <div class="mt-1">
           <%= tag.persisted? ? t('actions.edit') : t('actions.new') %>
           <span data-tag-target="preview">
@@ -25,19 +25,10 @@
     <%= render 'shared/error_messages', object: tag %>
 
       <!-- Project -->
-      <div class="col-md-12">
-        <% if @current_project.present? %>
-          <%= tag_f.hidden_field :project_id, value: @current_project.id %>
-          <%= render 'projects/project_card',
-                project: @current_project %>
-        <% else %>
-          <%= tag_f.select :project_id,
-                options_for_select(
-                  @projects.map { |p| ["#{p.code}: #{p.title}", p.id] },
-                  tag.project_id
-                ),
-                { class: 'form-select', required: true } %>
-        <% end %>
+      <div class="row">
+        <% project = tag.persisted? ? tag.project : current_project %>
+        <%= render 'projects/project_card',
+              project: project %>
       </div>
 
       <!-- Stage -->
@@ -55,7 +46,7 @@
         <%= tag_f.select :discipline_id,
               options_for_select(
                 @disciplines.map { |d|
-                  ["#{t("discipline.#{d.code.downcase.to_sym}.code",
+                  ["#{t("discipline.#{d.code}.label",
                     default: d.code)}: #{t("discipline.#{d.code.downcase.to_sym}.name",
                     default: d.code)}", d.id]
                 },

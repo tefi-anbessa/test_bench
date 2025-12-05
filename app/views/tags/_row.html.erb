@@ -9,18 +9,17 @@
   <td><%= t.location %></td>
   <td><%= t.notes %></td>
   <td>
-    <% if t.tagable_type.present? %>
-      <% text = t.tagable_type.tableize.singularize %>
+    <% if t.tagable_type.present? && Tag.tagable_types.include?(t.tagable_type)%>
       <%= t.tagable_type.constantize.model_name.human %>
       <% if t.tagable.present? %>
-        <%= link_to eval("#{text}_path(#{t.tagable_id})"),
+        <%= link_to t.tagable,
             class: "btn btn-sm btn-outline-secondary mb-2 icon-link",
-            title: t('show.linked', model: text) do %>
+            title: t('show.linked', model: t.tagable_type.constantize.model_name.human) do %>
               <%== bs_icon('box-arrow-down-right') %>
             <% end %>
       <% else %>
         <% if policy(t.tagable_type.constantize).new? %>
-          <% resource = t.tagable_type.tableize.singularize %>
+          <% resource = t.tagable_type.constantize.model_name.singular %>
           <%= link_to eval("new_tag_#{resource}_path(#{t.id})"),
               class: "btn btn-sm btn-outline-primary mb-2 icon-link",
               title: t('actions.link', resource: resource) do %>

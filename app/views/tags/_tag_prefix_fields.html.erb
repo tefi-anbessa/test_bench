@@ -1,9 +1,6 @@
-<% if tag.present? && tag.prefix.present? %>
-  <% schema = tag.prefix_constants %>
+<% if tag.present? %>
+  <% schema = tag.discipline&.prefix_schema %>
   <% parts = tag.prefix_parts || {} %>
-<% elsif tag.present? && tag.discipline_id.present? %>
-  <% schema = Tag.discipline_prefix_constants(tag.discipline_id) %>
-  <% parts = {} %>
 <% else %>
   <% schema = nil %>
   <% parts = {} %>

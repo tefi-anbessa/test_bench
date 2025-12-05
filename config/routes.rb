@@ -29,8 +29,8 @@ Rails.application.routes.draw do
     # Tagables override index from the shallow nesting under tags, 
     # there is no sense in nesting a 1:1 relationship.
     namespace :electrical do
-      # Provide for admins to list cable_types full catalog outwith project context
-      resources :cable_types, only: [:index]
+      # Provide for admins to create and list cable_types full catalog outwith project context
+      resources :cable_types, only: [:index, :new, :create]
       resources :cables, :motors, :light_ccts, 
                 :socket_ccts, only: [:index, :new, :create]
       resources :switchboards, only: [:index, :new, :create] do
@@ -49,6 +49,9 @@ Rails.application.routes.draw do
           resources :circuits, except: [:index]
         end
         resources :demands, except: [:index]
+      end
+      collection do
+        get :schema_data
       end
     end
 

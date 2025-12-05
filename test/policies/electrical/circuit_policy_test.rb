@@ -6,10 +6,6 @@ module Electrical
     def setup
       setup_resource_policy_test
     end
-    
-    def resource_class
-      Electrical::Circuit
-    end
 
     def create_resource(tag:)
       # Use circuit factory to create circuit with tag association, using default prefix and unique serial.
@@ -21,8 +17,6 @@ module Electrical
       build(:electrical_circuit, electrical_switchboard: create(:electrical_switchboard, tag: create(:tag, discipline: discipline)))
     end
 
-    def self.required_role
-      :electrical_designer
-    end
+    # All remaining setup and tests have been abstracted to ResourcePolicyTest and PolicyTestHelpers.
   end
 end

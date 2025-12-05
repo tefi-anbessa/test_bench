@@ -9,7 +9,7 @@ module Electrical
 
     # Default discipline for tagable models to reference back to this module
     def self.discipline_code
-      :elec
+      "elec"
     end
 
     def label

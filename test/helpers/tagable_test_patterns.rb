@@ -1,6 +1,6 @@
 
-# This module provides common test patterns for tagable controllers
-# Include this in your controller test and call the test methods you need
+# This module provides common test patterns for tagable controllers.
+# Include this in your controller test and all the test methods will run.
 module TagableTestPatterns
   extend ActiveSupport::Concern
 
@@ -24,7 +24,7 @@ module TagableTestPatterns
     @team_member.grant(:team_member, @project)
 
     # Factory default unique tag will be "A:AA-0001"
-    @gp_tag = create(:tag, :unique_tag, project: @project, discipline: @resource_discipline)
+    @gp_tag = create(:tag, :unique_tag, discipline: @resource_discipline)
     @request.env["devise.mapping"] = Devise.mappings[:user]
   end
 
@@ -39,6 +39,10 @@ module TagableTestPatterns
     @resource = create(resource_class.model_name.singular, tag: @assigned_tag)
     # Set up an unassigned tag for create and update tests
     @unassigned_tag = create(:tag, serial: 1002,  discipline: @resource_discipline)
+    # Set a class name that is not the current resource class for testing type check
+    @wrong_tagable_type = resource_class.name == "Electrical::Switchboard" ?
+     "Electrical::Motor" : 
+     "Electrical::Switchboard"
   end
 
   # Common test patterns used for all tagable controller tests
@@ -249,14 +253,16 @@ module TagableTestPatterns
   def test_team_member_cannot_update
     sign_in @team_member
     original_value = @resource.send(update_attribute_name)
-    patch :update, params: update_params
+    patch :update, params: 
+      { id: @resource.id, resource_name => { update_attribute_name => updated_attribute_value } }
     assert_forbidden
     assert_equal original_value, @resource.reload.send(update_attribute_name)
   end
 
   def test_accredited_team_member_can_update
     sign_in @accredited_team_member
-    patch :update, params: update_params
+    patch :update, params: 
+      { id: @resource.id, resource_name => { update_attribute_name => updated_attribute_value } }
     assert_equal updated_attribute_value, @resource.reload.send(update_attribute_name)
     assert_redirected_to resource_path(@resource)
     assert_successful_update_flash_message
@@ -307,11 +313,16 @@ module TagableTestPatterns
 
   # These methods must be implemented by the including test class
   def params_with_existing_tag
-    raise NotImplementedError, "Including class must implement params_with_existing_tag"
+    { tag_id: @unassigned_tag.id, resource_name => valid_resource_params }
   end
 
   def params_with_new_tag
-    raise NotImplementedError, "Including class must implement params_with_new_tag"
+    { resource_name => { tag: { prefix: @gp_tag.prefix,
+                                discipline_id: @resource_discipline.id,
+                                serial: @gp_tag.serial + 1,
+                                suffix: '',
+                                service: 'Test motor',
+                                stage: 1 }, **valid_resource_params } }
   end
 
   def params_with_invalid_tag_id

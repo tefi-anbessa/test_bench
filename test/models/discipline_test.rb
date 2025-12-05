@@ -52,7 +52,8 @@ class DisciplineTest < ActiveSupport::TestCase
       @discipline.code = code
       refute @discipline.valid?, "#{code} should not be a valid code"
       # puts "Code: #{code}, Errors: #{@discipline.errors[:code]}"
-      assert_includes @discipline.errors[:code], I18n.t("activerecord.errors.messages.invalid_symbol", 
+      assert_includes @discipline.errors[:code], 
+        I18n.t("activerecord.errors.models.discipline.attributes.code.invalid_symbol", 
         model: "Discipline",
         attribute: "Code"
       )
@@ -86,23 +87,6 @@ class DisciplineTest < ActiveSupport::TestCase
     @discipline.name = "A" * 51
     refute @discipline.valid?
     assert_includes @discipline.errors[:name], I18n.t("errors.messages.too_long", count: 50)
-  end
-  
-  test "code getter and setter handle valid input types" do
-    # Test string input
-    @discipline.code = "test"
-    assert_equal :test, @discipline.code
-    assert_equal "test", @discipline[:code]
-
-    # Test symbol input
-    @discipline.code = :another_test
-    assert_equal :another_test, @discipline.code
-    assert_equal "another_test", @discipline[:code]
-
-    # Test with numbers and underscores
-    @discipline.code = "test_123"
-    assert_equal :test_123, @discipline.code
-    assert_equal "test_123", @discipline[:code]
   end
 
   test "prefix_schema must be present" do

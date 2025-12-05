@@ -9,10 +9,10 @@ module CurrentProjectConcern
     private
     
     def set_current_project(project)
+      cookie_name = "project_id_user_#{current_user.id}"
       if project
         @current_project = project
         session[:project_id] = project.id
-        cookie_name = "project_id_user_#{current_user.id}"
         cookies.signed[cookie_name] = {
           value: project.id,
           expires: 1.year.from_now,
@@ -23,8 +23,7 @@ module CurrentProjectConcern
       else
         @current_project = nil
         session.delete(:project_id)
-        cookies.delete(:project_id)
-        
+        cookies.delete(cookie_name)
       end
     end
 
@@ -57,7 +56,8 @@ module CurrentProjectConcern
       return if project_selected?
       # debugger
       store_location_for_project(request.fullpath) if request.get?
-      redirect_to select_projects_path, alert: 'Please select a project to continue.' #TODO: internationalize
+      flash[:alert] = t('projects.required')
+      redirect_to select_projects_path
     end
     
     # Store location for project navigation

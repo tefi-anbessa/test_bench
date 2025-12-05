@@ -88,8 +88,9 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 
 - Constants in Rails applications are the subject of much debate in the forums. The understanding of what should be constant varies widely.
 - The context for this application includes:
-   - engineering and scientific constants that are indepedent of the application, such as standard ratings for circuit breakers, cable sizes, etc.
+   - Engineering and scientific constants that are indepedent of the application, such as standard ratings for circuit breakers, cable sizes, etc.
    - Role Based Access Control (RBAC) system configuration.
+   - Default setup for disciplines and associated prefix schemata.
 - Refer to docs/CONSTANTS.md for details on the constants management system implemented for this application.
 
 ### MVC Guidelines
@@ -185,9 +186,9 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 
 ### Form Design
 
-   - Use bootstrap buttons wherever possible for consistent appearance and behavior.
-   - Use bootstrap card format wherever applicable, for consistent appearance.
-   - Make use of the reusable collapsible card (with js controller) for ancilliary information relevant to the form but not for modification. e.g. Cable form includes a collapsible card for cable type, showing further details of the cable type.
+- Use bootstrap buttons wherever possible for consistent appearance and behavior.
+- Use bootstrap card format wherever applicable, for consistent appearance.
+- Make use of the reusable collapsible card (with js controller) for ancilliary information relevant to the form but not for modification. e.g. Cable form includes a collapsible card for cable type, showing further details of the cable type.
 
 ### Icons
 
@@ -217,7 +218,6 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - Flag icons are used to assist with locale/language selection.
   - The gem rails-icons is used with the library 'flags' to provide the icons.
   
-
 ## Known Issues
 
 ### Pagination
@@ -325,6 +325,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [x] Improve implementation of Discipline model, including translation. Consider using constants hash for each project.
 - [ ] Consider changing all delete links to use turbo to prevent page refresh.
 - [ ] Replace devise views with bespoke views in the style of the rest of the application.
+- [ ] Refactor RBAC system with functional roles limited to project scope.
 
 ## Potential Features
 
