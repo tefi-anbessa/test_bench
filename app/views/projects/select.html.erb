@@ -9,6 +9,16 @@
   <%= bootstrap_form_tag url: set_projects_path, method: :post do |f| %>
     <div class="d-flex flex-row mb-1">
       <div class="p-2 me-1 form-field">
+        <div class="actions">
+          <button type="submit" class="btn btn-primary">
+            <%= yield(:button_text) %>
+            <%== bs_icon('save') %>
+          </button>
+          <%= link_to (session[:project_return_to] || root_path), 
+                    class: 'btn btn-warning ms-2' do %>
+            <span class="me-1"><%== bs_icon('x-square') %></span> <%= t('.cancel') %>
+          <% end %>
+        </div>
         <% @options.each do |option| %>
           <div class="form-check">
             <%= f.radio_button :project_id, 
@@ -19,17 +29,6 @@
           </div>
         <% end %>
       </div>
-    </div>
-    
-    <div class="actions">
-      <button type="submit" class="btn btn-primary">
-        <%= yield(:button_text) %>
-        <%== bs_icon('save') %>
-      </button>
-      <%= link_to (session[:project_return_to] || root_path), 
-                 class: 'btn btn-warning ms-2' do %>
-        <span class="me-1"><%== bs_icon('x-square') %></span> <%= t('.cancel') %>
-      <% end %>
     </div>
   <% end %>
 </div>

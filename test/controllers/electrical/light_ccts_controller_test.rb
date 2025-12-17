@@ -39,7 +39,7 @@ module Electrical
             prefix: 'EL',
             serial: 2002,
             suffix: '',
-            service: 'Another test light circuit',
+            service: 'PARAMS WITH NEW TAG',
             stage: 1
           }
         }

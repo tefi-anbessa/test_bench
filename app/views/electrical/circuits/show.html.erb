@@ -71,7 +71,7 @@
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
               <% if policy(@circuit).edit? %>
-                <%= link_to edit_circuit_path(@circuit),
+                <%= link_to edit_electrical_circuit_path(@circuit),
                       class: "btn btn-outline-warning",
                       title: t('actions.edit') do %>
                   <%== bs_icon('pencil-square') %>
@@ -106,7 +106,7 @@
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
             <!-- Switchboard Card -->
               <div class="row g-3 mb-3">
-                <%= render 'electrical/switchboards/switchboard', object: @circuit.electrical_switchboard %>
+                <%= render 'electrical/switchboards/card', object: @circuit.electrical_switchboard %>
               </div>
         
             <!-- Circuit Details Card -->
@@ -169,7 +169,7 @@
                         <% text = t("activerecord.models.cable") %>
                         <div class="d-flex justify-content-between align-items-center">
                           <span><%= @circuit.feeder.label %></span>
-                          <%= link_to cable_path(@circuit.feeder),
+                          <%= link_to @circuit.feeder,
                                 class: "btn btn-sm btn-outline-secondary mb-2",
                                 title: t('show.linked', model: text) do %>
                                   <%== bs_icon('link-45deg') %>
@@ -194,7 +194,7 @@
                         <% text = t("activerecord.models.demand") %>
                         <div class="d-flex justify-content-between align-items-center">
                           <span><%= @circuit.demand.label %></span>
-                          <%= link_to demand_path(@circuit.demand),
+                          <%= link_to @circuit.demand,
                                 class: "btn btn-sm btn-outline-secondary mb-2",
                                 title: t('show.linked', model: text) do %>
                                   <%== bs_icon('link-45deg') %>

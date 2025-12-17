@@ -31,7 +31,7 @@ en:
     switchboards:
       index:
         title:            "Switchboards"
-        header:           "Switchboards Schedule"
+        header:           "Switchboards Schedule for %{project}"
       edit:
         title:            "Edit Switchboard"
         header:           "Edit Switchboard: %{label}"
@@ -45,7 +45,7 @@ en:
     circuits:
       index:
         title:            "Circuits"
-        header:           "Circuits Schedule"
+        header:           "%{switchboard} Circuits Schedule"
       edit:
         title:            "Edit Circuit"
         header:           "Edit Circuit: %{label}"
@@ -73,7 +73,7 @@ en:
     socket_ccts:
       index:
         title:            "Socket Circuits"
-        header:           "Socket Circuits Schedule"
+        header:           "Socket Circuits Schedule for %{project}"
       edit:
         title:            "Edit Socket Circuit"
         header:           "Edit Socket Circuit: %{label}"
@@ -87,7 +87,7 @@ en:
     light_ccts:
       index:
         title:            "Light Circuits"
-        header:           "Light Circuits Schedule"
+        header:           "Light Circuits Schedule for %{project}"
       edit:
         title:            "Edit Light Circuit"
         header:           "Edit Light Circuit: %{label}"
@@ -101,7 +101,7 @@ en:
     demands:
       index:
         title:            "Load List"
-        header:           "Load List"
+        header:           "Load List for %{project}"
       edit:
         title:            "Edit Load"
         header:           "Edit Load for %{label}"

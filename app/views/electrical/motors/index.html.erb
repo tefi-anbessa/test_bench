@@ -1,6 +1,6 @@
 <% provide(:title, t('.title')) %>
 <div class="container mt-3 mx-auto">
-  <!-- Motor Header Card -->
+  <!-- Motor Schedule Card Header -->
   <div class="card mb-4">
     <div class="card-header p-2">
       <div class="d-flex justify-content-between align-items-center">
@@ -19,11 +19,14 @@
               aria: { label: t('actions.new') },
               title: t('actions.new') do %>
               <%== bs_icon('plus-square-fill') %>
-              <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.motor')].join(' ') %></span>
+              <span class="ms-1">
+                <%= [t('actions.new'), t('activerecord.models.motor')].join(' ') %>
+              </span>
             <% end %>
         <% end %>
       </div> <!-- end of d-flex -->
     </div> <!-- end of card header -->
+    
     <div class="card-body">
       <div class="row search-form">
         <%= search_form_for @q do |f| %>
@@ -42,14 +45,70 @@
           <%= f.search_field :speed_rated_eq,
                 class: "search_field",
                 placeholder: t('activerecord.attributes.motor.speed_rated') %>
+          <%= f.search_field :notes_cont,
+                class: "search_field",
+                placeholder: t('activerecord.attributes.motor.notes') %>
           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
             <%== bs_icon('search') %>
           <% end %>
         <% end %>
       </div>
+
+      <!-- Broken and incomplete links -->
+      <% unless @link_broken.empty? %>
+        <table id='link_broken' class='table table-responsive table-condensed table-hoverable table-bordered' >
+          <thead>
+            <tr class="table-danger">
+              <th colspan="9">
+                <%= t('index.link_broken', models: t("activerecord.models.motor").tableize) %>
+              </th>
+            </tr>
+            <%= render 'tags/header' %>
+          </thead>
+          <tbody>
+            <% @link_broken.each do |tag| %>
+              <%= render 'tags/row', t: tag %>
+            <% end %>
+          </tbody>
+        </table>
+      <% end %>
+      <% unless @link_incomplete.empty? %>
+        <table id='link_incomplete' class='table table-responsive table-condensed table-hoverable table-bordered' >
+          <thead>
+            <tr class="table-warning">
+              <th colspan="9">
+                <%= t('index.link_incomplete', models: t("activerecord.models.motor").tableize) %>
+              </th>
+            </tr>
+            <%= render 'tags/header' %>
+          </thead>
+          <tbody>
+            <% @link_incomplete.each do |tag| %>
+              <%= render 'tags/row', t: tag %>
+            <% end %>
+          </tbody>
+        </table>
+      <% end %>
+
+      <!-- Motors -->
       <table id='motors' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
         <%= render 'header' %>
         <tbody>
+          <% unless @orphans.empty? %>
+            <tr class="table-danger">
+              <td colspan="<%= 10 + (current_project ? 0 : 1) %>">
+                <%= t('index.orphans', models: t("activerecord.models.motor").tableize) %>
+              </td>
+            </tr>
+            <% @orphans.each do |row| %>
+              <%= render 'row', row: row %>
+            <% end %>
+            <tr class="table-success">
+              <td colspan="<%= 10 + (current_project ? 0 : 1) %>">
+                <%= t('.title') %>
+              </td>
+            </tr>
+          <% end %>
           <% @motors.each do |row| %>
             <%= render 'row', row: row %>
           <% end %>

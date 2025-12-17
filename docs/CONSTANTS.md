@@ -3,12 +3,14 @@
 ## Implementation Choice
 
 Constants in Rails applications are the subject of much debate in the forums. The understanding of what should be constant varies widely.
-The context for this application includes:
-   * Engineering and scientific constants that are indepedent of the application
-   * Role based access control (RBAC) system
-   * System configuration
-   
-The commonly used options for implementing constants are:
+The context for this application includes
+
+* Engineering and scientific constants that are indepedent of the application
+* Role based access control (RBAC) system
+* System configuration
+
+The commonly used options for implementing constants are
+
 1. Hard code constants in the application, usually in model definitions.
    - Pro:
       - Speed: fast to access - predefined variables
@@ -36,7 +38,7 @@ The commonly used options for implementing constants are:
 - The code has been tweaked to allow the hash parsing to end on an array as well as a hash. This allows arrays for floating point numbers (primarily for electrical selectors).
 - The initializer will include all correctly formatted files found under config/constants. Contributers to constants are required to ensure that keys don't clash.
 
-## Usage
+## Use Cases
 
 In this application, constants have been used for a variety of cases.
 
@@ -44,9 +46,9 @@ In this application, constants have been used for a variety of cases.
 
 The role based access control system uses constants to restrict the allowed role names. This ensures consistent usage and simple understanding. Systems where users can define new roles soon get out of hand.
 
-Roles are defined in 
+Roles are defined in  
 `config/constants/role.yml`
-and the Role class implements helper methods such as 
+and the Role class implements helper methods such as
 `valid_roles_for(resource_type = nil, _resource_id = nil)`
 for building the RBAC UI.
 
@@ -61,20 +63,20 @@ Projects must define their own set of disciplines, but this can be done simply b
 
 ### Prefixes
 
-A fundamantal strength of the application is requiring tag prefixes to conform to a schema, to prevent proliferation of individual choices for the same object type. Historically different schemata have been used by different engineering companies and their disciplines, with the ISA standard 5.1 used for tagging instruments probably being the originator of the concept. This application allows each discipline on each project to define their own prefix schema, but provides a number of 'standard' schemata as well, which can be used as they are, or copied and modified. 
+A fundamantal strength of the application is requiring tag prefixes to conform to a schema, to prevent proliferation of individual choices for the same object type. Historically different schemata have been used by different engineering companies and their disciplines, with the ISA standard 5.1 used for tagging instruments probably being the originator of the concept. This application allows each discipline on each project to define their own prefix schema, but provides a number of 'standard' schemata as well, which can be used as they are, or copied and modified.
 
-"Standard' prefix schemata are defined in 
+"Standard' prefix schemata are defined in
 `config/constants/prefix.yml`
 
 ### Tagables
 
-The application uses tags as the core part of all engineering elements. Tags can have a "tagable" model attached, which extends the information linked to the tag, to include the specific information relevant to the type of element. The list of tag types or tagable models is retained in constants. This is largely managed by the system, and is not for user input.
+The application uses tags as the core part of all engineering elements. Tags can have a "tagable" model attached, which extends the information linked to the tag, to include the specific information relevant to the type of element. The list of tag types or tagable models is retained in constants. This is managed by the generators, and is not for user input.
 
 `test_bench/config/constants/tagable.yml`
 
 ### Modules
 
-Each module implemented has an associated constants file, where it saves the options for enumerated values, plus any other engineering contants that are not related to programming but are needed for the module's functionality. Enumerated values (enums) are used for populating drop down lists, which are widely used in the application to ensure ease of use and consistency of data.
+Each module implemented has an associated constants file, where it saves the options for enumerated values, plus any other engineering constants that are not related to programming but are needed for the module's functionality. Enumerated values (enums) are used for populating drop down lists, which are widely used in the application to improve usabiity and consistency of data.
 
 For example, electrical module has constants for phase designation, protection: device/rating/curve/elcb, conductor materials, insulator materials, armour materials, motor type, and so on. These are stored in
 
@@ -97,4 +99,3 @@ yields a hash:
 ```=> {:PVC=>0, :XLPE=>1, :LSZH=>2, :EPR=>3, :PUR=>4}```
 which can be used in the `class: CableType` model definition of an insulation field:
 ```enum :insulation, insulation_materials, prefix: true```
-

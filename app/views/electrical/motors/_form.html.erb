@@ -24,9 +24,16 @@
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
             <!-- Tag -->
-            <%= f.fields_for tag do |tag_f| %>
-              <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
-            <% end %>
+            <div class="card mb-1">
+              <% if tag.persisted? %>
+                <%= render 'tags/card', tag: tag %>
+                <%= hidden_field_tag :tag_id, tag.id %>
+              <% else %>
+                <%= f.fields_for tag do |tag_f| %>
+                  <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
+                <% end %>
+              <% end %>
+            </div>
 
             <!-- Motor Details -->
             <div class="card mb-1">

@@ -1,79 +1,105 @@
 <% provide(:title, t('.title')) %>
-<nav class="navbar bg-body-tertiary">
-  <div class="container">
-    <ul class="navbar-nav me-auto mb-2 mb-lg-0 flex-row">
-      <% if policy(Electrical::Cable).new? %>
-        <li class="nav-item">
-          <%= link_to new_electrical_cable_path, class: "btn btn-primary actions",
-                aria: { label: t('actions.new') },
-                title: t('actions.new')  do %>
-            <%== bs_icon('plus-square-fill') %>
-            <%= t('actions.new') + " " + t('activerecord.models.cable') %>
+<div class="container mt-3 mx-auto">
+  <!-- Cable Schedule Card Header-->
+  <div class="card">
+    <div class="card-header p-2">
+      <div class="d-flex justify-content-between align-items-center">
+        <!-- Header Text (Left) -->
+        <div class="ms-2">
+          <% project_text = current_project.present? ? 
+          [current_project.class.model_name.human, current_project.label].join(': ') : 
+          t('index.all', models: t('activerecord.models.project').pluralize) %>
+          <h5 class="mb-0"><%= t('.header', project: project_text) %></h5>
+        </div>
+
+        <!-- New Button (Right) -->
+        <% if policy(Electrical::Cable).new? %>
+            <%= link_to new_electrical_cable_path, 
+              class: "btn btn-outline-primary actions",
+              aria: { label: t('actions.new') },
+              title: t('actions.new') do %>
+              <%== bs_icon('plus-square-fill') %>
+              <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.cable')].join(' ') %></span>
+            <% end %>
+        <% end %>
+      </div> <!-- end of d-flex -->
+    </div> <!-- end of card header -->
+    <div class="card-body">
+      <div class="row search-form">
+        <%= search_form_for @q do |f| %>
+          <%= f.search_field :electrical_cable_type_code_cont,
+                class: "search_field",
+                placeholder: t('activerecord.models.electrical/cable_type') %>
+          <%= f.button class: "btn btn-outline-primary btn-sm mb-1", type: :submit do %>
+            <%== bs_icon('search') %>
           <% end %>
-        </li>
+        <% end %>
+      </div>
+
+      <!-- Broken and incomplete links -->
+      <% unless @link_broken.empty? %>
+        <table id='link_broken' class='table table-responsive table-condensed table-hoverable table-bordered' >
+          <thead>
+            <tr class="table-danger">
+              <td colspan="<%= 9 + (current_project ? 1 : 0) %>">
+                <%= t('index.link_broken', models: t("activerecord.models.cable").tableize) %>
+              </th>
+            </tr>
+            <%= render 'tags/header' %>
+          </thead>
+          <tbody>
+            <% @link_broken.each do |tag| %>
+              <%= render 'tags/row', t: tag %>
+            <% end %>
+          </tbody>
+        </table>
       <% end %>
-      <span class="nav-text ms-3 me-3 h2">
-        <%= t('.header')%>
-      </span>
-    </ul>
-  </div>
-</nav>
+      <% unless @link_incomplete.empty? %>
+        <table id='link_incomplete' class='table table-responsive table-condensed table-hoverable table-bordered' >
+          <thead>
+            <tr class="table-warning">
+              <td colspan="<%= 9 + (current_project ? 1 : 0) %>">
+                <%= t('index.link_incomplete', models: t("activerecord.models.cable").tableize) %>
+              </td>
+            </tr>
+            <%= render 'tags/header' %>
+          </thead>
+          <tbody>
+            <% @link_incomplete.each do |tag| %>
+              <%= render 'tags/row', t: tag %>
+            <% end %>
+          </tbody>
+        </table>
+      <% end %>
 
-<div class = "container">
-  <% unless @link_errors.empty? %>
-    <table id='tags' class='table table-responsive table-condensed table-hoverable table-bordered' >
-      <%= render 'tags/tag_header' %>
-      <tbody>
-        <% unless @link_broken.empty? %>
-          <tr class="table-danger">
-            <td colspan="4">
-              <%= t('index.link_broken', models: t("activerecord.models.cable").tableize) %>
-            </td>
-          </tr>
-          <% @link_broken.each do |tag| %>
-            <%= render 'tags/tag_row', t: tag %>
+      <!-- Cables -->
+      <table id='cables' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
+        <%= render 'header' %>
+        <tbody>
+          <% unless @orphans.empty? %>
+            <tr class="table-danger">
+              <td colspan="10">
+                <%= t('index.orphans', models: t("activerecord.models.cable").tableize) %>
+              </td>
+            </tr>
+            <% @orphans.each do |row| %>
+              <%= render 'row', row: row %>
+            <% end %>
+            <tr class="table-success">
+              <td colspan="10">
+                <%= t('.title') %>
+              </td>
+            </tr>
           <% end %>
-        <% end %>
-        <% unless @link_incomplete.empty? %>
-          <tr class="table-warning">
-            <td colspan="4">
-              <%= t('index.link_incomplete', models: t("activerecord.models.cable").tableize) %>
-            </td>
-          </tr>
-          <% @link_incomplete.each do |tag| %>
-            <%= render 'tags/tag_row', t: tag %>
+          <% @cables.each do |row| %>
+            <%= render 'row', row: row %>
           <% end %>
-        <% end %>
-      </tbody>
-    </table>
-  <% end %>
-
-  <div class = 'listing'>
-    <%== pagy_bootstrap_nav(@pagy) %>
-    <table id='cables' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
-      <%= render 'cable_header', cable: @cables.first %>
-      <tbody>
-        <% unless @orphans.empty? %>
-          <tr class="table-danger">
-            <td colspan="10">
-              <%= t('index.orphans', models: t("activerecord.models.cable").tableize) %>
-            </td>
-          </tr>
-          <% @orphans.each do |cable| %>
-            <%= render 'cable_row', row: cable %>
-          <% end %>
-        <% end %>
-        <tr class="table-success">
-          <td colspan="10">
-            <%= t('.title') %>
-          </td>
-        </tr>
-        <% @cables.each do |cable| %>
-          <%= render 'cable_row', row: cable %>
-        <% end %>
-      </tbody>
-    </table>
-    <%== pagy_bootstrap_nav(@pagy) %>
-    <%== pagy_info(@pagy) %>
-  </div>
-</div>
+        </tbody>
+      </table>
+    </div> <!-- card body -->
+    <div class="card-footer">
+      <%== pagy_bootstrap_nav(@pagy) %>
+      <%== pagy_info(@pagy) %>
+    </div> <!-- card footer -->
+  </div> <!-- card -->
+</div> <!-- container -->

@@ -397,7 +397,7 @@ module ProjectAssistant
         assert_match(/module\s+#{@module_name}/, content)
         assert_match(/class\s+#{@tagable_name.pluralize}ControllerTest\s*<\s*ActionController::TestCase/, content)
         assert_match(/include TagableTestPatterns/, content)
-        assert_match(/include TagableTestPatterns/, content)
+        assert_match(/include Devise::Test::ControllerHelpers/, content)
         @fields.select { |field| field[:options].include?(:required) }.each do |field|
           assert_match(/#{field[:name]}:/, content)
         end
@@ -409,6 +409,20 @@ module ProjectAssistant
       tagable_file = File.join(destination_root, 'config/constants/tagable.yml') 
       assert_file tagable_file do |content|
         assert_match(/# #{@module_name}\n\s*-\s+#{@class_name}\n/, content)
+      end
+    end
+
+    test "creates system test" do
+      run_generator(@args)
+      system_test_file = File.join(destination_root, 'test', 'system', @folder_name, 
+        "#{@plural_name}_system_test.rb")
+      assert_file system_test_file do |content|
+        assert_match(/module\s+#{@module_name}/, content)
+        assert_match(/class\s+#{@tagable_name.pluralize}SystemTest\s*<\s*ApplicationSystemTestCase/, content)
+        assert_match(/include TagableSystemTestPatterns/, content)
+        assert_match(/include Devise::Test::IntegrationHelpers/, content)
+        assert_match(/include Warden::Test::Helpers/, content)
+        assert_match(/include ActionView::Helpers::NumberHelper/, content)
       end
     end
   end

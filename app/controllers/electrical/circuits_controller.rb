@@ -5,12 +5,13 @@ module Electrical
     before_action :set_circuit, only: [:show, :edit, :update, :destroy]
     
     def index
+      authorize Electrical::Circuit
       if @switchboard.present?
-        @circuits = policy_scope(@switchboard.electrical_circuits).order(:serial)
+        @q = policy_scope(@switchboard.electrical_circuits).ransack(params[:q])
       else
-        @circuits = policy_scope(Electrical::Circuit).order(:serial)
+        @q = policy_scope(Electrical::Circuit).ransack(params[:q])
       end
-      authorize @circuits
+      @pagy, @circuits = pagy(@q.result)
     end
     
     def show

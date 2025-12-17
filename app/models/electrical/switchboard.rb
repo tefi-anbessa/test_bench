@@ -21,7 +21,7 @@ module Electrical
       end
 
       def self.ransackable_associations(auth_object = nil)
-        [ :electrical_circuits, :tag, :electrical_demand ]
+        [ :electrical_circuits, :tag, :tag_discipline, :tag_discipline_project, :electrical_demand ]
       end
 
   end

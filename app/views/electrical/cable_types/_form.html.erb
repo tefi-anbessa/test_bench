@@ -35,7 +35,7 @@
 
             <!-- Project card -->
             <% if @project && @project.persisted? %>
-              <%= render 'projects/project_card',
+              <%= render 'projects/card',
                     project: @project %>
               <%= f.hidden_field :project_id, value: @project.id %>
             <% else %>

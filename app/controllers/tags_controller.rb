@@ -28,7 +28,6 @@ class TagsController < ApplicationController
 
   # POST /tags or /tags.json
   def create
-    combine_prefix_parts
     @tag = authorize Tag.new(tag_params)
 
     respond_to do |format|
@@ -52,7 +51,6 @@ class TagsController < ApplicationController
   # PATCH/PUT /tags/1 or /tags/1.json
   def update
     authorize @tag
-    combine_prefix_parts
     respond_to do |format|
       if @tag.update(tag_params)
         format.html { redirect_to @tag, notice: "Tag was successfully updated." }
@@ -82,18 +80,6 @@ class TagsController < ApplicationController
     end
   end
 
-  # legacy code
-  # GET /tags/schema_data
-  def schema_data
-    discipline_id = params[:discipline_id]
-    return render json: {} unless discipline_id.present?
-    schema_data = Tag.schema_for_form(discipline_id)
-    respond_to do |format|
-      format.json { render json: schema_data }
-      format.any { render json: schema_data }
-    end
-  end
-
   private
 
     # [TODO] fix this to allow admin workflow for any project.
@@ -102,26 +88,18 @@ class TagsController < ApplicationController
         @project = current_project
       else
         @project = nil
+        @projects = policy_scope(Project)
       end
-      @projects = policy_scope(Project)
     end
 
     # Setup disciplines for the form selector
     def setup_disciplines
-      @disciplines = Discipline.all.select(:id, :code, :name).to_a
-    end
-
-    def combine_prefix_parts
-      return unless isa51_schema?
-      
-      parts = [
-        params[:tag][:measured_variable],
-        params[:tag][:modifier],
-        params[:tag][:function], 
-        params[:tag][:modifier_function]
-      ].compact
-      
-      params[:tag][:prefix] = parts.join('') if parts.any?
+      @disciplines = policy_scope(Discipline)
+        .joins(:project)
+        .select('projects.code as project_code, disciplines.id, disciplines.code')
+        .order('projects.code ASC, disciplines.code ASC')
+        .group_by(&:project_code)
+        .transform_values { |discs| discs.map { |d| [d.code, d.id] } }
     end
 
     def isa51_schema?

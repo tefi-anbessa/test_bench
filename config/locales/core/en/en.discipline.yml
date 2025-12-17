@@ -39,7 +39,7 @@ en:
       isa51: "ISA-5.1"
       dim1: "1 Dimension"
       dim2: "2 Dimensions"
-      alternate_inst: "Alternate ISA 5.1"
+      alternate_inst: "Alternate ISA-5.1"
     type:
       default: "Default"
       isa51: "ISA-5.1"

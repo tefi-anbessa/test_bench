@@ -14,7 +14,9 @@ Rails.application.routes.draw do
     resources :users, only: [:show, :index]
     
     resources :projects do
-      resources :disciplines, shallow: true
+      resources :disciplines, shallow: true do
+        get :schema, on: :member, constraints: { format: 'json' }
+      end
       namespace :electrical do
         resources :cable_types, shallow: true
       end
@@ -49,9 +51,6 @@ Rails.application.routes.draw do
           resources :circuits, except: [:index]
         end
         resources :demands, except: [:index]
-      end
-      collection do
-        get :schema_data
       end
     end
 

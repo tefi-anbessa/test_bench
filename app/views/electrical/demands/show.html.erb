@@ -106,19 +106,20 @@
 
             <!-- Demandable Card -->
             <% model = @demand.demandable_type.tableize.singularize %>
-            <% partial = "#{model.pluralize}/#{model}" %>
+            <% partial = "#{model.pluralize}/card" %>
             <% if lookup_context.exists?(partial, [], true) %>
               <div class="row g-3 mb-3">
                 <%= render partial, object: @demand.demandable %>
               </div>
             <% else %>
-              <div class="row mb-1"><% text = t("actions.back_to", model: model) %>
+              <div class="row mb-1">
+                <% text = t("actions.jump_to", model: model) %>
                 <% path = begin
                   polymorphic_path([@demand.demandable])
                 rescue NoMethodError, ActionController::UrlGenerationError
                   '#'
                 end %>
-                text = t("actions.back_to", model: model)
+                <% text = t("actions.jump_to", model: model) %>
                 <%= link_to path,
                     class: "btn btn-sm btn-outline-secondary me-2",
                     title: text do %>
@@ -139,7 +140,7 @@
                     </div>
                     <div class="col-8">
                       <% if @demand.circuit.present? %>
-                        <% text = t("activerecord.models.electrical.circuit") %>
+                        <% text = t("activerecord.models.electrical/circuit") %>
                         <div class="d-flex justify-content-between align-items-center">
                           <span><%= @demand.circuit.label %></span>
                           <%= link_to @demand.circuit,
@@ -151,7 +152,7 @@
                         </div>
                       <% else %>
                         <span class="text-muted">
-                          <%= t('show.unassigned', model: t("activerecord.models.electrical.circuit")) %>
+                          <%= t('show.unassigned', model: t("activerecord.models.electrical/circuit")) %>
                         </span>
                       <% end %>
                     </div>
@@ -164,7 +165,7 @@
                     </div>
                     <div class="col-8">
                       <% if @demand.incomer.present? %>
-                        <% text = t("activerecord.models.electrical.cable") %>
+                        <% text = t("activerecord.models.electrical/cable") %>
                         <div class="d-flex justify-content-between align-items-center">
                           <span><%= @demand.incomer.label %></span>
                           <%= link_to @demand.incomer,

@@ -5,13 +5,8 @@ module Electrical
       record
     end
     
-    # Get the parent switchboard
-    def switchboard
-      circuit&.electrical_switchboard
-    end
-    
     def self.required_role
-      :electrical_designer
+      Electrical::Circuit.required_role
     end
 
     class Scope < ApplicationPolicy::Scope
@@ -31,8 +26,7 @@ module Electrical
       # Protect against url injection
       return false if user.nil?
       if current_project.present?
-        user_is_accredited?(current_project) && 
-          switchboard&.tag&.discipline&.project == current_project
+        user_is_accredited?(current_project)
       else
         # Admin and app_owner can create when current project is nil
         user&.is_admin? || user&.is_app_owner?
@@ -44,9 +38,9 @@ module Electrical
       return false if user.nil?
       if current_project.present?
         user_is_accredited?(current_project) && 
-          switchboard&.tag&.discipline&.project == current_project
+          circuit&.electrical_switchboard&.tag&.discipline&.project == current_project
       else
-        # Admin and app_owner can create when current project is nil
+        # Admin and app_owner can update when current project is nil
         user&.is_admin? || user&.is_app_owner?
       end
     end

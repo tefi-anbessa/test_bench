@@ -2,7 +2,7 @@ class DisciplinesController < ApplicationController
   include RolesHelper
   before_action :authenticate_user!
   before_action :set_project, only: %i[ index new create ]
-  before_action :set_discipline, only: %i[ show edit update destroy ]
+  before_action :set_discipline, only: %i[ show edit update destroy schema ]
 
   # GET /disciplines or /disciplines.json
   def index
@@ -90,6 +90,15 @@ class DisciplinesController < ApplicationController
     else
         flash.now[:alert] = I18n.t('flash.destroy.alert', resource_name: I18n.t('activerecord.models.discipline'))
         redirect_back_or_to project_disciplines_url(@project)
+    end
+  end
+
+  # GET /discipline/1/schema
+  def schema
+    return render json: {} unless @discipline.present?
+    respond_to do |format|
+      format.json { render json: @discipline.schema_for_form }
+      format.any { render json: @discipline.schema_for_form }
     end
   end
 

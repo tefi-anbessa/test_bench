@@ -25,7 +25,7 @@
             <!-- Tag -->
             <div class="card mb-1">
               <% if tag.persisted? %>
-                <%= render 'tags/tag_card', tag: tag %>
+                <%= render 'tags/card', tag: tag %>
                 <%= hidden_field_tag :tag_id, tag.id %>
               <% else %>
                 <%= f.fields_for tag do |tag_f| %>

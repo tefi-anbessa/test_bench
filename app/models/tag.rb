@@ -43,7 +43,7 @@ class Tag < ApplicationRecord
   end
 
   def long_label
-    "#{discipline.code}: #{full_tag}"
+    "#{discipline.label}: #{full_tag}"
   end
 
   # Track original values to detect changes
@@ -120,8 +120,8 @@ class Tag < ApplicationRecord
       else
         parts[:modifier_function] = nil
       end
-
       return parts
+
     when :dim1
       if schema[:prefixes]&.keys&.map(&:to_s)&.include?(chars)
         parts[:prefix] = chars
@@ -130,6 +130,7 @@ class Tag < ApplicationRecord
         return nil
       end 
       return parts
+
     when :dim2
       parts[:part1] = schema[:part1].keys.map(&:to_s).find { |p| prefix.start_with?(p) }
       return nil unless parts[:part1] # not a valid dim2 prefix
@@ -226,82 +227,6 @@ class Tag < ApplicationRecord
     # @return [Hash] Tags grouped by loop_id
     def self.grouped_by_loop
       all.group_by(&:loop_id)
-    end
-
-    def self.schema_for_form(discipline)
-      return {} unless discipline.present?
-
-      discipline_code = normalize_discipline_code(discipline)
-      discipline_data = Constants.tag.discipline.send(discipline_code&.to_sym) rescue nil
-
-      return {} unless discipline_data
-
-      schema_type = discipline_data[:prefix_schema]
-      prefix_data = discipline_data[:prefix]
-
-      case schema_type
-      when :dim1
-        { prefix_schema: :dim1, prefixes: build_prefixes_array(prefix_data) }
-      when :isa51
-        { prefix_schema: :isa51, **build_isa51_form_data(prefix_data) }
-      else
-        { prefix_schema: :none }
-      end
-    end
-
-    # Normalizes discipline input to a code string
-    def self.normalize_discipline_code(discipline)
-      case discipline
-      when Discipline
-        discipline.code.downcase
-      when Integer
-        Discipline.find(discipline).code.downcase
-      else
-        # Check if it's a string that represents an integer ID
-        if discipline.to_s =~ /^\d+$/
-          begin
-            Discipline.find(discipline.to_i).code.downcase
-          rescue ActiveRecord::RecordNotFound
-            discipline.to_s.downcase
-          end
-        else
-          discipline.to_s.downcase
-        end
-      end
-    end
-
-    # Builds form data for :dim1 schema
-    def self.build_prefixes_array(prefix_data)
-      prefix_data.map do |key, value|
-        [key, value] if key.is_a?(String) && key.length == 1
-      end.compact
-    end
-
-    # Builds form data for :isa51 schema
-    def self.build_isa51_form_data(prefix_data)
-      {
-        measured_variables: prefix_data[:measured_variables]&.map { |k, v| [k, v] } || [],
-        modifiers: prefix_data[:modifiers]&.map { |k, v| [k, v] } || [],
-        functions: build_functions_hash(prefix_data),
-        modifier_functions: prefix_data[:modifier_functions]&.map { |k, v| [k, v] } || []
-      }
-    end
-
-    # Builds nested functions hash for :isa51 schema
-    def self.build_functions_hash(prefix_data)
-      functions = {}
-
-      # Readout functions
-      if prefix_data[:readout_functions]
-        functions['Readout Functions'] = prefix_data[:readout_functions].map { |k, v| [k, v] }
-      end
-
-      # Output functions
-      if prefix_data[:output_functions]
-        functions['Output Functions'] = prefix_data[:output_functions].map { |k, v| [k, v] }
-      end
-
-      functions
     end
 
     def self.ransackable_attributes(auth_object = nil)

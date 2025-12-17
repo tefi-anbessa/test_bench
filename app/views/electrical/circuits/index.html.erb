@@ -1,114 +1,58 @@
 <% provide(:title, t('.title')) %>
-<nav class="navbar bg-body-tertiary">
-  <div class="container">
-    <ul class="navbar-nav me-auto mb-2 mb-lg-0 flex-row">
-      <% if @switchboard.present? %>
-        <% if policy(Electrical::Circuit).new? %>
-          <li class="nav-item">
-            <%= link_to new_electrical_switchboard_circuit_path(@switchboard), 
-                  class: "btn btn-primary actions",
-                  data: { turbo: false },
-                  aria: { label: t('actions.new') },
-                  title: t('actions.new') do %>
-              <%== bs_icon('plus-square-fill') %>
-              <%= [t('actions.new'), t('activerecord.models.circuit')].join(' ') %>
-            <% end %>
-          </li>
-        <% end %>
-      <% end %>
-      <% if @switchboard.present? %>
-        <span class="nav-text ms-3 me-3 h2">
-          <%= [t('.header'), @switchboard.label].join(' ') %>
-        </span>
-      <% else %>
-        <span class="nav-text ms-3 me-3 h2">
-          <%= t('.header') %>
-        </span>
-      <% end %>
-    </ul>
-  </div>
-</nav>
+<div class="container mt-3 mx-auto">
+  <!-- Motor Schedule Card Header -->
+  <div class="card mb-4">
+    <div class="card-header p-2">
+      <div class="d-flex justify-content-between align-items-center">
+        <!-- Header Text (Left) -->
+        <div class="ms-2">
+          <% text = @switchboard.present? ? 
+          [@switchboard.class.model_name.human, @switchboard.label].join(' ') : 
+          t('index.all', models: t('activerecord.models.switchboard').pluralize) %>
+          <h5 class="mb-0"><%= t('.header', switchboard: text) %></h5>
+        </div>
 
-<div class="container">
-  <div class='listing'>
-    <table id='circuits' class='table table-responsive table-condensed table-striped table-hoverable table-bordered'>
-      <thead>
-        <tr>
-          <th><%= t('activerecord.models.circuit') %></th>
-          <th><%= t('activerecord.attributes.circuit.phase') %></th>
-          <th><%= t('activerecord.attributes.circuit.device') %></th>
-          <th><%= t('activerecord.attributes.circuit.poles') %></th>
-          <th><%= t('activerecord.attributes.circuit.rating') %></th>
-          <th><%= t('activerecord.attributes.circuit.curve') %></th>
-          <th><%= t('activerecord.attributes.circuit.elcb') %></th>
-          <th><%= t('activerecord.attributes.circuit.contactor') %></th>
-          <th><%= t('activerecord.attributes.circuit.feeder') %></th>
-          <th><%= t('activerecord.attributes.circuit.demand') %></th>
-          <th class="text-center"><%= t('table.links') %></th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @circuits.each do |circuit| %>
-          <tr>
-            <td><%= circuit.label %></td>
-            <td><%= circuit.phase %></td>
-            <td><%= circuit.device %></td>
-            <td><%= circuit.poles %></td>
-            <td><%= circuit.rating %></td>
-            <td><%= circuit.curve %></td>
-            <td><%= circuit.elcb %></td>
-            <td><%= circuit.contactor ? bs_icon('check', height: '1em') : ' ' %></td>
-            <td>
-              <% if circuit.feeder.present? && policy(circuit.feeder).show? %>
-                <%= link_to circuit.feeder.label, cable_path(circuit.feeder) %>
-              <% else %>
-                <%= t("show.unassigned", model: t("activerecord.attributes.circuit.feeder")) %>
+        <!-- New Button (Right) -->
+        <% if @switchboard.present? %>
+          <% if policy(Electrical::Circuit).new? %>
+              <%= link_to new_electrical_switchboard_circuit_path(@switchboard), 
+                class: "btn btn-outline-primary actions",
+                aria: { label: t('actions.new') },
+                title: t('actions.new') do %>
+                <%== bs_icon('plus-square-fill') %>
+                <span class="ms-1">
+                  <%= [t('actions.new'), t('activerecord.models.circuit')].join(' ') %>
+                </span>
               <% end %>
-            </td>
-            <td>
-              <% if circuit.demand.present? && policy(circuit.demand).show? %>
-                <%= link_to circuit.demand.label, demand_path(circuit.demand) %>
-              <% else %>
-                <%= t("show.unassigned", model: t("activerecord.models.demand")) %>
-              <% end %>
-            </td>
-            <!-- Links -->
-            <td>
-              <% if policy(circuit).show? %>
-                <%= link_to electrical_circuit_path(circuit), class: "btn btn-secondary btn-sm icon-link",
-                      aria: { label: t('actions.show') },
-                      title: t('actions.show'),
-                      display: "inline" do %>
-                        <%== bs_icon('eye') %>
-                      <% end %>
-              <% end %>
-                  
-              <% if policy(circuit).edit? %>
-                <%= link_to edit_electrical_circuit_path(circuit), class: "btn btn-warning btn-sm icon-link",
-                      aria: { label: t('actions.edit') },
-                      title: t('actions.edit'),
-                      display: "inline"  do %>
-                        <%== bs_icon('pencil') %>
-                      <% end %>
-              <% end %>
-                  
-              <% if policy(circuit).destroy? %>
-                <%= link_to electrical_circuit_path(circuit), 
-                      method: :delete,
-                      data: { 
-                        turbo_method: :delete,
-                        turbo_confirm: t('actions.sure')
-                      },
-                      class: "btn btn-danger btn-sm icon-link",
-                      title: t('actions.delete') do %>
-                  <%== bs_icon('trash') %>
-                <% end %>
-              <% end %>
-            </td>
-          </tr>
+          <% end %>
         <% end %>
-      </tbody>
-    </table>
-  </div>
+        </div> <!-- end of d-flex -->
+    </div> <!-- end of card header -->
 
-</div>
+    <div class="card-body">
+      <div class="row search-form">
+        <%= search_form_for @q do |f| %>
+          <%= f.search_field :phase_cont,
+                class: "search_field",
+                placeholder: t('activerecord.attributes.circuit.phase') %>
+          <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
+            <%== bs_icon('search') %>
+          <% end %>
+        <% end %>
+      </div> <!-- end of search-form -->
+      
+      <table id='circuits' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
+        <%= render 'header' %>
+        <tbody>
+          <% @circuits.each do |row| %>
+            <%= render 'row', row: row %>
+          <% end %>
+        </tbody>
+      </table>
+    </div> <!-- end of card-body -->
+    <div class="card-footer">
+      <%== pagy_bootstrap_nav(@pagy) %>
+      <%== pagy_info(@pagy) %>
+    </div>
+  </div> <!-- end of card -->
+</div> <!-- end of container -->

@@ -24,16 +24,9 @@
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
             <!-- Tag -->
-            <div class="card mb-1">
-              <% if tag.persisted? %>
-                <%= render 'tags/tag_card', tag: tag %>
-                <%= hidden_field_tag :tag_id, tag.id %>
-              <% else %>
-                <%= f.fields_for tag do |tag_f| %>
-                  <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
-                <% end %>
-              <% end %>
-            </div>
+            <%= f.fields_for tag do |tag_f| %>
+              <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
+            <% end %>
 
             <!-- Cable Details -->
             <div class="card mb-1">
@@ -155,8 +148,7 @@
                     <%= f.text_area :notes,
                             label_col: "col-sm-3",
                             control_col: "col-sm-9",
-                            rows: 3,
-                            placeholder: t('activerecord.attributes.tag.notes_help') %>
+                            rows: 3 %>
                   </div>
                 </div> <!-- end div data controller -->
               </div> <!-- end cable card body -->

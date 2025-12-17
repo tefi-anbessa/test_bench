@@ -96,6 +96,10 @@ module ProjectAssistant
     def create_controller_test_file
       template "controller_test.rb.erb", "test/controllers/#{controller_file_path}_controller_test.rb"
     end
+    
+    def create_system_test_file
+      template "system_test.rb.erb", "test/system/#{controller_file_path}_system_test.rb"
+    end
          
     def update_constants
       # Update tagable.yml

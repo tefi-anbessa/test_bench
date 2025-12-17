@@ -2,20 +2,20 @@
     <% if d.tag.nil? %>
       <td class="table-danger"><%= t('table.missing', model: t("activerecord.models.tag")) %>: ID <%= d.id %></td>
     <% else %>
-      <td><%= link_to d.tag.full_tag, tag_path(d.tag) %></td>
+      <td><%= link_to d.tag.label, tag_path(d.tag) %></td>
     <% end %>
     <!-- circuit -->
     <td>
-      <% if d.circuit.present? %>
-        <%= link_to d.circuit.label, circuit_path(d.circuit) %>
+      <% if d.incomer&.from&.present? %>
+        <%= link_to d.incomer.from.long_label, d.incomer.from %>
       <% else %>
         <%= t('show.unassigned', model: t("activerecord.models.circuit")) %>
       <% end %>
     </td>
     <!-- incomer -->
     <td>
-      <% if d.incomer.present? %>
-        <%= link_to d.incomer.label, cable_path(d.incomer) %>
+      <% if d.incomer&.present? %>
+        <%= link_to d.incomer.label, d.incomer %>
       <% else %>
         <%= t('show.unassigned', model: t("activerecord.models.cable")) %>
       <% end %>
@@ -36,7 +36,7 @@
     <% end %>
     <td>
       <% if policy(d).show? %>
-        <%= link_to d, class: "btn btn-secondary btn-sm icon-link",
+        <%= link_to d, class: "btn btn-outline-info btn-sm icon-link",
               aria: { label: t('actions.show') },
               title: t('actions.show'),
               display: "inline" do %>
@@ -44,7 +44,7 @@
         <% end %>
       <% end %>
       <% if policy(d).edit? %>
-        <%= link_to edit_electrical_demand_path(d), class: "btn btn-warning btn-sm icon-link",
+        <%= link_to edit_electrical_demand_path(d), class: "btn btn-outline-warning btn-sm icon-link",
               aria: { label: t('actions.edit') },
               title: t('actions.edit'),
               display: "inline"  do %>
@@ -52,7 +52,7 @@
         <% end %>
       <% end %>
       <% if policy(d).destroy? %>
-        <%= link_to d, method: :delete, class: "btn btn-danger btn-sm icon-link",
+        <%= link_to d, method: :delete, class: "btn btn-outline-danger btn-sm icon-link",
               aria: { label: t('actions.delete') },
               title: t('actions.delete'),
               display: "inline"  do %>

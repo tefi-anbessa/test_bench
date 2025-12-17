@@ -23,12 +23,12 @@ module Electrical
     if: -> { to_type.present? && to_id.present? }
 
     def self.ransackable_attributes(auth_object = nil)
-      ["route_length", "vertical_allowance", "termination_allowance",
+      ["electrical_cable_type_id", "route_length", "vertical_allowance", "termination_allowance",
         "start_mark", "end_mark", "created_at", "updated_at"]
     end
 
     def self.ransackable_associations(auth_object = nil)
-      [:tag, :electrical_cable_type, :from, :to]
+      [:tag, :tag_discipline, :tag_discipline_project, :electrical_cable_type, :from, :to]
     end
   end
 end

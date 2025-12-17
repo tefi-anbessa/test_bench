@@ -129,20 +129,23 @@
                     </div>
                     <div class="col-8">
                       <span>
-                        <% if @cable.from_type.present? %>
-                          <% text = @cable.from_type.tableize.singularize %>
+                        <% if @cable.from_type.present? && 
+                          Constants.electrical.connect_options.include?(@cable.from_type) %>
+                          <% text = @cable.from_type.constantize.model_name.human %>
                           <div class="d-flex justify-content-between align-items-center">  
                             <% if @cable.from.present? %>
                               <span><%= @cable.from.label %></span>
-                              <%= link_to eval("#{text}_path(#{@cable.from_id})"),
-                                  class: "btn btn-sm btn-outline-secondary mb-2",
-                                  title: t('show.linked', model: text) do %>
-                                    <%== bs_icon('link-45deg') %>
-                                    <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
-                                  <% end %>
+                              <%= link_to @cable.from,
+                                class: "btn btn-sm btn-outline-secondary mb-2",
+                                title: t('show.linked', model: text) do %>
+                                  <%== bs_icon('link-45deg') %>
+                                  <span class="d-none d-md-inline">
+                                    <%= t('show.linked', model: text) %>
+                                  </span>
+                                <% end %>
                             <% else %>
                               <span class="text-muted">
-                                <%= t('show.unassigned', model: @cable.from_type&.demodulize&.titleize) %>
+                                <%= t('show.unassigned', model: text) %>
                               </span>
                             <% end %>
                           </div>
@@ -162,20 +165,23 @@
                     </div>
                     <div class="col-8">
                       <span>
-                        <% if @cable.to_type.present? %>
-                          <% text = @cable.to_type.tableize.singularize %>
+                        <% if @cable.to_type.present? && 
+                          Constants.electrical.connect_options.include?(@cable.to_type) %>
+                          <% text = @cable.to_type.constantize.model_name.human %>
                           <div class="d-flex justify-content-between align-items-center">  
                             <% if @cable.to.present? %>
                               <span><%= @cable.to.label %></span>
-                              <%= link_to eval("#{text}_path(#{@cable.to_id})"),
-                                  class: "btn btn-sm btn-outline-secondary mb-2",
-                                  title: t('show.linked', model: text) do %>
-                                    <%== bs_icon('link-45deg') %>
-                                    <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
-                                  <% end %>
+                              <%= link_to @cable.to,
+                                class: "btn btn-sm btn-outline-secondary mb-2",
+                                title: t('show.linked', model: text) do %>
+                                  <%== bs_icon('link-45deg') %>
+                                  <span class="d-none d-md-inline">
+                                    <%= t('show.linked', model: text) %>
+                                  </span>
+                                <% end %>
                             <% else %>
                               <span class="text-muted">
-                                <%= t('show.unassigned', model: @cable.to_type&.demodulize&.titleize) %>
+                                <%= t('show.unassigned', model: text) %>
                               </span>
                             <% end %>
                           </div>

@@ -6,10 +6,10 @@ module Electrical
 
     # GET /demands
     def index
+      authorize Electrical::Demand
       @q = policy_scope(Electrical::Demand).ransack(params[:q])
       @pagy, @demands = pagy(@q.result.includes(:demandable), limit: 20)
-      @orphans = Electrical::Demand.includes(:demandable).select{ |o| o.demandable.nil? }
-      authorize @demands
+      @demands, @orphans = @demands.partition(&:demandable)
     end
 
     # GET /demands/1 or /demands/1.json

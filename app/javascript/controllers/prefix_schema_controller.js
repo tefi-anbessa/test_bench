@@ -1,5 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-console.log('Prefix Schema Controller is loading...');
+
 // Connects to data-controller="prefix-schema"
 export default class extends Controller {
   static targets = ["schemaInput", "schemaKey", "customSchemaFields", "schemaViewer", "schemaViewerContent", "schemaEditor", "schemaEditorWrapper", "schemaTypeSelector"]

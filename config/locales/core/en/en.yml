@@ -34,6 +34,8 @@ en:
     link_incomplete:  "The following tags are listed as %{models} but are not yet assigned:"
     link_broken:      "The following tags are listed as %{models} but the %{models} do not exist:"
     all:              "All Accessible %{models}"
+    link_unassigned:  "%{model} not assigned"
+    invalid_type:     "%{type} is not valid type"
 
   show:
     orphan:       "No associated parent %{model}"

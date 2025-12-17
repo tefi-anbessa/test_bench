@@ -7,7 +7,7 @@ FactoryBot.define do
     # Basic attributes
     motor_type { :induction }
     frame_size { '100' }
-    ingress_protection { 'IP55' }
+    ingress_protection { '55' }
     poles { 4 }
     speed_rated { 1500 }
     

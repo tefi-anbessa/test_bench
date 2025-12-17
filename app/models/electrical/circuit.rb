@@ -31,7 +31,7 @@ module Electrical
     end
 
     def self.ransackable_attributes(auth_object = nil)
-      ["serial", "device", "poles", "curve", "rating", "elcb", "contactor",
+      ["serial", "phase", "device", "poles", "curve", "rating", "elcb", "contactor",
         "notes", "created_at", "updated_at"]
     end
 

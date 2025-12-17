@@ -23,6 +23,15 @@ class Discipline < ApplicationRecord
     return prefix_schema['name'] if prefix_schema.present? && prefix_schema['name'].present?
     "#{project&.label}_#{code}".parameterize.underscore
   end
+
+  def schema_for_form
+    return {} if prefix_schema.blank? 
+    if custom_schema?
+      prefix_schema
+    else
+      Constants.prefix_schemata[prefix_schema['name']&.to_sym]
+    end
+  end
   
   private
   
@@ -97,5 +106,9 @@ class Discipline < ApplicationRecord
 
     def self.ransackable_attributes(auth_object = nil)
       ["code", "label", "name", "prefix_schema", "module_name", "sort_order", "notes"]
+    end
+
+    def self.ransackable_associations(auth_object = nil)
+      ["tags", "documents"]
     end
 end

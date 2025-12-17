@@ -45,6 +45,8 @@ en:
           readout_function: "Readout Function"
           output_function: "Output Function"
           modifier_function: "Modifier Function"
+          part1: "Part 1"
+          part2: "Part 2"
         serial:           "Loop"
         suffix:           "Suffix"
         service:          "Service"

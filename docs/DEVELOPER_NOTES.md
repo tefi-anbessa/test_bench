@@ -73,6 +73,36 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 
 ## Implementation
 
+### Application Structure
+
+The application has a core structure encompassing Users and the associated access control system, Projects, Disciplines, Tags and Documents.
+
+Refer to docs/ROLES_AND_PERMISSIONS.md for details on the role based access control system.
+
+#### Projects
+
+Projects are the top level resource of this application. Projects are fully self contained and independent of each other. Every engineering element in the application is associated with one project. The application caters for various user scenarios, including:
+
+- design and execute team such as a constructor, using a shared website app.
+- engineering design service for multiple clients, using a shared website app.
+- application installed in house for a single client.
+
+#### Disciplines
+
+Disciplines are used to group engineering objects, and associate them to functional requirements. Each project must define the set of relevant disciplines it uses. A standard set of disciplines is provided, including instrument, electrical, mechanical, etc. These can be copied as they are, or modified to suit particular requirements. Projects can even define their own disciplines if required, and custom disciplines can be associated to existing functionality.
+
+#### Tags
+
+Engineering design elements require a tag to be assigned. Tags are used to label all design elements, and link them to their own data, as well as to other elements, to documents, assets and other functionality.
+
+#### Tagables
+
+Tags can have a "tagable" model attached, which extends the information linked to the tag to include the specific information relevant to the type of element. For example, a motor and a cable have different information requirements, so the database needs to have a different table for each, but they share the structure of the tags table. Each of these models is known as a tagable model. All tagables are grouped into modules, and modules are closely coupled to the core disciplines provided.
+
+#### Documents
+
+Documents are used to manage and control the issue of information on a project. The application caters for two types of documents: those generated from the application database, and those stored in a content delivery network from files uploaded by users.
+
 ### Internationalization
 
 - The application has been designed for international use from the outset.
@@ -245,6 +275,8 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [x] Build user interaction management, using gems devise for authentication, rolify and pundit for authorization
 - [x] Build electrical module with basic data sheet options for electrical tagged items
 - [x] Enhance electrical module, allowing interconnection of tagged items with cables to model a distribution network
+- [x] Build a module generator.
+- [ ] Build a tagable generator.
 - [ ] Enhance electrical model with network load calculations
 - [ ] Enhance the existing database models to allow revison control of data
 - [ ] Build a document control module to manage document storage, issue, history including versions
@@ -255,7 +287,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 
 ## Technical Debt
 
-- [ ] Refactor models to incorporate i18n messages for validations
+- [x] Refactor models to incorporate i18n messages for validations
 - [ ] Refactor error messages partial to use i18n.
 - [ ] Refactor error views to use i18n.
 - [x] Refactor roles new view and projects edit view to translate resource names with a key value pair in the select field.
@@ -290,6 +322,7 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Write thorough tests for the tag parser and builder.
 - [x] Cable types routing should be nested under projects.
 - [ ] Cable types controller should be revised to suit nesting and protect against current project setting.
+- [ ] Add searching and sorting for from and to fields in cables index.
 
 ## Refactoring Opportunities
 
@@ -323,9 +356,10 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    - [ ] add colour code by discipline
 - [ ] Look at use of hover on buttons, and use turbo to prevent page refresh.
 - [x] Improve implementation of Discipline model, including translation. Consider using constants hash for each project.
-- [ ] Consider changing all delete links to use turbo to prevent page refresh.
+- [ ] Change all delete links to use turbo to prevent full page refresh.
+- [ ] Revise index views to use turbo for ransack searches.
 - [ ] Replace devise views with bespoke views in the style of the rest of the application.
-- [ ] Refactor RBAC system with functional roles limited to project scope.
+- [ ] Refactor RBAC system with functional roles limited to project scope, and project admin roles.
 
 ## Potential Features
 
@@ -344,6 +378,9 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 - [ ] Improve locale setting, and include language/currency/flag in locale selection.
 - [ ] Develop an application colour theme set. Consider discipline colour coding, also need to consider module colour coding.
 - [ ] Build an IP55 object to allow fully flexible reusable IP code generation.
+- [ ] Management of Change
+- [ ] Risk Management
+- [ ] 
 
 ## Architecture Considerations
 

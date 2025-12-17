@@ -37,7 +37,7 @@
   </td>
   <td>
     <% if policy(t).show? %>
-      <%= link_to tag_path(t), class: "btn btn-secondary btn-sm icon-link",
+      <%= link_to t, class: "btn btn-outline-info btn-sm icon-link",
             aria: { label: t('actions.show') },
             title: t('actions.show'),
             display: "inline" do %>
@@ -45,7 +45,7 @@
       <% end %>
     <% end %>
     <% if policy(t).edit? %>
-      <%= link_to edit_tag_path(t), class: "btn btn-warning btn-sm icon-link",
+      <%= link_to edit_tag_path(t), class: "btn btn-outline-warning btn-sm icon-link",
             aria: { label: t('actions.edit') },
             title: t('actions.edit'),
             display: "inline"  do %>
@@ -55,7 +55,7 @@
     <% if policy(t).destroy? %>
     <%= link_to t, 
           data: { method: :delete, confirm: t('actions.delete_sure') },
-          class: "btn btn-danger btn-sm icon-link",
+          class: "btn btn-outline-danger btn-sm icon-link",
           aria: { label: t('actions.delete') },
           title: t('actions.delete'),
           display: "inline"  do %>

@@ -24,13 +24,6 @@
   <div class="card-body p-2">
     <%= render 'shared/error_messages', object: tag %>
 
-      <!-- Project -->
-      <div class="row">
-        <% project = tag.persisted? ? tag.project : current_project %>
-        <%= render 'projects/project_card',
-              project: project %>
-      </div>
-
       <!-- Stage -->
       <div class="row">
         <%= tag_f.number_field :stage,
@@ -44,12 +37,12 @@
       <!-- Discipline -->
       <div class="row">
         <%= tag_f.select :discipline_id,
-              options_for_select(
-                @disciplines.map { |d|
-                  ["#{t("discipline.#{d.code}.label",
-                    default: d.code)}: #{t("discipline.#{d.code.downcase.to_sym}.name",
-                    default: d.code)}", d.id]
-                },
+              grouped_options_for_select(
+                @disciplines.transform_values do |disciplines|
+                  disciplines.map { |code, id|
+                    ["#{t("discipline.#{code.downcase.to_sym}.label")}: #{t("discipline.#{code.downcase.to_sym}.name")}", id]
+                  }
+                end,
                 tag.discipline_id
               ),
               { class: 'form-select' },
@@ -57,7 +50,7 @@
       </div>
 
       <!-- Prefix Fields - Dynamic based on discipline schema -->
-      <%= render 'tags/tag_prefix_fields', tag: tag, f: tag_f %>
+      <%= render 'tags/prefix_fields', tag: tag, f: tag_f %>
 
       <!-- Full tag preview -->
       <%= hidden_field_tag :full_tag, id: 'tag_full_tag_preview' %>
@@ -72,14 +65,9 @@
               inputmode: 'numeric',
               value: tag.serial.present? ? tag.serial.to_s.rjust(4, '0') : '0000',
               data: {
-                controller: 'numeric-mask',
-                'numeric-mask-target': 'input',
                 action: 'change->tag#updatePreview input->tag#updatePreview'
               },
               id: 'tag_serial' %>
-      </div>
-
-      <div class="row">
         <%= tag_f.text_field :suffix,
         label_col: "col-sm-3",
         control_col: "col-sm-3",

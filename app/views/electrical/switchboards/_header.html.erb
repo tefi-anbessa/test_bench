@@ -1,4 +1,8 @@
 <thead>
+  <% unless current_project %>
+    <th scope="col"><%= sort_link(@q, 'tag_discipline_project_code', Project.model_name.human) %></th>
+  <% end %>
+  <th scope="col"><%= sort_link(@q, :tag_stage) %></th>
   <th scope="col"><%= sort_link(@q, :tag) %></th>
   <th scope="col"><%= sort_link(@q, :ingress_protection) %></th>
   <th scope="col"><%= sort_link(@q, :voltage_rating) %></th>

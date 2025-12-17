@@ -26,6 +26,7 @@
         <%% end %>
       </div> <!-- end of d-flex -->
     </div> <!-- end of card header -->
+
     <div class="card-body">
       <div class="row search-form">
         <%%= search_form_for @q do |f| %>
@@ -39,9 +40,63 @@
           <%% end %>
         <%% end %>
       </div>
+
+      <!-- Broken and incomplete links -->
+      <%% unless @link_broken.empty? %>
+        <table id='link_broken' class='table table-responsive table-condensed table-hoverable table-bordered' >
+          <thead>
+            <tr class="table-danger">
+              <th colspan="9">
+                <%%= t('index.link_broken', models: t("activerecord.models.motor").tableize) %>
+              </th>
+            </tr>
+            <%%= render 'tags/header' %>
+          </thead>
+          <tbody>
+            <%% @link_broken.each do |tag| %>
+              <%%= render 'tags/row', t: tag %>
+            <%% end %>
+          </tbody>
+        </table>
+      <%% end %>
+      <%% unless @link_incomplete.empty? %>
+        <table id='link_incomplete' class='table table-responsive table-condensed table-hoverable table-bordered' >
+          <thead>
+            <tr class="table-warning">
+              <th colspan="9">
+                <%%= t('index.link_incomplete', models: t("activerecord.models.motor").tableize) %>
+              </th>
+            </tr>
+            <%%= render 'tags/header' %>
+          </thead>
+          <tbody>
+            <%% @link_incomplete.each do |tag| %>
+              <%%= render 'tags/row', t: tag %>
+            <%% end %>
+          </tbody>
+        </table>
+      <%% end %>
+
+<!-- <% human_name %> -->
       <table id='<%= table_name %>' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
         <%%= render 'header' %>
         <tbody>
+          <%% unless @orphans.empty? %>
+            <tr class="table-danger">
+              <%- columns = @fields.select { |field| INDEX_TYPES.include?(field[:type]) }.count + 3 %>
+              <td colspan="<%%= columns + (current_project ? 0 : 1) %>">
+                <%%= t('index.orphans', models: t("activerecord.models.motor").tableize) %>
+              </td>
+            </tr>
+            <%% @orphans.each do |row| %>
+              <%%= render 'row', row: row %>
+            <%% end %>
+            <tr class="table-success">
+              <td colspan="<%%= columns + (current_project ? 0 : 1) %>">
+                <%%= t('.title') %>
+              </td>
+            </tr>
+          <%% end %>
           <%% @<%= plural_name %>.each do |row| %>
             <%%= render 'row', row: row %>
           <%% end %>

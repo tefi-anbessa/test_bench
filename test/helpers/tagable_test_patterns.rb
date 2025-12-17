@@ -9,7 +9,6 @@ module TagableTestPatterns
     @project = create(:project)
     set_current_project(@project)
 
-    # Create resource discipline using the code provided by the tagable controller test
     @resource_discipline = create(:discipline, code: resource_class.discipline_code, project: @project)
 
     @regular_user = create(:user)   # No roles
@@ -24,7 +23,8 @@ module TagableTestPatterns
     @team_member.grant(:team_member, @project)
 
     # Factory default unique tag will be "A:AA-0001"
-    @gp_tag = create(:tag, :unique_tag, discipline: @resource_discipline)
+    @assigned_tag = create(:tag, :unique_tag, discipline: @resource_discipline, 
+      service: "ASSIGNED TAG", stage: 1)
     @request.env["devise.mapping"] = Devise.mappings[:user]
   end
 
@@ -38,7 +38,8 @@ module TagableTestPatterns
     @assigned_tag = create(:tag, serial: 1001, discipline: @resource_discipline)
     @resource = create(resource_class.model_name.singular, tag: @assigned_tag)
     # Set up an unassigned tag for create and update tests
-    @unassigned_tag = create(:tag, serial: 1002,  discipline: @resource_discipline)
+    @unassigned_tag = create(:tag, serial: 1002,  discipline: @resource_discipline, 
+      service: "UNASSIGNED TAG", stage: 1)
     # Set a class name that is not the current resource class for testing type check
     @wrong_tagable_type = resource_class.name == "Electrical::Switchboard" ?
      "Electrical::Motor" : 
@@ -59,8 +60,8 @@ module TagableTestPatterns
     assert @team_member.persisted?
     assert @regular_user.valid?
     assert @regular_user.persisted?
-    assert @gp_tag.valid?
-    assert @gp_tag.persisted?
+    assert @assigned_tag.valid?
+    assert @assigned_tag.persisted?
   end
 
   # Check validity of instance variables that are required but values are set in model specific setup
@@ -311,15 +312,16 @@ module TagableTestPatterns
     send(path_helper)
   end
 
-  # These methods must be implemented by the including test class
+  # These methods may be overridden by the including test class
   def params_with_existing_tag
     { tag_id: @unassigned_tag.id, resource_name => valid_resource_params }
   end
 
+  # [TODO] - a more reliable way of generating a unique serial number would be a good idea.
   def params_with_new_tag
-    { resource_name => { tag: { prefix: @gp_tag.prefix,
+    { resource_name => { tag: { prefix: @assigned_tag.prefix,
                                 discipline_id: @resource_discipline.id,
-                                serial: @gp_tag.serial + 1,
+                                serial: @assigned_tag.serial + 111,
                                 suffix: '',
                                 service: 'Test motor',
                                 stage: 1 }, **valid_resource_params } }

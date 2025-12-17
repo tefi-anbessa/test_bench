@@ -14,11 +14,11 @@ module Electrical
 
       def self.ransackable_attributes(auth_object = nil)
         ["motor_type", "frame_size", "ingress_protection", "poles",
-          "speed_rated", "created_at", "updated_at"]
+          "speed_rated", "notes", "created_at", "updated_at"]
       end
 
       def self.ransackable_associations(auth_object = nil)
-        [ :electrical_demand, :tag ]
+        [ :electrical_demand, :tag, :tag_discipline, :tag_discipline_project ]
       end
   end
 end
