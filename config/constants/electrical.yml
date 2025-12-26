@@ -135,52 +135,86 @@ electrical:
       temporary_immersion: 7
       continuous_immersion: 8
       high_pressure_water_jets: 9
-  motor_type:
-    other: 0
-    induction: 1
-    synchronous: 2
-    dc: 3
-    servo: 4
-    stepper: 5
-    brushless_dc: 6
-    universal: 7
-  frame_size:
-    "63": 63
-    "71": 71
-    "80": 80
-    "90": 90
-    "100": 100
-    "112": 112
-    "132": 132
-    "160": 160
-    "180": 180
-    "200": 200
-    "225": 225
-    "250": 250
-    "280": 280
-    "315": 315
-    "355": 355
-    "400": 400
-    "450": 450
-    "500": 500
-    "560": 560
-    "630": 630
-  light_fitting_type:
-    other: 0
-    general: 1 #AS3000 ai) Light, general
-    outdoor: 2 #AS3000 aii) Light, outdoor > 1000W
-  socket_type:
-    other: 0
-    "10A": 1 #AS3000 bi) Socket, 10A, general, no HVAC room
-    "10A_HVAC": 2 #AS3000 bii) Socket 10A, general, in HVAC room
-    "15A": 3 #AS3000 bi) Socket, 15A, general use
-    "20A": 4 #AS3000 bi) Socket, 20A, general use
-    "32A": 5 #AS3000 biii) Socket 32A, general use
-    "40A": 6 #AS3000 biii) Socket 40A, general use
-    "50A": 7 #AS3000 biii) Socket 50A, general use
-    "63A": 8 #AS3000 biii) Socket 63A, general use
-    "80A": 9 #AS3000 biii) Socket 80A, general use
-    "100A": 10 #AS3000 biii) Socket 100A, general use
-    "125A": 11 #AS3000 biii) Socket 125A, general use
-    
-    
+  motor:
+    motor_type:
+      other: 0
+      induction: 1
+      synchronous: 2
+      dc: 3
+      servo: 4
+      stepper: 5
+      brushless_dc: 6
+      universal: 7
+    frame_size:
+      "63": 63
+      "71": 71
+      "80": 80
+      "90": 90
+      "100": 100
+      "112": 112
+      "132": 132
+      "160": 160
+      "180": 180
+      "200": 200
+      "225": 225
+      "250": 250
+      "280": 280
+      "315": 315
+      "355": 355
+      "400": 400
+      "450": 450
+      "500": 500
+      "560": 560
+      "630": 630
+  light_cct:
+    light_fitting_type:
+      other: 0
+      general: 1 #AS3000 ai) Light, general
+      outdoor: 2 #AS3000 aii) Light, outdoor > 1000W
+  socket_cct:
+    socket_type:
+      other: 0
+      "10A": 1 #AS3000 bi) Socket, 10A, general, no HVAC room
+      "10A_HVAC": 2 #AS3000 bii) Socket 10A, general, in HVAC room
+      "15A": 3 #AS3000 bi) Socket, 15A, general use
+      "20A": 4 #AS3000 bi) Socket, 20A, general use
+      "32A": 5 #AS3000 biii) Socket 32A, general use
+      "40A": 6 #AS3000 biii) Socket 40A, general use
+      "50A": 7 #AS3000 biii) Socket 50A, general use
+      "63A": 8 #AS3000 biii) Socket 63A, general use
+      "80A": 9 #AS3000 biii) Socket 80A, general use
+      "100A": 10 #AS3000 biii) Socket 100A, general use
+      "125A": 11 #AS3000 biii) Socket 125A, general use
+  heater:
+    heater_type:
+      heater_type_other: 0 # Placeholder for other heater types
+    application:
+      application_other: 0 # Placeholder for other applications
+    sheath_material:
+      sheath_material_other: 0 # Placeholder for other sheath_materials
+    insulation_material:
+      insulation_material_other: 0 # Placeholder for other insulation_materials
+
+  heater:
+    heater_type:
+      heater_type_other: 0  # Placeholder for heater_types
+# TODO: Add enum values
+    application:
+      application_other: 0  # Placeholder for applications
+# TODO: Add enum values
+    sheath_material:
+      sheath_material_other: 0  # Placeholder for sheath_materials
+# TODO: Add enum values
+    insulation_material:
+      insulation_material_other: 0  # Placeholder for insulation_materials
+# TODO: Add enum values
+
+  heater:
+    heater_type:
+      heater_type_other: 0  # TODO: Add enum values
+    application:
+      application_other: 0  # TODO: Add enum values
+    sheath_material:
+      sheath_material_other: 0  # TODO: Add enum values
+    insulation_material:
+      insulation_material_other: 0  # TODO: Add enum values

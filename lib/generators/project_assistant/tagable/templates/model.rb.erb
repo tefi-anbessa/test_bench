@@ -5,9 +5,8 @@ module <%= module_name %>
     
 # enum declarations
     <%- @fields.select { |f| %w[enum enum_translated].include?(f[:type]) }.each do |field| -%>
-    enum <%= field[:name] %>: ['stub'] 
+    enum :<%= field[:name] %>, Constants.<%= module_name.underscore %>.<%= singular_name %>.<%= field[:name] %>.to_h
     #!!! Define enum options in Constants file config/constants/<%= module_name.underscore %>.yml
-    # and replace ['stub'] with Constants.<%= module_name.underscore %>.<%= field[:name] %>
     <%- end -%>
     
 # Presence validation for required fields.
@@ -23,7 +22,7 @@ module <%= module_name %>
     end
 
     def self.ransackable_associations(auth_object = nil)
-      [ :tag ]
+      [ :tag, :tag_discipline, :tag_discipline_project ]
     end
   end
 end

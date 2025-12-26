@@ -2,7 +2,7 @@ module Electrical
   class LightCct < Base
     include Tagable
     include Electrical::Demandable
-    enum :light_fitting_type, Constants.electrical.light_fitting_type.to_h
+    enum :light_fitting_type, Constants.electrical.light_cct.light_fitting_type.to_h
       
     # Validations
     validates :light_fitting_type, presence: true

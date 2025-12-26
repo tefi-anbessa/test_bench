@@ -4,7 +4,7 @@ FactoryBot.define do
     transient do
       tag { nil }
     end
-    # Basic attributes
+    # Attributes
     motor_type { :induction }
     frame_size { '100' }
     ingress_protection { '55' }

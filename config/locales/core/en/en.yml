@@ -55,6 +55,9 @@ en:
     unknown:      "Unknown"
     true:         "☑"
     false:        "☒"
+    error_message: 
+      one:        "The form contains %{count} error"
+      other:      "The form contains %{count} errors"
 
   admin:         "Admin"
 

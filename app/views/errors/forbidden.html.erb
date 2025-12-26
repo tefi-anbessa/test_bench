@@ -15,19 +15,20 @@
     
     <div class="card mt-4">
       <div class="card-header bg-warning text-dark">
-        <h2 class="h5 mb-0">Access Denied</h2>
+        <h2 class="h5 mb-0"><%= t(".subheader") %></h2>
       </div>
       <div class="card-body text-start">
         <% if @exception.present? %>
-          <p class="card-text"><strong>Reason:</strong> <%= @exception.message %></p>
+          <p class="card-text"><%= t(".message") %></p>
           
           <% if @exception.respond_to?(:query) && @exception.query.present? %>
-            <p class="card-text"><strong>Action:</strong> <code><%= @exception.query %></code></p>
+            <p class="card-text"><strong><%= t(".action") %></strong>
+            <code><%= @exception.query %></code></p>
           <% end %>
           
           <% if @exception.respond_to?(:record) && @exception.record.present? %>
             <p class="card-text">
-              <strong>Resource:</strong> 
+              <strong><%= t(".resource") %></strong> 
               <code><%= @exception.record.class.name %></code>
               <% if @exception.record.respond_to?(:id) %>
                 (ID: <%= @exception.record.id %>)
@@ -37,7 +38,7 @@
           
           <% if @exception.respond_to?(:policy) && @exception.policy.present? %>
             <p class="card-text">
-              <strong>Policy:</strong> 
+              <strong><%+ t(".policy") %></strong> 
               <code><%= @exception.policy.class.name %></code>
             </p>
           <% end %>
@@ -46,13 +47,14 @@
         <% if defined?(current_user) && current_user %>
           <p class="card-text"><strong>User:</strong> <%= current_user.email %></p>
           <% if current_user.respond_to?(:roles) %>
-            <p class="card-text"><strong>Roles:</strong> <%= current_user.roles.pluck(:name).join(', ') %></p>
+            <p class="card-text"><strong><%= t(".roles") %></strong> 
+            <%= current_user.roles.pluck(:name).join(', ') %></p>
           <% end %>
         <% end %>
           
           <% if defined?(current_project) && current_project %>
             <p class="card-text">
-              <strong>Current Project:</strong> 
+              <strong><%= t(".project") %></strong> 
               <%= current_project.label %>
             </p>
           <% end %>
@@ -61,12 +63,14 @@
       
       <div class="mt-4">
         <%= link_to root_path, class: "btn btn-primary me-2" do %>
-          <i class="bi bi-house-door"></i> Return to Home
+          <i class="bi bi-house-door"></i> 
+          <%= t('.back_to_home') %>
         <% end %>
         
         <% if defined?(current_project) && current_project %>
           <%= link_to project_path(current_project), class: "btn btn-outline-primary" do %>
-            <i class="bi bi-arrow-left"></i> Back to Project
+            <i class="bi bi-arrow-left"></i> 
+            <%= t('.go_back') %>
           <% end %>
         <% end %>
       </div>

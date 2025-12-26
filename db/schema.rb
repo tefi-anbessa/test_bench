@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_15_024322) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_21_072916) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -104,6 +104,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_15_024322) do
     t.text "notes"
     t.string "demandable_type"
     t.index ["demandable_type", "demandable_id"], name: "index_electrical_demands_on_demandable"
+  end
+
+  create_table "electrical_heaters", force: :cascade do |t|
+    t.integer "heater_type", null: false
+    t.integer "application", null: false
+    t.string "ingress_protection"
+    t.float "sheath_temperature_max"
+    t.float "power_density_min"
+    t.float "power_density_max"
+    t.integer "field"
+    t.integer "sheath_material"
+    t.integer "insulation_material"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "electrical_light_ccts", force: :cascade do |t|

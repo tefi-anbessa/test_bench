@@ -6,12 +6,21 @@ module ProjectAssistant
     desc "Create file structure, templates and config entries for a new module in Project Assistant app"
     source_root File.expand_path('module/templates', __dir__)
 
+    def initialize(args, *options)
+      puts "DEBUG: ModuleGenerator initialize called with args: #{args}"
+      super
+      puts "DEBUG: ModuleGenerator initialize completed"
+    end
+
     def create_module_structure
+      puts "DEBUG: create_module_structure started"
       # [TODO] These are available from the NamedBase generator so superfluous here.
       @module_name = name.underscore
       @module_class = name.camelize
+      puts "DEBUG: Module variables set: #{@module_name}, #{@module_class}"
 
       # Check for existing module structure
+      puts "DEBUG: Starting path checks..."
       paths_to_check = [
         # App directories
         *%w[controllers helpers models policies views].map { |dir| "app/#{dir}/#{@module_name}" },
@@ -23,12 +32,16 @@ module ProjectAssistant
         # Locales
         "config/locales/#{@module_name}"
       ]
+      puts "DEBUG: #{paths_to_check.length} paths to check"
 
       paths_to_check.each do |path|
+        puts "DEBUG: Checking path: #{path}"
         if should_abort?(path)
+          puts "DEBUG: Aborting on path: #{path}"
           return
         end
       end
+      puts "DEBUG: All path checks completed"
 
       # Create app folder structure with module subfolders
       %w[controllers helpers models policies views].each do |dir|
@@ -82,23 +95,42 @@ module ProjectAssistant
       # Add two routes namespaces 
       # [TODO verify if the first set of routes is really needed. 
       # They arose because of a conflict on index routes, but that may have been a special case]
-      # Update routes.rb for first insertion point
-      routes_file = File.join(destination_root, 'config/routes.rb')
+      # Update routes.rb for both insertion points
+      routes_file = File.join(destination_root, 'config', 'routes.rb')
       if File.exist?(routes_file)
+        puts "DEBUG: Reading routes file..."
         routes_content = File.read(routes_file)
-        routes_content.sub!(/# NAMESPACE INSERTION POINT 1 FOR GENERATOR/, 
-                         "namespace :#{@module_name} do\n    # Add #{@module_name.underscore} routes here with only: [:index, :new, :create]\n  end")
-        File.write(routes_file, routes_content)
+        puts "DEBUG: Routes file read successfully"
         
-        # Second insertion point under tags
-        routes_content = File.read(routes_file)
-        routes_content.sub!(/# NAMESPACE INSERTION POINT 2 FOR GENERATOR/,
-                         "namespace :#{@module_name} do\n      # Add #{@module_name.underscore} routes here with except: [:index]\n    end")
-        File.write(routes_file, routes_content)
+        # First insertion point
+        puts "DEBUG: Processing first insertion point..."
+        routes_content.sub!(/(# INSERTION POINT 1 FOR MODULE GENERATOR)/, 
+                     "namespace :#{@module_name} do\n" \
+                     "      # INSERTION POINT 1 FOR TAGABLE GENERATOR\n" \
+                     "    # Add #{@module_name.underscore} routes here with only: [:index, :new, :create]\n" \
+                     "  end\n" \
+                     "  \\1")
+        puts "DEBUG: First insertion point processed"
+        
+        # Second insertion point
+        puts "DEBUG: Processing second insertion point..."
+        routes_content.sub!(/(# INSERTION POINT 2 FOR MODULE GENERATOR)/,
+                         "namespace :#{@module_name} do\n" \
+                         "        # INSERTION POINT 2 FOR TAGABLE GENERATOR\n" \
+                         "      # Add #{@module_name.underscore} routes here with except: [:index]\n" \
+                         "    end\n" \
+                         "    \\1")
+        puts "DEBUG: Second insertion point processed"
+        
+        puts "DEBUG: Writing routes file..."
+        File.write(routes_file, routes_content) unless options[:pretend]
+        puts "DEBUG: Routes file written successfully"
       end
 
       # Add FactoryBot configuration
-      application "config.factory_bot.definition_file_paths << File.join(destination_root, 'test', '#{@module_name.underscore}', 'factories')"
+      application "config.factory_bot.definition_file_paths << " \
+                   "File.join(destination_root, 'test', '#{@module_name.underscore}', 'factories')" \
+                   unless options[:pretend]
     
       # Constants
       template "module.yml", "config/constants/#{@module_name}.yml"
@@ -108,7 +140,7 @@ module ProjectAssistant
       if File.exist?(tagable_file)
         content = File.read(tagable_file)
         content.sub!(/^(tagable:\n)/, "\\1  # #{@module_class}\n")
-        File.write(tagable_file, content)
+        File.write(tagable_file, content) unless options[:pretend]
       else
         say_status :error, "Tagable file not found: #{tagable_file}", :red
       end

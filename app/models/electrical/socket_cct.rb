@@ -4,7 +4,7 @@ module Electrical
     include Electrical::Demandable
     include TagableNavigation
     
-    enum :socket_type, Constants.electrical.socket_type.to_h
+    enum :socket_type, Constants.electrical.socket_cct.socket_type.to_h
 
     # Validations
     validates :socket_type, presence: true

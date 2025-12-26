@@ -276,20 +276,21 @@ Documents are used to manage and control the issue of information on a project. 
 - [x] Build electrical module with basic data sheet options for electrical tagged items
 - [x] Enhance electrical module, allowing interconnection of tagged items with cables to model a distribution network
 - [x] Build a module generator.
-- [ ] Build a tagable generator.
+- [x] Build a tagable generator.
 - [ ] Enhance electrical model with network load calculations
-- [ ] Enhance the existing database models to allow revison control of data
+- [ ] Enhance the existing database models to include revison control of data
 - [ ] Build a document control module to manage document storage, issue, history including versions
 - [ ] Build a bookkeeping module to manage financial transactions
 - [ ] Build a process piping module similar to the electrical module, using pipes and fittings to model a process piping network
 - [ ] Build an asset management module to track assets and link from design to maintenance
 - [ ] Build a maintenance management module
+- [ ] Add hazardous area functionality
 
 ## Technical Debt
 
 - [x] Refactor models to incorporate i18n messages for validations
-- [ ] Refactor error messages partial to use i18n.
-- [ ] Refactor error views to use i18n.
+- [x] Refactor error messages partial to use i18n.
+- [x] Refactor error views to use i18n.
 - [x] Refactor roles new view and projects edit view to translate resource names with a key value pair in the select field.
 - [x] Serve bootstrap from local dev or prod
 - [ ] Review all policies and tests for compliance with guidelines
@@ -309,7 +310,7 @@ Documents are used to manage and control the issue of information on a project. 
 - [ ] Complete workflows with admin and no project selected.
 - [ ] Complete proper ordering by switchboard tag and serial for circuits.
 - [ ] Update index view header lines.
-- [ ] Custom error view for not found errors. e.g. Case where admin deletes a record than uses browser back button.
+- [ ] Custom 404 not found error page. E.g. Case where admin deletes a record than uses browser back button.
 - [ ] Translation of html5 messages on required fields. Alternatively, suppress html 5 and use client side js.
 - [ ] Complete discipline system tests.
 - [x] Complete switchboard controller test.
@@ -344,7 +345,7 @@ Documents are used to manage and control the issue of information on a project. 
    - [x] convert insulation material to enum.
    - [x] add volt rating enum.
    - [ ] Add parent/child capability.
-- [ ] Motors: 
+- [ ] Motors:
    - [x] convert motor type to enum.
    - [x] convert frame size to enum.
    - [ ] build a ruby structure for ingress protection, convert ingress protection to this type.
@@ -356,6 +357,7 @@ Documents are used to manage and control the issue of information on a project. 
    - [ ] add colour code by discipline
 - [ ] Look at use of hover on buttons, and use turbo to prevent page refresh.
 - [x] Improve implementation of Discipline model, including translation. Consider using constants hash for each project.
+- [ ] Abstract ingress protection functionality so it can be reused by instrument module.
 - [ ] Change all delete links to use turbo to prevent full page refresh.
 - [ ] Revise index views to use turbo for ransack searches.
 - [ ] Replace devise views with bespoke views in the style of the rest of the application.
@@ -363,7 +365,6 @@ Documents are used to manage and control the issue of information on a project. 
 
 ## Potential Features
 
-- [ ] Add more comprehensive reporting for demand calculations
 - [ ] Implement bulk import/export
 - [ ] Data revision management
 - [ ] Customize devise users:
@@ -372,9 +373,9 @@ Documents are used to manage and control the issue of information on a project. 
    - [ ] Insert an admin approval in the confirmation process
    - [ ] Disable destroy, because the [future] change history will have links to users making changes. We may need to historise user name changes as well, that's a future problem. The revision management system may well include some sort of active/inactive status features.
 - [ ] Customize error trapping:
-   - [ ] Customize error trapping for Pundit::NotAuthorizedError
+   - [x] Customize error trapping for Pundit::NotAuthorizedError
    - [ ] Customize error trapping for unknown format
-   - [ ] Customize error trapping for forbidden
+   - [x] Customize error trapping for forbidden
 - [ ] Improve locale setting, and include language/currency/flag in locale selection.
 - [ ] Develop an application colour theme set. Consider discipline colour coding, also need to consider module colour coding.
 - [ ] Build an IP55 object to allow fully flexible reusable IP code generation.

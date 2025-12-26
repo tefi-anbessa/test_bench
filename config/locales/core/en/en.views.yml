@@ -24,7 +24,15 @@ en:
     forbidden:
       title:        "Forbidden"
       header:       "Forbidden"
+      subheader:    "Insufficient Permissions"
       message:      "You are not authorized to perform this action."
+      action:       "Action:"
+      resource:     "Resource:"
+      policy:       "Policy:"
+      roles:        "Roles:"
+      project:      "Current Project:"
+      back_to_home: "Back to Home"
+      go_back:      "Go Back"
     conflict:
       title:        "Conflict"
       header:       "Conflict Detected"

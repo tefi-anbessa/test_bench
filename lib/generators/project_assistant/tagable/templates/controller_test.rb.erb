@@ -18,9 +18,9 @@ module <%= module_name %>
     # Set the minimum required params for a valid resource
     def valid_resource_params
       {
-<%- @fields.select { |f| f[:options].include?('required') }.each do |field| -%>
-          field[:name]: ''
-<% end %>
+<%- @fields.select { |f| f[:options].include?('required') }.each do |field| %>
+        <%= "#{field[:name]}: '' # Add valid data" %>
+<%- end %>
       }
     end
 

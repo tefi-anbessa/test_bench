@@ -24,11 +24,13 @@ module ProjectAssistant
         end
       RUBY
 
+      # Create a clean routes.rb file for testing
       File.write(File.join(destination_root, 'config', 'routes.rb'), <<~RUBY)
         Rails.application.routes.draw do
-          # NAMESPACE INSERTION POINT 1 FOR GENERATOR
+          # INSERTION POINT 1 FOR MODULE GENERATOR
+          
           resources :tags, shallow: true do
-            # NAMESPACE INSERTION POINT 2 FOR GENERATOR
+            # INSERTION POINT 2 FOR MODULE GENERATOR
           end
         end
       RUBY
@@ -88,25 +90,27 @@ module ProjectAssistant
         assert_includes content, expected
       end
     end
-
-    test "adds_route_namespace_to_routes.rb" do
-      run_generator [@module_name]
-      
-      assert_file "config/routes.rb" do |content|
-        # Just check for the namespace and comment, ignore indentation
-        assert_match(/namespace :#{@module_name}/, content)
-        assert_match(/# Add #{@module_name.underscore} routes here with only: \[:index, :new, :create\]/, content)
-      end
-    end
     
     test "updates routes with module namespace" do
       run_generator [@module_name]
       routes_content = File.read(File.join(destination_root, 'config', 'routes.rb'))
-      assert_match(/namespace :#{@module_name} do\n\s+# Add #{@module_name} routes here with only: \[:index, :new, :create\]\n\s+end/, routes_content)
-      assert_match(/namespace :#{@module_name} do\n\s+# Add #{@module_name} routes here with except: \[:index\]\n\s+end/m, routes_content)
+      
+      # First insertion point pattern components
+      namespace_start = /namespace :#{@module_name} do/
+      tagable_point1 = /\s+# INSERTION POINT 1 FOR TAGABLE GENERATOR/
+      comment1 = /\s+# Add #{@module_name} routes here with only: \[:index, :new, :create\]/
+      namespace_end = /\s+end/
+      first_pattern = /#{namespace_start}\n#{tagable_point1}\n#{comment1}\n#{namespace_end}/
+      assert_match(first_pattern, routes_content)
+      
+      # Second insertion point pattern components
+      tagable_point2 = /\s+# INSERTION POINT 2 FOR TAGABLE GENERATOR/
+      comment2 = /\s+# Add #{@module_name} routes here with except: \[:index\]/
+      second_pattern = /#{namespace_start}\n#{tagable_point2}\n#{comment2}\n#{namespace_end}/m
+      assert_match(second_pattern, routes_content)
     end
     
-    test "adds_factory_bot_configuration" do
+    test "adds factory_bot configuration" do
       run_generator [@module_name]
       
       assert_file "config/application.rb" do |content|

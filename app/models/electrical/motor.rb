@@ -4,8 +4,8 @@ module Electrical
     include Electrical::Demandable
     include TagableNavigation
     
-    enum :motor_type, Constants.electrical.motor_type.to_h
-    enum :frame_size, Constants.electrical.frame_size.to_h
+    enum :motor_type, Constants.electrical.motor.motor_type.to_h
+    enum :frame_size, Constants.electrical.motor.frame_size.to_h
 
     validates :motor_type, presence: true
     validates :frame_size, presence: true

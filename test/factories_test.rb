@@ -3,109 +3,16 @@ require 'test_helper'
 class FactoriesTest < ActiveSupport::TestCase
   # Test that all factories can be created and are valid
   test 'all factories are valid' do
-    # Define factory-specific test cases
-    factory_tests = {
-      # Core models
-      :user => -> { build(:user) },
-      :role => -> { build(:role, :admin) },
-      :project => -> { build(:project) },
-      :discipline => -> { build(:discipline) },
-      :tag => -> { 
-        project = create(:project)
-        discipline = create(:discipline, project: project, code: 'E')
-        build(:tag, project: project, discipline: discipline)
-      },
-      :sequential_tag => -> { 
-        project = create(:project)
-        discipline = create(:discipline, project: project, code: 'E')
-        build(:sequential_tag, project: project, discipline: discipline)
-      },
-      :complete_tag => -> {
-        project = create(:project)
-        discipline = create(:discipline, project: project, code: 'E')
-        create(:complete_tag, project: project, discipline: discipline)
-      },
-      
-      # Electrical components (legacy)
-      :cable_type => :skip,
-      :cable => :skip,
-      :circuit => :skip,
-      :light_cct => :skip,
-      :motor => :skip,
-      :socket_cct => :skip,
-      :switchboard => :skip,
-      :demand => :skip,
-      
-      # Electrical components (namespaced)
-      :electrical_cable_type => -> { 
-        project = create(:project)
-        build(:electrical_cable_type, project: project) 
-      },
-      :electrical_cable => -> { 
-        project = create(:project)
-        discipline = create(:discipline, :elec, project: project)
-        tag = create(:tag, prefix: 'EC', project: project, discipline: discipline)
-        cable_type = create(:electrical_cable_type, project: project)
-        build(:electrical_cable, tag: tag, electrical_cable_type: cable_type)
-      },
-      :electrical_switchboard => -> { 
-        project = create(:project)
-        discipline = create(:discipline, :elec, project: project)
-        tag = create(:tag, prefix: 'EX', project: project, discipline: discipline)
-        build(:electrical_switchboard, tag: tag)
-      },
-      :electrical_circuit => -> {
-        project = create(:project)
-        discipline = create(:discipline, :elec, project: project)
-        switchboard_tag = create(:tag, prefix: 'EX', project: project, discipline: discipline)
-        switchboard = create(:electrical_switchboard, tag: switchboard_tag)
-        build(:electrical_circuit, electrical_switchboard: switchboard)
-      },
-      :electrical_light_cct => -> {
-        project = create(:project)
-        discipline = create(:discipline, :elec, project: project)
-        tag = create(:tag, prefix: 'EL', project: project, discipline: discipline)
-        build(:electrical_light_cct, tag: tag)
-      },
-      :electrical_motor => -> {
-        project = create(:project)
-        discipline = create(:discipline, :elec, project: project)
-        tag = create(:tag, prefix: 'M', project: project, discipline: discipline)
-        build(:electrical_motor, tag: tag)
-      },
-      :electrical_socket_cct => -> {
-        project = create(:project)
-        discipline = create(:discipline, :elec, project: project)
-        tag = create(:tag, prefix: 'ES', project: project, discipline: discipline)
-        build(:electrical_socket_cct, tag: tag)
-      },
-      :electrical_demand => -> {
-        project = create(:project)
-        discipline = create(:discipline, :elec, project: project)
-        light_cct = create(:electrical_light_cct, project: project, discipline: discipline)
-        build(:electrical_demand, demandable: light_cct)
-      },
-      
-      # Roles and permissions
-      :resource_role => -> { build(:resource_role, :project_project_manager) },
-      :user_role => -> { 
-        user = create(:user)
-        user.grant(:admin)
-        user
-      }
-    }
-    
     # Get all registered factories
     factory_names = FactoryBot.factories.map(&:name)
     
-    # Test each factory
+    # Test each factory automatically
     factory_names.sort.each do |factory_name|
-      next unless factory_tests.key?(factory_name) # Skip if no test defined
-      next if factory_tests[factory_name] == :skip # Skip explicitly skipped factories
-      
       begin
         DatabaseCleaner.cleaning do
-          instance = factory_tests[factory_name].call
+          # Simply build the factory with no parameters
+          instance = build(factory_name)
+          
           assert instance.valid?, 
                  "#{factory_name} factory is invalid: #{instance.errors.full_messages.to_sentence}"
         end
@@ -113,10 +20,6 @@ class FactoriesTest < ActiveSupport::TestCase
         flunk "Error with #{factory_name} factory: #{e.message}\n#{e.backtrace.first(5).join("\n")}"
       end
     end
-    
-    # Verify we're testing all factories (excluding discipline_set which is now a trait)
-    untested_factories = factory_names - factory_tests.keys - [:discipline_set]
-    assert_empty untested_factories, "The following factories are not being tested: #{untested_factories.join(', ')}"
   end
 
   # User factory tests
@@ -237,6 +140,6 @@ end
     # Test creating a standard discipline
     discipline = create(:discipline, :elec)  # Using standard discipline 'E' for Electrical
     assert discipline.valid?
-    assert_equal :elec, discipline.code
+    assert_equal "elec", discipline.code
   end
 end

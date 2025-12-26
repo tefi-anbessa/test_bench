@@ -21,17 +21,29 @@ module ProjectAssistant
       @folder_name = "#{@module_name.underscore}" # electrical
       @singular_name = "#{@tagable_name.underscore}" # motor
       @plural_name = "#{@tagable_name.underscore.pluralize}" # motors
-      # Set up a dummy Rails app
-#      app_root = File.join(destination_root, "dummy")
-#      FileUtils.mkdir_p(app_root)
-
-#      Dir.chdir(app_root) do
-#        # Initialize a minimal Rails app
-#        'rails new . --skip-bundle --skip-test --skip-system-test --skip-webpack-install --skip-jbuilder --skip-bootsnap'
-#      end
-#      
-      # Ensure test app includes config/application.rb
+      
+      # Create clean files for testing (avoid conflicts with real app files)
       FileUtils.mkdir_p(File.join(destination_root, 'config'))
+      FileUtils.mkdir_p(File.join(destination_root, 'config', 'constants'))
+      
+      # Create clean routes.rb with insertion points
+      File.write(File.join(destination_root, 'config', 'routes.rb'), <<~RUBY)
+        Rails.application.routes.draw do
+          # INSERTION POINT 1 FOR MODULE GENERATOR
+          
+          resources :tags, shallow: true do
+            # INSERTION POINT 2 FOR MODULE GENERATOR
+          end
+        end
+      RUBY
+      
+      # Create clean tagable.yml
+      File.write(File.join(destination_root, 'config', 'constants', 'tagable.yml'), <<~YAML)
+        tagable:
+          # Electrical
+        YAML
+      
+      # Ensure test app includes config/application.rb
       File.write(File.join(destination_root, 'config/application.rb'), <<~RUBY
         module TestApp
           class Application < Rails::Application
@@ -40,15 +52,9 @@ module ProjectAssistant
       RUBY
       )
 
-      # Ensure test setup includes config/constants/tagable.yml
-      FileUtils.mkdir_p(File.join(destination_root, 'config/constants'))
-      tagable_file = File.join(destination_root, 'config/constants/tagable.yml')
-      File.write(tagable_file, "tagable:\n") unless File.exist?(tagable_file)
-
       # Generate a module (silently)
       capture(:stdout) do
-        ProjectAssistant::ModuleGenerator.start([@module_name], 
-        destination_root: destination_root)
+        ProjectAssistant::ModuleGenerator.start([@module_name], destination_root: destination_root)
       end
 
       # Dummy arguments for the command line
@@ -60,12 +66,12 @@ module ProjectAssistant
         'sort_order:integer:index',
         'code:string:uniq'
       ]
-      # Mimic the generators process_fields method to improve test robustness.
+      
+      # Mimic the generators process_fields method.
       @fields = @args[1..-1].map do |arg| 
         name, type, *opts = arg.split(':')
         { name: name, type: type, options: opts } 
       end
-      puts "\n=== Setup complete ==="
     end
 
     test "module generator setup complete" do
@@ -88,6 +94,7 @@ module ProjectAssistant
       generator = ProjectAssistant::TagableGenerator.new(@args)
       
       # Test the process_fields method directly
+      # This should succeed since all test args are valid
       fields = generator.send(:process_fields)
       
       # Verify the fields were processed correctly
@@ -101,6 +108,91 @@ module ProjectAssistant
       end
     end
 
+    test "validates name without module" do
+      assert_raises(SystemExit) do
+        run_generator ["Electrical::123Invalid", "name:string"]
+      end
+    end
+
+    test "validates name with non-existent module" do
+      assert_raises(SystemExit) do
+        run_generator ["NonExistent::Heater", "name:string"]
+      end
+    end
+
+    test "validates invalid class name format" do
+      assert_raises(SystemExit) do
+        run_generator ["Electrical::123Invalid", "name:string"]
+      end
+    end
+
+    test "validates correct name format" do
+      assert_nothing_raised do
+        run_generator ["#{@module_name}::#{@tagable_name}", "name:string"]
+      end
+    end
+
+    test "validates invalid field names" do
+      invalid_args = ["#{@module_name}::#{@tagable_name}", "123invalid:string", "invalid-name:string", "invalid name:string"]
+      generator = ProjectAssistant::TagableGenerator.new(invalid_args)
+      
+      # Mock user input to choose 'N' (abort) when prompted
+      $stdin.stubs(:gets).returns("N\n")
+      assert_raises(SystemExit) do
+        generator.send(:process_fields)
+      end
+      $stdin.unstub(:gets)
+    end
+
+    test "validates missing field types" do
+      invalid_args = ["#{@module_name}::#{@tagable_name}", "name:", "description"]
+      generator = ProjectAssistant::TagableGenerator.new(invalid_args)
+      
+      # Mock user input to choose 'N' (abort) when prompted
+      $stdin.stubs(:gets).returns("N\n")
+      assert_raises(SystemExit) do
+        generator.send(:process_fields)
+      end
+      $stdin.unstub(:gets)
+    end
+
+    test "validates unknown field types" do
+      invalid_args = ["#{@module_name}::#{@tagable_name}", "name:invalid_type", "description:unknown"]
+      generator = ProjectAssistant::TagableGenerator.new(invalid_args)
+      
+      # Mock user input to choose 'N' (abort) when prompted
+      $stdin.stubs(:gets).returns("N\n")
+      assert_raises(SystemExit) do
+        generator.send(:process_fields)
+      end
+      $stdin.unstub(:gets)
+    end
+
+    test "validates invalid field options" do
+      invalid_args = ["#{@module_name}::#{@tagable_name}", "name:string:invalid_option", "description:text:unknown:another_invalid"]
+      generator = ProjectAssistant::TagableGenerator.new(invalid_args)
+      
+      # Mock user input to choose 'N' (abort) when prompted
+      $stdin.stubs(:gets).returns("N\n")
+      assert_raises(SystemExit) do
+        generator.send(:process_fields)
+      end
+      $stdin.unstub(:gets)
+    end
+
+    test "allows continuing with valid fields when some are invalid" do
+      mixed_args = ["#{@module_name}::#{@tagable_name}", "name:string", "123invalid:integer", "description:text"]
+      generator = ProjectAssistant::TagableGenerator.new(mixed_args)
+      
+      # Mock user input to choose 'y' (continue) when prompted
+      $stdin.stubs(:gets).returns("y\n")
+      fields = generator.send(:process_fields)
+      # Should only process the valid fields
+      assert_equal 2, fields.size
+      assert_equal ["name", "description"], fields.map { |f| f[:name] }
+      $stdin.unstub(:gets)
+    end
+
     test "creates model" do
       run_generator @args
       assert_file File.join(destination_root, 'app', 'models', 
@@ -111,7 +203,7 @@ module ProjectAssistant
           assert_match(/validates :#{f[:name]}, presence: true/, content)
         end
         @fields.select { |f| ['enum', 'enum_translated'].include?(f[:type]) }.each do |f|
-          assert_match(/enum #{f[:name]}: \['stub'\]/, content)
+          assert_match(/enum :#{f[:name]}, Constants\.#{@module_name.underscore}\.#{@tagable_name.underscore}\.#{f[:name]}\.to_h/, content)
         end
       
       # Check ransackable_attributes (legacy using args instead of fields...)
@@ -125,7 +217,7 @@ module ProjectAssistant
       end
       
       # Check ransackable_associations
-      assert_match(/def self\.ransackable_associations\(auth_object = nil\)\s+\[ :tag \]/m, content)
+      assert_match(/def self\.ransackable_associations\(auth_object = nil\)\s+\[ :tag, :tag_discipline, :tag_discipline_project \]/m, content)
       end
     end
 
@@ -153,7 +245,7 @@ module ProjectAssistant
         assert_match(/module #{@module_name}/, content)
         assert_match(/class #{@tagable_name}Test < ActiveSupport::TestCase/, content)
         assert_match(/include TagableModelPatterns/, content)
-        assert_match(/@resource = create\(#{@file_name}, tag: @tag\)/, content)
+        assert_match(/@resource = create\(:#{@file_name}, tag: @tag\)/, content)
         @fields.each do |field|
           if field[:options].include?('required')
             assert_match(/test "#{field[:name]} must be present" do/, content)
@@ -398,17 +490,9 @@ module ProjectAssistant
         assert_match(/class\s+#{@tagable_name.pluralize}ControllerTest\s*<\s*ActionController::TestCase/, content)
         assert_match(/include TagableTestPatterns/, content)
         assert_match(/include Devise::Test::ControllerHelpers/, content)
-        @fields.select { |field| field[:options].include?(:required) }.each do |field|
+        @fields.select { |field| field[:options].include?('required') }.each do |field|
           assert_match(/#{field[:name]}:/, content)
         end
-      end
-    end
-
-    test "edits constants" do
-      run_generator(@args)
-      tagable_file = File.join(destination_root, 'config/constants/tagable.yml') 
-      assert_file tagable_file do |content|
-        assert_match(/# #{@module_name}\n\s*-\s+#{@class_name}\n/, content)
       end
     end
 
@@ -423,6 +507,48 @@ module ProjectAssistant
         assert_match(/include Devise::Test::IntegrationHelpers/, content)
         assert_match(/include Warden::Test::Helpers/, content)
         assert_match(/include ActionView::Helpers::NumberHelper/, content)
+      end
+    end
+
+    test "edits constants" do
+      run_generator(@args)
+      tagable_file = File.join(destination_root, 'config', 'constants', "tagable.yml") 
+      assert_file tagable_file do |content|
+        assert_match(/# #{@module_name}\n\s*-\s+#{@class_name}\n/, content)
+      end
+    end
+
+    test "adds enum constants" do
+      run_generator(@args)
+      constants_file = File.join(destination_root, 'config', 'constants', "#{@module_name.underscore}.yml") 
+      assert_file constants_file do |content|
+        # Check that enum fields are added with namespaced structure
+        enum_fields = @fields.select { |f| ['enum', 'enum_translated'].include?(f[:type]) }
+        if enum_fields.any?
+          assert_match(/#{@singular_name}:\s*\n/, content)
+          enum_fields.each do |f|
+            assert_match(/#{f[:name]}:\s*\n\s+#{f[:name]}_other: 0.*?# TODO: Add enum values/m, content)
+          end
+        end
+      end
+    end
+
+    test "updates routes file" do
+      routes_file = File.join(destination_root, "config", "routes.rb")
+      
+      # Run the generator
+      run_generator @args
+      
+      # Check that the routes file was updated
+      assert_file routes_file do |content|
+        puts "DEBUG: Routes content:"
+        puts content
+        puts "DEBUG: Looking for pattern: /resources #{@plural_name}, only: \[:index, :new, :create\]/"
+        
+        # Check that the new resource lines were added to routes file
+        # TODO extend the regexp to match the correct location for each line.
+        assert_match(/resources #{@plural_name}, only: \[:index, :new, :create\]/, content)
+        assert_match(/resources #{@plural_name}, except: \[:index]/, content)
       end
     end
   end

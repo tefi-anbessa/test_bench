@@ -7,47 +7,118 @@ module ProjectAssistant
     include FieldTypes
     source_root File.expand_path("tagable/templates", __dir__)
     
+    def initialize(args, *options)
+      super
+      validate_name
+    end
+    
     def module_name
-      class_path[0].classify  # Module
+      class_name.split("::")[0..-2].join("::")  # "Module::SubModule".
     end
 
     def tagable_name
-      file_name.classify      # Tagable
+      file_name.classify      # "Tagable"
+    end
+
+    def validate_name
+      errors = []
+      
+      # Validate that we have a module and class name
+      unless class_name.include?("::")
+        errors << "Name must include both module and class with '::' separator (e.g. Electrical::Heater)"
+        return errors if errors.any?
+      end
+      
+      # Validate module exists
+      begin
+        module_name.constantize
+      rescue NameError
+        errors << "Module '#{module_name}' does not exist"
+      end
+      
+      # Validate class name format
+      unless tagable_name.match?(/^[A-Z][a-zA-Z0-9_]*$/)
+        errors << "Class name '#{tagable_name}' is not a valid Ruby identifier"
+      end
+      
+      if errors.any?
+        say_status :error, "Name validation failed:", :red
+        errors.each { |error| say_status :error, "  - #{error}", :red }
+        say_status :info, "Generator aborted. Please fix the name and try again.", :yellow
+        exit 1
+      end
     end
 
     def process_fields
-      @fields = args.map do |arg|
+      # First pass: collect all validation errors
+      errors = []
+      valid_fields = []
+      
+      args.each do |arg|
         begin
           # Split the argument into parts
           name, type, *options = arg.split(':')
           
           # Validate field name
           unless name&.match?(/^[a-zA-Z_][a-zA-Z0-9_]*$/)
-            say_status :error, "Invalid field name: #{name}. Must be a valid Ruby identifier", :red
+            errors << "Invalid field name: #{name}. Must be a valid Ruby identifier"
             next
           end
           
-          # Validate field type# Set default type to string if not provided
-          type ||= 'string'
+          # Validate field type (no defaults)
+          if type.nil?
+            errors << "Missing field type for #{name}. Please specify a type"
+            next
+          end
+          
           unless VALID_FIELD_TYPES.include?(type)
-            say_status :warning, "Unknown field type '#{type}' for #{name}. Defaulting to 'string'", :yellow
-            type = 'string'
+            errors << "Unknown field type '#{type}' for #{name}. Valid types are: #{VALID_FIELD_TYPES.join(', ')}"
+            next
           end
 
           # Validate options
           options = options.uniq # Remove duplicates
           invalid_options = options - VALID_OPTIONS
           unless invalid_options.empty?
-            say_status :warning, 
-              "Unknown option(s) #{invalid_options.inspect} for #{name}. " \
-              "Valid options are: #{VALID_OPTIONS.join(', ')}", :yellow
+            errors << "Unknown option(s) #{invalid_options.inspect} for #{name}. Valid options are: #{VALID_OPTIONS.join(', ')}"
+            next
           end
-          { name: name, type: type, options: options }
+          
+          valid_fields << { name: name, type: type, options: options }
         rescue ArgumentError => e
-          say_status :error, "Invalid attribute: #{arg} - #{e.message}", :red
-          next
+          errors << "Invalid attribute: #{arg} - #{e.message}"
         end
-      end.compact
+      end
+      
+      # Handle validation results
+      if errors.any?
+        say_status :error, "Validation errors found:", :red
+        errors.each { |error| say_status :error, "  - #{error}", :red }
+        
+        if valid_fields.any?
+          say_status :warning, "Valid fields that could be processed:", :yellow
+          valid_fields.each { |field| say_status :info, "  - #{field[:name]}:#{field[:type]}#{field[:options].map { |opt| ":#{opt}" }.join('')}", :blue }
+          
+          say_status :prompt, "Continue with valid fields only? (Recommended: No) [y/N]", :yellow
+          response = $stdin.gets.chomp.downcase
+          
+          if response == 'y'
+            @fields = valid_fields
+            say_status :info, "Proceeding with #{valid_fields.length} valid fields.", :green
+          else
+            say_status :info, "Generator aborted. Please fix the errors and run again.", :yellow
+            exit 1
+          end
+        else
+          say_status :error, "No valid fields found. Generator aborted.", :red
+          exit 1
+        end
+      else
+        @fields = valid_fields
+        say_status :info, "All #{valid_fields.length} fields are valid.", :green
+      end
+      
+      @fields
     end
 
     def create_model_file
@@ -100,18 +171,85 @@ module ProjectAssistant
     def create_system_test_file
       template "system_test.rb.erb", "test/system/#{controller_file_path}_system_test.rb"
     end
+    
+    def edit_routes_file
+      # Update config/routes.rb
+      routes_file = File.join(destination_root, "config", "routes.rb")
+      if File.exist?(routes_file)
+        content = File.read(routes_file)
+        
+        # Find the first insertion point comment and insert after it
+        insertion_pattern = /(namespace\s+:#{module_name.underscore}\s+do.*?# INSERTION POINT 1 FOR TAGABLE GENERATOR)/m
+        if content.match?(insertion_pattern)
+          content.sub!(insertion_pattern) do
+            "#{$1}\n      resources #{plural_name}, only: [:index, :new, :create]"
+          end
+        else
+          say_status :error, "#{routes_file}: Could not find insertion point 1 for tagable generator", :red
+          return
+        end
+        
+        # Find the second insertion point comment and insert after it
+        insertion_pattern = /(namespace\s+:#{module_name.underscore}\s+do.*?# INSERTION POINT 2 FOR TAGABLE GENERATOR)/m
+        if content.match?(insertion_pattern)
+          content.sub!(insertion_pattern) do
+            "#{$1}\n        resources #{plural_name}, except: [:index]"
+          end
+        else
+          say_status :error, "#{routes_file}: Could not find insertion point 2 for tagable generator", :red
+          return
+        end
+        
+        File.write(routes_file, content) unless options[:pretend]
+        say_status :update, "#{routes_file}: Updated with #{tagable_name.pluralize} resources", :green
+      else
+        say_status :error, "#{routes_file}: Not found", :red
+      end
+    end
          
     def update_constants
       # Update tagable.yml
-      tagable_file = File.join(destination_root, 'config/constants/tagable.yml')
+      tagable_file = File.join(destination_root, "config", "constants", "tagable.yml")
       if File.exist?(tagable_file)
         content = File.read(tagable_file)
         # Match the module name in the comment and append the class name
-        module_name = class_name.split("::")[0]
         content.sub!(/(#\s+#{module_name}\n)/, "\\1  - #{class_name}\n")
-        File.write(tagable_file, content)
+        File.write(tagable_file, content) unless options[:pretend]
+        say_status :update, "#{tagable_file}: Added #{class_name}", :green
       else
-        say_status :error, "Tagable file not found: #{tagable_file}", :red
+        say_status :error, "#{tagable_file}: Not found", :red
+      end
+
+      # Update module constants with enum definitions
+      constants_file = File.join(destination_root, "config", "constants", "#{module_name}.yml")
+      if File.exist?(constants_file)
+        content = File.read(constants_file)
+        
+        # Add enum definitions for fields of type :enum or :enum_translated
+        enum_fields = @fields.select { |field| field[:type] == 'enum' || field[:type] == 'enum_translated' }
+        if enum_fields.any?
+          # Create enum section with placeholder values (only once)
+          enum_section = "\n  #{class_name.demodulize.underscore}:\n"
+          
+          enum_fields.each do |field|
+            field_name = field[:name]
+            enum_section += "    #{field_name}:\n      #{field_name}_other: 0  # TODO: Add enum values\n"
+          end
+          
+          # Insert before the last end of the file
+          if content.match?(/\n\w+:\s*\n.*\n/)
+            # Insert after existing sections
+            content.sub!(/(\n\w+:\s*\n.*\n)/) { "#{$1}#{enum_section}" }
+          else
+            # Append to the end if no sections found
+            content += enum_section
+          end
+          
+          File.write(constants_file, content) unless options[:pretend]
+          say_status :update, "#{constants_file}: Added enum definitions", :green
+        end
+      else
+        say_status :error, "#{constants_file}: Not found", :red
       end
     end
   end

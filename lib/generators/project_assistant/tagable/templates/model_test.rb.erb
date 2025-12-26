@@ -10,7 +10,7 @@ module <%= module_name %>
     end
     
     def setup_model_specific_data
-      @resource = create(<%= singular_table_name %>, tag: @tag)
+      @resource = create(:<%= singular_table_name %>, tag: @tag)
       # Insert model specific test setup here, including relationships with other models.
       # E.g. setup electrical_demand for electrical models.
     end
