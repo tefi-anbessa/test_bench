@@ -2,6 +2,8 @@
   <%% unless current_project %>
     <th scope="col"><%%= sort_link(@q, 'tag_discipline_project_code', Project.model_name.human) %></th>
   <%% end %>
+  <th scope="col"><%= sort_link(@q, :tag_stage) %></th>
+  <th scope="col"><%= sort_link(@q, :tag) %></th>
 <%- @fields.select { |field| INDEX_TYPES.include?(field[:type]) }.each do |field| -%>
   <th scope="col"><%%= sort_link(@q, <%= ":#{field[:name]}" %>) %></th>
 <%- end -%>

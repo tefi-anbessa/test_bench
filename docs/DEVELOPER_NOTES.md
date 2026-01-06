@@ -250,6 +250,10 @@ Documents are used to manage and control the issue of information on a project. 
   
 ## Known Issues
 
+### Tagable Validation
+
+It is possible to create multiple tags referencing the same tagable element, despite the validations in place.
+
 ### Pagination
 
 - **Issue**: The pagination system is not respecting the `per_page` parameter correctly.

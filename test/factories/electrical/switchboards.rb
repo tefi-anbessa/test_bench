@@ -2,37 +2,30 @@
 
 FactoryBot.define do
   factory :electrical_switchboard, class: 'Electrical::Switchboard' do
-    transient do
-      # Tag can be passed explicitly or will be auto-created
-      tag { nil }
-
-      # Project and discipline can be passed or will use defaults
-      project { nil }      # Will create default if not provided
-      discipline { nil }   # Will create default if not provided
-    end
-
     # Default required attributes
     voltage_rating { '600/1000V' }  # Required field - use common voltage rating
     busbar_rating { 400 }           # Required field - common busbar rating in Amps
+    busbar_fault_duration { 0.5 }
+    cable_entry { "Bottom" }
+    incomer_protection { "Isolator 4P"}
+    metering { "None"}
+    neutral_bar_connections { "10 x 4mm²"}
+    earth_bar_connections { "10 x 4mm²"}
+    ingress_protection { "IP44"}
+    notes { Faker::Lorem.paragraph(sentence_count: 2) }
 
-    # Validation and tag creation
-    after(:build) do |switchboard, evaluator|
+    # Create tag association in a single transaction
+    before(:create) do |switchboard, evaluator|
       if evaluator.tag
-        # Tag was explicitly provided
-        raise "Tag is already associated with another record" if evaluator.tag.tagable.present?
+        # Use provided tag, but ensure it's not already associated
+        if evaluator.tag.tagable.present?
+          raise "Tag is already associated with another record: #{evaluator.tag.tagable_type}##{evaluator.tag.tagable_id}"
+        end
         switchboard.tag = evaluator.tag
       else
-        # Auto-create tag using provided or default project and discipline
-        project = evaluator.project || create(:project)
-        discipline = evaluator.discipline || create(:discipline, :elec)
-
-        switchboard.tag = create(:tag,
-          prefix: 'EX',
-          project: project,
-          discipline: discipline,
-          tagable_type: 'Electrical::Switchboard',
-          tagable_id: switchboard.id
-        )
+        # Create new tag with proper discipline in same transaction
+        discipline = Discipline.find_or_create_by(code: switchboard.class.discipline_code)
+        switchboard.tag = create(:tag, :unique_tag, discipline: discipline)
       end
     end
 

@@ -7,7 +7,7 @@ FactoryBot.define do
     suffix { '' }    # Default suffix if not provided
     service { "Test #{prefix}-#{'%04d' % serial}#{suffix}" }
     stage { 0 }  # Default stage to 0
-    notes { nil }
+    notes { Faker::Lorem.paragraph(sentence_count: 2) }
     discipline
 
     # Allow passing project through to discipline
@@ -25,13 +25,14 @@ FactoryBot.define do
     trait :unique_tag do
       # Override the serial with a database-aware sequence
       after(:build) do |tag, _evaluator|
-        tag.serial = generate_unique_serial(tag.prefix, tag.discipline)
+        # Ensure discipline is set before generating serial
+        if tag.discipline
+          tag.serial = generate_unique_serial(tag.prefix, tag.discipline)
+        else
+          # Fallback to simple serial if no discipline
+          tag.serial = 1
+        end
       end
-    end
-
-    # Factory for creating a full tag with all attributes
-    factory :complete_tag do
-      notes { Faker::Lorem.paragraph(sentence_count: 2) }
     end
   end
 end

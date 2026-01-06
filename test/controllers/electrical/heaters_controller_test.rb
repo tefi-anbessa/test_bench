@@ -1,7 +1,7 @@
 require "test_helper"
 require "helpers/tagable_test_patterns"
-module <%= module_name %>
-  class <%= tagable_name.pluralize %>ControllerTest < ActionController::TestCase
+module Electrical
+  class HeatersControllerTest < ActionController::TestCase
     include TagableTestPatterns
     include Devise::Test::ControllerHelpers
 
@@ -18,25 +18,24 @@ module <%= module_name %>
     # Set the minimum required params for a valid resource
     def valid_resource_params
       {
-<%= @fields.select { |f| f[:options].include?('required') }
-          .map { |field| "#{field[:name]}: '' # Add valid data" }
-          .join(",\n        ") %>
+        heater_type: 'cast_in',
+        application: 'annealing_heat_treating'
       }
     end
 
     # Set invalid resource params for tests
     def invalid_resource_params
-      { attribute: invalid_value }  # Set invalid value for an attribute
+      { heater_type: 'invalid' }  # Set invalid value for an attribute
     end
 
     # Nominate an attribute to get changed during update tests
     def update_attribute_name
-      :attribute
+      :sheath_temperature_max
     end
 
     # Nominate a valid value to update the attribute to
     def updated_attribute_value
-      1.0
+      400.0
     end
   end
 end

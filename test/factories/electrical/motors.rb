@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :electrical_motor, class: 'Electrical::Motor' do
-    # Tag can be passed explicitly or will be auto-created
+    # Tag can be passed explicitly, otherwise will be auto-created
     transient do
       tag { nil }
     end
@@ -10,14 +10,19 @@ FactoryBot.define do
     ingress_protection { '55' }
     poles { 4 }
     speed_rated { 1500 }
-    
-    after(:build) do |model, evaluator|
+
+    # Create tag association in a single transaction
+    before(:create) do |motor, evaluator|
       if evaluator.tag
-        raise "Tag is already associated with another record" if evaluator.tag.tagable.present?
-        model.tag = evaluator.tag
+        # Use provided tag, but ensure it's not already associated
+        if evaluator.tag.tagable.present?
+          raise "Tag is already associated with another record: #{evaluator.tag.tagable_type}##{evaluator.tag.tagable_id}"
+        end
+        motor.tag = evaluator.tag
       else
-        discipline = Discipline.find_or_create_by(code: model.class.discipline_code)
-        model.tag = create(:tag, :unique_tag, discipline: discipline)
+        # Create new tag with proper discipline in same transaction
+        discipline = Discipline.find_or_create_by(code: motor.class.discipline_code)
+        motor.tag = create(:tag, :unique_tag, discipline: discipline)
       end
     end
   end

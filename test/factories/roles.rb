@@ -35,6 +35,9 @@ FactoryBot.define do
         resource { nil }            # Allow passing a resource directly
       end
       
+      # Set default role based on resource type
+      name { Constants.roles.resources[resource_type.underscore.to_sym]&.first || 'team_member' }
+      
       after(:build) do |role, evaluator|
         if evaluator.resource
           role.resource = evaluator.resource

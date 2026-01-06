@@ -24,7 +24,7 @@ module Electrical
 
     def self.ransackable_attributes(auth_object = nil)
       ["electrical_cable_type_id", "route_length", "vertical_allowance", "termination_allowance",
-        "start_mark", "end_mark", "created_at", "updated_at"]
+        "start_mark", "end_mark", "notes", "created_at", "updated_at"]
     end
 
     def self.ransackable_associations(auth_object = nil)

@@ -7,7 +7,8 @@ module Electrical
       :electrical_designer
     end
 
-    # Default discipline for tagable models to reference back to this module
+    # Default discipline for tagable models to reference back to this module, used in testing. 
+    # Not used in the application, as projects can set their own disciplines.
     def self.discipline_code
       "elec"
     end

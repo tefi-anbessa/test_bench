@@ -6,13 +6,13 @@ en:
         header:           "Catalog of Cable Types for %{project}"
       edit:
         title:            "Edit Cable Type"
-        header:           "Edit Cable Type: %{label}"
+        header:           "Edit Cable Type %{label}"
       new:
         title:            "New Cable Type"
         header:           "New Cable Type"
       show:
         title:            "Cable Type"
-        header:           "Cable Type: %{label}"
+        header:           "Cable Type %{label}"
 
     cables:
       index:
@@ -20,13 +20,13 @@ en:
         header:           "Cable Schedule for %{project}"
       edit:
         title:            "Edit Cable"
-        header:           "Edit Cable: %{label}"
+        header:           "Edit Cable %{label}"
       new:
         title:            "New Cable"
         header:           "New Cable"
       show:
         title:            "Cable"
-        header:           "Cable: %{label}"
+        header:           "Cable %{label}"
 
     switchboards:
       index:
@@ -34,13 +34,13 @@ en:
         header:           "Switchboards Schedule for %{project}"
       edit:
         title:            "Edit Switchboard"
-        header:           "Edit Switchboard: %{label}"
+        header:           "Edit Switchboard %{label}"
       new:
         title:            "New Switchboard"
         header:           "New Switchboard"
       show:
         title:            "Switchboard"
-        header:           "Switchboard: %{label}"
+        header:           "Switchboard %{label}"
 
     circuits:
       index:
@@ -48,13 +48,13 @@ en:
         header:           "%{switchboard} Circuits Schedule"
       edit:
         title:            "Edit Circuit"
-        header:           "Edit Circuit: %{label}"
+        header:           "Edit Circuit %{label}"
       new:
         title:            "New Circuit"
         header:           "New Circuit for %{label}"
       show:
         title:            "Circuit"
-        header:           "Circuit: %{label}"
+        header:           "Circuit %{label}"
 
     motors:
       index:
@@ -62,13 +62,13 @@ en:
         header:           "Motors Schedule for %{project}"
       edit:
         title:            "Edit Motor"
-        header:           "Edit Motor: %{label}"
+        header:           "Edit Motor %{label}"
       new:
         title:            "New Motor"
         header:           "New Motor"
       show:
         title:            "Motor"
-        header:           "Motor: %{label}"
+        header:           "Motor %{label}"
 
     socket_ccts:
       index:
@@ -76,13 +76,13 @@ en:
         header:           "Socket Circuits Schedule for %{project}"
       edit:
         title:            "Edit Socket Circuit"
-        header:           "Edit Socket Circuit: %{label}"
+        header:           "Edit Socket Circuit %{label}"
       new:
         title:            "New Socket Circuit"
         header:           "New Socket Circuit"
       show:
         title:            "Socket Circuit"
-        header:           "Socket Circuit: %{label}"
+        header:           "Socket Circuit %{label}"
 
     light_ccts:
       index:
@@ -90,13 +90,13 @@ en:
         header:           "Light Circuits Schedule for %{project}"
       edit:
         title:            "Edit Light Circuit"
-        header:           "Edit Light Circuit: %{label}"
+        header:           "Edit Light Circuit %{label}"
       new:
         title:            "New Light Circuit"
         header:           "New Light Circuit"
       show:
         title:            "Light Circuit"
-        header:           "Light Circuit: %{label}"
+        header:           "Light Circuit %{label}"
 
     demands:
       index:
@@ -110,4 +110,18 @@ en:
         header:           "New Load for %{label}"
       show:
         title:            "Load"
-        header:           "Load: %{label}"
+        header:           "Load %{label}"
+
+    heaters:
+      index:
+        title:            "Heaters"
+        header:           "Heaters Schedule"
+      edit:
+        title:            "Edit Heater"
+        header:           "Edit Heater %{label}"
+      new:
+        title:            "New Heater"
+        header:           "New Heater"
+      show:
+        title:            "Heater"
+        header:           "Heater %{label}"

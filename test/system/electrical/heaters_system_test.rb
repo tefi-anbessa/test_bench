@@ -1,8 +1,7 @@
 require "application_system_test_case"
 require File.join(Rails.root, 'test', 'helpers', 'tagable_system_test_patterns')
-
 module Electrical
-  class CablesSystemTest < ApplicationSystemTestCase
+  class HeatersSystemTest < ApplicationSystemTestCase
     include TagableSystemTestPatterns
     include Devise::Test::IntegrationHelpers
     include Warden::Test::Helpers
@@ -15,24 +14,18 @@ module Electrical
 
     def setup_model_specific_data
       # List fields that should appear in index. 
-      @index_fields = %w[ electrical_cable_type_id route_length ]
+      @index_fields = %w[ heater_type application ingress_protection sheath_material insulation_material ]
 
       # List index fields that should have ransack search capability.
-      @search_fields = %w[ notes ]
+      @search_fields = %w[heater_type application ingress_protection sheath_material insulation_material ]
 
       # List all fields that should appear in show (should be all)
-      @show_fields = %w[ route_length vertical_allowance 
-        termination_allowance start_mark end_mark from to notes ]
+      @show_fields = %w[heater_type application ingress_protection sheath_temperature_max power_density_min 
+      power_density_max sheath_material insulation_material]
 
       # List all fields that should appear in forms (should be all)
-      @form_fields = %w[ electrical_cable_type_id route_length vertical_allowance 
-        termination_allowance start_mark end_mark from_type to_type notes ]
-
-      @cable_type1 = create(:electrical_cable_type, project: @project)
-      @cable_type2 = create(:electrical_cable_type, csa: 4.0, project: @project)
-
-      @resource.update(electrical_cable_type_id: @cable_type1.id)
-
+      @form_fields = %w[heater_type application ingress_protection sheath_temperature_max power_density_min 
+      power_density_max sheath_material insulation_material]
     end
   end
 end

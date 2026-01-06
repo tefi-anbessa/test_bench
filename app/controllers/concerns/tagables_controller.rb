@@ -88,7 +88,6 @@ module TagablesController
     # GET /edit 
     def edit_tagable
       authorize @resource, :edit?
-
       # Allow edit of resource without a tag as a way to rescue orphans
       @tag = (@resource.tag&.present? && @resource.tag.valid?)? @resource.tag : Tag.new(tagable_type: controller_path.classify)
       setup_form

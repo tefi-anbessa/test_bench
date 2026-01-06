@@ -34,7 +34,7 @@ Rails.application.routes.draw do
       # INSERTION POINT 1 FOR TAGABLE GENERATOR
       # Provide for admins to create and list cable_types full catalog outwith project context
       resources :cable_types, only: [:index, :new, :create]
-      resources :cables, :motors, :light_ccts, 
+      resources :heaters, :cables, :motors, :light_ccts, 
                 :socket_ccts, only: [:index, :new, :create]
       resources :switchboards, only: [:index, :new, :create] do
         resources :circuits, only: [:index, :new, :create]
@@ -48,7 +48,7 @@ Rails.application.routes.draw do
     resources :tags, shallow: true do
       namespace :electrical do
         # INSERTION POINT 2 FOR TAGABLE GENERATOR
-        resources :cables, :motors, :light_ccts, 
+        resources :heaters, :cables, :motors, :light_ccts, 
                   :socket_ccts, except: [:index]
         resources :switchboards, except: [:index] do
           resources :circuits, except: [:index]

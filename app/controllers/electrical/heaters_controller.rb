@@ -1,5 +1,5 @@
-module <%= module_name %>
-  class <%= tagable_name.pluralize %>Controller < ApplicationController
+module Electrical
+  class HeatersController < ApplicationController
     include TagablesController
 
     # GET /resource or /resource.json
@@ -53,8 +53,10 @@ module <%= module_name %>
 
       # Only allow a list of trusted parameters through.
       def resource_params
-        params.require(:<%= singular_table_name %>)
-        .permit(<%= @fields.map { |field| ":#{field[:name]}" }.join(', ') %>,
+        params.require(:electrical_heater)
+        .permit(:heater_type, :application, :ingress_protection, :sheath_temperature_max, 
+                :power_density_min, :power_density_max, :sheath_material, :insulation_material,
+                :notes,
           tag: [
             :id, :project_id, :discipline_id, :prefix, :serial,
             :suffix, :service, :stage, :notes, :tagable_type

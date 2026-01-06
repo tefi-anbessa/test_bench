@@ -190,7 +190,11 @@ module TagableTestPatterns
     skip "Invalid resource params not defined" unless invalid_resource_params.present?
     sign_in @accredited_team_member
 
-    if invalid_resource_params.keys.any? { |key| resource_class.defined_enums.key?(key.to_s) }
+    if invalid_resource_params.keys.any? { |key| 
+          resource_class.defined_enums.key?(key.to_s) && 
+          invalid_resource_params[key].present? && 
+          !resource_class.defined_enums[key.to_s].include?(invalid_resource_params[key])
+        }
       # Invalid enum values should raise conflict error
         assert_no_difference("#{resource_class}.count") do
           post :create, params: params_with_new_tag.deep_merge(resource_name => invalid_resource_params)
@@ -220,7 +224,11 @@ module TagableTestPatterns
   def test_cannot_create_both_with_invalid_resource
     skip "Invalid resource params not defined" unless invalid_resource_params.present?
     sign_in @accredited_team_member
-    if invalid_resource_params.keys.any? { |key| resource_class.defined_enums.key?(key.to_s) }
+    if invalid_resource_params.keys.any? { |key| 
+          resource_class.defined_enums.key?(key.to_s) && 
+          invalid_resource_params[key].present? && 
+          !resource_class.defined_enums[key.to_s].include?(invalid_resource_params[key])
+        }
       # Invalid enum values should return conflict response
       assert_no_difference("#{resource_class}.count") do
         post :create, params: params_with_new_tag.deep_merge(resource_name => invalid_resource_params)

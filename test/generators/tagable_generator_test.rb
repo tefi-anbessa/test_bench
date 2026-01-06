@@ -479,6 +479,9 @@ module ProjectAssistant
           end
         end
       end
+      
+      # Skip cleanup for this test to examine generated files
+      @skip_cleanup = true
     end
 
     test "creates controller test" do
@@ -547,8 +550,167 @@ module ProjectAssistant
         
         # Check that the new resource lines were added to routes file
         # TODO extend the regexp to match the correct location for each line.
-        assert_match(/resources #{@plural_name}, only: \[:index, :new, :create\]/, content)
-        assert_match(/resources #{@plural_name}, except: \[:index]/, content)
+        assert_match(/resources\s+:#{@plural_name}, only: \[:index, :new, :create\]/, content)
+        assert_match(/resources\s+:#{@plural_name}, except: \[:index]/, content)
+      end
+    end
+
+    test "creates model translations" do
+      # Set up locale files for this test
+      create_test_locale_files
+      I18n.stubs(:available_locales).returns([:en, :km])
+      
+      run_generator @args
+      
+      # Check English models file
+      en_models_file = File.join(destination_root, "config", "locales", @folder_name, "en", "en.#{@module_name}.models.yml")
+      assert_file en_models_file do |content|
+        assert_match(/#{@folder_name}\/#{@singular_name}: "#{@tagable_name}"/, content)
+        assert_match(/name: Name/, content)
+        assert_match(/description: Description/, content)
+        assert_match(/selector: Selector/, content)
+        assert_match(/status: Status/, content)
+        assert_match(/statuses:/, content)
+        assert_match(/other_status: "Other Status"/, content)
+      end
+      
+      # Check Khmer models file
+      km_models_file = File.join(destination_root, "config", "locales", @folder_name, "km", "km.#{@module_name}.models.yml")
+      assert_file km_models_file do |content|
+        assert_match(/#{@folder_name}\/#{@singular_name}: "#{@tagable_name}"/, content)
+        assert_match(/name: Name/, content)
+        assert_match(/description: Description/, content)
+      end
+    end
+
+    test "creates views translations" do
+      # Set up locale files for this test
+      create_test_locale_files
+      I18n.stubs(:available_locales).returns([:en, :km])
+      
+      run_generator @args
+      
+      # Check English views file
+      en_views_file = File.join(destination_root, "config", "locales", @folder_name, "en", "en.#{@module_name}.views.yml")
+      assert_file en_views_file do |content|
+        assert_match(/#{@plural_name}:/, content)
+        assert_match(/title:\s*"#{@tagable_name.pluralize}"/, content)
+        assert_match(/header:\s*"#{@tagable_name.pluralize} Schedule for %{project}"/, content)
+        assert_match(/title:\s*"Edit #{@tagable_name}"/, content)
+        assert_match(/header:\s*"Edit #{@tagable_name}: %{label}"/, content)
+        assert_match(/title:\s*"New #{@tagable_name}"/, content)
+        assert_match(/header:\s*"New #{@tagable_name}"/, content)
+        assert_match(/title:\s*"#{@tagable_name}"/, content)
+        assert_match(/header:\s*"#{@tagable_name}: %{label}"/, content)
+      end
+      
+      # Check Khmer views file
+      km_views_file = File.join(destination_root, "config", "locales", @folder_name, "km", "km.#{@module_name}.views.yml")
+      assert_file km_views_file do |content|
+        assert_match(/#{@plural_name}:/, content)
+        assert_match(/title:\s*"#{@tagable_name.pluralize}"/, content)
+        assert_match(/header:\s*"#{@tagable_name.pluralize} Schedule for %{project}"/, content)
+      end
+    end
+
+    test "handles enum_translated fields correctly in translations" do
+      # Set up locale files for this test
+      create_test_locale_files
+      I18n.stubs(:available_locales).returns([:en, :km])
+      
+      run_generator @args
+      
+      # Check models file for enum_translated field
+      en_models_file = File.join(destination_root, "config", "locales", @folder_name, "en", "en.#{@module_name}.models.yml")
+      assert_file en_models_file do |content|
+        assert_match(/status: Status/, content)
+        assert_match(/statuses:/, content)
+        assert_match(/other_status: "Other Status"/, content)
+      end
+    end
+
+    test "handles missing models file gracefully" do
+      # Set up locale files for this test
+      create_test_locale_files
+      I18n.stubs(:available_locales).returns([:en, :km])
+      
+      # Remove the models file
+      en_models_file = File.join(destination_root, "config", "locales", @folder_name, "en", "en.#{@module_name}.models.yml")
+      File.delete(en_models_file) if File.exist?(en_models_file)
+      
+      # Should not raise an error
+      assert_nothing_raised do
+        run_generator @args
+      end
+    end
+
+    test "handles missing views file gracefully" do
+      # Set up locale files for this test
+      create_test_locale_files
+      I18n.stubs(:available_locales).returns([:en, :km])
+      
+      # Remove the views file
+      en_views_file = File.join(destination_root, "config", "locales", @folder_name, "en", "en.#{@module_name}.views.yml")
+      File.delete(en_views_file) if File.exist?(en_views_file)
+      
+      # Should not raise an error
+      assert_nothing_raised do
+        run_generator @args
+      end
+    end
+
+    private
+
+    def teardown
+      # Skip cleanup if flag is set
+      return if @skip_cleanup
+      super
+    end
+
+    def create_test_locale_files
+      # Create locale directories based on available locales
+      locale_dirs = I18n.available_locales.map do |locale|
+        File.join(destination_root, "config", "locales", @folder_name, locale.to_s)
+      end
+      
+      locale_dirs.each do |dir|
+        FileUtils.mkdir_p(dir)
+      end
+      
+      # Create models files for each locale
+      I18n.available_locales.each do |locale|
+        models_file = File.join(destination_root, "config", "locales", @folder_name, locale.to_s, "#{locale}.#{@module_name}.models.yml")
+        
+        File.write(models_file, <<~YAML)
+          #{locale}:
+            activerecord:
+              models:
+                electrical/cable_type: "Cable Type"
+                electrical/cable: "Cable"
+              attributes:
+                electrical/cable_type:
+                  id: ID
+                  conductor_material: "Conductor Material"
+                electrical/cable:
+                  from: "From"
+                  to: "To"
+        YAML
+      end
+      
+      # Create views files for each locale
+      I18n.available_locales.each do |locale|
+        views_file = File.join(destination_root, "config", "locales", @folder_name, locale.to_s, "#{locale}.#{@module_name}.views.yml")
+        
+        File.write(views_file, <<~YAML)
+          #{locale}:
+            cables:
+              index:
+                title: "Cables"
+                header: "Cables Schedule for %{project}"
+              show:
+                title: "Cable"
+                header: "Cable: %{label}"
+        YAML
       end
     end
   end

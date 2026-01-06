@@ -21,12 +21,19 @@
 
       <div class="card-body p-2">
         <div class="row justify-content-center">
-          <div class="col-12 col-md-10 col-lg-8 col-xl-6">        # Adjust to fit requirements
+          <div class="col-12 col-md-10 col-lg-8 col-xl-6">        <!-- Adjust to fit field width requirements -->
 
             <!-- Tag -->
-            <%%= f.fields_for tag do |tag_f| %>
-              <%%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
-            <%% end %>
+            <div class="card mb-1">
+              <%% if tag.persisted? %>
+                <%%= render 'tags/card', tag: tag %>
+                <%%= hidden_field_tag :tag_id, tag.id %>
+              <%% else %>
+                <%%= f.fields_for tag do |tag_f| %>
+                  <%%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
+                <%% end %>
+              <%% end %>
+            </div>
 
             <!-- <%= human_name %> Details -->
             <div class="card mb-1">
@@ -38,6 +45,7 @@
                 <%%= render 'shared/error_messages', object: f.object %>
 
 <%- @fields.each do |field| -%>
+  <%- required = field[:options].include? ('required') %>
   <%- case field[:type] -%>
     <%- when "string" -%>
                 <%%= f.text_field :<%= field[:name] %>,
@@ -61,8 +69,9 @@
     <%- when "float", "decimal" -%>
                 <%%= f.number_field :<%= field[:name] %>,
                         class: 'form-control form-control-sm',
+                        qppend: 'x'                             # Customize engineering units
                         step: 0.01,                             # Customize as required
-                        label_col: "col-sm-4"
+                        label_col: "col-sm-4",
                         control_col: "col-sm-8"%>
 
     <%- when "datetime", "timestamp", "time", "date" -%>
@@ -90,25 +99,25 @@
                         control_col: "col-sm-8" %>
 
     <%- when "enum" -%>
-                <%% required = field[:options].include? ('required') %>
                 <%%= f.select :<%= field[:name] %>,
                     options_for_select(
                       <%= class_name%>.<%= field[:name].pluralize %>.keys,
                       selected: <%= singular_name %>.<%= field[:name] %>
                     ),
-                    { include_blank: required ? t('form.required') : t('form.optional') },
+                    { include_blank: <%= required ? "t('form.required')" : "t('form.optional')" %> },
                     class: 'form-control form-control-sm' %>
 
     <%- when "enum_translated" -%>
-                <%% required = field[:options].include? ('required') %>
+                <%- required = field[:options].include? ('required') %>
                 <%%= f.select :<%= field[:name] %>,
                     options_for_select(
-                      <%= class_name%>.<%= field[:name].pluralize %>.keys.collect do |k| 
-                      [<%= class_name %>.human_enum_name(:<%= field[:name] %>, k), k] },
+                      <%= class_name%>.<%= field[:name].pluralize %>.keys.collect 
+                        { |k| [<%= class_name %>.human_enum_name(:<%= field[:name] %>, k), k] },
                       selected: <%= singular_name %>.<%= field[:name] %>
                     ),
-                    { include_blank: required ? t('form.required') : t('form.optional') },
+                    { include_blank: <%= required ? "t('form.required')" : "t('form.optional')" %> },
                     class: 'form-control form-control-sm' %>
+
   <%- end -%>
 <%- end -%>
                 

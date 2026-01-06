@@ -188,33 +188,69 @@ electrical:
   heater:
     heater_type:
       heater_type_other: 0 # Placeholder for other heater types
+      cast_in: 1 # Cast-In Heater
+      ceramic_fiber: 2 # Ceramic Fiber Heater
+      circulation: 3 # Circulation Heater
+      drum: 4 # Drum Heater
+      duct: 5 # Duct Heater
+      enclosure: 6 # Enclosure Heater
+      explosion_proof: 7 # Explosion Proof Heater
+      flexible: 8 # Flexible Heater
+      forced_air: 9 # Forced Air Heater
+      heat_torch: 10 # Heat Torch
+      heat_tracing: 11 # Heat Tracing
+      heating_cable: 12 # Heating Cable
+      immersion: 13 # Immersion Heater
+      induction: 14 # Induction Heater
+      inline: 15 # Inline Heater
+      over_the_side: 16 # Over-the-Side Heater
+      radiant: 17 # Radiant Heater
+      radiant_flat_panel: 18 # Radiant Flat Panel Heater
+      radiant_reflective: 19 # Radiant Reflective Process Heater
+      radiant_floor: 20 # Radiant Floor Heater
+      space: 21 # Space Heater
+      strip: 22 # Strip Heater
+      tubular: 23 # Tubular Heater
+      water: 24 # Water Heater
     application:
       application_other: 0 # Placeholder for other applications
+      annealing_heat_treating: 1 # Annealing / Heat Treating
+      curing_tempering: 2 # Curing / Tempering
+      drying: 3 # Drying
+      melting: 4 # Melting
+      oem_custom: 5 # OEM / Custom
+      gases_vapors: 6 # Gases / Vapors
+      clean_water: 7 # Clean Water Heating
+      process_waters: 8 # Process Waters
+      high_purity_waters: 9 # High Purity Waters
+      lightweight_oils: 10 # Lightweight Oils & Degreasing Solutions
+      heavy_weight_oils: 11 # Heavy Weight Oils
+      medium_weight_oils: 12 # Medium Weight Oils
+      mild_corrosive: 13 # Mild Corrosive Solutions
+      severe_corrosive: 14 # Severe Corrosive Solutions
+      caustic_solutions: 15 # Caustic Solutions
+      liquid_paraffin: 16 # Liquid Paraffin
     sheath_material:
       sheath_material_other: 0 # Placeholder for other sheath_materials
+      sheath_material_none: 1 # None
+      aluminium: 2 # Aluminum
+      brass: 3 # Brass
+      copper: 4 # Copper
+      fluoropolymer: 5 # Fluoropolymer (Teflon)
+      ht_foil: 6 # HT Foil (Ceramic Foil)
+      iron: 7 # Iron
+      nickel_alloy: 8 # Nickel Alloy
+      polyimide: 9 # Polyimide (Kapton)
+      rubber: 10 # Rubber
+      stainless_steel: 11 # Stainless Steel
+      steel: 12 # Steel
+      synthetic_rubber: 13 # Synthetic Rubber (Neoprene)
     insulation_material:
       insulation_material_other: 0 # Placeholder for other insulation_materials
-
-  heater:
-    heater_type:
-      heater_type_other: 0  # Placeholder for heater_types
-# TODO: Add enum values
-    application:
-      application_other: 0  # Placeholder for applications
-# TODO: Add enum values
-    sheath_material:
-      sheath_material_other: 0  # Placeholder for sheath_materials
-# TODO: Add enum values
-    insulation_material:
-      insulation_material_other: 0  # Placeholder for insulation_materials
-# TODO: Add enum values
-
-  heater:
-    heater_type:
-      heater_type_other: 0  # TODO: Add enum values
-    application:
-      application_other: 0  # TODO: Add enum values
-    sheath_material:
-      sheath_material_other: 0  # TODO: Add enum values
-    insulation_material:
-      insulation_material_other: 0  # TODO: Add enum values
+      no_insulation: 1 # No Insulation
+      ceramic: 2 # Ceramic Insulation
+      magnesium_oxide: 3 # Magnesium Oxide
+      mica: 4 # Mica Insulation
+      mineral: 5 # Mineral Insulation
+      fluoropolymer: 6 # Fluoropolymer (Teflon)
+      fiberglass: 7 # Fiberglass Insulation

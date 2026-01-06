@@ -1,0 +1,71 @@
+<% resource = object %>
+<%= render 'components/collapsible',
+  id: "#{electrical_heaters}_#{resource.id}_details",
+  title: t("electrical.heaters.show.header", label: resource.label),
+  expanded: false,
+  header_class: 'py-1' do %>
+  
+    <div class="container-fluid">
+      <div class="row mb-1">
+        <% text = t("actions.jump_to", model: t("activerecord.models.electrical.heater")) %>
+        <%= link_to resource, 
+            class: "btn btn-sm btn-outline-secondary me-2",
+            title: text do %>
+          <%== bs_icon('box-arrow-in-up-left') %>
+          <span class="d-none d-md-inline"><%= text %></span>
+        <% end %>
+      </div>
+
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:heater_type) %></div>
+        <div class="col-8"><%= resource.class.human_enum_name(:heater_type, resource.heater_type) %></div>
+      </div>
+
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:application) %></div>
+        <div class="col-8"><%= resource.class.human_enum_name(:application, resource.application) %></div>
+      </div>
+
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:ingress_protection) %></div>
+        <div class="col-8"><%= resource.ingress_protection || '-' %></div>
+      </div>
+
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:sheath_temperature_max) %></div>
+        <div class="col-8"><%= number_to_human(resource.sheath_temperature_max, 
+          precision: 4, 
+          units: { unit: "°C" }) || '-' %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:power_density_min) %></div>
+        <div class="col-8"><%= number_to_human(resource.power_density_min, 
+          precision: 4, 
+          units: { unit: "W/m²" , thousand: "kW/m²", million: "MW/m²" }) || '-' %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:power_density_max) %></div>
+        <div class="col-8"><%= number_to_human(resource.power_density_max, 
+          precision: 4, 
+          units: { unit: "W/m²" , thousand: "kW/m²", million: "MW/m²" }) || '-' %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:sheath_material) %></div>
+        <div class="col-8"><%= resource.class.human_enum_name(:sheath_material, resource.sheath_material) %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:insulation_material) %></div>
+        <div class="col-8"><%= resource.class.human_enum_name(:insulation_material, resource.insulation_material) %></div>
+      </div>
+
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:notes) %></div>
+        <div class="col-8"><%= resource.notes.present? ? simple_format(resource.notes) : '-' %></div>
+      </div>
+
+    </div> <!-- end container-fluid -->
+<% end %>

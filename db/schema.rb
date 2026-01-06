@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_21_072916) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_28_045257) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -113,11 +113,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_21_072916) do
     t.float "sheath_temperature_max"
     t.float "power_density_min"
     t.float "power_density_max"
-    t.integer "field"
     t.integer "sheath_material"
     t.integer "insulation_material"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "notes"
   end
 
   create_table "electrical_light_ccts", force: :cascade do |t|

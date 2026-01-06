@@ -130,22 +130,6 @@ class ActiveSupport::TestCase
     assert_equal I18n.t('devise.failure.unauthenticated'), flash[:alert], message
   end
   
-  # Asserts that the request was rejected due to insufficient permissions
-  # Verifies:
-  # - 302 Found status code
-  # - Redirects to root path
-  # - Unauthorized flash message
-  # (This will be updated to use a custom unauthorized page in the future)
-  #
-  # @param message [String] Optional custom assertion message
-
-  # This is legacy AI code, it confused itself and wrote assert_forbidden which supersedes this.
-  def assert_unauthorized(message = nil)
-    assert_response :found, message # 302
-    assert_redirected_to root_path, message
-    assert_equal I18n.t('pundit.not_authorized'), flash[:alert], message
-  end
-  
   # Asserts that the request was explicitly forbidden (403)
   # Verifies:
   # - 403 Forbidden status code
@@ -156,8 +140,8 @@ class ActiveSupport::TestCase
   def assert_forbidden(message = nil)
     assert_response :forbidden
     if @response.media_type == 'text/html' || @response.media_type == 'text/html; charset=utf-8'
-      assert_select 'h1', /403: Forbidden/
-      assert_match(/Access Denied/, @response.body)
+      assert_select 'h1', /403: #{I18n.t('errors.forbidden.header')}/
+      assert_match(/#{I18n.t('errors.forbidden.message')}/, @response.body)
       assert_match(/#{Regexp.escape(message)}/, @response.body) if message
     end
   end
@@ -172,7 +156,7 @@ class ActiveSupport::TestCase
   def assert_conflict(message = nil)
     assert_response :conflict
     if @response.media_type == 'text/html' || @response.media_type == 'text/html; charset=utf-8'
-      assert_select 'h1', /409: Conflict/
+      assert_select 'h1', /409: #{I18n.t('errors.conflict.header')}/
       assert_match(/#{Regexp.escape(message)}/, @response.body) if message
     end
   end

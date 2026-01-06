@@ -174,7 +174,7 @@ module ProjectAssistant
     
     def edit_routes_file
       # Update config/routes.rb
-      routes_file = File.join(destination_root, "config", "routes.rb")
+      routes_file = Pathname.new(File.join(destination_root, "config", "routes.rb"))
       if File.exist?(routes_file)
         content = File.read(routes_file)
         
@@ -182,10 +182,10 @@ module ProjectAssistant
         insertion_pattern = /(namespace\s+:#{module_name.underscore}\s+do.*?# INSERTION POINT 1 FOR TAGABLE GENERATOR)/m
         if content.match?(insertion_pattern)
           content.sub!(insertion_pattern) do
-            "#{$1}\n      resources #{plural_name}, only: [:index, :new, :create]"
+            "#{$1}\n      resources :#{plural_name}, only: [:index, :new, :create]"
           end
         else
-          say_status :error, "#{routes_file}: Could not find insertion point 1 for tagable generator", :red
+          say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Could not find insertion point 1 for tagable generator", :red
           return
         end
         
@@ -193,35 +193,35 @@ module ProjectAssistant
         insertion_pattern = /(namespace\s+:#{module_name.underscore}\s+do.*?# INSERTION POINT 2 FOR TAGABLE GENERATOR)/m
         if content.match?(insertion_pattern)
           content.sub!(insertion_pattern) do
-            "#{$1}\n        resources #{plural_name}, except: [:index]"
+            "#{$1}\n        resources :#{plural_name}, except: [:index]"
           end
         else
-          say_status :error, "#{routes_file}: Could not find insertion point 2 for tagable generator", :red
+          say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Could not find insertion point 2 for tagable generator", :red
           return
         end
         
         File.write(routes_file, content) unless options[:pretend]
-        say_status :update, "#{routes_file}: Updated with #{tagable_name.pluralize} resources", :green
+        say_status :update, "#{routes_file.relative_path_from(Rails.root)}: Updated with #{tagable_name.pluralize} resources", :green
       else
-        say_status :error, "#{routes_file}: Not found", :red
+        say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Not found", :red
       end
     end
          
     def update_constants
       # Update tagable.yml
-      tagable_file = File.join(destination_root, "config", "constants", "tagable.yml")
+      tagable_file = Pathname.new(File.join(destination_root, "config", "constants", "tagable.yml"))
       if File.exist?(tagable_file)
         content = File.read(tagable_file)
         # Match the module name in the comment and append the class name
         content.sub!(/(#\s+#{module_name}\n)/, "\\1  - #{class_name}\n")
         File.write(tagable_file, content) unless options[:pretend]
-        say_status :update, "#{tagable_file}: Added #{class_name}", :green
+        say_status :update, "#{tagable_file.relative_path_from(Rails.root)}: Added #{class_name}", :green
       else
-        say_status :error, "#{tagable_file}: Not found", :red
+        say_status :error, "#{tagable_file.relative_path_from(Rails.root)}: Not found", :red
       end
 
       # Update module constants with enum definitions
-      constants_file = File.join(destination_root, "config", "constants", "#{module_name}.yml")
+      constants_file = Pathname.new(File.join(destination_root, "config", "constants", "#{module_name.underscore}.yml"))
       if File.exist?(constants_file)
         content = File.read(constants_file)
         
@@ -246,10 +246,82 @@ module ProjectAssistant
           end
           
           File.write(constants_file, content) unless options[:pretend]
-          say_status :update, "#{constants_file}: Added enum definitions", :green
+          say_status :update, "#{constants_file.relative_path_from(Rails.root)}: Added enum definitions", :green
         end
       else
-        say_status :error, "#{constants_file}: Not found", :red
+        say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Not found", :red
+      end
+    end
+
+    def add_translations
+      I18n.available_locales.each do |locale|
+        translation_file = Pathname.new(File.join(destination_root, "config", "locales", 
+          module_name.underscore, locale.to_s, "#{locale}.#{module_name}.models.yml"))
+        
+        if File.exist?(translation_file)
+          content = File.read(translation_file)  
+          # Prepare model name and attributes sections
+          model_section = "      #{file_path}: \"#{human_name}\"\n"
+          attributes_section = "      #{file_path}:\n"
+          
+          @fields.each do |field|
+            # Use field[:name].humanize as dummy translation
+            attributes_section += "        #{field[:name]}: #{field[:name].humanize}\n"
+            
+            # Add enum translations for enum_translated fields
+            if field[:type] == 'enum_translated'
+              attributes_section += "          #{field[:name].pluralize}:\n"
+              attributes_section += "            other_#{field[:name]}: \"Other #{field[:name].humanize}\"\n"
+            end
+          end
+          
+          # Insert model name under models section
+          if content.match?(/(\s+models:\n)/)
+            content.sub!(/(\s+models:\n)/) { "#{$1}#{model_section}" }
+          end
+          
+          # Insert attributes under attributes section
+          if content.match?(/(\s+attributes:\n)/)
+            content.sub!(/(\s+attributes:\n)/) { "#{$1}#{attributes_section}" }
+            File.write(translation_file, content) unless options[:pretend]
+            say_status :update, "#{translation_file.relative_path_from(Rails.root)}: Added #{class_name} translations", :green
+          else
+            say_status :error, "#{translation_file.relative_path_from(Rails.root)}: Attributes key not found", :red
+          end
+        else
+          say_status :error, "#{translation_file.relative_path_from(Rails.root)}: Not found", :red
+        end
+        
+        # Handle views translations
+        views_file = Pathname.new(File.join(destination_root, "config", "locales", 
+          module_name.underscore, locale.to_s, "#{locale}.#{module_name}.views.yml"))
+        
+        if File.exist?(views_file)
+          content = File.read(views_file)
+          
+          # Prepare views translations section
+          views_section = "    #{plural_name}:\n" +
+            "      index:\n" +
+            "        title:            \"#{human_name.pluralize}\"\n" +
+            "        header:           \"#{human_name.pluralize} Schedule for %{project}\"\n" +
+            "      edit:\n" +
+            "        title:            \"Edit #{human_name}\"\n" +
+            "        header:           \"Edit #{human_name}: %{label}\"\n" +
+            "      new:\n" +
+            "        title:            \"New #{human_name}\"\n" +
+            "        header:           \"New #{human_name}\"\n" +
+            "      show:\n" +
+            "        title:            \"#{human_name}\"\n" +
+            "        header:           \"#{human_name}: %{label}\"\n"
+          
+          # Append to the end of the file
+          content += views_section
+          
+          File.write(views_file, content) unless options[:pretend]
+          say_status :update, "#{views_file.relative_path_from(Rails.root)}: Added #{class_name} views translations", :green
+        else
+          say_status :error, "#{views_file.relative_path_from(Rails.root)}: Not found", :red
+        end
       end
     end
   end

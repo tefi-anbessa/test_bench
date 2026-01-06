@@ -56,7 +56,7 @@
 
                 <%= f.select :frame_size,
                     options_for_select(
-                      Constants.electrical.frame_size.map { |k, v| [k, k] },
+                      Electrical::Motor.frame_sizes.map { |k, v| [k, k] },
                       selected: motor.frame_size
                     ),
                     { include_blank: t('form.optional') },

@@ -1,0 +1,7 @@
+<% provide(:title, t('.title')) %>
+<% provide(:header, t('.header', label: @heater.label)) %>
+<% provide(:button_text, t('actions.update')) %>
+<%= render "form",
+  heater: @heater,
+  tag: @tag
+%>

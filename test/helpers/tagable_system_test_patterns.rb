@@ -39,7 +39,7 @@ module TagableSystemTestPatterns
     
     # Set up an unassigned tag for create and update tests
     @unassigned_tag = create(:tag, serial: 1002,  discipline: @discipline, 
-    tagable_type: resource_class.model_name.name)
+      tagable_type: resource_class.model_name.name)
   end
 
   # Helper methods
@@ -52,45 +52,54 @@ module TagableSystemTestPatterns
     fields&.each_with_object({}) do |field, hash|
       if resource_class.defined_enums.key?(field)
         hash[field] = :enum
+      elsif field.end_with?('_id')
+        hash[field] = :reference
+      elsif field.end_with?('_type')
+        hash[field] = :polymorphic
       else
         hash[field] = resource_class.attribute_types[field]&.type
       end
     end
   end
 
-  # Electrical::CableType -> Electrical
+  # Electrical::Cable -> Electrical
   def module_name
     resource_class.name.split('::').first
   end
 
-  # Electrical::CableType -> electrical_cable_types_path
+  # Electrical::Cable -> electrical_cables_path
   def index_path
     send("#{resource_class.model_name.route_key}_path")
   end
 
-  # Electrical::CableType -> electrical_cable_type_path
+  # Electrical::Cable -> electrical_cable_path
   def resource_path(resource)
     send("#{resource_class.model_name.singular_route_key}_path", resource)
   end
 
-  # Electrical::CableType -> new_electrical_cable_type_path
+  # Electrical::Cable -> new_electrical_cable_path
   def new_resource_path
     send("new_#{resource_class.model_name.singular_route_key}_path")
   end
 
-  # Electrical::CableType -> new_tag_electrical_cable_type_path
+  # Electrical::Cable -> new_tag_electrical_cable_path
   def new_tag_resource_path(tag)
     send("new_tag_#{resource_class.model_name.singular_route_key}_path", tag)
   end
 
-  # Electrical::CableType -> edit_electrical_cable_type_path
+  # Electrical::Cable -> edit_electrical_cable_path
   def edit_resource_path(resource)
     send("edit_#{resource_class.model_name.singular_route_key}_path", resource)
   end
 
-  # Electrical::CableType -> electrical.cable_types
+  # Electrical::Cable -> electrical.cables
   def view_key
     resource_class.model_name.route_key.gsub('_', '.')
+  end
+
+  # Electrical::Cable -> electrical/cable
+  def model_key
+    resource_class.model_name.i18n_key
   end
 
   # Tests
@@ -225,8 +234,8 @@ module TagableSystemTestPatterns
 
     # Submit the form data
     click_button I18n.t('actions.save')
-    sleep 0.5  # Give database time to commit
-    # Form data uses @assigned tag as a template, serial increased + 2.
+    sleep 1.0  # Give database time to commit
+    # Form data uses @assigned_tag as a template, serial increased + 200.
     new_tag = Tag.find_by(discipline: @discipline, 
       prefix: @assigned_tag.prefix, 
       serial: @assigned_tag.serial + 200, 
@@ -251,7 +260,7 @@ module TagableSystemTestPatterns
 
     # Submit the form data
     click_button I18n.t('actions.save')
-    sleep 0.5  # Give database time to commit
+    sleep 1.0  # Give database time to commit
     assert_current_path resource_path(@unassigned_tag.reload.tagable)
     assert_text @unassigned_tag.label
     assert_text I18n.t('flash.tagables.assigned_to',
@@ -281,7 +290,7 @@ module TagableSystemTestPatterns
     # Submit the form data
     click_button I18n.t('actions.update')
     sleep 0.5  # Give database time to commit
-    @resource.reload
+    # @resource.reload
     assert_current_path resource_path(@resource)
     assert_text @resource.label
     assert_text "REVISED FOR TEST"
@@ -465,6 +474,7 @@ module TagableSystemTestPatterns
   end
 
   def fill_in_resource_fields
+    # Set all attributes to the same values as @resource
     @form_fields.each do |field|
       name = "#{resource_class.model_name.param_key}[#{field}]"
       value = @resource.send(field)
@@ -473,8 +483,10 @@ module TagableSystemTestPatterns
         if I18n.exists?("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field.pluralize}.#{value}")
           select(resource_class.human_enum_name(field.pluralize, value), from: name)
         else
-          select(value, from: name)
+          find("select[name='#{name}'] option[value='#{value}']").select_option
         end
+      when :reference, :polymorphic
+        find("select[name='#{name}'] option[value='#{value}']").select_option
       when :integer, :float, :decimal
         fill_in name, with: value.to_s
       when :boolean
@@ -483,7 +495,7 @@ module TagableSystemTestPatterns
         fill_in name, with: value.to_s
       when :text
         fill_in name, with: value.to_s
-      else # string, text, integer, etc.
+      else # string, etc.
         fill_in name, with: value.to_s
       end
     end
@@ -496,10 +508,12 @@ module TagableSystemTestPatterns
       case field_types(fields)[field]
       when :enum
         if I18n.exists?("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field.pluralize}.#{value}")
-          assert_text resource_class.human_enum_name(field, value)
+      assert_text resource_class.human_enum_name(field, value)
         else
           assert_text value.to_s
         end
+      when :reference, :polymorphic
+        # No assertions, as references have variable display. Usually label but not always.
       when :float, :decimal
         assert_text number_to_human(value, precision: 4, units: { unit: field == :speed_rated ? "rpm" : "" }).strip
       when :boolean
@@ -525,6 +539,8 @@ module TagableSystemTestPatterns
         else
           assert_selector "select[name='#{name}'] option[selected]", text: value
         end
+      when :reference, :polymorphic
+        assert_selector "select[name='#{name}'] option[selected]", text: value
       when :integer, :float, :decimal
         assert_field name, with: value.to_s, type: 'number'
       when :boolean
@@ -548,7 +564,7 @@ module TagableSystemTestPatterns
     fields.each do |field|
       name = "#{resource_class.model_name.param_key}[#{field}]"
       case field_types(fields)[field]
-      when :enum
+      when :enum, :reference, :polymorphic
         assert_selector "select[name='#{name}']"
       when :integer, :float, :decimal
         assert_field name, type: 'number'

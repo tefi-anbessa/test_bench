@@ -1,6 +1,6 @@
 <tr scope="row">
   <% unless current_project %>
-    <td scope = "col"><%= row.tag&.nil? ? '-' : row.tag.discipline.project.code %></td>
+    <td><%= row.tag&.nil? ? '-' : row.tag&.discipline&.project&.code %></td>
   <% end %>
   <% if row.tag.nil? %>
     <td>'-'</td>

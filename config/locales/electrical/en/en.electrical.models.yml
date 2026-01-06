@@ -1,6 +1,7 @@
 en:
   activerecord:
     models:
+      electrical/heater:             "Heater"
       electrical/cable_type:         "Cable Type"
       electrical/cable:              "Cable"
       electrical/demand:             "Load"
@@ -10,6 +11,83 @@ en:
       electrical/socket_cct:         "Socket Circuit"
       electrical/light_cct:          "Light Circuit"
     attributes:
+      electrical/heater:
+        heater_type: "Heater Type"
+        heater_types:
+          heater_type_other: Other heater type
+          cast_in: Cast-In Heater
+          ceramic_fiber: Ceramic Fiber Heater
+          circulation: Circulation Heater
+          drum: Drum Heater
+          duct: Duct Heater
+          enclosure: Enclosure Heater
+          explosion_proof: Explosion Proof Heater
+          flexible: Flexible Heater
+          forced_air: Forced Air Heater
+          heat_torch: Heat Torch
+          heat_tracing: Heat Tracing
+          heating_cable: Heating Cable
+          immersion: Immersion Heater
+          induction: Induction Heater
+          inline: Inline Heater
+          over_the_side: Over-the-Side Heater
+          radiant: Radiant Heater
+          radiant_flat_panel: Radiant Flat Panel Heater
+          radiant_reflective: Radiant Reflective Process Heater
+          radiant_floor: Radiant Floor Heater
+          space: Space Heater
+          strip: Strip Heater
+          tubular: Tubular Heater
+          water: Water Heater
+        application: "Application"
+        applications:
+          application_other: Other application
+          annealing_heat_treating: Annealing / Heat Treating
+          curing_tempering: Curing / Tempering
+          drying: Drying
+          melting: Melting
+          oem_custom: OEM / Custom
+          gases_vapors: Gases / Vapors
+          clean_water: Clean Water Heating
+          process_waters: Process Waters
+          high_purity_waters: High Purity Waters
+          lightweight_oils: Lightweight Oils & Degreasing Solutions
+          heavy_weight_oils: Heavy Weight Oils
+          medium_weight_oils: Medium Weight Oils
+          mild_corrosive: Mild Corrosive Solutions
+          severe_corrosive: Severe Corrosive Solutions
+          caustic_solutions: Caustic Solutions
+          liquid_paraffin: Liquid Paraffin
+        ingress_protection: "Ingress Protection"
+        sheath_temperature_max: "Sheath Temperature Max"
+        power_density_min: "Power Density Min"
+        power_density_max: "Power Density Max"
+        sheath_material: "Sheath Material"
+        sheath_materials:
+          sheath_material_other: Other sheath_material
+          sheath_material_none: None
+          aluminium: Aluminum
+          brass: Brass
+          copper: Copper
+          fluoropolymer: Fluoropolymer (Teflon)
+          ht_foil: HT Foil (Ceramic Foil)
+          iron: Iron
+          nickel_alloy: Nickel Alloy
+          polyimide: Polyimide (Kapton)
+          rubber: Rubber
+          stainless_steel: Stainless Steel
+          steel: Steel
+          synthetic_rubber: Synthetic Rubber (Neoprene)
+        insulation_material: "Insulation Material"
+        insulation_materials:
+          insulation_material_other: Other insulation_material
+          no_insulation: No Insulation
+          ceramic: Ceramic Insulation
+          magnesium_oxide: Magnesium Oxide
+          mica: Mica Insulation
+          mineral: Mineral Insulation
+          fluoropolymer: Fluoropolymer (Teflon)
+          fiberglass: Fiberglass Insulation
       electrical/cable_type:
         id: ID
         conductor_material:	Conductor Material
