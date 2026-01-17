@@ -8,8 +8,10 @@ class Create<%= singular_table_name.camelize %> < ActiveRecord::Migration[<%= Ra
                       field[:type]
                     end
       -%>
-      t.<%= field_type %> :<%= field[:name] %><%= field[:options].include?('required') ? ', null: false' : '' %><%= field[:options].include?('index') ? ', index: true' : '' %><%= field[:options].include?('uniq') ? ', unique: true' : '' %>
-      <%- end -%>
+
+      t.<%= field_type %> :<%= field[:name] %><%= field[:options].include?('required') ? ', null: false' : '' %>
+<%- if field[:options].include?('index') || field[:options].include?('uniq') %>, index: true<%- end -%>
+<%- if field[:options].include?('uniq') %>, unique: true<%- end %>      <%- end -%>
 
       t.timestamps
     end

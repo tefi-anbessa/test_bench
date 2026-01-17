@@ -40,7 +40,7 @@ Progressively build the set of rules to implement these guidelines.
 - These guidelines and requirements will evolve over time.
 - Any changes should be reflected in the documentation.
 - When modifying role permissions or access controls, ensure both `ROLES_AND_PERMISSIONS.md` and the corresponding policy files are updated.
-- Request the AI to update its Memories when significant changes occur.
+- Request the AI to update its Memories when significant changes occur. [waste of time]
 
 ## KISS Principle Guidelines
 
@@ -75,13 +75,15 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 
 ### Application Structure
 
-The application has a core structure encompassing Users and the associated access control system, Projects, Disciplines, Tags and Documents.
+The application has a core structure encompassing Users and the associated access control system, Projects, Disciplines, Tags and Documents. Further functionality is encapsulated in modules, which correspond to disciplines.
+
+Only one level of module nesting is envisaged, however some features have provisioned for sub-modules.
 
 Refer to docs/ROLES_AND_PERMISSIONS.md for details on the role based access control system.
 
 #### Projects
 
-Projects are the top level resource of this application. Projects are fully self contained and independent of each other. Every engineering element in the application is associated with one project. The application caters for various user scenarios, including:
+Projects are the top level resource of this application. Projects are fully self contained and independent of each other. Every element in the application is associated with one project. The application caters for various user scenarios, including:
 
 - design and execute team such as a constructor, using a shared website app.
 - engineering design service for multiple clients, using a shared website app.
@@ -101,13 +103,16 @@ Tags can have a "tagable" model attached, which extends the information linked t
 
 #### Documents
 
-Documents are used to manage and control the issue of information on a project. The application caters for two types of documents: those generated from the application database, and those stored in a content delivery network from files uploaded by users.
+Documents are used to manage and control the issue of information on a project. The document model itself is located in the core application, but all subisidiary models are located in the document module. There appears to be no convention for this in rails, but there are multiple recommendations for this approach.
+
+The application caters for two types of documents: those generated from the application database, and those stored in a content delivery network from files uploaded by users.
 
 ### Internationalization
 
-- The application has been designed for international use from the outset.
+The application has been designed for international use from the outset.
+
 - All user facing text is provided with translations for all implemented languages.
-- To date, the only need for translation of database content identified is for discipline names. This is included as a potential feature below. 
+- To date, the only need for translation of database content identified is for discipline names. This is included as a potential feature below.
 - The application heavily uses the rails-i18n gem to assist with internationalization. This gem provides translations into many languages for the core rails features, including model validation, database errors, time and date functions, currency, etc.
 - For reference, a copy of the en version of the translations is saved in config/locales/rails-i18n gem en for reference/en.yml.ref. This file is not used in the application, it is simply a copy of the en.yml file that is provided by the rails-i18n gem. Check in this file if you are not sure whether a translation is already provided, and avoid duplicating core translations if possible. Also note that not all language files include all translations! It is a work in progress...
 - The locale setting follows the basic guidelines in [Rails Guides section 2.2](https://guides.rubyonrails.org/i18n.html#setting-the-locale-from-url-params).
@@ -118,12 +123,14 @@ Documents are used to manage and control the issue of information on a project. 
 
 - Constants in Rails applications are the subject of much debate in the forums. The understanding of what should be constant varies widely.
 - The context for this application includes:
-   - Engineering and scientific constants that are indepedent of the application, such as standard ratings for circuit breakers, cable sizes, etc.
-   - Role Based Access Control (RBAC) system configuration.
-   - Default setup for disciplines and associated prefix schemata.
+  - Engineering and scientific constants that are indepedent of the application, such as standard ratings for circuit breakers, cable sizes, etc.
+  - Role Based Access Control (RBAC) system configuration.
+  - Default setup for disciplines and associated prefix schemata.
 - Refer to docs/CONSTANTS.md for details on the constants management system implemented for this application.
 
 ### MVC Guidelines
+
+Ruby on rails implements the Model View Controller (MVC) pattern for data driven web applications.
 
 #### Models
 
@@ -133,92 +140,114 @@ Documents are used to manage and control the issue of information on a project. 
 
 #### Controllers
 
-- Controller classes include basic logic for performing CRUD operations on the object.
-   - Controllers are responsible for setting all variables for the view, generally including select options derived from data.
+CRUD operations refer to the four basic functions of persistent storage in computer programming: Create, Read, Update, and Delete. These operations are essential for managing data in databases and applications, allowing users to add, retrieve, modify, and remove data as needed.
+
+- Controller classes include logic for performing CRUD operations on the object.
+  - Controllers are responsible for setting variables for the view, including select options that are derived from data.
+  - Controllers are responsible for providing the user with feedback via an appropriate flash message after every operation.
 
 #### Views
 
+The standard set of views (as generated by the rails scaffold generator, or the application's tagable generator) should be provided for each resource model, including:
+
+- Index
+- Show
+- New
+- Edit
+
+The index view should use partials for the header and list items:
+
+- `_header`
+- `_row`
+
+The new and edit views should only set title and variables, then defer to the form partial:
+
+- `_form`
+
+In addition, a card partial should be provided for drop down view on other pages:
+
+- `_card`
+
 - Views should not include complex logical processing.
-   - Conditionals should be controlled by pundit policy calls where applicable.
-   - Conditionals may also use presence or otherwise of variables set in the controller.
-   - Views should use model constants such as enums to generate select options directly. Use human_enum_name from app/models/application_record.rb to provide the translations.
-   - Views should include i18n translations for all user facing text, including:
-      - Model names. {Example: @tag = Tag.first}
-         - Use @tag.model_name.human in most cases
-         - Use Tag.model_name.human if a model instance is not available
-         - Use of I18n::t('activerecord.models.tag') is also acceptable and may be faster.
-      - Attribute labels. {Example: @tag = Tag.first}
-         - In forms, use bootstrap_form fields, which automatically wrap with a translated label.
-         - Use @tag.class.human_attribute_name(:prefix) in other cases.
-         - Use Tag.human_attribute_name(:prefix) if a model instance is not available.
-         - Use of I18n::t('activerecord.attributes.tag.prefix') is also acceptable and may be faster.
-      - Attribute help text. {Example: @tag = Tag.first}
-         - In bootstrap_form fields, use help: I18n::t('activerecord.help.tag.prefix') option.
-         - Use I18n::t('activerecord.help.tag.prefix') if required in other cases.
-      - Select options
-         - If select options are derived from data, they should be built as an instance variable (hash or array) in the controller, and passed to the view. Options derived from data won't generally have translations available.
-         - If select options are built from enums (which mostly will be built in turn from Constants), and don't require translation, just use the Constants array or hash directly in the view.
-         - If select options are built from enums, and require translation, use something like:
-         ```demand.class.configs.keys.collect { |config| [demand.class.human_enum_name(:config, config), config] },```
-         directly in the view.
-      - Flash messages
-         - Flash messages should be generated and translated in the controller, and the standard layout will display them. Normally nothing is required in views.
-         - Complex forms may require further flash processing.
-         
-      - Messages
-         - Occasionally, bespoke explanatory messages are required. Translations should be provided in the appropriate views.yml file.
+- Conditionals should be controlled by pundit policy calls where applicable.
+- Conditionals may also use presence or otherwise of variables set in the controller.
+- Views should use model constants such as enums to generate select options directly. Use human_enum_name from app/models/application_record.rb to provide the translations.
+- Views should include i18n translations for all user facing text, including:
+  - Model names.
+    - Use @tag.model_name.human in most cases
+      - Use Tag.model_name.human if a model instance is not available
+      - Use of I18n::t('activerecord.models.tag') is also acceptable and may be faster.
+  - Attribute labels.
+    - In forms, use bootstrap_form fields, which automatically wrap with a translated label.
+    - Use @tag.class.human_attribute_name(:prefix) in other cases.
+    - Use Tag.human_attribute_name(:prefix) if a model instance is not available.
+    - Use of I18n::t('activerecord.attributes.tag.prefix') is also acceptable and may be faster.
+  - Attribute help text.
+    - In bootstrap_form fields, use help: I18n::t('activerecord.help.tag.prefix') option.
+      - Use I18n::t('activerecord.help.tag.prefix') if required in other cases. - Select options
+      - If select options are derived from data, they should be built as an instance variable (hash or array) in the controller, and passed to the view. Options derived from data won't generally have translations available.
+      - If select options are built from enums (which mostly will be built in turn from Constants), and don't require translation, just use the Constants array or hash directly in the view.
+      - If select options are built from enums, and require translation, use something like:
+      ```demand.class.configs.keys.collect { |config| [demand.class.human_enum_name(:config, config), config] },```
+      directly in the view.
+- Flash messages
+      - Flash messages should be generated and translated in the controller, and the standard layout will display them. Normally nothing is required in views.
+      - Complex forms may require further flash processing.
+- Messages
+      - Occasionally, bespoke explanatory messages are required. Translations should be provided in the appropriate views.yml file.
 
 ### Error Handling
 
-   - Errors are categorized as:
+Errors are categorized as:
 
-   #### Unauthenticated access:
+#### Unauthenticated access
 
-      - Users need to be authenticated by the devise system for all MVC actions.
-      - Errors are handled by the application controller rescue_from Devise::NotAuthenticatedError.
-      - Users are redirected to the sign in page.
-      - Controllers typically use a single before_action :authenticate_user! to implement devise security. 
-      - Controller tests typically include one test to ensure that unauthenticated access is not possible.
-      - Tests can use the test helper method assert_unauthenticated.
+- Users need to be authenticated by the devise system for all MVC actions.
+- Errors are handled by the application controller rescue_from Devise::NotAuthenticatedError.
+- Users are redirected to the sign in page.
+- Controllers typically use a single before_action :authenticate_user! to implement devise security.
+- Controller tests typically include one test to ensure that unauthenticated access is not possible.
+- Tests can use the test helper method assert_unauthenticated.
 
-   #### Unauthorized access:
+#### Unauthorized access
 
-      - These are pundit authorisation failures.
-      - Generally, the workflow should not allow access to unauthorized functions.
-      - However, until the application is thoroughly tested in use, this is considered a lesser error than a security breach attempt.
-      - Errors are processed by the application controller rescue_from Pundit::NotAuthorizedError.
-      - Rescue includes a flash danger message with the translated standard error message, and redirects to custom error page /403 forbidden.
-      - Policy tests should be used to verify that policies meet their objectives, refer to docs/ROLES_AND_PERMISSIONS.md.
-      - Controller tests should also include tests of unauthorized access, to ensure that appropriate authorization calls are included in relevant actions.
-      - Controller tests should only test the pass and fail paths, they are not intended to test the policy details.
-      - Tests can use the test helper method assert_forbidden.
+- These are pundit authorisation failures.
+- Generally, the workflow should not allow access to unauthorized functions.
+- However, until the application is thoroughly tested in use, this is considered a lesser error than a security breach attempt.
+- Errors are processed by the application controller rescue_from Pundit::NotAuthorizedError.
+- Rescue includes a flash danger message with the translated standard error message, and redirects to custom error page /403 forbidden.
+- Policy tests should be used to verify that policies meet their objectives, refer to docs/ROLES_AND_PERMISSIONS.md.
+- Controller tests should also include tests of unauthorized access, to ensure that appropriate authorization calls are included in relevant actions.
+- Controller tests should only test the pass and fail paths, they are not intended to test the policy details.
+- Tests can use the test helper method assert_forbidden.
 
-   #### User data entry errors:
+#### User data entry errors
 
-      - These are errors that can be fixed by the user, such as missing required fields or invalid data.
-      - Required fields are highlighted by html5 without any additional code. Not sure how to translate these.
-      - Invalid data should be detected in the controller and the form displayed again with flash :alert messages.
-      - Rails manages standard model validation messages but translations may need to be provided [HOLD] check this.
-      - Model validation messages are displayed on form views using the partial app/views/shared/_error_messages.html.erb
-      - More complex validations of associations use custom error messages with their translations.
-      - Model tests should include test of each validation to ensure that user data entry errors are caught and translated error messages are added to the model object.
+- These are errors that can be fixed by the user, such as missing required fields or invalid data.
+- Required fields are highlighted by html5 without any additional code. Not sure how to translate these.
+- Invalid data should be detected in the controller and the form displayed again with flash :alert messages.
+- Rails manages standard model validation messages but check that the translations are provided in the core application (config/locales/rails-i18n gem en for reference/en.yml.ref).
+- Model validation messages are displayed on form views using the partial app/views/shared/_error_messages.html.erb
+- More complex validations of associations use custom error messages with their translations.
+- Model tests should include test of each validation to ensure that user data entry errors are caught and translated error messages are added to the model object.
 
-   #### Security breach attempts: 
+#### Security breach attempts: 
 
-      - These are trapped forbidden operations that should not be possible using normal workflows.
-      - They are probably injected HTML or JSON requests in an attempt to defeat the permissions system. 
-      - When a controller detects invalid parameters, custom error class ConflictError should be raised, with a message key specific to the actual error.
-      - ConflictErrors are handled in ApplicationController by rescue_from ConflictError and method handle_conflict. 
-      - handle_conflict logs the error with the message code, redirects to the custom /409 conflict page, and logs out the current user.
-      - At present, the custom /409 page includes a flash alert with the translated error message. This may not be required in production if it is considered that 409 errors are definitely hacking attempts.
-      - Controller tests should include thorough test of each path through the controller to ensure that security breach attempts are trapped.
-      - Tests can use the test helper method assert_conflict.
+- These are trapped forbidden operations that should not be possible using normal workflows.
+- They are probably injected HTML or JSON requests in an attempt to defeat the permissions system.
+- When a controller detects invalid parameters, custom error class ConflictError should be raised, with a message key specific to the actual error.
+- ConflictErrors are handled in ApplicationController by rescue_from ConflictError and method handle_conflict.
+- handle_conflict logs the error with the message code, redirects to the custom /409 conflict page, and logs out the current user.
+- At present, the custom /409 page includes a flash alert with the translated error message. This may not be required in production if it is considered that 409 errors are definitely hacking attempts.
+- Controller tests should include thorough test of each path through the controller to ensure that security breach attempts are trapped.
+- Tests can use the test helper method assert_conflict.
 
 ### Form Design
 
+- Use bootstrap_form for forms.
 - Use bootstrap buttons wherever possible for consistent appearance and behavior.
 - Use bootstrap card format wherever applicable, for consistent appearance.
-- Make use of the reusable collapsible card (with js controller) for ancilliary information relevant to the form but not for modification. e.g. Cable form includes a collapsible card for cable type, showing further details of the cable type.
+- Make use of the reusable collapsible card (with js controller) for ancilliary information relevant to the form but not for modification. e.g. Cable form includes a collapsible card showing details of the cable type.
 
 ### Icons
 
@@ -281,6 +310,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Enhance electrical module, allowing interconnection of tagged items with cables to model a distribution network
 - [x] Build a module generator.
 - [x] Build a tagable generator.
+- [x] Build a scaffold generator for models without links to tags.
 - [ ] Enhance electrical model with network load calculations
 - [ ] Enhance the existing database models to include revison control of data
 - [ ] Build a document control module to manage document storage, issue, history including versions
@@ -289,6 +319,9 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Build an asset management module to track assets and link from design to maintenance
 - [ ] Build a maintenance management module
 - [ ] Add hazardous area functionality
+- [ ] Management of Change
+- [ ] Risk Management
+- [ ] Functional Safety
 
 ## Technical Debt
 
@@ -296,15 +329,16 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Refactor error messages partial to use i18n.
 - [x] Refactor error views to use i18n.
 - [x] Refactor roles new view and projects edit view to translate resource names with a key value pair in the select field.
-- [x] Serve bootstrap from local dev or prod
-- [ ] Review all policies and tests for compliance with guidelines
-- [ ] Review all models for compliance with guidelines
-- [x] Clean up old Load model references after migration
+- [x] Serve bootstrap from local dev or prod.
+- [ ] Complete tags controller test.
+- [ ] Review all policies and tests for compliance with guidelines.
+- [ ] Review all models for compliance with guidelines.
+- [x] Clean up old Load model references after migration.
 - [ ] The project was originally written for Rails 7 but got hibernated. On reawakening, it was upgraded to Rails 8. It has never been deployed to production, so Rails 8 upgrade is not yet officially declared complete.
 - [x] The transition to rails 8 should have changed over the asset pipeline to use propshaft. This has not been done properly, needs to be rectified.
 - [x] Improve has_one validation on tagable, possibly include database constraint.
 - [x] Improve has_one validation on demandable, possibly include database constraint.
-   - Database constraints deferred due to risk of locking database. Continue with inclusion of orphans on index displays, and manual clean up.
+   - Database constraints deferred due to risk of locking database. Continue with inclusion of orphans on admin index displays, and manual clean up.
 - [ ] Revisit the roles policy test. The roles policy is now using the role context from the controller, need to factor this into tests.
 - [ ] Roles policy is delegating to resource policies for resource instances. Tests need to consider this.
 - [ ] Ensure select for role names does not include restricted roles unless current user has app_owner role.
@@ -313,7 +347,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Model tests should include test of enums.
 - [ ] Complete workflows with admin and no project selected.
 - [ ] Complete proper ordering by switchboard tag and serial for circuits.
-- [ ] Update index view header lines.
+- [x] Update index view header lines.
 - [ ] Custom 404 not found error page. E.g. Case where admin deletes a record than uses browser back button.
 - [ ] Translation of html5 messages on required fields. Alternatively, suppress html 5 and use client side js.
 - [ ] Complete discipline system tests.
@@ -328,6 +362,9 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Cable types routing should be nested under projects.
 - [ ] Cable types controller should be revised to suit nesting and protect against current project setting.
 - [ ] Add searching and sorting for from and to fields in cables index.
+- [ ] Expand tagable and scaffold generator tests to include all types and options.
+- [ ] Improve system test template for scaffold generator.
+- [ ] Scaffold generator check for valid module names is not working correctly.
 
 ## Refactoring Opportunities
 
@@ -344,11 +381,11 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Tags:
    - [x] Refactor tag 'description' to 'service'.
    - [x] Add location attribute to tag, remove from all tagables.
+   - [ ] Add parent/child capability.
 - [x] Cable types: 
    - [x] convert core material to enum.
    - [x] convert insulation material to enum.
    - [x] add volt rating enum.
-   - [ ] Add parent/child capability.
 - [ ] Motors:
    - [x] convert motor type to enum.
    - [x] convert frame size to enum.
@@ -365,6 +402,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Change all delete links to use turbo to prevent full page refresh.
 - [ ] Revise index views to use turbo for ransack searches.
 - [ ] Replace devise views with bespoke views in the style of the rest of the application.
+- [ ] Add user profile info.
 - [ ] Refactor RBAC system with functional roles limited to project scope, and project admin roles.
 
 ## Potential Features
@@ -383,8 +421,6 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Improve locale setting, and include language/currency/flag in locale selection.
 - [ ] Develop an application colour theme set. Consider discipline colour coding, also need to consider module colour coding.
 - [ ] Build an IP55 object to allow fully flexible reusable IP code generation.
-- [ ] Management of Change
-- [ ] Risk Management
 - [ ] 
 
 ## Architecture Considerations

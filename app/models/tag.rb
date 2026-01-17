@@ -4,6 +4,12 @@ class Tag < ApplicationRecord
   belongs_to :discipline
   delegate :project, to: :discipline
 
+  has_paper_trail(
+    meta: {
+      project_id: ->(tag) { tag.project&.id }
+    }
+  )
+
   # Default scope to sort by loop_id, then by full_tag
   default_scope { order(:loop_id, :prefix, :suffix) }
 

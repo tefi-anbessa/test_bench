@@ -178,6 +178,20 @@ class ActiveSupport::TestCase
 #    sign_in_user(user)
 #    user
 #  end
+ 
+  # Enable paper_trail for specific tests
+  def with_versioning
+    was_enabled = PaperTrail.enabled?
+    was_enabled_for_request = PaperTrail.request.enabled?
+    PaperTrail.enabled = true
+    PaperTrail.request.enabled = true
+    begin
+      yield
+    ensure
+      PaperTrail.enabled = was_enabled
+      PaperTrail.request.enabled = was_enabled_for_request
+    end
+  end
 end
 
 # For controller tests
@@ -236,6 +250,20 @@ class ActionController::TestCase
     expected_messages.each do |expected_message|
       assert_includes flash_message, expected_message,
         "Expected flash[:#{type}] to include '#{expected_message}', got #{flash_message.inspect}"
+    end
+  end
+
+  # Enable paper_trail for specific tests
+  def with_versioning
+    was_enabled = PaperTrail.enabled?
+    was_enabled_for_request = PaperTrail.request.enabled?
+    PaperTrail.enabled = true
+    PaperTrail.request.enabled = true
+    begin
+      yield
+    ensure
+      PaperTrail.enabled = was_enabled
+      PaperTrail.request.enabled = was_enabled_for_request
     end
   end
 end

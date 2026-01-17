@@ -1,0 +1,6 @@
+# document models translations for th
+th:
+  activerecord:
+    models:           # Insert model name translations here
+    attributes:       # Insert model name translations here
+    errors:           # Insert custom validation error translations here

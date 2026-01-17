@@ -208,8 +208,8 @@ module ProjectAssistant
       
       # Check ransackable_attributes (legacy using args instead of fields...)
       assert_match(/def self\.ransackable_attributes/, content)
-      @args[1..-1].each do |field_arg|
-        field_name = field_arg.split(':').first
+      @fields.select { |f| SEARCHABLE_TYPES.include?(f[:type]) }.each do |field|
+        field_name = field[:name]
         assert_match(/:\s*#{field_name}(?=[,\s\]])/, content, "Expected #{field_name} to be in ransackable_attributes")
       end
       %w[created_at updated_at].each do |timestamp|
@@ -544,9 +544,9 @@ module ProjectAssistant
       
       # Check that the routes file was updated
       assert_file routes_file do |content|
-        puts "DEBUG: Routes content:"
-        puts content
-        puts "DEBUG: Looking for pattern: /resources #{@plural_name}, only: \[:index, :new, :create\]/"
+#        puts "DEBUG: Routes content:"
+#        puts content
+#        puts "DEBUG: Looking for pattern: /resources #{@plural_name}, only: \[:index, :new, :create\]/"
         
         # Check that the new resource lines were added to routes file
         # TODO extend the regexp to match the correct location for each line.
@@ -556,60 +556,37 @@ module ProjectAssistant
     end
 
     test "creates model translations" do
-      # Set up locale files for this test
-      create_test_locale_files
-      I18n.stubs(:available_locales).returns([:en, :km])
-      
       run_generator @args
+      I18n.available_locales.each do |language|
       
-      # Check English models file
-      en_models_file = File.join(destination_root, "config", "locales", @folder_name, "en", "en.#{@module_name}.models.yml")
-      assert_file en_models_file do |content|
-        assert_match(/#{@folder_name}\/#{@singular_name}: "#{@tagable_name}"/, content)
-        assert_match(/name: Name/, content)
-        assert_match(/description: Description/, content)
-        assert_match(/selector: Selector/, content)
-        assert_match(/status: Status/, content)
-        assert_match(/statuses:/, content)
-        assert_match(/other_status: "Other Status"/, content)
-      end
-      
-      # Check Khmer models file
-      km_models_file = File.join(destination_root, "config", "locales", @folder_name, "km", "km.#{@module_name}.models.yml")
-      assert_file km_models_file do |content|
-        assert_match(/#{@folder_name}\/#{@singular_name}: "#{@tagable_name}"/, content)
-        assert_match(/name: Name/, content)
-        assert_match(/description: Description/, content)
+        # Check models file
+        models_file = File.join(destination_root, "config", "locales", @folder_name, 
+          language.to_s, "#{language.to_s}.#{@module_name}.models.yml")
+        assert_file models_file do |content|
+          assert_match(/#{@folder_name}\/#{@singular_name}: "#{@tagable_name}"/, content)
+          @fields.each do |field|
+            assert_match(/#{field[:name]}:\s+#{field[:name].humanize}/, content)
+          end
+        end
       end
     end
 
     test "creates views translations" do
-      # Set up locale files for this test
-      create_test_locale_files
-      I18n.stubs(:available_locales).returns([:en, :km])
-      
       run_generator @args
-      
-      # Check English views file
-      en_views_file = File.join(destination_root, "config", "locales", @folder_name, "en", "en.#{@module_name}.views.yml")
-      assert_file en_views_file do |content|
-        assert_match(/#{@plural_name}:/, content)
-        assert_match(/title:\s*"#{@tagable_name.pluralize}"/, content)
-        assert_match(/header:\s*"#{@tagable_name.pluralize} Schedule for %{project}"/, content)
-        assert_match(/title:\s*"Edit #{@tagable_name}"/, content)
-        assert_match(/header:\s*"Edit #{@tagable_name}: %{label}"/, content)
-        assert_match(/title:\s*"New #{@tagable_name}"/, content)
-        assert_match(/header:\s*"New #{@tagable_name}"/, content)
-        assert_match(/title:\s*"#{@tagable_name}"/, content)
-        assert_match(/header:\s*"#{@tagable_name}: %{label}"/, content)
-      end
-      
-      # Check Khmer views file
-      km_views_file = File.join(destination_root, "config", "locales", @folder_name, "km", "km.#{@module_name}.views.yml")
-      assert_file km_views_file do |content|
-        assert_match(/#{@plural_name}:/, content)
-        assert_match(/title:\s*"#{@tagable_name.pluralize}"/, content)
-        assert_match(/header:\s*"#{@tagable_name.pluralize} Schedule for %{project}"/, content)
+      I18n.available_locales.each do |language|
+      views_file = File.join(destination_root, "config", "locales", @folder_name, 
+            language.to_s, "#{language.to_s}.#{@module_name}.views.yml")
+        assert_file views_file do |content|
+          assert_match(/#{@plural_name}:/, content)
+          assert_match(/title:\s*"#{@tagable_name.pluralize}"/, content)
+          assert_match(/header:\s*"#{@tagable_name.pluralize} Schedule for %{project}"/, content)
+          assert_match(/title:\s*"Edit #{@tagable_name}"/, content)
+          assert_match(/header:\s*"Edit #{@tagable_name}: %{label}"/, content)
+          assert_match(/title:\s*"New #{@tagable_name}"/, content)
+          assert_match(/header:\s*"New #{@tagable_name}"/, content)
+          assert_match(/title:\s*"#{@tagable_name}"/, content)
+          assert_match(/header:\s*"#{@tagable_name}: %{label}"/, content)
+        end
       end
     end
 

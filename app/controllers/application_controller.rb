@@ -94,6 +94,10 @@ class ApplicationController < ActionController::Base
       devise_parameter_sanitizer.permit :account_update, keys: added_attrs
     end
 
+    def info_for_paper_trail
+      { ip: request.remote_ip, user_agent: request.user_agent }
+    end
+
     def switch_locale(&action)
       locale = params[:locale] || I18n.default_locale
       I18n.with_locale(locale, &action)

@@ -14,15 +14,18 @@ Rails.application.routes.draw do
     resources :users, only: [:show, :index]
     
     resources :projects do
-      resources :disciplines, shallow: true do
-        get :schema, on: :member, constraints: { format: 'json' }
-      end
-      namespace :electrical do
-        resources :cable_types, shallow: true
-      end
       collection do
         get "select"
         post "set"
+      end
+      resources :disciplines, shallow: true do
+        get :schema, on: :member, constraints: { format: 'json' }
+      end
+      resources :documents, shallow: true
+
+      # Include routes for catalog type items which link directly to project.
+      namespace :electrical do
+        resources :cable_types, shallow: true
       end
     end
     
@@ -42,6 +45,12 @@ Rails.application.routes.draw do
       # Define top level index routes for circuits, demands, to allow complete load listings.
       resources :circuits, :demands, only: [:index]
     end
+
+    # Document namespace for document management
+    namespace :document do
+      # INSERTION POINT 1 FOR TAGABLE GENERATOR - though there are no tagables in document module
+      # Add document routes here
+    end
     # INSERTION POINT 1 FOR MODULE GENERATOR
     
     # Then define the shallow nested routes which require the tag
@@ -55,7 +64,7 @@ Rails.application.routes.draw do
         end
         resources :demands, except: [:index]
       end
-      # INSERTION POINT 2 FOR MODULE GENERATOR
+    # INSERTION POINT 2 FOR MODULE GENERATOR
     end
 
     # Routes for the RBAC system. 

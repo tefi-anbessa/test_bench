@@ -74,21 +74,19 @@ module ProjectAssistant
         
         # Check all YAML files exist directly in the language directory
         assert_file "config/locales/#{@module_name}/#{lang}/#{lang}.#{@module_name}.yml"
-        assert_file "config/locales/#{@module_name}/#{lang}/#{lang}.#{@module_name}.models.yml"
-        assert_file "config/locales/#{@module_name}/#{lang}/#{lang}.#{@module_name}.views.yml"
+        assert_file "config/locales/#{@module_name}/#{lang}/#{lang}.#{@module_name}.models.yml" do |content|
+          assert_match(/models:/, content)
+          assert_match(/attributes:/, content)
+          assert_match(/errors:/, content)
+        end
+        assert_file "config/locales/#{@module_name}/#{lang}/#{lang}.#{@module_name}.views.yml" do |content|
+          assert_match(/#{@module_name}:/, content)
+        end
       end
 
       # Test template files - base.rb is now under models/<module_name>/
       assert_file "app/models/#{@module_name}/base.rb"
       assert_file "app/models/#{@module_name}.rb"
-    end
-
-    test "adds factory_bot configuration to application.rb" do
-      run_generator [@module_name]
-      assert_file "config/application.rb" do |content|
-        expected = "config.factory_bot.definition_file_paths << File.join(destination_root, 'test', '#{@module_name.underscore}', 'factories')"
-        assert_includes content, expected
-      end
     end
     
     test "updates routes with module namespace" do
@@ -109,19 +107,12 @@ module ProjectAssistant
       second_pattern = /#{namespace_start}\n#{tagable_point2}\n#{comment2}\n#{namespace_end}/m
       assert_match(second_pattern, routes_content)
     end
-    
-    test "adds factory_bot configuration" do
-      run_generator [@module_name]
-      
-      assert_file "config/application.rb" do |content|
-        expected = "config.factory_bot.definition_file_paths << File.join(destination_root, 'test', '#{@module_name.underscore}', 'factories')"
-        assert_match(/#{Regexp.escape(expected)}/, content)
-      end
-    end
 
     test "creates constants file" do
       run_generator [@module_name]
-      assert_file "config/constants/#{@module_name}.yml"
+      assert_file "config/constants/#{@module_name}.yml" do |content|
+        assert_match(/#{@module_name}:/, content)
+      end
     end
 
     test "updates constants tagable.yml with module comment" do

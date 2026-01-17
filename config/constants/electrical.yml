@@ -6,7 +6,7 @@ electrical:
     - Electrical::Motor
     - Electrical::Heater
     - Electrical::Equipment
-  connect_options:
+  connect_options: # Options for to and from fields for cables
     - Electrical::Circuit
     - Electrical::Demand
   phase_designation:

@@ -1,0 +1,9 @@
+<thead>
+  <%% unless current_project %>
+    <th scope="col"><%%= sort_link(@q, 'project_code', Project.model_name.human) %></th>
+  <%% end %>
+<%- @fields.select { |field| INDEX_TYPES.include?(field[:type]) }.each do |field| -%>
+  <th scope="col"><%%= sort_link(@q, <%= ":#{field[:name]}" %>) %></th>
+<%- end -%>
+  <th scope="col" width="150px"><%%= t('table.links')%></th>
+</thead>

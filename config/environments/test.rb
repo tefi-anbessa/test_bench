@@ -50,4 +50,10 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # Disable paper_trail by default in test environment
+  config.after_initialize do
+    PaperTrail.enabled = false
+  end
+
 end

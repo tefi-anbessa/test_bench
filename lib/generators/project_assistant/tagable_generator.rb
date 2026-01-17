@@ -122,31 +122,31 @@ module ProjectAssistant
     end
 
     def create_model_file
-      template "model.rb.erb", "app/models/#{file_path}.rb"
+      template "model.rb.erb", File.join('app', 'models', "#{file_path}.rb")
     end
     
     def create_factory_file
-      template "factory.rb.erb", "test/factories/#{controller_file_path}.rb"
+      template "factory.rb.erb", File.join('test', 'factories', "#{route_url}.rb")
     end
 
     def create_model_test_file
-      template "model_test.rb.erb", "test/models/#{file_path}_test.rb"
+      template "model_test.rb.erb", File.join('test', 'models', "#{file_path}_test.rb")
     end
     
     def create_migration_file
       migration_name = "create_#{singular_table_name}"
       timestamp = Time.now.utc.strftime("%Y%m%d%H%M%S")
-      migration_file = File.join(destination_root, "db/migrate/#{timestamp}_#{migration_name}.rb")
+      migration_file = File.join(destination_root, 'db', 'migrate', "#{timestamp}_#{migration_name}.rb")
       
       template "migration.rb.erb", migration_file
     end
       
     def create_policy_file
-      template "policy.rb.erb", "app/policies/#{file_path}_policy.rb"
+      template "policy.rb.erb", File.join('app', 'policies', "#{file_path}_policy.rb")
     end
     
     def create_policy_test_file
-      template "policy_test.rb.erb", "test/policies/#{file_path}_policy_test.rb"
+      template "policy_test.rb.erb", File.join('test', 'policies', "#{file_path}_policy_test.rb")
     end
     
     def create_controller_file
@@ -155,21 +155,21 @@ module ProjectAssistant
     
     def create_view_files
       template "views/index.html.erb", "app/views/#{controller_file_path}/index.html.erb"
-      template "views/_header.html.erb", "app/views/#{controller_file_path}/_header.html.erb"
-      template "views/_row.html.erb", "app/views/#{controller_file_path}/_row.html.erb"
-      template "views/show.html.erb", "app/views/#{controller_file_path}/show.html.erb"
-      template "views/edit.html.erb", "app/views/#{controller_file_path}/edit.html.erb"
-      template "views/new.html.erb", "app/views/#{controller_file_path}/new.html.erb"
-      template "views/_form.html.erb", "app/views/#{controller_file_path}/_form.html.erb"
-      template "views/_card.html.erb", "app/views/#{controller_file_path}/_card.html.erb"
+      template "views/_header.html.erb", File.join('app', 'views', controller_file_path, '_header.html.erb')
+      template "views/_row.html.erb", File.join('app', 'views', controller_file_path, '_row.html.erb')
+      template "views/show.html.erb", File.join('app', 'views', controller_file_path, 'show.html.erb')
+      template "views/edit.html.erb", File.join('app', 'views', controller_file_path, 'edit.html.erb')
+      template "views/new.html.erb", File.join('app', 'views', controller_file_path, 'new.html.erb')
+      template "views/_form.html.erb", File.join('app', 'views', controller_file_path, '_form.html.erb')
+      template "views/_card.html.erb", File.join('app', 'views', controller_file_path, '_card.html.erb')
     end
     
     def create_controller_test_file
-      template "controller_test.rb.erb", "test/controllers/#{controller_file_path}_controller_test.rb"
+      template "controller_test.rb.erb", File.join('test', 'controllers', "#{controller_file_path}_controller_test.rb")
     end
     
     def create_system_test_file
-      template "system_test.rb.erb", "test/system/#{controller_file_path}_system_test.rb"
+      template "system_test.rb.erb", File.join('test', 'system', "#{controller_file_path}_system_test.rb")
     end
     
     def edit_routes_file
@@ -256,7 +256,7 @@ module ProjectAssistant
     def add_translations
       I18n.available_locales.each do |locale|
         translation_file = Pathname.new(File.join(destination_root, "config", "locales", 
-          module_name.underscore, locale.to_s, "#{locale}.#{module_name}.models.yml"))
+          module_name.underscore, locale.to_s, "#{locale}.#{module_name.underscore}.models.yml"))
         
         if File.exist?(translation_file)
           content = File.read(translation_file)  
@@ -276,13 +276,13 @@ module ProjectAssistant
           end
           
           # Insert model name under models section
-          if content.match?(/(\s+models:\n)/)
-            content.sub!(/(\s+models:\n)/) { "#{$1}#{model_section}" }
+          if content.match?(/(\s+models:)/)
+            content.sub!(/(\s+models:)/) { "#{$1}\n#{model_section}" }
           end
           
           # Insert attributes under attributes section
-          if content.match?(/(\s+attributes:\n)/)
-            content.sub!(/(\s+attributes:\n)/) { "#{$1}#{attributes_section}" }
+          if content.match?(/(\s+attributes:)/)
+            content.sub!(/(\s+attributes:)/) { "#{$1}\n#{attributes_section}" }
             File.write(translation_file, content) unless options[:pretend]
             say_status :update, "#{translation_file.relative_path_from(Rails.root)}: Added #{class_name} translations", :green
           else
@@ -294,7 +294,7 @@ module ProjectAssistant
         
         # Handle views translations
         views_file = Pathname.new(File.join(destination_root, "config", "locales", 
-          module_name.underscore, locale.to_s, "#{locale}.#{module_name}.views.yml"))
+          module_name.underscore, locale.to_s, "#{locale}.#{module_name.underscore}.views.yml"))
         
         if File.exist?(views_file)
           content = File.read(views_file)

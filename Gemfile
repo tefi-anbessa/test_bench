@@ -89,7 +89,7 @@ gem 'bootstrap-icons-helper'
 # Use gems "rolify" and "pundit" for authorization
 gem "rolify"
 gem "pundit"
-
+gem 'paper_trail'
 
 # End of added gems +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

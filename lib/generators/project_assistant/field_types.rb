@@ -28,7 +28,7 @@ module ProjectAssistant
     ]).freeze
       
     # These types (remaining after the subtraction) will include a column in the index view.
-    # The index view should only include fields that will easily tablulate.
+    # The index view should only include fields that will easily tabulate.
     # You can tweak the list as required before generation, leave it as you found it.
     INDEX_TYPES = (VALID_FIELD_TYPES - %w[text primary_key binary jsonb]).freeze
   end

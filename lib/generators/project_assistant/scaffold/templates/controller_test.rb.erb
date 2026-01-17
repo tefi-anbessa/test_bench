@@ -1,0 +1,197 @@
+require "test_helper"
+module <%= module_name %>
+  class <%= model_class.pluralize %>ControllerTest < ActionController::TestCase
+    include Devise::Test::ControllerHelpers
+
+    setup do
+      @project = create(:project)
+      set_current_project(@project)
+
+      @discipline = create(:discipline, code: 'test', project: @project)
+
+      @other_user = create(:user)   # No roles
+
+      @admin = create(:user)
+      @admin.grant(:admin)
+
+      @project_manager = create(:user)
+      @project_manager.grant(:project_manager, @project)
+
+      @team_member = create(:user)
+      @team_member.grant(:team_member, @project)
+
+      # Set up a user with edit permissions on this resource.
+      @accredited_team_member = create(:user)
+      @accredited_team_member.grant(:team_member, @project)
+      @accredited_team_member.grant(<%= class_name %>.required_role)
+
+      # Set up an instance of <%= singular_name %>
+      @<%= singular_name %> = create(:<%= singular_table_name %>)
+
+      @request.env["devise.mapping"] = Devise.mappings[:user]
+    end
+
+    # Set the minimum required params for a valid resource
+    def valid_resource_params
+      {
+<%= @fields.select { |f| f[:options].include?('required') }
+          .map { |field| "#{field[:name]}: '' # Add valid data" }
+          .join(",\n        ") %>
+      }
+    end
+
+    test "setup is valid" do
+      assert @project.valid?
+      assert @project.persisted?
+      assert @discipline.valid?
+      assert @discipline.persisted?
+      assert @admin.valid?
+      assert @admin.persisted?
+      assert @project_manager.valid?
+      assert @project_manager.persisted?
+      assert @team_member.valid?
+      assert @team_member.persisted?
+      assert @other_user.valid?
+      assert @other_user.persisted?
+      assert @accredited_team_member
+      assert @accredited_team_member.persisted?
+      assert @<%= singular_name %>.valid?
+      assert @<%= singular_name %>.persisted?
+    end
+
+    test "unauthenticated users are redirected to sign in" do
+      get :index
+      assert_unauthenticated
+    end
+
+    test "other user cannot access index" do
+      sign_in @other_user
+      get :index
+      assert_forbidden
+    end
+
+    test "team member can access index" do
+      sign_in @team_member
+      get :index
+      assert_response :success
+    end
+
+  # Show Tests
+    test "user cannot view resource details without project role" do
+      sign_in @other_user
+      get :show, params: { id: @<%= singular_name %>.id }
+      assert_forbidden
+    end
+
+    test "team member can view resource details" do
+      sign_in @team_member
+      get :show, params: { id: @<%= singular_name %>.id }
+      assert_response :success
+    end
+
+    # New Action Tests
+    test "team member cannot access new form" do
+      sign_in @team_member
+      get :new
+      assert_response :forbidden
+    end
+
+    test "accredited team member can access new form" do
+      sign_in @accredited_team_member
+      get :new
+      assert_response :success
+    end
+
+    # Create Action Tests - Success Cases
+      test "accredited team member can create" do
+        sign_in @accredited_team_member
+        assert_difference("#{<%= class_name %>.count}", 1) do
+          post :create, params: valid_resource_params
+        end
+
+        created_resource = <%= class_name %>.last
+        assert_redirected_to created_resource
+        assert_successful_assignment_flash_message(created_resource)
+    end
+
+    # Create Action Tests - Failure Cases
+    test "team member cannot create" do
+      sign_in @team_member
+      assert_no_difference("#{<%= class_name %>}.count") do
+        post :create, params: valid_resource_params
+      end
+      assert_forbidden
+    end
+
+    # Edit Action Tests
+    test "team member cannot access edit form" do
+      sign_in @team_member
+      get :edit, params: { id: @<%= singular_name %>.id }
+      assert_forbidden
+    end
+
+    test "accredited team member can access edit form" do
+      sign_in @accredited_team_member
+      get :edit, params: { id: @<%= singular_name %>.id }
+      assert_response :success
+    end
+
+    # Update Action Tests
+    test "team member cannot update" do
+      sign_in @team_member
+      original_value = @<%= singular_name %>.send(update_attribute_name)
+      patch :update, params: 
+        { id: @<%= singular_name %>.id, <%= singular_name %>_name => { update_attribute_name => updated_attribute_value } }
+      assert_forbidden
+      assert_equal original_value, @resource.reload.send(update_attribute_name)
+    end
+
+    test "accredited team member can update" do
+      sign_in @accredited_team_member
+      patch :update, params: 
+        { id: @<%= singular_name %>.id, <%= singular_table_name.to_sym %> => { update_attribute_name => updated_attribute_value } }
+      assert_equal updated_attribute_value, @<%= singular_name %>.reload.send(update_attribute_name)
+      assert_redirected_to @<%= singular_name %>
+      assert_successful_update_flash_message
+    end
+
+    # Destroy Action Tests
+    test "accredited team member cannot destroy" do
+      sign_in @accredited_team_member
+      assert_no_difference("#{class_name}.count") do
+        delete :destroy, params: { id: @<%= singular_name %>.id }
+      end
+      assert_forbidden
+    end
+
+    test "admin can destroy" do
+      sign_in @admin
+      assert_difference("#{class_name}.count", -1) do
+        delete :destroy, params: { id: @<%= singular_name %>.id }
+      end
+      assert_redirected_to <%= index_helper %>_path
+      assert_successful_destroy_flash_message
+    end
+
+    private
+
+      # Set invalid resource params for tests
+      def invalid_resource_params
+        { heater_type: 'invalid' }  # Set invalid value for an attribute
+      end
+
+      # Nominate an attribute to get changed during update tests
+      def update_attribute_name
+        :sheath_temperature_max
+      end
+
+      # Nominate a valid value to update the attribute to
+      def updated_attribute_value
+        400.0
+      end
+
+
+    # Helper methods
+
+  end
+end

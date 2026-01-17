@@ -1,0 +1,26 @@
+module <%= module_name %>
+  class <%= model_class %> < Base
+    
+# enum declarations
+    <%- @fields.select { |f| %w[enum enum_translated].include?(f[:type]) }.each do |field| -%>
+    enum :<%= field[:name] %>, Constants.<%= module_name.underscore %>.<%= singular_name %>.<%= field[:name] %>.to_h
+    #!!! Define enum options in Constants file config/constants/<%= module_name.underscore %>.yml
+    <%- end -%>
+    
+# Presence validation for required fields.
+    <%- @fields.select { |f| f[:options].include?('required') }.each do |field| -%>
+    validates :<%= field[:name] %>, presence: true
+    <%- end -%>
+    
+    private
+
+    def self.ransackable_attributes(auth_object = nil)
+      [<%= (@fields.select { |f| SEARCHABLE_TYPES.include?(f[:type]) }.map { |f| ":#{f[:name]}" } + 
+      [':created_at', ':updated_at']).join(', ') %>]
+    end
+
+    def self.ransackable_associations(auth_object = nil)
+      [ :project ]
+    end
+  end
+end

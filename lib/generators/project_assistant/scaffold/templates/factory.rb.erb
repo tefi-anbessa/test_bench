@@ -1,0 +1,9 @@
+FactoryBot.define do
+  factory :<%=singular_table_name%>, class: <%=class_name%> do
+    # Attributes
+    <%@fields.each do |field|-%>
+      <%=field[:name]%> {  } <%= "# Provide default value for required field" if field[:options].include?("required") %>
+    <%- end %>
+    
+  end
+end

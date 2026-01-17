@@ -1,0 +1,24 @@
+class Create<%= singular_table_name.camelize %> < ActiveRecord::Migration[<%= Rails.version.to_f %>]
+  def change
+    create_table :<%= table_name %> do |t|
+      <%- @fields.each do |field| -%>
+      <%- field_type = if ['enum', 'enum_translated'].include?(field[:type])
+                      'integer'
+                    else
+                      field[:type]
+                    end
+      -%>
+      t.<%= field_type %> :<%= field[:name] %><%= field[:options].include?('required') ? ', null: false' : '' %><%- if field[:options].include?('index') || field[:options].include?('uniq') %>, index: true<%- end -%><%- if field[:options].include?('uniq') %>, unique: true<%- end %>
+      <%- end -%>
+
+      t.timestamps
+    end
+
+    <%- @fields.each do |field| -%>
+      <%- if field[:options].include?('index') || field[:options].include?('uniq') -%>
+    add_index :<%= table_name %>, :<%= field[:name] %><%= field[:options].include?('uniq') ? 
+                                                              ', unique: true' : '' %>
+      <%- end -%>
+    <%- end -%>
+  end
+end
