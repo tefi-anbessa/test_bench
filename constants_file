@@ -1,0 +1,4 @@
+=> #<Pathname:tmp/generators/config/constants/existing_module.yml>
+test-bench(dev)> content = File.read(constants_file)
+=> ""
+test-bench(dev)>quit

@@ -31,7 +31,7 @@ module Electrical
       assert_includes @resource.errors[:application], I18n.t("errors.messages.blank")
     end
 
-    test "destroy motor should destroy demand" do
+    test "destroy heater should destroy demand" do
       demand = @resource.electrical_demand
       assert_difference 'Electrical::Demand.count', -1 do
         @resource.destroy

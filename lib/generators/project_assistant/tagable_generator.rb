@@ -221,32 +221,31 @@ module ProjectAssistant
       end
 
       # Update module constants with enum definitions
-      constants_file = Pathname.new(File.join(destination_root, "config", "constants", "#{module_name.underscore}.yml"))
+      constants_file = Pathname.new(File.join(destination_root, "config", "constants", "#{class_path[0]}.yml"))
       if File.exist?(constants_file)
         content = File.read(constants_file)
-        
-        # Add enum definitions for fields of type :enum or :enum_translated
-        enum_fields = @fields.select { |field| field[:type] == 'enum' || field[:type] == 'enum_translated' }
-        if enum_fields.any?
-          # Create enum section with placeholder values (only once)
-          enum_section = "\n  #{class_name.demodulize.underscore}:\n"
-          
-          enum_fields.each do |field|
-            field_name = field[:name]
-            enum_section += "    #{field_name}:\n      #{field_name}_other: 0  # TODO: Add enum values\n"
+        module_key = class_path.last
+        model_key = class_name.demodulize.underscore
+        insertion_pattern = /^(?<indent>[ \t]*)(?<key>#{module_key}:)\s*$/
+#       insertion_pattern = /^(\s*)(#{module_key}:)/
+        # Check that the module key is present
+        if found = content.match(insertion_pattern).named_captures
+          # Insert model key
+          insertion_text = "#{model_key}:\n"
+          # Add enum definitions for fields of type :enum or :enum_translated
+          enum_fields = @fields.select { |field| field[:type] == 'enum' || field[:type] == 'enum_translated' }
+          if enum_fields.any?
+            enum_fields.each do |field|
+              insertion_text += "#{found["indent"]}  #{field[:name]}:\n#{found["indent"]}    # TODO: Add enum values\n"
+            end
           end
-          
-          # Insert before the last end of the file
-          if content.match?(/\n\w+:\s*\n.*\n/)
-            # Insert after existing sections
-            content.sub!(/(\n\w+:\s*\n.*\n)/) { "#{$1}#{enum_section}" }
-          else
-            # Append to the end if no sections found
-            content += enum_section
+          content.sub!(insertion_pattern) do
+            "#{found["indent"]}#{found["key"]}\n#{insertion_text}" 
           end
-          
           File.write(constants_file, content) unless options[:pretend]
-          say_status :update, "#{constants_file.relative_path_from(Rails.root)}: Added enum definitions", :green
+          say_status :update, "#{constants_file.relative_path_from(Rails.root)}: Added model and enum keys", :green
+        else
+          say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Key #{module_key}: not found", :red
         end
       else
         say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Not found", :red

@@ -21,6 +21,7 @@ module ProjectAssistant
       @folder_name = "#{@module_name.underscore}" # electrical
       @singular_name = "#{@tagable_name.underscore}" # motor
       @plural_name = "#{@tagable_name.underscore.pluralize}" # motors
+      @controller_file_path = File.join(@module_name.underscore, @plural_name.underscore) # electrical/motors
       
       # Create clean files for testing (avoid conflicts with real app files)
       FileUtils.mkdir_p(File.join(destination_root, 'config'))
@@ -40,7 +41,6 @@ module ProjectAssistant
       # Create clean tagable.yml
       File.write(File.join(destination_root, 'config', 'constants', 'tagable.yml'), <<~YAML)
         tagable:
-          # Electrical
         YAML
       
       # Ensure test app includes config/application.rb
@@ -64,7 +64,8 @@ module ProjectAssistant
         'selector:enum',
         'status:enum_translated',
         'sort_order:integer:index',
-        'code:string:uniq'
+        'code:string:uniq',
+        'parent:references'
       ]
       
       # Mimic the generators process_fields method.
@@ -199,25 +200,39 @@ module ProjectAssistant
         "#{@module_name.underscore}", "#{@tagable_name.underscore}.rb") do |content|
         assert_match(/module #{@module_name}/, content)
         assert_match(/class #{@tagable_name} < Base/, content)
+        
+        # Check for belongs_to associations
+        @fields.select { |f| %w[references].include?(f[:type]) }.each do |field|
+          assert_match(/belongs_to :#{field[:name]}/, content)
+        end
+        
+        # Check for presence validation on required fields
         @fields.select { |f| f[:options].include?('required') }.each do |f|
           assert_match(/validates :#{f[:name]}, presence: true/, content)
         end
+        
+        # Check for enum declarations
         @fields.select { |f| ['enum', 'enum_translated'].include?(f[:type]) }.each do |f|
           assert_match(/enum :#{f[:name]}, Constants\.#{@module_name.underscore}\.#{@tagable_name.underscore}\.#{f[:name]}\.to_h/, content)
         end
-      
-      # Check ransackable_attributes (legacy using args instead of fields...)
-      assert_match(/def self\.ransackable_attributes/, content)
-      @fields.select { |f| SEARCHABLE_TYPES.include?(f[:type]) }.each do |field|
-        field_name = field[:name]
-        assert_match(/:\s*#{field_name}(?=[,\s\]])/, content, "Expected #{field_name} to be in ransackable_attributes")
-      end
-      %w[created_at updated_at].each do |timestamp|
-        assert_match(/:\s*#{timestamp}(?=[,\s\]])/, content, "Expected #{timestamp} to be in ransackable_attributes")
-      end
-      
-      # Check ransackable_associations
-      assert_match(/def self\.ransackable_associations\(auth_object = nil\)\s+\[ :tag, :tag_discipline, :tag_discipline_project \]/m, content)
+        
+        # Check ransackable_attributes
+        assert_match(/def self\.ransackable_attributes/, content)
+        @fields.select { |f| SEARCHABLE_TYPES.include?(f[:type]) }.each do |field|
+          field_name = field[:name]
+          assert_match(/:\s*#{field_name}(?=[,\s\]])/, content, "Expected #{field_name} to be in ransackable_attributes")
+        end
+        
+        %w[created_at updated_at].each do |timestamp|
+          assert_match(/:\s*#{timestamp}(?=[,\s\]])/, content, "Expected #{timestamp} to be in ransackable_attributes")
+        end
+        
+        # Check ransackable_associations
+        associations = [:tag, :tag_discipline, :tag_discipline_project]
+        @fields.select { |f| %w[references].include?(f[:type]) }.each do |field|
+          associations += [field[:name]]
+        end
+        assert_match(/def self\.ransackable_associations\(auth_object = nil\)\s+#{associations}/m, content)
       end
     end
 
@@ -373,6 +388,8 @@ module ProjectAssistant
               assert_match(/#{Regexp.escape("number_to_human(row.#{field[:name]}, precision: 4, units: { unit: 'x', thousand: 'kx', million: 'Mx' }) || '-'")}/, content)
             when 'enum_translated'
               assert_match(/#{Regexp.escape("row.class.human_enum_name(:#{field[:name]}, row.#{field[:name]})")}/, content)
+            when 'references'
+              assert_match(/#{Regexp.escape("link_to row.#{field[:name]}.label, row.#{field[:name]}")}/, content)
             end
           else
             refute_match(/#{Regexp.escape("row.#{field[:name]}")}/, content)
@@ -407,6 +424,8 @@ module ProjectAssistant
               assert_match(/time_tag\(@#{@singular_name}.#{field[:name]} || '-'\)/, content)
             when "binary"
               assert_match(/'PLACEHOLDER FOR BINARY FIELD'/, content)
+            when "references"
+              assert_match(/render #{Regexp.escape("#{File.join(@folder_name, field[:name].pluralize, "card")}")}, object: @#{@singular_name}.#{field[:name]} %>/, content)
             else
               assert_match(/#{Regexp.escape("@#{@singular_name}.#{field[:name]} || '-'")}/, content)
             end
@@ -449,6 +468,8 @@ module ProjectAssistant
             assert_match(/f\.select\s+:#{field[:name]}/, content)
           when "enum_translated"
             assert_match(/f\.select\s+:#{field[:name]}/, content)
+          when "references"
+            assert_match(/f\.select\s+:#{field[:name]}/, content)
           end
         end
       end
@@ -475,7 +496,7 @@ module ProjectAssistant
           when "binary"
             assert_match(/'PLACEHOLDER FOR BINARY FIELD'/, content)
           else
-            assert_match(/#{Regexp.escape("@#{@singular_name}.#{field[:name]} || '-'")}/, content)
+            assert_match(/resource\.#{field[:name]}&\.label\ \|\|\ '\-'/, content)
           end
         end
       end
@@ -530,7 +551,7 @@ module ProjectAssistant
         if enum_fields.any?
           assert_match(/#{@singular_name}:\s*\n/, content)
           enum_fields.each do |f|
-            assert_match(/#{f[:name]}:\s*\n\s+#{f[:name]}_other: 0.*?# TODO: Add enum values/m, content)
+            assert_match(/#{f[:name]}:\s*\n\s*# TODO: Add enum values/m, content)
           end
         end
       end
@@ -561,7 +582,7 @@ module ProjectAssistant
       
         # Check models file
         models_file = File.join(destination_root, "config", "locales", @folder_name, 
-          language.to_s, "#{language.to_s}.#{@module_name}.models.yml")
+          language.to_s, "#{language.to_s}.#{@folder_name}.models.yml")
         assert_file models_file do |content|
           assert_match(/#{@folder_name}\/#{@singular_name}: "#{@tagable_name}"/, content)
           @fields.each do |field|
@@ -575,7 +596,7 @@ module ProjectAssistant
       run_generator @args
       I18n.available_locales.each do |language|
       views_file = File.join(destination_root, "config", "locales", @folder_name, 
-            language.to_s, "#{language.to_s}.#{@module_name}.views.yml")
+            language.to_s, "#{language.to_s}.#{@folder_name}.views.yml")
         assert_file views_file do |content|
           assert_match(/#{@plural_name}:/, content)
           assert_match(/title:\s*"#{@tagable_name.pluralize}"/, content)

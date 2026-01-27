@@ -1,5 +1,10 @@
 module <%= module_name %>
   class <%= model_class %> < Base
+
+# Belongs to associatons
+    <%- @fields.select { |f| %w[references].include?(f[:type]) }.each do |field| -%>
+    belongs_to :<%= field[:name] %>
+    <%- end -%>
     
 # enum declarations
     <%- @fields.select { |f| %w[enum enum_translated].include?(f[:type]) }.each do |field| -%>
@@ -20,7 +25,7 @@ module <%= module_name %>
     end
 
     def self.ransackable_associations(auth_object = nil)
-      [ :project ]
+      [ :project, <%= (@fields.select { |f| %w[references].include?(f[:type]) }.map { |f| ":#{f[:name]}" }).join(', ') %> ]
     end
   end
 end

@@ -2,6 +2,11 @@ module <%= module_name %>
   class <%= tagable_name %> < Base
     include Tagable
     include TagableNavigation
+
+# Belongs to associatons
+    <%- @fields.select { |f| %w[references].include?(f[:type]) }.each do |field| -%>
+    belongs_to :<%= field[:name] %>
+    <%- end -%>
     
 # enum declarations
     <%- @fields.select { |f| %w[enum enum_translated].include?(f[:type]) }.each do |field| -%>
@@ -22,7 +27,11 @@ module <%= module_name %>
     end
 
     def self.ransackable_associations(auth_object = nil)
-      [ :tag, :tag_discipline, :tag_discipline_project ]
+      <%- associations = [ :tag, :tag_discipline, :tag_discipline_project ] -%>
+      <%- @fields.select { |f| %w[references].include?(f[:type]) }.each do |field| -%>
+        <%- associations += [field[:name]] -%>
+      <%- end -%>
+      <%= associations %>
     end
   end
 end

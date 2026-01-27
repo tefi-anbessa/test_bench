@@ -18,6 +18,8 @@
         precision: 4, units: { unit: "x", thousand: "kx", million: "Mx" }) || '-' %></td>
     <%- when "enum_translated" -%>
       <td><%%= row.class.human_enum_name(:<%= field[:name] %>, row.<%= field[:name] %>) %></td>
+    <%- when "references" -%>
+      <td><%%= link_to row.<%= field[:name] %>.label, row.<%= field[:name] %></td>
     <%- else -%>
       <td><%%= row.<%= field[:name] %> || '-' %></td>
     <%- end -%>

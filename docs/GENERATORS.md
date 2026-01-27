@@ -148,12 +148,15 @@ The tag model provides the following functionality:
 
 ## TAGABLE GENERATOR
 
+Because the application will require many different tagable types (one for each data sheet), a generator has been provided to create new tagable models, to aid in maintaining consistency with the application look and feel, and general requirements.
+
 ### Specification
 
 General requirements.
 
 * This generator will create the folders, files and edits required to add a new tagable type.
 * The generator itself is reasonably self documented, refer to `lib/generators/project_assistant/tagable_generator.rb`.
+
 
 #### Command Line
 
@@ -162,8 +165,7 @@ The generator shall be invoked using the rails generate command, the generator n
   ```bash
   rails generate project_assistant:tagable Electrical::Heater heater_type:enum_translated:required application:enum_translated:required ingress_protection:string sheath_temperature_max:float power_density_min:float power_density_max:float sheath_material:enum_translated insulation_material:enum_translated notes:text
   ```
-
-The name of the tagable type must be prefixed with its namespace module, as shown in the example. (The generator cannot be used to create a tagable type in the core application.)
+The name of the tagable type must be prefixed with its namespace module, as shown in the example. (The generator cannot be used to create a tagable type in the core application, and nested modules are not allowed.)
 
 Following the tagable model name, all fields to be included in the model shall be specified with their type and options, separated by colons with no spaces.
 
@@ -297,21 +299,22 @@ The generator shall provide a success message if the file edit is completed.
 
 ##### Constants
 
-* If any enum fields have been specified (either :enum or :enum_translated), the generator shall look for the file `config/constants/#{module_name}.yml`. If found, a section shall be appended for defining the enum options:
+* The generator shall look for the file `config/constants/#{module_name}.yml`. If found, a key shall be appended for defining any required model constants. Primarily, these are expected to be enum key definitions.
 
 ```ruby
   #{singular_name}:
 ```
 
-followed by an entry for each enum field:
+* If any enum fields have been specified (either :enum or :enum_translated), the generator shall insert a key for each required field name:
 
 ```ruby
     #{field[:name]}:
-      #{field[:name]}_other: 0  # Placeholder for other #{field[:name]}
       # TODO: Add enum values
 ```
 
-The generator shall provide a success message if the file edit is completed. If the file is not found, the generator shall log an error message.
+The enum keys can be completed using the enum generator, but a reminder comment is inserted in case this is left to be completed manually. (Don't remove the reminder then try to use the enum generator, because the enum generator uses the reminder as a placemarker.)
+
+The generator shall issue a success message if the file edit is completed. If the file is not found, the generator shall log an error message.
 
 ##### Translations
 
@@ -367,7 +370,7 @@ Usage is explained using the example mentioned in the command line section of th
 
 1. Before running this complex generator, it is strongly recommended to commit all changes to git, so there is a safe return point if things get messy. Generators can be partly reversed with destroy action, but this does not undo the edits made (in fact destroy repeats the edits), nor does it remove migrations because they are timestamped. The safest way for recovering is to use git.
 
-1. The second and most important step in creating a tagable is to make a list of all the fields that will be on the data sheet, and determine their types. Only include the necessary fields for all items of the tag type. [TODO] If additional fields may be optionally required, they can be added as user defined jsonb extensions.
+1. The second and most important step in creating a tagable is to make a list of all the fields that will be on the data sheet, and determine their types. Include all the necessary fields required to specify items of the new tag type. [TODO] If additional fields may be optionally required, they can be added as user defined jsonb extensions.
 
 Field names must be valid ruby identifiers.
 
@@ -400,6 +403,8 @@ Note that enum field option keys became class methods for the model, so have to 
 
 1. Include a field notes:text at the end of the list. All tagables have this field, and the system test expects it to be there.
 
+1. The generator has dependencies, which should automatically be met if the module generator has been used for setting up the module. Refer to the model generator documentation to see what is expected, and check that all requirements are in place.
+
 1. With all the fields ready, it's time to draft the command line.
 
 #### Command
@@ -424,15 +429,13 @@ Here again is our example command line:
      add the line:
      `include Electrical::Demandable`.
    * [TODO future: similar for process module].
-   * Check that the required :enum and :enum_translated type fields are specified as enum.
+   * Check that any required :enum and :enum_translated type fields are specified as enum.
    * Check that the fields with :required option have presence validations.
    * Add any other validations required, such as range limits, numericality, format, etc.
    * If the `ransackable_attributes` line is too long, split it after a comma for ease of reading.
 
-1. Open the module constants file (in our example config/constants/electrical.yml).
+1. Open the module constants file (in our example config/constants/electrical.yml). [HOLD revise after enum generator working.]
    * For each enum field, there should be a line with the field name as key.
-   * After the name field key, there should be a dummy option created by the generator as #{name}_type_other, with a value of 0. In our example, the first enum field is heater_type and this has a dummy option of `heater_type_other: 0`.
-   * Keep the dummy if it is useful, otherwise overwrite it, and enter the required options.
    * Give each option key a unique integer value.
    * Delete the placeholder comments, and add your own comments if required.
    * Go back to the model file, and delete the reminder comments for each :enum field to complete the enum values, as you have just completed this.
@@ -545,3 +548,34 @@ Here again is our example command line:
 1. Open the system test file (in our example `test/system/electrical/heaters_test.rb`).
    * In console, run `Module::ModelName.column_names` to list the fields for the model. Copy this list (without id, and without the timestamp fields unless there is a particular requirement for them), then paste it into each of the field lists in `setup_model_specific_data`. For each list, consider if any of the fields should be removed.
    * Save and close the system test file.
+
+## SCAFFOLD GENERATOR
+
+A scaffold generator is provided as an alternative to the rails standard scaffold generator. This generator is based on the tagable generator, but without the tag linkage aspects. Because it is so similar, the documentation here is primarily a list of differences from the tagable generator. Use the tagable generator specification and usage instructions, while referencing the differences listed here.
+
+The scaffold generator differs from the tagable generator in allowing models to be created in nested modules, or at the core level. All module levels must exist, with the associated folders and files, before running the generator. Always use the module generator to ensure that folders and files are in the expected state.
+
+### Specification.
+
+#### Command Line
+
+The scaffold generator shall be invoked using the rails generate command, the generator name project_assistant:scaffold, the module and tagable model name as a Ruby class specifier in CamelCase, and a list of arguments for the fields to be created.  Here is an example generate command for a document control object:
+
+  ```bash
+  rails generate project_assistant:scaffold Docment::Issue document:references code:string user:references{by} user:references{checked} user:references{approved}
+  ```
+
+Rules for arguments are the same.
+
+#### Folders and Files
+
+The generator creates the same folders and files as the tagable generator.
+
+#### Edits
+
+The generator only inserts one set of routes under the first module namespace. If there is no namespace, the routes are inserted ahead of the home routes comment.
+
+The generator does not edit the tagable constants file.
+
+Module constants and translation edits are the same as for tagable.
+

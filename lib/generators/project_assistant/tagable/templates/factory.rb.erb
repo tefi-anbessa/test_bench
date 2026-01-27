@@ -5,9 +5,9 @@ FactoryBot.define do
       tag { nil }
     end
     # Attributes
-    <%@fields.each do |field|-%>
+    <%- @fields.each do |field|-%>
       <%=field[:name]%> {  } <%= "# Provide default value for required field" if field[:options].include?("required") %>
-    <%- end %>
+    <%- end -%>
     
     after(:build) do |model, evaluator|
       if evaluator.tag

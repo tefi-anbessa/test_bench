@@ -41,6 +41,9 @@ module <%= module_name %>
 
       def setup_additional_form_data
         # Include setup for form variables such as select fields.
+        <%- @fields.select { |field| field[:type] == "references" }.each do |field| -%>
+          @<%= field[:name].pluralize %> = policy_scope(<%= field[:name].classify %>)
+        <%- end -%>
       end
 
       def after_create_hook(resource)

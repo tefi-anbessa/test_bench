@@ -129,23 +129,20 @@
   <%- case field[:type] -%>
   <%- when "string", "enum", "integer", "bigint", "decimal" -%>
                 <div class="col-8"><%%= @<%= singular_name %>.<%= field[:name] %> || '-' %></div>
-
   <%- when "float" -%>
                 <div class="col-8"><%%= number_to_human(@<%= singular_name %>.<%= field[:name] %>, 
                   precision: 4, 
                   units: { unit: "x", thousand: "kx", million: "Mx" }) || '-' %></div>
-
   <%- when "enum_translated" -%>
                 <div class="col-8"><%%= @<%= singular_name %>.class.human_enum_name(:<%= field[:name] %>, @<%= singular_name %>.<%= field[:name] %>) %></div>
   <%- when "text", "jsonb" -%> # TODO: Add json formatting
                 <div class="col-8"><%%= simple_format(@<%= singular_name %>.<%= field[:name] %> || '-') %></div>
-
   <%- when "datetime", "timestamp", "time", "date" -%> # Default to time_tag
                 <div class="col-8"><%%= time_tag(@<%= singular_name %>.<%= field[:name] %> || '-') %></div>
-
-  <%- when "binary" -%> # TODO: Add binary field support
+  <%- when "binary" -%> <!-- TODO: Add binary field support -->
                 <div class="col-8"><%%= 'PLACEHOLDER FOR BINARY FIELD' %></div>
-
+  <%- when "references" -%>
+                <div class="col-8"><%%= render <%= File.join(*class_path[0..], field[:name].pluralize, "card") %>, object: @<%= singular_name %>.<%= field[:name] %> %></div>
   <%- else -%> # Fallback to show whatever content is in the field.
                 <div class="col-8"><%%= @<%= singular_name %>.<%= field[:name] %> || '-' %></div>
   <%- end -%>

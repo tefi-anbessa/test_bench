@@ -311,17 +311,18 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Build a module generator.
 - [x] Build a tagable generator.
 - [x] Build a scaffold generator for models without links to tags.
-- [ ] Enhance electrical model with network load calculations
-- [ ] Enhance the existing database models to include revison control of data
-- [ ] Build a document control module to manage document storage, issue, history including versions
-- [ ] Build a bookkeeping module to manage financial transactions
-- [ ] Build a process piping module similar to the electrical module, using pipes and fittings to model a process piping network
-- [ ] Build an asset management module to track assets and link from design to maintenance
-- [ ] Build a maintenance management module
-- [ ] Add hazardous area functionality
-- [ ] Management of Change
-- [ ] Risk Management
-- [ ] Functional Safety
+- [ ] Enhance electrical model with network load calculations.
+- [ ] Enhance the existing database models to include revison control of data.
+- [ ] Build a document control module to manage document storage, issue, history including versions.
+- [ ] Build an instrument module.
+- [ ] Build a bookkeeping module to manage financial transactions.
+- [ ] Build a process piping module similar to the electrical module, using pipes and fittings to model a process piping network.
+- [ ] Build an asset management module to track assets and link from design to maintenance.
+- [ ] Build a maintenance management module.
+- [ ] Add hazardous area functionality.
+- [ ] Management of Change.
+- [ ] Risk Management.
+- [ ] Functional Safety.
 
 ## Technical Debt
 
@@ -365,6 +366,9 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Expand tagable and scaffold generator tests to include all types and options.
 - [ ] Improve system test template for scaffold generator.
 - [ ] Scaffold generator check for valid module names is not working correctly.
+- [ ] Verify if two set of routes are really needed for tagables.
+- [ ] Review all use of the method underscore. It apparently is not aware of the OS and uses '/' as the separator. Use File.join wherever appropriate.
+- [ ] Fix module generator to use nested parent modules.
 
 ## Refactoring Opportunities
 
@@ -418,7 +422,7 @@ It is possible to create multiple tags referencing the same tagable element, des
    - [x] Customize error trapping for Pundit::NotAuthorizedError
    - [ ] Customize error trapping for unknown format
    - [x] Customize error trapping for forbidden
-- [ ] Improve locale setting, and include language/currency/flag in locale selection.
+- [ ] Improve locale setting, and include language/currency/flag in locale selection. Include regions with fallback to language for most translations.
 - [ ] Develop an application colour theme set. Consider discipline colour coding, also need to consider module colour coding.
 - [ ] Build an IP55 object to allow fully flexible reusable IP code generation.
 - [ ] 

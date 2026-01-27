@@ -21,28 +21,24 @@
   <%- case field[:type] -%>
   <%- when "string", "enum", "integer", "bigint", "decimal" -%>
         <div class="col-8"><%%= resource.<%= field[:name] %> || '-' %></div>
-
   <%- when "float" -%>
         <div class="col-8"><%%= number_to_human(resource.<%= field[:name] %>, 
           precision: 4, 
           units: { unit: "x", thousand: "kx", million: "Mx" }) || '-' %>
             # Customize units as required. </div>
-
   <%- when "enum_translated" -%>
         <div class="col-8"><%%= resource.class.human_enum_name(:<%= field[:name] %>, resource.<%= field[:name] %>) %></div>
-
   <%- when "text", "jsonb" -%> 
         <!-- TODO: Add json formatting -->
         <div class="col-8"><%%= simple_format(resource.<%= field[:name] %> || '-') %></div>
-
   <%- when "datetime", "timestamp", "time", "date" -%> 
         <!-- Default to time_tag -->
         <div class="col-8"><%%= time_tag(resource.<%= field[:name] %> || '-') %></div>
-
   <%- when "binary" -%> 
         <!-- TODO: Add binary field support -->
         <div class="col-8"><%%= 'PLACEHOLDER FOR BINARY FIELD' %></div>
-
+  <%- when "references" -%>
+        <div class="col-8"><%%= resource.<%= field[:name] %>&.label || '-' %></div>
   <%- else -%>
         <div class="col-8"><%%= resource.<%= field[:name] %> || '-' %></div>
   <%- end %>

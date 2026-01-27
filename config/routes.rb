@@ -34,6 +34,7 @@ Rails.application.routes.draw do
     # Tagables override index from the shallow nesting under tags, 
     # there is no sense in nesting a 1:1 relationship.
     namespace :electrical do
+      # INSERTION POINT 1 FOR SUBMODULES
       # INSERTION POINT 1 FOR TAGABLE GENERATOR
       # Provide for admins to create and list cable_types full catalog outwith project context
       resources :cable_types, only: [:index, :new, :create]
@@ -48,6 +49,7 @@ Rails.application.routes.draw do
 
     # Document namespace for document management
     namespace :document do
+      # INSERTION POINT 1 FOR SUBMODULES
       # INSERTION POINT 1 FOR TAGABLE GENERATOR - though there are no tagables in document module
       # Add document routes here
     end
@@ -56,6 +58,7 @@ Rails.application.routes.draw do
     # Then define the shallow nested routes which require the tag
     resources :tags, shallow: true do
       namespace :electrical do
+        # INSERTION POINT 2 FOR SUBMODULES
         # INSERTION POINT 2 FOR TAGABLE GENERATOR
         resources :heaters, :cables, :motors, :light_ccts, 
                   :socket_ccts, except: [:index]

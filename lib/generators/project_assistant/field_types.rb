@@ -7,7 +7,7 @@ module ProjectAssistant
     ].freeze
 
     # Types can be added, but you will have to write the generator and test code to implement them.
-    SPECIAL_FIELD_TYPES = %w[enum enum_translated].freeze
+    SPECIAL_FIELD_TYPES = %w[references enum enum_translated].freeze
 
     # Don't edit this.
     VALID_FIELD_TYPES = (RAILS_FIELD_TYPES + SPECIAL_FIELD_TYPES).freeze

@@ -46,7 +46,7 @@ module ProjectAssistant
 
     def views_path
       if @namespaced
-        "#{module_name.underscore}/#{class_name.underscore}"
+        File.join(module_name.underscore, class_name.underscore)
       else
         class_name.underscore
       end
@@ -127,7 +127,7 @@ module ProjectAssistant
         end
       end
       
-      puts "DEBUG: Found #{errors.length} errors and #{valid_fields.length} valid fields"
+      # puts "DEBUG: Found #{errors.length} errors and #{valid_fields.length} valid fields"
       
       # Handle validation results
       if errors.any?
@@ -157,7 +157,7 @@ module ProjectAssistant
         say_status :info, "All #{valid_fields.length} fields are valid.", :green
       end
       
-      puts "DEBUG: Final @fields: #{@fields.inspect}"
+      # puts "DEBUG: Final @fields: #{@fields.inspect}"
       @fields
     end
 

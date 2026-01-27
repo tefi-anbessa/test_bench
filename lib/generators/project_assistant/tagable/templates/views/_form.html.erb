@@ -52,52 +52,44 @@
                         class: 'form-control form-control-sm',
                         label_col: "col-sm-4",
                         control_col: "col-sm-8" %>
-
     <%- when "text" -%>
                 <%%= f.text_area :<%= field[:name] %>,
                         class: 'form-control form-control-sm',
                         label_col: "col-sm-4",
                         control_col: "col-sm-8",
                         rows: 3 %>
-
     <%- when "integer", "bigint" -%>
                 <%%= f.number_field :<%= field[:name] %>,
                         class: 'form-control form-control-sm',
                         label_col: "col-sm-4",
                         control_col: "col-sm-8"%>
-
     <%- when "float", "decimal" -%>
                 <%%= f.number_field :<%= field[:name] %>,
                         class: 'form-control form-control-sm',
-                        qppend: 'x'                             # Customize engineering units
-                        step: 0.01,                             # Customize as required
+                        qppend: 'x'                             <!-- Customize engineering units -->
+                        step: 0.01,                             <!-- Customize as required -->
                         label_col: "col-sm-4",
                         control_col: "col-sm-8"%>
-
     <%- when "datetime", "timestamp", "time", "date" -%>
-                <%%= f.datetime_select :<%= field[:name] %>,     # Customize as required
+                <%%= f.datetime_select :<%= field[:name] %>,     <!-- Customize as required -->
                         class: 'form-control form-control-sm',
                         label_col: "col-sm-4",
                         control_col: "col-sm-8"%>
-
     <%- when "datetime", "timestamp", "time", "date" -%>
-                <%%= f.datetime_select :<%= field[:name] %>,     # Customize as required
+                <%%= f.datetime_select :<%= field[:name] %>,     <!-- Customize as required -->
                         class: 'form-control form-control-sm',
                         label_col: "col-sm-4",
                         control_col: "col-sm-8"%>
-
     <%- when "boolean" -%>
-                <%%= f.check_box :<%= field[:name] %>,     # Customize as required
+                <%%= f.check_box :<%= field[:name] %>,     <!-- Customize as required -->
                         class: 'form-control form-control-sm',
                         label_col: "col-sm-4",
                         control_col: "col-sm-8"%>
-
-    <%- when "jsonb" -%>                                    # [TODO: Add JSONB editor]
+    <%- when "jsonb" -%>                                    <!-- [TODO: Add JSONB editor] -->
                 <%%= f.text_area :<%= field[:name] %>,
                         class: 'form-control form-control-sm',
                         label_col: "col-sm-4",
                         control_col: "col-sm-8" %>
-
     <%- when "enum" -%>
                 <%%= f.select :<%= field[:name] %>,
                     options_for_select(
@@ -106,7 +98,6 @@
                     ),
                     { include_blank: <%= required ? "t('form.required')" : "t('form.optional')" %> },
                     class: 'form-control form-control-sm' %>
-
     <%- when "enum_translated" -%>
                 <%- required = field[:options].include? ('required') %>
                 <%%= f.select :<%= field[:name] %>,
@@ -117,7 +108,14 @@
                     ),
                     { include_blank: <%= required ? "t('form.required')" : "t('form.optional')" %> },
                     class: 'form-control form-control-sm' %>
-
+    <%- when "references" -%>
+                <%%= f.select :<%= field[:name] %>,
+                    options_for_select(
+                      @<%= field[:name].pluralize %>,
+                      selected: <%= singular_name %>.<%= field[:name] %>
+                    ),
+                    { include_blank: <%= required ? "t('form.required')" : "t('form.optional')" %> },
+                    class: 'form-control form-control-sm' %>
   <%- end -%>
 <%- end -%>
                 
