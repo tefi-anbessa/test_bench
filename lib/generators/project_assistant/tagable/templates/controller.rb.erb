@@ -54,14 +54,15 @@ module <%= module_name %>
         # Include any additional requirements for updating related entities here.
       end
 
-      # Only allow a list of trusted parameters through.
       def resource_params
         params.require(:<%= singular_table_name %>)
-        .permit(<%= @fields.map { |field| ":#{field[:name]}" }.join(', ') %>,
-          tag: [
-            :id, :project_id, :discipline_id, :prefix, :serial,
-            :suffix, :service, :stage, :notes, :tagable_type
-          ])
+        .permit(<%= @fields.map { |field| 
+          if field[:type] == "references"
+            ":#{field[:name]}_id"
+          else
+            ":#{field[:name]}"
+          end
+        }.join(', ') %>)
       end
   end
 end

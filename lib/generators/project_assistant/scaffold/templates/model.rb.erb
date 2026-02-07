@@ -25,7 +25,11 @@ module <%= module_name %>
     end
 
     def self.ransackable_associations(auth_object = nil)
-      [ :project, <%= (@fields.select { |f| %w[references].include?(f[:type]) }.map { |f| ":#{f[:name]}" }).join(', ') %> ]
+      <%- associations = [ ] -%>
+      <%- @fields.select { |f| %w[references].include?(f[:type]) }.each do |field| -%>
+        <%- associations += [field[:name]] -%>
+      <%- end -%>
+      <%= associations %>
     end
   end
 end

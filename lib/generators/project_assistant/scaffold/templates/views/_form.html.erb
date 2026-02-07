@@ -92,6 +92,14 @@
                     ),
                     { include_blank: <%= required ? "t('form.required')" : "t('form.optional')" %> },
                     class: 'form-control form-control-sm' %>
+    <%- when "references" -%>
+                <%%= f.select :<%= field[:name] %>,
+                    options_for_select(
+                      @<%= field[:name].pluralize %>,
+                      selected: <%= singular_name %>.<%= field[:name] %>
+                    ),
+                    { include_blank: <%= required ? "t('form.required')" : "t('form.optional')" %> },
+                    class: 'form-control form-control-sm' %>
   <%- end -%>
 <%- end -%>
                 

@@ -1,0 +1,117 @@
+en:
+  activerecord:
+    models:
+      resource:           "Resource"
+      user:               "User"
+      project:            "Project"
+      discipline:         "Discipline"
+      tag:                "Tag"
+      role:               "Role"
+    attributes:
+      resource:
+        id:               "ID"
+      user:
+        user_name:        "User"
+        email:            "Email"
+        password:         "Password"
+        password_confirmation:  "Confirm password"
+      project:
+        code:             "Code"
+        code_help:        "2 uppercase characters"
+        title:            "Title"
+        title_help:       "Maximum 50 characters"
+        description:      "Description"
+      discipline:
+        code:             "Code"
+        name:             "Name"
+        label:            "Label"
+        sort_order:       "Sort Order"
+        prefix_schema:    "Prefix Schema"
+        default_prefix_schema_name: "user_defined"
+        prefix_schema_keys:
+          type:             "Type"
+          schema:           "Schema"
+        module_name:      "Module Name"
+        notes:            "Notes"
+        copy_from_standard: "Copy from Standard" # Form label
+      tag:
+        project:          "Project"
+        discipline:       "Discipline"
+        prefix:           "Prefix"
+        prefix_parts:
+          measured_variable: "Measured Variable"
+          modifier: "Modifier"
+          function: "Function"
+          readout_function: "Readout Function"
+          output_function: "Output Function"
+          modifier_function: "Modifier Function"
+          part1: "Part 1"
+          part2: "Part 2"
+        serial:           "Loop"
+        suffix:           "Suffix"
+        service:          "Service"
+        location:         "Location"
+        stage:            "Stage"
+        notes:            "Notes"
+        full_tag:         "Tag"
+        tagable_type:     "Tag Type"
+      role:
+        name:             "Name"
+        resource_type:    "Resource"
+        resource_type_help: "Leave blank for global role"
+        resource_id:      "Instance"
+    help:
+      tag: 
+        prefix:           "Build prefix using discipline specific schema"
+        serial:           "Loop should be 4 digits"
+        suffix:           "Suffix should be typically one character, blank if not required"
+        service:          "Service description (40 characters maximum)"
+        location:         "Physical location of design element"
+        stage:            "Construction stage or phase (0 to 10)"
+        notes:            "Record useful tag related design information here"
+      discipline:
+        code:             "Symbol, maximum 12 characters"
+        name:             "Descriptive name, maximum 50 characters"
+        label:            "Display label, maximum 12 characters"
+        sort_order:       "Sort order"
+        prefix_schema:    "Select a standard schema or define a custom schema. Custom schema must have a unique name, set to project code + discipline code"
+        module_name:      "ignore: not implemented"
+        notes:            "Additional information"
+    errors:
+      custom_messages:
+        invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
+        unique: "%{model} %{attribute} has already been taken, must be unique"
+        custom_required: "%{model} %{attribute} is required"
+        already_associated: "%{child} is already associated with another %{parent}"
+        record_invalid: "Record is invalid"
+      models:
+        role:
+          attributes:
+            name:
+              blank: "Role must be selected"
+              invalid: "%{name} is not a valid role for %{resource}"
+        project:
+        discipline:
+          attributes:
+            code:
+              invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
+        tag:
+          base:
+          taken: "Tag %{tag} already exists"
+          attributes:
+            prefix: 
+              only_letters: "must contain only letters"
+        tagable_type:
+          not_assigned: "Not assigned"
+          change_tagable: "Cannot change tagable association once set"
+          invalid: "Invalid type %{tagable_type}"
+      attributes:
+        code:
+          invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
+      jsonb_fields:
+        blank: "%{field} can't be blank"
+        invalid: "%{field} is invalid"
+        included: "%{field} must be included in the allowed list"
+        taken: "%{field} has already been taken"
+
+#

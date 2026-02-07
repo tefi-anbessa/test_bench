@@ -12,16 +12,18 @@
   <%- @fields.select { |field| INDEX_TYPES.include?(field[:type]) }.each do |field| -%>
     <%- case field[:type] -%>
     <%- when "string", "enum", "integer", "bigint", "decimal" -%>
-      <td><%%= row.<%= field[:name] %> || '-' %></td>
+  <td><%%= row.<%= field[:name] %> || '-' %></td>
     <%- when "float" -%>
-      <td><%%= number_to_human(row.<%= field[:name] %>, 
-        precision: 4, units: { unit: "x", thousand: "kx", million: "Mx" }) || '-' %></td>
+  <td><%%= number_to_human(row.<%= field[:name] %>, 
+    precision: 4, units: { unit: "x", thousand: "kx", million: "Mx" }) || '-' %></td>
     <%- when "enum_translated" -%>
-      <td><%%= row.class.human_enum_name(:<%= field[:name] %>, row.<%= field[:name] %>) %></td>
+  <td><%%= row.class.human_enum_name(:<%= field[:name] %>, row.<%= field[:name] %>) %></td>
     <%- when "references" -%>
-      <td><%%= link_to row.<%= field[:name] %>.label, row.<%= field[:name] %></td>
+  <td><%%= row.<%= field[:name] %>.present? ?
+    link_to(row.<%= field[:name] %>.label, row.<%= field[:name] %>) : 
+    '-' %></td>
     <%- else -%>
-      <td><%%= row.<%= field[:name] %> || '-' %></td>
+  <td><%%= row.<%= field[:name] %> || '-' %></td>
     <%- end -%>
   <%- end -%>
   <td>

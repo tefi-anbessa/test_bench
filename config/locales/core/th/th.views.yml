@@ -1,0 +1,111 @@
+
+en:
+  site:
+    home:
+      title:        "Home"
+    about:
+      title:        "About"
+    contact:
+      title:        "Contact"
+    help:
+      title:        "Help"
+  users:
+    index:
+      title:        "Users"
+      header:       "Users Index"
+      message:      "Log in"
+      gravatar:     "Gravatar"
+    show:
+      title:        "User"
+      header:       "Show User"
+      message:      "Log in"
+      gravatar:     "Gravatar"
+  errors:
+    forbidden:
+      title:        "Forbidden"
+      header:       "Forbidden"
+      subheader:    "Insufficient Permissions"
+      message:      "You are not authorized to perform this action."
+      action:       "Action:"
+      resource:     "Resource:"
+      policy:       "Policy:"
+      roles:        "Roles:"
+      project:      "Current Project:"
+      back_to_home: "Back to Home"
+      go_back:      "Go Back"
+    conflict:
+      title:        "Conflict"
+      header:       "Conflict Detected"
+      subheader:    "This action cannot be completed"
+      reason:       "Reason:"
+      resource:     "Resource"
+      user:         "User"
+      roles:        "Roles"
+      show_details: "Show technical details"
+      back_to_home: "Back to Home"
+      go_back:      "Go Back"
+      tag_not_found: "The specified tag could not be found"
+      tag_already_assigned: "This tag has already been assigned to another item"
+      tagable_type_mismatch: "This tag has been assigned a different tag type"
+      invalid_enum: "Invalid enum value"
+  projects:
+    index:
+      title:            "Projects"
+      header:           "Projects Index"
+    select:
+      title:            "Select Project"
+      header:           "Project Selection"
+      select:           "Select"
+      no_project:       "No Project"
+      no_project_help:  "Select this to work outside of any project"
+      no_description:   "No description"
+      cancel:           "Cancel"
+    new:
+      title:            "New Project"
+      header:           "New Project"
+    show:
+      title:            "Project"
+      header:           "Project: %{label}"
+    edit:
+      title:            "Edit Project"
+      header:           "Edit Project: %{label}"
+  disciplines:
+    index:
+      title:            "Disciplines"
+      header:           "Disciplines for %{project}"
+    new:
+      title:            "New Discipline"
+      header:           "New Discipline"
+    show:
+      title:            "Discipline"
+      header:           "Discipline: %{label}"
+    edit:
+      title:            "Edit Discipline"
+      header:           "Edit Discipline: %{label}"
+  tags:
+    index:
+      title:            "Tags"
+      header:           "Tag List for %{project}"
+    new:
+      title:            "New Tag"
+      header:           "New Tag"
+    show:
+      title:            "Tag"
+      header:           "Tag: %{label}"
+    edit:
+      title:            "Edit Tag"
+      header:           "Edit Tag: %{label}"
+  roles:
+    index:
+      title:            "Roles"
+      header:           "Roles Index"
+    new:
+      title:            "New Role"
+      header:           "Assign New Role"
+      message_global_html:   "<small>This form can only submit global and resource roles. Submit instance roles from the resource view (if available).</small>"
+      message_instance_html: "<small>This form can only submit instance roles. Submit global and resource roles from the roles index view (if available).</small>"
+    partial:
+      message_html:     "Assign a new user role for %{resource}"
+      no_roles_assigned:  "No roles have been assigned yet"
+      existing_roles:  "Existing roles"
+

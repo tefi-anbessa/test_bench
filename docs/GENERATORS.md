@@ -157,14 +157,14 @@ General requirements.
 * This generator will create the folders, files and edits required to add a new tagable type.
 * The generator itself is reasonably self documented, refer to `lib/generators/project_assistant/tagable_generator.rb`.
 
-
 #### Command Line
 
 The generator shall be invoked using the rails generate command, the generator name project_assistant:tagable, the module and tagable model name as Ruby class specifier in CamelCase, and a list of arguments for the fields to be created. Here is an example generate command for an electrical heater:
 
-  ```bash
-  rails generate project_assistant:tagable Electrical::Heater heater_type:enum_translated:required application:enum_translated:required ingress_protection:string sheath_temperature_max:float power_density_min:float power_density_max:float sheath_material:enum_translated insulation_material:enum_translated notes:text
-  ```
+```bash
+rails generate project_assistant:tagable Electrical::Heater heater_type:enum_translated:required application:enum_translated:required ingress_protection:string sheath_temperature_max:float power_density_min:float power_density_max:float sheath_material:enum_translated insulation_material:enum_translated notes:text
+```
+
 The name of the tagable type must be prefixed with its namespace module, as shown in the example. (The generator cannot be used to create a tagable type in the core application, and nested modules are not allowed.)
 
 Following the tagable model name, all fields to be included in the model shall be specified with their type and options, separated by colons with no spaces.
@@ -202,7 +202,7 @@ The generator shall create these files:
   * enum declarations for any enum fields
   * presence validations for any required fields
   * ransackable attributes for searching and sorting all attributes
-  * ransackable associations for :tag, :tag_discipline, :tag_discipline_project
+  * ransackable associations for :tag, :tag_discipline, :tag_discipline_project, and any  fields of type :references
   * `app/models/#{module_name}/#{tagable_name}.rb`
 
 ##### Policy
@@ -391,6 +391,7 @@ Each field requires a valid type, separated by a colon with no space, selected f
 * jsonb: use for additional user defined data fields, stored as JSONB in the database. The form provides a text area. [TODO] Form should provide json editor but we couldn't get it working.
 * enum: use for selection options. This is not a standard rails type, it is used by the generator to create an integer field in the datbase, with drop down select in the form.
 * enum_translated: this is as for :enum type, but with translations for the options. the generator will look for translated option keys in forms and display them in views.
+* references: use for foreign keys. This type sets up the framework of an association.
 
 Fields may also have options, specified after the type, separated by a colons with no spaces. Available options are:
 
@@ -403,7 +404,7 @@ Note that enum field option keys became class methods for the model, so have to 
 
 1. Include a field notes:text at the end of the list. All tagables have this field, and the system test expects it to be there.
 
-1. The generator has dependencies, which should automatically be met if the module generator has been used for setting up the module. Refer to the model generator documentation to see what is expected, and check that all requirements are in place.
+1. The generator has dependencies, which should automatically be met if the module generator has been used for setting up the module. Refer to the module generator documentation to see what is expected, and check that all requirements are in place.
 
 1. With all the fields ready, it's time to draft the command line.
 
@@ -429,10 +430,12 @@ Here again is our example command line:
      add the line:
      `include Electrical::Demandable`.
    * [TODO future: similar for process module].
+   * Check that associations are correctly defined for :references fields. The generator adds `belongs_to` statements, but no options. These must be added if required. The generator assumes that the referenced class is in the same module/sub-module as the generated model.
    * Check that any required :enum and :enum_translated type fields are specified as enum.
    * Check that the fields with :required option have presence validations.
    * Add any other validations required, such as range limits, numericality, format, etc.
    * If the `ransackable_attributes` line is too long, split it after a comma for ease of reading.
+   * Check that `ransackable_associations` meet requirements.
 
 1. Open the module constants file (in our example config/constants/electrical.yml). [HOLD revise after enum generator working.]
    * For each enum field, there should be a line with the field name as key.
@@ -555,7 +558,7 @@ A scaffold generator is provided as an alternative to the rails standard scaffol
 
 The scaffold generator differs from the tagable generator in allowing models to be created in nested modules, or at the core level. All module levels must exist, with the associated folders and files, before running the generator. Always use the module generator to ensure that folders and files are in the expected state.
 
-### Specification.
+### Specification
 
 #### Command Line
 
@@ -579,3 +582,6 @@ The generator does not edit the tagable constants file.
 
 Module constants and translation edits are the same as for tagable.
 
+### Usage
+
+#### Preparation

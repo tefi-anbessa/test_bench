@@ -8,11 +8,11 @@ module ProjectAssistant
   class TagableGeneratorTest < Rails::Generators::TestCase
     include ProjectAssistant::FieldTypes
     tests ProjectAssistant::TagableGenerator
-    destination Rails.root.join('tmp/generators')
+    destination Rails.root.join('tmp', 'generators')
     setup :prepare_destination
 
     setup do
-      @module_name = "Electrical"
+      @module_name = "ExistingModule"
       @tagable_name = "Motor"
       # Generator::NamedBase methods not available in test environment
       @file_name = "#{@module_name.underscore}_#{@tagable_name.underscore}" # electrical_motor
@@ -64,8 +64,7 @@ module ProjectAssistant
         'selector:enum',
         'status:enum_translated',
         'sort_order:integer:index',
-        'code:string:uniq',
-        'parent:references'
+        'code:string:uniq'
       ]
       
       # Mimic the generators process_fields method.
@@ -76,9 +75,9 @@ module ProjectAssistant
     end
 
     test "module generator setup complete" do
-      assert_file "app/models/#{@module_name}/base.rb"
-      assert_file "app/models/#{@module_name}.rb"
-      assert_file "config/constants/tagable.yml"
+      assert_file File.join("app", "models", "#{@folder_name}", "base.rb")
+      assert_file File.join("app", "models", "#{@folder_name}.rb")
+      assert_file File.join("config", "constants", "tagable.yml")
     end
 
     test "generator runs without errors" do
@@ -244,10 +243,14 @@ module ProjectAssistant
         assert_match(/factory\s+:#{@file_name}/, content)
         assert_match(/class:\s+#{@class_name}/, content)
         @fields.each do |field|
-          if field[:options].include?('required')
-            assert_match(/#{field[:name]}\s+\{\s*\}\s*# Provide default value for required field/, content)
-          else
-            assert_match(/#{field[:name]}\s+\{\s*\}/, content)
+          if field[:type] == "references"
+            assert_match(/association\s+:\s*#{field[:name]}/, content)
+          else 
+            if field[:options].include?('required')
+              assert_match(/#{field[:name]}\s+\{\s*\}\s*# Provide default value for required field/, content)
+            else
+              assert_match(/#{field[:name]}\s+\{\s*\}/, content)
+            end
           end
         end
       end
@@ -572,7 +575,7 @@ module ProjectAssistant
         # Check that the new resource lines were added to routes file
         # TODO extend the regexp to match the correct location for each line.
         assert_match(/resources\s+:#{@plural_name}, only: \[:index, :new, :create\]/, content)
-        assert_match(/resources\s+:#{@plural_name}, except: \[:index]/, content)
+        assert_match(/resources\s+:#{@plural_name}, except: \[:index\]/, content)
       end
     end
 

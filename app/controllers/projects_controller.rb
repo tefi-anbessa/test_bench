@@ -42,10 +42,10 @@ class ProjectsController < ApplicationController
     authorize @project
 
     if @project.save
-      flash[:success] = I18n.t('flash.actions.create.notice', resource_name: I18n.t('activerecord.models.project'))
+      flash[:success] = I18n.t('flash.create.notice', resource_name: I18n.t('activerecord.models.project'))
       redirect_to @project
     else
-      flash.now[:alert] = I18n.t('flash.actions.create.alert', resource_name: I18n.t('activerecord.models.project'))
+      flash.now[:alert] = I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.project'))
       render :new, status: :unprocessable_content
     end
   end
@@ -71,11 +71,11 @@ class ProjectsController < ApplicationController
     authorize @project
     
     if @project.update(project_params)
-      flash[:success] = I18n.t('flash.actions.update.notice', resource_name: I18n.t('activerecord.models.project'))
+      flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.project'))
       redirect_to @project
     else
       setup_role_assignment(@project)
-      flash.now[:alert] = I18n.t('flash.actions.update.alert', resource_name: I18n.t('activerecord.models.project'))
+      flash.now[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.project'))
       render :edit, status: :unprocessable_content
     end
   end
@@ -85,10 +85,10 @@ class ProjectsController < ApplicationController
     authorize @project
     
     if @project.destroy
-        flash[:success] = I18n.t('flash.actions.destroy.notice', resource_name: I18n.t('activerecord.models.project'))
+        flash[:success] = I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.project'))
         redirect_to projects_url
     else
-        flash.now[:danger] = @project.errors.full_messages.join(', ')
+        flash.now[:danger] = I18n.t('flash.destroy.alert', resource_name: I18n.t('activerecord.models.project'))
         redirect_to projects_url
     end
   end

@@ -104,7 +104,7 @@
       <div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
-          <!-- Resource Details Card -->
+          <!-- <%= model_class %> Details Card -->
           <div class="card mb-4">
             <div class="card-header py-1">
               <h4 class="mb-0"><%%= t('show.details', model: @<%= singular_name %>.model_name.human) %></h4>
@@ -130,7 +130,7 @@
   <%- when "binary" -%> 
                 <div class="col-8"><%%= 'PLACEHOLDER FOR BINARY FIELD' %></div>
   <%- when "references" -%>
-                render <%%= "#{File.join(controller_file_path, "card")}" %>, object: @<%%= singular_name %> %>
+                <div class="col-8"><%%= render <%= File.join(*class_path, field[:name].pluralize, "card") %>, object: @<%= singular_name %>.<%= field[:name] %> %></div>
   <%- else -%> <!-- Other type: Fallback to show whatever content is in the field. -->
                 <div class="col-8"><%%= @<%= singular_name %>.<%= field[:name] %> || '-' %></div>
   <%- end -%>

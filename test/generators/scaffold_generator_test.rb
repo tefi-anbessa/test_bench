@@ -9,22 +9,22 @@ module ProjectAssistant
   class ScaffoldGeneratorTest < Rails::Generators::TestCase
     include ProjectAssistant::FieldTypes
     tests ProjectAssistant::ScaffoldGenerator
-    destination Rails.root.join('tmp/generators')
+    destination Rails.root.join('tmp', 'generators')
     setup :prepare_destination
 
     setup do
-      @module_name = "ModuleName"
-      @model_name = "ClassName"
+      @module_name = "ExistingModule"
+      @model_name = "NewModel"
       # Generator::NamedBase methods not available in test environment
       @human_name = @model_name.underscore.humanize
-      @class_path = @module_name.split('::').to_a # ["ModuleName"]
-      @file_name = "#{@model_name.underscore}" # "class_name"
-      @table_name = "#{@module_name.split('::').join('_').underscore}_#{@model_name.underscore.pluralize}" # "module_name_class_names"
-      @singular_table_name = @table_name.singularize # "module_name_class_name"
-      @class_name = "#{@module_name}::#{@model_name}" # "ModuleName::ClassName"
-      @folder_name = "#{@module_name.underscore}" # "module_name/class_name"
-      @singular_name = "#{@model_name.underscore}" # "class_name"
-      @plural_name = "#{@model_name.underscore.pluralize}" # "class_names"
+      @class_path = @module_name.split('::').to_a # ["ExistingModule"]
+      @file_name = "#{@model_name.underscore}" # "new_model"
+      @table_name = "#{@module_name.split('::').join('_').underscore}_#{@model_name.underscore.pluralize}" # "existing_module_new_models"
+      @singular_table_name = @table_name.singularize # "existing_module_new_model"
+      @class_name = "#{@module_name}::#{@model_name}" # "ExistingModule::NewModel"
+      @folder_name = "#{@module_name.underscore}" # "existing_module/new_model"
+      @singular_name = "#{@model_name.underscore}" # "new_model"
+      @plural_name = "#{@model_name.underscore.pluralize}" # "new_models"
       
       # Create clean files for testing (avoid conflicts with real app files)
       FileUtils.mkdir_p(File.join(destination_root, 'config'))
@@ -68,7 +68,8 @@ module ProjectAssistant
         'selector:enum',
         'status:enum_translated',
         'sort_order:integer:index',
-        'code:string:uniq'
+        'code:string:uniq',
+        'parent:references'
       ]
       
       # Mimic the generators process_fields method.
@@ -119,7 +120,7 @@ module ProjectAssistant
     end
 
     test "validates name with non-existent module" do
-      skip "Module name validation is crashing generator"
+#      skip "Module name validation is crashing generator"
       assert_raises(SystemExit) do
         run_generator ["NonExistent::Heater", "name:string"]
       end
@@ -195,28 +196,41 @@ module ProjectAssistant
     test "creates model" do
       run_generator @args
       assert_file File.join(destination_root, 'app', 'models', 
-        "#{@module_name.underscore}", "#{@model_name.underscore}.rb") do |content|
+          "#{@module_name.underscore}", "#{@model_name.underscore}.rb") do |content|
         assert_match(/module #{@module_name}/, content)
         assert_match(/class #{@model_name} < Base/, content)
+        
+        # Check for belongs_to associations
+        @fields.select { |f| %w[references].include?(f[:type]) }.each do |field|
+          assert_match(/belongs_to :#{field[:name]}/, content)
+        end
+
+        # Check for presence validations on required fields
         @fields.select { |f| f[:options].include?('required') }.each do |f|
           assert_match(/validates :#{f[:name]}, presence: true/, content)
         end
+        
+        # Check for enum declarations
         @fields.select { |f| ['enum', 'enum_translated'].include?(f[:type]) }.each do |f|
           assert_match(/enum :#{f[:name]}, Constants\.#{@module_name.underscore}\.#{@model_name.underscore}\.#{f[:name]}\.to_h/, content)
         end
       
-      # Check ransackable_attributes
-      assert_match(/def self\.ransackable_attributes/, content)
-      @fields.select { |f| SEARCHABLE_TYPES.include?(f[:type]) }.each do |field|
-        field_name = field[:name]
-        assert_match(/:\s*#{field_name}(?=[,\s\]])/, content, "Expected #{field_name} to be in ransackable_attributes")
-      end
-      %w[created_at updated_at].each do |timestamp|
-        assert_match(/:\s*#{timestamp}(?=[,\s\]])/, content, "Expected #{timestamp} to be in ransackable_attributes")
-      end
-      
-      # Check ransackable_associations
-      assert_match(/def self\.ransackable_associations\(auth_object = nil\)\s+\[ :project \]/m, content)
+        # Check ransackable_attributes
+        assert_match(/def self\.ransackable_attributes/, content)
+        @fields.select { |f| SEARCHABLE_TYPES.include?(f[:type]) }.each do |field|
+          field_name = field[:name]
+          assert_match(/:\s*#{field_name}(?=[,\s\]])/, content, "Expected #{field_name} to be in ransackable_attributes")
+        end
+        %w[created_at updated_at].each do |timestamp|
+          assert_match(/:\s*#{timestamp}(?=[,\s\]])/, content, "Expected #{timestamp} to be in ransackable_attributes")
+        end
+        
+        # Check ransackable_associations
+        associations = [:tag, :tag_discipline, :tag_discipline_project]
+        @fields.select { |f| %w[references].include?(f[:type]) }.each do |field|
+          associations += [field[:name]]
+        end
+        assert_match(/def self\.ransackable_associations\(auth_object = nil\)\s+#{associations}/m, content)
       end
     end
 
@@ -228,10 +242,14 @@ module ProjectAssistant
         assert_match(/factory\s+:#{@singular_table_name}/, content)
         assert_match(/class:\s+#{@class_name}/, content)
         @fields.each do |field|
-          if field[:options].include?('required')
-            assert_match(/#{field[:name]}\s+\{\s*\}\s*# Provide default value for required field/, content)
-          else
-            assert_match(/#{field[:name]}\s+\{\s*\}/, content)
+          if field[:type] == "references"
+            assert_match(/association\s+:\s*#{field[:name]}/, content)
+          else 
+            if field[:options].include?('required')
+              assert_match(/#{field[:name]}\s+\{\s*\}\s*# Provide default value for required field/, content)
+            else
+              assert_match(/#{field[:name]}\s+\{\s*\}/, content)
+            end
           end
         end
       end

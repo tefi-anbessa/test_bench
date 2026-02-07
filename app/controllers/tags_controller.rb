@@ -29,16 +29,13 @@ class TagsController < ApplicationController
   # POST /tags or /tags.json
   def create
     @tag = authorize Tag.new(tag_params)
-
-    respond_to do |format|
-      if @tag.save
-        format.html { redirect_to @tag, notice: "Tag was successfully created." }
-        format.json { render :show, status: :created, location: @tag }
-      else
-        setup_disciplines 
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @tag.errors, status: :unprocessable_entity }
-      end
+    if @tag.save
+      flash[:success] = I18n.t('flash.create.notice', resource_name: I18n.t('activerecord.models.tag'))
+      redirect_to @tag
+    else
+      flash[:alert] = I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.tag'))
+      setup_disciplines 
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -51,15 +48,14 @@ class TagsController < ApplicationController
   # PATCH/PUT /tags/1 or /tags/1.json
   def update
     authorize @tag
-    respond_to do |format|
-      if @tag.update(tag_params)
-        format.html { redirect_to @tag, notice: "Tag was successfully updated." }
-        format.json { render :show, status: :ok, location: @tag }
-      else
-        setup_disciplines 
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @tag.errors, status: :unprocessable_entity }
-      end
+    if @tag.update(tag_params)
+      flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.tag'))
+      redirect_to @tag
+    else
+      flash[:alert] = I18n.t('flash.update.alert', 
+      resource_name: I18n.t('activerecord.models.tag'))
+      setup_disciplines 
+      render :edit, status: :unprocessable_content
     end
   end
 
@@ -67,16 +63,13 @@ class TagsController < ApplicationController
   def destroy
     authorize @tag
     if @tag.destroy
-      flash[:success] = I18n.t('flash.actions.destroy.notice', 
+      flash[:success] = I18n.t('flash.destroy.notice', 
         resource_name: I18n.t('activerecord.models.tag'))
-      respond_to do |format|
-        format.html { redirect_to tags_path, status: :see_other }
-        format.json { head :no_content }
-      end
+      redirect_to tags_path, status: :see_other
     else
-      flash.now[:danger] = I18n.t('flash.actions.destroy.alert', 
+      flash.now[:danger] = I18n.t('flash.destroy.alert', 
         resource_name: I18n.t('activerecord.models.tag'))
-      render :show, status: :unprocessable_entity
+      render :show, status: :unprocessable_content
     end
   end
 

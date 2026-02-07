@@ -5,6 +5,7 @@ module ProjectAssistant
   class TagableGenerator < Rails::Generators::NamedBase
     include Rails::Generators::ResourceHelpers
     include FieldTypes
+    desc "Create files from templates and edit config entries for a new tagable model in Project Assistant app"
     source_root File.expand_path("tagable/templates", __dir__)
     
     def initialize(args, *options)
@@ -25,15 +26,20 @@ module ProjectAssistant
       
       # Validate that we have a module and class name
       unless class_name.include?("::")
-        errors << "Name must include both module and class with '::' separator (e.g. Electrical::Heater)"
+        errors << "Name must include both module and class with '::' separator"
         return errors if errors.any?
       end
       
       # Validate module exists
-      begin
-        module_name.constantize
-      rescue NameError
-        errors << "Module '#{module_name}' does not exist"
+      # begin
+#        module_name.constantize
+#      rescue NameError
+      folder = File.join(destination_root, "app", "models")
+      class_name.split("::")[0..-2].each do |part|
+        folder = File.join(folder, part.underscore)
+        unless Dir.exist?(folder)
+          errors << "Module '#{folder}' does not exist"
+        end
       end
       
       # Validate class name format

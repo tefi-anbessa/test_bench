@@ -64,12 +64,17 @@ module ProjectAssistant
       errors = []
       
       # For namespaced names, validate module existence
+      # Alternative test in place due to failure of const_defined? method: 
+      # just check one of the required folders exists.
       if @namespaced
+        folder = File.join(destination_root, "app", "models")
         class_name.split("::")[0..-2].each do |part|
 # This code is crashing the generator. TODO: Fix it.
 #          unless Module.const_defined?(part)
-#            errors << "#{part} is not a valid module"
-#          end
+          folder = File.join(folder, part.underscore)
+          unless Dir.exist?(folder)
+            errors << "#{part} is not a valid module"
+          end
         end
       end
         
@@ -298,9 +303,13 @@ module ProjectAssistant
 
     def add_translations
       I18n.available_locales.each do |locale|
-        translation_file = Pathname.new(File.join(destination_root, "config", "locales", 
-          @namespaced ? module_path : "core", locale.to_s, "#{locale}.#{class_path[-1]}.models.yml"))
-        
+        if @namespaced
+          translation_file = Pathname.new(File.join(destination_root, "config", "locales", 
+          module_path, locale.to_s, "#{locale}.#{class_path[-1]}.models.yml"))
+        else 
+          translation_file = Pathname.new(File.join(destination_root, "config", "locales", 
+          "core", locale.to_s, "#{locale}.models.yml"))
+        end
         if File.exist?(translation_file)
           content = File.read(translation_file)  
           # Prepare model name and attributes sections
@@ -339,9 +348,13 @@ module ProjectAssistant
         end
         
         # Handle views translations
-        views_file = Pathname.new(File.join(destination_root, "config", "locales", 
-          @namespaced ? module_path : "core", locale.to_s, "#{locale}.#{class_path[-1]}.views.yml"))
-        
+        if @namespaced
+          views_file = Pathname.new(File.join(destination_root, "config", "locales", 
+          module_path, locale.to_s, "#{locale}.#{class_path[-1]}.views.yml"))
+        else
+          views_file = Pathname.new(File.join(destination_root, "config", "locales", 
+          "core", locale.to_s, "#{locale}.views.yml"))
+        end
         if File.exist?(views_file)
           content = File.read(views_file)
           
