@@ -71,7 +71,7 @@ en:
     about:        "About"
     help:         "Help"
     contact:      "Contact"
-    electrical_resoureces: "Electrical Resources"
+    electrical_resources: "Electrical Resources"
 
   table:
     links:        "Links"
@@ -79,17 +79,6 @@ en:
 
   # Generic flash messages
   flash:
-    actions: # Deprecation: these translations are nested too deep. Use without actions scope.
-      create:
-        notice: "%{resource_name} was successfully created."
-        alert: "Could not create %{resource_name}."
-      update:
-        notice: "%{resource_name} was successfully updated."
-        alert: "Could not update %{resource_name}."
-      destroy:
-        notice: "%{resource_name} was successfully deleted."
-        alert: "Could not delete %{resource_name}."
-    # Prefer these translations without actions scope.
     create:
       notice: "%{resource_name} was successfully created."
       alert: "Could not create %{resource_name}."

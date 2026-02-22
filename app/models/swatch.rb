@@ -1,7 +1,7 @@
 class Swatch < ApplicationRecord
 
 # Belongs to associatons
-  
+  has_many :disciplines
 # enum declarations
   
 # Presence validation for required fields.
@@ -24,6 +24,6 @@ class Swatch < ApplicationRecord
   end
 
   def self.ransackable_associations(auth_object = nil)
-    []
+    [ "disciplines" ]
   end
 end

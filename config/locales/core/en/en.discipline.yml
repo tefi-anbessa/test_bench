@@ -48,3 +48,8 @@ en:
     messages:
       sure: "Are you sure? Changing schema will discard any existing customizations."
       initialize: "Initialize from Template"
+    viewing_schema: "Viewing Schema"
+    select_template: "Select Template"
+    template_help: "Select a template to initialize the schema"
+    custom_schema: "Custom Schema"
+    schema_help: "TODO"

@@ -3,6 +3,7 @@ class DisciplinesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_project, only: %i[ index new create ]
   before_action :set_discipline, only: %i[ show edit update destroy schema ]
+  before_action :set_swatches, only: %i[ new edit ]
 
   # GET /disciplines or /disciplines.json
   def index
@@ -137,12 +138,16 @@ class DisciplinesController < ApplicationController
     def handle_schema_error(e)
       @discipline.errors.add(:prefix_schema, I18n.t('errors.messages.invalid'))
     end
+
+    def set_swatches
+      @swatches = policy_scope(Swatch)
+    end
     
     # Only allow a list of trusted parameters through.
     def discipline_params
       params.require(:discipline).permit(
         :code, :label, :name, :module_name, 
-        :sort_order, :notes, :project_id,
+        :sort_order, :notes, :project_id, :swatch_id,
         :prefix_schema
       )
     end

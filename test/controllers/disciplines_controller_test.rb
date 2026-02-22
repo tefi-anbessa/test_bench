@@ -8,7 +8,8 @@ class DisciplinesControllerTest < ActionController::TestCase
 
     @project = create(:project)
     set_current_project(@project)
-    @discipline = create(:discipline, project: @project)
+    @swatch = create(:swatch)
+    @discipline = create(:discipline, project: @project, swatch: @swatch)
 
     @app_owner = create(:user)
     @app_owner.grant(:app_owner)
@@ -77,10 +78,11 @@ class DisciplinesControllerTest < ActionController::TestCase
       post :create, params: { 
         project_id: @project.id,
         discipline: {
-          code: 'PIP',
           name: 'Piping',
+          label: 'P',
           module_name: 'Piping',
-          prefix_schema: "name: default"
+          prefix_schema: "name: default",
+          swatch_id: @swatch.id
         }
       }
     end
@@ -92,7 +94,7 @@ class DisciplinesControllerTest < ActionController::TestCase
     assert_no_difference('Discipline.count') do
       post :create, params: { project_id: @project.id,
         discipline: {
-        code: ':' + 'a'*13,  # Invalid: name max length is 12
+        label: 'a'*6,  # Invalid: label max length is 5
         name: 'Process',
         prefix_schema: {"name": "default"},
         module_name: 'Process'
@@ -100,7 +102,7 @@ class DisciplinesControllerTest < ActionController::TestCase
     }
     end
     assert_template :new
-    assert_equal I18n.t('flash.actions.create.alert', resource_name: I18n.t('activerecord.models.discipline')), 
+    assert_equal I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.discipline')), 
                   flash[:alert]
   end
 
@@ -137,12 +139,12 @@ class DisciplinesControllerTest < ActionController::TestCase
     patch :update, params: {
       id: @discipline.id,
       discipline: {
-        code: ':' + 'a'*13  # Invalid: name max length is 12
+        label: 'a'*6  # Invalid: label max length is 5
       }
     }
     assert_template :edit
     assert_equal original_name, @discipline.reload.name
-    assert_equal I18n.t('flash.actions.update.alert', resource_name: I18n.t('activerecord.models.discipline')), flash[:alert]
+    assert_equal I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.discipline')), flash[:alert]
   end
 
   test "project manager can update discipline on their project" do
@@ -173,7 +175,7 @@ class DisciplinesControllerTest < ActionController::TestCase
       delete :destroy, params: { id: @discipline.id }
     end
     assert_redirected_to project_disciplines_url(@discipline.project)
-    assert_equal I18n.t('flash.actions.destroy.notice', resource_name: I18n.t('activerecord.models.discipline')), 
+    assert_equal I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.discipline')), 
                   flash[:success]
   end
 

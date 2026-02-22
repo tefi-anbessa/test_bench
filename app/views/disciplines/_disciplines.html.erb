@@ -19,10 +19,10 @@
     <% end %>
       <div class="table-responsive">
         <table class="table table-sm table-striped">
-          <%= render 'disciplines/disciplines_header', q: @q %>
+          <%= render 'disciplines/header', q: @q %>
           <tbody>
             <% @disciplines.each do |discipline| %>
-              <%= render 'disciplines/discipline_row', discipline: discipline %>
+              <%= render 'disciplines/row', discipline: discipline %>
             <% end %>
           </tbody>
         </table>

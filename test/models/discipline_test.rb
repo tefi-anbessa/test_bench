@@ -3,11 +3,13 @@ require "test_helper"
 class DisciplineTest < ActiveSupport::TestCase
   def setup
     @project = create(:project)
-    @discipline = build(:discipline, project: @project)
+    @swatch = create(:swatch)
+    @discipline = build(:discipline, project: @project, swatch: @swatch)
   end
 
   test "setup should be valid" do
     assert @project.valid?
+    assert @swatch.valid?
     assert @discipline.valid?
   end
 
@@ -16,10 +18,10 @@ class DisciplineTest < ActiveSupport::TestCase
     assert discipline.valid?
   end
 
-  test "code must be present" do
-    @discipline.code = ""
+  test "label must be present" do
+    @discipline.label = ""
     refute @discipline.valid?
-    assert_includes @discipline.errors[:code], I18n.t("errors.messages.blank")
+    assert_includes @discipline.errors[:label], I18n.t("errors.messages.blank")
   end
 
   test "project must be present" do
@@ -27,54 +29,34 @@ class DisciplineTest < ActiveSupport::TestCase
     refute @discipline.valid?
   end
 
-  test "code must be maximum 12 characters" do
-    @discipline.code = "a" * 13
+  test "swatch must be present" do
+    @discipline.swatch = nil
     refute @discipline.valid?
-    assert_includes @discipline.errors[:code], I18n.t("errors.messages.too_long", count: 12)
-    @discipline.code = "A"
+  end
+
+  test "label must be maximum 5 characters" do
+    @discipline.label = "a" * 6
+    refute @discipline.valid?
+    assert_includes @discipline.errors[:label], I18n.t("errors.messages.too_long", count: 5)
+    @discipline.label = "A"
     assert @discipline.valid?
   end
 
-  test "code should be a valid Ruby symbol" do
-    # Symbols are preferred
-    [:a, :_a, :A, :a1, :A1, :a_b_c, :A_B_C].each do |code|
-      @discipline.code = code
-      assert @discipline.valid?, "#{code} should be a valid code"
-    end
-
-    # Strings are allowed
-    ['A', 'a', '_test', 'test1', 'a_b_c'].each do |code|
-      @discipline.code = code
-      assert @discipline.valid?, "#{code} should be a valid code"
-    end
-
-    ['1a', '@test', 'test!', 'test-code', 'with space', ''].each do |code|
-      @discipline.code = code
-      refute @discipline.valid?, "#{code} should not be a valid code"
-      # puts "Code: #{code}, Errors: #{@discipline.errors[:code]}"
-      assert_includes @discipline.errors[:code], 
-        I18n.t("activerecord.errors.models.discipline.attributes.code.invalid_symbol", 
-        model: "Discipline",
-        attribute: "Code"
-      )
-    end
-  end
-
-  test "code must be unique within project" do
-    create(:discipline, code: :z, label: "Z", name: 'Test Discipline', project: @project)
+  test "label must be unique within project" do
+    create(:discipline, label: "Z", name: 'Test Discipline 1', project: @project, swatch: @swatch)
     
     # Try to create another discipline with the same code but different label
-    duplicate = build(:discipline, code: :z, label: "ZZZ", name: 'Test Discipline', project: @project)
+    duplicate = build(:discipline, label: "Z", name: 'Test Discipline 2', project: @project, swatch: @swatch)
     refute duplicate.valid?, "Should not allow duplicate discipline codes in same project"
-    assert_includes duplicate.errors[:code], I18n.t("errors.messages.taken")
+    assert_includes duplicate.errors[:label], I18n.t("errors.messages.taken")
   end
 
-  test "code can repeat in different projects" do
-    create(:discipline, code: :z, label: "Z", name: 'Test Discipline', project: @project)
+  test "label can repeat in different projects" do
+    create(:discipline, label: "Z", name: 'Test Discipline', project: @project, swatch: @swatch)
     
     # Try to create another discipline with the same code in a new project
-    duplicate = create(:discipline, code: :z, label: "XYZ", name: 'Test Discipline', project: create(:project))
-    assert duplicate.valid?, "Should allow duplicate discipline codes in different projects"
+    duplicate = create(:discipline, label: "Z", name: 'Test Discipline', project: create(:project), swatch: @swatch)
+    assert duplicate.valid?, "Should allow duplicate discipline labels in different projects"
   end
 
   test "name must be present" do

@@ -1,15 +1,11 @@
 class Discipline < ApplicationRecord
   has_many :tags, dependent: :destroy
   belongs_to :project
+  belongs_to :swatch
 
   before_validation :normalize_prefix_schema
-  validates :code,        presence: true, length: { maximum: 12},
-                          uniqueness:  { scope: :project_id },
-                          format: { 
-                            with: /\A[a-zA-Z_][a-zA-Z0-9_]*\z/,
-                            message: :invalid_symbol
-                          }
   validates :name, presence: true, length: { maximum: 50 }
+  validates :label, presence: true, length: { maximum: 5 }, uniqueness: { scope: :project_id }
   validates :prefix_schema, presence: true
   validate :validate_prefix_schema
 
@@ -109,6 +105,6 @@ class Discipline < ApplicationRecord
     end
 
     def self.ransackable_associations(auth_object = nil)
-      ["tags", "documents"]
+      ["tags", "documents", "swatches"]
     end
 end

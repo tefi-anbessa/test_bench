@@ -19,7 +19,7 @@
               aria: { label: t('actions.new') },
               title: t('actions.new') do %>
               <%== bs_icon('plus-square-fill') %>
-              <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.cable')].join(' ') %></span>
+              <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical/cable')].join(' ') %></span>
             <% end %>
         <% end %>
       </div> <!-- end of d-flex -->
@@ -32,7 +32,7 @@
                 placeholder: t('activerecord.models.electrical/cable_type') %>
           <%= f.search_field :notes_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.cable.notes') %>
+                placeholder: t('activerecord.attributes.electrical/cable.notes') %>
           <%= f.button class: "btn btn-outline-primary btn-sm mb-1", type: :submit do %>
             <%== bs_icon('search') %>
           <% end %>
@@ -45,7 +45,7 @@
           <thead>
             <tr class="table-danger">
               <td colspan="<%= 9 + (current_project ? 1 : 0) %>">
-                <%= t('index.link_broken', models: t("activerecord.models.cable").tableize) %>
+                <%= t('index.link_broken', models: t("activerecord.models.electrical/cable").tableize) %>
               </th>
             </tr>
             <%= render 'tags/header' %>
@@ -62,7 +62,7 @@
           <thead>
             <tr class="table-warning">
               <td colspan="<%= 9 + (current_project ? 1 : 0) %>">
-                <%= t('index.link_incomplete', models: t("activerecord.models.cable").tableize) %>
+                <%= t('index.link_incomplete', models: t("activerecord.models.electrical/cable").tableize) %>
               </td>
             </tr>
             <%= render 'tags/header' %>
@@ -82,7 +82,7 @@
           <% unless @orphans.empty? %>
             <tr class="table-danger">
               <td colspan="10">
-                <%= t('index.orphans', models: t("activerecord.models.cable").tableize) %>
+                <%= t('index.orphans', models: t("activerecord.models.electrical/cable").tableize) %>
               </td>
             </tr>
             <% @orphans.each do |row| %>

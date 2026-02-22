@@ -10,12 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_07_092346) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_22_074204) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "disciplines", force: :cascade do |t|
-    t.string "code"
     t.string "name"
     t.bigint "project_id", null: false
     t.jsonb "prefix_schema"
@@ -23,10 +22,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_07_092346) do
     t.string "module_name", comment: "Associated module for extended functionality"
     t.integer "sort_order", default: 100, comment: "Display order in UI (lower numbers first)"
     t.text "notes"
-    t.index ["project_id", "code"], name: "index_disciplines_on_project_id_and_code", unique: true
+    t.bigint "swatch_id", null: false
     t.index ["project_id", "label"], name: "index_disciplines_on_project_id_and_label", unique: true
     t.index ["project_id"], name: "index_disciplines_on_project_id"
     t.index ["sort_order"], name: "index_disciplines_on_sort_order"
+    t.index ["swatch_id"], name: "index_disciplines_on_swatch_id"
   end
 
   create_table "electrical_cable_types", force: :cascade do |t|
@@ -271,6 +271,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_07_092346) do
   end
 
   add_foreign_key "disciplines", "projects"
+  add_foreign_key "disciplines", "swatches"
   add_foreign_key "electrical_cable_types", "projects"
   add_foreign_key "electrical_cables", "electrical_cable_types"
   add_foreign_key "electrical_circuits", "electrical_switchboards"

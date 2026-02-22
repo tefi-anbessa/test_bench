@@ -3,22 +3,24 @@ FactoryBot.define do
 
   factory :discipline do
     association :project, factory: :project
-    code { "code#{SecureRandom.hex(4)}" }
-    name { "Discipline #{code}" }
+    swatch { Swatch.first || create(:swatch) }
+    sequence(:name) { |n| "Factory Discipline #{format('%02d', n)}" }
+    sequence(:label) { |n| "D#{format('%02d', n)}" }
+    notes { Faker::Lorem.sentence }
     module_name { name.parameterize.underscore.camelize }
     sort_order { 100 }
     prefix_schema { { name: 'default' } }
 
     # For specific discipline types
     trait :elec do
-      code { :elec }
       name { 'Electrical' }
+      label { 'E' }
       prefix_schema { { name: 'dim1' } }
     end
 
     trait :inst do
-      code { :inst }
-      name { 'Electrical' }
+      name { 'Instrumentation' }
+      label { 'I' }
       prefix_schema { { name: 'isa51' } }
     end
   end

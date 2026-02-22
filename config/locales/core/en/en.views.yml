@@ -77,7 +77,7 @@ en:
       header:           "New Discipline"
     show:
       title:            "Discipline"
-      header:           "Discipline: %{label}"
+      header:           "Project: %{project} - Discipline: %{label}"
     edit:
       title:            "Edit Discipline"
       header:           "Edit Discipline: %{label}"
@@ -107,16 +107,16 @@ en:
       message_html:     "Assign a new user role for %{resource}"
       no_roles_assigned:  "No roles have been assigned yet"
       existing_roles:  "Existing roles"
-    swatches:
-      index:
-        title:            "Swatches"
-        header:           "Swatches Collection"
-      edit:
-        title:            "Edit Swatch"
-        header:           "Edit Swatch: %{label}"
-      new:
-        title:            "New Swatch"
-        header:           "New Swatch"
-      show:
-        title:            "Swatch"
-        header:           "Swatch: %{label}"
+  swatches:
+    index:
+      title:            "Swatches"
+      header:           "Swatches Collection"
+    edit:
+      title:            "Edit Swatch"
+      header:           "Edit Swatch: %{label}"
+    new:
+      title:            "New Swatch"
+      header:           "New Swatch"
+    show:
+      title:            "Swatch"
+      header:           "Swatch: %{label}"

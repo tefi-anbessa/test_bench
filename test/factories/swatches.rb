@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :swatch, class: Swatch do
     # Attributes
-    name { "test" } 
+    name { "test_#{SecureRandom.hex(4)}" } 
     bg { "#101010" } # Provide default value for required field
     text { "#802020" } # Provide default value for required field
     form_bg { "#100000" } # Provide default value for required field
