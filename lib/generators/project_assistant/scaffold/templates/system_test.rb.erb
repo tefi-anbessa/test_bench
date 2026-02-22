@@ -1,5 +1,7 @@
 require "application_system_test_case"
+<%- if @namespaced -%>
 module <%= module_name %>
+<%- end -%>
   class <%= model_class.pluralize %>SystemTest < ApplicationSystemTestCase
     include Devise::Test::IntegrationHelpers
     include Warden::Test::Helpers
@@ -27,4 +29,6 @@ module <%= module_name %>
       @form_fields = %w[]
     end
   end
+<%- if @namespaced -%>
 end
+<%- end -%>

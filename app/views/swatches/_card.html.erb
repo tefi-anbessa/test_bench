@@ -1,0 +1,79 @@
+<% resource = object %>
+<%= render 'components/collapsible',
+  id: "#{swatches}_#{resource.id}_details",
+  title: t("swatches.show.header", label: resource.label),
+  expanded: false,
+  header_class: 'py-1' do %>
+  
+    <div class="container-fluid">
+      <div class="row mb-1">
+        <% text = t("actions.jump_to", model: t("activerecord.models.swatch")) %>
+        <%= link_to resource, 
+            class: "btn btn-sm btn-outline-secondary me-2",
+            title: text do %>
+          <%== bs_icon('box-arrow-in-up-left') %>
+          <span class="d-none d-md-inline"><%= text %></span>
+        <% end %>
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:name) %></div>
+        <div class="col-8"><%= resource.name || '-' %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:bg) %></div>
+        <div class="col-8"><%= resource.bg || '-' %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:text) %></div>
+        <div class="col-8"><%= resource.text || '-' %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:form_bg) %></div>
+        <div class="col-8"><%= resource.form_bg || '-' %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:form_field) %></div>
+        <div class="col-8"><%= resource.form_field || '-' %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:card_bg) %></div>
+        <div class="col-8"><%= resource.card_bg || '-' %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:card_header_bg) %></div>
+        <div class="col-8"><%= resource.card_header_bg || '-' %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:card_border) %></div>
+        <div class="col-8"><%= resource.card_border || '-' %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:badge_bg) %></div>
+        <div class="col-8"><%= resource.badge_bg || '-' %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:badge_text) %></div>
+        <div class="col-8"><%= resource.badge_text || '-' %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:link_text) %></div>
+        <div class="col-8"><%= resource.link_text || '-' %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:link_hover) %></div>
+        <div class="col-8"><%= resource.link_hover || '-' %></div>
+
+      </div>
+    </div> <!-- end container-fluid -->
+<% end %>

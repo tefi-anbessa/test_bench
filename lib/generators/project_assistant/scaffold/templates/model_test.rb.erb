@@ -1,7 +1,12 @@
 require "test_helper"
 require_relative "../../helpers/tagable_model_patterns"
+
+<%- if @namespaced -%>
 module <%= module_name %>
   class <%= model_class %>Test < ActiveSupport::TestCase
+<%- else -%>
+class <%= model_class %> < ApplicationRecord
+<%- end -%>
 
     def setup
       setup_model_specific_data
@@ -31,4 +36,6 @@ module <%= module_name %>
     # E.g. test electrical_demand for electrical models.
 
   end
+<%- if @namespaced -%>
 end
+<%- end -%>

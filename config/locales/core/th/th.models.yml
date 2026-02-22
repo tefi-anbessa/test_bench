@@ -1,6 +1,8 @@
 en:
   activerecord:
     models:
+      swatch: "Swatch"
+
       resource:           "Resource"
       user:               "User"
       project:            "Project"
@@ -8,6 +10,20 @@ en:
       tag:                "Tag"
       role:               "Role"
     attributes:
+      swatch:
+        name: "Name"
+        bg: "Bg"
+        text: "Text"
+        form_bg: "Form bg"
+        form_field: "Form field"
+        card_bg: "Card bg"
+        card_header_bg: "Card header bg"
+        card_border: "Card border"
+        badge_bg: "Badge bg"
+        badge_text: "Badge text"
+        link_text: "Link text"
+        link_hover: "Link hover"
+
       resource:
         id:               "ID"
       user:

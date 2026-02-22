@@ -1,6 +1,7 @@
 en:
   activerecord:
     models:
+      swatch: "Swatch"
       resource:           "Resource"
       user:               "User"
       project:            "Project"
@@ -8,6 +9,19 @@ en:
       tag:                "Tag"
       role:               "Role"
     attributes:
+      swatch:
+        name: "Name"
+        bg: "Background"
+        text: "Text"
+        form_bg: "Form background"
+        form_field: "Form field"
+        card_bg: "Card background"
+        card_header_bg: "Card header background"
+        card_border: "Card border"
+        badge_bg: "Badge background"
+        badge_text: "Badge text"
+        link_text: "Link text"
+        link_hover: "Link hover"
       resource:
         id:               "ID"
       user:
@@ -114,4 +128,3 @@ en:
         included: "%{field} must be included in the allowed list"
         taken: "%{field} has already been taken"
 
-#

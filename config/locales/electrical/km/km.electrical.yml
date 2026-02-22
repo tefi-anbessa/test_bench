@@ -1,6 +1,6 @@
-en:
+km:
   electrical:
-    module: "Electrical"
+    module: "កម្មវិធីអគ្គិសនី"
     motor_type:
       induction: "Induction"
       synchronous: "Synchronous"

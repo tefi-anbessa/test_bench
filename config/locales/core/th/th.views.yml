@@ -109,3 +109,16 @@ en:
       no_roles_assigned:  "No roles have been assigned yet"
       existing_roles:  "Existing roles"
 
+    swatches:
+      index:
+        title:            "Swatches"
+        header:           "Swatches Collection"
+      edit:
+        title:            "Edit Swatch"
+        header:           "Edit Swatch: %{label}"
+      new:
+        title:            "New Swatch"
+        header:           "New Swatch"
+      show:
+        title:            "Swatch"
+        header:           "Swatch: %{label}"

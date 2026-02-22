@@ -1,4 +1,3 @@
-
 # frozen_string_literal: true
 module Electrical
   class CableType < Base

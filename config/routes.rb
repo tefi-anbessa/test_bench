@@ -79,7 +79,10 @@ Rails.application.routes.draw do
     resources :roles, only: [:index, :new, :create]
   end
 
-  # Defines the root path route ("/")
+  
+  resources :swatches
+
+# Defines the root path route ("/")
   root to: 'site#home'
   
   # Error handling - custom error pages

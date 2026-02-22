@@ -1,6 +1,8 @@
 require 'test_helper'
 require_relative '../../helpers/resource_policy_test'
+<%- if @namespaced -%>
 module <%= module_name %>
+<%- end -%>
   class <%= model_class %>PolicyTest < ActiveSupport::TestCase
     include ResourcePolicyTest
 
@@ -10,4 +12,6 @@ module <%= module_name %>
 
     # All setup and tests have been abstracted to ResourcePolicyTest and PolicyTestHelpers.
   end
+<%- if @namespaced -%>
 end
+<%- end -%>

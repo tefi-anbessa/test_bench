@@ -31,7 +31,10 @@ module TestBench
     # Added for i18n installation
     # Path to search for translation files
     config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
-
+    
+    # Set default locale
+    config.i18n.default_locale = :en
+    
     # Permitted locales available for the application
     I18n.available_locales = [:en, :km ,:th, :cn]
     # end i18n

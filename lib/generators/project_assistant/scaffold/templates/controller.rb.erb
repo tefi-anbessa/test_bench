@@ -1,4 +1,7 @@
+# frozen_string_literal: true
+<%- if @namespaced -%>
 module <%= module_name %>
+<%- end -%>
   class <%= model_class.pluralize %>Controller < ApplicationController
     before_action :authenticate_user!
     before_action :require_project!, only: %i[ new create edit update ]
@@ -8,7 +11,7 @@ module <%= module_name %>
     def index
       authorize <%= class_name %>, :index?
       @q = policy_scope(<%= class_name %>).ransack(params[:q])
-      @pagy, @<%= plural_name %> = pagy(@q.result.includes(:tag), limit: 20)
+      @pagy, @<%= plural_name %> = pagy(@q.result, limit: 20)
     end
 
     # GET /<%= controller_file_path %>/1
@@ -29,10 +32,12 @@ module <%= module_name %>
       authorize @<%= singular_name %>
 
       if @<%= singular_name %>.save
-        flash[:success] = [t('flash.create.notice', resource_name: @<%= singular_name %>.model_name.human)]
+        flash[:success] = t('flash.create.notice', 
+          resource_name: @<%= singular_name %>.model_name.human)
         redirect_to @<%= singular_name %>
       else
-        flash[:alert] = [t('flash.create.alert', resource_name: @<%= singular_name %>.model_name.human.downcase)]
+        flash[:alert] = t('flash.create.alert', 
+          resource_name: @<%= singular_name %>.model_name.human.downcase)
         render :new, status: :unprocessable_content
       end
     end
@@ -47,10 +52,12 @@ module <%= module_name %>
     def update
       authorize @<%= singular_name %>
       if @<%= singular_name %>.update(<%= singular_name %>_params)
-        flash[:success] = [t('flash.update.notice', resource_name: @<%= singular_name %>.model_name.human)]
+        flash[:success] = t('flash.update.notice', 
+          resource_name: @<%= singular_name %>.model_name.human)
         redirect_to @<%= singular_name %>
       else
-        flash[:alert] = [t('flash.update.alert', resource_name: @<%= singular_name %>.model_name.human.downcase)]
+        flash[:alert] = t('flash.update.alert', 
+          resource_name: @<%= singular_name %>.model_name.human.downcase)
         render :edit, status: :unprocessable_content 
       end
     end
@@ -59,9 +66,11 @@ module <%= module_name %>
     def destroy
       authorize @<%= singular_name %>
       if @<%= singular_name %>.destroy
-        flash[:success] = [t('flash.destroy.notice', resource_name: @<%= singular_name %>.model_name.human)]
+        flash[:success] = t('flash.destroy.notice', 
+          resource_name: @<%= singular_name %>.model_name.human)
       else
-        flash[:alert] = [t('flash.destroy.alert', resource_name: @<%= singular_name %>.model_name.human.downcase)]
+        flash[:alert] = t('flash.destroy.alert', 
+          resource_name: @<%= singular_name %>.model_name.human.downcase)
       end
       redirect_to <%= plural_name %>_path
     end
@@ -70,6 +79,10 @@ module <%= module_name %>
 
       def set_<%= singular_name %>
         @<%= singular_name %> = <%= class_name %>.find(params[:id])
+      end
+
+      def setup_form
+        # Add selector setup here.
       end
 
       def resource_params
@@ -83,4 +96,6 @@ module <%= module_name %>
         }.join(', ') %>)
       end
   end
+<%- if @namespaced -%>
 end
+<%- end -%>

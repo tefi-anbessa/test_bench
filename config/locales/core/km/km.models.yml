@@ -1,6 +1,7 @@
-kh:
+km:
   activerecord:
     models:
+      swatch: "Swatch"
       resource:           "ធនធាន"
       user:               "អ្នកប្រើប្រាស់"
       project:            "គម្រោង"
@@ -16,6 +17,20 @@ kh:
       socket_cct:         "ច្រកចូលអគ្គិសនី"
       light_cct:          "សៀគ្វីភ្លើង"
     attributes:
+      swatch:
+        name: "Name"
+        bg: "Bg"
+        text: "Text"
+        form_bg: "Form bg"
+        form_field: "Form field"
+        card_bg: "Card bg"
+        card_header_bg: "Card header bg"
+        card_border: "Card border"
+        badge_bg: "Badge bg"
+        badge_text: "Badge text"
+        link_text: "Link text"
+        link_hover: "Link hover"
+
       resource:
         id:               "ល.រ"
       user:

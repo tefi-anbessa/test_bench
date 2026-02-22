@@ -1,0 +1,142 @@
+cn:
+  flag:     cn
+  app_name: "Test Bench"
+
+  rails:
+    walking:      "Walking on"
+
+  actions:
+    save:         "Save"
+    update:       "Update"
+    set:          "Set"
+    select:       "Select"
+    save_change:  "Save Changes"
+    delete:       "Delete"
+    delete_sure:  "Are you sure? Delete cannot be undone."
+    discard:      "Discard changes"
+    discard_new:  "Discard new"
+    sure:         "Are you sure?"
+    show:         "Show"
+    new:          "New"
+    edit:         "Edit"
+    index:        "Index"
+    next:         "Next"
+    previous:     "Prev"
+    grant:        "Grant"
+    revoke:       "Revoke"
+    link:         "Link to new %{resource}"
+    jump_to:      "Jump to %{model}"
+
+  index:
+    admin:            "Admin"
+    orphans:          "The following %{models} do not have an associated tag:"
+    link_incomplete:  "The following tags are listed as %{models} but are not yet assigned:"
+    link_broken:      "The following tags are listed as %{models} but the %{models} do not exist:"
+    all:              "All Accessible %{models}"
+    link_unassigned:  "%{model} not assigned"
+    invalid_type:     "%{type} is not valid type"
+
+  show:
+    orphan:       "No associated parent %{model}"
+    unassigned:   "%{model} not assigned"
+    linked:       "Show %{model}"
+    model:        "model"
+    label:        "Label"
+    details:      "%{model} Details"
+
+  form:
+    other:        "Other"
+    new_select:   "Leave blank when adding new selection"
+    required:     "Selection required:"
+    optional:     "Leave blank for no selection:"
+    undefined:    "Undefined"
+    none:         "None"
+    unknown:      "Unknown"
+    true:         "☑"
+    false:        "☒"
+    error_message: 
+      one:        "The form contains %{count} error"
+      other:      "The form contains %{count} errors"
+
+  admin:         "Admin"
+
+  menu:
+    toggle:       "Toggle navigation"
+    profile:      "Profile"
+    edit:         "Edit"
+    log_out:      "Sign out"
+    log_in:       "Sign in"
+    home:         "Home"
+    about:        "About"
+    help:         "Help"
+    contact:      "Contact"
+    electrical_resoureces: "Electrical Resources"
+
+  table:
+    links:        "Links"
+    missing:      "%{model} missing"
+
+  # Generic flash messages
+  flash:
+    actions: # Deprecation: these translations are nested too deep. Use without actions scope.
+      create:
+        notice: "%{resource_name} was successfully created."
+        alert: "Could not create %{resource_name}."
+      update:
+        notice: "%{resource_name} was successfully updated."
+        alert: "Could not update %{resource_name}."
+      destroy:
+        notice: "%{resource_name} was successfully deleted."
+        alert: "Could not delete %{resource_name}."
+    # Prefer these translations without actions scope.
+    create:
+      notice: "%{resource_name} was successfully created."
+      alert: "Could not create %{resource_name}."
+    update:
+      notice: "%{resource_name} was successfully updated."
+      alert: "Could not update %{resource_name}."
+    destroy:
+      notice: "%{resource_name} was successfully deleted."
+      alert: "Could not delete %{resource_name}."
+    assigned: 
+      one: "%{count} %{resource_name} was successfully assigned."
+      other: "%{count} %{resource_name} were successfully assigned."
+    destroyed: 
+      one: "%{count} %{resource_name} was successfully deleted."
+      other: "%{count} %{resource_name} were successfully deleted."
+
+    already_assigned: "%{resource_name} is already assigned. Edit %{resource_name} to change assignment."
+    not_found: "%{resource_name} not found."
+    required: "%{resource_name} is required."
+    
+  # Resource specific flash messages
+    tags:
+      tagable_already_assigned: "Tag %{tag} already has a %{resource_name} assigned"
+      tagable_wrong_type: "Tag %{tag} is not a %{resource_name}"
+      tag_discipline: "Tag discipline code %{discipline} is not valid for %{resource}"
+    tagables:
+      assigned_to: "Tag %{tag} has been assigned to %{resource_name} %{id}"
+      created_and_assigned: "%{resource_name} %{id} has been created and assigned to tag %{tag}"
+
+  # Resource specific messages
+  projects:
+    none_selected: "No project is currently selected"
+    selected: "Project '%{code}' is now selected"
+    invalid_selection: "Please select a valid project to continue"
+    required: "A current project is required for this action. Please select a project to continue."
+    all_projects:     "All Projects" # for nil current project selection
+
+  # Pundit authorization messages
+  pundit:
+    unauthorized: "You are not authorized to %{action} %{objects}"
+
+  pagination:
+    per_page: "Items per page"
+    per_page_aria: "Select number of items per page"
+    apply_page_size: "Apply page size"
+    go: "Go"
+    page_info: "Showing %{items} items per page"
+
+  footer:
+    credit:           "Website by frankie fusion. "
+

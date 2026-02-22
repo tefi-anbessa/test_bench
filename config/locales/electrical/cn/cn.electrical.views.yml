@@ -1,126 +1,127 @@
-en:
-  cable_types:
-    index:
-      title:            "Cable Types"
-      header:           "Cable Types"
-    edit:
-      title:            "Edit Cable Type"
-      header:           "Edit Cable Type %{label}"
-    new:
-      title:            "New Cable Type"
-      header:           "New Cable Type"
-    show:
-      title:            "Cable Type"
-      header:           "Cable Type %{label}"
+cn:
+  electrical:
+    cable_types:
+      index:
+        title:            "Cable Types"
+        header:           "Cable Types"
+      edit:
+        title:            "Edit Cable Type"
+        header:           "Edit Cable Type %{label}"
+      new:
+        title:            "New Cable Type"
+        header:           "New Cable Type"
+      show:
+        title:            "Cable Type"
+        header:           "Cable Type %{label}"
 
-  cables:
-    index:
-      title:            "Cables"
-      header:           "Cable Schedule"
-    edit:
-      title:            "Edit Cable"
-      header:           "Edit Cable %{label}"
-    new:
-      title:            "New Cable"
-      header:           "New Cable"
-    show:
-      title:            "Cable"
-      header:           "Cable %{label}"
+    cables:
+      index:
+        title:            "Cables"
+        header:           "Cable Schedule"
+      edit:
+        title:            "Edit Cable"
+        header:           "Edit Cable %{label}"
+      new:
+        title:            "New Cable"
+        header:           "New Cable"
+      show:
+        title:            "Cable"
+        header:           "Cable %{label}"
 
-  switchboards:
-    index:
-      title:            "Switchboards"
-      header:           "Switchboards Schedule"
-    edit:
-      title:            "Edit Switchboard"
-      header:           "Edit Switchboard %{label}"
-    new:
-      title:            "New Switchboard"
-      header:           "New Switchboard"
-    show:
-      title:            "Switchboard"
-      header:           "Switchboard %{label}"
+    switchboards:
+      index:
+        title:            "Switchboards"
+        header:           "Switchboards Schedule"
+      edit:
+        title:            "Edit Switchboard"
+        header:           "Edit Switchboard %{label}"
+      new:
+        title:            "New Switchboard"
+        header:           "New Switchboard"
+      show:
+        title:            "Switchboard"
+        header:           "Switchboard %{label}"
 
-  circuits:
-    index:
-      title:            "Circuits"
-      header:           "Circuits Schedule"
-    edit:
-      title:            "Edit Circuit"
-      header:           "Edit Circuit %{label}"
-    new:
-      title:            "New Circuit"
-      header:           "New Circuit for %{label}"
-    show:
-      title:            "Circuit"
-      header:           "Circuit %{label}"
+    circuits:
+      index:
+        title:            "Circuits"
+        header:           "Circuits Schedule"
+      edit:
+        title:            "Edit Circuit"
+        header:           "Edit Circuit %{label}"
+      new:
+        title:            "New Circuit"
+        header:           "New Circuit for %{label}"
+      show:
+        title:            "Circuit"
+        header:           "Circuit %{label}"
 
-  motors:
-    index:
-      title:            "Motors"
-      header:           "Motors Schedule"
-    edit:
-      title:            "Edit Motor"
-      header:           "Edit Motor %{label}"
-    new:
-      title:            "New Motor"
-      header:           "New Motor"
-    show:
-      title:            "Motor"
-      header:           "Motor %{label}"
+    motors:
+      index:
+        title:            "Motors"
+        header:           "Motors Schedule"
+      edit:
+        title:            "Edit Motor"
+        header:           "Edit Motor %{label}"
+      new:
+        title:            "New Motor"
+        header:           "New Motor"
+      show:
+        title:            "Motor"
+        header:           "Motor %{label}"
 
-  socket_ccts:
-    index:
-      title:            "Socket Circuits"
-      header:           "Socket Circuits Schedule"
-    edit:
-      title:            "Edit Socket Circuit"
-      header:           "Edit Socket Circuit %{label}"
-    new:
-      title:            "New Socket Circuit"
-      header:           "New Socket Circuit"
-    show:
-      title:            "Socket Circuit"
-      header:           "Socket Circuit %{label}"
+    socket_ccts:
+      index:
+        title:            "Socket Circuits"
+        header:           "Socket Circuits Schedule"
+      edit:
+        title:            "Edit Socket Circuit"
+        header:           "Edit Socket Circuit %{label}"
+      new:
+        title:            "New Socket Circuit"
+        header:           "New Socket Circuit"
+      show:
+        title:            "Socket Circuit"
+        header:           "Socket Circuit %{label}"
 
-  light_ccts:
-    index:
-      title:            "Light Circuits"
-      header:           "Light Circuits Schedule"
-    edit:
-      title:            "Edit Light Circuit"
-      header:           "Edit Light Circuit %{label}"
-    new:
-      title:            "New Light Circuit"
-      header:           "New Light Circuit"
-    show:
-      title:            "Light Circuit"
-      header:           "Light Circuit %{label}"
+    light_ccts:
+      index:
+        title:            "Light Circuits"
+        header:           "Light Circuits Schedule"
+      edit:
+        title:            "Edit Light Circuit"
+        header:           "Edit Light Circuit %{label}"
+      new:
+        title:            "New Light Circuit"
+        header:           "New Light Circuit"
+      show:
+        title:            "Light Circuit"
+        header:           "Light Circuit %{label}"
 
-  demands:
-    index:
-      title:            "Load List"
-      header:           "Load List"
-    edit:
-      title:            "Edit Load"
-      header:           "Edit Load for %{label}"
-    new:
-      title:            "New Load"
-      header:           "New Load for %{label}"
-    show:
-      title:            "Load"
-      header:           "Load: %{label}"
+    demands:
+      index:
+        title:            "Load List"
+        header:           "Load List"
+      edit:
+        title:            "Edit Load"
+        header:           "Edit Load for %{label}"
+      new:
+        title:            "New Load"
+        header:           "New Load for %{label}"
+      show:
+        title:            "Load"
+        header:           "Load: %{label}"
 
-  heaters:
-    index:
-      title:            "Heaters"
-      header:           "Heaters Schedule"
-    edit:
-      title:            "Edit Heater"
-      header:           "Edit Heater: %{label}"
-    new:
-      title:            "New Heater"
-      header:           "New Heater"
-    show:
-      title:            "Heater"
-      header:           "Heater: %{label}"
+    heaters:
+      index:
+        title:            "Heaters"
+        header:           "Heaters Schedule"
+      edit:
+        title:            "Edit Heater"
+        header:           "Edit Heater: %{label}"
+      new:
+        title:            "New Heater"
+        header:           "New Heater"
+      show:
+        title:            "Heater"
+        header:           "Heater: %{label}"

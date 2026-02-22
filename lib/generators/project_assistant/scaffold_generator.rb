@@ -240,7 +240,7 @@ module ProjectAssistant
           root_pattern = /(# Defines the root path route)/
           if content.match?(root_pattern)
             content.sub!(root_pattern) do
-              "\nresources :#{plural_name}\n\n#{$1}"
+              "\n  resources :#{plural_name}\n\n#{$1}"
             end
           else
             say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Could not find root path route", :red

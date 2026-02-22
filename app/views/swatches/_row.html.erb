@@ -1,0 +1,39 @@
+<tr scope="row">
+  <td><%= row.name || '-' %></td>
+  <td><%= row.bg || '-' %></td>
+  <td><%= row.text || '-' %></td>
+  <td><%= row.form_bg || '-' %></td>
+  <td><%= row.form_field || '-' %></td>
+  <td><%= row.card_bg || '-' %></td>
+  <td><%= row.card_header_bg || '-' %></td>
+  <td><%= row.card_border || '-' %></td>
+  <td><%= row.badge_bg || '-' %></td>
+  <td><%= row.badge_text || '-' %></td>
+  <td><%= row.link_text || '-' %></td>
+  <td><%= row.link_hover || '-' %></td>
+  <td>
+    <% if policy(row).show? %>
+      <%= link_to row, class: "btn btn-outline-info btn-sm icon-link",
+            aria: { label: t('actions.show') },
+            title: t('actions.show') do %>
+        <%== bs_icon('eye') %>
+      <% end %>
+    <% end %>
+    <% if policy(row).edit? %>
+      <%= link_to edit_swatch_path(row), class: "btn btn-outline-warning btn-sm icon-link",
+            aria: { label: t('actions.edit') },
+            title: t('actions.edit') do %>
+        <%== bs_icon('pencil') %>
+      <% end %>
+    <% end %>
+    <% if policy(row).destroy? %>
+    <%= link_to row,
+            data: { method: :delete, confirm: t('actions.delete_sure') },
+            class: "btn btn-outline-danger btn-sm icon-link",
+            aria: { label: t('actions.delete') },
+            title: t('actions.delete') do %>
+        <%== bs_icon('trash') %>
+      <% end %>
+    <% end %>
+  </td>
+</tr>

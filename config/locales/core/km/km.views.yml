@@ -1,4 +1,4 @@
-kh:
+km:
   site:
     home:
       title:        "ទំព័រដើម"
@@ -110,3 +110,16 @@ kh:
     show:
       title:            "បន្ទុក %{tag}"
       header:           "បន្ទុក: %{tag}"
+    swatches:
+      index:
+        title:            "Swatches"
+        header:           "Swatches Collection"
+      edit:
+        title:            "Edit Swatch"
+        header:           "Edit Swatch: %{label}"
+      new:
+        title:            "New Swatch"
+        header:           "New Swatch"
+      show:
+        title:            "Swatch"
+        header:           "Swatch: %{label}"
