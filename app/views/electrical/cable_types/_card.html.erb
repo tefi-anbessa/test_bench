@@ -1,14 +1,14 @@
-<div id="<%= dom_id cable_type %>">
+<div id="<%= dom_id cable_type %>" style="<%= card_styles(cable_type.class.swatch)%>">
 
   <%= render 'components/collapsible',
     id: "cable_type_#{cable_type.id}_details",
-    title: t('cable_types.show.header', label: cable_type.label),
+    title: t('electrical.cable_types.show.header', label: cable_type.label),
     expanded: false,
-    header_class: 'py-1' do %>
+    header_class: "py-1" do %>
 
     <div class="row mb-1">
       <% text = t("show.linked", model: cable_type.model_name.human) %>
-      <%= link_to electrical_cable_type_path(cable_type),
+      <%= link_to cable_type,
         class: "btn btn-sm btn-outline-secondary me-2",
         title: text do %>
         <%== bs_icon('box-arrow-in-up-left') %>

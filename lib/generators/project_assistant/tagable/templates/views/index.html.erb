@@ -1,8 +1,8 @@
 <%% provide(:title, t('.title')) %>
-<div class="container mt-3 mx-auto">
+<div class="container mt-3 mx-auto"style="<%= container_styles(@swatch)%>"
   <!-- Tagable Resource Header Card -->
-  <div class="card mb-4">
-    <div class="card-header p-2">
+  <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
       <div class="d-flex justify-content-between align-items-center">
         <!-- Header Text (Left) -->
         <div class="ms-2">

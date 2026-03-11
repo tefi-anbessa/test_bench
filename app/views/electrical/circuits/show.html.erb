@@ -1,8 +1,8 @@
 <% content_for :title, t('.title', label: @circuit.label) %>
-<div class="container mt-3">
+<div class="container mt-3" style="<%= container_styles(@swatch) %>">
   <!-- Circuit Header Card -->
-  <div class="card mb-4">
-    <div class="card-header p-2">
+  <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
       <div class="row align-items-center">
         <!-- Left Navigation -->
         <div class="col-auto">
@@ -38,7 +38,7 @@
         <div class="col text-center">
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
-              <span class="badge bg-primary fs-6">
+              <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
                 <%= t('.header', label: [@circuit.electrical_switchboard&.label, @circuit.label].join(': ')) %>
               </span>
               <% if @circuit.electrical_switchboard&.tag&.present? %>
@@ -166,7 +166,7 @@
                     </div>
                     <div class="col-8">
                       <% if @circuit.feeder.present? %>
-                        <% text = t("activerecord.models.cable") %>
+                        <% text = t("activerecord.models.electrical.cable") %>
                         <div class="d-flex justify-content-between align-items-center">
                           <span><%= @circuit.feeder.label %></span>
                           <%= link_to @circuit.feeder,
@@ -178,7 +178,7 @@
                         </div>
                       <% else %>
                         <span class="text-muted">
-                          <%= t('show.unassigned', model: t("activerecord.attributes.circuit.feeder")) %>
+                          <%= t('show.unassigned', model: t("activerecord.attributes.electrical.circuit.feeder")) %>
                         </span>
                       <% end %>
                     </div>
@@ -187,11 +187,11 @@
                   <!-- Load Section -->
                   <div class="row mb-1">
                     <div class="col-4 text-muted">
-                      <%= t('activerecord.attributes.circuit.demand') %>
+                      <%= t('activerecord.attributes.electrical.circuit.demand') %>
                     </div>
                     <div class="col-8">
                       <% if @circuit.demand.present? %>
-                        <% text = t("activerecord.models.demand") %>
+                        <% text = t("activerecord.models.electrical.demand") %>
                         <div class="d-flex justify-content-between align-items-center">
                           <span><%= @circuit.demand.label %></span>
                           <%= link_to @circuit.demand,
@@ -203,7 +203,7 @@
                         </div>
                       <% else %>
                         <span class="text-muted">
-                          <%= t('show.unassigned', model: t("activerecord.attributes.circuit.demand")) %>
+                          <%= t('show.unassigned', model: t("activerecord.attributes.electrical.circuit.demand")) %>
                         </span>
                       <% end %>
                     </div>

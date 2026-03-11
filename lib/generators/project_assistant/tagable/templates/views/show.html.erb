@@ -1,8 +1,8 @@
 <%% provide(:title, t('.title')) %>
-<div class="container mt-3">
+<div class="container mt-3" style="<%%= container_styles(@<%= singular_name %>.tag.discipline.swatch) %>">
   <!-- <%= human_name %> Header Card -->
-  <div class="card mb-4">
-    <div class="card-header p-2">
+  <div class="card mb-4" style="<%%= card_styles(@<%= singular_name %>.tag.discipline.swatch) %>">
+    <div class="card-header p-2" style="<%%= card_header_styles(@<%= singular_name %>.tag.discipline.swatch) %>">
       <div class="row align-items-center">
         <!-- Left Navigation -->
         <div class="col-auto">
@@ -39,7 +39,7 @@
         <div class="col text-center">
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
-              <span class="badge bg-primary fs-6">
+              <span class="badge fs-6" style="<%%= badge_styles(@<%= singular_name %>.tag.discipline.swatch) %>">
                 <%%= t('.header', label: @<%= singular_name %>.label)%>
               </span>
               <%% if @<%= singular_name %>.tag&.service.present? %>
@@ -117,8 +117,8 @@
           <%% end %>
 
           <!-- Resource Details Card -->
-          <div class="card mb-4">
-            <div class="card-header py-1">
+          <div class="card mb-4" style="<%%= card_styles(@<%= singular_name %>.tag.discipline.swatch) %>">
+            <div class="card-header py-1" style="<%%= card_header_styles(@<%= singular_name %>.tag.discipline.swatch) %>">
               <h4 class="mb-0"><%%= t('show.details', model: @<%= singular_name %>.model_name.human) %></h4>
             </div>
 

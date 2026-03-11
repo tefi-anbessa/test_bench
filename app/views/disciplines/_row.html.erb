@@ -1,5 +1,5 @@
 <tr scope="row">
-  <td><%= discipline.label %></td>
+  <td><%= link_to discipline.label, discipline %></td>
   <td><%= discipline.name %></td>
   <td><%= discipline.prefix_schema&.[]('name') %></td>
   <td><%= link_to discipline.swatch&.name, discipline.swatch %></td>

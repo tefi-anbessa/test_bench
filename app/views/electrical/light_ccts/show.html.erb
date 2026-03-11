@@ -1,8 +1,8 @@
 <% provide(:title, t('.title')) %>
-<div class="container mt-3">
+<div class="container mt-3" style="<%= container_styles(@swatch) %>">
   <!-- Light Circuit Header Card -->
-  <div class="card mb-4">
-    <div class="card-header p-2">
+  <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
       <div class="row align-items-center">
         <!-- Left Navigation -->
         <div class="col-auto">
@@ -23,7 +23,7 @@
         <div class="col text-center">
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
-              <span class="badge bg-primary fs-6">
+              <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
                 <%= t('.header', label: @light_cct.label)%>
               </span>
               <% if @light_cct.tag&.service.present? %>
@@ -86,8 +86,8 @@
 
             <!-- Light Circuit Details Card -->
             <div class="row">
-              <div class="card mb-4">
-                <div class="card-header py-1">
+              <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+                <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
                   <h4 class="mb-0"><%= t('show.details', model: @light_cct.model_name.human) %></h4>
                 </div>
                 <div class="card-body p-3">
@@ -117,7 +117,7 @@
                             <%== bs_icon('box-arrow-in-down-right') %>
                         <% end %>
                       <% else %>
-                      <% text = t("actions.link", resource: t("activerecord.models.demand")) %>
+                      <% text = t("actions.link", resource: t("activerecord.models.electrical.demand")) %>
                         <% if policy(Electrical::Demand).new? %>
                           <%= link_to new_tag_electrical_demand_path(@light_cct.tag.id),
                               class: "btn btn-sm btn-outline-primary mb-2",

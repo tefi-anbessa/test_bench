@@ -11,14 +11,14 @@
     <% if row.feeder.present? && policy(row.feeder).show? %>
       <%= link_to row.feeder.label, row.feeder %>
     <% else %>
-      <%= t("show.unassigned", model: t("activerecord.attributes.electrical/circuit.feeder")) %>
+      <%= t("show.unassigned", model: t("activerecord.attributes.electrical.circuit.feeder")) %>
     <% end %>
   </td>
   <td>
     <% if row.demand.present? && policy(row.demand).show? %>
       <%= link_to row.demand.label, row.demand %>
     <% else %>
-      <%= t("show.unassigned", model: t("activerecord.models.demand")) %>
+      <%= t("show.unassigned", model: t("activerecord.models.electrical.demand")) %>
     <% end %>
   </td>
   <!-- Links -->

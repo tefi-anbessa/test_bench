@@ -50,6 +50,9 @@ module Electrical
       # Set up request environment
   #    @request.env['HTTP_REFERER'] = 'http://test.host/'
   #    @request.env['devise.mapping'] = Devise.mappings[:user]
+
+      # Lemon swatch is expected for electrical models that aren't attached to a discipline
+      @swatch = Swatch.create!(name: "lemon") 
     end
 
     # Authentication tests
@@ -144,7 +147,7 @@ module Electrical
       assert_no_difference('Electrical::CableType.count') do
         post :create, params: {
                 project_id: @project.id,
-                cable_type: @cable_type_params
+                electrical_cable_type: @cable_type_params
         }
       end
       assert_forbidden
@@ -155,7 +158,7 @@ module Electrical
       assert_difference('Electrical::CableType.count') do
         post :create, params: {
                 project_id: @project.id,
-                cable_type: @cable_type_params
+                electrical_cable_type: @cable_type_params
         }
       end
       assert_redirected_to electrical_cable_type_path(Electrical::CableType.last)
@@ -165,7 +168,7 @@ module Electrical
       sign_in @accredited_user
       assert_difference('Electrical::CableType.count') do
         post :create, params: {
-                cable_type: @cable_type_params.merge(project_id: @project.id) }
+                electrical_cable_type: @cable_type_params.merge(project_id: @project.id) }
       end
       assert_redirected_to electrical_cable_type_path(Electrical::CableType.last)
     end
@@ -189,7 +192,7 @@ module Electrical
       sign_in @team_member
       patch :update, params: {
         id: @cable_type.id,
-        cable_type: { conductor_material: 'Al' }
+        electrical_cable_type: { conductor_material: 'Al' }
       }
       assert_forbidden
       assert_equal original_material, @cable_type.reload.conductor_material
@@ -199,7 +202,7 @@ module Electrical
       sign_in @accredited_user
       patch :update, params: {
         id: @cable_type.id,
-        cable_type: { conductor_material: 'Al' }
+        electrical_cable_type: { conductor_material: 'Al' }
       }
       assert_redirected_to electrical_cable_type_path(@cable_type)
       assert_equal 'Al', @cable_type.reload.conductor_material

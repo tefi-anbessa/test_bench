@@ -1,6 +1,6 @@
-<div data-controller="tag"
+<div class="card" style="<%= card_styles(@swatch) %>" data-controller="tag"
      data-tag-model-name-value="<%= t('activerecord.models.tag') %>">
-  <div class="card-header p-2">
+  <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
     <!-- Left Tag Header -->
     <div class="col text-left">
       <div class="d-flex flex-column align-items-left">
@@ -21,7 +21,7 @@
     </div>
   </div>
 
-  <div class="card-body p-2">
+  <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
     <%= render 'shared/error_messages', object: tag %>
 
       <!-- Stage -->
@@ -39,8 +39,8 @@
         <%= tag_f.select :discipline_id,
               grouped_options_for_select(
                 @disciplines.transform_values do |disciplines|
-                  disciplines.map { |code, id|
-                    ["#{t("discipline.#{code.downcase.to_sym}.label")}: #{t("discipline.#{code.downcase.to_sym}.name")}", id]
+                  disciplines.map { |name, id|
+                    ["#{t("discipline.#{name.downcase.to_sym}.label")}: #{t("discipline.#{name.downcase.to_sym}.name")}", id]
                   }
                 end,
                 tag.discipline_id

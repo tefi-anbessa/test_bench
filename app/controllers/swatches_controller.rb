@@ -79,6 +79,6 @@ class SwatchesController < ApplicationController
     def swatch_params
       params.require(:swatch)
       .permit(:name, :bg, :text, :form_bg, :form_field, :card_bg, :card_header_bg, :card_border, 
-      :badge_bg, :badge_text, :link_text, :link_hover)
+      :badge_bg, :badge_text, :link_text, :link_hover, :submit)
     end
 end

@@ -1,6 +1,6 @@
-<div class="container mt-3">
-  <div class="card">
-    <div class="card-header p-2">
+<div class="container mt-3" style="<%= container_styles(tag.discipline.swatch) %>">
+  <div class="card" style="<%= card_styles(@tag.discipline.swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@tag.discipline.swatch) %>">
       <!-- Center Tag Info -->
       <div class="col text-center">
         <div class="d-flex flex-column align-items-center">
@@ -21,7 +21,7 @@
       wrapper: { class: 'mb-1' },
       data: { controller: 'tag', 'tag-model-name-value': t('activerecord.models.tag') }) do |f| %>
 
-      <div class="card-body p-2">
+      <div class="card-body p-2" style="<%= form_styles(@tag.discipline.swatch) %>">
       <%= render 'shared/error_messages', object: f.object %>
 
         <div class="row justify-content-center">
@@ -58,16 +58,16 @@
             <!-- Serial and Suffix -->
             <div class="row">
               <%= f.text_field :serial,
-              label_col: "col-sm-3",
-              control_col: "col-sm-3",
-                    title: t('activerecord.help.tag.serial'),
-                    pattern: '\d*',
-                    inputmode: 'numeric',
-                    value: tag.serial.present? ? tag.serial.to_s.rjust(4, '0') : '0000',
-                    data: { 
-                      action: 'change->tag#updatePreview input->tag#updatePreview'
-                    },
-                    id: 'tag_serial' %>
+                label_col: "col-sm-3",
+                control_col: "col-sm-3",
+                title: t('activerecord.help.tag.serial'),
+                pattern: '\d*',
+                inputmode: 'numeric',
+                value: tag.serial.present? ? tag.serial.to_s.rjust(4, '0') : '0000',
+                data: { 
+                  action: 'change->tag#updatePreview input->tag#updatePreview'
+                },
+                id: 'tag_serial' %>
             </div>
 
             <div class="row">

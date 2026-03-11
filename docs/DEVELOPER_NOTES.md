@@ -352,11 +352,12 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Custom 404 not found error page. E.g. Case where admin deletes a record than uses browser back button.
 - [ ] Translation of html5 messages on required fields. Alternatively, suppress html 5 and use client side js.
 - [ ] Complete discipline system tests.
+- [ ] Complete swatch system tests.
 - [x] Complete switchboard controller test.
 - [ ] Complete cable system tests for from and to after switchboard, demand, and circuit tests are working.
-- [ ] Use of button text for new and edit forms is mixed. Standardise on save for new, update for edit.
+- [ ] Use of button text for new and edit forms is mixed. Standardise on create for new, update for edit.
 - [ ] Demand form live update of calculated values not working.
-- [ ] Cable types with no current project.
+- [ ] Workflow for cable types with no current project.
 - [x] Refine the collapsibles component to retain state after refresh operations (e.g. sorting links with ransack). Make a generalised solution, maybe use turbo.
 - [ ] Fix the page size js controller.
 - [ ] Write thorough tests for the tag parser and builder.
@@ -369,6 +370,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Verify if two set of routes are really needed for tagables.
 - [ ] Review all use of the method underscore. It apparently is not aware of the OS and uses '/' as the separator. Use File.join wherever appropriate.
 - [ ] Fix module generator to use nested parent modules.
+- [ ] Provide a means for admins to edit tags to remove broken links to tagable.
 
 ## Refactoring Opportunities
 

@@ -39,18 +39,12 @@ module Electrical
         @cable_type = Electrical::CableType.new(cable_type_params)
       end
       authorize @cable_type
-
-      respond_to do |format|
-        if @cable_type.save
-          format.html { redirect_to @cable_type,
-            notice: "Cable type was successfully created." }
-          format.json { render :show, status: :created,
-            location: @cable_type }
-        else
-          format.html { render :new, status: :unprocessable_entity }
-          format.json { render json: @cable_type.errors,
-            status: :unprocessable_entity }
-        end
+      if @cable_type.save
+        flash[:success] = t('flash.create.notice', resource_name: @cable_type.model_name.human)
+        redirect_to @cable_type
+      else
+        flash[:alert] = t('flash.create.alert', resource_name: @cable_type.model_name.human)
+        render :new, status: :unprocessable_entity
       end
     end
 
@@ -63,17 +57,12 @@ module Electrical
     # PATCH/PUT /electrical/cable_types/1 or /electrical/cable_types/1.json
     def update
       authorize @cable_type
-      respond_to do |format|
-        if @cable_type.update(cable_type_params)
-          format.html { redirect_to @cable_type,
-            notice: "Cable type was successfully updated." }
-          format.json { render :show, status: :ok,
-            location: @cable_type }
-        else
-          format.html { render :edit, status: :unprocessable_entity }
-          format.json { render json: @cable_type.errors,
-            status: :unprocessable_entity }
-        end
+      if @cable_type.update(cable_type_params)
+        flash[:success] = I18n.t('flash.update.notice', resource_name: @cable_type.model_name.human)
+        redirect_to @cable_type
+      else
+        flash[:alert] = I18n.t('flash.update.alert', resource_name: @cable_type.model_name.human.downcase)
+        render :edit, status: :unprocessable_entity
       end
     end
 
@@ -81,12 +70,12 @@ module Electrical
     def destroy
       authorize @cable_type
       project = @cable_type.project
-      @cable_type.destroy
-      flash[:success] = t('flash.destroy.notice', resource_name: t('activerecord.models.cable_type'))
-      respond_to do |format|
-        format.html { redirect_to project_electrical_cable_types_path(project),
-          status: :see_other }
-        format.json { head :no_content }
+      if @cable_type.destroy
+        flash[:success] = t('flash.destroy.notice', resource_name: @cable_type.model_name.human)
+        redirect_to project_electrical_cable_types_path(project), status: :see_other
+      else
+        flash[:alert] = t('flash.destroy.alert', resource_name: @cable_type.model_name.human)
+        redirect_to project_electrical_cable_types_path(project), status: :see_other
       end
     end
 
@@ -116,10 +105,10 @@ module Electrical
 
       # Only allow a list of trusted parameters through.
       def cable_type_params
-        params.require(:cable_type).permit(
+        params.require(:electrical_cable_type).permit(
           :conductor_material, :cores, :csa, :neutral_csa, :earth_csa, 
           :insulation, :bedding, :armour, :sheath, :bedding_od, :overall_od,
-          :temperature_rating, :voltage_rating, :project_id, :notes
+          :temperature_rating, :voltage_rating, :project_id, :notes, :submit
         )
       end
   end

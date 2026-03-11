@@ -1,8 +1,8 @@
 <% provide(:title, t('.title')) %>
-<div class="container mt-3 mx-auto">
+<div class="container mt-3 mx-auto" style="<%= container_styles(@swatch)%>">
   <!-- Motor Schedule Card Header -->
-  <div class="card mb-4">
-    <div class="card-header p-2">
+  <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
       <div class="d-flex justify-content-between align-items-center">
         <!-- Header Text (Left) -->
         <div class="ms-2">
@@ -20,7 +20,7 @@
               title: t('actions.new') do %>
               <%== bs_icon('plus-square-fill') %>
               <span class="ms-1">
-                <%= [t('actions.new'), t('activerecord.models.motor')].join(' ') %>
+                <%= [t('actions.new'), t('activerecord.models.electrical.motor')].join(' ') %>
               </span>
             <% end %>
         <% end %>
@@ -32,22 +32,22 @@
         <%= search_form_for @q do |f| %>
           <%= f.search_field :motor_type_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.motor.motor_type') %>
+                placeholder: t('activerecord.attributes.electrical.motor.motor_type') %>
           <%= f.search_field :frame_size_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.motor.frame_size') %>
+                placeholder: t('activerecord.attributes.electrical.motor.frame_size') %>
           <%= f.search_field :poles_eq,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.motor.poles') %>
+                placeholder: t('activerecord.attributes.electrical.motor.poles') %>
           <%= f.search_field :ingress_protection_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.motor.ingress_protection') %>
+                placeholder: t('activerecord.attributes.electrical.motor.ingress_protection') %>
           <%= f.search_field :speed_rated_eq,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.motor.speed_rated') %>
+                placeholder: t('activerecord.attributes.electrical.motor.speed_rated') %>
           <%= f.search_field :notes_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.motor.notes') %>
+                placeholder: t('activerecord.attributes.electrical.motor.notes') %>
           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
             <%== bs_icon('search') %>
           <% end %>

@@ -1,13 +1,13 @@
 <% motor = object %>
 <%= render 'components/collapsible',
   id: "motor_#{motor.id}_details",
-  title: t('motors.show.header', label: motor.label),
+  title: t('electrical.motors.show.header', label: motor.label),
   expanded: false,
   header_class: 'py-1' do %>
   
   <div class="container-fluid">
     <div class="row mb-1">
-      <% text = t("actions.jump_to", model: t("activerecord.models.electrical/motor")) %>
+      <% text = t("actions.jump_to", model: t("activerecord.models.electrical.motor")) %>
       <%= link_to motor, 
           class: "btn btn-sm btn-outline-secondary me-2",
           title: text do %>

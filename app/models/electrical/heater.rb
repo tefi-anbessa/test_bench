@@ -2,6 +2,7 @@ module Electrical
   class Heater < Base
     include Tagable
     include TagableNavigation
+    include Electrical::Demandable
     
 # enum declarations
     enum :heater_type, Constants.electrical.heater.heater_type.to_h

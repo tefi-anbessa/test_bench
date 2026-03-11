@@ -31,7 +31,7 @@ en:
     switchboards:
       index:
         title:            "Switchboards"
-        header:           "Switchboards Schedule for %{project}"
+        header:           "Switchboards List for %{project}"
       edit:
         title:            "Edit Switchboard"
         header:           "Edit Switchboard %{label}"
@@ -115,7 +115,7 @@ en:
     heaters:
       index:
         title:            "Heaters"
-        header:           "Heaters Schedule"
+        header:           "Heaters Schedule for %{project}"
       edit:
         title:            "Edit Heater"
         header:           "Edit Heater %{label}"

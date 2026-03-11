@@ -36,7 +36,7 @@ module TestBench
     config.i18n.default_locale = :en
     
     # Permitted locales available for the application
-    I18n.available_locales = [:en, :km ,:th, :cn]
+    I18n.available_locales = [:en, :km, :th, :cn]
     # end i18n
     # config.assets.paths << Rails.root.join('node_modules')
     config.dartsass.builds = { "application.scss" => "application.css" }

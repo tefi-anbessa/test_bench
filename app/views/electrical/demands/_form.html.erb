@@ -1,10 +1,10 @@
-<div class="container mt-3">
-  <div class="card">
-    <div class="card-header p-2">
+<div class="container mt-3" style="<%= container_styles(@swatch) %>">
+  <div class="card" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
       <!-- Center Tag Info -->
       <div class="col text-center">
         <div class="d-flex flex-column align-items-center">
-          <div class="mt-1">
+          <div class="badge fs-6" style="<%= badge_styles(@swatch) %>">
             <%= yield(:header) %>
             <% if tag.present? && tag.persisted? %>
               <small class="text-muted ms-2"><%= tag.service %></small>
@@ -20,7 +20,7 @@
         label_col: "col-sm-4", 
         control_col: "col-sm-8") do |f| %>
 
-      <div class="card-body p-2">
+      <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
         <%= render 'shared/error_messages', object: f.object %>
 
         <div class="row justify-content-center">

@@ -1,16 +1,16 @@
 <tr scope="row">
   <td><%= row.name || '-' %></td>
-  <td><%= row.bg || '-' %></td>
-  <td><%= row.text || '-' %></td>
-  <td><%= row.form_bg || '-' %></td>
-  <td><%= row.form_field || '-' %></td>
-  <td><%= row.card_bg || '-' %></td>
-  <td><%= row.card_header_bg || '-' %></td>
-  <td><%= row.card_border || '-' %></td>
-  <td><%= row.badge_bg || '-' %></td>
-  <td><%= row.badge_text || '-' %></td>
-  <td><%= row.link_text || '-' %></td>
-  <td><%= row.link_hover || '-' %></td>
+  <td style="<%= container_styles(row) %>"><%= row.bg || '-' %></td>
+  <td style="<%= container_styles(row) %>"><%= row.text || '-' %></td>
+  <td style="<%= form_styles(row) %>"><%= row.form_bg || '-' %></td>
+  <td style="<%= form_field_styles(row) %>"><%= row.form_field || '-' %></td>
+  <td style="<%= card_styles(row) %>"><%= row.card_bg || '-' %></td>
+  <td style="<%= card_header_styles(row) %>"><%= row.card_header_bg || '-' %></td>
+  <td style="background-color: <%= row.card_border %>"><%= row.card_border || '-' %></td>
+  <td style="<%= badge_styles(row) %>"><%= row.badge_bg || '-' %></td>
+  <td style="<%= badge_styles(row) %>"><%= row.badge_text || '-' %></td>
+  <td style="<%= link_styles(row) %>"><%= row.link_text || '-' %></td>
+  <td style="<%= link_hover_styles(row) %>"><%= row.link_hover || '-' %></td>
   <td>
     <% if policy(row).show? %>
       <%= link_to row, class: "btn btn-outline-info btn-sm icon-link",

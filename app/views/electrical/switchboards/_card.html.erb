@@ -1,14 +1,14 @@
 <% switchboard = object %>
 <%= render 'components/collapsible',
   id: "switchboard_#{switchboard.id}_details",
-  title: t('switchboards.show.header', label: switchboard.label),
+  title: t('electrical.switchboards.show.header', label: switchboard.label),
   expanded: false,
   header_class: 'py-1' do %>
   
   <div class="container-fluid">
 
     <div class="row mb-1">
-      <% text = t("actions.back_to", model: switchboard.model_name.human) %>
+      <% text = t("actions.jump_to", model: switchboard.model_name.human) %>
       <%= link_to switchboard, 
         class: "btn btn-sm btn-outline-secondary me-2",
         title: text do %>

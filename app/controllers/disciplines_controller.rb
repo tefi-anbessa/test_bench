@@ -26,6 +26,8 @@ class DisciplinesController < ApplicationController
   # GET /disciplines/new
   def new
     @discipline = @project.disciplines.build()
+    # Set default theme for new discipline
+    @swatch = Swatch.find_by(name: 'app_theme')
     authorize @discipline
     set_prefix_schema_selection
   end
@@ -112,6 +114,7 @@ class DisciplinesController < ApplicationController
     def set_discipline
       @discipline = Discipline.find(params[:id])
       @project = @discipline.project
+      @swatch = @discipline.swatch
     end
 
     def set_prefix_schema_selection
@@ -148,7 +151,7 @@ class DisciplinesController < ApplicationController
       params.require(:discipline).permit(
         :code, :label, :name, :module_name, 
         :sort_order, :notes, :project_id, :swatch_id,
-        :prefix_schema
+        :prefix_schema, :submit
       )
     end
 end

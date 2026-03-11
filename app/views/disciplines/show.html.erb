@@ -1,8 +1,8 @@
 <% provide(:title, t('.title')) %>
-<div class="container mt-3">
+<div class="container mt-3" style="<%= container_styles(@discipline.swatch) %>">
   <!-- Discipline Header Card -->
-  <div class="card mb-4">
-    <div class="card-header p-2">
+  <div class="card mb-4" style="<%= container_styles(@discipline.swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@discipline.swatch) %>">
       <div class="row align-items-center">
         <!-- Left Navigation -->
         <div class="col-auto">
@@ -38,7 +38,7 @@
         <div class="col text-center">
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
-              <span class="badge bg-primary fs-6">
+              <span class="badge fs-6" style="<%= badge_styles(@discipline.swatch) %>">
                 <%= t('.header', project: @project.label, label: @discipline.label)%>
               </span>
               <small class="text-muted ms-2"><%= @discipline.name %></small>
@@ -114,7 +114,7 @@
 
             <!-- Discipline Details Card -->
             <div class="row">
-              <div class="card mb-4">
+              <div class="card mb-4" style="<%= card_styles(@discipline.swatch) %>">
                 <div class="card-body p-3">
                 
                   <div class="row mb-1">
@@ -142,16 +142,26 @@
                     <div class="col-8"><%= @discipline.module_name %></div>
                   </div>
 
+                  <% if @discipline.swatch.present? %>
+                    <%= render 'swatches/card', 
+                      object: @discipline.swatch %>
+                  <% else %>
+                    <div class="row mb-1">
+                      <div class="col-4 text-muted"><%= t('activerecord.modules.swatch') %></div>
+                      <div class="col-8"><%= @discipline.swatch.name %></div>
+                    </div>
+                  <% end %>
+
                   <div class="row mb-1">
                     <div class="col-4 text-muted"><%= t('activerecord.attributes.discipline.notes') %></div>
                     <div class="col-8"><%= @discipline.notes || '-' %></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+                  </div> <!-- end row -->
+                </div> <!-- end discipline details card-body -->
+              </div> <!-- end discipline card -->
+            </div> <!-- end row -->
+          </div> <!-- end col -->
+        </div> <!-- end justify content row -->
+      </div> <!-- end card-body -->
+    </div> <!-- end card -->
+  </div> <!-- end container -->
+</div> <!-- end container -->

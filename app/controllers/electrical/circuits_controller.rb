@@ -3,6 +3,7 @@ module Electrical
     before_action :authenticate_user!
     before_action :set_switchboard, only: [:index, :new, :create]
     before_action :set_circuit, only: [:show, :edit, :update, :destroy]
+    before_action :set_swatch, only: [:index, :show, :new, :edit]
     
     def index
       authorize Electrical::Circuit
@@ -138,6 +139,10 @@ module Electrical
         @switchboard = @circuit.electrical_switchboard
       end
 
+      def set_swatch
+        @swatch = Electrical::Circuit.swatch
+      end
+
       # User can allocate a feeder cable from the circuit form, only if the cable is presently unallocated.
       # To change an existing allocation, user must edit the cable itself.
       def set_feeder
@@ -209,7 +214,7 @@ module Electrical
       
       def circuit_params
         params.require(:electrical_circuit).permit(
-          :serial, :phase, :device, :poles, :curve, :rating, :elcb, :contactor, :notes
+          :serial, :phase, :device, :poles, :curve, :rating, :elcb, :contactor, :notes, :submit
         )
       end
   end

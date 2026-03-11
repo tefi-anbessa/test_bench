@@ -62,7 +62,7 @@ module <%= module_name %>
           else
             ":#{field[:name]}"
           end
-        }.join(', ') %>)
+        }.join(', ') %>, :submit)
       end
   end
 end

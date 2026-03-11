@@ -3,6 +3,7 @@ module Electrical
     before_action :authenticate_user!
     before_action :set_tag, only: %i[new create]
     before_action :set_demand, only: %i[ show edit update destroy ]
+    before_action :set_swatch, only: %i[index show new edit]
 
     # GET /demands
     def index
@@ -104,10 +105,14 @@ module Electrical
         end
       end
 
+      def set_swatch
+        @swatch = Electrical::Demand.swatch
+      end
+
       # Only allow a list of trusted parameters through.
       def demand_params
         params.require(:electrical_demand).permit(:basis, :config, :supply, :power, :current, :power_factor, 
-        :duty, :other_supply, :loadable_type, :loadable_id, :notes)
+        :duty, :other_supply, :loadable_type, :loadable_id, :notes, :submit)
       end
   end
 end

@@ -1,7 +1,7 @@
 en:
   activerecord:
     models:
-      swatch: "Swatch"
+      swatch:             "Swatch"
       resource:           "Resource"
       user:               "User"
       project:            "Project"
@@ -31,12 +31,9 @@ en:
         password_confirmation:  "Confirm password"
       project:
         code:             "Code"
-        code_help:        "2 uppercase characters"
         title:            "Title"
-        title_help:       "Maximum 50 characters"
         description:      "Description"
       discipline:
-        code:             "Code"
         name:             "Name"
         label:            "Label"
         sort_order:       "Sort Order"
@@ -49,8 +46,6 @@ en:
         notes:            "Notes"
         copy_from_standard: "Copy from Standard" # Form label
       tag:
-        project:          "Project"
-        discipline:       "Discipline"
         prefix:           "Prefix"
         prefix_parts:
           measured_variable: "Measured Variable"
@@ -72,9 +67,11 @@ en:
       role:
         name:             "Name"
         resource_type:    "Resource"
-        resource_type_help: "Leave blank for global role"
         resource_id:      "Instance"
     help:
+      project:
+        code:             "2 uppercase characters"
+        title:            "Maximum 50 characters"
       tag: 
         prefix:           "Build prefix using discipline specific schema"
         serial:           "Loop should be 4 digits"
@@ -83,6 +80,8 @@ en:
         location:         "Physical location of design element"
         stage:            "Construction stage or phase (0 to 10)"
         notes:            "Record useful tag related design information here"
+      role:
+        resource_type:    "Leave blank for global role"
       discipline:
         code:             "Symbol, maximum 12 characters"
         name:             "Descriptive name, maximum 50 characters"
@@ -104,26 +103,25 @@ en:
             name:
               blank: "Role must be selected"
               invalid: "%{name} is not a valid role for %{resource}"
-        project:
-        discipline:
-          attributes:
-            code:
-              invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
         tag:
           base:
-          taken: "Tag %{tag} already exists"
-          attributes:
-            prefix: 
-              only_letters: "must contain only letters"
-        tagable_type:
-          not_assigned: "Not assigned"
-          change_tagable: "Cannot change tagable association once set"
-          invalid: "Invalid type %{tagable_type}"
+            taken: "Tag %{tag} already exists"
       attributes:
+        tag:
+          prefix:
+            only_letters: "must contain only letters"
+          tagable_type:
+            not_assigned: "Not assigned"
+            change_tagable: "Cannot change tagable association once set"
+            invalid: "Invalid type %{tagable_type}"
+        role:
+          name:
+            blank: "Role must be selected"
+            invalid: "%{name} is not a valid role for %{resource}"
         code:
           invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
       jsonb_fields:
-        blank: "%{field} can't be blank"
+        blank: "%{field} can''t be blank"
         invalid: "%{field} is invalid"
         included: "%{field} must be included in the allowed list"
         taken: "%{field} has already been taken"

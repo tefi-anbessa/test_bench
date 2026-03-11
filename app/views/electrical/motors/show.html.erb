@@ -1,8 +1,8 @@
 <% provide(:title, t('.title')) %>
-<div class="container mt-3">
+<div class="container mt-3" style="<%= container_styles(@swatch) %>">
   <!-- Motor Header Card -->
-  <div class="card mb-4">
-    <div class="card-header p-2">
+  <div class="card mb-4" style="<%= container_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
       <div class="row align-items-center">
         <!-- Left Navigation -->
         <div class="col-auto">
@@ -38,7 +38,7 @@
         <div class="col text-center">
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
-              <span class="badge bg-primary fs-6">
+              <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
                 <%= t('.header', label: @motor.label)%>
               </span>
               <% if @motor.tag&.service.present? %>
@@ -115,8 +115,8 @@
           <% end %>
 
           <!-- Motor Details Card -->
-          <div class="card mb-4">
-            <div class="card-header py-1">
+          <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
               <h4 class="mb-0"><%= t('show.details', model: @motor.model_name.human) %></h4>
             </div> <!-- end inner card header -->
 
@@ -154,9 +154,10 @@
                 <div class="col-8"><%= @motor.notes.present? ? simple_format(@motor.notes) : '-' %></div>
               </div>
 
+              <!-- Demand section -->
               <div class="row mb-1">
                 <div class="col-4 text-muted">
-                  <% text = t('activerecord.models.demand') %>
+                  <% text = t('activerecord.electrical.models.demand') %>
                   <% if @motor.electrical_demand.present? %>
                     <%= link_to @motor.electrical_demand,
                       class: "btn btn-sm btn-outline-secondary",
@@ -165,7 +166,7 @@
                         <%== bs_icon('box-arrow-in-down-right') %>
                     <% end %>
                   <% elsif @motor.tag&.present? %> <!-- Cannot create a new demand without a tag. -->
-                    <% text = t("actions.link", resource: t("activerecord.models.demand")) %>
+                    <% text = t("actions.link", resource: t("activerecord.models.electrical.demand")) %>
                     <% if policy(Electrical::Demand).new? %>
                       <%= link_to new_tag_electrical_demand_path(@motor.tag.id),
                           class: "btn btn-sm btn-outline-primary mb-2",
@@ -175,6 +176,10 @@
                             </span>
                             <%== bs_icon('link') %>
                           <% end %>
+                    <% else %>
+                      <span class="d-none d-md-inline">
+                        <%= t('show.unassigned', model: text) %>
+                      </span>
                     <% end %>
                   <% end %>
                 </div> <!-- end column -->

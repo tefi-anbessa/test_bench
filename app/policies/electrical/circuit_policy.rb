@@ -22,6 +22,17 @@ module Electrical
       end
     end
 
+  def show?
+    # Protect against url injection
+    return false if user.nil?
+    if current_project.present?
+      user_has_project_role?(current_project) && circuit&.electrical_switchboard&.tag&.discipline&.project == current_project
+    else
+      # Admin and app_owner can view when current project is nil
+      user&.is_admin? || user&.is_app_owner?
+    end
+  end
+
     def create?
       # Protect against url injection
       return false if user.nil?

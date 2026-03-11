@@ -89,10 +89,10 @@ class TagsController < ApplicationController
     def setup_disciplines
       @disciplines = policy_scope(Discipline)
         .joins(:project)
-        .select('projects.code as project_code, disciplines.id, disciplines.code')
-        .order('projects.code ASC, disciplines.code ASC')
+        .select('projects.code as project_code, disciplines.id, disciplines.label')
+        .order('projects.code ASC, disciplines.label ASC')
         .group_by(&:project_code)
-        .transform_values { |discs| discs.map { |d| [d.code, d.id] } }
+        .transform_values { |discs| discs.map { |d| [d.label, d.id] } }
     end
 
     def isa51_schema?
@@ -117,7 +117,7 @@ class TagsController < ApplicationController
 
     def tag_params
       params.require(:tag).permit(:discipline_id, :stage, :prefix, :serial, :suffix,
-                                  :service, :location, :notes, :tagable_type, :tagable_id)
+                                  :service, :location, :notes, :tagable_type, :tagable_id, :submit)
     end
 
 

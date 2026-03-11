@@ -1,7 +1,7 @@
 <thead>
-  <th scope="col"><%= t('activerecord.attributes.tag.full_tag') %></th>
-  <th scope="col"><%= t('activerecord.attributes.demand.circuit') %></th>
-  <th scope="col"><%= t('activerecord.attributes.demand.incomer') %></th>
+  <th scope="col"><%= sort_link(@q, 'tags.full_tag', t('activerecord.attributes.tag.full_tag')) %></th>
+  <th scope="col"><%= t('activerecord.attributes.electrical.demand.circuit') %></th>
+  <th scope="col"><%= t('activerecord.attributes.electrical.demand.incomer') %></th>
   <th scope="col"><%= sort_link(@q, :basis) %></th>
   <th scope="col"><%= sort_link(@q, :config) %></th>
   <th scope="col"><%= sort_link(@q, :supply) %></th>

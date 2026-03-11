@@ -1,8 +1,8 @@
 <% provide(:title, t('.title')) %>
-<div class="container mt-3">
+<div class="container mt-3" style="<%= container_styles(@swatch) %>">
   <!-- Heater Header Card -->
-  <div class="card mb-4">
-    <div class="card-header p-2">
+  <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
       <div class="row align-items-center">
         <!-- Left Navigation -->
         <div class="col-auto">
@@ -39,7 +39,7 @@
         <div class="col text-center">
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
-              <span class="badge bg-primary fs-6">
+              <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
                 <%= t('.header', label: @heater.label)%>
               </span>
               <% if @heater.tag&.service.present? %>
@@ -170,6 +170,37 @@
                 <div class="col-4 text-muted"><%= @heater.class.human_attribute_name(:notes) %></div>
                 <div class="col-8"><%= @heater.notes.present? ? simple_format(@heater.notes) : '-' %></div>
               </div>
+
+              <!-- Demand section -->
+              <div class="row mb-1">
+                <div class="col-4 text-muted">
+                  <% text = t('activerecord.models.electrical.demand') %>
+                  <% if @heater.electrical_demand.present? %>
+                    <%= link_to @heater.electrical_demand,
+                      class: "btn btn-sm btn-outline-secondary",
+                      title: text do %>
+                        <%= text %>
+                        <%== bs_icon('box-arrow-in-down-right') %>
+                    <% end %>
+                  <% elsif @heater.tag&.present? %> <!-- Cannot create a new demand without a tag. -->
+                    <% text = t("actions.link", resource: text) %>
+                    <% if policy(Electrical::Demand).new? %>
+                      <%= link_to new_tag_electrical_demand_path(@heater.tag.id),
+                          class: "btn btn-sm btn-outline-primary mb-2",
+                          title: text do %>
+                            <span class="d-none d-md-inline">
+                              <%= text %>
+                            </span>
+                            <%== bs_icon('link') %>
+                          <% end %>
+                    <% else %>
+                      <span class="d-none d-md-inline">
+                        <%= t('show.unassigned', model: text) %>
+                      </span>
+                    <% end %>
+                  <% end %>
+                </div> <!-- end column -->
+              </div> <!-- end demand row -->
             </div>  <!-- end inner card body -->
           </div> <!-- end inner card -->
         </div> <!-- end responsive columns -->

@@ -1,9 +1,9 @@
 <% provide(:title, t('.title', id: @cable_type.id)) %>
 <!-- Centred container for cable type show card -->
-<div class="container mt-3 mx-auto">
+<div class="container mt-3 mx-auto" style="<%= container_styles(@cable_type.class.swatch) %>">
   <!-- Cable Type Header Card -->
-  <div class="card mb-4">
-    <div class="card-header p-2">
+  <div class="card mb-4" style="<%= card_styles(@cable_type.class.swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@cable_type.class.swatch) %>">
       <div class="row align-items-center">
         <!-- Left Navigation -->
         <div class="col-auto">
@@ -44,11 +44,11 @@
         <!-- Center Tag Info -->
         <div class="col text-center">
           <div class="d-flex flex-column align-items-center">
-            <div class="mt-1">
-              <%= [@cable_type.class.model_name.human, 
+            <span class="badge fs-6" style="<%= badge_styles(@cable_type.class.swatch) %>">
+              <%= [@cable_type.model_name.human, 
                 @cable_type&.id].compact.join(' ') %>
                 <small class="text-muted"><%= @cable_type.long_label %></small>
-            </div>
+            </span>
           </div>
         </div>
 

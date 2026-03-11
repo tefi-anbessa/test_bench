@@ -1,12 +1,14 @@
-<div class="container mt-3">
-  <div class="card">
-    <div class="card-header p-2">
+<div class="container mt-3" style="<%%= container_styles(<%= singular_name %>.tag.discipline.swatch) %>">
+  <div class="card" style="<%%= card_styles(@<%= singular_name %>.tag.discipline.swatch) %>">
+    <div class="card-header p-2" style="<%%= card_header_styles(@<%= singular_name %>.tag.discipline.swatch) %>">
 
       <!-- Center Tag Info -->
       <div class="col text-center">
         <div class="d-flex flex-column align-items-center">
-          <div class="mt-1">
-            <%%= yield(:header) %>
+          <div class ="mt-1">
+            <span class="badge fs-6" style="<%%= badge_styles(<%= singular_name %>.tag.discipline.swatch) %>">
+              <%= yield(:header) %>
+            </span>
           </div>
         </div>
       </div>
@@ -36,10 +38,7 @@
             </div>
 
             <!-- <%= human_name %> Details -->
-            <div class="card mb-1">
-              <div class="card-header p-2">
-                <h5><%%= t('activerecord.models.<%= singular_name %>') %></h5>
-              </div>
+            <div class="card mb-1" style="<%%= form_styles(<%= singular_name %>.tag.discipline.swatch) %>">
 
               <div class="card-body p-2">
                 <%%= render 'shared/error_messages', object: f.object %>

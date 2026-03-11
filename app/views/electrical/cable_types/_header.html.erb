@@ -1,0 +1,8 @@
+<thead>
+  <% unless current_project %>
+    <th scope = "col"><%= sort_link(@q, "#{Project.model_name.human}", :project_id) %>
+  <% end %>
+  <th scope="col"><%= sort_link(@q, :id, t('activerecord.attributes.electrical.cable_type.id')) %></th>
+  <th scope="col"><%= sort_link(@q, :code, t('activerecord.attributes.electrical.cable_type.code')) %></th>
+  <th scope="col" width="150px"><%= t('table.links')%></th>
+</thead>

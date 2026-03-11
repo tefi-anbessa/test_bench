@@ -31,6 +31,15 @@
               </li>
             <% end %>
 
+            <% if policy(Swatch).create? %>
+              <li class="nav-item">
+                <%= link_to t('swatch', scope: 'activerecord.models').pluralize,
+                  swatches_path,
+                  class: 'nav-link',
+                  aria: { label: t('swatch', scope: 'activerecord.models').pluralize } %>
+              </li>
+            <% end %>
+
             <% if policy(Project).index? %>
                 <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle"
@@ -90,11 +99,11 @@
                 <% if policy(Electrical::CableType).index? %>
                   <li>
                     <% if project_selected? %>
-                      <%= link_to t('electrical/cable_type', scope: 'activerecord.models').pluralize,
+                      <%= link_to t('electrical.cable_type', scope: 'activerecord.models').pluralize,
                         project_electrical_cable_types_path(project_id: current_project.id),
                         class: "dropdown-item" %>
                     <% else %>
-                      <%= link_to t('electrical/cable_type', scope: 'activerecord.models').pluralize,
+                      <%= link_to t('electrical.cable_type', scope: 'activerecord.models').pluralize,
                         electrical_cable_types_path,
                         class: "dropdown-item" %>
                     <% end %>
@@ -102,49 +111,49 @@
                 <% end %>
                 <% if policy(Electrical::Cable).index? %>
                   <li>
-                    <%= link_to t('electrical/cable', scope: 'activerecord.models').pluralize,
+                    <%= link_to t('electrical.cable', scope: 'activerecord.models').pluralize,
                       electrical_cables_path,
                       class: "dropdown-item" %>
                   </li>
                 <% end %>
                 <% if policy(Electrical::Switchboard).index? %>
                   <li>
-                    <%= link_to t('electrical/switchboard', scope: 'activerecord.models').pluralize,
+                    <%= link_to t('electrical.switchboard', scope: 'activerecord.models').pluralize,
                       electrical_switchboards_path,
                       class: "dropdown-item" %>
                   </li>
                 <% end %>
                 <% if policy(Electrical::Motor).index? %>
                   <li>
-                    <%= link_to t('electrical/motor', scope: 'activerecord.models').pluralize,
+                    <%= link_to t('electrical.motor', scope: 'activerecord.models').pluralize,
                       electrical_motors_path,
                       class: "dropdown-item" %>
                   </li>
                 <% end %>
                 <% if policy(Electrical::Heater).index? %>
                   <li>
-                    <%= link_to t('electrical/heater', scope: 'activerecord.models').pluralize,
+                    <%= link_to t('electrical.heater', scope: 'activerecord.models').pluralize,
                       electrical_heaters_path,
                       class: "dropdown-item" %>
                   </li>
                 <% end %>
                 <% if policy(Electrical::LightCct).index? %>
                   <li>
-                    <%= link_to t('electrical/light_cct', scope: 'activerecord.models').pluralize,
+                    <%= link_to t('electrical.light_cct', scope: 'activerecord.models').pluralize,
                       electrical_light_ccts_path,
                       class: "dropdown-item" %>
                   </li>
                 <% end %>
                 <% if policy(Electrical::SocketCct).index? %>
                   <li>
-                    <%= link_to t('electrical/socket_cct', scope: 'activerecord.models').pluralize,
+                    <%= link_to t('electrical.socket_cct', scope: 'activerecord.models').pluralize,
                       electrical_socket_ccts_path,
                       class: "dropdown-item" %>
                   </li>
                 <% end %>
                 <% if policy(Electrical::Demand).index? %>
                   <li>
-                    <%= link_to t('electrical/demand', scope: 'activerecord.models').pluralize,
+                    <%= link_to t('electrical.demand', scope: 'activerecord.models').pluralize,
                       electrical_demands_path,
                       class: "dropdown-item" %>
                   </li>

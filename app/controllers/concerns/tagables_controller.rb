@@ -7,11 +7,15 @@ module TagablesController
     before_action :set_resource, only: %i[ show edit update destroy ]
   end
 
-  # Configuration methods that subclasses should override
   private
 
     def set_resource
-      @resource = resource_class.find(params[:id])
+      begin
+        @resource = resource_class.find(params[:id])
+        @swatch = @resource.tag&.discipline.swatch
+      rescue ActiveRecord::RecordNotFound
+        render 'errors/not_found', status: :not_found
+      end
     end
 
     # Main abstracted methods
@@ -22,7 +26,7 @@ module TagablesController
       authorize resource_class, :index?
       @q = policy_scope(resource_class).ransack(params[:q])
       @pagy, @resources = pagy(@q.result.includes(:tag), limit: 20)
-
+      @swatch = resource_class.swatch
       # Set the resources instance variable (e.g., @motors, @switchboards)
       # At present, orphans will only be visible to admins, as other users 
       # have their scope set by current_project, and orphans do not have a project.
@@ -47,6 +51,7 @@ module TagablesController
     # GET /new - abstracted new action
     def new_tagable
       @resource = resource_class.new()
+      @swatch = resource_class.swatch
       authorize @resource, :new?
       set_tag
       setup_form
@@ -54,6 +59,7 @@ module TagablesController
 
   # POST /switchboards 
     def create_tagable
+      debugger
       # For create action, we need to create a new resource
       begin
         @resource = resource_class.new(resource_params.except(:tag))
@@ -286,19 +292,21 @@ module TagablesController
     end
 
     def setup_form
+      # Depends on current project being set
       instance_variable_set(resource_var_name, @resource)
       @projects = policy_scope(Project)
       @disciplines = policy_scope(Discipline)
         .joins(:project)
-        .select('projects.code as project_code, disciplines.id, disciplines.code')
-        .order('projects.code ASC, disciplines.code ASC')
+        .select('projects.code as project_code, disciplines.id, disciplines.label')
+        .order('projects.code ASC, disciplines.label ASC')
         .group_by(&:project_code)
-        .transform_values { |discs| discs.map { |d| [d.code, d.id] } }
+        .transform_values { |discs| discs.map { |d| [d.label, d.id] } }
       
       # Set tag type and discipline according to the resource defaults (if not already set,
       # which could be the case when re-rendering because of parameter errors).
       @tag.tagable_type ||= controller_path.classify
-      @tag.discipline ||= Discipline.find_by(code: resource_class.discipline_code)
+      @tag.discipline ||= Discipline.find_by(project: @current_project, 
+        name: resource_class.model_name.name.split('::')[0].underscore)
 
       # Hook for model-specific form setup
       setup_additional_form_data

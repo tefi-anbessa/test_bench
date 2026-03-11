@@ -144,7 +144,12 @@ The tag model provides the following functionality:
 * If prompted, it means the generator has found an existing folder, and will ask if you want to proceed.
   * If you are sure that the existing folder does not contain anything that needs to be retained, respond with 'y'.
   * If you are not sure, respond with 'n'. The generator will abort.
-* The generator will create the folders, files and edits required to add a new module. The generator will show the files and edits created.
+* The generator will create the folders, files and edits required to add a new module. The generator output will show the files and edits created.
+* IMPORTANT. The module generator creates a locale file folder, with files for each locale for models, views, and general translations. These files have a namespace key, but no content. If you do not create a model in the new module, the empty locale file (for models at least) will break the translations. Either remove the empty locale file, or add content to it.
+* The generator creates a base class for the module, which is used as the parent class for all models in the module. This base class is used to define shared behavior for all models in the module.
+* The base class defaults the colour swatch to "app_theme". Set as required.
+* The base class defaults the module discpline to the same name as the module. This is used in testing. The user can set any discipline names for each project, they are not constrained to the module name.
+* The base class defaults label and long_label methods to inherit from tag. If the module is not used for tagable models, this should be changed to something suitable, or removed.
 
 ## TAGABLE GENERATOR
 

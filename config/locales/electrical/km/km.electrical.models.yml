@@ -1,15 +1,16 @@
 km:
   activerecord:
     models:
-      electrical/heater:             "Heater"
-      electrical/cable_type:         "Cable Type"
-      electrical/cable:              "Cable"
-      electrical/demand:             "Load"
-      electrical/switchboard:        "Switchboard"
-      electrical/circuit:            "Circuit"
-      electrical/motor:              "Motor"
-      electrical/socket_cct:         "Socket Circuit"
-      electrical/light_cct:          "Light Circuit"
+      electrical:
+        heater:             "Heater"
+        cable_type:         "Cable Type"
+        cable:              "Cable"
+        demand:             "Load"
+        switchboard:        "Switchboard"
+        circuit:            "Circuit"
+        motor:              "Motor"
+        socket_cct:         "Socket Circuit"
+        light_cct:          "Light Circuit"
     attributes:
       electrical/heater:
         heater_type: "Heater Type"

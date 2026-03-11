@@ -1,14 +1,14 @@
 <% provide(:title, t('.title')) %>
-<div class="container mt-3 mx-auto">
+<div class="container mt-3 mx-auto" style="<%= container_styles(@swatch) %>">
   <!-- Motor Schedule Card Header -->
-  <div class="card mb-4">
-    <div class="card-header p-2">
+  <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
       <div class="d-flex justify-content-between align-items-center">
         <!-- Header Text (Left) -->
         <div class="ms-2">
           <% text = @switchboard.present? ? 
           [@switchboard.class.model_name.human, @switchboard.label].join(' ') : 
-          t('index.all', models: t('activerecord.models.switchboard').pluralize) %>
+          t('index.all', models: t('activerecord.models.electrical.switchboard').pluralize) %>
           <h5 class="mb-0"><%= t('.header', switchboard: text) %></h5>
         </div>
 
@@ -21,7 +21,7 @@
                 title: t('actions.new') do %>
                 <%== bs_icon('plus-square-fill') %>
                 <span class="ms-1">
-                  <%= [t('actions.new'), t('activerecord.models.circuit')].join(' ') %>
+                  <%= [t('actions.new'), t('activerecord.models.electrical.circuit')].join(' ') %>
                 </span>
               <% end %>
           <% end %>
@@ -34,7 +34,7 @@
         <%= search_form_for @q do |f| %>
           <%= f.search_field :phase_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.circuit.phase') %>
+                placeholder: t('activerecord.attributes.electrical.circuit.phase') %>
           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
             <%== bs_icon('search') %>
           <% end %>

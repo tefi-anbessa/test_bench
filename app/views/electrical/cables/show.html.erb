@@ -1,8 +1,8 @@
 <% provide :title, "#{t('activerecord.models.' + @cable.model_name.i18n_key.to_s, default: @cable.model_name.human)} #{@cable.tag.full_tag}" %>
-<div class="container mt-3">
+<div class="container mt-3" style="<%= container_styles(@swatch) %>">
   <!-- Cable Header Card -->
-  <div class="card mb-4">
-    <div class="card-header p-2">
+  <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
       <div class="row align-items-center">
         <!-- Left Navigation -->
         <div class="col-auto">
@@ -38,7 +38,7 @@
         <div class="col text-center">
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
-              <span class="badge bg-primary fs-6">
+              <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
                 <%= t('.header', label: @cable.label) %>
               </span>
               <% if @cable.tag.service.present? %>
@@ -93,9 +93,9 @@
               <% end %>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
+        </div> <!-- col-auto -->
+      </div> <!-- row -->
+    </div> <!-- card header -->
 
 
     <div class="d-flex flex-column justify-content-center">
@@ -110,13 +110,13 @@
           
             <!-- Cable Type Card -->
             <div class="row g-3 mb-3">
-                <%= render 'electrical/cable_types/cable_type', cable_type: @cable.electrical_cable_type %>
+                <%= render 'electrical/cable_types/card', cable_type: @cable.electrical_cable_type %>
             </div>
         
             <!-- Cable Details Card -->
             <div class="row">
-              <div class="card mb-4">
-                <div class="card-header py-1">
+              <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+                <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
                   <h4 class="mb-0"><%= t('show.details', model: @cable.model_name.human) %></h4>
                 </div>
 

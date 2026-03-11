@@ -1,11 +1,11 @@
-<div class="container mt-3">
-  <div class="card">
-    <div class="card-header p-2">
+<div class="container mt-3" style="<%= container_styles(@swatch) %>">
+  <div class="card" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
 
       <!-- Center Tag Info -->
       <div class="col text-center">
         <div class="d-flex flex-column align-items-center">
-          <div class="mt-1">
+          <div class="badge fs-6" style="<%= badge_styles(@swatch) %>">
             <%= yield(:header) %>
           </div>
         </div>
@@ -19,7 +19,7 @@
           wrapper_class: 'mb-1',
           ) do |f| %>
 
-      <div class="card-body p-2">
+      <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
         <div class="row justify-content-center">
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">        <!-- Adjust to fit requirements -->
 

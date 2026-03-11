@@ -1,6 +1,6 @@
 <% resource = object %>
 <%= render 'components/collapsible',
-  id: "#{electrical_heaters}_#{resource.id}_details",
+  id: "heater_#{resource.id}_details",
   title: t("electrical.heaters.show.header", label: resource.label),
   expanded: false,
   header_class: 'py-1' do %>

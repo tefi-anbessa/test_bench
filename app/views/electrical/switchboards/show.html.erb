@@ -1,8 +1,8 @@
 <% provide(:title, t('.title')) %>
-<div class="container mt-3">
+<div class="container mt-3" style="<%= container_styles(@swatch) %>">
   <!-- Switchboard Header Card -->
-  <div class="card mb-4">
-    <div class="card-header p-2">
+  <div class="card mb-4" style="<%= container_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
       <div class="row align-items-center">
         <!-- Left Navigation -->
         <div class="col-auto">
@@ -38,7 +38,7 @@
         <div class="col text-center">
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
-              <span class="badge bg-primary fs-6">
+              <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
                 <%= t('.header', label: @switchboard.label)%>
               </span>
               <% if @switchboard.tag&.service.present? %>
@@ -118,8 +118,8 @@
         
             <!-- Switchboard Details Card -->
             <div class="row">
-              <div class="card mb-4">
-                <div class="card-body p-3">
+              <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+                <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
                   
                   <div class="row mb-1">
                     <div class="col-4 text-muted"><%= @switchboard.class.human_attribute_name(:ingress_protection) %></div>
@@ -184,7 +184,7 @@
                   
                   <div class="row mb-1">
                     <div class="col-4 text-muted">
-                      <% text = t('activerecord.attributes.switchboard.circuits') %>
+                      <% text = t('activerecord.attributes.electrical.switchboard.circuits') %>
                       <%= link_to electrical_switchboard_circuits_path(@switchboard),
                         class: "btn btn-sm btn-outline-secondary",
                         title: text do %>
@@ -196,7 +196,7 @@
 
                   <div class="row mb-1">
                     <div class="col-4 text-muted">
-                      <% text = t('activerecord.models.demand') %>
+                      <% text = t('activerecord.models.electrical.demand') %>
                       <% if @switchboard.electrical_demand.present? %>
                         <%= link_to @switchboard.electrical_demand,
                           class: "btn btn-sm btn-outline-secondary",
@@ -205,7 +205,6 @@
                             <%== bs_icon('box-arrow-in-down-right') %>
                         <% end %>
                       <% elsif @switchboard.tag&.present? %> 
-                        <% text = t("actions.link", resource: t("activerecord.models.demand")) %>
                         <% if policy(Electrical::Demand).new? %>
                           <%= link_to new_tag_electrical_demand_path(@switchboard.tag&.id),
                               class: "btn btn-sm btn-outline-primary mb-2",
