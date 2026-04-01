@@ -1,6 +1,7 @@
 cn:
   activerecord:
     models:
+      document: "Document"
       swatch: "Swatch"
       resource:           "Resource"
       user:               "User"
@@ -9,6 +10,10 @@ cn:
       tag:                "Tag"
       role:               "Role"
     attributes:
+      document:
+        serial: "Serial"
+        title: "Title"
+        notes: "Notes"
       swatch:
         name: "Name"
         bg: "Bg"

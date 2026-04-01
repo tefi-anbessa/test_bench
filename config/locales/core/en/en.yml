@@ -8,6 +8,7 @@ en:
 
   actions:
     save:         "Save"
+    create:       "Create"
     update:       "Update"
     set:          "Set"
     select:       "Select"
@@ -50,6 +51,7 @@ en:
     new_select:   "Leave blank when adding new selection"
     required:     "Selection required:"
     optional:     "Leave blank for no selection:"
+    select_option: "Select an option"
     undefined:    "Undefined"
     none:         "None"
     unknown:      "Unknown"

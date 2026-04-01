@@ -1,5 +1,5 @@
 module Electrical
-  class MotorPolicy < ResourcePolicy
+  class MotorPolicy < TagablePolicy
     # Returns the motor record
     def motor
       record

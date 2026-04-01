@@ -2,8 +2,8 @@ class TagsController < ApplicationController
   before_action :authenticate_user!
   before_action :require_project!, only: %i[ new create ]
   before_action :set_project
-  before_action :set_tag
-#  before_action :new_params, only: %i[ create update ]
+  before_action :set_tag, only: %i[ show edit update destroy ]
+  before_action :set_swatch, only: %i[ index show new edit ]
 #  after_action :verify_authorized
 
   # GET /tags or /tags.json
@@ -34,7 +34,8 @@ class TagsController < ApplicationController
       redirect_to @tag
     else
       flash[:alert] = I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.tag'))
-      setup_disciplines 
+      setup_disciplines
+      set_swatch
       render :new, status: :unprocessable_content
     end
   end
@@ -54,7 +55,8 @@ class TagsController < ApplicationController
     else
       flash[:alert] = I18n.t('flash.update.alert', 
       resource_name: I18n.t('activerecord.models.tag'))
-      setup_disciplines 
+      setup_disciplines
+      set_swatch
       render :edit, status: :unprocessable_content
     end
   end
@@ -81,8 +83,8 @@ class TagsController < ApplicationController
         @project = current_project
       else
         @project = nil
-        @projects = policy_scope(Project)
       end
+      @projects = policy_scope(Project)
     end
 
     # Setup disciplines for the form selector
@@ -109,15 +111,23 @@ class TagsController < ApplicationController
 
     def set_tag
       if params[:id].present?
-        @tag = Tag.find(params[:id])
+        @tag = policy_scope(Tag).find(params[:id])
       else
         @tag = Tag.new
       end
     end
 
+    def set_swatch
+      if @tag && @tag.persisted?
+        @swatch = @tag.discipline.swatch
+      else
+        @swatch = Swatch.find_by(name: 'app_theme')
+      end
+    end
+
     def tag_params
       params.require(:tag).permit(:discipline_id, :stage, :prefix, :serial, :suffix,
-                                  :service, :location, :notes, :tagable_type, :tagable_id, :submit)
+                                  :service, :location, :notes, :tagable_type, :tagable_id)
     end
 
 

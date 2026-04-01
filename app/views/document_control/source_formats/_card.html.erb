@@ -1,0 +1,45 @@
+<% resource = object %>
+<%= render 'components/collapsible',
+  id: "#{document_control_source_formats}_#{resource.id}_details",
+  title: t("document_control.source_formats.show.header", label: resource.label),
+  expanded: false,
+  header_class: 'py-1' do %>
+  
+    <div class="container-fluid">
+      <div class="row mb-1">
+        <% text = t("actions.jump_to", model: t("activerecord.models.document_control.source_format")) %>
+        <%= link_to resource, 
+            class: "btn btn-sm btn-outline-secondary me-2",
+            title: text do %>
+          <%== bs_icon('box-arrow-in-up-left') %>
+          <span class="d-none d-md-inline"><%= text %></span>
+        <% end %>
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:vendor) %></div>
+        <div class="col-8"><%= resource.vendor || '-' %></div>
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:title) %></div>
+        <div class="col-8"><%= resource.title || '-' %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:file_extension) %></div>
+        <div class="col-8"><%= resource.file_extension || '-' %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:revision) %></div>
+        <div class="col-8"><%= resource.revision || '-' %></div>
+
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:notes) %></div>
+ 
+        <!-- TODO: Add json formatting -->
+        <div class="col-8"><%= simple_format(resource.notes || '-') %></div>
+
+      </div>
+    </div> <!-- end container-fluid -->
+<% end %>

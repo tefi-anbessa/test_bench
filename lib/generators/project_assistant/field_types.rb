@@ -23,7 +23,7 @@ module ProjectAssistant
     # Number fields are not really searchable for content, they generally require comparison operators. 
     # You can write your own search fields for ransack in the index view.
     SEARCHABLE_TYPES = (VALID_FIELD_TYPES - %w[
-      integer bigint float decimal 
+      references integer bigint float decimal 
       datetime timestamp time date binary boolean primary_key
     ]).freeze
       

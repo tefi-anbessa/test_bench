@@ -3,7 +3,7 @@ require "test_helper"
 class DemandTest < ActiveSupport::TestCase
   setup do
     @project = create(:project)
-    @discipline = create(:discipline, code: 'E', name: 'Electrical', project: @project)
+    @discipline = create(:discipline, label: 'E', name: 'Electrical', project: @project)
     @tag = create(:tag, :unique_tag, discipline: @discipline, prefix: 'EL')
     @light_cct = create(:electrical_light_cct, tag: @tag)
     @demand = create(:electrical_demand, demandable: @light_cct)

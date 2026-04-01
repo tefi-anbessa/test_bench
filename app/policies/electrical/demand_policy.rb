@@ -1,6 +1,6 @@
 
 module Electrical
-  class DemandPolicy < ResourcePolicy
+  class DemandPolicy < TagablePolicy
     # Returns the demand record
     def demand
       record

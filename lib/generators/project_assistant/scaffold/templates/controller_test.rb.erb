@@ -1,188 +1,30 @@
 # frozen_string_literal: true
-require "test_helper"
+require "helpers/resource_controller_test_helper.rb"
 <%- if @namespaced -%>
 module <%= module_name %>
 <%- end -%>
   class <%= model_class.pluralize %>ControllerTest < ActionController::TestCase
     include Devise::Test::ControllerHelpers
+    include ResourceControllerTestHelper
 
     setup do
-      @project = create(:project)
-      set_current_project(@project)
+      setup_controller_test # In test/helpers/resource_controller_test_helper.rb      
 
-      @discipline = create(:discipline, code: 'test', project: @project)
-
-      @other_user = create(:user)   # No roles
-
-      @admin = create(:user)
-      @admin.grant(:admin)
-
-      @project_manager = create(:user)
-      @project_manager.grant(:project_manager, @project)
-
-      @team_member = create(:user)
-      @team_member.grant(:team_member, @project)
-
-      # Set up a user with edit permissions on this resource.
-      @accredited_team_member = create(:user)
-      @accredited_team_member.grant(:team_member, @project)
-      @accredited_team_member.grant(<%= class_name %>.required_role)
-
-      # Set up an instance of <%= singular_name %>
-      @<%= singular_name %> = create(:<%= singular_table_name %>)
-
-      @request.env["devise.mapping"] = Devise.mappings[:user]
-    end
-
-    # Set the minimum required params for a valid resource
-    def valid_resource_params
-      {
-<%= @fields.select { |f| f[:options].include?('required') }
-          .map { |field| "#{field[:name]}: ''}
-          .join(",\n        ") %>
-      }
-    end
-
-    test "setup is valid" do
-      assert @project.valid?
-      assert @project.persisted?
-      assert @discipline.valid?
-      assert @discipline.persisted?
-      assert @admin.valid?
-      assert @admin.persisted?
-      assert @project_manager.valid?
-      assert @project_manager.persisted?
-      assert @team_member.valid?
-      assert @team_member.persisted?
-      assert @other_user.valid?
-      assert @other_user.persisted?
-      assert @accredited_team_member
-      assert @accredited_team_member.persisted?
-      assert @<%= singular_name %>.valid?
-      assert @<%= singular_name %>.persisted?
-    end
-
-    test "unauthenticated users are redirected to sign in" do
-      get :index
-      assert_unauthenticated
-    end
-
-    test "other user cannot access index" do
-      sign_in @other_user
-      get :index
-      assert_forbidden
-    end
-
-    test "team member can access index" do
-      sign_in @team_member
-      get :index
-      assert_response :success
-    end
-
-  # Show Tests
-    test "user cannot view resource details without project role" do
-      sign_in @other_user
-      get :show, params: { id: @<%= singular_name %>.id }
-      assert_forbidden
-    end
-
-    test "team member can view resource details" do
-      sign_in @team_member
-      get :show, params: { id: @<%= singular_name %>.id }
-      assert_response :success
-    end
-
-    # New Action Tests
-    test "team member cannot access new form" do
-      sign_in @team_member
-      get :new
-      assert_response :forbidden
-    end
-
-    test "accredited team member can access new form" do
-      sign_in @accredited_team_member
-      get :new
-      assert_response :success
-    end
-
-    # Create Action Tests - Success Cases
-      test "accredited team member can create" do
-        sign_in @accredited_team_member
-        assert_difference("#{<%= class_name %>.count}", 1) do
-          post :create, params: <%= singular_name %>: valid_resource_params
-        end
-
-        created_resource = <%= class_name %>.last
-        assert_redirected_to created_resource
-        assert_equal I18n.t("flash.create.notice", 
-          resource_name: created_resource.model_name.human), 
-          flash[:notice]
-    end
-
-    # Create Action Tests - Failure Cases
-    test "team member cannot create" do
-      sign_in @team_member
-      assert_no_difference("#{<%= class_name %>}.count") do
-        post :create, params: <%= singular_name %>: valid_resource_params
-      end
-      assert_forbidden
-    end
-
-    # Edit Action Tests
-    test "team member cannot access edit form" do
-      sign_in @team_member
-      get :edit, params: { id: @<%= singular_name %>.id }
-      assert_forbidden
-    end
-
-    test "accredited team member can access edit form" do
-      sign_in @accredited_team_member
-      get :edit, params: { id: @<%= singular_name %>.id }
-      assert_response :success
-    end
-
-    # Update Action Tests
-    test "team member cannot update" do
-      sign_in @team_member
-      original_value = @<%= singular_name %>.send(update_attribute_name)
-      patch :update, params: 
-        { id: @<%= singular_name %>.id, <%= singular_name %>: { update_attribute_name => updated_attribute_value } }
-      assert_forbidden
-      assert_equal original_value, @resource.reload.send(update_attribute_name)
-    end
-
-    test "accredited team member can update" do
-      sign_in @accredited_team_member
-      patch :update, params: 
-        { id: @<%= singular_name %>.id, <%= singular_name %>: { update_attribute_name => updated_attribute_value } }
-      assert_equal updated_attribute_value, @<%= singular_name %>.reload.send(update_attribute_name)
-      assert_redirected_to @<%= singular_name %>
-      assert_equal I18n.t("flash.update.notice", 
-        resource_name: @<%= singular_name %>.model_name.human), 
-        flash[:notice]
-    end
-
-    # Destroy Action Tests
-    test "accredited team member cannot destroy" do
-      sign_in @accredited_team_member
-      assert_no_difference("<%= class_name %>.count") do
-        delete :destroy, params: { id: @<%= singular_name %>.id }
-      end
-      assert_forbidden
-    end
-
-    test "admin can destroy" do
-      sign_in @admin
-      assert_difference("<%= class_name %>.count", -1) do
-        delete :destroy, params: { id: @<%= singular_name %>.id }
-      end
-      assert_redirected_to <%= index_helper %>_path
-      assert_equal I18n.t("flash.destroy.notice", 
-        resource_name: @<%= singular_name %>.model_name.human), 
-        flash[:notice]
+      # Set up in and out of scope instances of <%= singular_name %>
+      @resource = create(:<%= singular_table_name %>, discipline: @discipline)
+      @other_resource = create(:<%= singular_table_name %>, discipline: @other_discipline)
     end
 
     private
+
+      # Set the minimum required params for a valid resource
+      def valid_resource_params
+      {
+  <%- @fields.select { |f| f[:options].include?('required') }.each do |field| -%>
+          <%= "#{field[:name]}: '' # Add valid data" %>
+  <% end %>
+        }
+      end
 
       # Set invalid resource params for tests
       def invalid_resource_params
@@ -191,19 +33,13 @@ module <%= module_name %>
 
       # Nominate an attribute to get changed during update tests
       def update_attribute_name
-        :<%= fields[0][:name] %>
+        # Set one attribute name
       end
 
       # Nominate a valid value to update the attribute to
       def updated_attribute_value
         "new_value"
       end
-
-    # Helper methods
-      def assert_successful_creation_flash_message(resource = @resource)
-        assert_equal I18n.t("flash.create.notice", resource: resource.model_name.human), flash[:notice]
-      end
-
   end
 <%- if @namespaced -%>
 end

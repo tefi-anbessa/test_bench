@@ -25,7 +25,8 @@ FactoryBot.define do
         heater.tag = evaluator.tag
       else
         # Create new tag with proper discipline in the same transaction
-        discipline = Discipline.find_or_create_by(code: heater.class.discipline_code)
+        discipline = Discipline.find_by(name: heater.class.discipline) || 
+             create(:discipline, name: heater.class.discipline)
         heater.tag = create(:tag, :unique_tag, discipline: discipline)
       end
     end

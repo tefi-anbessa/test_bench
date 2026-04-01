@@ -106,7 +106,7 @@
                 <%== bs_icon('x-square') %>
               <% end %>
 
-              <%= f.button :submit, class: 'btn btn-primary' do %>
+              <%= f.button :submit, class: 'btn btn-primary', name: 'form[submit]' do %>
                 <%= yield(:button_text) %>
                 <%== bs_icon('save') %>
               <% end %>

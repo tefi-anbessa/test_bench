@@ -14,6 +14,31 @@
   <td><%= row.busbar_rating %></td>
   <td><%= row.busbar_fault_rating %></td>
   <td><%= row.busbar_fault_duration %></td>
+  <td>
+    <% text = t('activerecord.models.electrical.demand') %>
+    <% if row.electrical_demand.present? %>
+      <%= link_to row.electrical_demand,
+        class: "btn btn-sm btn-outline-info",
+        title: text do %>
+          <%= text %>
+        <% end %>
+    <% else %>
+      <% if row.tag&.present? %>
+        <% if policy(Electrical::Demand).new? %>
+          <% text = t("actions.link", resource: text) %>
+          <%= link_to new_tag_electrical_demand_path(row.tag.id),
+            class: "btn btn-sm btn-outline-primary",
+            title: text do %>
+              <%= text %>
+            <% end %>
+        <% else %>
+          <span class="d-none d-md-inline">
+            <%= t('show.unassigned', model: text) %>
+          </span>
+        <% end %>
+      <% end %>
+    <% end %>
+  </td>
   <td><%= link_to row.electrical_circuits.count, electrical_switchboard_circuits_path(row) %></td>
   <td>
     <% if policy(row).show? %>

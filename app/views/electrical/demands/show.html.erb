@@ -113,13 +113,14 @@
               </div>
             <% else %>
               <div class="row mb-1">
-                <% text = t("actions.jump_to", model: model) %>
+                <% model_text = t("activerecord.models.#{@demand.demandable_type.split("::").map(&:underscore).join(".")}") %>
+                <% text = t("actions.jump_to", model: model_text) %>
                 <% path = begin
                   polymorphic_path([@demand.demandable])
                 rescue NoMethodError, ActionController::UrlGenerationError
                   '#'
                 end %>
-                <% text = t("actions.jump_to", model: model) %>
+                <% text = t("actions.jump_to", model: model_text) %>
                 <%= link_to path,
                     class: "btn btn-sm btn-outline-secondary me-2",
                     title: text do %>

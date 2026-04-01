@@ -1,6 +1,5 @@
 module TagablesController
   extend ActiveSupport::Concern
-
   included do
     before_action :authenticate_user!
     before_action :require_project!, only: %i[ new create edit update ]
@@ -59,7 +58,6 @@ module TagablesController
 
   # POST /switchboards 
     def create_tagable
-      debugger
       # For create action, we need to create a new resource
       begin
         @resource = resource_class.new(resource_params.except(:tag))
@@ -295,13 +293,7 @@ module TagablesController
       # Depends on current project being set
       instance_variable_set(resource_var_name, @resource)
       @projects = policy_scope(Project)
-      @disciplines = policy_scope(Discipline)
-        .joins(:project)
-        .select('projects.code as project_code, disciplines.id, disciplines.label')
-        .order('projects.code ASC, disciplines.label ASC')
-        .group_by(&:project_code)
-        .transform_values { |discs| discs.map { |d| [d.label, d.id] } }
-      
+      @disciplines = policy_scope(Discipline).map { |d| [d.label, d.name, d.id] }
       # Set tag type and discipline according to the resource defaults (if not already set,
       # which could be the case when re-rendering because of parameter errors).
       @tag.tagable_type ||= controller_path.classify
@@ -317,6 +309,7 @@ module TagablesController
       # @resource has been set in the calling action
       # @tag needs to be set also, otherwise setup_form will error
       return_action = @resource.persisted? ? :edit : :new
+      @swatch = resource_class.swatch
       setup_form
       respond_to do |format|
         format.html { render return_action, status: :unprocessable_content }

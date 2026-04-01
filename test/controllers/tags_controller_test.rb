@@ -1,45 +1,49 @@
+# frozen_string_literal: true
 require "test_helper"
+require_relative "../helpers/resource_controller_test_helper"
 
 class TagsControllerTest < ActionController::TestCase
   include Devise::Test::ControllerHelpers
+  include ResourceControllerTestHelper
 
   setup do
-    @project = create(:project)
-    set_current_project(@project)
-    @discipline = create(:discipline, :elec, project: @project)
-    @tag = create(:tag,  discipline: @discipline)
-
-    # Set up users
-    @admin = create(:user)
-    @regular_user = create(:user)
-    @project_manager = create(:user)
-    @team_member = create(:user)
-    
-    # Add global admin role
-    @admin.grant(:admin)
-
-    # Add project-specific team member roles
-    @project_manager.grant(:project_manager, @project)
-    @team_member.grant(:team_member, @project)
+    setup_common_test_data
+    setup_model_specific_data
   end
 
-  # Authentication tests
-  test "unauthenticated users should be redirected to sign in" do
-    get :index
-    assert_unauthenticated
+  def setup_model_specific_data
+    # Delete the discipline created by the helper and override with a standard discipline
+    @resource_discipline&.destroy
+    @resource_discipline = create(:discipline, label: "E", name: "Electrical", project: @project)
+    # Set up an instance of tag
+    @resource = create(:tag, discipline: @resource_discipline)
   end
 
-  # Index tests
-  test "users without team role on current project are forbidden to access tag index" do
-    sign_in @regular_user
-    get :index
-    assert_forbidden
-  end
+  private
 
-  test "team members on current project can view tag index" do
-    sign_in @team_member
-    get :index
-    assert_response :success
-    assert_not_nil assigns(:tags)
-  end
+    # Set the minimum required params for a valid resource
+    def valid_resource_params
+      { tag: {
+        prefix: "T",
+        serial: 1111,
+        stage: 1,
+        discipline_id: @resource_discipline.id,
+        service: 'Test service'
+      }}
+    end
+
+    # Set invalid resource params for tests
+    def invalid_resource_params
+      { prefix: "22" }
+    end
+
+    # Nominate an attribute to get changed during update tests
+    def update_attribute_name
+      :service
+    end
+
+    # Nominate a valid value to update the attribute to
+    def updated_attribute_value
+      "Update service"
+    end
 end

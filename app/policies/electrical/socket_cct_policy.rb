@@ -1,5 +1,5 @@
 module Electrical
-  class SocketCctPolicy < ResourcePolicy
+  class SocketCctPolicy < TagablePolicy
     # Returns the socket_cct record
     def socket_cct
       record

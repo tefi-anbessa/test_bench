@@ -1,5 +1,5 @@
 module Electrical
-  class HeaterPolicy < ResourcePolicy
+  class HeaterPolicy < TagablePolicy
     # Returns the resource record
     def heater
       record

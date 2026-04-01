@@ -20,8 +20,8 @@ FactoryBot.define do
     route_length { 10 }  # meters
     vertical_allowance { 6 }  # meters
     termination_allowance { 4 }  # meters per end
-    start_mark { nil }
-    end_mark { nil }
+    start_mark { 1001 }
+    end_mark { 1010 }
 
     # Create tag association in a single transaction
     before(:create) do |cable, evaluator|
@@ -34,7 +34,7 @@ FactoryBot.define do
         cable.tag = tag
       else
         # Create new tag with proper discipline in same transaction
-        discipline = Discipline.find_or_create_by(code: cable.class.discipline_code)
+        discipline = Discipline.find_or_create_by(name: cable.class.discipline)
         cable.tag = create(:tag, :unique_tag, discipline: discipline)
       end
 

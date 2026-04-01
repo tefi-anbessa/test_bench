@@ -2,6 +2,10 @@
 
 FactoryBot.define do
   factory :electrical_switchboard, class: 'Electrical::Switchboard' do
+    # Tag can be passed explicitly, otherwise will be auto-created
+    transient do
+      tag { nil }
+    end
     # Default required attributes
     voltage_rating { '600/1000V' }  # Required field - use common voltage rating
     busbar_rating { 400 }           # Required field - common busbar rating in Amps
@@ -24,7 +28,8 @@ FactoryBot.define do
         switchboard.tag = evaluator.tag
       else
         # Create new tag with proper discipline in same transaction
-        discipline = Discipline.find_or_create_by(code: switchboard.class.discipline_code)
+        discipline = Discipline.find_by(name: switchboard.class.discipline) || 
+             create(:discipline, name: switchboard.class.discipline)
         switchboard.tag = create(:tag, :unique_tag, discipline: discipline)
       end
     end

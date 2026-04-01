@@ -1,6 +1,7 @@
 en:
   activerecord:
     models:
+      document: "Document"
       swatch:             "Swatch"
       resource:           "Resource"
       user:               "User"
@@ -9,6 +10,11 @@ en:
       tag:                "Tag"
       role:               "Role"
     attributes:
+      document:
+        serial: "Serial"
+        doc_number: "Document Number"
+        title: "Title"
+        notes: "Notes"
       swatch:
         name: "Name"
         bg: "Background"
@@ -106,6 +112,9 @@ en:
         tag:
           base:
             taken: "Tag %{tag} already exists"
+          attributes:
+            prefix:
+              only_letters: "must contain only letters"
       attributes:
         tag:
           prefix:

@@ -1,3 +1,34 @@
+.themed {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+.themed .card {
+  background-color: var(--card-bg);
+  border-color: var(--card-border);
+}
+
+.themed .card-header {
+  background-color: var(--card-header-bg);
+}
+
+.themed .card-body {
+  background-color: var(--form-bg);
+}
+
+.themed .badge {
+  background-color: var(--badge-bg);
+  color: var(--badge-text);
+}
+
+.themed a {
+  color: var(--link);
+}
+
+.themed a:hover {
+  color: var(--link-hover);
+}
+
 /* Collapsible chevron rotation */
 [data-controller="collapsible"] {
   [data-collapsible-target="icon"] {

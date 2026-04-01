@@ -1,5 +1,5 @@
 module Electrical
-  class LightCctPolicy < ResourcePolicy
+  class LightCctPolicy < TagablePolicy
     # Returns the light_cct record
     def light_cct
       record

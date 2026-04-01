@@ -2,7 +2,6 @@
 # These will be available to all projects
 #
 # Fields:
-#   code:       Symbol identifier (used internally)
 #   label:      Short 1-3 character code (for display)
 #   name:       Full name of the discipline
 #   module:     Optional: Associated Ruby module for extended functionality
@@ -10,79 +9,74 @@
 
 disciplines:
 
-  - code: "admin"
-    label: A
+  A:
     name: Administration
     prefix_schema: { name: 'default' }
     module: Administration
     sort_order: 10
 
-  - code: "arch"
-    label: B
+  B:
     name: Architecture
     prefix_schema: { name: 'default' }
     module: Architecture
     sort_order: 20
 
-  - code: "process"
-    label: PR
+  P:
     name: Process
     prefix_schema: { name: 'default' }
     module: Process
     sort_order: 30
 
-  - code: "elec"
-    label: E
+  E:
     name: Electrical
     prefix_schema: { name: 'default' }
     module: Electrical
     sort_order: 10
 
-  - code: "inst"
-    label: J
+  J:
     name: Instrumentation
     prefix_schema: { name: 'isa51' }
     module: Instrumentation
     sort_order: 40
 
-  - code: "it"
-    label: IT
+  IT:
     name: Information Technology & Communications
     prefix_schema: { name: 'default' }
     module: It
     sort_order: 50
 
-  - code: "mech"
-    label: M
+  M:
     name: Mechanical
     prefix_schema: { name: 'default' }
     module: Mechanical
     sort_order: 60
 
-  - code: "piping"
-    label: PI
+  PIP:
     name: Piping
     prefix_schema: { name: 'default' }
     module: Piping
     sort_order: 70
 
-  - code: "civil"
-    label: C
+  C:
     name: Civil
     prefix_schema: { name: 'default' }
     module: Civil
     sort_order: 80
 
-  - code: "struct"
-    label: S
+  S:
     name: Structural
     prefix_schema: { name: 'default' }
     module: Structural
     sort_order: 90
 
-  - code: "hvac"
-    label: HV
+  HVAC:
     name: Heating Ventilation Air Conditioning
     prefix_schema: { name: 'default' }
     module: Hvac
     sort_order: 100
+
+  COMP:
+    name: Completions
+    prefix_schema: { name: 'default' }
+    module: Completions
+    sort_order: 110

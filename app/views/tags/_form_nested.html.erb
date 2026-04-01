@@ -37,12 +37,12 @@
       <!-- Discipline -->
       <div class="row">
         <%= tag_f.select :discipline_id,
-              grouped_options_for_select(
-                @disciplines.transform_values do |disciplines|
-                  disciplines.map { |name, id|
-                    ["#{t("discipline.#{name.downcase.to_sym}.label")}: #{t("discipline.#{name.downcase.to_sym}.name")}", id]
-                  }
-                end,
+              options_for_select(
+                  @disciplines.map { |label, name, id|
+                    translated_label = t("discipline.label.#{label}", default: label)
+                    translated_name = t("discipline.name.#{name}", default: name)
+                    ["#{translated_label}: #{translated_name}", id]
+                  },
                 tag.discipline_id
               ),
               { class: 'form-select' },

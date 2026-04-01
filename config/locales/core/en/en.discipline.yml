@@ -2,36 +2,28 @@
 # Custom content is not translated.
 en:
   discipline:
-    admin:
-      label: 'A'
-      name: 'Administration'
-    arch:
-      label: 'B'
-      name: 'Architecture'
-    civil:
-      label: 'C'
-      name: 'Civil'
-    elec:
-      label: 'E'
-      name: 'Electrical'
-    inst:
-      label: 'J'
-      name: 'Instrument'
-    it:
-      label: 'I'
-      name: 'Information Tech'    
-    mech:
-      label: 'M'
-      name: 'Mechanical'
-    process:
-      label: 'P'
-      name: 'Process'
-    struct:
-      label: 'S'
-      name: 'Structural'
-    multi:
-      label: 'U'
-      name: 'Multi-Discipline'
+    label:
+      "A": 'A'
+      "B": 'B'
+      "C": 'C'
+      "E": 'E'
+      "J": 'J'
+      "I": 'I'
+      "M": 'M'
+      "P": 'P'
+      "S": 'S'
+      "U": 'U'
+    name:
+      Administration: 'Administration'
+      Architecture: 'Architecture'
+      Civil: 'Civil'
+      Electrical: 'Electrical'
+      Instrument: 'Instrument'
+      Information_Tech: 'Information Tech'
+      Mechanical: 'Mechanical'
+      Process: 'Process'
+      Structural: 'Structural'
+      Multi_Discipline: 'Multi-Discipline'
   prefix_schema:
     key:
       custom: "Custom"
@@ -52,4 +44,4 @@ en:
     select_template: "Select Template"
     template_help: "Select a template to initialize the schema"
     custom_schema: "Custom Schema"
-    schema_help: "TODO"
+    schema_help: "TODO: help for schema editor"

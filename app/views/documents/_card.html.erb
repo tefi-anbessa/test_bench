@@ -1,0 +1,41 @@
+<% resource = object %>
+<%= render 'components/collapsible',
+  id: "#{documents}_#{resource.id}_details",
+  title: t("documents.show.header", label: resource.label),
+  expanded: false,
+  header_class: 'py-1' do %>
+  
+    <div class="container-fluid">
+      <div class="row mb-1">
+        <% text = t("actions.jump_to", model: t("activerecord.models.document")) %>
+        <%= link_to resource, 
+            class: "btn btn-sm btn-outline-secondary me-2",
+            title: text do %>
+          <%== bs_icon('box-arrow-in-up-left') %>
+          <span class="d-none d-md-inline"><%= text %></span>
+        <% end %>
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:discipline) %></div>
+        <div class="col-8"><%= resource.discipline&.label || '-' %></div>
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:document_control_type) %></div>
+        <div class="col-8"><%= resource.document_control_type&.label || '-' %></div>
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:serial) %></div>
+        <div class="col-8"><%= resource.serial || '-' %></div>
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:title) %></div>
+        <div class="col-8"><%= resource.title || '-' %></div>
+      </div>
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= resource.class.human_attribute_name(:notes) %></div>
+ 
+        <!-- TODO: Add json formatting -->
+        <div class="col-8"><%= simple_format(resource.notes || '-') %></div>
+      </div>
+    </div> <!-- end container-fluid -->
+<% end %>

@@ -1,0 +1,4 @@
+document_control:
+  serial_digits: 5
+  separator: "-"
+  

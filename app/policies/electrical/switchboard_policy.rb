@@ -1,5 +1,5 @@
 module Electrical
-  class SwitchboardPolicy < ResourcePolicy
+  class SwitchboardPolicy < TagablePolicy
     # Returns the switchboard record
     def switchboard
       record

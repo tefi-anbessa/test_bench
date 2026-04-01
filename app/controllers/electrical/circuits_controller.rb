@@ -214,7 +214,7 @@ module Electrical
       
       def circuit_params
         params.require(:electrical_circuit).permit(
-          :serial, :phase, :device, :poles, :curve, :rating, :elcb, :contactor, :notes, :submit
+          :serial, :phase, :device, :poles, :curve, :rating, :elcb, :contactor, :notes
         )
       end
   end

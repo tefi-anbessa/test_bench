@@ -12,7 +12,6 @@ roles:
       - team_member
     tag:
       - editor
-
     
   functional_roles:
     - electrical_designer

@@ -1,5 +1,9 @@
 FactoryBot.define do
   factory :electrical_light_cct, class: 'Electrical::LightCct' do
+    # Tag can be passed explicitly, otherwise will be auto-created
+    transient do
+      tag { nil }
+    end
     # Attributes
     light_fitting_type { :general }
     quantity { 1 }
@@ -14,7 +18,8 @@ FactoryBot.define do
         light_cct.tag = evaluator.tag
       else
         # Create new tag with default discipline in same transaction
-        discipline = Discipline.find_or_create_by(code: light_cct.class.discipline_code)
+        discipline = Discipline.find_by(name: light_cct.class.discipline) || 
+             create(:discipline, name: light_cct.class.discipline)
         light_cct.tag = create(:tag, :unique_tag, discipline: discipline)
       end
     end

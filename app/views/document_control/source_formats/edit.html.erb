@@ -1,0 +1,6 @@
+<% provide(:title, t('.title')) %>
+<% provide(:header, t('.header', label: @source_format.label )) %>
+<% provide(:button_text, t('actions.update')) %>
+<%= render "form",
+  source_format: @source_format
+%>

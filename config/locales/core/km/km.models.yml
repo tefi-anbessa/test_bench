@@ -1,6 +1,7 @@
 km:
   activerecord:
     models:
+      document: "Document"
       swatch: "Swatch"
       resource:           "ធនធាន"
       user:               "អ្នកប្រើប្រាស់"
@@ -17,6 +18,10 @@ km:
       socket_cct:         "ច្រកចូលអគ្គិសនី"
       light_cct:          "សៀគ្វីភ្លើង"
     attributes:
+      document:
+        serial: "Serial"
+        title: "Title"
+        notes: "Notes"
       swatch:
         name: "Name"
         bg: "Bg"

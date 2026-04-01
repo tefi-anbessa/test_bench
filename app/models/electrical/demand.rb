@@ -2,9 +2,7 @@
 module Electrical
   class Demand < Base
   # Demandable types are the models that can have electrical load information attached.
-    delegated_type :demandable, 
-      types: Constants.electrical.loadable,
-      required: true
+    delegated_type :demandable, types: Constants.electrical.loadable, required: true
 
     # Associations
     has_one :incomer, as: :to, class_name: 'Electrical::Cable', dependent: :nullify
@@ -25,7 +23,7 @@ module Electrical
     validates :power_factor, 
       numericality: { in: -1.0..1.0 }, 
       allow_nil: true,
-      exclusion: { in: [0.0], message: I18n.t("activerecord.errors.attributes.electrical/demand.power_factor.zero_pf") }
+      exclusion: { in: [0.0], message: I18n.t("activerecord.errors.attributes.electrical.demand.power_factor.zero_pf") }
       
     validates :duty, numericality: { in: 0.0..1.0 }, allow_nil: true
     

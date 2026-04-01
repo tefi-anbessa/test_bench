@@ -36,13 +36,13 @@ module ProjectAssistant
     end
     
     # Helper methods for path generation
-#    def model_path
-#      if @namespaced
-#        "#{module_name.underscore}/#{class_name.underscore}"
-#      else
-#        class_name.underscore
-#      end
-#    end
+    def i18n_insertion_point
+      if @namespaced
+        "#{class_path[-1]}:"
+      else
+        class_name.underscore
+      end
+    end
 
     def views_path
       if @namespaced
@@ -92,7 +92,7 @@ module ProjectAssistant
     end
 
     def process_fields
-      puts "DEBUG: Starting process_fields with args: #{args.inspect}"
+#      puts "DEBUG: Starting process_fields with args: #{args.inspect}"
       errors = []
       valid_fields = []
       
@@ -273,7 +273,7 @@ module ProjectAssistant
           if content.match?(insertion_pattern)
             content.sub!(insertion_pattern) do
               # $1 is the captured indentation, $2 is the module key
-              "#{$1}#{$2}\n#{$1}#{model_key}\n"
+              "\n#{$1}#{$2}#{$1}#{model_key}"
             end
           else
             say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Could not find module key #{module_key}", :red
@@ -281,8 +281,8 @@ module ProjectAssistant
           end
         else
           # Non-namespaced case - add at root level
-          model_key = "#{singular_name}:"
-          content += "\n#{model_key}\n"
+          model_key = "\n#{singular_name}:"
+          content += "#{model_key}\n"
         end
         
         # Add enum fields if they exist
@@ -310,34 +310,43 @@ module ProjectAssistant
           translation_file = Pathname.new(File.join(destination_root, "config", "locales", 
           "core", locale.to_s, "#{locale}.models.yml"))
         end
+        tab = "  "
         if File.exist?(translation_file)
-          content = File.read(translation_file)  
+          content = File.read(translation_file)
           # Prepare model name and attributes sections
-          model_section = "      #{file_path}: \"#{human_name}\"\n"
-          attributes_section = "      #{file_path}:\n"
+          model_section = tab*(2 + class_path.count) + "#{singular_name}: #{human_name}"
+          attributes_section = tab*(2 + class_path.count) + "#{singular_name}:\n"
           
           @fields.each do |field|
             # Use field[:name].humanize as dummy translation
-            attributes_section += "        #{field[:name]}: \"#{field[:name].humanize}\"\n"
+            attributes_section += tab*(3 + class_path.count) + "#{field[:name]}: \"#{field[:name].humanize}\"\n"
             
             # Add enum translations for enum_translated fields
             if field[:type] == 'enum_translated'
-              attributes_section += "          #{field[:name].pluralize}:\n"
-              attributes_section += "            other_#{field[:name]}: \"Other #{field[:name].humanize}\"\n"
+              attributes_section += tab*(3 + class_path.count) + "#{field[:name].pluralize}:\n"
+              attributes_section += tab*(4 + class_path.count) + "other_#{field[:name]}: \"Other #{field[:name].humanize}\"\n"
             end
           end
           
+
+        if @namespaced
+          model_insertion_regex = /models:\n((?:.+\n)*?)#{class_path[-1]}:\n/
+          attributes_insertion_regex = /attributes:\n((?:.+\n)*?)#{class_path[-1]}:\n/
+        else
+          model_insertion_regex = /models:\n/
+          attributes_insertion_regex = /attributes:\n/
+        end
           # Insert model name under models section
-          if content.match?(/(\s+models:)/)
-            content.sub!(/(\s+models:)/) { "#{$1}\n#{model_section}" }
+          if content.match?(model_insertion_regex)
+            content.sub!(model_insertion_regex) { "#{$1}\n#{model_section}" }
           else
             say_status :error, "#{translation_file.relative_path_from(Rails.root)}: Models key not found", :red
             return
           end
           
           # Insert attributes under attributes section
-          if content.match?(/(\s+attributes:)/)
-            content.sub!(/(\s+attributes:)/) { "#{$1}\n#{attributes_section}" }
+          if content.match?(attributes_insertion_regex)
+            content.sub!(attributes_insertion_regex) { "#{$1}\n#{attributes_section}" }
             File.write(translation_file, content) unless options[:pretend]
             say_status :update, "#{translation_file.relative_path_from(Rails.root)}: Added #{class_name} translations", :green
           else
@@ -357,9 +366,9 @@ module ProjectAssistant
         end
         if File.exist?(views_file)
           content = File.read(views_file)
-          
+          tab = "  "
           # Prepare views translations section
-          views_section = "    #{plural_name}:\n" +
+          views_section = "\n" + tab*2 + "#{plural_name}:\n" +
             "      index:\n" +
             "        title:            \"#{human_name.pluralize}\"\n" +
             "        header:           \"#{human_name.pluralize} Schedule for %{project}\"\n" +
@@ -371,7 +380,7 @@ module ProjectAssistant
             "        header:           \"New #{human_name}\"\n" +
             "      show:\n" +
             "        title:            \"#{human_name}\"\n" +
-            "        header:           \"#{human_name}: %{label}\"\n"
+            "        header:           \"#{human_name}: %{label}\""
           
           # Append to the end of the file
           content += views_section

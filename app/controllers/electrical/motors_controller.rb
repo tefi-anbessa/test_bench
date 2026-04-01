@@ -57,7 +57,7 @@ module Electrical
     # Only allow a list of trusted parameters through.
     def resource_params
       params.require(:electrical_motor).permit(:motor_type, :frame_size, :poles, :ingress_protection, :speed_rated,
-        :notes, :submit,
+        :notes,
         tag: [
           :id, :project_id, :discipline_id, :prefix, :serial,
           :suffix, :service, :stage, :notes, :tagable_type

@@ -1,5 +1,5 @@
 module Electrical
-  class CircuitPolicy < ResourcePolicy
+  class CircuitPolicy < TagablePolicy
     # Returns the circuit record
     def circuit
       record

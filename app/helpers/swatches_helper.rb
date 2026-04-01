@@ -1,4 +1,21 @@
 module SwatchesHelper
+
+  def swatch_variables(swatch)
+    {
+      "--bg" => swatch.bg,
+      "--text" => swatch.text,
+      "--form-bg" => swatch.form_bg,
+      "--form-field" => swatch.form_field,
+      "--card-bg" => swatch.card_bg,
+      "--card-header-bg" => swatch.card_header_bg,
+      "--card-border" => swatch.card_border,
+      "--badge-bg" => swatch.badge_bg,
+      "--badge-text" => swatch.badge_text,
+      "--link" => swatch.link_text,
+      "--link-hover" => swatch.link_hover
+    }.map { |k, v| "#{k}: #{v};" }.join(" ")
+  end
+
   def container_styles(swatch)
     "background-color: #{swatch.bg}; color: #{swatch.text}"
   end

@@ -1,0 +1,5 @@
+# General translations for document module in km
+km:
+  document:
+    actions:
+      issue: "Issue"

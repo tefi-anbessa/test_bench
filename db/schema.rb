@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_22_074204) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_29_092127) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -27,6 +27,55 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_22_074204) do
     t.index ["project_id"], name: "index_disciplines_on_project_id"
     t.index ["sort_order"], name: "index_disciplines_on_sort_order"
     t.index ["swatch_id"], name: "index_disciplines_on_swatch_id"
+  end
+
+  create_table "document_control_doc_types", force: :cascade do |t|
+    t.bigint "discipline_id"
+    t.string "code", null: false
+    t.string "label", null: false
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discipline_id", "code"], name: "index_document_control_doc_types_on_discipline_id_and_code", unique: true
+    t.index ["discipline_id"], name: "index_document_control_doc_types_on_discipline_id"
+  end
+
+  create_table "document_control_issues", force: :cascade do |t|
+    t.bigint "document_id", null: false
+    t.string "code", null: false
+    t.string "reason", null: false
+    t.bigint "document_control_source_format_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["document_control_source_format_id"], name: "idx_on_document_control_source_format_id_fd61cf2117"
+    t.index ["document_id", "code"], name: "index_document_control_issues_on_document_id_and_code", unique: true
+    t.index ["document_id"], name: "index_document_control_issues_on_document_id"
+  end
+
+  create_table "document_control_source_formats", force: :cascade do |t|
+    t.string "title", null: false
+    t.string "file_extension"
+    t.string "revision"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "vendor"
+    t.index ["revision", "title"], name: "index_document_control_source_formats_on_revision_and_title", unique: true
+  end
+
+  create_table "documents", force: :cascade do |t|
+    t.bigint "discipline_id"
+    t.bigint "doc_type_id"
+    t.integer "serial"
+    t.string "title", null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "doc_number"
+    t.index ["discipline_id"], name: "index_documents_on_discipline_id"
+    t.index ["doc_number"], name: "index_documents_on_doc_number", unique: true
+    t.index ["doc_type_id"], name: "index_documents_on_doc_type_id"
+    t.index ["serial", "discipline_id", "doc_type_id"], name: "index_documents_on_serial_and_discipline_id_and_doc_type_id", unique: true
   end
 
   create_table "electrical_cable_types", force: :cascade do |t|
@@ -272,6 +321,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_22_074204) do
 
   add_foreign_key "disciplines", "projects"
   add_foreign_key "disciplines", "swatches"
+  add_foreign_key "document_control_doc_types", "disciplines"
+  add_foreign_key "document_control_issues", "document_control_source_formats"
+  add_foreign_key "documents", "disciplines"
+  add_foreign_key "documents", "document_control_doc_types", column: "doc_type_id"
   add_foreign_key "electrical_cable_types", "projects"
   add_foreign_key "electrical_cables", "electrical_cable_types"
   add_foreign_key "electrical_circuits", "electrical_switchboards"

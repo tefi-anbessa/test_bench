@@ -54,7 +54,7 @@ module Electrical
 
     # Only allow a list of trusted parameters through.
     def resource_params
-      params.require(:electrical_light_cct).permit(:light_fitting_type, :quantity, :notes, :submit,
+      params.require(:electrical_light_cct).permit(:light_fitting_type, :quantity, :notes,
         tag: [
           :id, :project_id, :discipline_id, :prefix, :serial,
           :suffix, :service, :stage, :notes, :tagable_type

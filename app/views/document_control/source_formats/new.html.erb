@@ -1,0 +1,6 @@
+<% provide(:title, t('.title')) %>
+<% provide(:header, t('.header')) %>
+<% provide(:button_text, t('actions.create')) %>
+<%= render "form",
+  source_format: @source_format
+%>

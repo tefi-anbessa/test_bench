@@ -1,8 +1,8 @@
 <%% provide(:title, t('.title')) %>
-<div class="container mt-3">
+<div class="container mt-3" style="<%%= container_styles(@swatch) %>">
   <!-- <%= human_name %> Header Card -->
-  <div class="card mb-4">
-    <div class="card-header p-2">
+  <div class="card mb-4" style="<%%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%%= card_header_styles(@swatch) %>">
       <div class="row align-items-center">
         <!-- Left Navigation -->
         <div class="col-auto">
@@ -35,16 +35,14 @@
           </div>
         </div>
 
-        <!-- Center Tag Info -->
+        <!-- Center Badge Info -->
         <div class="col text-center">
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
-              <span class="badge bg-primary fs-6">
+              <span class="badge fs-6" style="<%%= badge_styles(@swatch) %>">
                 <%%= t('.header', label: @<%= singular_name %>.label)%>
               </span>
-              <%% if @<%= singular_name %>.tag&.service.present? %>
-                <small class="text-muted ms-2"><%%= @<%= singular_name %>.tag.service %></small>
-              <%% end %>
+              <!-- Add descriptor here if available -->
             </div>
           </div>
         </div>
@@ -93,6 +91,18 @@
                   </span>
                 <%% end %>
               <%% end %>
+
+              <%% if policy(@<%= singular_name %>).new? %>
+                <%%= link_to new_<%= singular_table_name %>_path, 
+                  class: "btn btn-outline-primary actions",
+                  aria: { label: t('actions.new') },
+                  title: t('actions.new') do %>
+                  <%%== bs_icon('plus-square-fill') %>
+                  <span class="ms-1">
+                    <%%= [t('actions.new'), t('activerecord.models.<%= controller_i18n_scope.singularize %>')].join(' ') %>
+                  </span>
+                <%% end %>
+              <%% end %>
             </div>
           </div>
         </div>
@@ -105,8 +115,8 @@
         <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
           <!-- <%= model_class %> Details Card -->
-          <div class="card mb-4">
-            <div class="card-header py-1">
+          <div class="card mb-4" style="<%%= card_styles(@swatch) %>">
+            <div class="card-header py-1" style="<%%= card_header_styles(@swatch) %>">
               <h4 class="mb-0"><%%= t('show.details', model: @<%= singular_name %>.model_name.human) %></h4>
             </div>
 
@@ -130,7 +140,7 @@
   <%- when "binary" -%> 
                 <div class="col-8"><%%= 'PLACEHOLDER FOR BINARY FIELD' %></div>
   <%- when "references" -%>
-                <div class="col-8"><%%= render <%= File.join(*class_path, field[:name].pluralize, "card") %>, object: @<%= singular_name %>.<%= field[:name] %> %></div>
+                <div class="col-8"><%%= render "<%= File.join(*class_path, field[:name].pluralize, "card") %>", object: @<%= singular_name %>.<%= field[:name] %> %></div>
   <%- else -%> <!-- Other type: Fallback to show whatever content is in the field. -->
                 <div class="col-8"><%%= @<%= singular_name %>.<%= field[:name] %> || '-' %></div>
   <%- end -%>

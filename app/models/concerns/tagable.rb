@@ -4,6 +4,7 @@ module Tagable
   included do
     has_one :tag, as: :tagable, dependent: :nullify
     accepts_nested_attributes_for :tag
+    delegate :project, to: :tag
 
     # Custom validation to ensure tag is present and valid
     # validates :tag, presence: :true, if: :persisted?

@@ -6,6 +6,7 @@ module <%= module_name %>
     before_action :authenticate_user!
     before_action :require_project!, only: %i[ new create edit update ]
     before_action :set_<%= singular_name %>, only: [:show, :edit, :update, :destroy]
+    before_action :set_swatch, only: [:index, :show, :new, :edit]
 
     # GET /<%= controller_file_path %>
     def index
@@ -34,10 +35,12 @@ module <%= module_name %>
       if @<%= singular_name %>.save
         flash[:success] = t('flash.create.notice', 
           resource_name: @<%= singular_name %>.model_name.human)
+        set_swatch
         redirect_to @<%= singular_name %>
       else
         flash[:alert] = t('flash.create.alert', 
           resource_name: @<%= singular_name %>.model_name.human.downcase)
+        set_swatch
         render :new, status: :unprocessable_content
       end
     end
@@ -54,10 +57,12 @@ module <%= module_name %>
       if @<%= singular_name %>.update(<%= singular_name %>_params)
         flash[:success] = t('flash.update.notice', 
           resource_name: @<%= singular_name %>.model_name.human)
+        set_swatch
         redirect_to @<%= singular_name %>
       else
         flash[:alert] = t('flash.update.alert', 
           resource_name: @<%= singular_name %>.model_name.human.downcase)
+        set_swatch
         render :edit, status: :unprocessable_content 
       end
     end
@@ -72,7 +77,8 @@ module <%= module_name %>
         flash[:alert] = t('flash.destroy.alert', 
           resource_name: @<%= singular_name %>.model_name.human.downcase)
       end
-      redirect_to <%= plural_name %>_path
+      set_swatch
+      redirect_to <%= plural_route_name %>_path
     end
 
     private
@@ -81,11 +87,15 @@ module <%= module_name %>
         @<%= singular_name %> = <%= class_name %>.find(params[:id])
       end
 
+      def set_swatch
+        @swatch = <%= name %>.swatch
+      end
+
       def setup_form
         # Add selector setup here.
       end
 
-      def resource_params
+      def <%= singular_name %>_params
         params.require(:<%= singular_table_name %>)
         .permit(<%= @fields.map { |field| 
           if field[:type] == "references"

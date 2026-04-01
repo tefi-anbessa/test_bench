@@ -21,7 +21,8 @@ FactoryBot.define do
         motor.tag = evaluator.tag
       else
         # Create new tag with proper discipline in same transaction
-        discipline = Discipline.find_or_create_by(code: motor.class.discipline_code)
+        discipline = Discipline.find_by(name: motor.class.discipline) || 
+             create(:discipline, name: motor.class.discipline)
         motor.tag = create(:tag, :unique_tag, discipline: discipline)
       end
     end

@@ -70,57 +70,21 @@ class FactoriesTest < ActiveSupport::TestCase
     assert discipline.valid?, "Discipline should be valid: #{discipline.errors.full_messages.join(', ')}"
   end
 
-  test "discipline factory creates unique codes" do
+  test "discipline factory creates unique names and labels" do
     project = create(:project)
     discipline1 = create(:discipline, project: project)
     discipline2 = create(:discipline, project: project)
     
-    assert_not_equal discipline1.code, discipline2.code
+    assert_not_equal discipline1.name, discipline2.name
+    assert_not_equal discipline1.label, discipline2.label
   end
 
-  test "discipline factory generates sequential codes" do
-    project = create(:project)
-    # Test that codes are unique and follow the pattern
-    codes = 5.times.map { create(:discipline, project: project).code }.sort
-
-    # Should generate 5 unique codes from A-Z
-    assert_equal 5, codes.uniq.length
-    codes.each do |code|
-      assert_match /\A[a-zA-Z_][a-zA-Z0-9_]*\z/, code
-    end
-  end
-
-test "discipline factory generates sequential names" do
-  disciplines = create_list(:discipline, 10)
-  names = disciplines.map(&:name)
-  assert_equal 10, names.uniq.length
-  names.each_with_index do |name, i|
-    assert_match /\ADiscipline code[a-f0-9]+\z/, name
-  end
-end
-
-  test "discipline factory handles code wrapping" do
-    project = create(:project)
-    # Since tests run in parallel, we can't rely on global sequence state
-    # Instead, test that the factory generates valid, unique codes
-    disciplines = create_list(:discipline, 10, project: project)
-
-    # Verify all codes are valid single letters and unique
-    codes = disciplines.map(&:code)
-    assert_equal 10, codes.uniq.length
-    codes.each do |code|
-      assert_match /\A[a-zA-Z_][a-zA-Z0-9_]*\z/, code
-    end
-
-    # Test that creating more disciplines still works (no wrapping errors)
-    more_disciplines = create_list(:discipline, 5, project: project)
-    more_codes = more_disciplines.map(&:code)
-
-    # All codes should be unique across both sets
-    all_codes = codes + more_codes
-    assert_equal 15, all_codes.uniq.length
-    codes.each do |code|
-      assert_match /\A[a-zA-Z_][a-zA-Z0-9_]*\z/, code
+  test "discipline factory generates sequential names" do
+    disciplines = create_list(:discipline, 10)
+    names = disciplines.map(&:name)
+    assert_equal 10, names.uniq.length
+    names.each_with_index do |name, i|
+      assert_match /\AFactory Discipline [a-f0-9]+\z/, name
     end
   end
   
@@ -131,15 +95,8 @@ end
   
   test 'project with tags is valid' do
     project = create(:project, code: 'CC')
-    discipline = create(:discipline, code: 'M')
+    discipline = create(:discipline, label: 'M')
     create_list(:tag, 3, project: project, discipline: discipline)
     assert project.valid?, "Project with tags is not valid: #{project.errors.full_messages.join(', ')}"
-  end
-  
-  test 'discipline with standard code is valid' do
-    # Test creating a standard discipline
-    discipline = create(:discipline, :elec)  # Using standard discipline 'E' for Electrical
-    assert discipline.valid?
-    assert_equal "elec", discipline.code
   end
 end

@@ -1,0 +1,43 @@
+# document views translations for th
+th:
+  document_control:
+    doc_types:
+      index:
+        title:            "Doc types"
+        header:           "Doc types Schedule for %{project}"
+      edit:
+        title:            "Edit Doc type"
+        header:           "Edit Doc type: %{label}"
+      new:
+        title:            "New Doc type"
+        header:           "New Doc type"
+      show:
+        title:            "Doc type"
+        header:           "Doc type: %{label}"
+    source_formats:
+      index:
+        title:            "Source formats"
+        header:           "Source formats Schedule for %{project}"
+      edit:
+        title:            "Edit Source format"
+        header:           "Edit Source format: %{label}"
+      new:
+        title:            "New Source format"
+        header:           "New Source format"
+      show:
+        title:            "Source format"
+        header:           "Source format: %{label}"
+        
+    issues:
+      index:
+        title:            "Issues"
+        header:           "Issues Schedule for %{project}"
+      edit:
+        title:            "Edit Issue"
+        header:           "Edit Issue: %{label}"
+      new:
+        title:            "New Issue"
+        header:           "New Issue"
+      show:
+        title:            "Issue"
+        header:           "Issue: %{label}"

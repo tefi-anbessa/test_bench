@@ -107,7 +107,6 @@ th:
       message_html:     "Assign a new user role for %{resource}"
       no_roles_assigned:  "No roles have been assigned yet"
       existing_roles:  "Existing roles"
-
     swatches:
       index:
         title:            "Swatches"
@@ -120,4 +119,17 @@ th:
         header:           "New Swatch"
       show:
         title:            "Swatch"
-        header:           "Swatch: %{label}"
+        header:           "Swatch: %{label}"    
+    documents:
+      index:
+        title:            "Documents"
+        header:           "Documents Register for %{project}"
+      edit:
+        title:            "Edit Document"
+        header:           "Edit Document: %{label}"
+      new:
+        title:            "New Document"
+        header:           "New Document"
+      show:
+        title:            "Document"
+        header:           "Document: %{label}"

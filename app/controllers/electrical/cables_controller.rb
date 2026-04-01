@@ -84,7 +84,7 @@ module Electrical
       def resource_params
         params.require(:electrical_cable).permit(:electrical_cable_type_id,
           :route_length, :vertical_allowance, :termination_allowance,
-          :start_mark, :end_mark, :from_id, :from_type, :to_id, :to_type, :notes, :submit,
+          :start_mark, :end_mark, :from_id, :from_type, :to_id, :to_type, :notes,
           tag: [
             :id, :project_id, :discipline_id, :prefix, :serial,
             :suffix, :service, :stage, :notes, :tagable_type

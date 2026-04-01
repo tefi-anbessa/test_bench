@@ -1,0 +1,5 @@
+# General translations for document module in cn
+cn:
+  document_control:
+    actions:
+      issue: "Issue"

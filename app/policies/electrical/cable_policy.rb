@@ -1,5 +1,5 @@
 module Electrical
-  class CablePolicy < ResourcePolicy
+  class CablePolicy < TagablePolicy
     # Returns the cable record
     def cable
       record

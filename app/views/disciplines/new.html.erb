@@ -1,7 +1,7 @@
 <% provide(:title, t('.title')) %>
 <% provide(:header, [t("projects.show.header", label: @project.label), 
                       t('.header')].join("; ")) %>
-<% provide(:button_text, t('actions.save')) %>
+<% provide(:button_text, t('actions.create')) %>
 <%= render "form",
   discipline: @discipline,
   project: @project

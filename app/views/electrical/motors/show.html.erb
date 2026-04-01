@@ -157,7 +157,7 @@
               <!-- Demand section -->
               <div class="row mb-1">
                 <div class="col-4 text-muted">
-                  <% text = t('activerecord.electrical.models.demand') %>
+                  <% text = t('activerecord.models.electrical.demand') %>
                   <% if @motor.electrical_demand.present? %>
                     <%= link_to @motor.electrical_demand,
                       class: "btn btn-sm btn-outline-secondary",
@@ -166,7 +166,7 @@
                         <%== bs_icon('box-arrow-in-down-right') %>
                     <% end %>
                   <% elsif @motor.tag&.present? %> <!-- Cannot create a new demand without a tag. -->
-                    <% text = t("actions.link", resource: t("activerecord.models.electrical.demand")) %>
+                    <% text = t("actions.link", resource: text) %>
                     <% if policy(Electrical::Demand).new? %>
                       <%= link_to new_tag_electrical_demand_path(@motor.tag.id),
                           class: "btn btn-sm btn-outline-primary mb-2",

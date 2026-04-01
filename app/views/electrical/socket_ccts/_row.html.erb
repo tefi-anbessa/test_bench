@@ -1,9 +1,9 @@
 <tr scope="row">
   <% unless current_project %>
-    <td scope = "col"><%%= row.tag&.nil? ? '-' : row.tag.discipline.project.code %></td>
-  <%% end %>
+    <td><%%= row.tag&.nil? ? '-' : row.tag.discipline.project.code %></td>
+  <% end %>
   <% if row.tag&.nil? %>
-    <td>'-'</td>
+    <td>-</td>
     <td class="table-danger"><%= t("index.no_tag", id: row.id) %></td>
   <% else %>
     <td><%= row.tag.stage %></td>
@@ -11,6 +11,31 @@
   <% end %>
   <td><%= row.class.human_enum_name(:socket_type, row.socket_type) %></td>
   <td><%= row.quantity %></td>
+  <td>
+    <% text = t('activerecord.models.electrical.demand') %>
+    <% if row.electrical_demand.present? %>
+      <%= link_to row.electrical_demand,
+        class: "btn btn-sm btn-outline-info",
+        title: text do %>
+          <%= text %>
+        <% end %>
+    <% else %>
+      <% if row.tag&.present? %>
+        <% if policy(Electrical::Demand).new? %>
+          <% text = t("actions.link", resource: text) %>
+          <%= link_to new_tag_electrical_demand_path(row.tag.id),
+            class: "btn btn-sm btn-outline-primary",
+            title: text do %>
+              <%= text %>
+            <% end %>
+        <% else %>
+          <span class="d-none d-md-inline">
+            <%= t('show.unassigned', model: text) %>
+          </span>
+        <% end %>
+      <% end %>
+    <% end %>
+  </td>
   <td>
     <% if policy(row).show? %>
       <%= link_to row, class: "btn btn-outline-info btn-sm icon-link",

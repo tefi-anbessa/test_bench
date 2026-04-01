@@ -1,0 +1,94 @@
+<div class="container mt-3" style="<%= container_styles(@swatch) %>">
+  <div class="card" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+
+      <!-- Center Tag Info -->
+      <div class="col text-center">
+        <div class="d-flex flex-column align-items-center">
+            <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
+            <%= yield(:header) %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%= bootstrap_form_with(model: document,
+          layout: :horizontal,
+          label_col: "col-sm-4",
+          control_col: "col-sm-8",
+          wrapper_class: 'mb-1',
+          ) do |f| %>
+
+      <div class="card-body p-2" style="<%= card_styles(@swatch) %>">
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-10 col-lg-8 col-xl-6">        <!-- Adjust to fit field width requirements -->
+
+            <!-- Document Details -->
+            <div class="card mb-1" style="<%= card_styles(@swatch) %>">
+              <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+                <h5><%= t('activerecord.models.document') %></h5>
+              </div>
+
+              <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
+                <%= render 'shared/error_messages', object: f.object %>
+                <% disable = document.persisted? %>
+                <% if document.new_record? %>
+                  <%= f.select :discipline_id,
+                      options_for_select(
+                          @disciplines.map { |discipline|
+                            translated_label = t("discipline.label.#{discipline.label}", default: discipline.label)
+                            translated_name = t("discipline.name.#{discipline.name}", default: discipline.name)
+                            ["#{translated_label}: #{translated_name}", discipline.id]
+                          },
+                        document.discipline_id
+                      ),
+                      { include_blank: t('form.required') },
+                      disabled: disable,
+                      class: 'form-control form-control-sm' %>
+
+                  <%= f.select :doc_type_id,
+                      options_for_select(
+                        @doc_types.map { |doc_type|
+                          ["#{doc_type.code}: #{doc_type.label}", doc_type.id]
+                        },
+                        selected: document.doc_type_id
+                      ),
+                      { include_blank: t('form.required') },
+                      disabled: disable,
+                      class: 'form-control form-control-sm' %>
+                <% end %>
+                <%= f.text_field :title,
+                        class: 'form-control form-control-sm',
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-8" %>
+                <%= f.text_area :notes,
+                        class: 'form-control form-control-sm',
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-8",
+                        rows: 3 %>
+                
+              </div> <!-- end document card body -->
+            </div> <!-- end document card -->
+
+            <!-- Card Footer with Actions -->
+            <div class="card-footer bg-transparent text-end p-2">
+              <%= link_to(document.persisted? ? 
+              document : 
+              documents_path,
+                    class: 'btn btn-warning',
+                    data: { confirm: t('actions.sure'), turbo: false }) do %>
+                <%= t('actions.discard') %>
+                <%== bs_icon('x-square') %>
+              <% end %>
+
+              <%= f.button :submit, class: 'btn btn-primary', name: "form[submit]" do %>
+                <%= yield(:button_text) %>
+                <%== bs_icon('save') %>
+              <% end %>
+            </div> <!-- end card footer -->
+          </div> <!-- end responsive columns -->
+        </div> <!-- end row -->
+      </div> <!-- end card body -->
+    <% end %> <!-- end bootstrap_form_with -->
+  </div> <!-- end card -->
+</div> <!-- end container -->

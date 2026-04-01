@@ -21,7 +21,6 @@ Rails.application.routes.draw do
       resources :disciplines, shallow: true do
         get :schema, on: :member, constraints: { format: 'json' }
       end
-      resources :documents, shallow: true
 
       # Include routes for catalog type items which link directly to project.
       namespace :electrical do
@@ -48,7 +47,9 @@ Rails.application.routes.draw do
     end
 
     # Document namespace for document management
-    namespace :document do
+    namespace :document_control do
+      resources :source_formats
+      resources :doc_types
       # INSERTION POINT 1 FOR SUBMODULES
       # INSERTION POINT 1 FOR TAGABLE GENERATOR - though there are no tagables in document module
       # Add document routes here
@@ -79,8 +80,12 @@ Rails.application.routes.draw do
     resources :roles, only: [:index, :new, :create]
   end
 
-  
   resources :swatches
+  resources :documents, shallow: true do
+    namespace :document_control do
+      resources :issues
+    end
+  end
 
 # Defines the root path route ("/")
   root to: 'site#home'

@@ -1,8 +1,8 @@
 <% content_for :title, "#{t('activerecord.models.tag') + ' ' + @tag.full_tag}" %>
-<div class="container mt-3" style="<%= container_styles(@tag.discipline.swatch) %>">
+<div class="container mt-3 themed" style="<%= swatch_variables(@swatch) %>">
   <!-- Tag Header Card -->
-  <div class="card mb-4" style="<%= card_styles(@tag.discipline.swatch) %>">
-    <div class="card-header p-2" style="<%= card_header_styles(@tag.discipline.swatch) %>">
+  <div class="card mb-4">
+    <div class="card-header p-2">
       <div class="row align-items-center">
         <!-- Left Navigation -->
         <div class="col-auto">
@@ -37,7 +37,7 @@
         <div class="col text-center">
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
-              <span class="badge fs-6" style="<%= badge_styles(@tag.discipline.swatch) %>">
+              <span class="badge fs-6">
                 <%= [t('activerecord.models.tag'), @tag.full_tag].join(': ') %>
               </span>
               <% if @tag.service.present? %>
@@ -107,13 +107,13 @@
 
           <!-- Project stage -->
           <div class="row mb-1">
-            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.stage') %></div>
+            <div class="col-4"><%= t('activerecord.attributes.tag.stage') %></div>
             <div class="col-8"><%= @tag.stage %></div>
           </div>
 
           <!-- Discipline Info -->
           <div class="row mb-1">
-            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.discipline') %></div>
+            <div class="col-4 text-muted"><%= t('activerecord.models.discipline') %></div>
             <div class="col-8"><%= [@tag.discipline.label, " - ", @tag.discipline.name].join %></div>
           </div>
 

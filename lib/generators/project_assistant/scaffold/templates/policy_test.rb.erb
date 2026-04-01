@@ -1,5 +1,5 @@
 require 'test_helper'
-require_relative '../../helpers/resource_policy_test'
+require 'helpers/resource_policy_test'
 <%- if @namespaced -%>
 module <%= module_name %>
 <%- end -%>
@@ -8,6 +8,16 @@ module <%= module_name %>
 
     def setup
       setup_resource_policy_test
+      @resource = create(:<%= singular_table_name %>, discipline: @discipline)
+      @other_resource = create(:<%= singular_table_name %>, discipline: @other_discipline)
+    end
+
+    def new_project_resource
+      build(:<%= singular_table_name %>, discipline: @discipline)
+    end
+
+    def new_other_project_resource
+      build(:<%= singular_table_name %>, discipline: @other_discipline)
     end
 
     # All setup and tests have been abstracted to ResourcePolicyTest and PolicyTestHelpers.

@@ -122,4 +122,17 @@ km:
         header:           "New Swatch"
       show:
         title:            "Swatch"
-        header:           "Swatch: %{label}"
+        header:           "Swatch: %{label}"    
+    documents:
+      index:
+        title:            "Documents"
+        header:           "Documents Schedule for %{project}"
+      edit:
+        title:            "Edit Document"
+        header:           "Edit Document: %{label}"
+      new:
+        title:            "New Document"
+        header:           "New Document"
+      show:
+        title:            "Document"
+        header:           "Document: %{label}"

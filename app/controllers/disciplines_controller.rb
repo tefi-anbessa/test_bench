@@ -7,10 +7,12 @@ class DisciplinesController < ApplicationController
 
   # GET /disciplines or /disciplines.json
   def index
+    authorize Discipline
     @q = policy_scope(Discipline).ransack(params[:q])
     @pagy, @disciplines = pagy(@q.result, limit: 20)
     @discipline = @project.disciplines.build()
     authorize @discipline
+    @swatch = Swatch.find_by(name: 'app_theme')
   end
 
   # GET /disciplines/1 or /disciplines/1.json
@@ -151,7 +153,7 @@ class DisciplinesController < ApplicationController
       params.require(:discipline).permit(
         :code, :label, :name, :module_name, 
         :sort_order, :notes, :project_id, :swatch_id,
-        :prefix_schema, :submit
+        :prefix_schema
       )
     end
 end

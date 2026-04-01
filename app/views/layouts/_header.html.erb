@@ -40,42 +40,84 @@
               </li>
             <% end %>
 
-            <% if policy(Project).index? %>
-                <li class="nav-item dropdown">
-                  <a class="nav-link dropdown-toggle"
-                      href="#"
-                      data-bs-toggle="dropdown"
-                      id="project-menu-btn"
-                      role="button"
-                      aria-expanded="false">
-                      <%= project_selected? ?
-                        t('project', scope: 'activerecord.models') + ": " + current_project.code :
-                        t('project', scope: 'activerecord.models').pluralize %>
-                  </a>
-                  <ul class="dropdown-menu" aria-labelledby="project-menu-btn">
-                    <% if project_selected? %>
-                      <% if policy(current_project).show? %>
-                      <li><%= link_to [t('actions.show'), current_project.code].join(" "),
-                            project_path(current_project),
-                            class: "dropdown-item" %></li>
-                      <% end %>
-                      <% if policy(current_project).edit? %>
-                      <li><%= link_to [t('actions.edit'), current_project.code].join(" "),
-                            edit_project_path(current_project),
-                            class: "dropdown-item" %></li>
-                      <% end %>
+            <!-- Project section -->
+            <% if policy(Project).index? %> 
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle"
+                    href="#"
+                    data-bs-toggle="dropdown"
+                    id="project-menu-btn"
+                    role="button"
+                    aria-expanded="false">
+                    <%= project_selected? ?
+                      t('project', scope: 'activerecord.models') + ": " + current_project.code :
+                      t('project', scope: 'activerecord.models').pluralize %>
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="project-menu-btn">
+                  <% if project_selected? %>
+                    <% if policy(current_project).show? %>
+                    <li><%= link_to [t('actions.show'), current_project.code].join(" "),
+                          project_path(current_project),
+                          class: "dropdown-item" %></li>
                     <% end %>
-                    
-                    <li><%= link_to t('actions.select'),
-                          select_projects_path,
+                    <% if policy(current_project).edit? %>
+                    <li><%= link_to [t('actions.edit'), current_project.code].join(" "),
+                          edit_project_path(current_project),
                           class: "dropdown-item" %></li>
-                    <li><%= link_to t('project', scope: 'activerecord.models').pluralize,
-                          projects_path,
+                    <% end %>
+                  <% end %>
+                  
+                  <li><%= link_to t('actions.select'),
+                        select_projects_path,
+                        class: "dropdown-item" %></li>
+                  <li><%= link_to t('project', scope: 'activerecord.models').pluralize,
+                        projects_path,
+                        class: "dropdown-item" %></li>
+                </ul>
+              </li>
+            <% end %> <!-- Project section -->
+
+            <!-- Documents section: if access is available to document control models, make a dropdown menu -->
+            <% if policy(DocumentControl::DocType).new? %> 
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle"
+                    href="#"
+                    data-bs-toggle="dropdown"
+                    id="document-menu-btn"
+                    role="button"
+                    aria-expanded="false">
+                    <%= t('document', scope: 'activerecord.models').pluralize %>
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="document-menu-btn">
+                  <% if policy(Document).index? %>
+                    <li><%= link_to t('documents.index.title'),
+                          documents_path,
                           class: "dropdown-item" %></li>
-                  </ul>
-                </li>
+                  <% end %>
+                  <% if policy(DocumentControl::DocType).index? %>
+                    <li><%= link_to t('activerecord.models.document_control.doc_type').pluralize,
+                          document_control_doc_types_path,
+                          class: "dropdown-item" %></li>
+                  <% end %>
+                  <% if policy(DocumentControl::SourceFormat).index? %>
+                    <li><%= link_to t('activerecord.models.document_control.source_format').pluralize,
+                          document_control_source_formats_path,
+                          class: "dropdown-item" %></li>
+                  <% end %>
+                </ul>
+              </li> <!-- Document dropdown -->
+
+            <!-- Otherwise, provide a simple documents register link -->
+            <% else %>
+              <li class="nav-item">
+                <%= link_to t('document', scope: 'activerecord.models').pluralize,
+                  documents_path,
+                  class: 'nav-link',
+                  aria: { label: t('document', scope: 'activerecord.models').pluralize } %>
+              </li>
             <% end %>
 
+            <!-- Tags section -->
             <li class="nav-item">
               <%= link_to t('tag', scope: 'activerecord.models').pluralize,
                 tags_path,

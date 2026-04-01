@@ -108,7 +108,7 @@ module Electrical
         params.require(:electrical_cable_type).permit(
           :conductor_material, :cores, :csa, :neutral_csa, :earth_csa, 
           :insulation, :bedding, :armour, :sheath, :bedding_od, :overall_od,
-          :temperature_rating, :voltage_rating, :project_id, :notes, :submit
+          :temperature_rating, :voltage_rating, :project_id, :notes
         )
       end
   end

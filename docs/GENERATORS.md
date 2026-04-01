@@ -176,7 +176,7 @@ Following the tagable model name, all fields to be included in the model shall b
 
 * Names must be valid ruby symbols.
 * Types implemented shall be the standard rails types as used by the scaffold generator, with custom additions for this generator as listed below.
-* The generator is not required to handle `:references` for relationships between models. 
+* The generator is not required to handle `:references` for relationships between models.
 * Standard rails column types are: `:string, :text, :integer, :bigint, :float, :decimal, :datetime, :timestamp, :time, :date, :binary, :boolean, jsonb`.
 * The generator shall implement the custom `:enum` type to create an enumerated field. The generator shall set integer type in the migration, and shall create a framework for the enum in the model, views, and constants files for the module. The allowable values for the enum will need to be set manually after generation.
 * The generator shall implement the custom `:enum_translated` type to specify an enumerated field (with translations). The generator shall set integer type in the migration, and shall create a framework for the enum in the model, views, and constants as for `:enum` type. In addition, the locales files for the module shall be edited with placeholders for the field name and option translations. The allowable values and translations for the enum will need to be set manually after generation.
@@ -435,8 +435,8 @@ Here again is our example command line:
      add the line:
      `include Electrical::Demandable`.
    * [TODO future: similar for process module].
-   * Check that associations are correctly defined for :references fields. The generator adds `belongs_to` statements, but no options. These must be added if required. The generator assumes that the referenced class is in the same module/sub-module as the generated model.
-   * Check that any required :enum and :enum_translated type fields are specified as enum.
+   * Check that associations are correctly defined for :references fields. The generator adds `belongs_to` statements, but no options. These must be added if required. The generator assumes that the referenced class is in the same module/sub-module as the generated model. Add the inverse relation (has_many or has_one) to the referenced model.
+   * Check that any required :enum and :enum_translated type fields are specified as enum with reference to the constants defining the field options..
    * Check that the fields with :required option have presence validations.
    * Add any other validations required, such as range limits, numericality, format, etc.
    * If the `ransackable_attributes` line is too long, split it after a comma for ease of reading.
@@ -474,8 +474,8 @@ Here again is our example command line:
    * Check all fields are included as expected.
    * If there are any decimal fields, add the required precision. For example, a dollar currency field might require
      `t.decimal :amount, precision: 5, scale: 2`.
-   * If the model has a reference to an existing table, you can add the reference at this point. For example, an electrical cable belongs_to electrical_cable_type, and the migration includes the line
-     `t.references :electrical_cable_type, null: false, foreign_key: true`
+   * Check that any references to existing tables are to the correct table name. For example, an electrical cable belongs_to electrical_cable_type, and the migration includes the line
+     `t.references :electrical_cable_type, foreign_key: true`
      However, if the referenced table does not exist yet, it will be better to create a new migration to add the reference later.
    * Other options are available, but not usually required. Refer to [http://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/SchemaStatements.html#method-i-add_column]
    * Save and close the migration file, then in a terminal, run `rails db:migrate`.
@@ -498,7 +498,7 @@ Here again is our example command line:
 
 1. Unless the new model has special permissions requirements, the policy and policy_test files should not need editing.
 
-   * Run the policy test (in our test `test/policies/electrical/heater_policy_test.rb`).
+   * Run the policy test (in our example `test/policies/electrical/heater_policy_test.rb`).
 
 1. Open the controller file (in our example `app/controllers/electrical/heaters_controller.rb`).
 
@@ -570,7 +570,7 @@ The scaffold generator differs from the tagable generator in allowing models to 
 The scaffold generator shall be invoked using the rails generate command, the generator name project_assistant:scaffold, the module and tagable model name as a Ruby class specifier in CamelCase, and a list of arguments for the fields to be created.  Here is an example generate command for a document control object:
 
   ```bash
-  rails generate project_assistant:scaffold Docment::Issue document:references code:string user:references{by} user:references{checked} user:references{approved}
+  rails generate project_assistant:scaffold DocumentControl::Issue document:references code:string user:references{by} user:references{checked} user:references{approved}
   ```
 
 Rules for arguments are the same.

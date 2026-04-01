@@ -5,7 +5,7 @@
       <%= t('.header', project: @project.present? ? @project.label : t('projects.all_projects')) %>
     </h4>
     
-    <% if policy(@tag).new? %>
+    <% if policy(Tag).new? %>
       <div class=me-1>
         <%= link_to new_tag_path, class: "btn btn-outline-primary", 
               aria: { label: t('actions.new') },

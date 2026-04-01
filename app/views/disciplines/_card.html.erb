@@ -1,0 +1,60 @@
+<% discipline = object %>
+<%= render 'components/collapsible',
+  id: "discipline_#{discipline.id}_details",
+  title: t("disciplines.show.header", project: discipline.project.label, label: discipline.label),
+  expanded: false,
+  header_class: 'py-1' do %>
+  
+    <div class="container-fluid">
+      <div class="row mb-1">
+        <% text = t("actions.jump_to", model: t("activerecord.models.discipline")) %>
+        <%= link_to discipline, 
+            class: "btn btn-sm btn-outline-secondary me-2",
+            title: text do %>
+          <%== bs_icon('box-arrow-in-up-left') %>
+          <span class="d-none d-md-inline"><%= text %></span>
+        <% end %>
+      </div>
+
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= discipline.class.human_attribute_name(:label) %></div>
+        <div class="col-8"><%= discipline.label %></div>
+      </div>
+
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= discipline.class.human_attribute_name(:name) %></div>
+        <div class="col-8"><%= discipline.name %></div>
+      </div>
+
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= discipline.project.model_name.human %></div>
+        <% if discipline.project.present? %>
+          <div class="col-8"><%= discipline.project.code %></div>
+        <% else %>
+          <div class="col-8 alert alert-danger">
+            <%= t('show.orphan', model: Project.model_name.human.downcase) %>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= discipline.class.human_attribute_name(:prefix_schema) %></div>
+        <div class="col-8"><%= discipline.prefix_schema["name"] || '-' %></div>
+      </div>
+
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= discipline.class.human_attribute_name(:module_name) %></div>
+        <div class="col-8"><%= discipline.module_name || '-' %></div>
+      </div>
+
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= discipline.swatch.model_name.human %></div>
+        <div class="col-8"><%= discipline.swatch.name || '-' %></div>
+
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= discipline.class.human_attribute_name(:notes) %></div>
+        <div class="col-8"><%= discipline.notes.present? ? simple_format(discipline.notes) : '-' %></div>
+      </div>
+
+    </div> <!-- end container-fluid -->
+<% end %>

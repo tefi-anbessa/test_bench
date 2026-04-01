@@ -9,7 +9,7 @@ module TagableTestPatterns
     @project = create(:project)
     set_current_project(@project)
 
-    @resource_discipline = create(:discipline, code: resource_class.discipline_code, project: @project)
+    @resource_discipline = create(:discipline, name: resource_class.discipline, project: @project)
 
     @regular_user = create(:user)   # No roles
 
@@ -377,13 +377,13 @@ module TagableTestPatterns
   end
 
   def assert_successful_update_flash_message
-    expected = I18n.t('flash.actions.update.notice',
+    expected = I18n.t('flash.update.notice',
       resource_name: resource_class.model_name.human)
     assert_flash_message :success, expected
   end
 
   def assert_successful_destroy_flash_message
-    expected = I18n.t('flash.actions.destroy.notice',
+    expected = I18n.t('flash.destroy.notice',
       resource_name: resource_class.model_name.human)
     assert_flash_message :success, expected
   end

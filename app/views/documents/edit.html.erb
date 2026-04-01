@@ -1,0 +1,6 @@
+<% provide(:title, t('.title')) %>
+<% provide(:header, t('.header', label: @document.label )) %>
+<% provide(:button_text, t('actions.update')) %>
+<%= render "form",
+  document: @document
+%>

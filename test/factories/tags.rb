@@ -8,7 +8,7 @@ FactoryBot.define do
     service { "Test #{prefix}-#{'%04d' % serial}#{suffix}" }
     stage { 0 }  # Default stage to 0
     notes { Faker::Lorem.paragraph(sentence_count: 2) }
-    discipline
+    association :discipline
 
     # Allow passing project through to discipline
     transient do

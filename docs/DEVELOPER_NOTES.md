@@ -212,7 +212,7 @@ Errors are categorized as:
 #### Unauthorized access
 
 - These are pundit authorisation failures.
-- Generally, the workflow should not allow access to unauthorized functions.
+- Generally, the workflow should not provide access to unauthorized functions.
 - However, until the application is thoroughly tested in use, this is considered a lesser error than a security breach attempt.
 - Errors are processed by the application controller rescue_from Pundit::NotAuthorizedError.
 - Rescue includes a flash danger message with the translated standard error message, and redirects to custom error page /403 forbidden.
@@ -231,7 +231,7 @@ Errors are categorized as:
 - More complex validations of associations use custom error messages with their translations.
 - Model tests should include test of each validation to ensure that user data entry errors are caught and translated error messages are added to the model object.
 
-#### Security breach attempts: 
+#### Security breach attempts
 
 - These are trapped forbidden operations that should not be possible using normal workflows.
 - They are probably injected HTML or JSON requests in an attempt to defeat the permissions system.
@@ -273,7 +273,7 @@ Errors are categorized as:
   - "trash" for delete buttons to delete the object
   - "search" for search buttons on views
   - "x-square" for Discard Changes buttons on forms
-  - "save" for save buttons on forms
+  - "save" for save (create or pdate) buttons on forms
 - Flag icons are used to assist with locale/language selection.
   - The gem rails-icons is used with the library 'flags' to provide the icons.
   
@@ -313,14 +313,15 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Build a scaffold generator for models without links to tags.
 - [ ] Enhance electrical model with network load calculations.
 - [ ] Enhance the existing database models to include revison control of data.
-- [ ] Build a document control module to manage document storage, issue, history including versions.
+- [x] Build a document control module to manage document storage, issue, history including versions.
+- [ ] Add polymorphic comments.
+- [ ] Management of Change.
 - [ ] Build an instrument module.
 - [ ] Build a bookkeeping module to manage financial transactions.
 - [ ] Build a process piping module similar to the electrical module, using pipes and fittings to model a process piping network.
 - [ ] Build an asset management module to track assets and link from design to maintenance.
 - [ ] Build a maintenance management module.
 - [ ] Add hazardous area functionality.
-- [ ] Management of Change.
 - [ ] Risk Management.
 - [ ] Functional Safety.
 
@@ -344,7 +345,6 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Roles policy is delegating to resource policies for resource instances. Tests need to consider this.
 - [ ] Ensure select for role names does not include restricted roles unless current user has app_owner role.
 - [ ] System tests for all resources.
-- [ ] Improve forbidden error logging messages, include user. Consider automatic sign out.
 - [ ] Model tests should include test of enums.
 - [ ] Complete workflows with admin and no project selected.
 - [ ] Complete proper ordering by switchboard tag and serial for circuits.
@@ -355,7 +355,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Complete swatch system tests.
 - [x] Complete switchboard controller test.
 - [ ] Complete cable system tests for from and to after switchboard, demand, and circuit tests are working.
-- [ ] Use of button text for new and edit forms is mixed. Standardise on create for new, update for edit.
+- [x] Use of button text for new and edit forms is mixed. Standardise on create for new, update for edit.
 - [ ] Demand form live update of calculated values not working.
 - [ ] Workflow for cable types with no current project.
 - [x] Refine the collapsibles component to retain state after refresh operations (e.g. sorting links with ransack). Make a generalised solution, maybe use turbo.
@@ -371,6 +371,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Review all use of the method underscore. It apparently is not aware of the OS and uses '/' as the separator. Use File.join wherever appropriate.
 - [ ] Fix module generator to use nested parent modules.
 - [ ] Provide a means for admins to edit tags to remove broken links to tagable.
+- [ ] Add tagable controller checks to ensure discipline belongs to current project.
 
 ## Refactoring Opportunities
 
@@ -404,12 +405,16 @@ It is possible to create multiple tags referencing the same tagable element, des
    - [ ] add colour code by discipline
 - [ ] Look at use of hover on buttons, and use turbo to prevent page refresh.
 - [x] Improve implementation of Discipline model, including translation. Consider using constants hash for each project.
+- [ ] Refactor colour system to use CSS variables.
 - [ ] Abstract ingress protection functionality so it can be reused by instrument module.
 - [ ] Change all delete links to use turbo to prevent full page refresh.
 - [ ] Revise index views to use turbo for ransack searches.
 - [ ] Replace devise views with bespoke views in the style of the rest of the application.
 - [ ] Add user profile info.
 - [ ] Refactor RBAC system with functional roles limited to project scope, and project admin roles.
+- [ ] Refactor test helpers to minimise code duplication, and simplify generation of new models.
+- [ ] Improve forbidden error logging messages, include user. Consider automatic sign out.
+- [ ] Move document issues to change module, generalise so it can be used for other entities (polymorphic).
 
 ## Potential Features
 

@@ -13,14 +13,14 @@
         </div>
       </div>
     </div>
-<%= bootstrap_form_with(model: discipline,
+    <%= bootstrap_form_with(model: discipline,
       url: discipline.persisted? ? discipline_path(discipline) : project_disciplines_path(project),
       layout: :horizontal, 
       label_col: "col-sm-4", 
       control_col: "col-sm-8",
       html: { novalidate: true }) do |f| %>
 
-      <div class="card-body p-2">
+      <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
         <%= render 'shared/error_messages', object: f.object %>
 
         <div class="row justify-content-center">
@@ -48,13 +48,13 @@
                 <%= f.select :copy_from_standard,
                       options_for_select(
                         Constants.disciplines.map { |d| 
-                          [t("discipline.#{d[:code]}.name", default: d[:name]), d[:code]] 
+                          [t("discipline.name.#{d[:name]}", default: d[:name]), d[:label]] 
                         }
                       ),
                       { include_blank: t('form.new_select') },
                       { class: "form-select" } %>
               </div>
-<% end %>
+           <% end %>
 
             <!-- Name -->
             <div class="row">
@@ -109,7 +109,7 @@
               <% end %>
         <% end %>
         <!-- Button to submit form -->
-        <%= f.button :submit, class: 'btn btn-primary' do %>
+        <%= f.button :submit, class: 'btn btn-primary', name: 'form[submit]' do %>
           <%= yield(:button_text) %>
           <%== bs_icon('save') %>
         <% end %>

@@ -5,9 +5,13 @@ module TagableSystemTestPatterns
 
     # Create project
     @project = create(:project)
+    @swatch = create(:swatch, name: 'app_theme')
 
-    # Create resource discipline using the class discipline_code and default prefix_schema
-    @discipline = create(:discipline, project: @project, code: resource_class.discipline_code,
+    # Create resource discipline using the class discipline and default prefix_schema
+    @discipline = create(:discipline, project: @project, 
+      name: resource_class.discipline, 
+      label: resource_class.discipline.upcase[0],
+      swatch: @swatch,
       prefix_schema: { name: 'default'})
 
     # Create users with roles

@@ -1,11 +1,11 @@
 require 'test_helper'
-require_relative '../../helpers/resource_policy_test'
+require_relative '../../helpers/tagable_policy_test'
 module Electrical
   class HeaterPolicyTest < ActiveSupport::TestCase
-    include ResourcePolicyTest
+    include TagablePolicyTest
 
     def setup
-      setup_resource_policy_test
+      setup_tagable_policy_test
     end
 
     # All setup and tests have been abstracted to ResourcePolicyTest and PolicyTestHelpers.

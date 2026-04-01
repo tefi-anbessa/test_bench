@@ -6,23 +6,23 @@ module <%= module_name %>
 class <%= model_class %> < ApplicationRecord
 <%- end -%>
 
-# Belongs to associatons
+    # Belongs to associatons
     <%- @fields.select { |f| %w[references].include?(f[:type]) }.each do |field| -%>
-    belongs_to :<%= field[:name] %>
+    belongs_to :<%= field[:name] %><%- unless f[:options].include?('required') %>, optional: true<%- end %>
     <%- end -%>
     
-# enum declarations
+    # enum declarations
     <%- @fields.select { |f| %w[enum enum_translated].include?(f[:type]) }.each do |field| -%>
     enum :<%= field[:name] %>, Constants.<%= module_name.underscore %>.<%= singular_name %>.<%= field[:name] %>.to_h
     #!!! Define enum options in Constants file config/constants/<%= module_name.underscore %>.yml
     <%- end -%>
     
-# Presence validation for required fields.
-    <%- @fields.select { |f| f[:options].include?('required') }.each do |field| -%>
+    # Presence validation for required fields.
+    <%- @fields.select { |f| f[:options].include?('required') && !%w[references].include?(f[:type]) }.each do |field| -%>
     validates :<%= field[:name] %>, presence: true
     <%- end -%>
     
-# Uniqueness validation for unique fields.
+    # Uniqueness validation for unique fields.
     <%- @fields.select { |f| f[:options].include?('uniq') }.each do |field| -%>
     validates :<%= field[:name] %>, uniqueness: true
     <%- end -%>
@@ -37,7 +37,7 @@ class <%= model_class %> < ApplicationRecord
     def self.ransackable_associations(auth_object = nil)
       <%- associations = [ ] -%>
       <%- @fields.select { |f| %w[references].include?(f[:type]) }.each do |field| -%>
-        <%- associations += [field[:name]] -%>
+        <%- associations += [field[:name]].to_sym -%>
       <%- end -%>
       <%= associations %>
     end

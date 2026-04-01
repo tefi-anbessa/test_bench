@@ -1,5 +1,6 @@
 class Discipline < ApplicationRecord
   has_many :tags, dependent: :destroy
+  has_many :doc_types, class_name: 'DocumentControl::DocType', dependent: :destroy
   belongs_to :project
   belongs_to :swatch
 
@@ -17,7 +18,7 @@ class Discipline < ApplicationRecord
 
   def default_prefix_schema_name
     return prefix_schema['name'] if prefix_schema.present? && prefix_schema['name'].present?
-    "#{project&.label}_#{code}".parameterize.underscore
+    "#{project&.label}_#{label}".parameterize.underscore
   end
 
   def schema_for_form

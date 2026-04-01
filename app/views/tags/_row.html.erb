@@ -13,7 +13,7 @@
       <%= t.tagable_type.constantize.model_name.human %>
       <% if t.tagable.present? %>
         <%= link_to t.tagable,
-            class: "btn btn-sm btn-outline-secondary mb-2 icon-link",
+            class: "btn btn-sm btn-outline-info mb-2 icon-link",
             title: t('show.linked', model: t.tagable_type.constantize.model_name.human) do %>
               <%== bs_icon('box-arrow-down-right') %>
             <% end %>

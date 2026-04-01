@@ -1,0 +1,26 @@
+# document models translations for th
+th:
+  activerecord:
+    models:
+      document_control:
+        issue: "Issue"
+        source_format: "Source Format"
+        doc_type: "Document Type"
+    attributes:
+      document_control:
+        issue:
+          document: "Document"
+          code: "Code"
+          reason: "Reason for Issue"
+          source_format: "Source Format"
+        source_format:
+          vendor: "Vendor"
+          title: "Software Title"
+          file_extension: "File extension"
+          revision: "Revision"
+          notes: "Notes"
+        doc_type:
+          discipline: "Discipline"
+          code: "Code"
+          label: "Type"
+          description: "Description"
