@@ -1,9 +1,11 @@
 require "test_helper"
-require_relative "../../helpers/model_test_patterns"
+require "helpers/model_test_patterns"
 module DocumentControl
   class IssueTest < ActiveSupport::TestCase
+    include ModelTestPatterns
 
     def setup
+      setup_common_test_data
       setup_model_specific_data
     end
     

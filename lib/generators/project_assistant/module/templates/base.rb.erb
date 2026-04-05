@@ -6,15 +6,15 @@ module <%= name.camelize %>
     # Default discipline for tagable models to reference back to this module, used in testing. 
     # Not used in the application, as projects can set their own disciplines.
     def self.discipline
-      <%= name.split("::").last %>
+      <%= name.split("::").last.to_s %>
     end
 
     def label
-      tag&.label || I18n::t("show.orphan", model: Tag.model_name.human)
+      "define default label in app/models/<%= name.underscore %>/base.rb"
     end
 
     def long_label
-      tag&.long_label || I18n::t("show.orphan", model: Tag.model_name.human)
+      "define default long_label in app/models/<%= name.underscore %>/base.rb"
     end
 
     def self.swatch

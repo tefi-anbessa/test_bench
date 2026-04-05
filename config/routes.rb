@@ -51,11 +51,17 @@ Rails.application.routes.draw do
       resources :source_formats
       resources :doc_types
       # INSERTION POINT 1 FOR SUBMODULES
-      # INSERTION POINT 1 FOR TAGABLE GENERATOR - though there are no tagables in document module
+      # INSERTION POINT 1 FOR TAGABLE GENERATOR
       # Add document routes here
     end
     # INSERTION POINT 1 FOR MODULE GENERATOR
-    
+    # Change namespace for change management
+    namespace :project_change do
+      resources :requests
+      # INSERTION POINT 1 FOR TAGABLE GENERATOR
+      # Insert change member routes here with only: [:index, :new, :create]
+    end
+
     # Then define the shallow nested routes which require the tag
     resources :tags, shallow: true do
       namespace :electrical do
@@ -69,6 +75,7 @@ Rails.application.routes.draw do
         resources :demands, except: [:index]
       end
     # INSERTION POINT 2 FOR MODULE GENERATOR
+
     end
 
     # Routes for the RBAC system. 

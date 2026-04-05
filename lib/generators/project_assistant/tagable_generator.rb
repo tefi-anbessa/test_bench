@@ -270,6 +270,9 @@ module ProjectAssistant
           attributes_section = "      #{file_path}:\n"
           
           @fields.each do |field|
+            # Skip translations for references fields - they use their model's translations
+            next if field[:type] == 'references' || field[:type] == 'belongs_to'
+            
             # Use field[:name].humanize as dummy translation
             attributes_section += "        #{field[:name]}: #{field[:name].humanize}\n"
             

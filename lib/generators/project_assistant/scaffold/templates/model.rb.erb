@@ -8,7 +8,7 @@ class <%= model_class %> < ApplicationRecord
 
     # Belongs to associatons
     <%- @fields.select { |f| %w[references].include?(f[:type]) }.each do |field| -%>
-    belongs_to :<%= field[:name] %><%- unless f[:options].include?('required') %>, optional: true<%- end %>
+    belongs_to :<%= field[:name] %><%- unless field[:options].include?('required') %>, optional: true<%- end %>
     <%- end -%>
     
     # enum declarations
@@ -37,7 +37,7 @@ class <%= model_class %> < ApplicationRecord
     def self.ransackable_associations(auth_object = nil)
       <%- associations = [ ] -%>
       <%- @fields.select { |f| %w[references].include?(f[:type]) }.each do |field| -%>
-        <%- associations += [field[:name]].to_sym -%>
+        <%- associations += [field[:name]] -%>
       <%- end -%>
       <%= associations %>
     end

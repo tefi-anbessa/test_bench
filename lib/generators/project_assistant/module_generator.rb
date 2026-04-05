@@ -106,9 +106,12 @@ module ProjectAssistant
 # #{singular_name} model translations for #{language}
 #{language}:
   activerecord:
-    models:           # Insert model name translations here
-    attributes:       # Insert attributes translations here
-    errors:           # Insert custom validation error translations here
+    models:
+      <%= singular_name %>:        # Insert model name translations here
+    attributes:
+      <%= singular_name %>:        # Insert attributes translations here
+    errors:
+      <%= singular_name %>:        # Insert custom validation error translations here
         YAML
 
         # Create views translation file
@@ -163,7 +166,7 @@ module ProjectAssistant
         
         # puts "DEBUG: Writing routes file..."
         File.write(routes_file, routes_content) unless options[:pretend]
-        say_status :update, "#{routes_file.relative_path_from(Rails.root)}: Added module routes", :green
+        say_status :update, "#{routes_file.relative_path_from(Rails.root)}: Add module routes", :green
       else
         say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Not found", :red
       end
@@ -182,7 +185,7 @@ module ProjectAssistant
           if match
             content.sub!(match[0], "#{match[:indent] + '  ' }#{@class_path.last}:\n")
             constants_file.write(content) unless options[:pretend]
-            say_status :update, "#{constants_file.relative_path_from(Rails.root)}: Added #{singular_name} key", :green
+            say_status :update, "#{constants_file.relative_path_from(Rails.root)}: Add #{singular_name} key", :green
           else
             say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Key not found: #{@class_path[-2]}", :red
           end
@@ -194,12 +197,12 @@ module ProjectAssistant
     def update_tagable_file
       # say_status :skip, "Skipping edit_tagable_file method for debugging", :blue
       # return
-      tagable_file = Pathname.new(File.join(destination_root, 'config/constants/tagable.yml'))
+      tagable_file = Pathname.new(File.join(destination_root, 'config', 'constants', 'tagable.yml'))
       if tagable_file.exist?
         content = tagable_file.read
         content.sub!(/^(tagable:\n)/, "\\1  # #{class_name}\n")
         tagable_file.write(content) unless options[:pretend]
-        say_status :update, "#{tagable_file.relative_path_from(Rails.root)}: Added #{class_name}", :green
+        say_status :update, "#{tagable_file.relative_path_from(Rails.root)}: Add #{class_name}", :green
       else
         say_status :error, "#{tagable_file.relative_path_from(Rails.root)}: Not found", :red
       end

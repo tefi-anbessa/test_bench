@@ -436,7 +436,7 @@ Here again is our example command line:
      `include Electrical::Demandable`.
    * [TODO future: similar for process module].
    * Check that associations are correctly defined for :references fields. The generator adds `belongs_to` statements, but no options. These must be added if required. The generator assumes that the referenced class is in the same module/sub-module as the generated model. Add the inverse relation (has_many or has_one) to the referenced model.
-   * Check that any required :enum and :enum_translated type fields are specified as enum with reference to the constants defining the field options..
+   * Check that any required :enum and :enum_translated type fields are specified as enum with reference to the constants defining the field options.
    * Check that the fields with :required option have presence validations.
    * Add any other validations required, such as range limits, numericality, format, etc.
    * If the `ransackable_attributes` line is too long, split it after a comma for ease of reading.

@@ -1,0 +1,16 @@
+# change views translations for th
+th:
+  project_change:
+    requests:
+      index:
+        title:            "Change Requests"
+        header:           "Change Requests for %{project}"
+      edit:
+        title:            "Edit Change Request"
+        header:           "Edit Change Request: %{label}"
+      new:
+        title:            "New Change Request"
+        header:           "New Change Request"
+      show:
+        title:            "Change Request"
+        header:           "Change Request: %{label}"

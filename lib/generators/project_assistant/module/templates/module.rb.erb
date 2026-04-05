@@ -1,3 +1,5 @@
 module <%= name.camelize %>
-  # Module configuration and shared methods go here
+  def self.table_name_prefix
+    <%= name.underscore %>_
+  end
 end

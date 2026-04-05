@@ -77,6 +77,36 @@
               </li>
             <% end %> <!-- Project section -->
 
+            <!-- Change section: if access is available to change models, make a dropdown menu -->
+            <% if policy(ProjectChange::Request).new? %> 
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle"
+                    href="#"
+                    data-bs-toggle="dropdown"
+                    id="project-change-menu-btn"
+                    role="button"
+                    aria-expanded="false">
+                    <%= t('module_name.project_change').pluralize %>
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="project-change-menu-btn">
+                  <% if policy(ProjectChange::Request).index? %>
+                    <li><%= link_to t('project_change.requests.index.title'),
+                          project_change_requests_path,
+                          class: "dropdown-item" %></li>
+                  <% end %>
+                </ul>
+              </li> <!-- Change dropdown -->
+
+            <!-- Otherwise, provide a simple change register link -->
+            <% else %>
+              <li class="nav-item">
+                <%= link_to t('project_change', scope: 'activerecord.models').pluralize,
+                  project_change_requests_path,
+                  class: 'nav-link',
+                  aria: { label: t('document', scope: 'activerecord.models').pluralize } %>
+              </li>
+            <% end %>
+
             <!-- Documents section: if access is available to document control models, make a dropdown menu -->
             <% if policy(DocumentControl::DocType).new? %> 
               <li class="nav-item dropdown">

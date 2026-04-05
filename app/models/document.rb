@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 class Document < ApplicationRecord
+  # Callbacks
+  around_create :set_document_number
 
-# Associatons
+  # Associatons
   belongs_to :discipline
   delegate :project, to: :discipline
   belongs_to :doc_type, class_name: "DocumentControl::DocType"
   has_many :issues, class_name: "DocumentControl::Issue"
-  
-  around_create :set_document_number
 
   # Default scope to sort by document number
   default_scope { order(:doc_number) }

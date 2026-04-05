@@ -11,8 +11,6 @@ module ResourceControllerTestHelper
   # Setup common to all resource controllers
   def setup_controller_test
     setup_projects_and_users # In test/helpers/test_login_helpers.rb
-    set_current_project(@project)
-
     @request.env["devise.mapping"] = Devise.mappings[:user]
   end
 
@@ -50,46 +48,46 @@ module ResourceControllerTestHelper
   end
 
   def test_regular_user_cannot_access_index
-    sign_in @regular_user
+    sign_in_and_set_project @regular_user, @project
     get :index
     assert_forbidden
   end
 
   def test_team_member_can_access_index
-    sign_in @team_member
+    sign_in_and_set_project @team_member, @project
     get :index
     assert_response :success
   end
 
   # Show Tests
   def test_user_cannot_view_resource_details_without_project_role
-    sign_in @regular_user
+    sign_in_and_set_project @regular_user, @project
     get :show, params: { id: @resource.id }
     assert_forbidden
   end
 
   def test_team_member_can_view_resource_details
-    sign_in @team_member
+    sign_in_and_set_project @team_member, @project
     get :show, params: { id: @resource.id }
     assert_response :success
   end
 
   # New Action Tests
   def test_team_member_cannot_access_new_form
-    sign_in @team_member
+    sign_in_and_set_project @team_member, @project
     get :new
     assert_response :forbidden
   end
 
   def test_accredited_team_member_can_access_new_form
-    sign_in @accredited_team_member
+    sign_in_and_set_project @accredited_team_member, @project
     get :new
     assert_response :success
   end
 
   # Create Action Tests - Failure Cases
   def test_team_member_cannot_create
-    sign_in @team_member
+    sign_in_and_set_project @team_member, @project
     assert_no_difference("#{resource_class}.count") do
       post :create, params: { resource_name => valid_create_params }
     end
@@ -98,7 +96,7 @@ module ResourceControllerTestHelper
 
   # Create Action Tests - Success Cases
   def test_accredited_team_member_can_create
-    sign_in @accredited_team_member
+    sign_in_and_set_project @accredited_team_member, @project
     assert_difference("#{resource_class}.count", 1) do
       post :create, params: { resource_name => valid_create_params }
     end
@@ -110,7 +108,7 @@ module ResourceControllerTestHelper
 
   def test_cannot_create_with_invalid_resource_params
     skip "Invalid resource params not defined" unless invalid_resource_params.present?
-    sign_in @accredited_team_member
+    sign_in_and_set_project @accredited_team_member, @project
 
     if invalid_resource_params.keys.any? { |key| 
           resource_class.defined_enums.key?(key.to_s) && 
@@ -135,20 +133,20 @@ module ResourceControllerTestHelper
 
   # Edit Action Tests
   def test_team_member_cannot_access_edit_form
-    sign_in @team_member
+    sign_in_and_set_project @team_member, @project
     get :edit, params: { id: @resource.id }
     assert_forbidden
   end
 
   def test_accredited_team_member_can_access_edit_form
-    sign_in @accredited_team_member
+    sign_in_and_set_project @accredited_team_member, @project
     get :edit, params: { id: @resource.id }
     assert_response :success
   end
 
   # Update Action Tests
   def test_team_member_cannot_update
-    sign_in @team_member
+    sign_in_and_set_project @team_member, @project
     original_value = @resource.send(update_attribute_name)
     patch :update, params: 
       { id: @resource.id, resource_name => valid_update_params.merge(update_attribute_name => updated_attribute_value) }
@@ -157,7 +155,7 @@ module ResourceControllerTestHelper
   end
 
   def test_accredited_team_member_can_update
-    sign_in @accredited_team_member
+    sign_in_and_set_project @accredited_team_member, @project
     patch :update, params: 
       { id: @resource.id, resource_name => valid_update_params.merge( update_attribute_name => updated_attribute_value ) }
     assert_equal updated_attribute_value, @resource.reload.send(update_attribute_name)
@@ -167,7 +165,7 @@ module ResourceControllerTestHelper
 
   # Destroy Action Tests
   def test_accredited_team_member_cannot_destroy
-    sign_in @accredited_team_member
+    sign_in_and_set_project @accredited_team_member, @project
     assert_no_difference("#{resource_class}.count") do
       delete :destroy, params: { id: @resource.id }
     end
@@ -175,7 +173,7 @@ module ResourceControllerTestHelper
   end
 
   def test_admin_can_destroy
-    sign_in @admin
+    sign_in_and_set_project @admin, @project
     assert_difference("#{resource_class}.count", -1) do
       delete :destroy, params: { id: @resource.id }
     end

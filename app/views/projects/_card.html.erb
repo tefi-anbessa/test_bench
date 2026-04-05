@@ -1,7 +1,8 @@
 <!-- Project collapsible card -->
+<% project = object %>
 <div class="card-body">
 	<%= render 'components/collapsible',
-		title: [t("activerecord.models.project"), local_assigns[:project].label].join(": "),
+		title: [t("activerecord.models.project"), project.label].join(": "),
 		id: 'project-collapse',
 		expanded: false,
 		show_icon: true,

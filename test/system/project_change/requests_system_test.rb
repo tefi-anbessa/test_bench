@@ -1,0 +1,30 @@
+require "application_system_test_case"
+module ProjectChange
+  class RequestsSystemTest < ApplicationSystemTestCase
+    include Devise::Test::IntegrationHelpers
+    include Warden::Test::Helpers
+    include ActionView::Helpers::NumberHelper
+
+    setup do
+      setup_model_specific_data
+    end
+
+    def setup_model_specific_data
+      # List fields that should appear in index. 
+      # The generator will include test for sort link header for each column, 
+      # and try to find an appropriate value field for the type.
+      @index_fields = %w[]
+
+      # List index fields that should have ransack search capability.
+      # The generator will only test for "contains" fields (_cont).
+      # Don't include numeric or date fields, add model specific tests for these later in this file.
+      @search_fields = %w[]
+
+      # List all fields that should appear in show (should be all)
+      @show_fields = %w[]
+
+      # List all fields that should appear in forms (should be all)
+      @form_fields = %w[]
+    end
+  end
+end

@@ -33,7 +33,7 @@
         <%- @fields.select { |field| SEARCHABLE_TYPES.include?(field[:type]) }.each do |field| -%>
           <%%= f.search_field :<%= field[:name] %>_cont,
                 class: "search_field",
-                placeholder: t("activerecord.attributes.<%= controller_i18n_scope %>.<%= field[:name] %>") %>
+                placeholder: t("activerecord.attributes.<%= i18n_scope %>.<%= field[:name] %>") %>
           <%- end -%>
           <%%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
             <%%== bs_icon('search') %>

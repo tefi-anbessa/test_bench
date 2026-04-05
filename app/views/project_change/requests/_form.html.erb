@@ -1,0 +1,82 @@
+<div class="container mt-3" style="<%= container_styles(@swatch) %>">
+  <div class="card" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+
+      <!-- Center Tag Info -->
+      <div class="col text-center">
+        <div class="d-flex flex-column align-items-center">
+            <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
+            <%= yield(:header) %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%= bootstrap_form_with(model: request,
+          layout: :horizontal,
+          label_col: "col-sm-4",
+          control_col: "col-sm-8",
+          wrapper_class: 'mb-1',
+          ) do |f| %>
+
+      <div class="card-body p-2" style="<%= card_styles(@swatch) %>">
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-10 col-lg-8 col-xl-6">        <!-- Adjust to fit field width requirements -->
+
+            <!-- Request Details -->
+            <div class="card mb-1" style="<%= card_styles(@swatch) %>">
+              <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+                <h5><%= t('activerecord.models.project_change.request') %></h5>
+              </div>
+
+              <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
+                <%= render 'shared/error_messages', object: f.object %>
+                <%= f.text_field :title,
+                        class: 'form-control form-control-sm',
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-8" %>
+                <%= f.select :duration,
+                    options_for_select(
+                      ProjectChange::Request.durations.keys.collect { |k| 
+                        [ProjectChange::Request.human_enum_name(:duration, k), k] 
+                      },
+                      selected: request.duration
+                    ),
+                    { include_blank: t('form.required') },
+                    class: 'form-control form-control-sm' %>
+                <%= f.text_area :reason,
+                        class: 'form-control form-control-sm',
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-8",
+                        rows: 3 %>
+                <%= f.text_area :summary,
+                        class: 'form-control form-control-sm',
+                        label_col: "col-sm-4",
+                        control_col: "col-sm-8",
+                        rows: 3 %>
+                
+              </div> <!-- end request card body -->
+            </div> <!-- end request card -->
+
+            <!-- Card Footer with Actions -->
+            <div class="card-footer bg-transparent text-end p-2">
+              <%= link_to(request.persisted? ? 
+              request : 
+              project_change_requests_path,
+                    class: 'btn btn-warning',
+                    data: { confirm: t('actions.sure'), turbo: false }) do %>
+                <%= t('actions.discard') %>
+                <%== bs_icon('x-square') %>
+              <% end %>
+
+              <%= f.button :submit, class: 'btn btn-primary', name: 'form[submit]' do %>
+                <%= yield(:button_text) %>
+                <%== bs_icon('save') %>
+              <% end %>
+            </div> <!-- end card footer -->
+          </div> <!-- end responsive columns -->
+        </div> <!-- end row -->
+      </div> <!-- end card body -->
+    <% end %> <!-- end bootstrap_form_with -->
+  </div> <!-- end card -->
+</div> <!-- end container -->

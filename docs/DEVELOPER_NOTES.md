@@ -415,6 +415,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Refactor test helpers to minimise code duplication, and simplify generation of new models.
 - [ ] Improve forbidden error logging messages, include user. Consider automatic sign out.
 - [ ] Move document issues to change module, generalise so it can be used for other entities (polymorphic).
+- [ ] Abstract controllers for project linked models, similar to tagables controller.
 
 ## Potential Features
 

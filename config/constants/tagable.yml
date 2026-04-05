@@ -1,5 +1,6 @@
 # One designation for each type of tag requiring a data sheet. Name must be the Module::Model full class name.
 tagable:
+  # Change
   # Electrical
   - Electrical::Heater
   - Electrical::Switchboard

@@ -1,5 +1,5 @@
 require "test_helper"
-require_relative "../../helpers/model_test_patterns"
+require "helpers/model_test_patterns"
 
 module DocumentControl
   class SourceFormatTest < ActiveSupport::TestCase

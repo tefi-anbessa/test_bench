@@ -1,4 +1,5 @@
 electrical:
+  name: "Electrical"
   loadable:
     - Electrical::Switchboard
     - Electrical::SocketCct

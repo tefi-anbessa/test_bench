@@ -1,0 +1,9 @@
+<thead>
+  <% unless current_project %>
+    <th scope="col"><%= sort_link(@q, 'project_code', Project.model_name.human) %></th>
+  <% end %>
+  <th scope="col"><%= sort_link(@q, :serial, t("activerecord.attributes.project_change.request.serial")) %></th>
+  <th scope="col"><%= sort_link(@q, :title, t("activerecord.attributes.project_change.request.title")) %></th>
+  <th scope="col"><%= sort_link(@q, :duration, t("activerecord.attributes.project_change.request.duration")) %></th>
+  <th scope="col" width="150px"><%= t('table.links')%></th>
+</thead>

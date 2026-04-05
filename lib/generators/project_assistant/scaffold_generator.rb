@@ -318,6 +318,9 @@ module ProjectAssistant
           attributes_section = tab*(2 + class_path.count) + "#{singular_name}:\n"
           
           @fields.each do |field|
+            # Skip translations for references fields - they use their model's translations
+            next if field[:type] == 'references' || field[:type] == 'belongs_to'
+            
             # Use field[:name].humanize as dummy translation
             attributes_section += tab*(3 + class_path.count) + "#{field[:name]}: \"#{field[:name].humanize}\"\n"
             
@@ -328,17 +331,16 @@ module ProjectAssistant
             end
           end
           
-
-        if @namespaced
-          model_insertion_regex = /models:\n((?:.+\n)*?)#{class_path[-1]}:\n/
-          attributes_insertion_regex = /attributes:\n((?:.+\n)*?)#{class_path[-1]}:\n/
-        else
-          model_insertion_regex = /models:\n/
-          attributes_insertion_regex = /attributes:\n/
-        end
+          if @namespaced
+            model_insertion_regex = /models:\n((?:.+\n)*?)\s*(#{class_path[-1]}):.*\n/
+            attributes_insertion_regex = /attributes:\n((?:.+\n)*?)\s*(#{class_path[-1]}):.*\n/
+          else
+            model_insertion_regex = /models:\n/
+            attributes_insertion_regex = /attributes:\n/
+          end
           # Insert model name under models section
           if content.match?(model_insertion_regex)
-            content.sub!(model_insertion_regex) { "#{$1}\n#{model_section}" }
+            content.sub!(model_insertion_regex) { "models:\n#{$1}#{$2}:\n#{model_section}\n" }
           else
             say_status :error, "#{translation_file.relative_path_from(Rails.root)}: Models key not found", :red
             return
@@ -346,7 +348,7 @@ module ProjectAssistant
           
           # Insert attributes under attributes section
           if content.match?(attributes_insertion_regex)
-            content.sub!(attributes_insertion_regex) { "#{$1}\n#{attributes_section}" }
+            content.sub!(attributes_insertion_regex) { "attributes:\n#{$1}#{$2}:\n#{attributes_section}" }
             File.write(translation_file, content) unless options[:pretend]
             say_status :update, "#{translation_file.relative_path_from(Rails.root)}: Added #{class_name} translations", :green
           else

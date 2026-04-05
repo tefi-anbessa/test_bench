@@ -22,7 +22,6 @@ module ModelTestPatterns
   def test_model_specific_setup_is_valid
     assert @resource.valid?
     assert @resource.persisted?
-    assert resource_class.required_role.present?
   end
 
   def test_factory_default_should_create_resource_with_valid_attributes

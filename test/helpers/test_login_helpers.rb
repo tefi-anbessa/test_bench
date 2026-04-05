@@ -41,6 +41,12 @@ module TestLoginHelpers
 
   # Helper methods
 
+  # Signs in user and sets current project (order matters: must sign in first)
+  def sign_in_and_set_project(user, project)
+    sign_in user
+    set_current_project(project)
+  end
+
   def resource_class
    self.class.name.sub('ControllerTest', '').singularize.constantize
   end

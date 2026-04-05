@@ -1,0 +1,23 @@
+# change model translations for th
+th:
+  activerecord:
+    models:
+      project_change:
+        request: Request
+    attributes:
+      project_change:
+        request:
+          project: "Project"
+          serial: "Number"
+          title: "Title"
+          reason: "Reason"
+          summary: "Summary"
+          duration: "Duration"
+          durations:
+            permanent: "Permanent"
+            trial: "Trial"
+            temporary: "Temporary"
+    errors:
+      project_change:
+        request:
+          none: None
