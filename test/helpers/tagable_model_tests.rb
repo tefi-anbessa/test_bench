@@ -1,16 +1,17 @@
 # This module provides common test patterns for tagable models
 # Include this in your controller test and all the test methods will run.
-module TagableModelPatterns
+module TagableModelTests
   extend ActiveSupport::Concern
 # Setup common to all tagable models
   def setup_common_test_data
-    @project = create(:project)
+    # Create project with standard disciplines
+    @project = create(:project, title: "#{resource_class} Tagable Model Test")
 
-    # Create resource discipline using the code provided by the tagable controller test
-    @resource_discipline = create(:discipline, code: resource_class.discipline_code, project: @project)
-
+    # Set resource discipline using the class' module name
+    @resource_discipline = @project.disciplines.find_by(name: resource_class.module_parent_name)
     # Factory default unique tag will be "A:AA-0001"
     @tag = create(:tag, :unique_tag, discipline: @resource_discipline)
+    @resource = create(resource_class.model_name.singular, tag: @tag)
   end
 
   # Common test patterns used for all tagable controller tests
@@ -43,6 +44,12 @@ module TagableModelPatterns
       new_tag.reload
       assert_equal new_tag.tagable, new_resource
     end
+  end
+
+  # Test that resource class delegates label and long_label to tag.
+  def test_resource_label_should_be_tag_label
+    assert_equal @resource.label, @tag.label
+    assert_equal @resource.long_label, @tag.long_label
   end
 
   def test_destroy_resource_should_nullify_tagable

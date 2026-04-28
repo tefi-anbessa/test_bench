@@ -1,70 +1,144 @@
-<% provide(:title, t('.title', code: @project.code)) %>
-<%# Header with navigation buttons. %>
-<div class="container">
-  <nav class="navbar bg-body-tertiary">
-    <ul class="navbar-nav flex-row page-heading">
-      <li class="nav-item d-inline-flex p-1">
-        <%= link_to projects_path,
-              class: "icon-link btn btn-sm btn-secondary actions",
-              title: t('actions.index') do %>
-          <%== bs_icon('list-columns-reverse') %>
-          <%= t('actions.index') %>
-        <% end %>
-      </li>
-      <!-- Admin section -->
-      <% if policy(@project).edit? %>
-        <li class="nav-item d-inline-flex p-1">
-          <%= link_to edit_project_path(@project),
-                class: "icon-link btn btn-sm btn-warning actions",
-                title: t('actions.edit') do %>
-                <%== bs_icon('pencil') %>
-                <%= t('actions.edit') %>
-          <% end %>
-        </li>
-      <% end %>
-      <% if policy(@project).destroy? %>
-        <li class="nav-item d-inline-flex p-1">
-          <%= link_to @project,
-                method: :delete,
-                class: "icon-link btn btn-sm btn-danger actions",
-                title: t('actions.delete'),
-                data: { confirm: "Are you sure? Delete cannot be undone." } do %>
-            <%== bs_icon('trash') %>
-            <%= t('actions.delete') %>
-          <% end %>
-        </li>
-      <% end %>
+<% provide(:title, t('.title')) %>
+<div class="container mt-3" style="<%= container_styles(@swatch) %>">
+  <!-- Project Header Card -->
+  <div class="card mb-4" style="<%= container_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+      <div class="row align-items-center">
+        <!-- Left Navigation -->
+        <div class="col-auto">
+          <div class="d-flex align-items-center">
+            <!-- Index Button -->
+            <% if policy(@project).index? %>
+              <%= link_to projects_path,
+                    class: "btn btn-sm btn-outline-info me-2",
+                    title: t('actions.index') do %>
+                <%== bs_icon('list-columns-reverse') %>
+                <span class="d-none d-md-inline"><%= t('actions.index') %></span>
+              <% end %>
+            <% end %>
 
-      <li class="nav-item d-inline-flex p-1">
-        <%= link_to @project.prev("code"),
-              class: "icon-link btn btn-sm btn-secondary actions",
-              title: t('actions.previous') do %>
-          <%== bs_icon('arrow-left') %>
-          <%= t('actions.previous') %>
-        <% end %>
-      </li>
+            <!-- Previous Button -->
+            <% prev_project = @project.prev("code") %>
+            <% if prev_project.present? %>
+              <% disabled = prev_project == @project %>
+              <%= link_to project_path(prev_project),
+                    disabled: disabled,
+                    class: "btn btn-sm btn-outline-secondary
+                      #{'disabled' if disabled}",
+                    title: "#{t('actions.previous')}: #{prev_project.code}" do %>
+                <%== bs_icon('box-arrow-in-left') %>
+                <span class="d-none d-md-inline">
+                  <%= t('actions.previous') %>
+                </span>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
 
-      <li class="nav-text h2 d-inline-flex p-1 ms-5 me-5">
-        <%= @project.code + ": " + @project.title %>
-      </li>
+        <!-- Center Project Info -->
+        <div class="col text-center">
+          <div class="d-flex flex-column align-items-center">
+            <div class="mt-1">
+              <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
+                <%= t('.header', label: @project.code) %>
+              </span>
+              <% if @project.title.present? %>
+                <small class="text-muted ms-2"><%= @project.title %></small>
+              <% end %>
+            </div>
+          </div>
+        </div>
 
-      <li class="nav-item d-inline-flex p-1">
-        <%= link_to @project.next("code"),
-              class: "icon-link btn btn-sm btn-secondary actions",
-              title: t('actions.next') do %>
-          <%= t('actions.next') %>
-          <%== bs_icon('arrow-right') %>
-        <% end %>
-      </li>
-    </ul>
-  </nav>
+        <!-- Right Navigation and Actions -->
+        <div class="col-auto">
+          <div class="d-flex align-items-center">
+            <!-- Next Button -->
+            <% next_project = @project.next("code") %>
+            <% if next_project.present? %>
+              <% disabled = next_project == @project %>
+              <%= link_to project_path(next_project),
+                    disabled: disabled,
+                    class: "btn btn-sm btn-outline-secondary
+                      me-2 #{'disabled' if disabled}",
+                    title: "#{t('actions.next')}: #{next_project.code}" do %>
+                <span class="d-none d-md-inline">
+                  <%= t('actions.next') %>
+                </span>
+                <%== bs_icon('box-arrow-in-right') %>
+              <% end %>
+            <% end %>
 
-  <div class="container border bg-primary-subtle border-primary-subtle mb-2">
-    <div class="d-flex flex-row">
-      <div class="p-2">
-        <%= render @project %>
+            <!-- Action Buttons -->
+            <div class="btn-group btn-group-sm gap-1">
+              <% if policy(@project).edit? %>
+                <%= link_to edit_project_path(@project),
+                      class: "btn btn-outline-warning",
+                      title: t('actions.edit') do %>
+                  <%== bs_icon('pencil-square') %>
+                  <span class="d-none d-md-inline">
+                    <%= t('actions.edit') %>
+                  </span>
+                <% end %>
+              <% end %>
+
+              <% if policy(@project).destroy? %>
+                <%= link_to @project,
+                      method: :delete,
+                      data: { confirm: t('actions.delete_sure') },
+                      class: "btn btn-outline-danger",
+                      title: t('actions.delete') do %>
+                  <%== bs_icon('trash') %>
+                  <span class="d-none d-md-inline">
+                    <%= t('actions.delete') %>
+                  </span>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <%= render 'disciplines/disciplines', object: @project %>
+    <div class="card-body" style="<%= form_styles(@swatch) %>">
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+
+          <!-- Project Details Card -->
+          <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+            <div class="card-body p-3">
+
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= t('activerecord.attributes.project.code') %></div>
+                <div class="col-8"><%= @project.code %></div>
+              </div>
+
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= t('activerecord.attributes.project.title') %></div>
+                <div class="col-8"><%= @project.title %></div>
+              </div>
+
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= t('activerecord.attributes.project.description') %></div>
+                <div class="col-8"><%= @project.description || '-' %></div>
+              </div>
+
+              <% if @project.swatch.present? %>
+                <%= render 'swatches/card', 
+                  object: @project.swatch %>
+              <% else %>
+                <div class="row mb-1">
+                  <div class="col-4 text-muted"><%= t('activerecord.models.swatch') %></div>
+                  <div class="col-8"><%= @project.swatch&.name || '-' %></div>
+                </div>
+              <% end %>
+            </div> <!-- end project card body -->
+          </div> <!-- end project card -->
+
+        </div> <!-- end responsive columns -->
+
+        <!-- Disciplines Section -->
+        <%= render 'disciplines/disciplines', object: @project %>
+      </div> <!-- end justify content center -->
+    </div> <!-- end form card body -->
+  </div> <!-- end form card -->
+</div> <!-- end container -->

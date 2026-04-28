@@ -1,13 +1,15 @@
+# frozen_string_literal: true
+
 require 'test_helper'
-require_relative '../../helpers/resource_policy_test'
+require 'helpers/tagable_policy_test'
 module <%= module_name %>
   class <%= tagable_name %>PolicyTest < ActiveSupport::TestCase
-    include ResourcePolicyTest
+    include TagablePolicyTest
 
     def setup
-      setup_resource_policy_test
+      setup_tagable_policy_test
     end
 
-    # All setup and tests have been abstracted to ResourcePolicyTest and PolicyTestHelpers.
+    # All setup and tests have been abstracted to TagablePolicyTest and TestSetupHelpers.
   end
 end

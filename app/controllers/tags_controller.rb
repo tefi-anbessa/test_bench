@@ -1,9 +1,9 @@
 class TagsController < ApplicationController
   before_action :authenticate_user!
-  before_action :require_project!, only: %i[ new create ]
-  before_action :set_project
+  before_action :require_project!, only: %i[ new create edit update]
   before_action :set_tag, only: %i[ show edit update destroy ]
   before_action :set_swatch, only: %i[ index show new edit ]
+  before_action :validate_discipline_id, only: %i[ create update ]
 #  after_action :verify_authorized
 
   # GET /tags or /tags.json
@@ -11,7 +11,6 @@ class TagsController < ApplicationController
     authorize Tag
     @q = policy_scope(Tag).ransack(params[:q])
     @pagy, @tags = pagy(@q.result.includes(discipline: :project), limit: 20)
-    @project = current_project
   end
 
   # GET /tags/1 or /tags/1.json
@@ -87,14 +86,33 @@ class TagsController < ApplicationController
       @projects = policy_scope(Project)
     end
 
-    # Setup disciplines for the form selector
+    # Setup disciplines for the form selector - only disciplines where user has required_role
     def setup_disciplines
-      @disciplines = policy_scope(Discipline)
-        .joins(:project)
-        .select('projects.code as project_code, disciplines.id, disciplines.label')
-        .order('projects.code ASC, disciplines.label ASC')
-        .group_by(&:project_code)
-        .transform_values { |discs| discs.map { |d| [d.label, d.id] } }
+      disciplines = policy_scope(Discipline)
+        .select('disciplines.id, disciplines.label, disciplines.name, disciplines.required_role')
+        .to_a
+      
+      # Global admins see all disciplines
+      unless current_user.is_admin? || current_user.is_app_owner?
+        disciplines = disciplines.select { |d| current_user.has_role?(d.required_role, current_project) }
+      end
+      
+      @disciplines = disciplines.map { |d| [d.label, d.name, d.id] }
+    end
+
+    # Validate that the discipline_id is authorized for the current user
+    def validate_discipline_id
+      discipline_id = params[:tag][:discipline_id]
+      return if discipline_id.blank?
+
+      discipline = Discipline.find_by(id: discipline_id)
+      return if discipline.nil?
+
+      unless current_user.has_role?(discipline.required_role, current_project) ||
+             current_user.is_admin? ||
+             current_user.is_app_owner?
+        raise Pundit::NotAuthorizedError, t('pundit.discipline', discipline: discipline.name)
+      end
     end
 
     def isa51_schema?
@@ -110,10 +128,10 @@ class TagsController < ApplicationController
     end
 
     def set_tag
-      if params[:id].present?
+      begin
         @tag = policy_scope(Tag).find(params[:id])
-      else
-        @tag = Tag.new
+      rescue ActiveRecord::RecordNotFound
+        raise Pundit::NotAuthorizedError
       end
     end
 

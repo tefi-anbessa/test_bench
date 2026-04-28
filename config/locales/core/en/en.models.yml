@@ -46,10 +46,12 @@ en:
         prefix_schema:    "Prefix Schema"
         default_prefix_schema_name: "user_defined"
         prefix_schema_keys:
+          name:             "Name"
           type:             "Type"
           schema:           "Schema"
         module_name:      "Module Name"
         notes:            "Notes"
+        required_role:    "Required Role"
         copy_from_standard: "Copy from Standard" # Form label
       tag:
         prefix:           "Prefix"
@@ -89,13 +91,13 @@ en:
       role:
         resource_type:    "Leave blank for global role"
       discipline:
-        code:             "Symbol, maximum 12 characters"
         name:             "Descriptive name, maximum 50 characters"
-        label:            "Display label, maximum 5 characters"
-        sort_order:       "Sort order"
-        prefix_schema:    "Select a standard schema or define a custom schema. Custom schema must have a unique name, set to project code + discipline code"
-        module_name:      "ignore: not implemented"
+        label:            "Unique label, maximum 5 characters"
+        sort_order:       "Sort order - deprecated"
+        prefix_schema:    "Select a standard schema or define a custom schema. Custom schema must have a unique name, defaults to project code + discipline code"
+        module_name:      "Links the discipline to a module in the application"
         notes:            "Additional information"
+        required_role:    "Role required to work with elements in this discipline"
     errors:
       custom_messages:
         invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
@@ -108,7 +110,7 @@ en:
           attributes:
             name:
               blank: "Role must be selected"
-              invalid: "%{name} is not a valid role for %{resource}"
+              invalid: "%{value} is not a valid role"
         tag:
           base:
             taken: "Tag %{tag} already exists"

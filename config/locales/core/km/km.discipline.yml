@@ -1,0 +1,51 @@
+# The discipline model has standardised content available, with translations.
+# Custom content is not translated.
+km:
+  discipline:
+    label:
+      "A": 'A'
+      "B": 'B'
+      "C": 'C'
+      "COMP": 'COMP'
+      "E": 'E'
+      "HVAC": 'HVAC'
+      "IT": 'IT'
+      "J": 'J'
+      "M": 'M'
+      "P": 'P'
+      "PIP": 'PIP'
+      "S": 'S'
+    name:
+      Administration: 'រដ្ឋបាល'
+      Architecture: 'ស្ថាបត្យកម្ម'
+      Civil: 'ស៊ីវិល'
+      Completions: 'ការបញ្ចប់'
+      Electrical: 'អគ្គិសនី'
+      Hvac: 'ប្រព័ន្ធកង្ហារអាកាស'
+      Instrument: 'ឧបករណ៍វัดឌិន'
+      It: 'ព័ត៌មានវិទ្យា'
+      Mechanical: 'មេកានិក'
+      Piping: 'បំពង់'
+      Process: 'ដំណើរការ'
+      Structural: 'រចនាសម្ព័ន្ធ'
+  prefix_schema:
+    key:
+      custom: "ផ្ទាល់ខ្លួន"
+      default: "លំនាំដើម"
+      isa51: "ISA-5.1"
+      dim1: "1 វិមាត្រ"
+      dim2: "2 វិមាត្រ"
+      alternate_inst: "ISA-5.1 ជំនួស"
+    type:
+      default: "លំនាំដើម"
+      isa51: "ISA-5.1"
+      dim1: "1 វិមាត្រ"
+      dim2: "2 វិមាត្រ"
+    messages:
+      sure: "តើអ្នកប្រាកដឬទេ? ការផ្លាស់ប្តូរសៀម៉ាវនឹងលុបចោលការកែប្រែដែលមាន។"
+      initialize: "ចាប់ផ្តើមពីព្រឹត្តិប័ត្រ"
+    viewing_schema: "មើលសៀម៉ា"
+    select_template: "ជ្រើសរើសព្រឹត្តិប័ត្រ"
+    template_help: "ជ្រើសរើសព្រឹត្តិប័ត្រដើម្បីចាប់ផ្តើមសៀម៉ា"
+    custom_schema: "សៀម៉ាផ្ទាល់ខ្លួន"
+    schema_help: "TODO: ជំនួយសម្រាប់កម្មវិធីកែសៀម៉ា"

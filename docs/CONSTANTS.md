@@ -8,6 +8,7 @@ The context for this application includes
 * Engineering and scientific constants that are indepedent of the application
 * Role based access control (RBAC) system
 * System configuration
+* Allowed values for enum type attributes
 
 The commonly used options for implementing constants are
 
@@ -51,22 +52,28 @@ Roles are defined in
 and the Role class implements helper methods such as
 `valid_roles_for(resource_type = nil, _resource_id = nil)`
 for building the RBAC UI.
+Translations of role names and associated messages are stored in
+`config/locales/core/xx/xx.rolify.yml`.
 
 ### Disciplines
 
-Disciplines are an edge case for constants. The application originally hard coded disciplines, then switched to a database model with no UI. As the concept developed, and the need for improved isolation between projects became apparent, it was realized that disciplines were a suitable vehicle for allowing projects to customize themselves to suit end user requirements. Disciplines are a means of grouping engineering objects such as documents and tags, but their functionality has been extended here. Prefix schema, associated functional modules, and form colour swatches are linked to discipline.
+Disciplines are an edge case for constants. The application originally hard coded disciplines, then switched to a database model with no UI. As the concept eveloved, and the need for improved isolation between projects became apparent, it was realized that disciplines were a suitable vehicle for allowing projects to customize themselves to suit end user requirements. Disciplines are a means of grouping engineering objects such as documents and tags, but their functionality has been extended here. Prefix schema, associated functional modules, access control, and form colour swatches are linked to discipline.
 
 Projects must define their own set of disciplines, but this can be done simply by adding 'standard' disciplines such as Instrument and Electrical, and this is the recommended usage. However, the project is free to modify the standard disciplines to suit requirements, or indeed generate new disciplines from scratch. One use case is to use alternative translations of the discipline names and labels.
 
-"Standard' disciplines are defined in 
+"Standard" disciplines are defined in
 `config/constants/discipline.yml`
+Translations of discipline names and labels are stored in
+`config/locales/core/xx/xx.discipline.yml`.
 
 ### Prefixes
 
 A fundamantal strength of the application is requiring tag prefixes to conform to a schema, to prevent proliferation of individual choices for the same object type. Historically different schemata have been used by different engineering companies and their disciplines, with the ISA standard 5.1 used for tagging instruments probably being the originator of the concept. This application allows each discipline on each project to define their own prefix schema, but provides a number of 'standard' schemata as well, which can be used as they are, or copied and modified.
 
 "Standard' prefix schemata are defined in
-`config/constants/prefix.yml`
+`config/constants/prefix.yml`.
+Translations of prefix names and labels are stored in
+`config/locales/core/xx/xx.prefix.yml`.
 
 ### Tagables
 
@@ -99,3 +106,6 @@ yields a hash:
 ```=> {:PVC=>0, :XLPE=>1, :LSZH=>2, :EPR=>3, :PUR=>4}```
 which can be used in the `class: CableType` model definition of an insulation field:
 ```enum :insulation, insulation_materials, prefix: true```
+
+Some enum fields are mainly numerical, such as MCB ratings, so do not require translation. Translation of enum values is included in the attributes section of the model translation files, e.g. `config/locales/electrical/xx/xx.electrical.models.yml`, under a key which is the plural of the attribute name. Translated enum values can be accessed using:
+`@resource.class.human_enum_name(:attribute, @resource.attribute)`

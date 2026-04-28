@@ -1,18 +1,13 @@
 require "test_helper"
-require "helpers/model_test_patterns"
+require "helpers/discipline_model_tests"
 
 module DocumentControl
   class DocTypeTest < ActiveSupport::TestCase
-    include ModelTestPatterns
+    include DisciplineModelTests
 
     def setup
-      setup_common_test_data # in model_test_patterns.rb
-      setup_model_specific_data
-    end
-    
-    def setup_model_specific_data
-      @resource = create(:document_control_doc_type, discipline: @resource_discipline, 
-                        code: "DOC", label: "Test Document Type")
+      setup_common_test_data # in discipline_model_tests.rb
+      @resource = create(:document_control_doc_type, discipline: @resource_discipline, code: "DOC")
     end
 
     test "code must be present" do
@@ -27,16 +22,25 @@ module DocumentControl
       assert_includes @resource.errors[:code], I18n.t("errors.messages.too_long", count: 6)
     end
 
-    test "label must be present" do
-      @resource.label = nil
+    test "name must be present" do
+      @resource.name = nil
       refute @resource.valid?
-      assert_includes @resource.errors[:label], I18n.t("errors.messages.blank")
+      assert_includes @resource.errors[:name], I18n.t("errors.messages.blank")
     end
 
-    test "label must not be too long" do
-      @resource.label = "a" * 51
+    test "name must not be too long" do
+      @resource.name = "a" * 51
       refute @resource.valid?
-      assert_includes @resource.errors[:label], I18n.t("errors.messages.too_long", count: 50)
+      assert_includes @resource.errors[:name], I18n.t("errors.messages.too_long", count: 50)
+    end
+
+    test "label returns code" do
+      assert_equal @resource.code, @resource.label
+    end
+
+    test "long_label returns discipline label and code" do
+      expected = "#{@resource_discipline.label}: DOC"
+      assert_equal expected, @resource.long_label
     end
 
     test "code must be unique within discipline" do

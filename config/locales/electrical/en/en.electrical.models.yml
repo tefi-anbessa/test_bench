@@ -92,6 +92,7 @@ en:
             fiberglass: Fiberglass Insulation
         cable_type:
           id: ID
+          code: "Code"
           conductor_material:	Conductor Material
           cores:	Conductor Cores
           csa:	CSA
@@ -147,6 +148,7 @@ en:
           demandable_type:  "Load Type"
           demandable:       "Equipment"
           notes:            "Notes"
+          circuit:          "Circuit"
         switchboard:
           ingress_protection: "Ingress Protection"
           ip_1:             "1st digit"
@@ -215,34 +217,35 @@ en:
             outdoor: "Outdoor > 1000W: AS3000 aii) Light, outdoor > 1000W"
           quantity:         "Quantity"
           notes:            "Notes"
-      help:
-        electrical:
-          cable_type:
-            notes:       "Record useful cable type design information here"
-          cable:
-            route_length:    "Route length of cable run, plan view"
-            vertical_allowance:  "Cable length to be added to plan view, e.g. for riser to switchboard. If routes are 3D modeled, set to zero."
-            termination_allowance: "Allowance for cable routing inside boxes"
-            notes:       "Record useful cable related design references here"
-          demand:
-            basis:       "Defines which load parameters are given and which are calculated"
-            basis_notes: "Record references for derivation of the load parameters"
-            config:      "Select the power system for the load"
-            supply:      "Select the supply voltage for the load. Leave blank for other supply."
-            duty:        "Proportional ON time for the load, for total load estimates"
-            demandable:  "Equipment datasheet"
-            notes:       "Record additional load related design references here"
-          switchboard:
-          circuit:
-            notes:       "Record additional circuit related design references here"
-          motor:
-            notes:       "Record additional motor related design references here"
-          socket_cct:
-            socket_type:      "AS3000 load classes"
-            notes:       "Record additional socket circuit related design references here"
-          light_cct:
-            light_fitting_type:  "AS3000 load classes"
-            notes:       "Record additional light circuit related design references here"
+    help:
+      electrical:
+        cable_type:
+          notes:       "Record useful cable type design information here"
+        cable:
+          route_length:    "Route length of cable run, plan view"
+          vertical_allowance:  "Cable length to be added to plan view, e.g. for riser to switchboard. If routes are 3D modeled, set to zero."
+          termination_allowance: "Allowance for cable routing inside boxes"
+          notes:       "Record useful cable related design references here"
+        demand:
+          basis:       "Defines which load parameters are given and which are calculated"
+          basis_notes: "Record references for derivation of the load parameters"
+          config:      "Select the power system for the load"
+          supply:      "Select the supply voltage for the load. Leave blank for other supply."
+          other_supply: "Enter the supply voltage for the load if not in the list"
+          duty:        "Proportional ON time for the load, for total load estimates"
+          demandable:  "Equipment datasheet"
+          notes:       "Record additional load related design references here"
+        switchboard:
+        circuit:
+          notes:       "Record additional circuit related design references here"
+        motor:
+          notes:       "Record additional motor related design references here"
+        socket_cct:
+          socket_type:      "AS3000 load classes"
+          notes:       "Record additional socket circuit related design references here"
+        light_cct:
+          light_fitting_type:  "AS3000 load classes"
+          notes:       "Record additional light circuit related design references here"
     errors:
       custom_messages:
       attributes:

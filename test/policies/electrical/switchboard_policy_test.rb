@@ -8,6 +8,6 @@ module Electrical
       setup_tagable_policy_test
     end
     
-    # All setup and tests have been abstracted to TagablePolicyTest and PolicyTestHelpers.
+    # All setup and tests have been abstracted to TagablePolicyTest and TestSetupHelpers.
   end
 end

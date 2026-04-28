@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 module <%= module_name %>
   class <%= tagable_name %> < Base
     include Tagable
     include TagableNavigation
 
 # Belongs to associatons
-    <%- @fields.select { |f| %w[references].include?(f[:type]) }.each do |field| -%>
+    <%- @fields.select { |f| %w[references belongs_to].include?(f[:type]) }.each do |field| -%>
     belongs_to :<%= field[:name] %>
     <%- end -%>
     

@@ -1,8 +1,11 @@
 FactoryBot.define do
   factory :electrical_light_cct, class: 'Electrical::LightCct' do
-    # Tag can be passed explicitly, otherwise will be auto-created
+    # Tag can be passed explicitly, if not tag will be created.
+    # If discipline is passed, tag will be created on that discipline.
+    # Otherwise, tag will be created on a new project with "Electrical" discipline.
     transient do
       tag { nil }
+      discipline { nil }
     end
     # Attributes
     light_fitting_type { :general }
@@ -17,10 +20,17 @@ FactoryBot.define do
         end
         light_cct.tag = evaluator.tag
       else
-        # Create new tag with default discipline in same transaction
-        discipline = Discipline.find_by(name: light_cct.class.discipline) || 
-             create(:discipline, name: light_cct.class.discipline)
-        light_cct.tag = create(:tag, :unique_tag, discipline: discipline)
+        # Create new tag with proper discipline in same transaction
+        if evaluator.discipline
+          # Create tag on the provided discipline
+          light_cct.tag = create(:tag, :unique_tag, discipline: evaluator.discipline)
+        else
+          # Create project with auto-created disciplines
+          project = create(:project)
+          discipline = project.disciplines.find_by(name: light_cct.class.module_parent_name) ||
+               create(:discipline, name: light_cct.class.module_parent_name, project: project)
+          light_cct.tag = create(:tag, :unique_tag, discipline: discipline)
+        end
       end
     end
   end

@@ -1,13 +1,13 @@
 class DisciplinesController < ApplicationController
   include RolesHelper
   before_action :authenticate_user!
+  before_action :require_project!, only: %i[ new create edit update]
   before_action :set_project, only: %i[ index new create ]
   before_action :set_discipline, only: %i[ show edit update destroy schema ]
-  before_action :set_swatches, only: %i[ new edit ]
+  before_action :validate_required_role, only: %i[ create update ]
 
   # GET /disciplines or /disciplines.json
   def index
-    authorize Discipline
     @q = policy_scope(Discipline).ransack(params[:q])
     @pagy, @disciplines = pagy(@q.result, limit: 20)
     @discipline = @project.disciplines.build()
@@ -18,43 +18,26 @@ class DisciplinesController < ApplicationController
   # GET /disciplines/1 or /disciplines/1.json
   def show
     authorize @discipline
-    
-    respond_to do |format|
-      format.html
-      format.json { render json: @discipline }
-    end
   end
 
   # GET /disciplines/new
   def new
     @discipline = @project.disciplines.build()
+    authorize @discipline
     # Set default theme for new discipline
     @swatch = Swatch.find_by(name: 'app_theme')
-    authorize @discipline
-    set_prefix_schema_selection
+    setup_form
   end
 
   # POST /disciplines
   def create
     @discipline = @project.disciplines.build(discipline_params)
     authorize @discipline
-    if params[:discipline][:copy_from_standard].present?
-      if (standard = Constants.disciplines.find { |d| d[:code].to_s == params[:discipline][:copy_from_standard] })
-        @discipline.assign_attributes(
-          code: standard[:code],
-          name: standard[:name],
-          module_name: standard[:module],
-          sort_order: standard[:sort_order],
-          prefix_schema: standard[:prefix_schema]
-        )
-      end
-    end
-
     if @discipline.save
       flash[:success] = I18n.t('flash.create.notice', resource_name: I18n.t('activerecord.models.discipline'))
       redirect_to @discipline
     else
-      set_prefix_schema_selection
+      setup_form
       flash.now[:alert] = I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.discipline'))
       render :new, status: :unprocessable_content
     end
@@ -63,23 +46,25 @@ class DisciplinesController < ApplicationController
   # GET /disciplines/1/edit
   def edit
     authorize @discipline
-    set_prefix_schema_selection
-    respond_to do |format|
-      format.html
-      format.json { render json: @discipline }
+    setup_form
+    
+    # Set up role assignment form if user has permission
+    if policy(@discipline).edit?
+      setup_role_assignment(@discipline)
+      @role_return_path = discipline_path(@discipline)
     end
   end
 
   # PATCH/PUT /disciplines/1
   def update
-    @discipline.assign_attributes(discipline_params)
+    @discipline.assign_attributes(discipline_params.except(:copy_from_standard))
     authorize @discipline
     
     if @discipline.save
       flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.discipline'))
       redirect_to @discipline
     else
-      set_prefix_schema_selection
+      setup_form
       flash.now[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.discipline'))
       render :edit, status: :unprocessable_content
     end
@@ -110,13 +95,24 @@ class DisciplinesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_project
-      @project = Project.find(params[:project_id])
+      unless params[:project_id].to_i == current_project.id
+        raise ApplicationController::ConflictError, 
+          :out_of_scope
+      end
+      @project = current_project
     end
 
     def set_discipline
-      @discipline = Discipline.find(params[:id])
+      @discipline = policy_scope(Discipline).find_by(id: params[:id])
+      raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
       @project = @discipline.project
       @swatch = @discipline.swatch
+    end
+
+    def setup_form
+      set_prefix_schema_selection
+      @swatch = @discipline.swatch || Swatch.find_by(name: 'app_theme')
+      @swatches = policy_scope(Swatch)
     end
 
     def set_prefix_schema_selection
@@ -147,13 +143,23 @@ class DisciplinesController < ApplicationController
     def set_swatches
       @swatches = policy_scope(Swatch)
     end
+
+    def validate_required_role
+      required_role = params.dig(:discipline, :required_role)
+      return if required_role.blank?
+      
+      unless Role.valid_role?(required_role, "Discipline")
+        raise ApplicationController::ConflictError, "Invalid role: #{required_role}"
+      end
+    end
     
     # Only allow a list of trusted parameters through.
     def discipline_params
       params.require(:discipline).permit(
-        :code, :label, :name, :module_name, 
+        :label, :name, :required_role,
         :sort_order, :notes, :project_id, :swatch_id,
         :prefix_schema
       )
     end
 end
+

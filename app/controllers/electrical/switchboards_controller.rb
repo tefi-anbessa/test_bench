@@ -39,15 +39,6 @@ module Electrical
 
     private
 
-    # Switchboard-specific configuration
-    def tag_prefix
-      "EX"  # Electrical Switchboard
-    end
-
-    def discipline_code
-      "elec"  # Electrical
-    end
-
     def setup_additional_form_data
       @circuits = @switchboard.persisted? ? @switchboard.electrical_circuits.count : 0
       @voltage_ratings = Constants.electrical.voltage_ratings
@@ -72,7 +63,7 @@ module Electrical
       current_count = switchboard.electrical_circuits.count
       count = desired_count - current_count
       if count > 0
-        authorize switchboard.electrical_circuits.build(), :create?
+        authorize switchboard, :create?
         
         count.times do |i|
           switchboard.electrical_circuits.create(serial: current_count + i + 1)
@@ -80,7 +71,7 @@ module Electrical
         resource_name = Electrical::Circuit.model_name.human(count: count)
         flash[:success] << t("flash.assigned", count: count, resource_name: resource_name)
       elsif count < 0
-        authorize switchboard.electrical_circuits.build(), :destroy?
+        authorize switchboard, :destroy?
         switchboard.electrical_circuits
                   .order(serial: :desc)
                   .limit(current_count - desired_count)

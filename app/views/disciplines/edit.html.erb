@@ -6,3 +6,17 @@
   discipline: @discipline,
   project: @project
 %>
+
+<% if policy(@discipline).edit? %>
+  <div class="container mt-4">
+    <%= render 'roles/role_assignment',
+    users: @users,
+    role: @role,
+    roles: @roles,
+    resources: @resources,
+    selected_user_id: nil,
+    selected_resource: @discipline,
+    selected_role_name: nil,
+    role_return_path: edit_discipline_path(@discipline) %>
+  </div>
+<% end %>

@@ -1,7 +1,8 @@
 <tr scope="row">
-  <td><%= link_to discipline.label, discipline %></td>
+  <td><%= discipline.label %></td>
   <td><%= discipline.name %></td>
   <td><%= discipline.prefix_schema&.[]('name') %></td>
+  <td><%= discipline.required_role || '-' %></td>
   <td><%= link_to discipline.swatch&.name, discipline.swatch %></td>
   <td>
     <% if policy(discipline).show? %>

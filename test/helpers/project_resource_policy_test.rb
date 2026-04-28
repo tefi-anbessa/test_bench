@@ -1,19 +1,12 @@
+# frozen_string_literal: true
+# Mix in for project-scoped resource policy tests.
 require 'test_helper'
-require 'helpers/test_login_helpers'
+require 'helpers/test_setup_helpers'
 
-module ResourcePolicyTest
+module ProjectResourcePolicyTest
   extend ActiveSupport::Concern
-  include TestLoginHelpers
+  include TestSetupHelpers
   included do
-    def setup_resource_policy_test
-      # Set up projects and disciplines for in and out of current project scope tests,
-      # and core users with roles
-      setup_projects_and_users # In test/support/test_login_helpers.rb 
-
-      # Inheriting classes must set up resources in and out of project scope for testing, i.e. 
-      # @resource = create(:cable, tag: @tag)
-      # @other_resource = create(:cable, tag: @other_tag)
-    end
 
     def policy_class
       @policy_class ||= "#{resource_class}Policy".constantize
@@ -31,24 +24,23 @@ module ResourcePolicyTest
       policy_class.new(user_context, record || resource_class)
     end
 
-  def test_setup_is_valid
-    if resource_class.respond_to?(:required_role)
-      assert resource_class.required_role.present?
-    end
+  test "setup is valid" do
     assert @project.valid?
     assert @project.persisted?
-    assert @discipline.valid?
-    assert @discipline.persisted?
     assert @admin.valid?
     assert @admin.persisted?
     assert @project_manager.valid?
     assert @project_manager.persisted?
+    assert @project_admin.valid?
+    assert @project_admin.persisted?
     assert @team_member.valid?
     assert @team_member.persisted?
     assert @regular_user.valid?
     assert @regular_user.persisted?
-    assert @accredited_team_member.valid?
-    assert @accredited_team_member.persisted?
+    assert @accredited_user.valid?
+    assert @accredited_user.persisted?
+    assert @accredited_user_other_project.valid?
+    assert @accredited_user_other_project.persisted?
   end
 
   # Ensure that the including controller test creates valid in and out of scope resources
@@ -67,14 +59,14 @@ module ResourcePolicyTest
       refute_includes scope, @other_resource
     end
 
-    test 'scope for admins returns resources for current project when current project selected' do
+    test 'scope for global admins returns resources for current project when current project selected' do
       context = ApplicationPolicy::UserContext.new(@admin, @project)
       scope = policy_class::Scope.new(context, resource_class).resolve
       assert_includes scope, @resource
       refute_includes scope, @other_resource
     end
 
-    test 'scope for admins returns resources for all projects when current project is nil' do
+    test 'scope for global admins returns resources for all projects when current project is nil' do
       context = ApplicationPolicy::UserContext.new(@admin, nil)
       scope = policy_class::Scope.new(context, resource_class).resolve
       assert_includes scope, @resource
@@ -101,6 +93,7 @@ module ResourcePolicyTest
       assert policy(@admin, @project).index?
       assert policy(@app_owner, @project).index?
       assert policy(@project_manager, @project).index?
+      assert policy(@project_admin, @project).index?
       assert policy(@team_member, @project).index?
       assert policy(@accredited_user, @project).index?
     end
@@ -112,6 +105,7 @@ module ResourcePolicyTest
 
     test 'index? denies team members when no project is selected' do
       refute policy(@project_manager, nil).index?
+      refute policy(@project_admin, nil).index?
       refute policy(@team_member, nil).index?
       refute policy(@accredited_user, nil).index?
     end
@@ -132,13 +126,16 @@ module ResourcePolicyTest
       assert policy(@admin, @project, @resource).show?
       assert policy(@app_owner, @project, @resource).show?
       assert policy(@project_manager, @project, @resource).show?
+      assert policy(@project_admin, @project, @resource).show?
       assert policy(@team_member, @project, @resource).show?
       assert policy(@accredited_user, @project, @resource).show?
     end
 
     test 'show? denies admins and team members on current project to view resource on different project' do
       refute policy(@project_manager, @project, @other_resource).show?
+      refute policy(@project_admin, @project, @other_resource).show?
       refute policy(@team_member, @project, @other_resource).show?
+      refute policy(@accredited_user, @project, @other_resource).show?
       refute policy(@admin, @project, @other_resource).show?
       refute policy(@app_owner, @project, @other_resource).show?
     end
@@ -153,6 +150,8 @@ module ResourcePolicyTest
       refute policy(@team_member, nil, @other_resource).show?
       refute policy(@project_manager, nil, @resource).show?
       refute policy(@project_manager, nil, @other_resource).show?
+      refute policy(@project_admin, nil, @resource).show?
+      refute policy(@project_admin, nil, @other_resource).show?
       refute policy(@accredited_user, nil, @resource).show?
       refute policy(@accredited_user, nil, @other_resource).show?
     end
@@ -162,67 +161,139 @@ module ResourcePolicyTest
       refute policy(@regular_user, @project, @resource).show?
       refute policy(@regular_user, @project, nil).show?
       refute policy(nil, @project, @resource).show?
+      end
+
+      # New tests
+    test 'new allows admins and accredited users on current project to access new form' do
+      assert policy(@admin, @project, resource_class).new?
+      assert policy(@app_owner, @project, resource_class).new?
+      assert policy(@project_admin, @project, resource_class).new?
+      assert policy(@accredited_user, @project, resource_class).new?
     end
 
-    # New tests defer to create
+    test 'new denies admins and accredited users with nil current project to access new form' do
+      refute policy(@admin, nil, resource_class).new?
+      refute policy(@app_owner, nil, resource_class).new?
+      refute policy(@project_admin, nil, resource_class).new?
+      refute policy(@accredited_user, nil, resource_class).new?
+    end
+
+    test 'new denies users without required role on current project to access new form' do
+      refute policy(@team_member, @project, resource_class).new?
+    end
+
+    test 'new denies users without project roles' do
+      refute policy(@team_member_other_project, @project, resource_class).new?
+      refute policy(@regular_user, @project, resource_class).new?
+      refute policy(nil, @project, resource_class).new?
+    end
+
     # Create Tests
-    test 'create allows admins and accredited team members to create resource on the current project' do
-      assert policy(@admin, @project, new_project_resource).create?
-      assert policy(@app_owner, @project, new_project_resource).create?
-      assert policy(@accredited_user, @project, new_project_resource).create?
+    test 'create allows admins and accredited users to create resource on the current project' do
+      assert policy(@admin, @project, @new_resource).create?
+      assert policy(@app_owner, @project, @new_resource).create?
+      assert policy(@project_admin, @project, @new_resource).create?
+      assert policy(@accredited_user, @project, @new_resource).create?
     end
 
     test "create denies any user without accreditation to create resource on current project" do
-      refute policy(@project_manager, @project, new_project_resource).create?
-      refute policy(@team_member, @project, new_project_resource).create?
-      refute policy(@accredited_user_other_project, @project, new_project_resource).create?
-      refute policy(@regular_user, @project, new_project_resource).create?
-      refute policy(nil, @project, new_project_resource).create?
+      refute policy(@team_member, @project, @new_resource).create?
+      refute policy(@accredited_user_other_project, @project, @new_resource).create?
+      refute policy(@regular_user, @project, @new_resource).create?
+      refute policy(nil, @project, @new_resource).create?
     end
 
-    test 'create denies accredited users with nil current project to create resource on any project' do
-      refute policy(@accredited_user, nil, new_project_resource).create?
-      refute policy(@accredited_user, nil, new_other_project_resource).create?
+    test 'create denies admins and accredited users with nil current project to create resource on any project' do
+      refute policy(@admin, nil, @new_resource).create?
+      refute policy(@app_owner, nil, @new_resource).create?
+      refute policy(@project_admin, nil, @new_resource).create?
+      refute policy(@accredited_user, nil, @new_resource).create?
+      refute policy(@accredited_user, nil, @new_other_resource).create?
     end
 
     test "create denies accredited user to create resource on other project" do
-      refute policy(@accredited_user, @project, new_other_project_resource).create?
-      refute policy(@admin, @project, new_other_project_resource).create?
-      refute policy(@app_owner, @project, new_other_project_resource).create?
+      refute policy(@accredited_user, @project, @new_other_resource).create?
+      refute policy(@admin, @project, @new_other_resource).create?
+      refute policy(@app_owner, @project, @new_other_resource).create?
     end
 
-    # Edit tests defer to update
+    # Edit tests
+    test 'edit allows admins and accredited users on current project to access edit form' do
+      assert policy(@admin, @project, @resource).edit?
+      assert policy(@app_owner, @project, @resource).edit?
+      assert policy(@project_admin, @project, @resource).edit?
+      assert policy(@accredited_user, @project, @resource).edit?
+    end
+
+  test 'edit denies admins and accredited users with nil current project to access edit form' do
+    refute policy(@app_owner, nil, @resource).edit?
+    refute policy(@admin, nil, @resource).edit?
+    refute policy(@project_admin, nil, @resource).edit?
+    refute policy(@accredited_user, nil, @resource).edit?
+    end
+
+  test 'edit denies users without required project role' do
+    refute policy(@team_member, @project, @resource).edit?
+    refute policy(@regular_user, @project, @resource).edit?
+    refute policy(nil, @project, @resource).edit?
+  end
+
     # Update Tests
-    test 'update allows admins and accredited team members to update resource on the current project' do
+    test 'update allows admins and accredited users to update resource on the current project' do
       assert policy(@admin, @project, @resource).update?
       assert policy(@app_owner, @project, @resource).update?
+      assert policy(@project_admin, @project, @resource).update?
       assert policy(@accredited_user, @project, @resource).update?
     end
 
-    test 'update denies accredited users with nil current project to update resources on any project' do
+    test 'update denies admins and accredited users with nil current project to update resources on any project' do
+      refute policy(@admin, nil, @resource).update?
+      refute policy(@app_owner, nil, @resource).update?
+      refute policy(@project_admin, nil, @resource).update?
       refute policy(@accredited_user, nil, @resource).update?
       refute policy(@accredited_user, nil, @other_resource).update?
     end
 
     test 'update denies users without accreditation and project role' do
-      refute policy(@project_manager, @project, @resource).update?
       refute policy(@team_member, @project, @resource).update?
       refute policy(@regular_user, @project, @resource).update?
       refute policy(@accredited_user_other_project, @project, @resource).update?
       refute policy(nil, @project, @resource).update?
     end
 
-    # Destroy Tests
-    test 'destroy allows admin and app_owner' do
-      assert policy(@admin, @project, @resource).destroy?
-      assert policy(@app_owner, @project, @resource).destroy?
+    test "update denies accredited user to update resource on other project" do
+      refute policy(@admin, @project, @other_resource).update?
+      refute policy(@app_owner, @project, @other_resource).update?
+      refute policy(@project_admin, @project, @other_resource).update?
+      refute policy(@accredited_user, @project, @other_resource).update?
     end
 
-    test 'destroy denies project manager, team members and regular users' do
+    # Destroy Tests
+    test 'destroy allows admins on current project' do
+      assert policy(@admin, @project, @resource).destroy?
+      assert policy(@app_owner, @project, @resource).destroy?
+      assert policy(@project_admin, @project, @resource).destroy?
+    end
+
+    test 'destroy denies users other than admins' do
       refute policy(@project_manager, @project, @resource).destroy?
+      refute policy(@accredited_user, @project, @resource).destroy?
       refute policy(@team_member, @project, @resource).destroy?
       refute policy(@regular_user, @project, @resource).destroy?
       refute policy(nil, @project, @resource).destroy?
+    end
+
+    test 'destroy allows global admins with current project to destroy on another project' do
+      assert policy(@app_owner, @project, @other_resource).destroy?
+      assert policy(@admin, @project, @other_resource).destroy?
+    end
+
+    test 'destroy denies project admins with current project to destroy on another project' do
+      refute policy(@project_admin, @project, @other_resource).destroy?
+      refute policy(@accredited_user, @project, @other_resource).destroy?
+      refute policy(@team_member, @project, @other_resource).destroy?
+      refute policy(@regular_user, @project, @other_resource).destroy?
+      refute policy(nil, @project, @other_resource).destroy?
     end
   end
 end

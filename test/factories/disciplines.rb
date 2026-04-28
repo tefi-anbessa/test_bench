@@ -7,22 +7,9 @@ FactoryBot.define do
     sequence(:name) { |n| "Factory Discipline #{format('%02d', n)}" }
     sequence(:label) { |n| "D#{format('%02d', n)}" }
     notes { Faker::Lorem.sentence }
-    module_name { name.parameterize.underscore.camelize }
+    required_role { nil }
     sort_order { 100 }
     prefix_schema { { name: 'default' } }
-
-    # For specific discipline types
-    trait :elec do
-      name { 'Electrical' }
-      label { 'E' }
-      prefix_schema { { name: 'dim1' } }
-    end
-
-    trait :inst do
-      name { 'Instrumentation' }
-      label { 'I' }
-      prefix_schema { { name: 'isa51' } }
-    end
   end
 end
 

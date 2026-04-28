@@ -18,18 +18,18 @@ module DocumentControl
 
   validates :file_extension, length: { maximum: 10 }, format: { with: /\A\./ }
     
-    def label
-      "#{title} #{revision}"
+  def label
+    "#{title} #{revision}"
+  end
+
+  private
+
+    def self.ransackable_attributes(auth_object = nil)
+      [:vendor, :title, :file_extension, :revision, :notes, :created_at, :updated_at]
     end
 
-    private
-
-      def self.ransackable_attributes(auth_object = nil)
-        [:vendor, :title, :file_extension, :revision, :notes, :created_at, :updated_at]
-      end
-
-      def self.ransackable_associations(auth_object = nil)
-        [ :issues ]
-      end
+    def self.ransackable_associations(auth_object = nil)
+      [ :issues ]
+    end
   end
 end

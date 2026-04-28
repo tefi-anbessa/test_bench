@@ -1,16 +1,7 @@
 <% provide(:title, t('.title')) %>
 <% provide(:header, t('.header', label: @project.label)) %>
 <% provide(:button_text, t('actions.update')) %>
-
-<div class="container mb-3">
-  <div class="position-relative">
-    <h2 class="text-center mb-0">
-      <%= t('.header', label: @project.label) %>
-    </h2>
-  </div>
-</div>
-
-<%= render 'form' %>
+<%= render "form" %>
 
 <% if policy(@project).edit? %>
   <div class="container mt-4">

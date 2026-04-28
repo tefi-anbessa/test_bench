@@ -33,12 +33,11 @@ class RoleTest < ActiveSupport::TestCase
 
   test "should assign role to user" do
     user = create(:user)
-    role = create(:role, :electrical_designer)
+    role = create(:role, name: 'admin')
     
     assert_difference 'user.roles.count', 1 do
       user.add_role(role.name.to_sym, role.resource)
     end
-    
     assert user.has_role?(role.name.to_sym, role.resource)
   end
 

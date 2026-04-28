@@ -18,9 +18,10 @@
         <h2 class="h5 mb-0"><%= t(".subheader") %></h2>
       </div>
       <div class="card-body text-start">
+        <p class="card-text"><%= t(".message") %></p>
         <% if @exception.present? %>
-          <p class="card-text"><%= t(".message") %></p>
-          
+          <p class="card-text"><strong>Exception:</strong> <code><%= @exception.message %></code></p>
+
           <% if @exception.respond_to?(:query) && @exception.query.present? %>
             <p class="card-text"><strong><%= t(".action") %></strong>
             <code><%= @exception.query %></code></p>

@@ -2,81 +2,69 @@
 # These will be available to all projects
 #
 # Fields:
-#   label:      Short 1-3 character code (for display)
-#   name:       Full name of the discipline
-#   module:     Optional: Associated Ruby module for extended functionality
-#   sort_order: [deprecated] Display order in UI (lower numbers first)
+#   label:      Short 1-5 character code for display (project customizable)
+#   prefix_schema: Schema for tag/document numbering
+#   sort_order: Display order in UI (lower numbers first)
+#   required_role: Default required role for content creation (:designer, :checker, :approver, :controller or nil)
 
 disciplines:
 
-  A:
-    name: Administration
+  Administration:
+    label: A
     prefix_schema: { name: 'default' }
-    module: Administration
     sort_order: 10
+    required_role: :designer
 
-  B:
-    name: Architecture
+  Architecture:
+    label: B
     prefix_schema: { name: 'default' }
-    module: Architecture
     sort_order: 20
+    required_role: :designer
 
-  P:
-    name: Process
+  DocumentControl:
+    label: DC
     prefix_schema: { name: 'default' }
-    module: Process
+    sort_order: 25
+    required_role: :document_controller
+
+  Process:
+    label: P
+    prefix_schema: { name: 'default' }
     sort_order: 30
+    required_role: :designer
 
-  E:
-    name: Electrical
+  Electrical:
+    label: E
     prefix_schema: { name: 'default' }
-    module: Electrical
     sort_order: 10
+    required_role: :designer
 
-  J:
-    name: Instrumentation
+  Instrument:
+    label: J
     prefix_schema: { name: 'isa51' }
-    module: Instrumentation
     sort_order: 40
+    required_role: :designer
 
-  IT:
-    name: Information Technology & Communications
+  InformationTechnology:
+    label: IT
     prefix_schema: { name: 'default' }
-    module: It
     sort_order: 50
+    required_role: :designer
 
-  M:
-    name: Mechanical
+  Mechanical:
+    label: M
     prefix_schema: { name: 'default' }
-    module: Mechanical
     sort_order: 60
+    required_role: :designer
 
-  PIP:
-    name: Piping
+  Piping:
+    label: PIP
     prefix_schema: { name: 'default' }
-    module: Piping
     sort_order: 70
+    required_role: :designer
 
-  C:
-    name: Civil
+  Civil:
+    label: C
     prefix_schema: { name: 'default' }
-    module: Civil
     sort_order: 80
-
-  S:
-    name: Structural
-    prefix_schema: { name: 'default' }
-    module: Structural
-    sort_order: 90
-
-  HVAC:
-    name: Heating Ventilation Air Conditioning
-    prefix_schema: { name: 'default' }
-    module: Hvac
-    sort_order: 100
-
-  COMP:
-    name: Completions
-    prefix_schema: { name: 'default' }
-    module: Completions
-    sort_order: 110
+    required_role: :designer

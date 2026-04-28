@@ -4,18 +4,18 @@ roles:
   global_roles:
     - admin
     - app_owner
-
+    - document_controller
   # Resource-specific role definitions
   resources:
     project:
       - project_manager
+      - project_admin
       - team_member
-    tag:
-      - editor
-    
-  functional_roles:
-    - electrical_designer
-    - mechanical_designer
-    - structural_designer
-    - document_controller
-  
+      - document_controller
+    discipline:
+      - designer
+      - checker
+      - approver
+      - controller
+      - custodian
+      - document_controller

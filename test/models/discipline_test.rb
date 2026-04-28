@@ -2,8 +2,9 @@ require "test_helper"
 
 class DisciplineTest < ActiveSupport::TestCase
   def setup
-    @project = create(:project)
+    @project = create(:project) # Create project also creates standard disciplines.
     @swatch = create(:swatch)
+    # new discipline for testing
     @discipline = build(:discipline, project: @project, swatch: @swatch)
   end
 
@@ -29,25 +30,15 @@ class DisciplineTest < ActiveSupport::TestCase
     refute @discipline.valid?
   end
 
-  test "swatch must be present" do
-    @discipline.swatch = nil
-    refute @discipline.valid?
-  end
-
   test "label must be maximum 5 characters" do
     @discipline.label = "a" * 6
     refute @discipline.valid?
     assert_includes @discipline.errors[:label], I18n.t("errors.messages.too_long", count: 5)
-    @discipline.label = "A"
-    assert @discipline.valid?
   end
 
   test "label must be unique within project" do
-    create(:discipline, label: "Z", name: 'Test Discipline 1', project: @project, swatch: @swatch)
-    
-    # Try to create another discipline with the same code but different label
-    duplicate = build(:discipline, label: "Z", name: 'Test Discipline 2', project: @project, swatch: @swatch)
-    refute duplicate.valid?, "Should not allow duplicate discipline codes in same project"
+    duplicate = build(:discipline, label: "E", name: 'Test Discipline 1', project: @project, swatch: @swatch)
+    refute duplicate.valid?, "Should not allow duplicate discipline labels in same project"
     assert_includes duplicate.errors[:label], I18n.t("errors.messages.taken")
   end
 
@@ -69,6 +60,12 @@ class DisciplineTest < ActiveSupport::TestCase
     @discipline.name = "A" * 51
     refute @discipline.valid?
     assert_includes @discipline.errors[:name], I18n.t("errors.messages.too_long", count: 50)
+  end
+
+  test "name must be unique within project" do
+    duplicate = build(:discipline, label: "TEST", name: 'Electrical', project: @project, swatch: @swatch)
+    refute duplicate.valid?, "Should not allow duplicate discipline names in same project"
+    assert_includes duplicate.errors[:name], I18n.t("errors.messages.taken")
   end
 
   test "prefix_schema must be present" do
@@ -110,16 +107,29 @@ class DisciplineTest < ActiveSupport::TestCase
       )
   end
 
+  test "required_role must be a valid discipline role" do
+    @discipline.required_role = "invalid_role"
+    refute @discipline.valid?
+    assert_includes @discipline.errors[:required_role], I18n.t("errors.messages.inclusion")
+  end
+
+  test "required_role accepts all valid discipline roles" do
+    Role.all_resource_roles[:discipline].each do |role|
+      @discipline.required_role = role
+      assert @discipline.valid?, "Should be valid with role: #{role}"
+    end
+  end
+
   test "destroy project should destroy discipline" do
     # Create a new project with a single tag for this test
     test_project = create(:project)
-    create(:discipline, project: test_project)
-    
-    # Verify the discipline exists
-    assert_equal 1, test_project.disciplines.count, "Should have 1 discipline"
+    standard_count = test_project.disciplines.count
+    assert_difference('test_project.disciplines.count', 1) do
+      create(:discipline, project: test_project)
+    end
     
     # Destroy the project and verify all its disciplines are destroyed
-    assert_difference('Discipline.count', -1) do
+    assert_difference('Discipline.count', -(standard_count + 1)) do
       test_project.destroy
     end
   end

@@ -1,14 +1,14 @@
+# frozen_string_literal: true
 require "test_helper"
-require "helpers/tagable_test_patterns"
+require "helpers/tagable_controller_tests"
 module Electrical
   class MotorsControllerTest < ActionController::TestCase
-    include TagableTestPatterns
+    include TagableControllerTests
     include Devise::Test::ControllerHelpers
 
     setup do
       setup_common_test_data
       setup_model_specific_data
-      setup_tags_and_resources
     end
 
     def setup_model_specific_data
@@ -19,12 +19,16 @@ module Electrical
     def valid_resource_params
       {
         motor_type: :induction,
-        frame_size: '132'
+        frame_size: '132',
+        poles: 2,
+        ingress_protection: 'IP54',
+        speed_rated: 1750.0,
+        notes: 'Test motor'
       }
     end
 
     # Set invalid resource params for tests
-    def invalid_resource_params
+    def invalid_resource_param
       { motor_type: 999 }  # Invalid motor type (enum only allows 0-7)
     end
 

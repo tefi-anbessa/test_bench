@@ -4,22 +4,27 @@ module DocumentControl
 
   # Associatons
     belongs_to :discipline
-    has_many :documents
-
-    # Define project association for polymorphic tagging
     delegate :project, to: :discipline
+    has_many :documents, dependent: :destroy
     
     # Presence validation for required fields.
     validates :code, presence: true, length: { maximum: 6 }
-    validates :label, presence: true, length: { maximum: 50 }
+    validates :name, presence: true, length: { maximum: 50 }
     
+    def label
+      code
+    end
+    
+    def long_label
+      "#{discipline.label}: #{code}"
+    end
   # Uniqueness validation for unique fields.
     validates :code, uniqueness: { scope: :discipline_id }
     
     private
 
       def self.ransackable_attributes(auth_object = nil)
-        [:code, :label, :description, :created_at, :updated_at]
+        [:code, :name, :description, :created_at, :updated_at]
       end
 
       def self.ransackable_associations(auth_object = nil)

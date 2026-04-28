@@ -23,6 +23,8 @@ class ProjectsControllerTest < ActionController::TestCase
 
     # Set the current project for all tests that need it
     set_current_project(@project) if defined?(set_current_project)
+    # Project default swatch must be present
+    @swatch= create(:swatch, name: "app_theme")
   end
 
   # Index action tests
@@ -126,7 +128,7 @@ class ProjectsControllerTest < ActionController::TestCase
       }
     end
     assert_template :new
-    assert_equal I18n.t('flash.actions.create.alert', resource_name: I18n.t('activerecord.models.project')), flash[:alert]
+    assert_equal I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.project')), flash[:alert]
   end
 
   # Edit action tests
@@ -188,7 +190,7 @@ class ProjectsControllerTest < ActionController::TestCase
     }
     assert_template :edit
     assert_equal original_title, @project.reload.title
-    assert_equal I18n.t('flash.actions.update.alert', resource_name: I18n.t('activerecord.models.project')), flash[:alert]
+    assert_equal I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.project')), flash[:alert]
   end
 
   test "project owner can update their project" do
@@ -228,7 +230,7 @@ class ProjectsControllerTest < ActionController::TestCase
       delete :destroy, params: { id: @project.id }
     end
     assert_redirected_to projects_url
-    assert_equal I18n.t('flash.actions.destroy.notice', resource_name: I18n.t('activerecord.models.project')), flash[:success]
+    assert_equal I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.project')), flash[:success]
   end
 
   # Select action tests

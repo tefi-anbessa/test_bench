@@ -47,6 +47,11 @@ en:
       tag_already_assigned: "This tag has already been assigned to another item"
       tagable_type_mismatch: "This tag has been assigned a different tag type"
       invalid_enum: "Invalid enum value"
+      tagable_not_set: "The tag has no object to assign the load"
+      tag_not_demandable: "The tag type is not an electric load"
+      out_of_scope: "The item requested is not in the current project scope"
+      record_is_orphan: "The item requested does not have a valid parent"
+      already_assigned: "This item is already assigned to another object"
   projects:
     index:
       title:            "Projects"

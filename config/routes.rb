@@ -7,12 +7,15 @@ Rails.application.routes.draw do
     get 'site/contact'
     get 'site/test_icons'
 
+    # Devise routes
     devise_for :users, controllers: {
       sessions: 'users/sessions'
     }
     
+    # Additional routes for users UI (presentation only)
     resources :users, only: [:show, :index]
     
+    # App wide resources
     resources :projects do
       collection do
         get "select"
@@ -27,6 +30,17 @@ Rails.application.routes.draw do
         resources :cable_types, shallow: true
       end
     end
+
+    namespace :document_control do
+        resources :source_formats
+    end
+
+    # Top-level disciplines routes (shallow from projects nesting)
+    resources :disciplines, only: [], shallow: true do
+      namespace :document_control do
+        resources :doc_types
+      end
+    end
     
     # Tagable models have top level new and create routes to allow creation 
     # of tagable and tag in a single operation
@@ -35,24 +49,13 @@ Rails.application.routes.draw do
     namespace :electrical do
       # INSERTION POINT 1 FOR SUBMODULES
       # INSERTION POINT 1 FOR TAGABLE GENERATOR
-      # Provide for admins to create and list cable_types full catalog outwith project context
-      resources :cable_types, only: [:index, :new, :create]
       resources :heaters, :cables, :motors, :light_ccts, 
                 :socket_ccts, only: [:index, :new, :create]
       resources :switchboards, only: [:index, :new, :create] do
-        resources :circuits, only: [:index, :new, :create]
+        resources :circuits, shallow: true
       end
       # Define top level index routes for circuits, demands, to allow complete load listings.
       resources :circuits, :demands, only: [:index]
-    end
-
-    # Document namespace for document management
-    namespace :document_control do
-      resources :source_formats
-      resources :doc_types
-      # INSERTION POINT 1 FOR SUBMODULES
-      # INSERTION POINT 1 FOR TAGABLE GENERATOR
-      # Add document routes here
     end
     # INSERTION POINT 1 FOR MODULE GENERATOR
     # Change namespace for change management
@@ -69,9 +72,7 @@ Rails.application.routes.draw do
         # INSERTION POINT 2 FOR TAGABLE GENERATOR
         resources :heaters, :cables, :motors, :light_ccts, 
                   :socket_ccts, except: [:index]
-        resources :switchboards, except: [:index] do
-          resources :circuits, except: [:index]
-        end
+        resources :switchboards, except: [:index]
         resources :demands, except: [:index]
       end
     # INSERTION POINT 2 FOR MODULE GENERATOR
@@ -85,12 +86,12 @@ Rails.application.routes.draw do
     end
     # Role creation is attached to the index view for global and resource wide roles.
     resources :roles, only: [:index, :new, :create]
-  end
 
-  resources :swatches
-  resources :documents, shallow: true do
-    namespace :document_control do
-      resources :issues
+    resources :swatches
+    resources :documents, shallow: true do
+      namespace :document_control do
+        resources :issues
+      end
     end
   end
 

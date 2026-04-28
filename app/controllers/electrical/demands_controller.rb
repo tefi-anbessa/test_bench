@@ -25,7 +25,7 @@ module Electrical
     end
 
     def create
-      @demand = @tag.tagable.build_electrical_demand(demand_params)
+      @demand = @tag.tagable.build_electrical_demand(demand_params.except(:other_supply))
       authorize @demand
       if @demand.save
         flash[:success] = I18n.t('flash.create.notice', 
@@ -33,6 +33,7 @@ module Electrical
         redirect_to @demand
         return
       else
+        set_swatch
         flash.now[:alert] = I18n.t('flash.create.alert', 
           resource_name: I18n.t('activerecord.models.electrical.demand'))
         render 'new', status: :unprocessable_entity
@@ -48,19 +49,13 @@ module Electrical
     # PATCH/PUT /demands/1 or /demands/1.json
     def update
       authorize @demand
-      @tag = @demand.tag
       if @demand.update(demand_params)
-        flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.demand'))
-        respond_to do |format|
-          format.html { redirect_to @demand }
-          format.json { render :show, status: :ok, location: @demand }
-        end
+        flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.electrical.demand'))
+        redirect_to @demand
       else
-        flash.now[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.demand'))
-        respond_to do |format|  
-          format.html { render :edit, status: :unprocessable_entity }
-          format.json { render json: @demand.errors, status: :unprocessable_entity }
-        end
+        set_swatch
+        flash.now[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.electrical.demand'))
+        render :edit, status: :unprocessable_entity
       end
     end
 
@@ -68,41 +63,37 @@ module Electrical
     def destroy
       authorize @demand
       if @demand.destroy
-        flash[:success] = I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.demand'))
+        flash[:success] = I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.electrical.demand'))
       else
-        flash.now[:alert] = I18n.t('flash.destroy.alert', resource_name: I18n.t('activerecord.models.demand'))
+        flash.now[:alert] = I18n.t('flash.destroy.alert', resource_name: I18n.t('activerecord.models.electrical.demand'))
       end
-      respond_to do |format|
-        format.html { redirect_to electrical_demands_url, status: :see_other }
-        format.json { head :no_content }
-      end
+      redirect_to electrical_demands_url, status: :see_other
     end
 
     private
       # Use callbacks to share common setup or constraints between actions.
       def set_demand
-        @demand = Electrical::Demand.find(params[:id])
-        @tag = @demand.tag
+        @demand = policy_scope(Electrical::Demand).find_by(id: params[:id])
+        raise ApplicationController::ConflictError, 
+          :out_of_scope if @demand.nil?
+        if @demand.demandable.present? && @demand.demandable.tag.present?
+          @tag = @demand.tag
+        else
+          raise ApplicationController::ConflictError, 
+            :record_is_orphan
+        end
       end
 
       def set_tag
-        @tag = Tag.find(params[:tag_id])
-        # Trap case when trying to add a demand to a tag that is:
-        # - not found in the database 
-        # - does not have a tagable
-        # - does not have a tagable type that is also demandable
-        # Workflow should prevent this from being possible through normal use of the application.
-        if @tag.nil? 
-          return false
-        end
-        if @tag.tagable.nil?
-          @tag = nil
-          return false
-        end
-        if !Electrical::Demand.demandable_types.include?(@tag.tagable_type)
-          @tag = nil
-          return false
-        end
+        @tag = policy_scope(Tag).find_by(id: params[:tag_id])
+        raise ApplicationController::ConflictError, 
+          :tag_not_found if @tag.nil?
+        raise ApplicationController::ConflictError, 
+          :tagable_not_set if @tag.tagable.nil?
+        raise ApplicationController::ConflictError, 
+          :tag_not_demandable unless Electrical::Demand.demandable_types.include?(@tag.tagable.class.name)
+        raise ApplicationController::ConflictError, 
+          :tag_already_assigned if @tag.tagable.electrical_demand.present?
       end
 
       def set_swatch

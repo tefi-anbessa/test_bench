@@ -4,7 +4,7 @@ module ProjectChange
     
     # [TODO: set roles after revamp of RBAC system]
     def self.required_role
-      :document_controller
+      :designer
     end
 
     # Default discipline for tagable models to reference back to this module, used in testing. 

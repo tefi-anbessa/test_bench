@@ -14,7 +14,7 @@
 
         <!-- New Button (Right) -->
         <% if @switchboard.present? %>
-          <% if policy(Electrical::Circuit).new? %>
+          <% if policy(Electrical::Switchboard).new? %>
               <%= link_to new_electrical_switchboard_circuit_path(@switchboard), 
                 class: "btn btn-outline-primary actions",
                 aria: { label: t('actions.new') },

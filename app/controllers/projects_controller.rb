@@ -2,16 +2,16 @@ class ProjectsController < ApplicationController
   include PageSizeable
   include RolesHelper
   
+  before_action :authenticate_user!
   before_action :get_project, only: %i[ show edit update destroy ]
   before_action :set_project, only: %i[ set ]
-  before_action :authenticate_user!
-  before_action :ensure_html_format, except: [:show] # or any actions where you want to allow
-
+  before_action :ensure_html_format, except: [:show]
   # GET /projects or /projects.json
   def index
     @q = policy_scope(Project).ransack(params[:q])
     @pagy, @projects = pagy(@q.result.ordered, limit: 20)
     authorize @projects
+    set_swatch
   end
 
   # GET /projects/1 or /projects/1.json
@@ -20,20 +20,14 @@ class ProjectsController < ApplicationController
     @q = @project.disciplines.ransack(params[:q])
     @pagy, @disciplines = pagy(@q.result, items: 10)
     authorize @project
-    
-    respond_to do |format|
-      format.html
-      format.json { render json: @project }
-    end
-
+    set_swatch
   end
 
   # GET /projects/new
   def new
     @project = Project.new
     authorize @project
-    @roles = Constants.roles.resources[:project] || []
-    @users = User.all
+    setup_form
   end
 
   # POST /projects
@@ -46,6 +40,7 @@ class ProjectsController < ApplicationController
       redirect_to @project
     else
       flash.now[:alert] = I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.project'))
+      setup_form
       render :new, status: :unprocessable_content
     end
   end
@@ -53,16 +48,11 @@ class ProjectsController < ApplicationController
   # GET /projects/1/edit
   def edit
     authorize @project
-    
+    setup_form
     # Set up role assignment form if user has permission
     if policy(@project).edit?
       setup_role_assignment(@project)
-      @role_return_path = project_path(@project)
-    end
-    
-    respond_to do |format|
-      format.html
-      format.json { render json: @project }
+      @role_return_path = edit_project_path(@project)
     end
   end
 
@@ -76,6 +66,7 @@ class ProjectsController < ApplicationController
     else
       setup_role_assignment(@project)
       flash.now[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.project'))
+      setup_form
       render :edit, status: :unprocessable_content
     end
   end
@@ -119,7 +110,7 @@ class ProjectsController < ApplicationController
       # Clear any stored location for project to prevent redirect loops
       clear_stored_location_for_project
       flash[:success] = I18n.t('projects.selected', code: @project.code)
-      redirect_to saved_path || projects_path
+      redirect_to saved_path || project_path(@project)
     else
       # If invalid project is selected
       redirect_to select_projects_path,
@@ -145,9 +136,22 @@ class ProjectsController < ApplicationController
       return if request.format.html?
       head :not_acceptable
     end
+
+    def setup_form
+      set_swatch
+      @swatches = policy_scope(Swatch)
+    end
+
+    def set_swatch
+      if @project&.persisted? && @project.swatch
+        @swatch = @project.swatch
+      else
+        @swatch = Project.swatch
+      end
+    end
     
     # Only allow a list of trusted parameters through.
     def project_params
-      params.require(:project).permit(:code, :title, :description, :submit)
+      params.require(:project).permit(:code, :title, :description, :swatch_id)
     end
 end

@@ -3,103 +3,158 @@ module Electrical
     before_action :authenticate_user!
     before_action :set_switchboard, only: [:index, :new, :create]
     before_action :set_circuit, only: [:show, :edit, :update, :destroy]
-    before_action :set_swatch, only: [:index, :show, :new, :edit]
     
     def index
-      authorize Electrical::Circuit
       if @switchboard.present?
-        @q = policy_scope(@switchboard.electrical_circuits).ransack(params[:q])
+        # Cater for index on given switchboard
+        authorize @switchboard
+        @q = @switchboard.electrical_circuits.ransack(params[:q])
+        @pagy, @circuits = pagy(@q.result)
       else
-        @q = policy_scope(Electrical::Circuit).ransack(params[:q])
+        # Cater for index on all circuits in current project
+        authorize Electrical::Switchboard
+        @q = Electrical::Circuit.joins(:electrical_switchboard)
+              .merge(policy_scope(Electrical::Switchboard)).ransack(params[:q])
+        @pagy, @circuits = pagy(@q.result)
       end
-      @pagy, @circuits = pagy(@q.result)
+      set_swatch
     end
     
     def show
-      authorize @circuit
+      authorize @circuit.electrical_switchboard
+      set_swatch
     end
     
     def new
+      authorize @switchboard
       @circuit = @switchboard.electrical_circuits.new
-      authorize @circuit
       setup_form
     end
     
     def create
-      @circuit = @switchboard.electrical_circuits.new(circuit_params.except(:cable))
-      authorize @circuit
-      
-      if @circuit.save
-        flash[:success] = [t("flash.create.notice", resource_name: @circuit.model_name.human)]
-        
-        # Only assign feeder if it's different from current (prevents "already assigned" error)
-        feeder_id = params.dig(:cable, :from_id).presence
-        if feeder_id && feeder_id != @circuit.feeder&.id
-          if set_feeder
-            flash[:success] << t("flash.assigned", resource_name: Electrical::Circuit.human_attribute_name(:feeder))
-          end
-        end
-        
-        # Only assign demand if it's different from current (prevents "already assigned" error)
-        demand_id = params.dig(:cable, :to_id).presence
-        if demand_id && demand_id != @circuit.reload.feeder&.to&.id
-          if set_demand
-            flash[:success] << t("flash.assigned", resource_name: Electrical::Circuit.human_attribute_name(:demand))
-          end
-        end
-        # Create complete
-        redirect_to @circuit
-      else
-        flash.now[:alert] = t("flash.create.alert", resource_name: @circuit.model_name.human)
+      authorize @switchboard
+      # Catch enum validation errors
+      begin
+        @circuit = @switchboard.electrical_circuits.build
+        @circuit.assign_attributes(circuit_params.except(:cable))
+      rescue ArgumentError => _
+        # Handle invalid enum values as a conflict
+        raise ApplicationController::ConflictError, :invalid_enum
+      end
+      unless process_cable_params
         setup_form
-        render :new, status: :unprocessable_entity
+        render :new, status: :unprocessable_content
+        return
+      end
+      # Ready to complete transactions
+      begin 
+        @circuit.class.transaction do
+          # Create circuit
+          @circuit.save!
+          # Set feeder cable if specified and valid
+          @feeder.update(from: @circuit) if @feeder.present?
+          if @demand.present?
+            if @demand.incomer&.present?
+              # Nullify any existing incomer :to association.
+              @demand.incomer.update(to: nil)
+            end
+            # Set demand as feeder cable :to
+            @feeder.update(to: @demand) if @demand.present?
+          end
+        end
+        flash[:success] = [t("flash.create.notice",
+                          resource_name: t("activerecord.models.electrical.circuit"))]
+        flash[:success] << t("flash.assigned",
+          resource_name: t("activerecord.attributes.electrical.circuit.feeder")) if @feeder.present?
+        flash[:success] << t("flash.assigned",
+          resource_name: t("activerecord.attributes.electrical.circuit.demand")) if @demand.present?
+        redirect_to @circuit
+      rescue ActiveRecord::RecordInvalid => _e
+        # Handle validation errors
+        setup_form
+        flash.now[:alert] = t("flash.create.alert", 
+          resource_name: t("activerecord.models.electrical.circuit").downcase)
+        render :new, status: :unprocessable_content
       end
     end
-    
+
     def edit
-      authorize @circuit
+      authorize @switchboard
       setup_form
     end
     
     def update
-      authorize @circuit
-      if @circuit.update(circuit_params)
-        flash[:success] = [t("flash.actions.update.notice", resource_name: @circuit.model_name.human)]
-        
-        # Only assign feeder if it's different from current (prevents "already assigned" error)
-        feeder_id = params.dig(:cable, :from_id).presence
-        if feeder_id && feeder_id != @circuit.feeder&.id
-          if set_feeder 
-            flash[:success] << t("flash.assigned", resource_name: Electrical::Circuit.human_attribute_name(:feeder))
-          end
-        end
-        
-        # Only assign demand if it's different from current (prevents "already assigned" error)
-        demand_id = params.dig(:cable, :to_id).presence
-        if demand_id && demand_id != @circuit.reload.feeder&.to&.id
-          if set_demand
-            flash[:success] << t("flash.assigned", resource_name: Electrical::Circuit.human_attribute_name(:demand))
-          end
-        end
-        # Updates complete
-        redirect_to @circuit
-      else
-        # Update failed, probably validation error
-        flash.now[:alert] = t("flash.update.alert", resource_name: @circuit.model_name.human)
+      authorize @switchboard
+      # Catch enum validation errors
+      begin
+        @circuit.assign_attributes(circuit_params.except(:cable))
+      rescue ArgumentError => _
+        # Handle invalid enum values as a conflict
+        raise ApplicationController::ConflictError, :invalid_enum
+      end
+      unless process_cable_params
         setup_form
-        render :edit, status: :unprocessable_entity
+        render :edit, status: :unprocessable_content
+        return
+      end
+
+      # Transaction
+      begin
+        @circuit.class.transaction do
+          # Update circuit
+          @circuit.save!
+          if @feeder.present?
+            # Transfer the circuit to feeder
+            if @circuit.feeder.present?
+              # Nullify any previous cable association
+              @circuit.feeder.update(from: nil)
+            end
+            @feeder.update(from: @circuit)
+          end
+          # Set demand as feeder cable :to
+          if @demand.present?
+            if @demand.incomer&.present?
+              # Nullify any previous incomer :to association.
+              @demand.incomer.update(to: nil)
+            end
+            if @feeder.present?
+              # Set demand on replacement feeder cable
+              @feeder.update(to: @demand)
+            else
+              if @circuit.feeder&.present?
+                # Set demand on existing feeder cable
+                @circuit.feeder.update(to: @demand)
+              else
+                # Should have been trapped in process_cable_params. 
+                # Cannot set a demand when no feeder existing or requested.
+              end
+            end
+          end
+        end
+        flash[:success] = [t("flash.actions.update.notice",
+                          resource_name: t("activerecord.models.electrical.circuit"))]
+        flash[:success] << t("flash.assigned",
+          resource_name: t("activerecord.attributes.electrical.circuit.feeder")) if @feeder.present?
+        flash[:success] << t("flash.assigned",
+          resource_name: t("activerecord.attributes.electrical.circuit.demand")) if @demand.present?
+        redirect_to @circuit
+      rescue ActiveRecord::RecordInvalid
+        # Handle validation errors
+        flash.now[:alert] = t("flash.update.alert",
+          resource_name: t("activerecord.models.electrical.circuit").downcase)
+        setup_form
+        render :edit, status: :unprocessable_content
       end
     end
     
     def destroy
-      authorize @circuit
-      switchboard = @circuit.electrical_switchboard
+      authorize @switchboard
       if @circuit.destroy
         flash[:success] = t("flash.destroy.notice", resource_name: @circuit.model_name.human)
       else
         flash.now[:alert] = t("flash.destroy.alert", resource_name: @circuit.model_name.human)
       end
-      redirect_to electrical_switchboard_circuits_path(switchboard)
+      redirect_to electrical_switchboard_circuits_path(@switchboard)
     end
     
     private
@@ -128,87 +183,98 @@ module Electrical
 
         @demands = demands.map { |demand| [demand.label, demand.id] }
         @demand = Electrical::Demand.new() # dummy instance for bootstrap fields
+        set_swatch
       end
       
       def set_switchboard
-        @switchboard = Electrical::Switchboard.find(params[:switchboard_id])
+        if params[:switchboard_id].present?
+          # Index for single switchboard
+          @switchboard = policy_scope(Electrical::Switchboard).find_by(id: params[:switchboard_id])
+          raise ApplicationController::ConflictError, :out_of_scope if @switchboard.nil?
+        else
+          # Index for complete project
+          @switchboard = nil
+        end
       end
       
       def set_circuit
-        @circuit = Electrical::Circuit.find(params[:id])
+        @circuit = Electrical::Circuit.joins(:electrical_switchboard)
+              .merge(policy_scope(Electrical::Switchboard))
+              .find_by(id: params[:id])
+        raise ApplicationController::ConflictError, :out_of_scope if @circuit.nil?
         @switchboard = @circuit.electrical_switchboard
       end
 
       def set_swatch
-        @swatch = Electrical::Circuit.swatch
+        @swatch = @switchboard&.discipline&.swatch || Electrical::Circuit.swatch
+      end
+
+      def process_cable_params
+        @feeder = @demand = nil
+        # Only assign feeder if the param is set and it is not pointing to the present @circuit
+        feeder_id = params.dig(:electrical_cable, :from_id).presence
+        if feeder_id && feeder_id != @circuit.feeder&.id
+          # Don't look for a feeder if it is already set (only relevant on update)
+          # Check that feeder is valid and trap false params.
+          @feeder = set_feeder(feeder_id)
+          # Tried to set a feeder but error occurred
+          return false if @feeder.nil?
+        end
+        # Only assign demand if the param is set and it is not pointing to the present @circuit
+        demand_id = params.dig(:electrical_cable, :to_id).presence
+        if demand_id && demand_id != @circuit.feeder&.to_id
+          # Check that demand is valid and trap false params.
+          @demand = set_demand(demand_id)
+          # Tried to set demand but error occurred
+          return false if @demand.nil?
+        end
+        # No errors or no cable params changed
+        true
       end
 
       # User can allocate a feeder cable from the circuit form, only if the cable is presently unallocated.
       # To change an existing allocation, user must edit the cable itself.
-      def set_feeder
+      def set_feeder(feeder_id)
         # Check that the cable requested exists and is in scope
-        unless @feeder = policy_scope(Electrical::Cable).find_by(id: params.dig(:cable, :from_id))
-          flash[:alert] = t("flash.not_found", resource_name: Electrical::Circuit.human_attribute_name(:feeder))
-          return false
+        unless feeder = policy_scope(Electrical::Cable).find_by(id: feeder_id)
+          raise ApplicationController::ConflictError, :out_of_scope
         end
 
         # Check that user has permission to edit cable
-        unless policy(@feeder).edit?
+        unless policy(feeder).edit?
           flash[:alert] = t("pundit.unauthorized", 
                                 action: t("actions.edit"), 
                                 objects: @circuit.feeder.model_name.human.pluralize.downcase)
-          return false
-        end
-          
-        # Check whether cable is already assigned to a from object.
-        if @feeder&.from&.persisted?
-            flash[:alert] = t("flash.already_assigned", resource_name: Electrical::Circuit.human_attribute_name(:feeder))
-          return false
+          return nil
         end
         
-        # Make the update to the feeder cable
-        unless @feeder.update(from: @circuit)
-          flash[:alert] = t("flash.update.alert", resource_name: Electrical::Circuit.human_attribute_name(:demand))
-          return false
-        end
-        
-        # Return the feeder cable object - not used but suffices as true.
-        return @feeder
+        # Checks complete: Return the feeder cable object.
+        return feeder
       end
 
-      def set_demand
-        # Ensure feeder is assigned, required to set demand (as feeder.to)
-        unless @circuit&.feeder&.persisted?
+      def set_demand(demand_id)
+        # Ensure the circuit's feeder is assigned, or is being set in this operation.
+        # Required to set demand (as feeder.to)
+        feeder = @feeder || @circuit.feeder
+        unless feeder&.persisted?
           flash[:alert] = t("flash.required", resource_name: Electrical::Circuit.human_attribute_name(:feeder))
-          return false
+          return nil
         end
 
-        # Check that a valid demand id has been requested
-        unless demand = policy_scope(Electrical::Demand).find_by(id: params[:cable][:to_id])
-          flash[:alert] = t("flash.not_found", resource_name: Electrical::Circuit.human_attribute_name(:demand))
-          return false
-        end
-
-        # If feeder already has a valid :to object, or demand already has a valid :incomer, do nothing
-        if @circuit.feeder.to&.persisted? || demand.incomer&.persisted?
-          flash[:alert] = t("flash.already_assigned", resource_name: Electrical::Circuit.human_attribute_name(:demand))
-          return false
+        # Check that the demand requested exists and is in scope
+        unless demand = policy_scope(Electrical::Demand).find_by(id: demand_id)
+          raise ApplicationController::ConflictError, :out_of_scope
         end
 
         # Check that user has permission to edit the feeder
-        unless policy(@circuit.feeder).edit?
+        unless policy(feeder).edit?
           flash[:alert] = t("pundit.unauthorized", 
                                 action: t("actions.edit"), 
-                                objects: @circuit.feeder.model_name.human.pluralize.downcase)
-          return false
-        end
-        # Edit the feeder cable :to field
-        unless @circuit.feeder.update(to: demand)
-          flash[:alert] = t("flash.update.alert", resource_name: Electrical::Circuit.human_attribute_name(:demand))
-          return false
+                                objects: feeder.model_name.human.pluralize.downcase)
+          return nil
         end
 
-        # Return the demand object - not used but suffices as true.
+        # Return the demand object
         return demand
       end
       

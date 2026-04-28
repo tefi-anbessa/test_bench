@@ -77,12 +77,12 @@
 
             <div class="row">
               <%= f.check_box :contactor, 
-                    label: t('activerecord.attributes.circuit.contactor') %>
+                    label: t('activerecord.attributes.electrical.circuit.contactor') %>
             </div>
 
             <div class="row">
               <%= f.text_area :notes,
-                    label: t('activerecord.attributes.circuit.notes'),
+                    label: t('activerecord.attributes.electrical.circuit.notes'),
                     rows: 2 %>
             </div>
 
@@ -95,7 +95,7 @@
                         layout: :horizontal,
                         label_col: "col-sm-4", 
                         control_col: "col-sm-8",
-                        label: t('activerecord.attributes.circuit.feeder') } %>
+                        label: t('activerecord.attributes.electrical.circuit.feeder') } %>
               <% end %>
             </div>
 
@@ -108,7 +108,7 @@
                         layout: :horizontal,
                         label_col: "col-sm-4", 
                         control_col: "col-sm-8",
-                        label: t('activerecord.attributes.circuit.demand') } %>
+                        label: t('activerecord.attributes.electrical.circuit.demand') } %>
               <% end %>
             </div>
           </div>

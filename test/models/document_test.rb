@@ -1,14 +1,13 @@
+# frozen_string_literal: true
+
 require "test_helper"
-require_relative "../helpers/model_test_patterns"
+require "helpers/discipline_model_tests"
 class DocumentTest < ActiveSupport::TestCase
-  include ModelTestPatterns
+  include DisciplineModelTests
 
   def setup
-    setup_common_test_data # in model_test_patterns.rb
-    setup_model_specific_data
-  end
-  
-  def setup_model_specific_data
+    @project = create(:project)
+    @resource_discipline = @project.disciplines.find_by(name: 'Electrical')
     @dt = create(:document_control_doc_type, discipline: @resource_discipline, code: "DOC", label: "Test Document Type")
     @resource = create(:document, discipline: @resource_discipline, doc_type: @dt)
   end
@@ -43,8 +42,8 @@ class DocumentTest < ActiveSupport::TestCase
 
   test "default scope sorts by discipline label, doc type code, then serial" do
     # Create documents with different disciplines and doc types
-    discipline_a = create(:discipline, label: "A", name: "A Discipline", project: @resource_discipline.project)
-    discipline_b = create(:discipline, label: "B", name: "B Discipline", project: @resource_discipline.project)
+    discipline_a = @project.disciplines.find_by(label: "A")
+    discipline_b = @project.disciplines.find_by(label: "B")
     
     doc_type_a = create(:document_control_doc_type, code: "AAA", discipline: discipline_a)
     doc_type_b = create(:document_control_doc_type, code: "BBB", discipline: discipline_b)
@@ -69,7 +68,7 @@ class DocumentTest < ActiveSupport::TestCase
     
     # Specifically verify A discipline docs come before B discipline docs
     a_docs = test_docs.select { |doc| doc.discipline.label == "A" }
-    b_docs = test_docs.select { |doc| doc.discipline.label == "B" }
+    # b_docs = test_docs.select { |doc| doc.discipline.label == "B" }
     
     # Within A discipline, verify serial ordering
     assert a_docs.first.serial < a_docs.last.serial

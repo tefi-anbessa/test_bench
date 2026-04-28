@@ -1,16 +1,40 @@
 class Discipline < ApplicationRecord
-  has_many :tags, dependent: :destroy
-  has_many :doc_types, class_name: 'DocumentControl::DocType', dependent: :destroy
+  resourcify
+
   belongs_to :project
-  belongs_to :swatch
+  belongs_to :swatch, optional: true
+  has_many :tags, dependent: :destroy
+  has_many :documents, dependent: :destroy
+  has_many :doc_types, class_name: 'DocumentControl::DocType', dependent: :destroy
 
   before_validation :normalize_prefix_schema
-  validates :name, presence: true, length: { maximum: 50 }
+  validates :name, presence: true, length: { maximum: 50 }, uniqueness: { scope: :project_id }
   validates :label, presence: true, length: { maximum: 5 }, uniqueness: { scope: :project_id }
   validates :prefix_schema, presence: true
+  validate :validate_required_role
   validate :validate_prefix_schema
 
-  default_scope { order(project_id: :asc, sort_order: :asc) }
+  default_scope { order(project_id: :asc, label: :asc) }
+
+  def self.required_role
+    :project_admin
+  end
+
+  # Create all disciplines for a new project from constants
+  def self.create_all_for_project(project)
+    return [] unless Constants.respond_to?(:disciplines)
+    return [] unless project.disciplines.count == 0
+    Constants.disciplines.to_h.map do |name, attrs|
+      create!(
+        project: project,
+        name: name.to_s,
+        label: attrs[:label],
+        prefix_schema: attrs[:prefix_schema],
+        sort_order: attrs[:sort_order],
+        required_role: attrs[:required_role]
+      )
+    end
+  end
 
   def custom_schema?
     prefix_schema.present? && !Constants.prefix_schemata.key?(prefix_schema['name']&.to_sym)
@@ -101,8 +125,15 @@ class Discipline < ApplicationRecord
       end
     end
 
+    def validate_required_role
+      return if required_role.blank?
+      unless Role.valid_role?(required_role, "Discipline")
+        errors.add(:required_role, :inclusion)
+      end
+    end
+
     def self.ransackable_attributes(auth_object = nil)
-      ["code", "label", "name", "prefix_schema", "module_name", "sort_order", "notes"]
+      ["label", "name", "prefix_schema", "sort_order", "notes", "required_role"]
     end
 
     def self.ransackable_associations(auth_object = nil)

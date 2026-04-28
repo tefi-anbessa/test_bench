@@ -4,7 +4,7 @@ class User < ApplicationRecord
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
-         :confirmable, :lockable, :timeoutable, :trackable,
+         :confirmable, :lockable, #:trackable,
          authentication_keys: [:login]
 
   # only allow letter, number, underscore and punctuation.
@@ -21,9 +21,9 @@ class User < ApplicationRecord
 
   attr_writer :login
 
-  def assign_default_role
-    self.add_role(:default) if self.roles.blank?
-  end
+#  def assign_default_role
+#    self.add_role(:default) if self.roles.blank?
+#  end
 
   # from devise wiki for allowing alternate login keys (name or email)
   def login

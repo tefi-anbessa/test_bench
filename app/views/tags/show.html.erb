@@ -90,6 +90,18 @@
                   </span>
                 <% end %>
               <% end %>
+
+              <% if policy(@tag).new? %>
+                <%= link_to new_tag_path, 
+                  class: "btn btn-outline-primary actions",
+                  aria: { label: t('actions.new') },
+                  title: t('actions.new') do %>
+                  <%== bs_icon('plus-square-fill') %>
+                  <span class="ms-1">
+                    <%= [t('actions.new'), t('activerecord.models.tag')].join(' ') %>
+                  </span>
+                <% end %>
+              <% end %>
             </div> <!-- button group -->
           </div> <!-- d-flex align-items-center -->
         </div> <!-- right navigation and actions -->
@@ -102,7 +114,7 @@
 
           <!-- Project collapsible card -->
           <div class="row mb-1">
-            <%= render 'projects/card', project: @tag.project %>
+            <%= render 'projects/card', object: @tag.project %>
           </div>
 
           <!-- Project stage -->

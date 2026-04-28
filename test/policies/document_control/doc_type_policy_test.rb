@@ -1,21 +1,17 @@
+# frozen_string_literal: true
 require 'test_helper'
-require 'helpers/resource_policy_test'
+require 'helpers/test_setup_helpers'
+require 'helpers/discipline_resource_policy_test'
 module DocumentControl
   class DocTypePolicyTest < ActiveSupport::TestCase
-    include ResourcePolicyTest
+    include TestSetupHelpers
+    include DisciplineResourcePolicyTest
 
-    def setup
-      setup_resource_policy_test
-      @resource = create(:document_control_doc_type, discipline: @discipline)
-      @other_resource = create(:document_control_doc_type, discipline: @other_discipline)
-    end
-
-    def new_project_resource
-      build(:document_control_doc_type, discipline: @discipline)
-    end
-
-    def new_other_project_resource
-      build(:document_control_doc_type, discipline: @other_discipline)
+    setup do
+      setup_projects_and_users
+      setup_disciplines(name: "Electrical", required_role: :designer)
+      setup_discipline_resources
+      setup_accredited_users(:document_controller)
     end
   end
 end

@@ -1,8 +1,8 @@
 # Developer Guidance
 
-1. Read Readme.md, it is the primary documentation for installers and users. It explains the application's capabilities.
-2. Read docs/DOCUMENTATION_PREFERENCES.md, it explains the available documentation for the application and how to use it.
-3. Read docs/ROLES_AND_PERMISSIONS.md, it explains the role based access control (RBAC) system, one of the pillars of the application.
+1. Read [Readme](../README.md), it is the primary documentation for installers and users. It explains the application's capabilities. [TODO: update readme]
+2. Read [DOCUMENTATION_PREFERENCES](DOCUMENTATION_PREFERENCES.md), it explains the available documentation for the application and how to use it.
+3. Read [ROLES_AND_PERMISSIONS](ROLES_AND_PERMISSIONS.md), it explains the role based access control (RBAC) system, one of the pillars of the application.
 4. Read the following sections of this document:
    - AI Integration
    - KISS Principle Guidelines
@@ -39,7 +39,7 @@ Progressively build the set of rules to implement these guidelines.
 
 - These guidelines and requirements will evolve over time.
 - Any changes should be reflected in the documentation.
-- When modifying role permissions or access controls, ensure both `ROLES_AND_PERMISSIONS.md` and the corresponding policy files are updated.
+- When modifying role permissions or access controls, ensure both [ROLES_AND_PERMISSIONS](ROLES_AND_PERMISSIONS.md)`and the corresponding policy files are updated.
 - Request the AI to update its Memories when significant changes occur. [waste of time]
 
 ## KISS Principle Guidelines
@@ -75,19 +75,21 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 
 ### Application Structure
 
-The application has a core structure encompassing Users and the associated access control system, Projects, Disciplines, Tags and Documents. Further functionality is encapsulated in modules, which correspond to disciplines.
-
-Only one level of module nesting is envisaged, however some features have provisioned for sub-modules.
-
-Refer to docs/ROLES_AND_PERMISSIONS.md for details on the role based access control system.
-
-#### Projects
-
-Projects are the top level resource of this application. Projects are fully self contained and independent of each other. Every element in the application is associated with one project. The application caters for various user scenarios, including:
+The application caters for various user scenarios, including:
 
 - design and execute team such as a constructor, using a shared website app.
 - engineering design service for multiple clients, using a shared website app.
 - application installed in house for a single client.
+
+The application has a core structure encompassing Users and the associated access control system, Projects, Disciplines, Tags and Documents. Further functionality is encapsulated in modules, which correspond to disciplines.
+
+Only one level of module nesting is envisaged, however some features have provisioned for sub-modules.
+
+Refer to [ROLES_AND_PERMISSIONS](ROLES_AND_PERMISSIONS.md) for details on the role based access control system.
+
+#### Projects
+
+Projects are the top level resource of this application. Projects are fully self contained and independent of each other. Every element in the application is associated with one project.
 
 #### Disciplines
 
@@ -103,9 +105,10 @@ Tags can have a "tagable" model attached, which extends the information linked t
 
 #### Documents
 
-Documents are used to manage and control the issue of information on a project. The document model itself is located in the core application, but all subisidiary models are located in the document module. There appears to be no convention for this in rails, but there are multiple recommendations for this approach.
+Documents are used to manage and control the issue of information on a project. The document model itself is located in the core application, but all subisidiary models are located in the document control module. There appears to be no convention for this in rails, but there are multiple recommendations for this approach.
 
-The application caters for two types of documents: those generated from the application database, and those stored in a content delivery network from files uploaded by users.
+[HOLD At present, no repository is included, only a document register].
+ The application caters for two types of documents: those generated from the application database, and those stored in a content delivery network from files uploaded by users.
 
 ### Internationalization
 
@@ -113,11 +116,11 @@ The application has been designed for international use from the outset.
 
 - All user facing text is provided with translations for all implemented languages.
 - To date, the only need for translation of database content identified is for discipline names. This is included as a potential feature below.
-- The application heavily uses the rails-i18n gem to assist with internationalization. This gem provides translations into many languages for the core rails features, including model validation, database errors, time and date functions, currency, etc.
-- For reference, a copy of the en version of the translations is saved in config/locales/rails-i18n gem en for reference/en.yml.ref. This file is not used in the application, it is simply a copy of the en.yml file that is provided by the rails-i18n gem. Check in this file if you are not sure whether a translation is already provided, and avoid duplicating core translations if possible. Also note that not all language files include all translations! It is a work in progress...
+- The application uses the rails-i18n gem to assist with internationalization. This gem provides translations into many languages for the core rails features, including model validation, database errors, time and date functions, currency, etc.
+- For reference, a copy of the en version of the translations is saved in config/locales/rails-i18n gem en for reference/en.yml.ref. This file is not used in the application, it is simply a copy of the en.yml file that is provided by the rails-i18n gem. Check in this file if you are not sure whether a translation is already provided, and __avoid duplicating core translations__ if possible. Also note that not all language files include all translations! It is a work in progress...
 - The locale setting follows the basic guidelines in [Rails Guides section 2.2](https://guides.rubyonrails.org/i18n.html#setting-the-locale-from-url-params).
 - Changing locale is available in the layout header via a drop down menu.
-- The storage of translation files is detailed in the [INTERNATIONALIZATION.md](INTERNATIONALIZATION.md) file.
+- The storage of translation files is detailed in the [INTERNATIONALIZATION](INTERNATIONALIZATION.md) document.
 
 ### Constants
 
@@ -126,7 +129,8 @@ The application has been designed for international use from the outset.
   - Engineering and scientific constants that are indepedent of the application, such as standard ratings for circuit breakers, cable sizes, etc.
   - Role Based Access Control (RBAC) system configuration.
   - Default setup for disciplines and associated prefix schemata.
-- Refer to docs/CONSTANTS.md for details on the constants management system implemented for this application.
+  - Allowed values for enum type attributes.
+- Refer to [CONSTANTS](CONSTANTS.md) for details on the constants management system implemented for this application.
 
 ### MVC Guidelines
 
@@ -171,7 +175,7 @@ In addition, a card partial should be provided for drop down view on other pages
 - Views should not include complex logical processing.
 - Conditionals should be controlled by pundit policy calls where applicable.
 - Conditionals may also use presence or otherwise of variables set in the controller.
-- Views should use model constants such as enums to generate select options directly. Use human_enum_name from app/models/application_record.rb to provide the translations.
+- Views should use model constants such as enums to generate select options directly. Use human_enum_name from [application_record](../app/models/application_record.rb) to provide the translations.
 - Views should include i18n translations for all user facing text, including:
   - Model names.
     - Use @tag.model_name.human in most cases
@@ -216,7 +220,7 @@ Errors are categorized as:
 - However, until the application is thoroughly tested in use, this is considered a lesser error than a security breach attempt.
 - Errors are processed by the application controller rescue_from Pundit::NotAuthorizedError.
 - Rescue includes a flash danger message with the translated standard error message, and redirects to custom error page /403 forbidden.
-- Policy tests should be used to verify that policies meet their objectives, refer to docs/ROLES_AND_PERMISSIONS.md.
+- Policy tests should be used to verify that policies meet their objectives, refer to [ROLES_AND_PERMISSIONS](ROLES_AND_PERMISSIONS.md).
 - Controller tests should also include tests of unauthorized access, to ensure that appropriate authorization calls are included in relevant actions.
 - Controller tests should only test the pass and fail paths, they are not intended to test the policy details.
 - Tests can use the test helper method assert_forbidden.
@@ -273,7 +277,7 @@ Errors are categorized as:
   - "trash" for delete buttons to delete the object
   - "search" for search buttons on views
   - "x-square" for Discard Changes buttons on forms
-  - "save" for save (create or pdate) buttons on forms
+  - "save" for save (create or update) buttons on forms
 - Flag icons are used to assist with locale/language selection.
   - The gem rails-icons is used with the library 'flags' to provide the icons.
   
@@ -313,7 +317,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Build a scaffold generator for models without links to tags.
 - [ ] Enhance electrical model with network load calculations.
 - [ ] Enhance the existing database models to include revison control of data.
-- [x] Build a document control module to manage document storage, issue, history including versions.
+- [ ] Build a document control module to manage document storage, issue, history including versions and workflow.
 - [ ] Add polymorphic comments.
 - [ ] Management of Change.
 - [ ] Build an instrument module.
@@ -332,20 +336,20 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Refactor error views to use i18n.
 - [x] Refactor roles new view and projects edit view to translate resource names with a key value pair in the select field.
 - [x] Serve bootstrap from local dev or prod.
-- [ ] Complete tags controller test.
-- [ ] Review all policies and tests for compliance with guidelines.
-- [ ] Review all models for compliance with guidelines.
+- [x] Complete tags controller test.
+- [x] Review all policies and tests for compliance with guidelines.
+- [x] Review all models for compliance with guidelines.
 - [x] Clean up old Load model references after migration.
 - [ ] The project was originally written for Rails 7 but got hibernated. On reawakening, it was upgraded to Rails 8. It has never been deployed to production, so Rails 8 upgrade is not yet officially declared complete.
 - [x] The transition to rails 8 should have changed over the asset pipeline to use propshaft. This has not been done properly, needs to be rectified.
 - [x] Improve has_one validation on tagable, possibly include database constraint.
 - [x] Improve has_one validation on demandable, possibly include database constraint.
    - Database constraints deferred due to risk of locking database. Continue with inclusion of orphans on admin index displays, and manual clean up.
-- [ ] Revisit the roles policy test. The roles policy is now using the role context from the controller, need to factor this into tests.
-- [ ] Roles policy is delegating to resource policies for resource instances. Tests need to consider this.
-- [ ] Ensure select for role names does not include restricted roles unless current user has app_owner role.
+- [x] Revisit the roles policy test. The roles policy is now using the role context from the controller, need to factor this into tests.
+- [x] Roles policy is delegating to resource policies for resource instances. Tests need to consider this.
+- [x] Ensure select for role names does not include restricted roles unless current user has app_owner role.
 - [ ] System tests for all resources.
-- [ ] Model tests should include test of enums.
+- [x] Model tests should include test of enums.
 - [ ] Complete workflows with admin and no project selected.
 - [ ] Complete proper ordering by switchboard tag and serial for circuits.
 - [x] Update index view header lines.
@@ -372,6 +376,11 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Fix module generator to use nested parent modules.
 - [ ] Provide a means for admins to edit tags to remove broken links to tagable.
 - [ ] Add tagable controller checks to ensure discipline belongs to current project.
+- [x] Cable factory begets discipline, project, then cable_type, but cable_type begets its own project. Should inherit from cable factory.
+- [ ] Add model tests for read only attributes - documents, tags.
+- [ ] Review security of all controllers wrt injection attacks.
+- [ ] Check that usage of accepts_nested_attributes_for is correct for tagable concern.
+- [ ] Fix previous and next functionality in tagable navigation, and generatise it for non tagables.
 
 ## Refactoring Opportunities
 
@@ -402,7 +411,7 @@ It is possible to create multiple tags referencing the same tagable element, des
    - [x] builder/parser model for each discipline which creates the string according to the required format, and can parse the string back into the components.
    - [x] provide default format for each discipline, e.g. isa5.1
    - [x] add next/previous functionality
-   - [ ] add colour code by discipline
+   - [x] add colour code by discipline
 - [ ] Look at use of hover on buttons, and use turbo to prevent page refresh.
 - [x] Improve implementation of Discipline model, including translation. Consider using constants hash for each project.
 - [ ] Refactor colour system to use CSS variables.
@@ -412,10 +421,20 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Replace devise views with bespoke views in the style of the rest of the application.
 - [ ] Add user profile info.
 - [ ] Refactor RBAC system with functional roles limited to project scope, and project admin roles.
+- [ ] Refactor all controllers to use the preferred safe params expect rather than require.
 - [ ] Refactor test helpers to minimise code duplication, and simplify generation of new models.
 - [ ] Improve forbidden error logging messages, include user. Consider automatic sign out.
 - [ ] Move document issues to change module, generalise so it can be used for other entities (polymorphic).
 - [ ] Abstract controllers for project linked models, similar to tagables controller.
+- [ ] Add catalog required roles in disciplines, to allow different role for cable types and doc types, etc.
+- [ ] Cable types should belong to discipline, and the discipline should be "Electrical".
+- [ ] Index views should preload permissions and not check every row.
+- [ ] Scafold generators should include enum configuration, or build a separate generator.
+- [ ] Include a valid value for fields in generators.
+- [ ] Switchboards can refer to circuits, and circuits can refer to switchboards, without the module prefix.
+- [ ] Consider whether the same improvement applies to demand.
+- [ ] Remove unnecessary namespacing within electrical module naming, e.g. switchboard has many electrical_circuits.
+- [ ] Transition documents and cable types to discipline nested.
 
 ## Potential Features
 
@@ -431,9 +450,9 @@ It is possible to create multiple tags referencing the same tagable element, des
    - [ ] Customize error trapping for unknown format
    - [x] Customize error trapping for forbidden
 - [ ] Improve locale setting, and include language/currency/flag in locale selection. Include regions with fallback to language for most translations.
-- [ ] Develop an application colour theme set. Consider discipline colour coding, also need to consider module colour coding.
+- [x] Develop an application colour theme set. Consider discipline colour coding, also need to consider module colour coding.
 - [ ] Build an IP55 object to allow fully flexible reusable IP code generation.
-- [ ] 
+- [ ] Allow projects to add role names.
 
 ## Architecture Considerations
 
@@ -446,3 +465,8 @@ It is possible to create multiple tags referencing the same tagable element, des
 
 - [x] Keep backward compatibility during the Load → Demand transition
 - [ ] Consider adding performance benchmarks for critical paths
+
+## Gloassary
+
+Resource: In rails, resource often refers to an abstracted model. In this application, resource more often refers to an abstracted tagable model. Context should clarify which meaning is intended.
+Record: Resource instance. Used internally in Pundit.

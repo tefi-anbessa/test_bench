@@ -1,5 +1,4 @@
 class Tag < ApplicationRecord
-  resourcify
   delegated_type :tagable, types: Constants.tagable, optional: true, dependent: :destroy
   belongs_to :discipline
   delegate :project, to: :discipline
@@ -219,7 +218,7 @@ class Tag < ApplicationRecord
       return unless self.class.tagable_types.include?(tagable_type_was)
       return if tagable_type_was.constantize.where(id: tagable_id_was).none?
       
-      errors.add(:base, I18n::t("activerecord.errors.models.tag.change_tagable")) 
+      errors.add(:base, I18n::t("activerecord.errors.attributes.tag.tagable_type.change_tagable")) 
     end
 
     # Prevent setting tagable association to an invalid resource

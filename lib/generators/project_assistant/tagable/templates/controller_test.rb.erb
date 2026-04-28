@@ -1,31 +1,31 @@
+# frozen_string_literal: true
+
 require "test_helper"
-require "helpers/tagable_test_patterns"
+require "helpers/tagable_controller_tests"
 module <%= module_name %>
   class <%= tagable_name.pluralize %>ControllerTest < ActionController::TestCase
-    include TagableTestPatterns
+    include TagableControllerTests
     include Devise::Test::ControllerHelpers
 
     setup do
       setup_common_test_data
       setup_model_specific_data
-      setup_tags_and_resources
     end
 
     def setup_model_specific_data
       # Setup for model functions unrelated to tags
     end
 
-    # Set the minimum required params for a valid resource
+    # Set the expected params for a valid resource create
     def valid_resource_params
       {
-<%= @fields.select { |f| f[:options].include?('required') }
-          .map { |field| "#{field[:name]}: '' # Add valid data" }
+<%= @fields.map { |field| "#{field[:name]}: '' # Add valid data" }
           .join(",\n        ") %>
       }
     end
 
-    # Set invalid resource params for tests
-    def invalid_resource_params
+    # Set invalid resource param for tests
+    def invalid_resource_param
       { attribute: invalid_value }  # Set invalid value for an attribute
     end
 

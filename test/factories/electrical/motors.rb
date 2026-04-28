@@ -1,8 +1,11 @@
 FactoryBot.define do
   factory :electrical_motor, class: 'Electrical::Motor' do
-    # Tag can be passed explicitly, otherwise will be auto-created
+    # Tag can be passed explicitly, if not tag will be created.
+    # If discipline is passed, tag will be created on that discipline.
+    # Otherwise, tag will be created on a new project with "Electrical" discipline.
     transient do
       tag { nil }
+      discipline { nil }
     end
     # Attributes
     motor_type { :induction }
@@ -21,9 +24,16 @@ FactoryBot.define do
         motor.tag = evaluator.tag
       else
         # Create new tag with proper discipline in same transaction
-        discipline = Discipline.find_by(name: motor.class.discipline) || 
-             create(:discipline, name: motor.class.discipline)
-        motor.tag = create(:tag, :unique_tag, discipline: discipline)
+        if evaluator.discipline
+          # Create tag on the provided discipline
+          motor.tag = create(:tag, :unique_tag, discipline: evaluator.discipline)
+        else
+          # Create project with auto-created disciplines
+          project = create(:project)
+          discipline = project.disciplines.find_by(name: motor.class.module_parent_name) ||
+               create(:discipline, name: motor.class.module_parent_name, project: project)
+          motor.tag = create(:tag, :unique_tag, discipline: discipline)
+        end
       end
     end
   end

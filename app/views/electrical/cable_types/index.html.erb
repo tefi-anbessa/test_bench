@@ -14,24 +14,13 @@
 
         <!-- New Button (Right) -->
         <% if policy(Electrical::CableType).new? %>
-          <% if project_selected? %>
-            <%= link_to new_project_electrical_cable_type_path(current_project), 
-              class: "btn btn-outline-primary actions",
-              aria: { label: t('actions.new') },
-              title: t('actions.new') do %>
-              <%== bs_icon('plus-square-fill') %>
-              <span class="ms-1"><%= t('actions.new') %></span>
-              <span class="d-none d-md-inline"><%= " " + t('activerecord.models.electrical.cable_type') %></span>
-            <% end %>
-          <% else %>
-            <%= link_to new_electrical_cable_type_path,
-              class: "btn btn-outline-primary actions",
-              aria: { label: t('actions.new') },
-              title: t('actions.new') do %>
-              <%== bs_icon('plus-square-fill') %>
-              <span class="ms-1"><%= t('actions.new') %></span>
-              <span class="d-none d-md-inline"><%= " " + t('activerecord.models.cable_type') %></span>
-            <% end %>
+          <%= link_to new_project_electrical_cable_type_path(current_project), 
+            class: "btn btn-outline-primary actions",
+            aria: { label: t('actions.new') },
+            title: t('actions.new') do %>
+            <%== bs_icon('plus-square-fill') %>
+            <span class="ms-1"><%= t('actions.new') %></span>
+            <span class="d-none d-md-inline"><%= " " + t('activerecord.models.electrical.cable_type') %></span>
           <% end %>
         <% end %>
       </div>
@@ -39,7 +28,7 @@
     
     <div class="card-body">
       <div class="row search-form">
-        <%= search_form_for @q do |f| %>
+        <%= search_form_for @q, url: project_electrical_cable_types_path(current_project) do |f| %>
           <%= f.search_field :conductor_material_cont,
                 class: "search_field",
                 placeholder: t('activerecord.attributes.electrical.cable_type.conductor_material') %>

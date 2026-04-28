@@ -80,11 +80,8 @@
     private
 
       def set_document
-        begin
-          @document = policy_scope(Document).find(params[:id])
-        rescue ActiveRecord::RecordNotFound
-          raise Pundit::NotAuthorizedError
-        end
+        @document = policy_scope(Document).find_by(id: params[:id])
+        raise ApplicationController::ConflictError, :out_of_scope if @document.nil?
         @issues = @document.issues
       end
 

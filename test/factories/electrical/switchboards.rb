@@ -2,9 +2,12 @@
 
 FactoryBot.define do
   factory :electrical_switchboard, class: 'Electrical::Switchboard' do
-    # Tag can be passed explicitly, otherwise will be auto-created
+    # Tag can be passed explicitly, if not tag will be created.
+    # If discipline is passed, tag will be created on that discipline.
+    # Otherwise, tag will be created on a new project with "Electrical" discipline.
     transient do
       tag { nil }
+      discipline { nil }
     end
     # Default required attributes
     voltage_rating { '600/1000V' }  # Required field - use common voltage rating
@@ -28,9 +31,16 @@ FactoryBot.define do
         switchboard.tag = evaluator.tag
       else
         # Create new tag with proper discipline in same transaction
-        discipline = Discipline.find_by(name: switchboard.class.discipline) || 
-             create(:discipline, name: switchboard.class.discipline)
-        switchboard.tag = create(:tag, :unique_tag, discipline: discipline)
+        if evaluator.discipline
+          # Create tag on the provided discipline
+          switchboard.tag = create(:tag, :unique_tag, discipline: evaluator.discipline)
+        else
+          # Create project with auto-created disciplines
+          project = create(:project)
+          discipline = project.disciplines.find_by(name: switchboard.class.module_parent_name) ||
+               create(:discipline, name: switchboard.class.module_parent_name, project: project)
+          switchboard.tag = create(:tag, :unique_tag, discipline: discipline)
+        end
       end
     end
 

@@ -11,7 +11,10 @@
 class TagablePolicy < ApplicationPolicy
   class Scope < ApplicationPolicy::Scope
     def resolve
-      if current_project.present? && user_has_project_role?(current_project)
+      if current_project.present? && 
+          (user_has_project_role?(current_project) || 
+          user&.is_admin? || 
+          user&.is_app_owner?)
         scope.joins(tag: { discipline: :project })
            .where(projects: { id: current_project.id })
       elsif user&.is_admin? || user&.is_app_owner?
@@ -22,31 +25,22 @@ class TagablePolicy < ApplicationPolicy
     end
   end
 
-  def required_role
-    model = record.is_a?(Class) ? record : record.class
-    unless model.respond_to?(:required_role)
-      # [TODO: change this to a custom server error.]
-      raise NotImplementedError, "Model #{model} must implement required_role"
-    end
-    model.required_role
-  end
-
   def index?
     # Protect against url injection
     return false if user.nil?
-    if current_project.present?
-      user_has_project_role?(current_project)
-    else
-      # Admin and app_owner can view when current project is nil
-      user&.is_admin? || user&.is_app_owner?
-    end
+    # Global admins can see index irrespective of current project
+    return true if user&.is_admin? || user&.is_app_owner?
+    # Other users must have current project set in order to set scope
+    current_project.present? && user_has_project_role?(current_project)
   end
 
   def show?
     # Protect against url injection
     return false if user.nil?
     if current_project.present?
-      user_has_project_role?(current_project) && record.tag.discipline.project == current_project
+      # Only allow show of records on current project, if it is set
+      (user_has_project_role?(current_project) || user&.is_admin? || user&.is_app_owner?) &&
+        record.project == current_project
     else
       # Admin and app_owner can view when current project is nil
       user&.is_admin? || user&.is_app_owner?
@@ -54,51 +48,56 @@ class TagablePolicy < ApplicationPolicy
   end
 
   def new?
-    create?
+    # Protect against url injection
+    return false if user.nil?
+    # Content modification actions require current project to be set
+    return false unless current_project.present?
+    # new? action is a special case for discipline scoped resources. 
+    # User must have at least one discpline role to access new, or have admin role.
+    user_has_a_required_role?(current_project) || 
+      user&.is_admin? || 
+      user&.is_app_owner? ||
+      user&.is_project_admin_of?(current_project)
   end
 
   def create?
     # Protect against url injection
     return false if user.nil?
-    if current_project.present?
-      # pundit has no way to get the project context for the tagable resource being created.
-      # authorization relies on the resource controller also checking tag permissions
-      # when creating a new tag at the same time as a resource, and using single transaction.
-      user_is_accredited?(current_project) 
-    else
-      # Admin and app_owner can create when current project is nil
-      user&.is_admin? || user&.is_app_owner?
-    end
+    # Content modification actions require current project to be set
+    return false unless current_project.present?
+    # Tagable policy can't check project association of new resource and tag because
+    # the tag is not persisted at time of authorization.
+    # Authorization relies on the resource controller also checking tag permissions
+    # when creating a new tag at the same time as a resource, and using single transaction.
+    user_has_a_required_role?(current_project) || 
+      user&.is_admin? || 
+      user&.is_app_owner? ||
+      user&.is_project_admin_of?(current_project)
   end
 
   def edit?
-    update?
+    # Protect against url injection
+    return false if user.nil?
+    # Content modification actions require current project to be set
+    return false unless current_project.present?
+    user_is_accredited?(record.discipline) && record.project == current_project
   end
 
   def update?
     # Protect against url injection
     return false if user.nil?
-    if current_project.present?
-      # pundit could check the resource's tag to find the project, but the controllers allow
-      # for resources to create a new tag through edit, as a way to rescue orphaned resources.
-      # As for create, authorization relies on the resource controller also checking tag permissions
-      # when creating a new tag at the same time as a resource, and using single transaction.
-      user_is_accredited?(current_project) 
-    else
-      # Admin and app_owner can create when current project is nil
-      user&.is_admin? || user&.is_app_owner?
-    end
+    # Content modification actions require current project to be set
+    return false unless current_project.present?
+    user_is_accredited?(record.discipline) && record.project == current_project
   end
 
   def destroy?
     # Protect against url injection
     return false if user.nil?
-    user&.is_admin? || user&.is_app_owner?
+    user&.is_admin? || 
+    user&.is_app_owner? || 
+    (user&.is_project_admin_of?(current_project) && record.project == current_project)
   end
 
   private
-
-  def user_is_accredited?(project)
-    (user_has_project_role?(project) && user.has_role?(required_role)) || user.is_admin? || user.is_app_owner?
-  end
 end

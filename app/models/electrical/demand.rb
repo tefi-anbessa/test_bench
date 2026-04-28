@@ -3,7 +3,11 @@ module Electrical
   class Demand < Base
   # Demandable types are the models that can have electrical load information attached.
     delegated_type :demandable, types: Constants.electrical.loadable, required: true
+    delegate :tag, :discipline, :project, :label, :long_label, to: :demandable
 
+    # Attribute accessors
+    attr_accessor :other_supply
+    
     # Associations
     has_one :incomer, as: :to, class_name: 'Electrical::Cable', dependent: :nullify
     has_one :feeder, as: :from, class_name: 'Electrical::Cable', dependent: :nullify
@@ -12,6 +16,9 @@ module Electrical
     enum :basis, Constants.electrical.load_basis.to_h
     enum :config, Constants.electrical.load_configuration.to_h
     
+    # Callbacks
+    before_validation :set_supply
+
     # Validations
     validates :config, presence: true
     validates :basis, presence: true
@@ -29,17 +36,6 @@ module Electrical
     
     attribute :power_factor, default: 1.0
     attribute :duty, default: 1.0
-
-    def tag
-      demandable&.tag
-    end
-    
-    def label
-      demandable&.label || I18n.t("show.orphan", 
-                                  model: demandable_type.presence&.constantize&.model_name&.human || 
-                                  I18n.t("show.default_model")
-                                )
-    end
 
     def self.required_role
       :electrical_designer

@@ -3,13 +3,14 @@ module DocumentControl
   class DocTypesController < ApplicationController
     before_action :authenticate_user!
     before_action :require_project!, only: %i[ new create edit update ]
+    before_action :set_discipline, only: %i[ index new create ]
     before_action :set_doc_type, only: [:show, :edit, :update, :destroy]
-    before_action :set_swatch, only: [:index, :show, :new, :edit]
+    before_action :set_swatch, only: [:index, :show ]
 
     # GET /document_control/doc_types
     def index
       authorize DocumentControl::DocType, :index?
-      @q = policy_scope(DocumentControl::DocType).ransack(params[:q])
+      @q = @discipline.doc_types.ransack(params[:q])
       @pagy, @doc_types = pagy(@q.result, limit: 20)
     end
 
@@ -20,33 +21,25 @@ module DocumentControl
 
     # GET /document_control/doc_types/new
     def new
-      @doc_type = DocumentControl::DocType.new
+      @doc_type = @discipline.doc_types.build()
       authorize @doc_type
       setup_form
     end
 
     # POST /document_control/doc_types
     def create
-      debugger
-      # Ensure that discipline belongs to current project.
-      begin
-        @discipline = current_project.disciplines.find(params[:document_control_doc_type][:discipline_id])
-      rescue ActiveRecord::RecordNotFound
-        # Discipline param provided is not found in current project
-        raise ApplicationController::ConflictError, :discipline_not_found
-      end
-      @doc_type = @discipline.doc_types.build(resource_params)
+      @doc_type = @discipline.doc_types.build()
       authorize @doc_type
-
+      # Doc_type has a copy_from facility to allow selecting any other existing
+      # doc_type as a template. Does not cater for enum checking.
+      set_attributes
       if @doc_type.save
         flash[:success] = t('flash.create.notice', 
-          resource_name: @doc_type.model_name.human)
-        set_swatch
+          resource_name: t("activerecord.models.document_control.doc_type"))
         redirect_to @doc_type
       else
         flash[:alert] = t('flash.create.alert', 
-          resource_name: @doc_type.model_name.human.downcase)
-        set_swatch
+          resource_name: t("activerecord.models.document_control.doc_type").downcase)
         setup_form
         render :new, status: :unprocessable_content
       end
@@ -60,22 +53,17 @@ module DocumentControl
 
     # PATCH/PUT /document_control/doc_types/1
     def update
-      begin
-        @discipline = current_project.disciplines.find(params[:document_control_doc_type][:discipline_id])
-      rescue ActiveRecord::RecordNotFound
-        # Discipline param provided is not found in current project
-        raise ApplicationController::ConflictError, :discipline_not_found
-      end
       authorize @doc_type
-      if @doc_type.update(resource_params)
+      # Doc_type has a copy_from facility to allow selecting any other existing
+      # doc_type as a template. Does not cater for enum checking.
+      set_attributes
+      if @doc_type.save
         flash[:success] = t('flash.update.notice', 
-          resource_name: @doc_type.model_name.human)
-        set_swatch
+          resource_name: t("activerecord.models.document_control.doc_type"))
         redirect_to @doc_type
       else
         flash[:alert] = t('flash.update.alert', 
-          resource_name: @doc_type.model_name.human.downcase)
-        set_swatch
+          resource_name: t("activerecord.models.document_control.doc_type").downcase)
         setup_form
         render :edit, status: :unprocessable_content 
       end
@@ -86,19 +74,31 @@ module DocumentControl
       authorize @doc_type
       if @doc_type.destroy
         flash[:success] = t('flash.destroy.notice', 
-          resource_name: @doc_type.model_name.human)
+          resource_name: t("activerecord.models.document_control.doc_type"))
       else
         flash[:alert] = t('flash.destroy.alert', 
-          resource_name: @doc_type.model_name.human.downcase)
+          resource_name: t("activerecord.models.document_control.doc_type").downcase)
       end
-      set_swatch
-      redirect_to document_control_doc_types_path
+      redirect_to discipline_document_control_doc_types_path(@discipline)
     end
 
     private
 
+      def set_discipline
+        @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
+        raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
+      end
+
       def set_doc_type
-        @doc_type = DocumentControl::DocType.find(params[:id])
+        @doc_type = policy_scope(DocumentControl::DocType).find_by(id: params[:id])
+        raise ApplicationController::ConflictError, :out_of_scope if @doc_type.nil?
+        @discipline = @doc_type.discipline
+      end
+
+      def set_attributes
+        @template = DocumentControl::DocType.find_by(id: params[:copy_from]) if params[:copy_from].present?
+        template_attrs = @template ? @template.attributes.slice(*resource_params.except(:copy_from).keys) : {}
+        @doc_type.assign_attributes(template_attrs.merge(resource_params.except(:copy_from)))
       end
 
       def set_swatch
@@ -106,14 +106,16 @@ module DocumentControl
       end
 
       def setup_form
-        @disciplines = policy_scope(Discipline)
-        .select('disciplines.id, disciplines.label, disciplines.name')
-        .order('disciplines.label ASC')
+        @copy_from_selector = DocumentControl::DocType
+          .select(:code, :name)
+          .distinct
+          .order(:code, :name)
+        set_swatch
       end
 
       def resource_params
         params.require(:document_control_doc_type)
-        .permit(:discipline_id, :code, :label, :description)
+        .permit(:code, :name, :description)
       end
   end
 end

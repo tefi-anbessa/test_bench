@@ -40,12 +40,10 @@
             <!-- Discipline -->
             <div class="row">
               <%= f.select :discipline_id,
-                    grouped_options_for_select(
-                      @disciplines.transform_values do |disciplines|
-                        disciplines.map { |label, id|
-                          [label, id]
-                        }
-                      end,
+                    options_for_select(
+                      @disciplines.map { |label, name, id| 
+                        ["#{label}: #{t("discipline.name.#{name}", default: name)}", id] 
+                      },
                       tag.discipline_id
                     ),
                     { class: 'form-select' },

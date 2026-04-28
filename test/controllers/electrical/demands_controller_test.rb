@@ -1,206 +1,122 @@
+# frozen_string_literal: true
+
 require "test_helper"
+require "helpers/controller_test_helper"
 module Electrical
   class DemandsControllerTest < ActionController::TestCase
+    include ControllerTestHelper
     include Devise::Test::ControllerHelpers
 
     setup do
+      setup_controller_test
+      setup_tags
+      setup_model_specific_data
+    end
+    
+    def setup_model_specific_data
+      # Create a tag without any tagable
+      @tag_no_tagable = create(:tag, :unique_tag, discipline: @discipline)
 
-      @project = create(:project)
-      @other_project = create(:project)
-      # Set the current project for all tests that need it
-      set_current_project(@project) if defined?(set_current_project)
+      # Create a tagable child of @tag
+      @tagable = create(:electrical_light_cct, tag: @tag)
+      @resource = create(:electrical_demand, demandable: @tagable)
+      @other_tagable = create(:electrical_light_cct, tag: @other_tag)
+      @other_resource = create(:electrical_demand, demandable: @other_tagable)
 
-      # Set in and out of project disciplines
-      @discipline = create(:discipline, code: :elec, name: 'Electrical', project: @project)
-      @other_discipline = create(:discipline, code: :elec, name: 'Electrical', project: @other_project)
-
-      @admin = create(:user)
-      @admin.grant(:admin)
-
-      @project_manager = create(:user)
-      @project_manager.grant(:project_manager, @project) # Project manager role
-
-      @team_member = create(:user)
-      @team_member.grant(:team_member, @project) # Project team member role
-
-      @accredited_team_member = create(:user)
-      @accredited_team_member.grant(:electrical_designer) # Global electrical designer role
-      @accredited_team_member.grant(:team_member, @project) # Project team member role
-
-      @regular_user = create(:user)   # No roles
-      
-      # Create tags for a circuit and load connected with a cable
-      @swbd_tag = create(:tag, prefix: 'EX', serial: 1001, discipline: @discipline)
+      # Create extra tags for a circuit and load connected with a cable
+      @switchboard_tag = create(:tag, prefix: 'EX', serial: 1001, discipline: @discipline)
       @cable_tag = create(:tag, prefix: 'EC', serial: 1001, discipline: @discipline)
       @motor_tag = create(:tag, prefix: 'EM', serial: 1001, discipline: @discipline)
-
-      # Create out of project tags
-      @other_motor_tag = create(:tag, prefix: 'EX', serial: 1002, discipline: @other_discipline)
       
       # Create tagables with the tags
-      @switchboard = create(:electrical_switchboard, tag: @swbd_tag)
-      @circuit = create(:electrical_circuit, electrical_switchboard: @switchboard)
+      @switchboard = create(:electrical_switchboard, tag: @switchboard_tag)
       @motor = create(:electrical_motor, tag: @motor_tag)
-      @other_motor = create(:electrical_motor, tag: @other_motor_tag)
       @cable = create(:electrical_cable, tag: @cable_tag)
 
-      # Create loads for in and out of project loads
-      @demand = create(:electrical_demand, demandable: @motor, config: 'three_3c')
-      @other_demand = create(:electrical_demand, demandable: @other_motor, config: 'three_3c')
+      # Create a circuit on the switchboard
+      @circuit = create(:electrical_circuit, electrical_switchboard: @switchboard)
 
       # Create unassigned tag for building new demand
       @unassigned_tag = create(:tag, :unique_tag, discipline: @discipline)
       @unassigned_tag.update(tagable: create(:electrical_light_cct, tag: @unassigned_tag))
-
-      @request.env["devise.mapping"] = Devise.mappings[:user]
     end
 
-    # Index action tests
-    test "unauthenticated users should be redirected to sign in" do
-      get :index 
-      assert_unauthenticated 
-    end
-
-    test "regular user cannot get index" do
-      sign_in @regular_user
-      get :index
-      assert_response :forbidden
-    end
-
-    test "should get index for user with role on current project" do
-      sign_in @team_member
-      get :index
-      assert_response :success
-    end
-
-    # Show action tests
-    test "user cannot view demand details without a project role" do
-      sign_in @regular_user
-      get :show, params: { id: @demand.id }
-      assert_response :forbidden
-    end
-
-    test "team member can view demand details" do
-      sign_in @team_member
-      get :show, params: { id: @demand.id }
-      assert_response :success
-    end
-
-    # New Action Tests
-    test "team member cannot access new form" do
-      sign_in @team_member
-      get :new, params: { tag_id: @unassigned_tag.id }
-      assert_response :forbidden
-    end
-
-    test "accredited team member can access new form for existing unassigned tag" do
-      sign_in @accredited_team_member
-      get :new, params: { tag_id: @unassigned_tag.id }
-      assert_response :success
-    end
-
-    # Create Action Tests - Success Cases
-    test "accredited team member can create with existing unassigned tag" do
-      sign_in @accredited_team_member
-      assert_difference('Electrical::Demand.count', 1) do
-        post :create, params: { tag_id: @unassigned_tag.id ,
-                                electrical_demand: { 
-                                  basis: 'power_pf',
-                                  basis_notes: 'test basis notes',
-                                  config: 'one',
-                                  supply: 240.0,
-                                  power: 100.0,
-                                  power_factor: 0.95,
-                                  duty: 0.1,
-                                  notes: 'test notes'
-                                } 
-                              }
+  # Create Action Tests - Failure Cases
+    test "cannot create with tag out of scope" do
+      sign_in_and_set_project @accredited_user, @project
+      assert_no_difference("#{resource_class}.count") do
+        post :create, params: new_nesting_params.merge(create_params).merge(tag_id: @other_tag.id)
       end
-      assert_equal I18n.t('flash.create.notice', 
-                    resource_name: I18n.t('activerecord.models.electrical.demand')), 
-                    flash[:success]
-      assert_redirected_to electrical_demand_path(@unassigned_tag.tagable.electrical_demand)
+      assert_conflict
     end
 
-    # Create Action Tests - Failure Cases
-    test "accredited team member cannot create with existing unassigned tag and invalid data" do
-      sign_in @accredited_team_member
-      assert_no_difference('Electrical::Demand.count') do
-        post :create, params: { tag_id: @unassigned_tag.id,
-                                electrical_demand: {
-                                  basis: 'power_pf',
-                                  basis_notes: 'test basis notes',
-                                  config: '',
-                                  supply: 240.0,
-                                  power: 100.0,
-                                  power_factor: 0.95,
-                                  duty: 0.1,
-                                  notes: 'test notes'
-                                } }
+    test "cannot create with tag that has no tagable" do
+      sign_in_and_set_project @accredited_user, @project
+      assert_no_difference("#{resource_class}.count") do
+        post :create, params: new_nesting_params.merge(create_params).merge(tag_id: @tag_no_tagable.id)
       end
-      assert_response :unprocessable_content
-      assert_template :new
-      assert flash.now[:alert].present?
+      assert_conflict
     end
 
-  # Edit Action Tests
-    test "team member cannot access edit form" do
-      sign_in @team_member
-      get :edit, params: { id: @demand.id }
-      assert_forbidden
-    end
-
-    test "accredited team member can access edit form" do
-      sign_in @accredited_team_member
-      get :edit, params: { id: @demand.id }
-      assert_response :success
-    end
-
-  # Update Action Tests
-    test "team member cannot update" do
-      sign_in @team_member
-      @demand.update(power: 100.0)
-      patch :update, params: { id: @demand.id,
-                               electrical_demand: { 
-                                 power: 200.0
-                               } }
-      assert_forbidden
-      assert_equal 100.0, @demand.reload.power
-    end
-
-  # Update Action Tests
-    test "accredited team member can update" do
-      sign_in @accredited_team_member
-      @demand.update(power: 100.0)
-      patch :update, params: { id: @demand.id,
-                               electrical_demand: { 
-                                 power: 200.0
-                               } }
-      assert_redirected_to electrical_demand_path(@demand)
-      assert_equal I18n.t('flash.update.notice', 
-                    resource_name: @demand.model_name.human), 
-                    flash[:success]
-      assert_equal 200.0, @demand.reload.power
-    end
-
-  # Destroy Action Tests
-    test "accredited team member cannot destroy" do
-      sign_in @accredited_team_member
-      assert_no_difference("Electrical::Demand.count") do
-        delete :destroy, params: { id: @demand.id }
+    test "cannot create with tag already has a demand" do
+      sign_in_and_set_project @accredited_user, @project
+      assert_no_difference("#{resource_class}.count") do
+        post :create, params: new_nesting_params.merge(create_params).merge(tag_id: @tag.id)
       end
-      assert_forbidden
+      assert_conflict
     end
 
-    test "admin can destroy" do
-      sign_in @admin
-      assert_difference("Electrical::Demand.count", -1) do
-        delete :destroy, params: { id: @demand.id }
+    # Placeholoder for test "cannot create a tag that is not demandable"
+    # No modules implemented yet that are not demandable
+    
+    private
+
+      # Required for nested routes to new and create
+      def new_nesting_params
+        { tag_id: @unassigned_tag.id }
       end
-      assert_redirected_to electrical_demands_path
-      assert_equal I18n.t('flash.destroy.notice', 
-                    resource_name: @demand.model_name.human), 
-                    flash[:success]
-    end
+
+      # Set the minimum required params for a valid resource
+      def create_params
+          { electrical_demand: { 
+              basis: 'power_pf',
+              basis_notes: 'Test basis notes',
+              supply: 220.0,
+              config: :one,
+              power: 100.0,
+              vector: 0.0,
+              power_factor: 0.8,
+              current: 0.0,
+              duty: 0.0
+            } 
+          }
+      end
+
+      # Some models have read only attributes, these need to be excluded from update tests
+      # to avoid validation errors
+      def update_params
+          create_params
+      end
+
+      # Set an invalid resource param to test controller response
+      def invalid_param
+        { electrical_demand: { supply: "210V" } } # non-existent enum key
+      end
+
+      # Nominate an attribute to get changed during update tests
+      def update_attribute_name
+        :power
+      end
+
+      # Nominate a valid value to update the attribute to
+      def updated_attribute_value
+        200.0
+      end
+
+      # Override the index path, because demands (like tagables) is shallow nested excluding index.
+      def resource_index_path
+        path_helper = "electrical_demands_path"
+        send(path_helper)
+      end
   end
 end

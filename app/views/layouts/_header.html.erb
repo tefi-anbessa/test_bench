@@ -100,52 +100,21 @@
             <!-- Otherwise, provide a simple change register link -->
             <% else %>
               <li class="nav-item">
-                <%= link_to t('project_change', scope: 'activerecord.models').pluralize,
+                <% test = t('project_change.request', scope: 'activerecord.models').pluralize %>
+                <%= link_to test,
                   project_change_requests_path,
                   class: 'nav-link',
-                  aria: { label: t('document', scope: 'activerecord.models').pluralize } %>
+                  aria: { label: test } %>
               </li>
             <% end %>
 
-            <!-- Documents section: if access is available to document control models, make a dropdown menu -->
-            <% if policy(DocumentControl::DocType).new? %> 
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle"
-                    href="#"
-                    data-bs-toggle="dropdown"
-                    id="document-menu-btn"
-                    role="button"
-                    aria-expanded="false">
-                    <%= t('document', scope: 'activerecord.models').pluralize %>
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="document-menu-btn">
-                  <% if policy(Document).index? %>
-                    <li><%= link_to t('documents.index.title'),
-                          documents_path,
-                          class: "dropdown-item" %></li>
-                  <% end %>
-                  <% if policy(DocumentControl::DocType).index? %>
-                    <li><%= link_to t('activerecord.models.document_control.doc_type').pluralize,
-                          document_control_doc_types_path,
-                          class: "dropdown-item" %></li>
-                  <% end %>
-                  <% if policy(DocumentControl::SourceFormat).index? %>
-                    <li><%= link_to t('activerecord.models.document_control.source_format').pluralize,
-                          document_control_source_formats_path,
-                          class: "dropdown-item" %></li>
-                  <% end %>
-                </ul>
-              </li> <!-- Document dropdown -->
-
-            <!-- Otherwise, provide a simple documents register link -->
-            <% else %>
-              <li class="nav-item">
-                <%= link_to t('document', scope: 'activerecord.models').pluralize,
-                  documents_path,
-                  class: 'nav-link',
-                  aria: { label: t('document', scope: 'activerecord.models').pluralize } %>
-              </li>
-            <% end %>
+            <!-- Documents section -->
+            <li class="nav-item">
+              <%= link_to t('document', scope: 'activerecord.models').pluralize,
+                documents_path,
+                class: 'nav-link',
+                aria: { label: t('document', scope: 'activerecord.models').pluralize } %>
+            </li>
 
             <!-- Tags section -->
             <li class="nav-item">
@@ -155,6 +124,7 @@
                 aria: { label: t('tag', scope: 'activerecord.models').pluralize } %>
             </li>
 
+            <!-- Electrical section -->
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle"
                   href="#"

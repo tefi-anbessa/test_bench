@@ -1,12 +1,16 @@
 # frozen_string_literal: true
 require "test_helper"
-require_relative "../helpers/resource_controller_test_helper"
+require "helpers/controller_test_helper"
 class DocumentsControllerTest < ActionController::TestCase
   include Devise::Test::ControllerHelpers
-  include ResourceControllerTestHelper
+  include ControllerTestHelper
 
   setup do
-    setup_controller_test
+    # setup_controller_test
+    # Cannot use standard setup because Document class has no module to define discipline
+    setup_projects_and_users
+    setup_disciplines(name: "Electrical", required_role: :designer)
+    setup_accredited_users(:designer)
     setup_model_specific_data
   end
 
@@ -18,19 +22,28 @@ class DocumentsControllerTest < ActionController::TestCase
   end
 
   private
-
-    # Set the minimum required params for a valid resource
-    def valid_create_params
-        { title: 'Test Document', discipline_id: @discipline.id, doc_type_id: @dt.id }
+  
+    # Set the expected params for a valid create
+    def create_params
+        { document: 
+          { 
+          title: 'Test Document', 
+          discipline_id: @discipline.id, 
+          doc_type_id: @dt.id,
+          notes: 'Test document notes'
+          } 
+        }
     end
 
-    def valid_update_params
-        { title: 'Updated Document' }
+    # Some models have read only attributes, these need to be excluded from update tests
+    # to avoid validation errors
+    def update_params
+        create_params
     end
 
-    # Set invalid resource params for tests
-    def invalid_resource_params
-      { title: "A"*51 }
+    # Set an invalid resource param to test controller response
+    def invalid_param
+      { document: { title: "A"*51 } }
     end
 
     # Nominate an attribute to get changed during update tests

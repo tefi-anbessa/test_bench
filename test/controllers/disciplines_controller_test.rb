@@ -1,143 +1,46 @@
+# frozen_string_literal: true
 require "test_helper"
+require "helpers/controller_test_helper"
 
 class DisciplinesControllerTest < ActionController::TestCase
   include Devise::Test::ControllerHelpers
+  include ControllerTestHelper
 
   setup do
-    @request.env["devise.mapping"] = Devise.mappings[:user]
-
-    @project = create(:project)
-    set_current_project(@project)
-    @swatch = create(:swatch)
-    @discipline = create(:discipline, project: @project, swatch: @swatch)
-
-    @app_owner = create(:user)
-    @app_owner.grant(:app_owner)
-
-    @admin = create(:user)
-    @admin.grant(:admin)
-
-    @project_manager = create(:user)
-    @project_manager.grant(:project_manager, @project)
-
-    @team_member = create(:user)
-    @team_member.grant(:team_member, @project)
-
-    @regular_user = create(:user)
-
+    # Don't use the standard helper setup, discipline model will get confused.
+    setup_projects_and_users
+    setup_disciplines(name: "Electrical", required_role: :designer)
+    setup_accredited_users
+    setup_model_specific_data
   end
 
-  # Index action tests
-  test "unauthenticated users should be redirected to sign in" do
-    get :index, params: { project_id: @project.id }
-    assert_unauthenticated
+  def setup_model_specific_data
+    # Override accredited users. :project_admin can create disciplines
+    @accredited_user = @project_admin
+    # Set up instances of discipline
+    @resource = @project.disciplines.find_by(name: "Electrical")
+    @other_resource = @other_project.disciplines.find_by(name: "Electrical")
   end
 
-  test "regular user cannot access index" do
-    sign_in @regular_user
-    get :index, params: { project_id: @project.id }
-    assert_forbidden
-  end
-
-  test "should get index for any user with project role" do
-    sign_in @team_member
-    get :index, params: { project_id: @project.id }
-    assert_response :success
-  end
-
-  # Show action tests
-  test "user cannot view discipline details without a project role" do
-    sign_in @regular_user
-    get :show, params: { id: @discipline.id }
-    assert_response :forbidden
-  end
-
-  test "team member can view discipline details" do
-    sign_in @team_member
-    get :show, params: { id: @discipline.id }
-    assert_response :success
-  end
-
-  # New action tests
-  test "team member cannot access new discipline form" do
-    sign_in @team_member
-    get :new, params: { project_id: @project.id }
-    assert_response :forbidden
-  end
-
-  test "project manager can access new discipline form" do
-    sign_in @project_manager
-    get :new, params: { project_id: @project.id }
-    assert_response :success
-  end
-
-  # Create action tests
-  test "project manager can create discipline" do
-    sign_in @project_manager
-    assert_difference('Discipline.count', 1) do
-      post :create, params: { 
-        project_id: @project.id,
-        discipline: {
-          name: 'Piping',
-          label: 'P',
-          module_name: 'Piping',
-          prefix_schema: "name: default",
-          swatch_id: @swatch.id
-        }
-      }
-    end
-    assert_redirected_to discipline_url(Discipline.last)
-  end
-
-  test "shows error flash when discipline creation fails" do
-    sign_in @project_manager
+  test "returns conflict response for invalid required_role injection attempt" do
+    sign_in_and_set_project(@project_manager, @project)
     assert_no_difference('Discipline.count') do
-      post :create, params: { project_id: @project.id,
-        discipline: {
-        label: 'a'*6,  # Invalid: label max length is 5
-        name: 'Process',
-        prefix_schema: {"name": "default"},
-        module_name: 'Process'
-      }
-    }
+      post :create, params: new_nesting_params.merge(create_params).deep_merge({ discipline: { required_role: 'admin' } })
     end
-    assert_template :new
-    assert_equal I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.discipline')), 
-                  flash[:alert]
-  end
-
-  # Edit action tests
-  test "team member cannot access edit form" do
-    sign_in @team_member
-    get :edit, params: { id: @discipline.id }
-    assert_forbidden
+    assert_conflict
   end
 
   test "project manager can edit their discipline" do
-    sign_in @project_manager
-    get :edit, params: { id: @discipline.id }
+    sign_in_and_set_project(@project_manager, @project)
+    get :edit, params: { id: @discipline.id, project_id: @project.id }
     assert_response :success
-  end
-
-  # Update action tests
-  test "team member cannot update discipline" do
-    sign_in @team_member
-    original_name = @discipline.name
-    patch :update, params: {
-      id: @discipline.id,
-      discipline: {
-        name: 'Should Not Update'
-      }
-    }
-    assert_forbidden
-    assert_equal original_name, @discipline.reload.name
   end
   
   test "shows error flash when project update fails" do
-    sign_in @project_manager
+    sign_in_and_set_project(@project_manager, @project)
     original_name = @discipline.name
     patch :update, params: {
-      id: @discipline.id,
+      id: @discipline.id, project_id: @project.id,
       discipline: {
         label: 'a'*6  # Invalid: label max length is 5
       }
@@ -148,9 +51,9 @@ class DisciplinesControllerTest < ActionController::TestCase
   end
 
   test "project manager can update discipline on their project" do
-    sign_in @project_manager
+    sign_in_and_set_project(@project_manager, @project)
     patch :update, params: {
-      id: @discipline.id,
+      id: @discipline.id, project_id: @project.id,
       discipline: {
         name: 'Owner Updated Title'
       }
@@ -161,16 +64,10 @@ class DisciplinesControllerTest < ActionController::TestCase
   end
 
   # Destroy action tests
-  test "project manager cannot destroy discipline" do
-    sign_in @project_manager
-    assert_no_difference('Discipline.count') do
-      delete :destroy, params: { id: @discipline.id }
-    end
-    assert_forbidden
-  end
-
-  test "admin can destroy discipline" do
-    sign_in @admin
+  # Accredited user for disciplines is project_admin, so can destroy.
+  undef test_accredited_user_cannot_destroy
+  test "project admin can destroy discipline" do
+    sign_in_and_set_project(@project_admin, @project)
     assert_difference('Discipline.count', -1) do
       delete :destroy, params: { id: @discipline.id }
     end
@@ -178,5 +75,59 @@ class DisciplinesControllerTest < ActionController::TestCase
     assert_equal I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.discipline')), 
                   flash[:success]
   end
+
+  test "admin can destroy discipline" do
+    sign_in_and_set_project(@admin, @project)
+    assert_difference('Discipline.count', -1) do
+      delete :destroy, params: { id: @discipline.id }
+    end
+    assert_redirected_to project_disciplines_url(@discipline.project)
+    assert_equal I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.discipline')), 
+                  flash[:success]
+  end
+
+  private
+
+    # Required for nested routes
+    def new_nesting_params
+      { project_id: @project.id }
+    end
+
+    # Required for nested routes
+    def index_nesting_params
+      { project_id: @project.id }
+    end
+
+    # Set the expected params for a valid resource create
+    def create_params
+      { discipline: 
+        {
+        name: "Test Discipline",
+        label: "TD",
+        prefix_schema: "name: default",
+        required_role: "designer"
+        } 
+      }
+    end
+
+    # No read only attributes
+    def update_params
+      create_params
+    end
+
+    # Set one invalid resource param for tests
+    def invalid_param
+      { discipline: { label: "xxxxxx" } }
+    end
+
+    # Nominate an attribute to get changed during update tests
+    def update_attribute_name
+      :required_role
+    end
+
+    # Nominate a valid value to update the attribute to
+    def updated_attribute_value
+      "checker"
+    end
 
 end

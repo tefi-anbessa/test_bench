@@ -23,7 +23,7 @@
   </td>
   <!-- Links -->
   <td>
-    <% if policy(row).show? %>
+    <% if policy(row.electrical_switchboard).show? %>
       <%= link_to row, class: "btn btn-outline-info btn-sm icon-link",
             aria: { label: t('actions.show') },
             title: t('actions.show'),
@@ -32,7 +32,7 @@
             <% end %>
     <% end %>
         
-    <% if policy(row).edit? %>
+    <% if policy(row.electrical_switchboard).edit? %>
       <%= link_to edit_electrical_circuit_path(row), class: "btn btn-outline-warning btn-sm icon-link",
             aria: { label: t('actions.edit') },
             title: t('actions.edit'),
@@ -41,7 +41,7 @@
             <% end %>
     <% end %>
         
-    <% if policy(row).destroy? %>
+    <% if policy(row.electrical_switchboard).destroy? %>
       <%= link_to row, 
             method: :delete,
             data: { 

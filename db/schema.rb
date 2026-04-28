@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_04_110248) do
+ActiveRecord::Schema[8.0].define(version: 2026_04_14_171200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -19,11 +19,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_04_110248) do
     t.bigint "project_id", null: false
     t.jsonb "prefix_schema"
     t.string "label", comment: "Short 2-3 character code for display"
-    t.string "module_name", comment: "Associated module for extended functionality"
     t.integer "sort_order", default: 100, comment: "Display order in UI (lower numbers first)"
     t.text "notes"
-    t.bigint "swatch_id", null: false
+    t.bigint "swatch_id"
+    t.string "required_role"
     t.index ["project_id", "label"], name: "index_disciplines_on_project_id_and_label", unique: true
+    t.index ["project_id", "name"], name: "index_disciplines_on_project_id_and_name", unique: true
     t.index ["project_id"], name: "index_disciplines_on_project_id"
     t.index ["sort_order"], name: "index_disciplines_on_sort_order"
     t.index ["swatch_id"], name: "index_disciplines_on_swatch_id"
@@ -32,7 +33,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_04_110248) do
   create_table "document_control_doc_types", force: :cascade do |t|
     t.bigint "discipline_id"
     t.string "code", null: false
-    t.string "label", null: false
+    t.string "name", null: false
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -232,6 +233,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_04_110248) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "swatch_id"
+    t.index ["swatch_id"], name: "index_projects_on_swatch_id"
   end
 
   create_table "roles", force: :cascade do |t|
@@ -342,5 +345,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_04_110248) do
   add_foreign_key "electrical_cable_types", "projects"
   add_foreign_key "electrical_cables", "electrical_cable_types"
   add_foreign_key "electrical_circuits", "electrical_switchboards"
+  add_foreign_key "projects", "swatches"
   add_foreign_key "tags", "disciplines"
 end

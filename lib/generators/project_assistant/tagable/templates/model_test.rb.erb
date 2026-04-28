@@ -1,18 +1,14 @@
+# frozen_string_literal: true
+
 require "test_helper"
-require_relative "../../helpers/tagable_model_patterns"
+require 'helpers/tagable_model_tests'
+
 module <%= module_name %>
   class <%= tagable_name %>Test < ActiveSupport::TestCase
-    include TagableModelPatterns
+    include TagableModelTests
 
     def setup
       setup_common_test_data
-      setup_model_specific_data
-    end
-    
-    def setup_model_specific_data
-      @resource = create(:<%= singular_table_name %>, tag: @tag)
-      # Insert model specific test setup here, including relationships with other models.
-      # E.g. setup electrical_demand for electrical models.
     end
 
     test "model specific setup should be valid" do

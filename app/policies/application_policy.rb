@@ -31,17 +31,16 @@ class ApplicationPolicy
     end
 
     private
-
-      def user_has_project_role?(project)
-        return false if user.nil?
-        if project.present?
-          # Check if user has any role on the specified project
-          user.roles.where(resource: project).exists? || user.is_admin? || user.is_app_owner?
-        else
-          # If project is nil, only admin and app_owner have a role.
-          user.is_admin? || user.is_app_owner?
-        end
-      end
+    # Only project and discipline instance roles are tested. 
+    # Global roles and resource wide roles are not checked.
+    def user_has_project_role?(project)
+      return false if user.nil?
+      return false unless project.present?
+      # Check if user has any role on the specified project or its disciplines
+      user.roles.where(resource_type: "Discipline").
+        where(resource_id: Discipline.where(project: project).select(:id)).exists? ||
+      user.roles.where(resource: project).exists?
+    end
   end
 
   attr_reader :user_context, :record, :user, :current_project
@@ -66,7 +65,7 @@ class ApplicationPolicy
   end
 
   def new?
-    create?
+    false
   end
 
   def update?
@@ -74,7 +73,7 @@ class ApplicationPolicy
   end
 
   def edit?
-    update?
+    false
   end
 
   # Only global admins or app owner can destroy records by default
@@ -84,15 +83,41 @@ class ApplicationPolicy
   end
 
   private
-
+    # Only project and discipline instance roles are tested. 
+    # Global roles and resource wide roles are not checked.
     def user_has_project_role?(project)
       return false if user.nil?
-      if project.present?
-        # Check if user has any role on the specified project
-        user.roles.where(resource: project).exists? || user.is_admin? || user.is_app_owner?
-      else
-        # If project is nil, only admin and app_owner have a role.
-        user.is_admin? || user.is_app_owner?
-      end
+      return false unless project.present?
+      # Check if user has any role on the specified project or its disciplines
+      user.roles.where(resource_type: "Discipline").
+        where(resource_id: Discipline.where(project: project).select(:id)).exists? ||
+      user.roles.where(resource: project).exists?
+    end
+
+    # Use to find if a user has a required role on any discipline of a project.
+    # This allows access to the new form on discipline scoped resources (tags, documents) 
+    # before the discipline is known.
+    def user_has_a_required_role?(project)
+      return false if user.nil? || project.nil?
+      user.roles.select { |role| role.resource_type == "Discipline" &&
+        role.resource_id.present? &&
+        role.resource.project_id == project.id &&
+        (role.name.to_s == (role.resource.required_role? ? 
+          role.resource.required_role.to_s : 
+          "#{role.resource.name}::Base".safe_constantize&.required_role.to_s)
+        )
+      }.any?
+    end
+
+    # Use to find if a user has the required role for a record's discipline.
+    def user_is_accredited?(discipline)
+      return false if discipline.nil?
+      rr = discipline.required_role? ? 
+          discipline.required_role.to_s : 
+          discipline.class.required_role.to_s
+      user.has_role?(rr, discipline) || 
+        user.is_admin? || 
+        user.is_app_owner? ||
+        user.is_project_admin_of?(discipline.project)
     end
 end

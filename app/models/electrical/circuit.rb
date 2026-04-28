@@ -1,6 +1,7 @@
 module Electrical
   class Circuit < Base
     belongs_to :electrical_switchboard, class_name: 'Electrical::Switchboard'
+    delegate :tag, :discipline, :project, to: :electrical_switchboard
 
     has_one :feeder, as: :from, class_name: 'Electrical::Cable', dependent: :nullify
 
@@ -11,11 +12,6 @@ module Electrical
     validates :poles, inclusion: { in: 1..6 }, allow_nil: true
     enum :curve, Constants.electrical.protection.curve.to_h
     enum :elcb, Constants.electrical.protection.elcb.to_h
-
-    # Provide tag method using parent switchboard's tag association
-    def tag
-      electrical_switchboard&.tag
-    end
 
     def label
       "##{serial.to_s.rjust(2, '0')}"

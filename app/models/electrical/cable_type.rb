@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 module Electrical
   class CableType < Base
-    resourcify
     belongs_to :project, required: true
     has_many :electrical_cables, class_name: 'Electrical::Cable', 
          foreign_key: 'electrical_cable_type_id', dependent: :destroy

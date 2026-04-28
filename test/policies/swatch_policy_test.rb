@@ -1,10 +1,11 @@
+# frozen_string_literal: true
 require 'test_helper'
-require_relative '../helpers/policy_test_helpers'
+require 'helpers/test_setup_helpers'
   class SwatchPolicyTest < ActiveSupport::TestCase
-    include PolicyTestHelpers
+    include TestSetupHelpers
 
     def setup
-      setup_policy_test
+      setup_projects_and_users
       @swatch = create(:swatch, name: "policy_test")
     end
 

@@ -18,8 +18,8 @@ module DocumentControl
       # Set the minimum required params for a valid resource
       def valid_resource_params
       {
-          document: '' # Add valid data
-            code: '' # Add valid data
+          document: '', # Add valid data
+            code: '', # Add valid data
             reason: '' # Add valid data
   
         }

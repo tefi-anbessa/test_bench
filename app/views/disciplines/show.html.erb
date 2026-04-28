@@ -102,7 +102,7 @@
             <!-- Project Card -->
             <% if @project.present? %>
               <div class="row g-3 mb-3">
-                  <%= render 'projects/card', project: @project %>
+                  <%= render 'projects/card', object: @project %>
               </div>
             <% else %>
               <div class="row g-3 mb-3">
@@ -138,8 +138,8 @@
                   <% end %>
 
                   <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.discipline.module_name') %></div>
-                    <div class="col-8"><%= @discipline.module_name %></div>
+                    <div class="col-4 text-muted"><%= t('activerecord.attributes.discipline.required_role') %></div>
+                    <div class="col-8"><%= @discipline.required_role || '-' %></div>
                   </div>
 
                   <% if @discipline.swatch.present? %>

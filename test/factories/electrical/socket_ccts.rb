@@ -1,8 +1,11 @@
 FactoryBot.define do
   factory :electrical_socket_cct, class: 'Electrical::SocketCct' do
-    # Tag can be passed explicitly, otherwise will be auto-created
+    # Tag can be passed explicitly, if not tag will be created.
+    # If discipline is passed, tag will be created on that discipline.
+    # Otherwise, tag will be created on a new project with "Electrical" discipline.
     transient do
       tag { nil }
+      discipline { nil }
     end
     # Attributes
     socket_type { "10A" }
@@ -18,9 +21,16 @@ FactoryBot.define do
         socket_cct.tag = evaluator.tag
       else
         # Create new tag with proper discipline in same transaction
-        discipline = Discipline.find_by(name: socket_cct.class.discipline) || 
-             create(:discipline, name: socket_cct.class.discipline)
-        socket_cct.tag = create(:tag, :unique_tag, discipline: discipline)
+        if evaluator.discipline
+          # Create tag on the provided discipline
+          socket_cct.tag = create(:tag, :unique_tag, discipline: evaluator.discipline)
+        else
+          # Create project with auto-created disciplines
+          project = create(:project)
+          discipline = project.disciplines.find_by(name: socket_cct.class.module_parent_name) ||
+               create(:discipline, name: socket_cct.class.module_parent_name, project: project)
+          socket_cct.tag = create(:tag, :unique_tag, discipline: discipline)
+        end
       end
     end
   end

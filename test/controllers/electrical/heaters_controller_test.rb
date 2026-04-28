@@ -1,31 +1,38 @@
+# frozen_string_literal: true
+
 require "test_helper"
-require "helpers/tagable_test_patterns"
+require "helpers/tagable_controller_tests"
 module Electrical
   class HeatersControllerTest < ActionController::TestCase
-    include TagableTestPatterns
+    include TagableControllerTests
     include Devise::Test::ControllerHelpers
 
     setup do
       setup_common_test_data
       setup_model_specific_data
-      setup_tags_and_resources
     end
 
     def setup_model_specific_data
       # Setup for model functions unrelated to tags
     end
 
-    # Set the minimum required params for a valid resource
+    # Set the expected params for a valid resource create
     def valid_resource_params
       {
         heater_type: 'cast_in',
-        application: 'annealing_heat_treating'
+        application: 'annealing_heat_treating',
+        ingress_protection: 'IP54',
+        sheath_temperature_max: 450.0,
+        power_density_min: 50.0,
+        power_density_max: 200.0,
+        sheath_material: 'stainless_steel',
+        insulation_material: 'fluoropolymer'
       }
     end
 
     # Set invalid resource params for tests
-    def invalid_resource_params
-      { heater_type: 'invalid' }  # Set invalid value for an attribute
+    def invalid_resource_param
+      { insulation_material: 'magnesia' }  # Set invalid value for an attribute AI concocted!!!
     end
 
     # Nominate an attribute to get changed during update tests

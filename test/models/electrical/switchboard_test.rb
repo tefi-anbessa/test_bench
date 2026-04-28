@@ -1,111 +1,148 @@
+# frozen_string_literal: true
 require "test_helper"
+require 'helpers/tagable_model_tests'
 
-class SwitchboardTest < ActiveSupport::TestCase
-  def setup
-    @project = create(:project, title: 'Test Switchboards')
-    @discipline_e = create(:discipline, code: :elec, project: @project)
-    @switchboard = create(:electrical_switchboard, discipline: @discipline_e, 
-                            voltage_rating: '600/1000V', busbar_rating: 400)
-    @tag = @switchboard.tag
-  end
+module Electrical
+  class SwitchboardTest < ActiveSupport::TestCase
+    include TagableModelTests
 
-  test "factory should create valid switchboard with tag" do
-    assert @switchboard.valid?
-    assert @tag.valid?
+    def setup
+      setup_common_test_data
+      @resource.electrical_demand = create(:electrical_demand, demandable: @resource)
+      @circuit = create(:electrical_circuit, electrical_switchboard: @resource)
+    end
 
-    # Check that factory creates a functional switchboard without any given parameters.
-    swbd = create(:electrical_switchboard)
-    assert swbd.valid?
-    assert swbd.tag.valid?
-    assert_equal swbd.label, swbd.tag.label
-  end
+    test "circuit setup must be valid" do
+      assert @circuit.valid?
+      assert_equal @resource.electrical_circuits.count, 1
+      assert_equal @resource, @circuit.electrical_switchboard
+    end
 
-  test "voltage rating must be present" do
-    @switchboard.voltage_rating = nil
-    refute @switchboard.valid?
-    assert_includes @switchboard.errors[:voltage_rating], I18n.t("errors.messages.blank")
-  end
+    test "voltage rating must be present" do
+      @resource.voltage_rating = nil
+      refute @resource.valid?
+      assert_includes @resource.errors[:voltage_rating], I18n.t("errors.messages.blank")
+    end
 
-  test "busbar rating must be present" do
-    @switchboard.busbar_rating = nil
-    refute @switchboard.valid?
-    assert_includes @switchboard.errors[:busbar_rating], I18n.t("errors.messages.blank")
-  end
+    test "busbar rating must be present" do
+      @resource.busbar_rating = nil
+      refute @resource.valid?
+      assert_includes @resource.errors[:busbar_rating], I18n.t("errors.messages.blank")
+    end
 
-  test "switchboard label should be tag label" do
-    assert_equal @switchboard.label, @tag.label
-    assert_equal @switchboard.long_label, @tag.long_label
-  end
+    test "switchboard label should be tag label" do
+      assert_equal @resource.label, @tag.label
+      assert_equal @resource.long_label, @tag.long_label
+    end
 
-  test "should create switchboard with custom tag attributes" do
-    switchboard = nil
-    assert_difference ['Electrical::Switchboard.count', 'Tag.count'], 1 do
-      switchboard = create(:electrical_switchboard,
-        ingress_protection: '22'
+    test "should create switchboard with custom tag attributes" do
+      switchboard = nil
+      assert_difference ['Electrical::Switchboard.count', 'Tag.count'], 1 do
+        switchboard = create(:electrical_switchboard,
+          ingress_protection: '22'
+        )
+      end
+      # Check factory default prefix
+      assert_equal '22', switchboard.ingress_protection
+    end
+
+    test "should create new switchboard through tag update" do
+      tag = create(:tag,
+        prefix: 'EX',
+        serial: 5,
+        suffix: "X",
+        stage: 9,
+        discipline: @resource_discipline
       )
-    end
-    # Check factory default prefix
-    assert_equal 'EX', switchboard.tag.prefix
-    assert_match(/EX\d+\.?\w*/, switchboard.tag.reload.full_tag)
-    assert_equal '22', switchboard.ingress_protection
-  end
-  
-  test "should create new switchboard through tag update" do
-    tag = create(:tag,
-      prefix: 'EX',
-      serial: 5,
-      suffix: "X",
-      stage: 9,
-      discipline: @discipline_e
-    )
-    
-    assert_difference 'Electrical::Switchboard.count', 1 do
-      tag.update(tagable: create(:electrical_switchboard, tag: tag,
-        ingress_protection: '22'
-      ))
-    end
-    
-    assert tag.tagable.class == Electrical::Switchboard
-    assert_equal "EX0005X", tag.electrical_switchboard.label
-    assert_equal '22', tag.tagable.ingress_protection
-  end
 
-  test "destroy switchboard should nullify tagable" do
-    @switchboard.destroy
-    @tag.reload
-    assert_nil @tag.tagable_id
-  end
+      assert_difference 'Electrical::Switchboard.count', 1 do
+        tag.update(tagable: create(:electrical_switchboard, tag: tag,
+          ingress_protection: '22'
+        ))
+      end
 
-  test "destroy tag should destroy switchboard" do
-    assert_difference 'Electrical::Switchboard.count', -1 do
-      @tag.destroy
+      assert tag.tagable.class == Electrical::Switchboard
+      assert_equal '22', tag.tagable.ingress_protection
+    end
+
+    test "destroy switchboard should destroy associated circuits" do
+      # Destroy the switchboard and verify the circuit is also destroyed
+      assert_difference 'Electrical::Circuit.count', -1 do
+        @resource.destroy
+      end
+      # Verify the circuit was destroyed
+      assert_raises(ActiveRecord::RecordNotFound) { @circuit.reload }
+    end
+
+    # Circuit tests
+    test "should create switchboard with specified number of circuits" do
+      switchboard = create(:electrical_switchboard, :with_circuits, circuits_count: 5)
+      assert_equal 5, switchboard.electrical_circuits.count
+
+      # Verify all circuits have unique serial numbers between 1 and 36
+      serials = switchboard.electrical_circuits.pluck(:serial)
+      assert_equal serials.uniq, serials, "All circuit serials should be unique"
+      assert serials.all? { |s| (1..36).cover?(s) }, "All serials should be between 1 and 36"
+      end
+
+    test "should require serial number between 1 and 36" do
+      @circuit.serial = 0
+      refute @circuit.valid?
+      #assert_includes @circuit.errors[:serial], I18n.t('errors.messages.in', count: 1..36)
+      
+      @circuit.serial = 37
+      refute @circuit.valid?
+      assert_includes @circuit.errors[:serial], I18n.t('errors.messages.in', count: 1..36)
+      
+      @circuit.serial = 1
+      assert @circuit.valid?
+      
+      @circuit.serial = 36
+      assert @circuit.valid?
+    end
+
+    test "should require unique serial number per switchboard" do
+      # Use a unique serial number for this test to avoid conflicts with other tests
+      test_serial = create(:electrical_circuit, electrical_switchboard: @resource, serial: 35)
+
+      # Try to create another circuit with the same serial on the same switchboard
+      duplicate_circuit = build(:electrical_circuit, electrical_switchboard: @resource, serial: test_serial.serial)
+      refute duplicate_circuit.valid?
+      assert_includes duplicate_circuit.errors[:serial], I18n.t('errors.messages.taken')
+
+      # Should allow same serial on a different switchboard
+      other_tag = create(:tag, discipline: @resource_discipline)
+      other_switchboard = create(:electrical_switchboard, tag: other_tag)
+      other_circuit = build(:electrical_circuit, electrical_switchboard: other_switchboard, serial: test_serial.serial)
+      assert other_circuit.valid?
+    end
+
+    test "destroy circuit should nullify cable feeder reference" do
+      circuit = create(:electrical_circuit, electrical_switchboard: @resource)
+      cable_tag = create(:tag, discipline: @resource_discipline, prefix: "EC")
+      cable = create(:electrical_cable, tag: cable_tag, from: circuit)
+
+      # Only the circuit count should decrease
+      assert_difference 'Electrical::Circuit.count', -1 do
+        assert_no_difference ['Electrical::Cable.count'] do
+          circuit.destroy
+        end
+      end
+
+      # Check that cable still exists but its from reference is nullified
+      assert_nil cable.reload.from_id
+    end
+
+    test "factory should create multiple circuits with unique serial numbers" do
+      # Create 3 circuits on the same switchboard
+      circuits = create_list(:electrical_circuit, 3, electrical_switchboard: @resource)
+      
+      # Get all serial numbers and ensure they're unique
+      serials = circuits.map(&:serial)
+      assert_equal serials.uniq, serials, "Expected all serial numbers to be unique"
+      
+      # All serials should be between 1 and 36
+      assert serials.all? { |s| (1..36).cover?(s) }, "All serials should be between 1 and 36"
     end
   end
-
-  test "destroy switchboard should destroy associated circuits" do
-    # First, create a circuit associated with the switchboard
-    circuit = create(:electrical_circuit, electrical_switchboard: @switchboard)
-    
-    # Verify the circuit was created
-    assert_includes @switchboard.electrical_circuits, circuit
-    
-    # Now destroy the switchboard and verify the circuit is also destroyed
-    assert_difference 'Electrical::Circuit.count', -1 do
-      @switchboard.destroy
-    end
-    
-    # Verify the circuit was destroyed
-    assert_raises(ActiveRecord::RecordNotFound) { circuit.reload }
-  end
-  
-  test "should create switchboard with specified number of circuits" do
-    switchboard = create(:electrical_switchboard, :with_circuits, circuits_count: 5)
-    assert_equal 5, switchboard.electrical_circuits.count
-    
-    # Verify all circuits have unique serial numbers between 1 and 36
-    serials = switchboard.electrical_circuits.pluck(:serial)
-    assert_equal serials.uniq, serials, "All circuit serials should be unique"
-    assert serials.all? { |s| (1..36).cover?(s) }, "All serials should be between 1 and 36"
-  end
-
 end

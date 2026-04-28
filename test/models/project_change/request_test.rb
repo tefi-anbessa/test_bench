@@ -1,19 +1,27 @@
 require "test_helper"
-require "helpers/model_test_patterns"
+# require "helpers/model_test_patterns"
 module ProjectChange
   class RequestTest < ActiveSupport::TestCase
-    include ModelTestPatterns
+    # include ModelTestPatterns
 
     def setup
-      setup_common_test_data
-      setup_model_specific_data
-    end
-    
-    def setup_model_specific_data
+      @project = create(:project)
       @resource = create(:project_change_request)
       # Insert model specific test setup here, including relationships with other models.
       # E.g. setup electrical_demand for electrical models.
     end
+
+    test "title must be present" do
+      @resource.title = nil
+      refute @resource.valid?
+      assert_includes @resource.errors[:title], I18n.t("errors.messages.blank")
+    end
+
+  test "title should not be too long" do
+    @resource.title = "a" * 256
+    refute @resource.valid?
+    assert_includes @resource.errors[:title], I18n.t("errors.messages.too_long", count: 255)
+  end
 
     test "project must be present" do
       new_request = build(:project_change_request, project: nil)
@@ -50,9 +58,5 @@ module ProjectChange
         @resource.update(serial: 999)
       end
     end
-
-    # Insert model specific tests here.
-    # E.g. test electrical_demand for electrical models.
-
   end
 end

@@ -6,7 +6,7 @@
     link_to(row.discipline.label, row.discipline) : 
     '-' %></td>
   <td><%= row.code || '-' %></td>
-  <td><%= row.label || '-' %></td>
+  <td><%= row.name || '-' %></td>
   <td><%= row.description || '-' %></td>
   <td>
     <% if policy(row).show? %>

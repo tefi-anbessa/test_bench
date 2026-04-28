@@ -32,10 +32,7 @@ module TagableNavigation
     sql = <<-SQL
       WITH ordered_tags AS (
         SELECT t.id,
-              t.discipline_id,
-              t.loop_id,
-              t.prefix,
-              COALESCE(t.suffix, '') as suffix_sort,
+              t.tagable_id,
               t.tagable_type,
               LAG(t.id) OVER (
                 PARTITION BY t.tagable_type 
@@ -50,17 +47,25 @@ module TagableNavigation
         WHERE d.project_id = :project_id
           AND t.tagable_type = :model_name
       )
-      SELECT * FROM ordered_tags
+      SELECT #{column} FROM ordered_tags
       WHERE id = :current_tag_id
     SQL
     
-    model_class.find_by_sql([
-      sql, 
-      { 
-        project_id: tag.discipline.project_id, 
-        current_tag_id: tag.id,
-        model_name: model_class.name
-      }
-    ]).first
+    adjacent_tag_id = model_class.connection.select_value(
+      model_class.send(:sanitize_sql_array, [
+        sql, 
+        { 
+          project_id: tag.discipline.project_id, 
+          current_tag_id: tag.id,
+          model_name: model_class.name
+        }
+      ])
+    )
+    
+    return unless adjacent_tag_id
+    
+    # Find the actual tagable record using the adjacent tag
+    adjacent_tag = Tag.find_by(id: adjacent_tag_id)
+    adjacent_tag&.tagable
   end
 end

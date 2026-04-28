@@ -4,6 +4,8 @@ FactoryBot.define do
   factory :electrical_cable, class: 'Electrical::Cable' do
     transient do
       tag { nil }
+      discipline { nil }
+      cable_type { nil }
       from { nil }  # Source object (Circuit, Switchboard, etc.)
       to { nil }    # Destination object (Demand, Motor, etc.)
     end
@@ -23,26 +25,44 @@ FactoryBot.define do
     start_mark { 1001 }
     end_mark { 1010 }
 
+    # Handle from/to associations for both build and create
+    after(:build) do |cable, evaluator|
+      cable.from = evaluator.from if evaluator.from
+      cable.to = evaluator.to if evaluator.to
+    end
+
     # Create tag association in a single transaction
     before(:create) do |cable, evaluator|
+      # Determine cable_type - either provided or create one
+      cable_type = evaluator.cable_type || cable.electrical_cable_type
+
+      # Handle tag creation
       if evaluator.tag
-        # Use provided tag, but ensure it's not already associated
         tag = evaluator.tag.is_a?(Tag) ? evaluator.tag : Tag.find(evaluator.tag)
         if tag.tagable.present?
           raise "Tag is already associated with another record: #{tag.tagable_type}##{tag.tagable_id}"
         end
+        # Validate project match if cable_type provided
+        if evaluator.cable_type && tag.discipline&.project != cable_type.project
+          raise "Tag's project does not match cable_type's project"
+        end
         cable.tag = tag
       else
         # Create new tag with proper discipline in same transaction
-        discipline = Discipline.find_or_create_by(name: cable.class.discipline)
-        cable.tag = create(:tag, :unique_tag, discipline: discipline)
+        if evaluator.discipline
+          # Validate project match if cable_type provided
+          if evaluator.cable_type && evaluator.discipline.project != cable_type.project
+            raise "Discipline's project does not match cable_type's project"
+          end
+          cable.tag = create(:tag, :unique_tag, discipline: evaluator.discipline)
+        else
+          # Use cable_type's project or create new project
+          project = cable_type&.project || create(:project)
+          discipline = project.disciplines.find_by(name: cable.class.module_parent_name) ||
+               create(:discipline, name: cable.class.module_parent_name, project: project)
+          cable.tag = create(:tag, :unique_tag, discipline: discipline)
+        end
       end
-
-      # Assign from association if provided
-      cable.from = evaluator.from if evaluator.from
-
-      # Assign to association if provided
-      cable.to = evaluator.to if evaluator.to
     end
   end
 end

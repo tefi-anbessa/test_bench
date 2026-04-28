@@ -3,6 +3,7 @@
     <th><%= sort_link(@q, :label, request.query_parameters.merge(disciplines_expanded: '1')) %></th>
     <th><%= sort_link(@q, :name, request.query_parameters.merge(disciplines_expanded: '1')) %></th>
     <th><%= sort_link(@q, :prefix_schema, request.query_parameters.merge(disciplines_expanded: '1')) %></th>
+    <th><%= sort_link(@q, :required_role, request.query_parameters.merge(disciplines_expanded: '1')) %></th>
     <th><%= sort_link(@q, :swatch, request.query_parameters.merge(disciplines_expanded: '1')) %></th>
     <th class="text-end"><%= t('table.links') %></th>
   </tr>

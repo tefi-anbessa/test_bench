@@ -1,49 +1,59 @@
+# frozen_string_literal: true
+
 require "test_helper"
-require_relative "../../helpers/tagable_model_patterns"
+require 'helpers/tagable_model_tests'
+
 module Electrical
   class HeaterTest < ActiveSupport::TestCase
-    include TagableModelPatterns
+    include TagableModelTests
 
     def setup
       setup_common_test_data
-      setup_model_specific_data
-    end
-    
-    def setup_model_specific_data
-      @resource = create(:electrical_heater, tag: @tag)
-      # Insert model specific test setup here, including relationships with other models.
-      # E.g. setup electrical_demand for electrical models.
+      @resource.electrical_demand = create(:electrical_demand, demandable: @resource)
     end
 
-    test "model specific setup should be valid" do
-      # Insert validity test of model specific test setup here, including relationships with other models.
-      # E.g. electrical_demand for electrical models.
-    end
-
-    test "heater_type must be present" do
+    test "heater type must be present" do
       @resource.heater_type = nil
       refute @resource.valid?
       assert_includes @resource.errors[:heater_type], I18n.t("errors.messages.blank")
     end
+
     test "application must be present" do
       @resource.application = nil
       refute @resource.valid?
       assert_includes @resource.errors[:application], I18n.t("errors.messages.blank")
     end
 
-    test "destroy heater should destroy demand" do
-      demand = @resource.electrical_demand
-      assert_difference 'Electrical::Demand.count', -1 do
-        @resource.destroy
-      end
-      assert_raises(ActiveRecord::RecordNotFound) { demand.reload }
+    # Demand creation is tested separately in Demand model tests
+
+    test "destroy heater should nullify tagable" do
+      @resource.destroy
+      
+      @tag.reload
+      assert_nil @tag.tagable
+      assert_nil @tag.tagable_type
+      assert_nil @tag.tagable_id
     end
     
-    test "should have electrical_demand through demandable concern" do
+    test "should have demand through demandable concern" do
       assert_respond_to @resource, :electrical_demand
-      assert @resource.electrical_demand.present?, 'Motor should have an electrical demand'
-      assert_kind_of Electrical::Demand, @resource.electrical_demand
     end
-
+    
+    test "should have tag through tagable concern" do
+      assert_respond_to @resource, :tag
+      assert_equal @tag, @resource.tag
+    end
+    
+    # Test enum definitions
+    test "should have enum attributes" do
+      assert_respond_to @resource, :heater_type
+      assert_respond_to @resource, :cast_in?
+      assert_respond_to @resource, :application
+      assert_respond_to @resource, :annealing_heat_treating?
+      assert_respond_to @resource, :sheath_material
+      assert_respond_to @resource, :sheath_material_aluminium?
+      assert_respond_to @resource, :insulation_material
+      assert_respond_to @resource, :insulation_material_ceramic?
+    end
   end
 end

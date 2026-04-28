@@ -30,7 +30,8 @@ module TestBench
 
     # Added for i18n installation
     # Path to search for translation files
-    config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
+    # Commented out as Rails 8 is supposed to autoload.
+    # config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
     
     # Set default locale
     config.i18n.default_locale = :en

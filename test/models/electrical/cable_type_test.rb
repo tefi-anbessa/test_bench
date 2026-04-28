@@ -4,6 +4,7 @@ class Electrical::CableTypeTest < ActiveSupport::TestCase
   def setup
     @project = create(:project)
     @cable_type = create(:electrical_cable_type, project: @project)
+    @resource = @cable_type # prepare for abstraction of this test to project or discipline type
   end
 
   test "setup should be valid" do
@@ -132,4 +133,22 @@ class Electrical::CableTypeTest < ActiveSupport::TestCase
     expected_pattern = %r{Cu~2.5mm²~3C\+N\+E\~XLPE~PVC~GSWA~PVC~450/750V~75˚C~01}
     assert_match expected_pattern, ct.code
   end
+    
+    # Test enum definitions
+    test "should have enum attributes" do
+      assert_respond_to @resource, :conductor_material
+      assert_respond_to @resource, :Cu?
+      assert_respond_to @resource, :insulation
+      assert_respond_to @resource, :insulation_XLPE?
+      assert_respond_to @resource, :bedding
+      assert_respond_to @resource, :bedding_PVC?
+      assert_respond_to @resource, :armour
+      assert_respond_to @resource, :armour_GSWA?
+      assert_respond_to @resource, :sheath
+      assert_respond_to @resource, :sheath_PVC?
+      assert_respond_to @resource, :voltage_rating
+      assert_respond_to @resource, :'450/750V?'
+      assert_respond_to @resource, :temperature_rating
+      assert_respond_to @resource, :"75˚C?"
+    end
 end

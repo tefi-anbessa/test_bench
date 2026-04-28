@@ -10,13 +10,6 @@ FactoryBot.define do
       end
     end
     
-    # Generate traits for functional roles
-    Constants.roles.functional_roles.each do |role_name|
-      trait role_name.to_sym do
-        name { role_name }
-      end
-    end
-    
     # Generate traits for resource-specific roles
     Constants.roles.resources.to_h.each do |resource_type, roles|
       roles.each do |role_name|
@@ -63,14 +56,6 @@ FactoryBot.define do
       
       # Create traits for each role type
       Constants.roles.global_roles.each do |role_name|
-        trait role_name.to_sym do
-          name { role_name }
-          resource { nil }
-        end
-      end
-      
-      # Create traits for functional roles
-      Constants.roles.functional_roles.each do |role_name|
         trait role_name.to_sym do
           name { role_name }
           resource { nil }

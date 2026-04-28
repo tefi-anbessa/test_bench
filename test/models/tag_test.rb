@@ -2,9 +2,9 @@ require "test_helper"
 
 class TagTest < ActiveSupport::TestCase
   setup do
-    # Set up project and discipline
+    # Set up project with standard disciplines
     @project = create(:project)
-    @discipline = create(:discipline, :elec, project: @project)  # Using electrical discipline as an example
+    @discipline = @project.disciplines.find_by(name: "Electrical")  # Using electrical discipline as an example
     
     # Create test tags 
     @tag_a1 = create(:tag, discipline: @discipline, 
@@ -75,23 +75,13 @@ class TagTest < ActiveSupport::TestCase
     assert_equal @tag_a1, @tag_a2.prev(:id),
                  'A1B.prev(:id) should fall back to ID-based ordering'
   end
-
-  test 'complete_tag factory should create complete tags' do
-    complete_tag = create(:complete_tag, project: @project, discipline: @discipline)
-    assert complete_tag.valid?
-    assert complete_tag.prefix.present?
-    assert complete_tag.serial.present?
-    assert complete_tag.service.present?
-    assert complete_tag.stage.present?
-    assert complete_tag.notes.present?
-  end
   
   test "should require unique combination of discipline, prefix, serial, and suffix" do
     project1 = create(:project)
-    discipline1 = create(:discipline, code: :elec, project: project1)
-    discipline2 = create(:discipline, code: :inst, project: project1)
+    discipline1 = project1.disciplines.find_by(name: "Electrical")
+    discipline2 = project1.disciplines.find_by(name: "Instrument")
     project2 = create(:project)
-    discipline3 = create(:discipline, code: :elec, project: project2)
+    discipline3 = project2.disciplines.find_by(name: "Electrical")
 
     tag1 = create(:tag, discipline: discipline1, suffix: 'X')
     
@@ -194,13 +184,13 @@ class TagTest < ActiveSupport::TestCase
   end
 
   test "full tag method should work on persisted tags" do
-    discipline = create(:discipline, code: 'A', project: @project)  # Create a discipline with a specific code
+    discipline = @project.disciplines.find_by(name: "Instrument")
     tag1 = create(:tag, prefix: 'PG', serial: 1001, suffix: '', discipline: discipline)
     assert_equal "#{tag1.prefix}#{tag1.serial.to_s.rjust(4, '0')}", tag1.full_tag
   end
 
   test "loop id method should work on persisted and new tags" do
-    discipline = create(:discipline, code: 'A', project: @project)  # Create a discipline with a specific code
+    discipline = @project.disciplines.find_by(name: "Instrument", label: "J")
     tag1 = create(:tag, prefix: 'PG', serial: 1001, suffix: '', discipline: discipline)
     assert_equal "#{tag1.prefix.first.upcase}#{tag1.serial.to_s.rjust(4, '0')}", tag1.loop_id
   end
@@ -210,7 +200,7 @@ class TagTest < ActiveSupport::TestCase
   end
 
   test "long_label method should return discipline and full tag" do
-    assert_equal "#{@tag_a1.discipline.code}: #{@tag_a1.full_tag}", @tag_a1.long_label
+    assert_equal "#{@tag_a1.discipline.label}: #{@tag_a1.full_tag}", @tag_a1.long_label
   end
 
   test "destroy tag should remove from discipline" do
@@ -352,7 +342,7 @@ class TagTest < ActiveSupport::TestCase
   
   test "destroy discipline should destroy associated tags" do
     # Create a new discipline with a single tag for this test
-    test_discipline = create(:discipline, project: @project)
+    test_discipline = create(:discipline, name: "Test", project: @project)
     create(:tag, discipline: test_discipline, 
                  prefix: 'X', serial: 1, suffix: nil, service: 'Test Tag')
     

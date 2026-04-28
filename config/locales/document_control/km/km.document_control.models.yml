@@ -22,5 +22,5 @@ km:
         doc_type:
           discipline: "Discipline"
           code: "Code"
-          label: "Type"
+          name: "Type"
           description: "Description"

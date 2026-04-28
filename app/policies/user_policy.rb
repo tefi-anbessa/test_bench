@@ -32,5 +32,3 @@ class UserPolicy < ApplicationPolicy
     !user.nil?
   end
 end
-
-User.joins(:roles).where(name: [:admin, :app_owner])

@@ -38,15 +38,15 @@ class Role < ApplicationRecord
   # Class methods for role queries
   class << self
     # Get valid roles for a resource type
-    # @param resource_type [String, Symbol, Class, nil] The resource type, class, or nil for global/functional roles
+    # @param resource_type [String, Symbol, Class, nil] The resource type, class, or nil for global roles
     # @param _resource_id [Integer, nil] Unused, kept for backward compatibility
     # @return [Array] Array of valid role names for the resource type
     def valid_roles_for(resource_type = nil, _resource_id = nil)
       resource_type = resource_type.name if resource_type.is_a?(Class)
-      
+
       if resource_type.blank?
-        # Return global and functional roles when no resource type is specified
-        (Array(Constants.roles.global_roles) + Array(Constants.roles.functional_roles)).uniq
+        # Return global roles when no resource type is specified
+        Array(Constants.roles.global_roles)
       elsif Constants.roles.respond_to?(:resources)
         # Return resource-specific roles
         resource_key = Constants.roles.resources.to_h.keys
@@ -65,11 +65,11 @@ class Role < ApplicationRecord
     def valid_role?(role_name, resource_type = nil, _resource_id = nil)
       role_name = role_name.to_s
       resource_type = resource_type.name if resource_type.is_a?(Class)
-      
+
       if resource_type.present?
         valid_roles_for(resource_type).include?(role_name)
       else
-        global_roles.include?(role_name) || functional_roles.include?(role_name)
+        global_roles.include?(role_name)
       end
     end
     
@@ -79,16 +79,10 @@ class Role < ApplicationRecord
       Array(Constants.roles.try(:global_roles) || [])
     end
     
-    # Get all functional roles
-    # @return [Array<String>] Array of functional role names
-    def functional_roles
-      Array(Constants.roles.try(:functional_roles) || [])
-    end
-    
     # Get all valid role names across all categories
     # @return [Array<String>] Array of all role names
     def role_names
-      (global_roles + functional_roles + all_resource_roles.values.flatten).uniq
+      (global_roles + all_resource_roles.values.flatten).uniq
     end
     
     # Get all resource types and their roles

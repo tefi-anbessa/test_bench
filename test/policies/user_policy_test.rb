@@ -1,11 +1,11 @@
 require 'test_helper'
-require_relative '../helpers/resource_policy_test'
+require 'helpers/test_setup_helpers'
 
 class UserPolicyTest < ActiveSupport::TestCase
-  include PolicyTestHelpers
+  include TestSetupHelpers
   
   def setup
-    setup_policy_test
+    setup_projects_and_users
   end
   
   # Helper to create policy with user and project context

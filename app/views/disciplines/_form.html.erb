@@ -31,7 +31,7 @@
               <% if project.present? %>
                 <%= f.hidden_field :project_id, value: project.id %>
                 <%= render 'projects/card',
-                      project: project %>
+                      object: project %>
               <% else %>
                 <%= f.select :project_id,
                       options_for_select(
@@ -47,8 +47,8 @@
               <div class="mb-1">
                 <%= f.select :copy_from_standard,
                       options_for_select(
-                        Constants.disciplines.map { |d| 
-                          [t("discipline.name.#{d[:name]}", default: d[:name]), d[:label]] 
+                        Constants.disciplines.map { |label, attrs| 
+                          [t("discipline.name.#{attrs[:name]}", default: attrs[:name]), label.to_s] 
                         }
                       ),
                       { include_blank: t('form.new_select') },
@@ -85,6 +85,19 @@
                   discipline.swatch_id
                 ),
                 { class: 'form-select' } %>
+            </div>
+
+            <!-- Required Role -->
+            <div class="row">
+              <%= f.select :required_role,
+                options_for_select(
+                  Role.all_resource_roles[:discipline].map { |r| [r.humanize, r] },
+                  discipline.required_role
+                ),
+                { include_blank: true, label: t('activerecord.attributes.discipline.required_role') },
+                { label_col: "col-sm-3",
+                  control_col: "col-sm-9",
+                  title: t('activerecord.help.discipline.required_role') } %>
             </div>
 
           </div> <!-- end responsive columns --> 

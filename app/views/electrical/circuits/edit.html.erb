@@ -1,5 +1,5 @@
 <% provide(:title, t('.title')) %>
-<% provide(:header, t('.header', label: [@circuit.electrical_switchboard&.label, @circuit&.label].join(': '))) %>
+<% provide(:header, t('.header', label: @circuit.long_label)) %>
 <% provide(:button_text, t('actions.update')) %>
 <%= render "form", 
   switchboard: @switchboard,

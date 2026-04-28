@@ -1,6 +1,10 @@
 class Project < ApplicationRecord
   resourcify
   before_save { self.code = code.upcase }
+  after_create :create_disciplines
+
+  # Associations
+  belongs_to :swatch, optional: true
   has_many :disciplines, dependent: :destroy
   has_many :tags, through: :disciplines
   has_many :electrical_cable_types, class_name: 'Electrical::CableType', dependent: :destroy
@@ -12,17 +16,12 @@ class Project < ApplicationRecord
                           uniqueness: true
   validates :title, presence: true, length: { maximum: 50 }
 
-
   def label
       "#{code}"
   end
 
-  def self.ransackable_attributes(auth_object = nil)
-    ["code", "title", "description", "created_at", "updated_at"]
-  end
-
-  def self.ransackable_associations(auth_object = nil)
-    [ :disciplines, :tags, :electrical_cable_types ]
+  def self.swatch
+    Swatch.find_by(name: "app_theme")
   end
 
   # Default scope for ordering projects
@@ -30,4 +29,15 @@ class Project < ApplicationRecord
 
   private
 
+    def self.ransackable_attributes(auth_object = nil)
+      ["code", "title", "description", "created_at", "updated_at"]
+    end
+
+    def self.ransackable_associations(auth_object = nil)
+      [ :disciplines, :tags, :electrical_cable_types ]
+    end
+
+    def create_disciplines
+      Discipline.create_all_for_project(self)
+    end
 end

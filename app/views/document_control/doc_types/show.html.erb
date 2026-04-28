@@ -9,7 +9,7 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@doc_type).index? %>
-              <%= link_to document_control_doc_types_path,
+              <%= link_to discipline_document_control_doc_types_path(@doc_type.discipline),
                     class: "btn btn-sm btn-outline-secondary me-2",
                     title: t('actions.index') do %>
                 <%== bs_icon('list-columns-reverse') %>
@@ -40,7 +40,7 @@
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
               <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
-                <%= t('.header', label: @doc_type.label)%>
+                <%= t('.header', label: @doc_type.long_label)%>
               </span>
             </div>
           </div>
@@ -90,6 +90,19 @@
                   </span>
                 <% end %>
               <% end %>
+
+              <% if policy(@doc_type).new? %>
+                <%= link_to new_discipline_document_control_doc_type_path(@doc_type.discipline),
+                      class: "btn btn-outline-primary",
+                      title: t('actions.new') do %>
+                  <%== bs_icon('plus') %>
+                  <span class="d-none d-md-inline">
+                    <%= t('actions.new') %>
+                  </span>
+                <% end %>
+              <% end %>
+
+
             </div>
           </div>
         </div>
@@ -117,8 +130,8 @@
                 <div class="col-8"><%= @doc_type.code || '-' %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @doc_type.class.human_attribute_name(:label) %></div>
-                <div class="col-8"><%= @doc_type.label || '-' %></div>
+                <div class="col-4 text-muted"><%= @doc_type.class.human_attribute_name(:name) %></div>
+                <div class="col-8"><%= @doc_type.name || '-' %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
                 <div class="col-4 text-muted"><%= @doc_type.class.human_attribute_name(:description) %></div>

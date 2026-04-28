@@ -6,12 +6,13 @@ class TagsSystemTest < ApplicationSystemTestCase
 
   setup do
     @project = create(:project)
+    @swatch = create(:swatch, name: 'app_theme')
     @discipline = create(:discipline, project: @project)
-    @discipline_e = create(:discipline, project: @project, code: 'elec', label: 'E', 
+    @discipline_e = create(:discipline, project: @project, label: 'E', 
       name: 'Electrical', prefix_schema: { name: 'dim1'})
-    @discipline_j = create(:discipline, project: @project, code: 'inst', label: 'J', 
+    @discipline_j = create(:discipline, project: @project, label: 'J', 
       name: 'Instrument', prefix_schema: { name: 'isa51'})
-    @discipline_p = create(:discipline, project: @project, code: 'process', label: 'P', 
+    @discipline_p = create(:discipline, project: @project, label: 'P', 
       name: 'Process', prefix_schema: { name: 'dim2'})
 
     @app_owner = create(:user)
@@ -122,7 +123,7 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert_text I18n.t('activerecord.attributes.tag.notes')
     assert_text I18n.t('activerecord.attributes.tag.tagable_type')
     assert_text @tag.stage
-    assert_text @tag.discipline.code
+    assert_text @tag.discipline.label
     assert_text @tag.label
     assert_text @tag.prefix
     assert_text @tag.serial
@@ -164,7 +165,7 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert_selector "select[name='tag[tagable_type]']"
 
     # Form buttons
-    assert_selector "input[type='submit']"
+    assert_selector "button[type='submit']"
     assert_selector "a.btn.btn-warning", text: I18n.t('actions.discard')
   end
 
@@ -207,12 +208,12 @@ class TagsSystemTest < ApplicationSystemTestCase
     fill_in "tag_suffix", with: "A"
     fill_in "tag_service", with: "MAIN STREAM ANALYSIS"
 
-    click_button I18n.t('actions.save')
+    click_button I18n.t('actions.create')
     sleep 0.1  # Give database time to commit
     new_tag = Tag.find_by(prefix: "AT", serial: "0101", suffix: "A")
     assert_current_path tag_path(new_tag)
     assert_text "AT0101A"
-    assert_text I18n.t("flash.actions.create.notice", resource_name: I18n.t("activerecord.models.tag"))
+    assert_text I18n.t("flash.create.notice", resource_name: I18n.t("activerecord.models.tag"))
   end
 
   test "team member edit tag with default schema" do
@@ -243,12 +244,12 @@ class TagsSystemTest < ApplicationSystemTestCase
     fill_in "tag_serial", with: "0101"
     fill_in "tag_suffix", with: "A"
     fill_in "tag_service", with: "MODIFIED SERVICE"
-    click_button I18n.t('actions.save')
+    click_button I18n.t('actions.update')
 
     assert_current_path tag_path(@tag)
     assert_text "EC0101A"
     assert_text "MODIFIED SERVICE"
-    assert_text I18n.t("flash.actions.update.notice", resource_name: I18n.t("activerecord.models.tag"))
+    assert_text I18n.t("flash.update.notice", resource_name: I18n.t("activerecord.models.tag"))
 
     # Make another edit to test the show view link, and then discard
     click_link(href: edit_tag_path(@tag))
@@ -275,7 +276,7 @@ class TagsSystemTest < ApplicationSystemTestCase
     end
     assert_current_path tags_path
     refute_selector "a[href='#{tag_path(@tag)}']"
-    assert_text I18n.t("flash.actions.destroy.notice", resource_name: I18n.t("activerecord.models.tag"))
+    assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.tag"))
   end
 
   test "admin destroy tag from the show view" do
@@ -289,6 +290,6 @@ class TagsSystemTest < ApplicationSystemTestCase
     end
     assert_current_path tags_path
     refute_selector "a[href='#{tag_path(@tag)}']"
-    assert_text I18n.t("flash.actions.destroy.notice", resource_name: I18n.t("activerecord.models.tag"))
+    assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.tag"))
   end
 end

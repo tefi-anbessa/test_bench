@@ -13,30 +13,48 @@ module DocumentControl
     end
 
     def index?
-      true
+      # Protect against url injection
+      return false if user.nil?
+      true 
     end
 
     def show?
-      true
+      # Protect against url injection
+      return false if user.nil?
+      true 
     end
 
     def new?
-      create?
+      # Protect against url injection
+      return false if user.nil?
+      user.is_admin? || user.is_app_owner? || user.roles.exists?(name: :project_admin) || 
+        user.roles.exists?(name: :document_controller)
     end
 
     def create?
-      user.is_admin? || user.is_app_owner? || user.has_role?(:document_controller)
+      # Protect against url injection
+      return false if user.nil?
+      user.is_admin? || user.is_app_owner? || user.roles.exists?(name: :project_admin) || 
+        user.roles.exists?(name: :document_controller)
     end
 
     def edit?
-      update?
+      # Protect against url injection
+      return false if user.nil?
+      user.is_admin? || user.is_app_owner? || user.roles.exists?(name: :project_admin) || 
+        user.roles.exists?(name: :document_controller)
     end
 
     def update?
-      user.is_admin? || user.is_app_owner? || user.has_role?(:document_controller)
+      # Protect against url injection
+      return false if user.nil?
+      user.is_admin? || user.is_app_owner? || user.roles.exists?(name: :project_admin) || 
+        user.roles.exists?(name: :document_controller)
     end
 
     def destroy?
+      # Protect against url injection
+      return false if user.nil?
       user.is_admin? || user.is_app_owner?
     end
   end

@@ -318,9 +318,6 @@ module ProjectAssistant
           attributes_section = tab*(2 + class_path.count) + "#{singular_name}:\n"
           
           @fields.each do |field|
-            # Skip translations for references fields - they use their model's translations
-            next if field[:type] == 'references' || field[:type] == 'belongs_to'
-            
             # Use field[:name].humanize as dummy translation
             attributes_section += tab*(3 + class_path.count) + "#{field[:name]}: \"#{field[:name].humanize}\"\n"
             

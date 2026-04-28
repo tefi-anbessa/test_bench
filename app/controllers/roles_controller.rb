@@ -167,26 +167,26 @@ class RolesController < ApplicationController
         return false
       end
 
-    @role_name = @role_name.to_sym
-    unless Role.valid_role?(@role_name, @resource_type, @resource_id)
-      flash.now[:warning] = I18n.t("rolify.flash.name_invalid",
-        name: I18n.t("rolify.names.#{@role_name}", default: @role_name.to_s.humanize),
-        resource: @resource_type ? I18n.t("activerecord.models.#{@resource_type.downcase}", default: @resource_type) : I18n.t('roles.global')
-      )
-        # Return to form with warning - user error [TODO] Check whether this should be upgraded to security after
-        # the name select is upgraded with only valid names available.
-        redirect_back(fallback_location: @role_return_path, status: :unprocessable_content)
-      return false
-    end
+      @role_name = @role_name.to_sym
+      unless Role.valid_role?(@role_name, @resource_type, @resource_id)
+        flash.now[:warning] = I18n.t("rolify.flash.name_invalid",
+          name: I18n.t("rolify.names.#{@role_name}", default: @role_name.to_s.humanize),
+          resource: @resource_type ? I18n.t("activerecord.models.#{@resource_type.downcase}", default: @resource_type) : I18n.t('rolify.role_types.global')
+        )
+          # Return to form with warning - user error [TODO] Check whether this should be upgraded to security after
+          # the name select is upgraded with only valid names available.
+          redirect_back(fallback_location: @role_return_path, status: :unprocessable_content)
+        return false
+      end
 
-    # Trap if trying to manage admin/app_owner roles, and redirect to forbidden.
-    if %i[admin app_owner].include?(@role_name) && !current_user.is_app_owner?
-      Rails.logger.error("Security event: Attempt to grant admin role by non app owner: #{current_user.name}")
-      return trap_forbidden
+      # Trap if trying to manage admin/app_owner roles, and redirect to forbidden.
+      if %i[admin app_owner].include?(@role_name) && !current_user.is_app_owner?
+        Rails.logger.error("Security event: Attempt to grant admin role by non app owner: #{current_user.name}")
+        return trap_forbidden
+      end
+      @role.name = @role_name
+      true
     end
-    @role.name = @role_name
-    true
-  end
 
     # Set up variables from params for role destroy
     def get_role_variables_for_destroy

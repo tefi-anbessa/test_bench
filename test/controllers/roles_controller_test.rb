@@ -1,25 +1,35 @@
-require "test_helper"
+# frozen_string_literal: true
+
+require 'test_helper'
+require 'helpers/test_setup_helpers'
 
 class RolesControllerTest < ActionController::TestCase
   include Devise::Test::ControllerHelpers
+  include TestSetupHelpers
 
   setup do
     # Project context
-    @project = create(:project)
+    setup_projects_and_users
     set_current_project(@project)
-    
-    # Users
-    @role = create(:role)
-    @regular_user = create(:user)
-    @electrical_designer = create(:user)
-    @project_manager = create(:user)
-    @admin = create(:user, :admin)
-    @app_owner = create(:user, :app_owner)
-    
-    # Roles
-    @electrical_designer.grant(:team_member, @project)
-    @electrical_designer.grant(:electrical_designer)
-    @project_manager.grant(:project_manager, @project)
+    setup_disciplines(name: "Electrical", required_role: :designer)
+    setup_accredited_users
+  end
+
+  test "setup_is_valid" do
+    assert @project.valid?
+    assert @project.persisted?
+    assert @discipline.valid?
+    assert @discipline.persisted?
+    assert @admin.valid?
+    assert @admin.persisted?
+    assert @project_manager.valid?
+    assert @project_manager.persisted?
+    assert @team_member.valid?
+    assert @team_member.persisted?
+    assert @regular_user.valid?
+    assert @regular_user.persisted?
+    assert @accredited_user.valid?
+    assert @accredited_user.persisted?
   end
 
   # Authentication tests
@@ -51,7 +61,7 @@ class RolesControllerTest < ActionController::TestCase
     assert_logs(error_message, :error) do
       assert_no_difference '@regular_user.roles.count' do
         post :create, params: { role: { user_id: @regular_user.id,
-                                      name: :electrical_designer,
+                                      name: :designer,
                                       resource_type: 'NonExistentResource',
                                       resource_id: 1,
                                       role_return_path: nil } }
@@ -144,7 +154,7 @@ class RolesControllerTest < ActionController::TestCase
       post :create, params: { 
         role: { 
           user_id: @regular_user.id,  # Valid user
-          name: "electrical_designer",
+          name: :designer,
           resource_type: @project.class.to_s,
           resource_id: @project.id,
           role_return_path: edit_project_path(@project)
@@ -152,7 +162,7 @@ class RolesControllerTest < ActionController::TestCase
       }
     end
     assert_equal I18n.t("rolify.flash.name_invalid", 
-      name: I18n.t("rolify.names.electrical_designer"), 
+      name: I18n.t("rolify.names.designer"), 
       resource: I18n.t("activerecord.models.#{@project.class.model_name.i18n_key}")), flash[:warning]
     assert_response :unprocessable_content
     sign_out @admin
@@ -199,11 +209,11 @@ class RolesControllerTest < ActionController::TestCase
   test "admin can create global role" do
     sign_in @admin
     post :create, params: { role: { user_id: @regular_user.id,
-                                    name: "electrical_designer",
+                                    name: :document_controller,
                                     resource_type: "",
                                     resource_id: "",
                                     role_return_path: roles_path} }
-    assert @regular_user.has_role?(:electrical_designer)
+    assert @regular_user.has_role?(:document_controller)
     assert_equal flash_message('global', :grant), flash[:success]
     assert_redirected_to roles_url
     sign_out @admin
@@ -236,7 +246,7 @@ class RolesControllerTest < ActionController::TestCase
     sign_out @admin
   end
 
-  test "project manager can create resource instance role" do
+  test "project manager can create project instance role" do
     sign_in @project_manager
     post :create, params: { role: { user_id: @regular_user.id,
                                     name: :team_member,
@@ -249,12 +259,25 @@ class RolesControllerTest < ActionController::TestCase
     sign_out @project_manager
   end
 
+  test "project manager can create discipline instance role" do
+    sign_in @project_manager
+    post :create, params: { role: { user_id: @regular_user.id,
+                                    name: :designer,
+                                    resource_type: @discipline.class.to_s,
+                                    resource_id: @discipline.id,
+                                    role_return_path: edit_project_path(@project)} }
+    assert @regular_user.has_role?(:designer, @discipline)
+    assert_equal flash_message('resource_instance', :grant), flash[:success]
+    assert_redirected_to edit_project_path(@project.id)
+    sign_out @project_manager
+  end
+
   # Destroy tests
   # Test failing paths first
   test "admin cannot revoke role that doesn't exist" do
     sign_in @admin
-    assert_no_difference '@electrical_designer.roles.count' do
-      delete :destroy, params: { user_id: @electrical_designer.id, 
+    assert_no_difference '@accredited_user.roles.count' do
+      delete :destroy, params: { user_id: @accredited_user.id, 
                   id: 9999,
                   role_return_path: roles_path }
     end
@@ -291,38 +314,43 @@ class RolesControllerTest < ActionController::TestCase
       action: ('destroy?')
     ), flash[:danger]
     assert_response :forbidden
+    sign_out @admin
   end
 
-  test "regular user cannot revoke global role" do
-    sign_in @regular_user
-    delete :destroy, params: { user_id: @electrical_designer.id, 
-                id: @electrical_designer.roles.where(name: 'electrical_designer', resource: nil).first.id,
+  test "accredited user cannot revoke global role" do
+    @accredited_user.grant(:document_controller)
+    sign_in @accredited_user
+    delete :destroy, params: { user_id: @accredited_user.id, 
+                id: @accredited_user.roles.where(name: :document_controller, resource: nil).first.id,
                 role_return_path: roles_path }
-    assert @electrical_designer.has_role?(:electrical_designer)
+    assert @accredited_user.has_role?(:document_controller)
     assert_forbidden
+    sign_out @accredited_user
   end
 
-  test "regular user cannot revoke resource-wide role" do
-    sign_in @electrical_designer
+  test "accredited user cannot revoke resource-wide role" do
+    sign_in @accredited_user
     # Create the role we want to destroy: resource wide roles are not used in the app at this time
-    @electrical_designer.grant(:team_member, Project)
-    role = @electrical_designer.roles.find_by(name: 'team_member', resource_type: 'Project', resource_id: nil)
+    @accredited_user.grant(:team_member, Project)
+    role = @accredited_user.roles.find_by(name: 'team_member', resource_type: 'Project', resource_id: nil)
     delete :destroy, params: { 
-      user_id: @electrical_designer.id, 
+      user_id: @accredited_user.id, 
       id: role.id,
       role_return_path: roles_path 
     }
-    assert @electrical_designer.has_role?(:team_member, Project)
+    assert @accredited_user.has_role?(:team_member, Project)
     assert_forbidden
+    sign_out @accredited_user
   end
 
-  test "regular user cannot revoke resource instance role" do
-    sign_in @electrical_designer
-    delete :destroy, params: { user_id: @electrical_designer.id, 
-                                id: @electrical_designer.roles.where(name: 'team_member', resource: @project).first.id,
+  test "accredited user cannot revoke project instance role" do
+    sign_in @accredited_user
+    delete :destroy, params: { user_id: @team_member.id, 
+                                id: @team_member.roles.where(name: 'team_member', resource: @project).first.id,
                                 role_return_path: edit_project_path(@project) }
-    assert @electrical_designer.has_role?(:team_member, @project)
+    assert @team_member.has_role?(:team_member, @project)
     assert_forbidden
+    sign_out @accredited_user
   end
 
   # Destroy tests
@@ -350,6 +378,7 @@ class RolesControllerTest < ActionController::TestCase
       delete :destroy, params: { id: admin_role.id, user_id: @regular_user.id, role_return_path: roles_path }
     end
     assert_redirected_to roles_url
+    sign_out @app_owner
   end
 
   # Worryingly, app_owner can revoke their own app_owner role
@@ -361,40 +390,56 @@ class RolesControllerTest < ActionController::TestCase
     refute @app_owner.has_role?(:app_owner)
     assert_equal flash_message('global', :revoke), flash[:success]
     assert_redirected_to roles_url
+    sign_out @app_owner
   end
 
   test "admin can revoke global role" do
+    @accredited_user.grant(:document_controller)
     sign_in @admin
-    delete :destroy, params: { user_id: @electrical_designer.id, 
-                id: @electrical_designer.roles.where(name: 'electrical_designer', resource: nil).first.id,
+    delete :destroy, params: { user_id: @accredited_user.id, 
+                id: @accredited_user.roles.where(name: :document_controller, resource: nil).first.id,
                 role_return_path: roles_path }
-    refute @electrical_designer.has_role?(:electrical_designer)
+    refute @accredited_user.has_role?(:document_controller)
     assert_equal flash_message('global', :revoke), flash[:success]
     assert_redirected_to roles_url
+    sign_out @admin
   end
 
   test "admin can revoke resource-wide role" do
     sign_in @admin
     # Create the role we want to destroy: resource wide roles are not used in the app at this time
-    @electrical_designer.grant(:team_member, Project)
-    role = @electrical_designer.roles.find_by(name: 'team_member', resource_type: 'Project', resource_id: nil)
-    delete :destroy, params: { user_id: @electrical_designer.id, 
+    @accredited_user.grant(:team_member, Project)
+    role = @accredited_user.roles.find_by(name: 'team_member', resource_type: 'Project', resource_id: nil)
+    delete :destroy, params: { user_id: @accredited_user.id, 
                   id: role.id,
                   role_return_path: roles_path }
-    refute @electrical_designer.has_role?(:team_member, Project)
+    refute @accredited_user.has_role?(:team_member, Project)
     assert_equal flash_message('resource_wide', :revoke), flash[:success]
     assert_redirected_to roles_url
+    sign_out @admin
   end
 
-  test "project manager can revoke resource instance role" do
+  test "project manager can revoke project instance role" do
     sign_in @project_manager
-    @electrical_designer.grant(:team_member, @project)
-    delete :destroy, params: { user_id: @electrical_designer.id, 
-                          id: @electrical_designer.roles.where(name: 'team_member', resource: @project).first.id,
+    @accredited_user.grant(:team_member, @project)
+    delete :destroy, params: { user_id: @accredited_user.id, 
+                          id: @accredited_user.roles.where(name: 'team_member', resource: @project).first.id,
                           role_return_path: edit_project_path(@project) }
-    refute @electrical_designer.has_role?(:team_member, @project)
+    refute @accredited_user.has_role?(:team_member, @project)
     assert_equal flash_message('resource_instance', :revoke), flash[:success]
     assert_redirected_to edit_project_path(@project.id)
+    sign_out @project_manager
+  end
+
+  test "project manager can revoke discipline instance role" do
+    sign_in @project_manager
+    delete :destroy, params: { user_id: @accredited_user.id, 
+                          id: @accredited_user.roles.where(name: 'designer', resource: @discipline).first.id,
+                          role_return_path: edit_project_path(@discipline) }
+    refute @accredited_user.has_role?(:team_member, @discipline)
+    assert_equal flash_message('resource_instance', :revoke), flash[:success]
+    assert_redirected_to edit_project_path(@discipline.id)
+    sign_out @project_manager
   end
 
   private
