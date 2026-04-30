@@ -489,7 +489,7 @@ if @ec6.tagable.nil?
   @ec6.tagable = Cable.create!(cable_type: @ct1)
 end
 
-unless Cable.count > 50 do
+unless Cable.count > 50 
   # Build 50 tagged cables
   tag_params = {
   prefix: "EC", 

@@ -93,7 +93,7 @@ Projects are the top level resource of this application. Projects are fully self
 
 #### Disciplines
 
-Disciplines are used to group engineering objects, and associate them to functional requirements. Each project must define the set of relevant disciplines it uses. A standard set of disciplines is provided, including instrument, electrical, mechanical, etc. These can be copied as they are, or modified to suit particular requirements. Projects can even define their own disciplines if required, and custom disciplines can be associated to existing functionality.
+Disciplines are used to group engineering objects, and associate them to functional requirements. Each project is provided with a standard set of disciplines including instrument, electrical, mechanical, etc.
 
 #### Tags
 
@@ -101,7 +101,7 @@ Engineering design elements require a tag to be assigned. Tags are used to label
 
 #### Tagables
 
-Tags can have a "tagable" model attached, which extends the information linked to the tag to include the specific information relevant to the type of element. For example, a motor and a cable have different information requirements, so the database needs to have a different table for each, but they share the structure of the tags table. Each of these models is known as a tagable model. All tagables are grouped into modules, and modules are closely coupled to the core disciplines provided.
+Tags can have a "tagable" model attached, which extends the information linked to the tag to include the specific information relevant to the type of element. For example, a motor and a cable have different information requirements, so the database needs to have a different table for each, but they share the structure of the tags table. Each of these models is known as a tagable model. All tagables are grouped into modules, and modules are coupled to the disciplines provided.
 
 #### Documents
 
@@ -175,10 +175,10 @@ In addition, a card partial should be provided for drop down view on other pages
 - Views should not include complex logical processing.
 - Conditionals should be controlled by pundit policy calls where applicable.
 - Conditionals may also use presence or otherwise of variables set in the controller.
-- Views should use model constants such as enums to generate select options directly. Use human_enum_name from [application_record](../app/models/application_record.rb) to provide the translations.
+- Views should use model constants such as enums to generate select options directly.  Use human_enum_name from [application_record](../app/models/application_record.rb) to provide the translations.
 - Views should include i18n translations for all user facing text, including:
   - Model names.
-    - Use @tag.model_name.human in most cases
+    - Use @tag.model_name.human in most cases [HOLD: Human is not working correctly with the present activerecord translation setup.]
       - Use Tag.model_name.human if a model instance is not available
       - Use of I18n::t('activerecord.models.tag') is also acceptable and may be faster.
   - Attribute labels.
@@ -190,7 +190,7 @@ In addition, a card partial should be provided for drop down view on other pages
     - In bootstrap_form fields, use help: I18n::t('activerecord.help.tag.prefix') option.
       - Use I18n::t('activerecord.help.tag.prefix') if required in other cases. - Select options
       - If select options are derived from data, they should be built as an instance variable (hash or array) in the controller, and passed to the view. Options derived from data won't generally have translations available.
-      - If select options are built from enums (which mostly will be built in turn from Constants), and don't require translation, just use the Constants array or hash directly in the view.
+      - If select options are built from enums (which mostly will be built in turn from Constants), and don't require translation, use the model enum methods directly in the view.
       - If select options are built from enums, and require translation, use something like:
       ```demand.class.configs.keys.collect { |config| [demand.class.human_enum_name(:config, config), config] },```
       directly in the view.
@@ -375,10 +375,10 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Review all use of the method underscore. It apparently is not aware of the OS and uses '/' as the separator. Use File.join wherever appropriate.
 - [ ] Fix module generator to use nested parent modules.
 - [ ] Provide a means for admins to edit tags to remove broken links to tagable.
-- [ ] Add tagable controller checks to ensure discipline belongs to current project.
+- [x] Add tagable controller checks to ensure discipline belongs to current project.
 - [x] Cable factory begets discipline, project, then cable_type, but cable_type begets its own project. Should inherit from cable factory.
 - [ ] Add model tests for read only attributes - documents, tags.
-- [ ] Review security of all controllers wrt injection attacks.
+- [x] Review security of all controllers wrt injection attacks.
 - [ ] Check that usage of accepts_nested_attributes_for is correct for tagable concern.
 - [ ] Fix previous and next functionality in tagable navigation, and generatise it for non tagables.
 
@@ -466,7 +466,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Keep backward compatibility during the Load → Demand transition
 - [ ] Consider adding performance benchmarks for critical paths
 
-## Gloassary
+## Glossary
 
 Resource: In rails, resource often refers to an abstracted model. In this application, resource more often refers to an abstracted tagable model. Context should clarify which meaning is intended.
 Record: Resource instance. Used internally in Pundit.

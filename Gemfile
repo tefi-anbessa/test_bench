@@ -3,6 +3,9 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby "3.3.5"
 
+# Use postgresql in all environments
+gem "pg"
+
 # Rails defaults:
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 8.0.0"
@@ -96,7 +99,6 @@ gem 'paper_trail'
 group :development, :test do
 # Rails defaults:
   # Use sqlite3 as the database for Active Record
-  gem "pg"
 
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
@@ -115,6 +117,12 @@ group :development do
 
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem "spring"
+   
+  # Added by fly.io deployment
+  gem "dockerfile-rails", ">= 1.7"
+
+  # Preview emails in browser
+  gem "letter_opener"
 end
 
 group :test do
@@ -137,7 +145,3 @@ group :test do
   gem "guard-minitest", "~> 2.4"
 end
 
-# Added gems
-group :production do
-  gem "pg"
-end
