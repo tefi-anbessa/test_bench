@@ -69,8 +69,8 @@ electrical:
     "Cu": 0  # Copper
     "Al": 1  # Aluminium 
   insulation_materials:
-    "PVC": 0
-    "XLPE": 1
+    "PVC": 0   # Polyvinyl Chloride
+    "XLPE": 1  # Cross-linked Polyethylene
     "LSZH": 2  # Low Smoke Zero Halogen
     "EPR": 3   # Ethylene Propylene Rubber
     "PUR": 4   # Polyurethane

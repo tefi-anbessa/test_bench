@@ -15,17 +15,15 @@ FactoryBot.define do
     speed_rated { 1500 }
 
     # Create tag association in a single transaction
-    before(:create) do |motor, evaluator|
-      if evaluator.tag
-        # Use provided tag, but ensure it's not already associated
-        if evaluator.tag.tagable.present?
-          raise "Tag is already associated with another record: #{evaluator.tag.tagable_type}##{evaluator.tag.tagable_id}"
-        end
-        motor.tag = evaluator.tag
-      else
-        # Create new tag with proper discipline in same transaction
-        if evaluator.discipline
-          # Create tag on the provided discipline
+    after(:build) do |motor, evaluator|
+      unless motor.tag
+        if evaluator.tag
+          # Use provided tag, but ensure it's not already associated
+          if evaluator.tag.tagable.present?
+            raise "Tag is already associated with another record: #{evaluator.tag.tagable_type}##{evaluator.tag.tagable_id}"
+          end
+          motor.tag = evaluator.tag
+        elsif evaluator.discipline
           motor.tag = create(:tag, :unique_tag, discipline: evaluator.discipline)
         else
           # Create project with auto-created disciplines

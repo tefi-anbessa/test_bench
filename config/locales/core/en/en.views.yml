@@ -12,12 +12,12 @@ en:
     index:
       title:        "Users"
       header:       "Users Index"
-      message:      "Log in"
+      message:      "Sign in"
       gravatar:     "Gravatar"
     show:
       title:        "User"
       header:       "Show User"
-      message:      "Log in"
+      message:      "Sign in"
       gravatar:     "Gravatar"
   errors:
     forbidden:

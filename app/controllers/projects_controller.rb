@@ -89,7 +89,7 @@ class ProjectsController < ApplicationController
   # Set action sets the current project for the session.
   # GET /projects/select
   def select
-    @options = policy_scope(Project)
+    @options = policy_scope(Project).order(:code)
     # Add a 'No Project' option at the beginning
     @options = [OpenStruct.new(id: 'none', label: 'No Project')] + @options
   end

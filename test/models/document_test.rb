@@ -7,9 +7,9 @@ class DocumentTest < ActiveSupport::TestCase
 
   def setup
     @project = create(:project)
-    @resource_discipline = @project.disciplines.find_by(name: 'Electrical')
-    @dt = create(:document_control_doc_type, discipline: @resource_discipline, code: "DOC", label: "Test Document Type")
-    @resource = create(:document, discipline: @resource_discipline, doc_type: @dt)
+    @discipline = @project.disciplines.find_by(name: 'Electrical')
+    @dt = create(:document_control_doc_type, discipline: @discipline, code: "DOC", label: "Test Document Type")
+    @resource = create(:document, discipline: @discipline, doc_type: @dt)
   end
 
   test "title must be present" do
@@ -27,14 +27,14 @@ class DocumentTest < ActiveSupport::TestCase
   test "document number is correctly generated" do
     # Find the expected serial number of the new document.
     # This test could fail due to race condition with parallel tests...
-    serial = Document.where(discipline: @resource_discipline, doc_type: @dt).maximum(:serial) || 0 
+    serial = Document.where(discipline: @discipline, doc_type: @dt).maximum(:serial) || 0 
     serial += 1
     # Create a document and verify the doc_number format
-    doc = create(:document, discipline: @resource_discipline, doc_type: @dt)
+    doc = create(:document, discipline: @discipline, doc_type: @dt)
     
     # Use the same logic as the model to generate expected format
     separator = Constants.document_control.separator
-    expected_format = "#{@resource_discipline.project.label}#{separator}#{@resource_discipline.label}#{separator}#{@dt.code}#{separator}#{serial.to_s.rjust(5, '0')}"
+    expected_format = "#{@discipline.project.label}#{separator}#{@discipline.label}#{separator}#{@dt.code}#{separator}#{serial.to_s.rjust(5, '0')}"
     
     assert_equal expected_format, doc.doc_number
     assert_equal serial, doc.serial
@@ -76,13 +76,13 @@ class DocumentTest < ActiveSupport::TestCase
 
   test "readonly attributes cannot be changed" do
     # Test discipline_id cannot be changed
-    new_discipline = create(:discipline, project: @resource_discipline.project)
+    new_discipline = create(:discipline, project: @discipline.project)
     assert_raises(ActiveRecord::ReadonlyAttributeError) do
       @resource.update(discipline: new_discipline)
     end
     
     # Test doc_type_id cannot be changed
-    new_doc_type = create(:document_control_doc_type, discipline: @resource_discipline)
+    new_doc_type = create(:document_control_doc_type, discipline: @discipline)
     assert_raises(ActiveRecord::ReadonlyAttributeError) do
       @resource.update(doc_type: new_doc_type)
     end

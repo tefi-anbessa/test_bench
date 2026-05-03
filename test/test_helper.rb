@@ -100,7 +100,7 @@ class ActiveSupport::TestCase
     @controller.instance_variable_set(:@current_project, project) if defined?(@controller)
     # Also set in session and cookies for integration tests
     if project.present?
-      session[:project_id] = project.id if session
+      session[:project_id] = project.id if respond_to?(:session)
       if respond_to?(:cookies)
         cookie_name = "project_id_user_#{current_user&.id}"
         cookies.signed[cookie_name] = {
@@ -112,7 +112,7 @@ class ActiveSupport::TestCase
         }
       end
     else
-      session.delete(:project_id) if session
+      session.delete(:project_id) if respond_to?(:session)
       cookies.delete("project_id_user_#{current_user&.id}") if respond_to?(:cookies)
     end
   end
@@ -172,12 +172,12 @@ class ActiveSupport::TestCase
   end
   
   # Creates and signs in a user with the specified role on a resource
-#  def sign_in_as(role, resource = nil)
-#    user = create(:user)
-#    assign_role(user, role, resource) if role
-#    sign_in_user(user)
-#    user
-#  end
+  #  def sign_in_as(role, resource = nil)
+  #    user = create(:user)
+  #    assign_role(user, role, resource) if role
+  #    sign_in_user(user)
+  #    user
+  #  end
  
   # Enable paper_trail for specific tests
   def with_versioning

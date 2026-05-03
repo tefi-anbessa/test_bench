@@ -1,5 +1,8 @@
 class Project < ApplicationRecord
+  # Rolify can set roles scoped to project
   resourcify
+
+  # Callbacks
   before_save { self.code = code.upcase }
   after_create :create_disciplines
 
@@ -7,7 +10,6 @@ class Project < ApplicationRecord
   belongs_to :swatch, optional: true
   has_many :disciplines, dependent: :destroy
   has_many :tags, through: :disciplines
-  has_many :electrical_cable_types, class_name: 'Electrical::CableType', dependent: :destroy
   has_many :change_requests, class_name: 'ProjectChange::Request', dependent: :destroy
 
   VALID_CODE_REGEX = /[A-Z][A-Z]/

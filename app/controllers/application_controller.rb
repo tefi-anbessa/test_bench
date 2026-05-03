@@ -50,7 +50,7 @@ class ApplicationController < ActionController::Base
 
   # Override Pundit's default user context
   def pundit_user
-    @pundit_user ||= ApplicationPolicy::UserContext.new(current_user, current_project)
+    ApplicationPolicy::UserContext.new(current_user, current_project)
   end
 
   # Helper method to prepare role assignment data for any resource
@@ -76,11 +76,19 @@ class ApplicationController < ActionController::Base
       if project
         set_current_project(project)
         return project_path(project)
-      else
-      # If no project cookie is set, set @current_project to nil and go to projects index.
-        set_current_project(nil)
-        return projects_path
       end
+
+      # If no project cookie is set, check if user has exactly one project available
+      available_projects = ProjectPolicy::Scope.new(pundit_user, Project).resolve
+      if available_projects.count == 1
+        project = available_projects.first
+        set_current_project(project)
+        return project_path(project)
+      end
+
+      # Multiple or no projects available, go to projects index to select
+      set_current_project(nil)
+      projects_path
     end
 
     def default_url_options

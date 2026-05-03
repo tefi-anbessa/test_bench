@@ -94,7 +94,12 @@ en:
           id: ID
           code: "Code"
           conductor_material:	Conductor Material
-          cores:	Conductor Cores
+          groups:	Conductor Groups
+          construction: Construction
+          constructions: 
+            core: "Core"
+            pair: "Pair"
+            triple: "Triple"
           csa:	CSA
           csa_units:  mm²
           neutral:	Neutral

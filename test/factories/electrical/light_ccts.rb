@@ -12,17 +12,15 @@ FactoryBot.define do
     quantity { 1 }
 
     # Create tag association in a single transaction
-    before(:create) do |light_cct, evaluator|
-      if evaluator.tag
-        # Use provided tag, but ensure it's not already associated
-        if evaluator.tag.tagable.present?
-          raise "Tag is already associated with another record: #{evaluator.tag.tagable_type}##{evaluator.tag.tagable_id}"
-        end
+    after(:build) do |light_cct, evaluator|
+      unless light_cct.tag
+        if evaluator.tag
+          # Use provided tag, but ensure it's not already associated
+          if evaluator.tag.tagable.present?
+            raise "Tag is already associated with another record: #{evaluator.tag.tagable_type}##{evaluator.tag.tagable_id}"
+          end
         light_cct.tag = evaluator.tag
-      else
-        # Create new tag with proper discipline in same transaction
-        if evaluator.discipline
-          # Create tag on the provided discipline
+        elsif evaluator.discipline
           light_cct.tag = create(:tag, :unique_tag, discipline: evaluator.discipline)
         else
           # Create project with auto-created disciplines

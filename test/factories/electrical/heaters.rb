@@ -19,17 +19,15 @@ FactoryBot.define do
     insulation_material { "ceramic" }
 
     # Create tag association in a single transaction
-    before(:create) do |heater, evaluator|
-      if evaluator.tag
-        # Use provided tag, but ensure it's not already associated
-        if evaluator.tag.tagable.present?
-          raise "Tag is already associated with another record: #{evaluator.tag.tagable_type}##{evaluator.tag.tagable_id}"
-        end
-        heater.tag = evaluator.tag
-      else
-        # Create new tag with proper discipline in the same transaction
-        if evaluator.discipline
-          # Create tag on the provided discipline
+    after(:build) do |heater, evaluator|
+      unless heater.tag
+        if evaluator.tag
+          # Use provided tag, but ensure it's not already associated
+          if evaluator.tag.tagable.present?
+            raise "Tag is already associated with another record: #{evaluator.tag.tagable_type}##{evaluator.tag.tagable_id}"
+          end
+          heater.tag = evaluator.tag
+        elsif evaluator.disciplineß
           heater.tag = create(:tag, :unique_tag, discipline: evaluator.discipline)
         else
           # Create project with auto-created disciplines

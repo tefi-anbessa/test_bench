@@ -21,13 +21,10 @@ Rails.application.routes.draw do
         get "select"
         post "set"
       end
+
+      # Project nested resources
       resources :disciplines, shallow: true do
         get :schema, on: :member, constraints: { format: 'json' }
-      end
-
-      # Include routes for catalog type items which link directly to project.
-      namespace :electrical do
-        resources :cable_types, shallow: true
       end
     end
 
@@ -39,6 +36,10 @@ Rails.application.routes.draw do
     resources :disciplines, only: [], shallow: true do
       namespace :document_control do
         resources :doc_types
+      end
+
+      namespace :electrical do
+        resources :cable_types, shallow: true
       end
     end
     

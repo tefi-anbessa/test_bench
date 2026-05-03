@@ -1,48 +1,38 @@
-<h2><%= t('.title', resource: devise_i18n_fix_model_name_case(resource.model_name.human, i18n_key: 'registrations.edit.title')) %></h2>
+<div class="container mt-5">
+  <div class="row justify-content-end">
+    <div class="col-md-6 col-lg-5 col-xl-4">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="mb-0"><%= t('.title', resource: devise_i18n_fix_model_name_case(resource.model_name.human, i18n_key: 'registrations.edit.title')) %></h4>
+        </div>
+        <div class="card-body">
+          <%= bootstrap_form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+            <%= render "devise/shared/error_messages", resource: resource %>
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
+            <%= f.text_field :name, autofocus: true, autocomplete: "name", wrapper: { class: 'mb-3' } %>
+            <%= f.email_field :email, autocomplete: "email", wrapper: { class: 'mb-3' } %>
 
-  <div class="field">
-    <%= f.label :name %><br />
-    <%= f.text_field :name, autofocus: true, autocomplete: "name" %>
+            <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+              <div class="alert alert-info mb-3">
+                <%= t('.currently_waiting_confirmation_for_email', email: resource.unconfirmed_email) %>
+              </div>
+            <% end %>
+
+            <%= f.password_field :password, autocomplete: "new-password",
+                  help: t('.leave_blank_if_you_don_t_want_to_change_it'),
+                  wrapper: { class: 'mb-3' } %>
+            <%= f.password_field :password_confirmation, autocomplete: "new-password", wrapper: { class: 'mb-3' } %>
+            <%= f.password_field :current_password, autocomplete: "current-password",
+                  help: t('.we_need_your_current_password_to_confirm_your_changes'),
+                  wrapper: { class: 'mb-3' } %>
+
+            <%= f.submit t('.update'), class: 'btn btn-primary w-100' %>
+          <% end %>
+
+          <hr class="my-3">
+          <%= link_to t('devise.shared.links.back'), :back, class: 'btn btn-outline-secondary w-100' %>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <div class="field">
-    <%= f.label :email %><br />
-    <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
-  </div>
-
-  <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-    <div><%= t('.currently_waiting_confirmation_for_email', email: resource.unconfirmed_email) %></div>
-  <% end %>
-
-  <div class="field">
-    <%= f.label :password %> <i>(<%= t('.leave_blank_if_you_don_t_want_to_change_it') %>)</i><br />
-    <%= f.password_field :password, autocomplete: "new-password" %>
-    <% if @minimum_password_length %>
-      <br />
-      <em><%= t('devise.shared.minimum_password_length', count: @minimum_password_length) %></em>
-    <% end %>
-  </div>
-
-  <div class="field">
-    <%= f.label :password_confirmation %><br />
-    <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
-  </div>
-
-  <div class="field">
-    <%= f.label :current_password %> <i>(<%= t('.we_need_your_current_password_to_confirm_your_changes') %>)</i><br />
-    <%= f.password_field :current_password, autocomplete: "current-password" %>
-  </div>
-
-  <div class="actions">
-    <%= f.submit t('.update') %>
-  </div>
-<% end %>
-
-<h3><%= t('.cancel_my_account') %></h3>
-
-<div><%= t('.unhappy') %> <%= button_to t('.cancel_my_account'), registration_path(resource_name), data: { confirm: t('.are_you_sure'), turbo_confirm: t('.are_you_sure') }, method: :delete %></div>
-
-<%= link_to t('devise.shared.links.back'), :back %>
+</div>

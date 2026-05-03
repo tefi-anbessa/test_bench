@@ -14,7 +14,7 @@
 
         <!-- New Button (Right) -->
         <% if policy(Electrical::Cable).new? %>
-            <%= link_to new_electrical_cable_path, 
+            <%= link_to new_electrical.cable_path, 
               class: "btn btn-outline-primary actions",
               aria: { label: t('actions.new') },
               title: t('actions.new') do %>
@@ -45,7 +45,7 @@
           <thead>
             <tr class="table-danger">
               <td colspan="<%= 9 + (current_project ? 1 : 0) %>">
-                <%= t('index.link_broken', models: t("activerecord.models.electrical_cable").tableize) %>
+                <%= t('index.link_broken', models: t("activerecord.models.electrical.cable").tableize) %>
               </th>
             </tr>
             <%= render 'tags/header' %>
@@ -62,7 +62,7 @@
           <thead>
             <tr class="table-warning">
               <td colspan="<%= 9 + (current_project ? 1 : 0) %>">
-                <%= t('index.link_incomplete', models: t("activerecord.models.electrical_cable").tableize) %>
+                <%= t('index.link_incomplete', models: t("activerecord.models.electrical.cable").tableize) %>
               </td>
             </tr>
             <%= render 'tags/header' %>
@@ -82,7 +82,7 @@
           <% unless @orphans.empty? %>
             <tr class="table-danger">
               <td colspan="10">
-                <%= t('index.orphans', models: t("activerecord.models.electrical_cable").tableize) %>
+                <%= t('index.orphans', models: t("activerecord.models.electrical.cable").tableize) %>
               </td>
             </tr>
             <% @orphans.each do |row| %>
