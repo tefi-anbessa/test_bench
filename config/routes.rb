@@ -37,6 +37,7 @@ Rails.application.routes.draw do
 
     # Top-level disciplines routes (shallow from projects nesting)
     resources :disciplines, only: [], shallow: true do
+      resources :tags, :documents
       namespace :document_control do
         resources :doc_types
       end
@@ -66,7 +67,7 @@ Rails.application.routes.draw do
     end
 
     # Then define the shallow nested routes which require the tag
-    resources :tags, shallow: true do
+    resources :tags, shallow: true, only: [] do
       namespace :electrical do
         # INSERTION POINT 2 FOR SUBMODULES
         # INSERTION POINT 2 FOR TAGABLE GENERATOR
@@ -88,7 +89,7 @@ Rails.application.routes.draw do
     resources :roles, only: [:index, :new, :create]
 
     resources :swatches
-    resources :documents, shallow: true do
+    resources :documents, only: [], shallow: true do
       namespace :document_control do
         resources :issues
       end

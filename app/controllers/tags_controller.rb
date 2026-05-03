@@ -1,10 +1,9 @@
 class TagsController < ApplicationController
   before_action :authenticate_user!
   before_action :require_project!, only: %i[ new create edit update]
+  before_action :set_discipline, only: %i[ index new create ]
   before_action :set_tag, only: %i[ show edit update destroy ]
   before_action :set_swatch, only: %i[ index show new edit ]
-  before_action :validate_discipline_id, only: %i[ create update ]
-#  after_action :verify_authorized
 
   # GET /tags or /tags.json
   def index
@@ -20,9 +19,7 @@ class TagsController < ApplicationController
 
   # GET /tags/new
   def new
-    authorize @tag = Tag.new
-    setup_disciplines
-    @projects = policy_scope(Project)
+    authorize @tag = @discipline.tag.build()
   end
 
   # POST /tags or /tags.json
@@ -33,7 +30,6 @@ class TagsController < ApplicationController
       redirect_to @tag
     else
       flash[:alert] = I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.tag'))
-      setup_disciplines
       set_swatch
       render :new, status: :unprocessable_content
     end
@@ -42,7 +38,6 @@ class TagsController < ApplicationController
   # GET /tags/1/edit
   def edit
     authorize @tag
-    setup_disciplines
   end
 
   # PATCH/PUT /tags/1 or /tags/1.json
@@ -54,7 +49,6 @@ class TagsController < ApplicationController
     else
       flash[:alert] = I18n.t('flash.update.alert', 
       resource_name: I18n.t('activerecord.models.tag'))
-      setup_disciplines
       set_swatch
       render :edit, status: :unprocessable_content
     end
@@ -66,7 +60,7 @@ class TagsController < ApplicationController
     if @tag.destroy
       flash[:success] = I18n.t('flash.destroy.notice', 
         resource_name: I18n.t('activerecord.models.tag'))
-      redirect_to tags_path, status: :see_other
+      redirect_back fallback_location: discipline_tags_path(@discipline)
     else
       flash.now[:danger] = I18n.t('flash.destroy.alert', 
         resource_name: I18n.t('activerecord.models.tag'))
@@ -76,43 +70,8 @@ class TagsController < ApplicationController
 
   private
 
-    # [TODO] fix this to allow admin workflow for any project.
-    def set_project
-      if current_project
-        @project = current_project
-      else
-        @project = nil
-      end
-      @projects = policy_scope(Project)
-    end
-
-    # Setup disciplines for the form selector - only disciplines where user has required_role
-    def setup_disciplines
-      disciplines = policy_scope(Discipline)
-        .select('disciplines.id, disciplines.label, disciplines.name, disciplines.required_role')
-        .to_a
-      
-      # Global admins see all disciplines
-      unless current_user.is_admin? || current_user.is_app_owner?
-        disciplines = disciplines.select { |d| current_user.has_role?(d.required_role, current_project) }
-      end
-      
-      @disciplines = disciplines.map { |d| [d.label, d.name, d.id] }
-    end
-
-    # Validate that the discipline_id is authorized for the current user
-    def validate_discipline_id
-      discipline_id = params[:tag][:discipline_id]
-      return if discipline_id.blank?
-
-      discipline = Discipline.find_by(id: discipline_id)
-      return if discipline.nil?
-
-      unless current_user.has_role?(discipline.required_role, current_project) ||
-             current_user.is_admin? ||
-             current_user.is_app_owner?
-        raise Pundit::NotAuthorizedError, t('pundit.discipline', discipline: discipline.name)
-      end
+    def set_discipline
+      @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
     end
 
     def isa51_schema?
@@ -128,19 +87,13 @@ class TagsController < ApplicationController
     end
 
     def set_tag
-      begin
-        @tag = policy_scope(Tag).find(params[:id])
-      rescue ActiveRecord::RecordNotFound
-        raise Pundit::NotAuthorizedError
-      end
+      @tag = policy_scope(Tag).find_by(id: params[:id])
+      raise ApplicationController::ConflictError :out_of_scope if @tag.nil?
+      @discipline = @tag.discipline
     end
 
     def set_swatch
-      if @tag && @tag.persisted?
-        @swatch = @tag.discipline.swatch
-      else
-        @swatch = Swatch.find_by(name: 'app_theme')
-      end
+      @swatch = @discipline.swatch || Swatch.find_by(name: 'app_theme')
     end
 
     def tag_params

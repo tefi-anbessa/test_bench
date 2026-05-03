@@ -249,13 +249,13 @@ class TagTest < ActiveSupport::TestCase
     tag.tagable_id = 999
     tag.save
     refute tag.valid?
-    assert_includes tag.errors[:base], I18n::t("activerecord.errors.models.tag.change_tagable")
+    assert_includes tag.errors[:base], I18n::t("activerecord.errors.attributes.tag.tagable_type.change_tagable")
 
     #test again using update
     tag.reload
     tag.update(tagable: build(:electrical_cable))
     refute tag.valid?
-    assert_includes tag.errors[:base], I18n::t("activerecord.errors.models.tag.change_tagable")
+    assert_includes tag.errors[:base], I18n::t("activerecord.errors.attributes.tag.tagable_type.change_tagable")
   end
   
   test "should prevent assigning tagable that's already associated with a tag" do
