@@ -29,7 +29,7 @@ module DocumentControl
 
       # Required for nested routes
       def index_nesting_params
-        { discipline_id: @discipline.id }
+        new_nesting_params
       end
 
       # Set the expected params for a valid create

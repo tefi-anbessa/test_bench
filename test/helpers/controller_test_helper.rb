@@ -8,7 +8,11 @@ module ControllerTestHelper
   extend ActiveSupport::Concern
   include TestSetupHelpers
 
-  # Setup common to all resource controllers
+  # Setup common to all resource controllers, where the module defines the discipline.
+  # Core models use their own setup.
+  # Including test classes must set up @resource and @other_resource.
+  # Use setup_discipline_resources or setup_project_resources,
+  # or manage special cases.
   def setup_controller_test
     setup_projects_and_users # In test/helpers/test_login_helpers.rb
     setup_disciplines # Will default to resource discipline

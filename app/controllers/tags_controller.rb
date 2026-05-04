@@ -72,6 +72,13 @@ class TagsController < ApplicationController
 
     def set_discipline
       @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
+      raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
+    end
+
+    def set_tag
+      @tag = policy_scope(Tag).find_by(id: params[:id])
+      raise ApplicationController::ConflictError, :out_of_scope if @tag.nil?
+      @discipline = @tag.discipline
     end
 
     def isa51_schema?
@@ -84,12 +91,6 @@ class TagsController < ApplicationController
       
       return false unless discipline_data
       discipline_data[:prefix_schema] == :isa51
-    end
-
-    def set_tag
-      @tag = policy_scope(Tag).find_by(id: params[:id])
-      raise ApplicationController::ConflictError :out_of_scope if @tag.nil?
-      @discipline = @tag.discipline
     end
 
     def set_swatch

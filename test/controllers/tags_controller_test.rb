@@ -1,35 +1,23 @@
 # frozen_string_literal: true
 require "test_helper"
-require "helpers/test_setup_helpers.rb"
-
+require "helpers/controller_test_helper"
 class TagsControllerTest < ActionController::TestCase
   include Devise::Test::ControllerHelpers
-  include TestSetupHelpers
+  include ControllerTestHelper
 
   setup do
-    setup_projects_and_users # in test/helpers/test_login_helpers.rb
-    setup_disciplines(name: "Electrical", required_role: :designer)
+    setup_projects_and_users # In test/helpers/test_login_helpers.rb
+    setup_disciplines(name: "Electrical", required_role: :designer) 
     setup_accredited_users(:designer)
-    setup_model_specific_data
+    setup_discipline_resources
+    @request.env["devise.mapping"] = Devise.mappings[:user]
   end
 
-  def setup_model_specific_data
-    # Add another standard discipline
-    @discipline_j = @project.disciplines.find_by(name: "Instrument")
-    # Set up instances of tag
-    @accredited_user_j = create(:user)
-    @accredited_user_j.grant(:designer, @discipline_j)
-    @tag = create(:tag, discipline: @discipline)
-    @tag_j = create(:tag, discipline: @discipline_j)
-  end
-
-  test "setup_is_valid" do
+  test "Local_setup_is_valid" do
     assert @project.valid?
     assert @project.persisted?
     assert @discipline.valid?
     assert @discipline.persisted?
-    assert @discipline_j.valid?
-    assert @discipline_j.persisted?
     assert @admin.valid?
     assert @admin.persisted?
     assert @project_manager.valid?
@@ -40,26 +28,15 @@ class TagsControllerTest < ActionController::TestCase
     assert @regular_user.persisted?
     assert @accredited_user.valid?
     assert @accredited_user.persisted?
-    assert @accredited_user_j.valid?
-    assert @accredited_user_j.persisted?
-    assert @tag.valid?
-    assert @tag.persisted?
-    assert @tag_j.valid?
-    assert @tag_j.persisted?
   end
 
-  test "unauthenticated users are redirected to sign in" do
-    get :index
-    assert_unauthenticated
-  end
-
-  test "regular user cannot access index" do
+  test "Local_regular user cannot access index" do
     sign_in_and_set_project @regular_user, @project
-    get :index
+    get :index, params: index_nesting_params
     assert_forbidden
   end
 
-  test "team member can access index" do
+  test "Local_team member can access index" do
     sign_in_and_set_project @team_member, @project
     get :index
     assert_response :success
@@ -67,13 +44,13 @@ class TagsControllerTest < ActionController::TestCase
   end
 
   # Show Tests
-  test "user cannot view tag details without project role" do
+  test "Local_user cannot view tag details without project role" do
     sign_in_and_set_project @regular_user, @project
     get :show, params: { id: @tag.id }
     assert_forbidden
   end
 
-  test "team member can view tag details" do
+  test "Local_team member can view tag details" do
     sign_in_and_set_project @team_member, @project
     get :show, params: { id: @tag.id }
     assert_response :success
@@ -82,13 +59,13 @@ class TagsControllerTest < ActionController::TestCase
   end
 
   # New Action Tests
-  test "team member cannot access new form without any discipline required role" do
+  test "Local_team member cannot access new form without any discipline required role" do
     sign_in_and_set_project @team_member, @project
     get :new
     assert_response :forbidden
   end
 
-  test "accredited team member can access new form" do
+  test "Local_accredited team member can access new form" do
     sign_in_and_set_project @accredited_user, @project
     get :new
     assert_response :success
@@ -98,24 +75,38 @@ class TagsControllerTest < ActionController::TestCase
 
   # Helper methods
 
-  def resource_class
-   self.class.name.sub('ControllerTest', '').singularize.constantize
-  end
+    # Required for nested routes
+    def new_nesting_params
+      { discipline_id: @discipline.id }
+    end
+
+    # Required for nested routes
+    def index_nesting_params
+      { discipline_id: @discipline.id }
+    end
 
     # Set the minimum required params for a valid resource
-    def valid_params
-      { tag: {
-        prefix: "T",
-        serial: 1111,
-        stage: 1,
-        discipline_id: @discipline.id,
-        service: 'Test service'
-      }}
+    def create_params
+      { discipline_id: @discipline.id,
+        tag: {
+          prefix: "T",
+          serial: 1111,
+          suffix: "",
+          stage: 1,
+          service: 'Test service',
+          location: "Test location",
+          notes: "Test notes"
+        }
+    }
+    end
+
+    def update_params
+      create_params
     end
 
     # Set invalid resource params for tests
-    def invalid_params
-      { prefix: "22" }
+    def invalid_param
+      { tag: { prefix: "22" } }
     end
 
     # Nominate an attribute to get changed during update tests
