@@ -2,7 +2,7 @@
 <nav class="navbar bg-body-tertiary">
   <div class="container d-flex justify-content-between align-items-center">
     <h4 class="ms-1">
-      <%= t('.header', project: @project.present? ? @project.label : t('projects.all_projects')) %>
+      <%= t('.header', project: current_project.present? ? current_project.label : t('projects.all_projects')) %>
     </h4>
     
     <% if policy(Tag).new? %>

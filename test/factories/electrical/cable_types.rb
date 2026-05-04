@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 FactoryBot.define do
   factory :electrical_cable_type, class: 'Electrical::CableType' do
-    project { association :project } 
+    discipline { association :discipline } 
     
     # Required fields
+    groups { 3 }
+    construction { 'core' }
     conductor_material { 'Cu' }
     csa { 2.5 }
-    cores { 3 }
     
     # Optional fields with sensible defaults
     neutral_csa { 2.5 }

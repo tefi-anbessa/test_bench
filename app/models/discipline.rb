@@ -1,20 +1,25 @@
 class Discipline < ApplicationRecord
+  # Rolify can set roles scoped to discipline
   resourcify
 
+  # Associations
   belongs_to :project
   belongs_to :swatch, optional: true
   has_many :tags, dependent: :destroy
   has_many :documents, dependent: :destroy
+  has_many :electrical_cable_types, class_name: 'Electrical::CableType', dependent: :destroy
   has_many :doc_types, class_name: 'DocumentControl::DocType', dependent: :destroy
 
+  # Scopes
+  default_scope { order(project_id: :asc, label: :asc) }
+
+  # Valications
   before_validation :normalize_prefix_schema
   validates :name, presence: true, length: { maximum: 50 }, uniqueness: { scope: :project_id }
   validates :label, presence: true, length: { maximum: 5 }, uniqueness: { scope: :project_id }
   validates :prefix_schema, presence: true
   validate :validate_required_role
   validate :validate_prefix_schema
-
-  default_scope { order(project_id: :asc, label: :asc) }
 
   def self.required_role
     :project_admin

@@ -1,37 +1,20 @@
+# frozen_string_literal: true
+require "helpers/test_setup_helpers"
 require "application_system_test_case"
 
 class TagsSystemTest < ApplicationSystemTestCase
   include Devise::Test::IntegrationHelpers
   include Warden::Test::Helpers
+  include TestSetupHelpers
 
   setup do
-    @project = create(:project)
-    @swatch = create(:swatch, name: 'app_theme')
-    @discipline = create(:discipline, project: @project)
-    @discipline_e = create(:discipline, project: @project, label: 'E', 
-      name: 'Electrical', prefix_schema: { name: 'dim1'})
-    @discipline_j = create(:discipline, project: @project, label: 'J', 
-      name: 'Instrument', prefix_schema: { name: 'isa51'})
-    @discipline_p = create(:discipline, project: @project, label: 'P', 
-      name: 'Process', prefix_schema: { name: 'dim2'})
-
-    @app_owner = create(:user)
-    @app_owner.grant(:app_owner)
-
-    @admin = create(:user)
-    @admin.grant(:admin)
-
-    @project_manager = create(:user)
-    @project_manager.grant(:project_manager, @project)
-
-    @team_member = create(:user)
-    @team_member.grant(:team_member, @project)
-
-    @regular_user = create(:user)
-
-    @tag = create(:tag, stage: '1', discipline: @discipline, 
-      prefix: 'EC', serial: '1', suffix: "i", service: 'TEST TAG E:EC-0001.i', location: 'TEST LOCATION', notes: "Lorem ipsum",
-      tagable_type: "Electrical::Cable")
+    setup_projects_and_users
+    setup_disciplines(name: 'Electrical', required_role: :designer)
+    setup_accredited_users(:designer)
+    setup_tags
+    @discipline_e = @discipline
+    @discipline_j = @project.disciplines.find_by(label: 'J')
+    @discipline_p = @project.disciplines.find_by(label: 'P')
   end
 
   test "unauthenticated users should not see tags link" do
@@ -41,12 +24,13 @@ class TagsSystemTest < ApplicationSystemTestCase
 
   test "team member viewing the tags index" do
     sign_in @team_member
-    # Mock current_project for this test
-    ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit root_url
+    # Navigate to select project page and choose a project
+    visit select_projects_path
+    choose @project.code
+    click_button I18n.t('helpers.submit.project_set')
     
-    # Click the tag index link
-    click_link(href: tags_path)
+    # Navigate to tags index
+    visit tags_path
     assert_current_path tags_path
     assert_text I18n.t("tags.index.header", project: @project.code)
     assert page.title.include?(I18n.t("tags.index.title"))
@@ -93,7 +77,6 @@ class TagsSystemTest < ApplicationSystemTestCase
 
   test "team member viewing the tag show view" do
     sign_in @team_member
-    # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit tags_path
     click_link(href: tag_path(@tag))

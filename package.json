@@ -6,5 +6,6 @@
     "copyfiles": "^2.4.1",
     "jquery": "^3.7.1",
     "jsoneditor": "^10.4.2"
-  }
+  },
+  "packageManager": "yarn@1.22.22"
 }

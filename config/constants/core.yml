@@ -1,3 +1,8 @@
 nr: "Not Required"
 swatch:
 document:
+cable:
+  constructions:
+    core: 1
+    pair: 2
+    triple: 3

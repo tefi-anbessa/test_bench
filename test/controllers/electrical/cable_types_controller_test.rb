@@ -9,7 +9,7 @@ module Electrical
 
     setup do
       setup_controller_test
-      setup_project_resources
+      setup_discipline_resources
       setup_model_specific_data
     end
 
@@ -21,7 +21,7 @@ module Electrical
 
       # Required for nested routes
       def new_nesting_params
-        { project_id: @project.id }
+        { discipline_id: @discipline.id }
       end
 
       # Required for nested routes
@@ -35,7 +35,8 @@ module Electrical
           {
           conductor_material: "Cu",
           csa: 4.0,
-          cores: 3,
+          groups: 3,
+          construction: 'core',
           neutral_csa: 4.0,
           earth_csa: 2.5,
           insulation: "XLPE",
@@ -62,7 +63,7 @@ module Electrical
 
       # Nominate an attribute to get changed during update tests
       def update_attribute_name
-        :cores
+        :groups
       end
 
       # Nominate a valid value to update the attribute to

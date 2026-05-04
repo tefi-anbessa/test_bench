@@ -1,15 +1,14 @@
+# frozen_string_literal: true
+
 require "test_helper"
-
+require "helpers/discipline_model_tests"
 class Electrical::CableTypeTest < ActiveSupport::TestCase
-  def setup
-    @project = create(:project)
-    @cable_type = create(:electrical_cable_type, project: @project)
-    @resource = @cable_type # prepare for abstraction of this test to project or discipline type
-  end
+  include DisciplineModelTests
 
-  test "setup should be valid" do
-    assert @project.valid?
-    assert @cable_type.valid?
+  def setup
+    setup_common_test_data
+    @resource = create(:electrical_cable_type, discipline: @discipline)
+    @cable_type = @resource
   end
 
   test "factory default should create valid cable type" do
@@ -19,10 +18,11 @@ class Electrical::CableTypeTest < ActiveSupport::TestCase
   
   test "factory should create new cable type with all required attributes" do
     assert_difference 'Electrical::CableType.count', 1 do
-      @ct = create(:electrical_cable_type, 
+      @ct = create(:electrical_cable_type,
           conductor_material: "Cu",
           csa: 2.5,
-          cores: 3,
+          construction: "core",
+          groups: 3,
           neutral_csa: 2.5,
           earth_csa: 1.5,
           insulation: "XLPE",
@@ -33,12 +33,13 @@ class Electrical::CableTypeTest < ActiveSupport::TestCase
           temperature_rating: "75˚C",
           bedding_od: 10,
           overall_od: 12,
-          project: @project)
+          discipline: @discipline)
     end
     assert @ct.valid?
     assert_equal "Cu", @ct.conductor_material
     assert_equal 2.5, @ct.csa
-    assert_equal 3, @ct.cores
+    assert_equal "core", @ct.construction
+    assert_equal 3, @ct.groups
     assert_equal 2.5, @ct.neutral_csa
     assert_equal 1.5, @ct.earth_csa
     assert_equal "XLPE", @ct.insulation
@@ -49,7 +50,7 @@ class Electrical::CableTypeTest < ActiveSupport::TestCase
     assert_equal "75˚C", @ct.temperature_rating
     assert_equal 10, @ct.bedding_od
     assert_equal 12, @ct.overall_od
-    assert_equal @project, @ct.project
+    assert_equal @discipline, @ct.discipline
   end
 
   test "should require conductor_material" do
@@ -58,78 +59,83 @@ class Electrical::CableTypeTest < ActiveSupport::TestCase
     assert_includes cable_type.errors[:conductor_material], I18n.t('errors.messages.blank')
   end
 
-  test "should require cores" do
-    cable_type = build(:electrical_cable_type, cores: nil)
+  test "should require groups" do
+    cable_type = build(:electrical_cable_type, groups: nil)
     refute cable_type.valid?
-    assert_includes cable_type.errors[:cores], I18n.t('errors.messages.blank')
+    assert_includes cable_type.errors[:groups], I18n.t('errors.messages.blank')
   end
 
   test "should require csa" do
-    cable_type = build(:electrical_cable_type, csa: nil, project: @project)
+    cable_type = build(:electrical_cable_type, csa: nil, discipline: @discipline)
     refute cable_type.valid?
     assert_includes cable_type.errors[:csa], I18n.t('errors.messages.blank')
   end
   
-  test "should require project" do
-    cable_type = build(:electrical_cable_type, project: nil)
+  test "should require discipline" do
+    cable_type = build(:electrical_cable_type, discipline: nil)
     refute cable_type.valid?
-    assert_includes cable_type.errors[:project], I18n.t('errors.messages.required')
+    assert_includes cable_type.errors[:discipline], I18n.t('errors.messages.required')
   end
 
-  test "should allow same specifications in different projects" do
-    # Create a cable type with project
-    cable_type1 = create(:electrical_cable_type, 
+  test "should allow same specifications in different disciplines" do
+    # Create a cable type with discipline
+    cable_type1 = create(:electrical_cable_type,
                         conductor_material: "Al",
-                        cores: 4,
+                        construction: "core",
+                        groups: 4,
                         csa: 10.0,
-                        project: @project)
+                        discipline: @discipline)
     assert_match(/~01\z/, cable_type1.code, "First type should get code suffix 01")
-    # Create another project
+    # Create another project with discipline
     other_project = create(:project, code: 'CD')
-    
-    # Same specs in different project should be valid and first code
+    other_discipline = other_project.disciplines.find_by(name: "Electrical")
+
+    # Same specs in different discipline should be valid and first code
     cable_type2 = create(:electrical_cable_type,
                        conductor_material: "Al",
-                       cores: 4,
+                       construction: "core",
+                       groups: 4,
                        csa: 10.0,
-                       project: other_project)
-    
+                       discipline: other_discipline)
+
     assert cable_type2.valid?
-    assert_match(/~01\z/, cable_type2.code, "First code in other project should also be 01")
-    
-    # Duplicate in same project should have code with suffix 02
+    assert_match(/~01\z/, cable_type2.code, "First code in other discipline should also be 01")
+
+    # Duplicate in same discipline should have code with suffix 02
     cable_type3 = create(:electrical_cable_type,
                      conductor_material: "Al",
-                     cores: 4,
+                     construction: "core",
+                     groups: 4,
                      csa: 10.0,
-                     project: @project)
-    
+                     discipline: @discipline)
+
     assert cable_type3.valid?
     assert_match(/~02\z/, cable_type3.code, "Duplicate type should get code suffix 02")
   end
 
-  test "should be destroyed when associated project is destroyed" do
-    cable_type = create(:electrical_cable_type, project: @project)
+  test "should be destroyed when associated discipline is destroyed" do
+    cable_type = create(:electrical_cable_type, discipline: @discipline)
     # Destroys setup cable type and cable type created in this test.
-    assert_difference 'Electrical::CableType.count', -2 do 
-      @project.destroy
+    assert_difference 'Electrical::CableType.count', -2 do
+      @discipline.destroy
     end
-    
+
     refute Electrical::CableType.exists?(cable_type.id)
   end
   
   test "should generate code from attributes" do
-    ct = create(:electrical_cable_type, 
+    ct = create(:electrical_cable_type,
                   conductor_material: "Cu",
                   csa: 2.5,
-                  cores: 3,
+                  construction: "core",
+                  groups: 3,
                   neutral_csa: 2.5,
                   earth_csa: 1.5,
                   insulation: "XLPE",
                   bedding: "PVC",
                   armour: "GSWA",
-                  project: @project)
-    
+                  discipline: @discipline)
+
     expected_pattern = %r{Cu~2.5mm²~3C\+N\+E\~XLPE~PVC~GSWA~PVC~450/750V~75˚C~01}
     assert_match expected_pattern, ct.code
   end

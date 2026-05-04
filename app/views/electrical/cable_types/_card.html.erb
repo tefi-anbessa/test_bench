@@ -28,8 +28,13 @@
       </div>
       
       <div class="row mb-1">
-        <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:cores) %></div>
-        <div class="col-8"><%= cable_type.cores.presence || '-' %></div>
+        <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:groups) %></div>
+        <div class="col-8"><%= cable_type.groups.presence || '-' %></div>
+      </div>
+      
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:construction) %></div>
+        <div class="col-8"><%= cable_type.construction.presence || '-' %></div>
       </div>
       
       <div class="row mb-1">

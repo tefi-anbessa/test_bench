@@ -1,22 +1,26 @@
+# frozen_string_literal: true
+
 # This module provides common test patterns for models associated with a discipline, but not tagged.
 # Include this in your model test and all the test methods will run.
+require 'helpers/test_setup_helpers'
 module DisciplineModelTests
   extend ActiveSupport::Concern
+  include TestSetupHelpers
 # Setup common to typical resource models other than tagables.
   def setup_common_test_data
     # Create project with standard disciplines
     @project = create(:project, title: "#{resource_class} Model Test")
 
     # Set resource discipline using the class' module name
-    @resource_discipline = @project.disciplines.find_by(name: resource_class.module_parent_name)
+    @discipline = @project.disciplines.find_by(name: resource_class.module_parent_name)
   end
 
   # Common test patterns used for all model tests
   def test_common_setup_is_valid
     assert @project.valid?
     assert @project.persisted?
-    assert @resource_discipline.valid?
-    assert @resource_discipline.persisted?
+    assert @discipline.valid?
+    assert @discipline.persisted?
   end
 
   # Ensure specific model test has created @resource instance variable

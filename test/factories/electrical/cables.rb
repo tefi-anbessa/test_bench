@@ -8,15 +8,11 @@ FactoryBot.define do
       cable_type { nil }
       from { nil }  # Source object (Circuit, Switchboard, etc.)
       to { nil }    # Destination object (Demand, Motor, etc.)
+      cable_type_attributes { {} }
     end
 
-    # Required attributes - override with cable_type: your_type if needed
-    electrical_cable_type {
-      create(:electrical_cable_type,
-        notes: "Test Cable Type #{SecureRandom.hex(4)}",
-        csa: 1.0
-      )
-    }
+    # Required attributes - set in after(:build) to avoid inline create
+    electrical_cable_type { nil }
 
     # Optional attributes
     route_length { 10 }  # meters
@@ -25,39 +21,31 @@ FactoryBot.define do
     start_mark { 1001 }
     end_mark { 1010 }
 
-    # Handle from/to associations for both build and create
+    # Handle associations for both build and create
     after(:build) do |cable, evaluator|
+      # Set from/to associations
       cable.from = evaluator.from if evaluator.from
       cable.to = evaluator.to if evaluator.to
-    end
 
-    # Create tag association in a single transaction
-    before(:create) do |cable, evaluator|
-      # Determine cable_type - either provided or create one
-      cable_type = evaluator.cable_type || cable.electrical_cable_type
+      # Create cable_type if not provided
+      unless cable.electrical_cable_type
+        cable.electrical_cable_type = evaluator.cable_type ||
+          build(:electrical_cable_type, evaluator.cable_type_attributes)
+      end
 
-      # Handle tag creation
-      if evaluator.tag
-        tag = evaluator.tag.is_a?(Tag) ? evaluator.tag : Tag.find(evaluator.tag)
-        if tag.tagable.present?
-          raise "Tag is already associated with another record: #{tag.tagable_type}##{tag.tagable_id}"
-        end
-        # Validate project match if cable_type provided
-        if evaluator.cable_type && tag.discipline&.project != cable_type.project
-          raise "Tag's project does not match cable_type's project"
-        end
-        cable.tag = tag
-      else
-        # Create new tag with proper discipline in same transaction
-        if evaluator.discipline
-          # Validate project match if cable_type provided
-          if evaluator.cable_type && evaluator.discipline.project != cable_type.project
-            raise "Discipline's project does not match cable_type's project"
+      # Create tag if not provided
+      unless cable.tag
+        if evaluator.tag
+          tag = evaluator.tag.is_a?(Tag) ? evaluator.tag : Tag.find(evaluator.tag)
+          if tag.tagable.present?
+            raise "Tag is already associated with another record: #{tag.tagable_type}##{tag.tagable_id}"
           end
+          cable.tag = tag
+        elsif evaluator.discipline
           cable.tag = create(:tag, :unique_tag, discipline: evaluator.discipline)
         else
-          # Use cable_type's project or create new project
-          project = cable_type&.project || create(:project)
+          cable_type = cable.electrical_cable_type
+          project = cable_type&.discipline&.project || create(:project)
           discipline = project.disciplines.find_by(name: cable.class.module_parent_name) ||
                create(:discipline, name: cable.class.module_parent_name, project: project)
           cable.tag = create(:tag, :unique_tag, discipline: discipline)

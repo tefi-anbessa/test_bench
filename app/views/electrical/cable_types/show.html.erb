@@ -9,16 +9,9 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Index Button -->
-            <% if project_selected? %>
-              <%= link_to project_electrical_cable_types_path(current_project), 
-                class: "btn btn-sm btn-outline-secondary me-2",
-                title: t('actions.index') do %>
-                <%== bs_icon('list-columns-reverse') %>
-                <span class="d-none d-md-inline"><%= t('actions.index') %></span>
-              <% end %>
-            <% else %>
-              <%= link_to electrical_cable_types_path,
-                class: "btn btn-sm btn-outline-secondary me-2",
+            <% if policy(@discipline).index? %>
+              <%= link_to discipline_electrical_cable_types_path(@discipline), 
+                class: "btn btn-sm btn-outline-info me-2",
                 title: t('actions.index') do %>
                 <%== bs_icon('list-columns-reverse') %>
                 <span class="d-none d-md-inline"><%= t('actions.index') %></span>
@@ -95,6 +88,17 @@
                   </span>
                 <% end %>
               <% end %>
+
+              <% if policy(@cable_type).new? %>
+                <%= link_to new_discipline_electrical_cable_type_path(@discipline),
+                      class: "btn btn-outline-primary",
+                      title: t('actions.new') do %>
+                  <%== bs_icon('plus-square-fill') %>
+                  <span class="d-none d-md-inline">
+                    <%= t('actions.new') %>
+                  </span>
+                <% end %>
+              <% end %>
             </div>
           </div>
         </div>
@@ -116,14 +120,17 @@
                     <tr>
                       <th><%= @cable_type.class.human_attribute_name(:conductor_material) %></th>
                       <td><%= @cable_type&.conductor_material %></td>
+                    <tr>
+                      <th><%= @cable_type.class.human_attribute_name(:groups) %></th>
+                      <td><%= @cable_type&.groups %></td>
+                    </tr>
+                    <tr>
+                      <th><%= @cable_type.class.human_attribute_name(:construction) %></th>
+                      <td><%= @cable_type.class.human_enum_name(:construction, @cable_type.construction) %></td>
                     </tr>
                     <tr>
                       <th><%= @cable_type.class.human_attribute_name(:csa) %></th>
                       <td><%= @cable_type&.csa %></td>
-                    </tr>
-                    <tr>
-                      <th><%= @cable_type.class.human_attribute_name(:cores) %></th>
-                      <td><%= @cable_type&.cores %></td>
                     </tr>
                     <tr>
                       <th><%= @cable_type.class.human_attribute_name(:neutral_csa) %></th>

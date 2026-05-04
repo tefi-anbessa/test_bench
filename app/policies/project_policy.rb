@@ -4,20 +4,16 @@ class ProjectPolicy < ApplicationPolicy
   end
 
   class Scope < ApplicationPolicy::Scope
-    def resolve(scope = nil, current_project: nil)
-      scope ||= self.scope
-      
-      if user.is_app_owner? || user.is_admin? ||
-        user.roles.where(resource_type: "Project", resource_id: nil).count > 0
-        # If user has global admin role, or any resource wide role on Projects,
-        # scope includes all.
+    def resolve
+      if user.is_app_owner? || user.is_admin?
         scope.all
       else
-        # Scope includes the projects where user has any role
-        scope.where(:id => user.roles.where(resource_type: "Project")
-                        .pluck(:resource_id).uniq)
+        # Scope includes projects where user has any role on the project
+        # or on any discipline belonging to the project
+        project_ids = user.roles.where(resource_type: "Project").select(:resource_id)
+        discipline_project_ids = Discipline.where(id: user.roles.where(resource_type: "Discipline").select(:resource_id)).select(:project_id)
+        scope.where(id: project_ids).or(scope.where(id: discipline_project_ids))
       end
-
     end
   end
 

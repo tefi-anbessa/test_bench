@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_14_171200) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_01_020733) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -33,7 +33,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_14_171200) do
   create_table "document_control_doc_types", force: :cascade do |t|
     t.bigint "discipline_id"
     t.string "code", null: false
-    t.string "name", null: false
+    t.string "label", null: false
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -95,11 +95,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_14_171200) do
     t.datetime "updated_at", null: false
     t.string "code"
     t.text "notes", default: "", null: false
-    t.integer "project_id", null: false
-    t.integer "cores"
+    t.integer "groups"
     t.integer "voltage_rating"
-    t.index ["project_id", "code"], name: "index_electrical_cable_types_on_project_and_code", unique: true
-    t.index ["project_id"], name: "index_electrical_cable_types_on_project_id"
+    t.integer "construction"
+    t.bigint "discipline_id", null: false
+    t.index ["discipline_id"], name: "index_electrical_cable_types_on_discipline_id"
   end
 
   create_table "electrical_cables", force: :cascade do |t|
@@ -342,7 +342,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_14_171200) do
   add_foreign_key "document_control_issues", "document_control_source_formats"
   add_foreign_key "documents", "disciplines"
   add_foreign_key "documents", "document_control_doc_types", column: "doc_type_id"
-  add_foreign_key "electrical_cable_types", "projects"
+  add_foreign_key "electrical_cable_types", "disciplines"
   add_foreign_key "electrical_cables", "electrical_cable_types"
   add_foreign_key "electrical_circuits", "electrical_switchboards"
   add_foreign_key "projects", "swatches"

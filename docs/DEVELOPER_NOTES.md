@@ -85,30 +85,33 @@ The application has a core structure encompassing Users and the associated acces
 
 Only one level of module nesting is envisaged, however some features have provisioned for sub-modules.
 
-Refer to [ROLES_AND_PERMISSIONS](ROLES_AND_PERMISSIONS.md) for details on the role based access control system.
+Refer to [ROLES_AND_PERMISSIONS](ROLES_AND_PERMISSIONS.md) for details on the RBAC system.
 
 #### Projects
 
-Projects are the top level resource of this application. Projects are fully self contained and independent of each other. Every element in the application is associated with one project.
+Projects are the top level resource of this application. Projects are "ring-fenced" for security, so users are always working on their current project. Users with access to more than one project can copy from one to the other. [TODO: not implemented yet]
 
 #### Disciplines
 
-Disciplines are used to group engineering objects, and associate them to functional requirements. Each project must define the set of relevant disciplines it uses. A standard set of disciplines is provided, including instrument, electrical, mechanical, etc. These can be copied as they are, or modified to suit particular requirements. Projects can even define their own disciplines if required, and custom disciplines can be associated to existing functionality.
+Disciplines are used to group engineering objects, and associate them to functional requirements. Each project is provided with a standard set of disciplines including instrument, electrical, mechanical, etc.
 
 #### Tags
 
-Engineering design elements require a tag to be assigned. Tags are used to label all design elements, and link them to their own data, as well as to other elements, to documents, assets and other functionality.
+Engineering design elements require a tag to be assigned. Tags are used to label design elements, and link them to their own data, as well as to other elements, to documents, assets and other functionality. Tags belong to a discipline, which determines their available prefixes.
 
 #### Tagables
 
-Tags can have a "tagable" model attached, which extends the information linked to the tag to include the specific information relevant to the type of element. For example, a motor and a cable have different information requirements, so the database needs to have a different table for each, but they share the structure of the tags table. Each of these models is known as a tagable model. All tagables are grouped into modules, and modules are closely coupled to the core disciplines provided.
+Tags can have a "tagable" model attached, which extends the information linked to the tag to include the specific information relevant to the type of element. For example, a motor and a cable have different information requirements, so the database needs to have a different table for each, but they share the structure of the tags table. Each of these models is known as a tagable model. All tagables are grouped into modules, and modules are coupled to the disciplines provided.
 
 #### Documents
 
-Documents are used to manage and control the issue of information on a project. The document model itself is located in the core application, but all subisidiary models are located in the document control module. There appears to be no convention for this in rails, but there are multiple recommendations for this approach.
+Documents are used to manage and control the issue of information on a project. The document model is located in the core application.
+
+Each discipline has its own set of document types. A document must have a document type, which determines the discipline to which it belongs, as well as the associated workflow when issuing the document.
+
+Documents can be generated from the application database, or stored in a content delivery network from files uploaded by users.
 
 [HOLD At present, no repository is included, only a document register].
- The application caters for two types of documents: those generated from the application database, and those stored in a content delivery network from files uploaded by users.
 
 ### Internationalization
 
@@ -117,14 +120,14 @@ The application has been designed for international use from the outset.
 - All user facing text is provided with translations for all implemented languages.
 - To date, the only need for translation of database content identified is for discipline names. This is included as a potential feature below.
 - The application uses the rails-i18n gem to assist with internationalization. This gem provides translations into many languages for the core rails features, including model validation, database errors, time and date functions, currency, etc.
-- For reference, a copy of the en version of the translations is saved in config/locales/rails-i18n gem en for reference/en.yml.ref. This file is not used in the application, it is simply a copy of the en.yml file that is provided by the rails-i18n gem. Check in this file if you are not sure whether a translation is already provided, and __avoid duplicating core translations__ if possible. Also note that not all language files include all translations! It is a work in progress...
-- The locale setting follows the basic guidelines in [Rails Guides section 2.2](https://guides.rubyonrails.org/i18n.html#setting-the-locale-from-url-params).
+- For reference, a copy of the en version of the translations is saved in [config/locales/rails-i18n gem en for reference/en.yml.ref](../config/locales/rails-i18n%20gem%20en%20for%20reference/en.yml.ref). This file is not used in the application, it is simply a copy of the en.yml file that is provided by the rails-i18n gem. Check in this file if you are not sure whether a translation is already provided, and *avoid duplicating core translations* if possible. Also note that not all language files include all translations! It is a community work in progress...
+- The locale setting follows the basic guidelines in [Rails Internationalization (I18n) API section 2.2](https://guides.rubyonrails.org/i18n.html#setting-the-locale-from-url-params).
 - Changing locale is available in the layout header via a drop down menu.
 - The storage of translation files is detailed in the [INTERNATIONALIZATION](INTERNATIONALIZATION.md) document.
 
 ### Constants
 
-- Constants in Rails applications are the subject of much debate in the forums. The understanding of what should be constant varies widely.
+- Constants in Rails applications are the subject of debate in the forums. The understanding of what should be constant varies widely.
 - The context for this application includes:
   - Engineering and scientific constants that are indepedent of the application, such as standard ratings for circuit breakers, cable sizes, etc.
   - Role Based Access Control (RBAC) system configuration.
@@ -178,9 +181,9 @@ In addition, a card partial should be provided for drop down view on other pages
 - Views should use model constants such as enums to generate select options directly. Use human_enum_name from [application_record](../app/models/application_record.rb) to provide the translations.
 - Views should include i18n translations for all user facing text, including:
   - Model names.
-    - Use @tag.model_name.human in most cases
-      - Use Tag.model_name.human if a model instance is not available
-      - Use of I18n::t('activerecord.models.tag') is also acceptable and may be faster.
+    - Use @tag.model_name.human in most cases [HOLD: Human is not working correctly with the present activerecord translation setup.]
+    - Use Tag.model_name.human if a model instance is not available
+    - Use of I18n::t('activerecord.models.tag') is also acceptable and may be faster.
   - Attribute labels.
     - In forms, use bootstrap_form fields, which automatically wrap with a translated label.
     - Use @tag.class.human_attribute_name(:prefix) in other cases.
@@ -188,17 +191,18 @@ In addition, a card partial should be provided for drop down view on other pages
     - Use of I18n::t('activerecord.attributes.tag.prefix') is also acceptable and may be faster.
   - Attribute help text.
     - In bootstrap_form fields, use help: I18n::t('activerecord.help.tag.prefix') option.
-      - Use I18n::t('activerecord.help.tag.prefix') if required in other cases. - Select options
-      - If select options are derived from data, they should be built as an instance variable (hash or array) in the controller, and passed to the view. Options derived from data won't generally have translations available.
-      - If select options are built from enums (which mostly will be built in turn from Constants), and don't require translation, just use the Constants array or hash directly in the view.
-      - If select options are built from enums, and require translation, use something like:
+    - Use I18n::t('activerecord.help.tag.prefix') if required in other cases.
+  - Select options.
+    - If select options are derived from data, they should be built as an instance variable (hash or array) in the controller, and passed to the view. Options derived from data won't generally have translations available.
+    - If select options are built from enums (which mostly will be built in turn from Constants), and don't require translation, use the model enum methods directly in the view.
+    - If select options are built from enums, and require translation, use something like:
       ```demand.class.configs.keys.collect { |config| [demand.class.human_enum_name(:config, config), config] },```
       directly in the view.
-- Flash messages
-      - Flash messages should be generated and translated in the controller, and the standard layout will display them. Normally nothing is required in views.
-      - Complex forms may require further flash processing.
-- Messages
-      - Occasionally, bespoke explanatory messages are required. Translations should be provided in the appropriate views.yml file.
+   - Flash messages
+         - Flash messages should be generated and translated in the controller, and the standard layout will display them. Normally nothing is required in views.
+         - Complex forms may require further flash processing.
+   - Messages
+         - Occasionally, bespoke explanatory messages are required. Translations should be provided in the appropriate views.yml file.
 
 ### Error Handling
 
@@ -340,7 +344,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Review all policies and tests for compliance with guidelines.
 - [x] Review all models for compliance with guidelines.
 - [x] Clean up old Load model references after migration.
-- [ ] The project was originally written for Rails 7 but got hibernated. On reawakening, it was upgraded to Rails 8. It has never been deployed to production, so Rails 8 upgrade is not yet officially declared complete.
+- [x] The project was originally written for Rails 7 but got hibernated. On reawakening, it was upgraded to Rails 8. It has never been deployed to production, so Rails 8 upgrade is not yet officially declared complete.
 - [x] The transition to rails 8 should have changed over the asset pipeline to use propshaft. This has not been done properly, needs to be rectified.
 - [x] Improve has_one validation on tagable, possibly include database constraint.
 - [x] Improve has_one validation on demandable, possibly include database constraint.
@@ -375,12 +379,13 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Review all use of the method underscore. It apparently is not aware of the OS and uses '/' as the separator. Use File.join wherever appropriate.
 - [ ] Fix module generator to use nested parent modules.
 - [ ] Provide a means for admins to edit tags to remove broken links to tagable.
-- [ ] Add tagable controller checks to ensure discipline belongs to current project.
+- [x] Add tagable controller checks to ensure discipline belongs to current project.
 - [x] Cable factory begets discipline, project, then cable_type, but cable_type begets its own project. Should inherit from cable factory.
 - [ ] Add model tests for read only attributes - documents, tags.
-- [ ] Review security of all controllers wrt injection attacks.
+- [x] Review security of all controllers wrt injection attacks.
 - [ ] Check that usage of accepts_nested_attributes_for is correct for tagable concern.
 - [ ] Fix previous and next functionality in tagable navigation, and generatise it for non tagables.
+- [ ] RBAC still has anomalous behaviour when resource wide roles are applied. Scope will include all projects, and alow selection of any project as current, but accessing the project without a specific role will result in forbidden. Either block resource wide roles or implement them in policies.
 
 ## Refactoring Opportunities
 
@@ -434,10 +439,13 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Switchboards can refer to circuits, and circuits can refer to switchboards, without the module prefix.
 - [ ] Consider whether the same improvement applies to demand.
 - [ ] Remove unnecessary namespacing within electrical module naming, e.g. switchboard has many electrical_circuits.
-- [ ] Transition documents and cable types to discipline nested.
+- [ ] Transition documents to discipline nested.
+- [x] Transition cable types to core module, discipline nested. This should allow other disciplines (instrument, communication) to create appropriate cable types.
+- [ ] Revise index views to get credentials once and use for links, for all resources where the credentials are not granular, i.e. everything except projects and disciplines.
 
 ## Potential Features
 
+- [ ] Implement copy from other project
 - [ ] Implement bulk import/export
 - [ ] Data revision management
 - [ ] Customize devise users:
@@ -466,7 +474,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Keep backward compatibility during the Load → Demand transition
 - [ ] Consider adding performance benchmarks for critical paths
 
-## Gloassary
+## Glossary
 
 Resource: In rails, resource often refers to an abstracted model. In this application, resource more often refers to an abstracted tagable model. Context should clarify which meaning is intended.
 Record: Resource instance. Used internally in Pundit.

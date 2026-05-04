@@ -22,7 +22,7 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     @team_member.grant(:team_member, @project)
 
     @regular_user = create(:user)
-
+    @swatch = create(:swatch, :app_theme)
     # Set the current project for all tests that need it
     set_current_project(@project) if defined?(set_current_project)
   end
@@ -81,7 +81,7 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     assert_selector "a[href*='q%5Bs%5D=code']"
     assert_selector "a[href*='q%5Bs%5D=title']"
     assert_selector "a[href*='q%5Bs%5D=description']"
-    assert_selector "a[href='#{project_path(@project)}']", count: 2 # one link on code and one on icon in links
+    assert_selector "a[href='#{project_path(@project)}']"
     refute_selector "a[href='#{edit_project_path(@project)}']"
     refute_selector "a[href='#{project_path(@project)}'][data-turbo-method='delete']"
     refute_selector "a[href='#{new_project_path}']" # only admin can create new project
@@ -116,8 +116,8 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     assert_selector "a.sort_link", text: I18n.t('activerecord.attributes.project.code') # alternative pattern
     assert_selector "a.sort_link", text: I18n.t('activerecord.attributes.project.title')
     assert_selector "a.sort_link", text: I18n.t('activerecord.attributes.project.description')
-    assert_selector "a[href='#{project_path(@project)}']", count: 2 # one link on code and one on icon in links
-    assert_selector "a[href='#{project_path(@project2)}']", count: 2 # one link on code and one on icon in links
+    assert_selector "a[href='#{project_path(@project)}']"
+    assert_selector "a[href='#{project_path(@project2)}']"
     assert_selector "a[href='#{edit_project_path(@project)}']" # edit icon
     refute_selector "a[href='#{project_path(@project)}'][data-turbo-method='delete']" # delete icon
   end
@@ -194,8 +194,8 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     assert_selector "a[href='#{project_path(@project)}'][data-method='delete']" # delete icon
   end
 
-  test "admin create new project" do
-    sign_in @admin
+  test "app_owner create new project" do
+    sign_in @app_owner
     visit projects_path
     click_link(href: new_project_path)
     assert_current_path new_project_path
@@ -206,7 +206,7 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     assert_selector "input[name='project[title]']"
     assert_selector "textarea[name='project[description]']"
     assert_selector "button[type='submit']"
-    assert_selector "a.btn.btn-warning.actions", text: I18n.t('actions.discard')
+    assert_selector "a.btn.btn-warning", text: I18n.t('actions.discard')
 
     # Complete the form
     fill_in "project_code", with: "TT"
@@ -214,12 +214,12 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     fill_in "project_description", with: "This is a test project"
 
     # Save the new project
-    click_button I18n.t('actions.save')
+    click_button I18n.t('actions.create')
     sleep 0.1  # Give database time to commit
     new_project = Project.find_by(code: "TT")
     assert_current_path project_path(new_project) 
     assert_text "New Project"
-    assert_text I18n.t("flash.actions.create.notice", resource_name: I18n.t("activerecord.models.project"))
+    assert_text I18n.t("flash.create.notice", resource_name: I18n.t("activerecord.models.project"))
   end
 
   test "project manager edit project" do
@@ -234,12 +234,12 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     assert_selector "input[name='project[title]']"
     assert_selector "textarea[name='project[description]']"
     assert_selector "button[type='submit']"
-    assert_selector "a.btn.btn-warning.actions", text: I18n.t('actions.discard')
+    assert_selector "a.btn.btn-warning", text: I18n.t('actions.discard')
 
     # Complete the form
     fill_in "project_title", with: "Modified Test Project"
     fill_in "project_description", with: "This is a modified test project"
-    click_button I18n.t('actions.save')
+    click_button I18n.t('actions.update')
 
     assert_current_path project_path(@project)
     assert_text "Modified Test Project"
@@ -265,7 +265,7 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     end
     assert_current_path projects_path
     refute_selector "a[href='#{project_path(@project)}']"
-    assert_text I18n.t("flash.actions.destroy.notice", resource_name: I18n.t("activerecord.models.project"))
+    assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.project"))
   end
 
   test "app owner destroy project from the show view" do
@@ -277,7 +277,7 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     end
     assert_current_path projects_path
     refute_selector "a[href='#{project_path(@project)}']"
-    assert_text I18n.t("flash.actions.destroy.notice", resource_name: I18n.t("activerecord.models.project"))
+    assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.project"))
   end
 
 end

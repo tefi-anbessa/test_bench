@@ -22,17 +22,15 @@ FactoryBot.define do
     notes { Faker::Lorem.paragraph(sentence_count: 2) }
 
     # Create tag association in a single transaction
-    before(:create) do |switchboard, evaluator|
-      if evaluator.tag
-        # Use provided tag, but ensure it's not already associated
-        if evaluator.tag.tagable.present?
-          raise "Tag is already associated with another record: #{evaluator.tag.tagable_type}##{evaluator.tag.tagable_id}"
-        end
-        switchboard.tag = evaluator.tag
-      else
-        # Create new tag with proper discipline in same transaction
-        if evaluator.discipline
-          # Create tag on the provided discipline
+    after(:build) do |switchboard, evaluator|
+      unless switchboard.tag
+        if evaluator.tag
+          # Use provided tag, but ensure it's not already associated
+          if evaluator.tag.tagable.present?
+            raise "Tag is already associated with another record: #{evaluator.tag.tagable_type}##{evaluator.tag.tagable_id}"
+          end
+          switchboard.tag = evaluator.tag
+        elsif evaluator.discipline
           switchboard.tag = create(:tag, :unique_tag, discipline: evaluator.discipline)
         else
           # Create project with auto-created disciplines

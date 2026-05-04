@@ -19,7 +19,7 @@
     </div> <!-- end of card header -->
 
     <%= bootstrap_form_with(model: cable_type,
-            url: cable_type.persisted? ? electrical_cable_type_path(cable_type) : project_electrical_cable_types_path(@project),
+            url: discipline_electrical_cable_types_path(@discipline),
             layout: :horizontal,
             label_col: "col-sm-6",
             control_col: "col-sm-6",
@@ -32,41 +32,39 @@
       <div class="card-body p-3 mx-auto" style="<%= form_styles(cable_type.class.swatch) %>">
         <%= render 'shared/error_messages', object: f.object %>
         <div class="row justify-content-center">
-          <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-
-            <!-- Project card -->
-            <% if @project && @project.persisted? %>
-              <%= render 'projects/card',
-                    object: @project %>
-              <%= f.hidden_field :project_id, value: @project.id %>
-            <% else %>
-              <!-- Project select field -->
-              <div class="row">
-                <%= f.select :project_id,
-                    @projects.map { |p| [p.code, p.id] },
-                    { wrapper: { class: 'mb-1' },
-                      class: 'form-select' } %>
-              </div>
-            <% end %>  
+          <div class="col-12 col-md-10 col-lg-8 col-xl-6"> 
 
             <!-- Conductor Details -->
             <div class="row">
-                <%= f.select :conductor_material,
-                      @conductor_select.map { |k, v| [k.to_s.titleize, k] },
+              <%= f.select :conductor_material,
+                    Electrical::CableType.conductor_materials.map { |k, v| [k.to_s.titleize, k] },
+                    { wrapper: { class: 'mb-1' },
+                      class: 'form-select' } %>
+            </div>
+            <div class="row">
+                <%= f.number_field :groups,
+                        step: '1',
+                        min: 1,
+                        wrapper: { class: 'mb-1' } %>
+            </div>
+            <div class="row">
+                <%= f.select :construction,
+                      Electrical::CableType.constructions.map { |k, v| [t("activerecord.attributes.electrical.cable_type.constructions.#{k}"), k] },
                       { wrapper: { class: 'mb-1' },
                         class: 'form-select' } %>
             </div>
+            <div class="row">
+                <%= f.select :insulation,
+                      Electrical::CableType.insulations.map { |k, v| [k, k] },
+                      { include_blank: t("form.none"),
+                      wrapper: { class: 'mb-1' } } %>
+            </div>
+
             <div class="row">
                 <%= f.select :csa,
                       @csa_select.map { |csa| ["#{csa} mm²", csa] },
                       { wrapper: { class: 'mb-1' } },
                       { class: 'form-select' } %>
-            </div>
-            <div class="row">
-                <%= f.number_field :cores,
-                        step: '1',
-                        min: 1,
-                        wrapper: { class: 'mb-1' } %>
             </div>
 
             <div class="row">
@@ -86,25 +84,25 @@
             <!-- Insulation and Protection -->
             <div class="row">
                 <%= f.select :insulation,
-                      @insulation_select.map { |k, v| [k, k] },
+                      Electrical::CableType.insulations.map { |k, v| [k, k] },
                       { include_blank: t("form.none"),
                       wrapper: { class: 'mb-1' } } %>
             </div>
             <div class="row">
                 <%= f.select :bedding,
-                  @insulation_select.map { |k, v| [k, k] },
+                  Electrical::CableType.beddings.map { |k, v| [k, k] },
                   { include_blank: t("form.none"),
                       wrapper: { class: 'mb-1' } } %>
             </div>
             <div class="row">
                 <%= f.select :armour,
-                  @armour_select.map { |k, v| [k, k] },
+                  Electrical::CableType.armours.map { |k, v| [k, k] },
                   { include_blank: t("form.none"),
                       wrapper: { class: 'mb-1' } } %>
             </div>
             <div class="row">
                 <%= f.select :sheath,
-                  @insulation_select.map { |k, v| [k, k] },
+                  Electrical::CableType.sheaths.map { |k, v| [k, k] },
                   { include_blank: t("form.none"),
                       wrapper: { class: 'mb-1' } } %>
             </div>
@@ -127,13 +125,13 @@
             <!-- Rating -->
             <div class="row">
                 <%= f.select :temperature_rating,
-                  @temperature_select.map { |k, v| [k, k] },
+                  Electrical::CableType.temperature_ratings.map { |k, v| [k, k] },
                   { include_blank: t("form.unknown"),
                       wrapper: { class: 'mb-1' } } %>
             </div>
             <div class="row">
                 <%= f.select :voltage_rating,
-                  @voltage_select.map { |k, v| [k, k] },
+                  Electrical::CableType.voltage_ratings.map { |k, v| [k, k] },
                   { include_blank: t("form.unknown"),
                       wrapper: { class: 'mb-1' } } %>
             </div>
@@ -153,7 +151,7 @@
       <!-- Card Footer with Actions -->
       <div class="card-footer p-3 mx-auto">
         <div class="d-flex justify-content-end gap-2">
-          <%= link_to(cable_type.persisted? ? cable_type : project_electrical_cable_types_path(@project),
+          <%= link_to(cable_type.persisted? ? cable_type : discipline_electrical_cable_types_path(@discipline),
                 class: 'btn btn-warning',
                 data: { confirm: t('actions.sure'), turbo: false }) do %>
             <%= t('actions.discard') %>
