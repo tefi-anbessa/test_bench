@@ -9,7 +9,7 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@demand).index? %>
-              <%= link_to electrical_demands_path,
+              <%= link_to discipline_electrical_demands_path(@discipline),
                     class: "icon-link btn btn-sm btn-outline-secondary me-2 actions",
                     title: t('actions.index') do %>
                 <%== bs_icon('list-columns-reverse') %>

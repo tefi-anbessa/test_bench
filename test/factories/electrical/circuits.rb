@@ -16,7 +16,7 @@ FactoryBot.define do
     notes { nil }
 
     # Circuits must belong to a switchboard
-    association :electrical_switchboard
+    association :switchboard, factory: :electrical_switchboard
 
     # Traits for different types of circuits
     trait :single_phase do
@@ -43,8 +43,8 @@ FactoryBot.define do
 
     # Factory to create a circuit with a cable
     trait :with_cable do
-      after(:create) do |electrical_circuit, evaluator|
-        create(:electrical_cable, from: electrical_circuit)
+      after(:create) do |circuit, evaluator|
+        create(:electrical_cable, from: circuit)
       end
     end
   end

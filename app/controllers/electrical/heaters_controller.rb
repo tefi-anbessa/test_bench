@@ -58,7 +58,7 @@ module Electrical
                 :power_density_min, :power_density_max, :sheath_material, :insulation_material,
                 :notes,
           tag: [
-            :id, :project_id, :discipline_id, :prefix, :serial,
+            :discipline_id, :prefix, :serial,
             :suffix, :service, :stage, :notes, :tagable_type
           ])
       end

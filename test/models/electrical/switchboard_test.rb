@@ -9,13 +9,13 @@ module Electrical
     def setup
       setup_common_test_data
       @resource.electrical_demand = create(:electrical_demand, demandable: @resource)
-      @circuit = create(:electrical_circuit, electrical_switchboard: @resource)
+      @circuit = create(:electrical_circuit, switchboard: @resource)
     end
 
     test "circuit setup must be valid" do
       assert @circuit.valid?
-      assert_equal @resource.electrical_circuits.count, 1
-      assert_equal @resource, @circuit.electrical_switchboard
+      assert_equal @resource.circuits.count, 1
+      assert_equal @resource, @circuit.switchboard
     end
 
     test "voltage rating must be present" do
@@ -77,10 +77,10 @@ module Electrical
     # Circuit tests
     test "should create switchboard with specified number of circuits" do
       switchboard = create(:electrical_switchboard, :with_circuits, circuits_count: 5)
-      assert_equal 5, switchboard.electrical_circuits.count
+      assert_equal 5, switchboard.circuits.count
 
       # Verify all circuits have unique serial numbers between 1 and 36
-      serials = switchboard.electrical_circuits.pluck(:serial)
+      serials = switchboard.circuits.pluck(:serial)
       assert_equal serials.uniq, serials, "All circuit serials should be unique"
       assert serials.all? { |s| (1..36).cover?(s) }, "All serials should be between 1 and 36"
       end
@@ -103,22 +103,22 @@ module Electrical
 
     test "should require unique serial number per switchboard" do
       # Use a unique serial number for this test to avoid conflicts with other tests
-      test_serial = create(:electrical_circuit, electrical_switchboard: @resource, serial: 35)
+      test_serial = create(:electrical_circuit, switchboard: @resource, serial: 35)
 
       # Try to create another circuit with the same serial on the same switchboard
-      duplicate_circuit = build(:electrical_circuit, electrical_switchboard: @resource, serial: test_serial.serial)
+      duplicate_circuit = build(:electrical_circuit, switchboard: @resource, serial: test_serial.serial)
       refute duplicate_circuit.valid?
       assert_includes duplicate_circuit.errors[:serial], I18n.t('errors.messages.taken')
 
       # Should allow same serial on a different switchboard
       other_tag = create(:tag, discipline: @resource_discipline)
       other_switchboard = create(:electrical_switchboard, tag: other_tag)
-      other_circuit = build(:electrical_circuit, electrical_switchboard: other_switchboard, serial: test_serial.serial)
+      other_circuit = build(:electrical_circuit, switchboard: other_switchboard, serial: test_serial.serial)
       assert other_circuit.valid?
     end
 
     test "destroy circuit should nullify cable feeder reference" do
-      circuit = create(:electrical_circuit, electrical_switchboard: @resource)
+      circuit = create(:electrical_circuit, switchboard: @resource)
       cable_tag = create(:tag, discipline: @resource_discipline, prefix: "EC")
       cable = create(:electrical_cable, tag: cable_tag, from: circuit)
 
@@ -135,7 +135,7 @@ module Electrical
 
     test "factory should create multiple circuits with unique serial numbers" do
       # Create 3 circuits on the same switchboard
-      circuits = create_list(:electrical_circuit, 3, electrical_switchboard: @resource)
+      circuits = create_list(:electrical_circuit, 3, switchboard: @resource)
       
       # Get all serial numbers and ensure they're unique
       serials = circuits.map(&:serial)

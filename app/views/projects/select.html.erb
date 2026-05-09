@@ -25,7 +25,7 @@
                              option.id, 
                              class: 'form-check-input',
                              checked: (option.id == 'none' && current_project.nil?) || (option.id == current_project&.id),
-                             label: (option.id == 'none' ? t('.no_project') : option.label) %>
+                             label: (option.id == 'none' ? t('.no_project') : option.long_label) %>
           </div>
         <% end %>
       </div>

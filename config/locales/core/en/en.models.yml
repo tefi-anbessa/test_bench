@@ -1,13 +1,22 @@
 en:
   activerecord:
     models:
-      document: "Document"
+      document:
+        one: "Document"
+        other: "Documents"
       swatch:             "Swatch"
       resource:           "Resource"
       user:               "User"
       project:            "Project"
       discipline:         "Discipline"
-      tag:                "Tag"
+      tag:
+        one: "Tag"
+        other: "Tags"
+      doc_type:
+        one: "Document Type"
+        other: "Document Types"
+      issue: "Issue"
+      source_format: "Source Format"
       role:               "Role"
     attributes:
       document:
@@ -53,6 +62,22 @@ en:
         notes:            "Notes"
         required_role:    "Required Role"
         copy_from_standard: "Copy from Standard" # Form label
+      doc_type:
+        discipline: "Discipline"
+        code: "Code"
+        name: "Type"
+        description: "Description"
+      issue:
+        document: "Document"
+        code: "Code"
+        reason: "Reason for Issue"
+        source_format: "Source Format"
+      source_format:
+        vendor: "Vendor"
+        title: "Software Title"
+        file_extension: "File extension"
+        revision: "Revision"
+        notes: "Notes"
       tag:
         prefix:           "Prefix"
         prefix_parts:

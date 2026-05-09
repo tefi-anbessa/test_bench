@@ -5,9 +5,9 @@
       <%= t('.header', project: current_project.present? ? current_project.label : t('projects.all_projects')) %>
     </h4>
     
-    <% if policy(Tag).new? %>
+    <% if policy(@discipline.tags.build()).new? %>
       <div class=me-1>
-        <%= link_to new_tag_path, class: "btn btn-outline-primary", 
+        <%= link_to new_discipline_tag_path(@discipline), class: "btn btn-outline-primary", 
               aria: { label: t('actions.new') },
               title: t('actions.new') do %>
           <%== bs_icon('plus-square-fill') %>
@@ -19,7 +19,7 @@
 </nav>
 <div class = "container">
   <div class = 'listing'>
-    <%= search_form_for @q do |f| %>
+    <%= search_form_for @q, url: discipline_tags_path(@discipline) do |f| %>
       <%= f.search_field :prefix_cont,
             class: "search_field",
             placeholder: t('activerecord.attributes.tag.prefix') %>

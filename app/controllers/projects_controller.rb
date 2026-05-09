@@ -1,6 +1,7 @@
 class ProjectsController < ApplicationController
   include PageSizeable
   include RolesHelper
+  include ProjectRolesConcern
   
   before_action :authenticate_user!
   before_action :get_project, only: %i[ show edit update destroy ]
@@ -8,19 +9,17 @@ class ProjectsController < ApplicationController
   before_action :ensure_html_format, except: [:show]
   # GET /projects or /projects.json
   def index
+    authorize Project.new()
     @q = policy_scope(Project).ransack(params[:q])
     @pagy, @projects = pagy(@q.result.ordered, limit: 20)
-    authorize @projects
     set_swatch
   end
 
   # GET /projects/1 or /projects/1.json
   def show
-    @project = Project.includes(:disciplines).find(params[:id])
-    @q = @project.disciplines.ransack(params[:q])
-    @pagy, @disciplines = pagy(@q.result, items: 10)
     authorize @project
     set_swatch
+    setup_user_roles
   end
 
   # GET /projects/new
@@ -121,9 +120,11 @@ class ProjectsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def get_project
-      @project = Project.find(params[:id])
+      @project = policy_scope(Project).find_by(id: params[:id])
+      raise ApplicationController::ConflictError, :out_of_scope if @project.nil?
     end
 
+    # Same as get_project but doesn't raise an error, just passes nil project.
     def set_project
       if policy_scope(Project).pluck(:id).include?(params[:project_id].to_i)
         @project = Project.find(params[:project_id])
@@ -148,6 +149,10 @@ class ProjectsController < ApplicationController
       else
         @swatch = Project.swatch
       end
+    end
+
+    def setup_user_roles
+      @users = users_with_project_roles(@project)
     end
     
     # Only allow a list of trusted parameters through.

@@ -14,7 +14,7 @@
 
         <!-- New Button (Right) -->
         <% if policy(Electrical::LightCct).new? %>
-            <%= link_to new_electrical_light_cct_path, 
+            <%= link_to new_discipline_electrical_light_cct_path(@discipline), 
               class: "btn btn-outline-primary actions",
               aria: { label: t('actions.new') },
               title: t('actions.new') do %>
@@ -28,7 +28,7 @@
     </div> <!-- end of card header -->
     <div class="card-body">
       <div class="row search-form">
-        <%= search_form_for @q do |f| %>
+        <%= search_form_for @q, url: discipline_electrical_light_ccts_path(@discipline) do |f| %>
           <%= f.search_field :light_fitting_type_cont,
                 class: "search_field",
                 placeholder: t('activerecord.attributes.electrical.light_cct.light_fitting_type') %>

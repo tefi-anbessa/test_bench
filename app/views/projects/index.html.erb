@@ -10,7 +10,7 @@
         </div>
 
         <!-- New Button (Right) -->
-        <% if policy(Project).new? %>
+        <% if policy(Project.new()).new? %>
           <%= link_to new_project_path,
                 class: "btn btn-outline-primary actions",
                 aria: { label: t('actions.new') },

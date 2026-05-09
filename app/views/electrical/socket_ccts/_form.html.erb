@@ -1,10 +1,10 @@
-<div class="container mt-3" style="<%= container_styles(@swatch) %>">
-  <div class="card" style="<%= card_styles(@swatch) %>">
-    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+<div class="container mt-3" style="<%= container_styles(swatch) %>">
+  <div class="card" style="<%= card_styles(swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(swatch) %>">
       <!-- Center Header Info -->
       <div class="col text-center">
         <div class="d-flex flex-column align-items-center">
-          <div class="badge fs-6" style="<%= badge_styles(@swatch) %>">
+          <div class="badge fs-6" style="<%= badge_styles(swatch) %>">
             <%= yield(:header) %>
           </div>
         </div>
@@ -12,13 +12,14 @@
     </div>
 
     <%= bootstrap_form_with(model: socket_cct,
+          url: discipline_electrical_socket_ccts_path(discipline),
           layout: :horizontal,
           label_col: "col-sm-4",
           control_col: "col-sm-8",
           wrapper_class: 'mb-1',
           ) do |f| %>
 
-      <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
+      <div class="card-body p-2" style="<%= form_styles(swatch) %>">
         <div class="row justify-content-center">
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
@@ -74,7 +75,7 @@
 
             <!-- Card Footer with Actions -->
             <div class="card-footer bg-transparent text-end p-2">
-              <%= link_to(socket_cct.persisted? ? socket_cct : electrical_socket_ccts_path,
+              <%= link_to(socket_cct.persisted? ? socket_cct : discipline_electrical_socket_ccts_path(discipline),
                     class: 'btn btn-warning',
                     data: { confirm: t('actions.sure'), turbo: false }) do %>
                 <%= t('actions.discard') %>

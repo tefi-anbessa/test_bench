@@ -198,10 +198,10 @@ In addition, a card partial should be provided for drop down view on other pages
     - If select options are built from enums, and require translation, use something like:
       ```demand.class.configs.keys.collect { |config| [demand.class.human_enum_name(:config, config), config] },```
       directly in the view.
-   - Flash messages
+  - Flash messages
          - Flash messages should be generated and translated in the controller, and the standard layout will display them. Normally nothing is required in views.
          - Complex forms may require further flash processing.
-   - Messages
+  - Messages
          - Occasionally, bespoke explanatory messages are required. Translations should be provided in the appropriate views.yml file.
 
 ### Error Handling
@@ -261,7 +261,7 @@ Errors are categorized as:
 
 - Bootstrap icons are used as graphical elements to support usability.
 - The gem bootstrap-icons-helper simplifies finding the icons (notoriously difficult with the recommended installation methods).
-- Icons have been copied to app/assets/icons. 
+- Icons have been copied to app/assets/icons.
 - If a new icon is required, search in <https://icons.getbootstrap.com>, find the name and use it. (The website doesn't include sorting facilities so it is not easy to find by function unless the name corresponds to the function.)
 - The helper method bs_icon(name) in app/helpers/bootstrap_icon_helper.rb is used to further simplify icon usage.
 - Typical usage is:
@@ -294,15 +294,15 @@ It is possible to create multiple tags referencing the same tagable element, des
 ### Pagination
 
 - **Issue**: The pagination system is not respecting the `per_page` parameter correctly.
-- **Symptoms**: 
+- **Symptoms**:  
   - The URL updates with the selected `per_page` value
   - The page size selector shows the correct selected value
   - However, the number of items displayed remains at the default (20)
-- **Affected Files**:
+- **Affected Files**:  
   - `app/controllers/concerns/page_sizeable.rb`
   - `app/views/shared/_page_size_selector.html.erb`
   - `test/system/page_size_selector_test.rb`
-- **Next Steps**:
+- **Next Steps**:  
   - Check if the pagination is being overridden by any default scopes
   - Verify the pagination parameters are being passed correctly to the database query
   - Add more detailed logging to trace the pagination flow
@@ -348,7 +348,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] The transition to rails 8 should have changed over the asset pipeline to use propshaft. This has not been done properly, needs to be rectified.
 - [x] Improve has_one validation on tagable, possibly include database constraint.
 - [x] Improve has_one validation on demandable, possibly include database constraint.
-   - Database constraints deferred due to risk of locking database. Continue with inclusion of orphans on admin index displays, and manual clean up.
+  - Database constraints deferred due to risk of locking database. Continue with inclusion of orphans on admin index displays, and manual clean up.
 - [x] Revisit the roles policy test. The roles policy is now using the role context from the controller, need to factor this into tests.
 - [x] Roles policy is delegating to resource policies for resource instances. Tests need to consider this.
 - [x] Ensure select for role names does not include restricted roles unless current user has app_owner role.
@@ -375,7 +375,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Expand tagable and scaffold generator tests to include all types and options.
 - [ ] Improve system test template for scaffold generator.
 - [ ] Scaffold generator check for valid module names is not working correctly.
-- [ ] Verify if two set of routes are really needed for tagables.
+- [x] Verify if two set of routes are really needed for tagables.
 - [ ] Review all use of the method underscore. It apparently is not aware of the OS and uses '/' as the separator. Use File.join wherever appropriate.
 - [ ] Fix module generator to use nested parent modules.
 - [ ] Provide a means for admins to edit tags to remove broken links to tagable.
@@ -384,8 +384,10 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Add model tests for read only attributes - documents, tags.
 - [x] Review security of all controllers wrt injection attacks.
 - [ ] Check that usage of accepts_nested_attributes_for is correct for tagable concern.
-- [ ] Fix previous and next functionality in tagable navigation, and generatise it for non tagables.
+- [ ] Fix previous and next functionality in tagable navigation, and generatise it for non tagables. All models next and prev should only look inside policy scope. At present can raise forbidden.
 - [ ] RBAC still has anomalous behaviour when resource wide roles are applied. Scope will include all projects, and alow selection of any project as current, but accessing the project without a specific role will result in forbidden. Either block resource wide roles or implement them in policies.
+- [ ] Clean up responsive views - test all on simulator.
+- [ ] Next
 
 ## Refactoring Opportunities
 
@@ -400,23 +402,22 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Change terminology and implementation from project owner to project manager.
 - [ ] Refactor projects controller and application controller setting of current project: `def after_sign_in_path_for(resource)to use app/controllers/concerns/current_project_concern.rb to reduce code duplication.
 - [ ] Tags:
-   - [x] Refactor tag 'description' to 'service'.
-   - [x] Add location attribute to tag, remove from all tagables.
-   - [ ] Add parent/child capability.
-- [x] Cable types: 
-   - [x] convert core material to enum.
-   - [x] convert insulation material to enum.
-   - [x] add volt rating enum.
+  - [x] Refactor tag 'description' to 'service'.
+  - [x] Add location attribute to tag, remove from all tagables.
+  - [ ] Add parent/child capability.
+- [x] Cable types:  
+  - [x] convert core material to enum.
+  - [x] convert insulation material to enum.
+  - [x] add volt rating enum.
 - [ ] Motors:
-   - [x] convert motor type to enum.
-   - [x] convert frame size to enum.
-   - [ ] build a ruby structure for ingress protection, convert ingress protection to this type.
+  - [x] convert motor type to enum.
+  - [x] convert frame size to enum.
+  - [ ] build a ruby structure for ingress protection, convert ingress protection to this type.
 - [ ] Redesign tag module:
-   - [x] base full tag becomes a virtual field.
-   - [x] builder/parser model for each discipline which creates the string according to the required format, and can parse the string back into the components.
-   - [x] provide default format for each discipline, e.g. isa5.1
-   - [x] add next/previous functionality
-   - [x] add colour code by discipline
+  - [x] builder/parser model for each discipline which creates the string according to the required format, and can parse the string back into the components.
+  - [x] provide default format for each discipline, e.g. isa5.1
+  - [x] add next/previous functionality
+  - [x] add colour code by discipline
 - [ ] Look at use of hover on buttons, and use turbo to prevent page refresh.
 - [x] Improve implementation of Discipline model, including translation. Consider using constants hash for each project.
 - [ ] Refactor colour system to use CSS variables.
@@ -425,23 +426,26 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Revise index views to use turbo for ransack searches.
 - [ ] Replace devise views with bespoke views in the style of the rest of the application.
 - [ ] Add user profile info.
-- [ ] Refactor RBAC system with functional roles limited to project scope, and project admin roles.
+- [x] Refactor RBAC system with functional roles limited to project scope, and project admin roles.
 - [ ] Refactor all controllers to use the preferred safe params expect rather than require.
 - [ ] Refactor test helpers to minimise code duplication, and simplify generation of new models.
 - [ ] Improve forbidden error logging messages, include user. Consider automatic sign out.
 - [ ] Move document issues to change module, generalise so it can be used for other entities (polymorphic).
 - [ ] Abstract controllers for project linked models, similar to tagables controller.
 - [ ] Add catalog required roles in disciplines, to allow different role for cable types and doc types, etc.
-- [ ] Cable types should belong to discipline, and the discipline should be "Electrical".
+- [ ] Refactor cable types to be core module available to electrical, instruments, telecoms (any module). Should belong to discipline.
 - [ ] Index views should preload permissions and not check every row.
-- [ ] Scafold generators should include enum configuration, or build a separate generator.
+- [ ] Scaffold generators should include enum configuration, or build a separate generator.
 - [ ] Include a valid value for fields in generators.
-- [ ] Switchboards can refer to circuits, and circuits can refer to switchboards, without the module prefix.
 - [ ] Consider whether the same improvement applies to demand.
-- [ ] Remove unnecessary namespacing within electrical module naming, e.g. switchboard has many electrical_circuits.
-- [ ] Transition documents to discipline nested.
+- [ ] Remove unnecessary namespacing within electrical module naming, e.g. switchboard has many electrical_circuits. Switchboards can refer to circuits, and circuits can refer to switchboards, without the module prefix.
+- [x] Transition documents to discipline nested.
 - [x] Transition cable types to core module, discipline nested. This should allow other disciplines (instrument, communication) to create appropriate cable types.
 - [ ] Revise index views to get credentials once and use for links, for all resources where the credentials are not granular, i.e. everything except projects and disciplines.
+- [ ] Refactor model translations with count.
+- [ ] Revert activerecord translations to convention with / instead of . key for module.
+- [ ] Rename project change module to change management.
+- [ ] Set up ransack to sort on translated attributes where relevant.
 
 ## Potential Features
 
@@ -449,18 +453,19 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Implement bulk import/export
 - [ ] Data revision management
 - [ ] Customize devise users:
-   - [ ] Add policy for users
-   - [ ] Allow users to self register through devise, edit their own profile and user name, email, password. 
-   - [ ] Insert an admin approval in the confirmation process
-   - [ ] Disable destroy, because the [future] change history will have links to users making changes. We may need to historise user name changes as well, that's a future problem. The revision management system may well include some sort of active/inactive status features.
+  - [ ] Add policy for users
+  - [ ] Allow users to self register through devise, edit their own profile and user name, email, password.
+  - [ ] Insert an admin approval in the confirmation process
+  - [ ] Disable destroy, because the [future] change history will have links to users making changes. We may need to historise user name changes as well, that's a future problem. The revision management system may well include some sort of active/inactive status features.
 - [ ] Customize error trapping:
-   - [x] Customize error trapping for Pundit::NotAuthorizedError
-   - [ ] Customize error trapping for unknown format
-   - [x] Customize error trapping for forbidden
+  - [x] Customize error trapping for Pundit::NotAuthorizedError
+  - [ ] Customize error trapping for unknown format
+  - [x] Customize error trapping for forbidden
 - [ ] Improve locale setting, and include language/currency/flag in locale selection. Include regions with fallback to language for most translations.
 - [x] Develop an application colour theme set. Consider discipline colour coding, also need to consider module colour coding.
 - [ ] Build an IP55 object to allow fully flexible reusable IP code generation.
 - [ ] Allow projects to add role names.
+- [ ] Add a generator for scaffolding nested models.
 
 ## Architecture Considerations
 

@@ -14,7 +14,7 @@
 
         <!-- New Button (Right) -->
         <% if policy(Electrical::Cable).new? %>
-            <%= link_to new_electrical.cable_path, 
+            <%= link_to discipline_new_electrical.cable_path(@discipline), 
               class: "btn btn-outline-primary actions",
               aria: { label: t('actions.new') },
               title: t('actions.new') do %>
@@ -26,7 +26,7 @@
     </div> <!-- end of card header -->
     <div class="card-body">
       <div class="row search-form">
-        <%= search_form_for @q do |f| %>
+        <%= search_form_for @q, url: discipline_electrical_cables_path(@discipline) do |f| %>
           <%= f.search_field :electrical_cable_type_code_cont,
                 class: "search_field",
                 placeholder: t('activerecord.models.electrical.cable_type') %>

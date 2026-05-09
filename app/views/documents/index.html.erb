@@ -13,8 +13,8 @@
         </div>
 
         <!-- New Button (Right) -->
-        <% if policy(Document).new? %>
-            <%= link_to new_document_path, 
+        <% if policy(@discipline.documents.build()).new? %>
+            <%= link_to new_discipline_document_path(@discipline), 
               class: "btn btn-outline-primary actions",
               aria: { label: t('actions.new') },
               title: t('actions.new') do %>
@@ -29,13 +29,13 @@
 
     <div class="card-body">
       <div class="row search-form">
-        <%= search_form_for @q do |f| %>
+        <%= search_form_for @q, url: discipline_documents_path(@discipline) do |f| %>
           <%= f.search_field :discipline_name_cont,
                 class: "search_field",
                 placeholder: t("activerecord.models.discipline") %>
           <%= f.search_field :doc_type_name_cont,
                 class: "search_field",
-                placeholder: t("activerecord.models.document_control.doc_type") %>
+                placeholder: t("activerecord.models.doc_type") %>
           <%= f.search_field :title_cont,
                 class: "search_field",
                 placeholder: t("activerecord.attributes.document.title") %>

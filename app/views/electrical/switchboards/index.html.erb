@@ -14,7 +14,7 @@
 
         <!-- New Button (Right) -->
         <% if policy(Electrical::Switchboard).new? %>
-            <%= link_to new_electrical_switchboard_path, 
+            <%= link_to new_discipline_electrical_switchboard_path(@discipline), 
               class: "btn btn-outline-primary actions",
               aria: { label: t('actions.new') },
               title: t('actions.new') do %>
@@ -27,7 +27,7 @@
     
     <div class="card-body">
       <div class="row search-form">
-        <%= search_form_for @q do |f| %>
+        <%= search_form_for @q, url: discipline_electrical_switchboards_path(@discipline) do |f| %>
           <%= f.search_field :voltage_rating_cont,
                 class: "search_field",
                 placeholder: t('activerecord.attributes.electrical.switchboard.voltage_rating') %>

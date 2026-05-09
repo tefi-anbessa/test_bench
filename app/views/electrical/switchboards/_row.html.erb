@@ -29,6 +29,7 @@
           <%= link_to new_tag_electrical_demand_path(row.tag.id),
             class: "btn btn-sm btn-outline-primary",
             title: text do %>
+              <%== bs_icon('link') %>
               <%= text %>
             <% end %>
         <% else %>
@@ -39,7 +40,7 @@
       <% end %>
     <% end %>
   </td>
-  <td><%= link_to row.electrical_circuits.count, electrical_switchboard_circuits_path(row) %></td>
+  <td><%= link_to row.circuits.count, electrical_switchboard_circuits_path(row) %></td>
   <td>
     <% if policy(row).show? %>
       <%= link_to row, class: "btn btn-outline-info btn-sm icon-link",

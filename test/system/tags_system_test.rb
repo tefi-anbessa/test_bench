@@ -1,10 +1,16 @@
 # frozen_string_literal: true
 require "helpers/test_setup_helpers"
+# frozen_string_literal: true
+require "helpers/test_setup_helpers"
+# frozen_string_literal: true
+require "helpers/test_setup_helpers"
 require "application_system_test_case"
 
 class TagsSystemTest < ApplicationSystemTestCase
   include Devise::Test::IntegrationHelpers
   include Warden::Test::Helpers
+  include TestSetupHelpers
+  include TestSetupHelpers
   include TestSetupHelpers
 
   setup do
@@ -23,14 +29,14 @@ class TagsSystemTest < ApplicationSystemTestCase
   end
 
   test "team member viewing the tags index" do
-    sign_in @team_member
-    # Navigate to select project page and choose a project
-    visit select_projects_path
-    choose @project.code
-    click_button I18n.t('helpers.submit.project_set')
+    sign_in_and_set_project @team_member, @project
+    # Mock current_project and pundit_user for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    # ApplicationController.any_instance.stubs(:pundit_user).returns(ApplicationPolicy::UserContext.new(@team_member, @project))
+    visit root_url
     
-    # Navigate to tags index
-    visit tags_path
+    # Click the tag index link
+    click_link(href: tags_path)
     assert_current_path tags_path
     assert_text I18n.t("tags.index.header", project: @project.code)
     assert page.title.include?(I18n.t("tags.index.title"))

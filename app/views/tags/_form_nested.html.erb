@@ -8,7 +8,7 @@
           <%= tag.persisted? ? t('actions.edit') : t('actions.new') %>
           <span data-tag-target="preview">
             <% if tag.persisted? %>
-              <%= [t('activerecord.models.tag'), tag.full_tag].join(': ') %>
+              <%= [t('activerecord.models.tag'), tag.long_label].join(': ') %>
             <% else %>
               <%= t('activerecord.models.tag') %>
             <% end %>
@@ -32,21 +32,6 @@
               min: 0,
               max: 10,
               title: t('activerecord.help.tag.stage') %>
-      </div>
-
-      <!-- Discipline -->
-      <div class="row">
-        <%= tag_f.select :discipline_id,
-              options_for_select(
-                  @disciplines.map { |label, name, id|
-                    translated_label = t("discipline.label.#{label}", default: label)
-                    translated_name = t("discipline.name.#{name}", default: name)
-                    ["#{translated_label}: #{translated_name}", id]
-                  },
-                tag.discipline_id
-              ),
-              { class: 'form-select' },
-              { data: { action: 'change->tag#updateFormStructure' } } %>
       </div>
 
       <!-- Prefix Fields - Dynamic based on discipline schema -->
@@ -102,10 +87,10 @@
 
       <!-- Tagable Type -->
       <div class="row">
-        <%= tag_f.select :tagable_type,
-              Tag.tagable_types,
-              { include_blank: t("form.none") },
-              { class: 'form-select' } %>
+        <%= tag_f.text_field :tagable_type,
+                label_col: "col-sm-3",
+                control_col: "col-sm-9",
+                disabled: true %>%
       </div>
   </div>
 

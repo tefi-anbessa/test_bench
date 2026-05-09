@@ -1,6 +1,6 @@
 <% provide(:title, t('.title')) %>
 <div class="container mt-3" style="<%= container_styles(@discipline.swatch) %>">
-  <!-- Discipline Header Card -->
+  <!-- Discipline Outer Card Header -->
   <div class="card mb-4" style="<%= container_styles(@discipline.swatch) %>">
     <div class="card-header p-2" style="<%= card_header_styles(@discipline.swatch) %>">
       <div class="row align-items-center">
@@ -10,7 +10,7 @@
             <!-- Index Button -->
             <% if policy(@discipline).index? %>
               <%= link_to project_disciplines_path(@project),
-                    class: "btn btn-sm btn-outline-secondary me-2",
+                    class: "btn btn-sm btn-outline-info me-2",
                     title: t('actions.index') do %>
                 <%== bs_icon('list-columns-reverse') %>
                 <span class="d-none d-md-inline"><%= t('actions.index') %></span>
@@ -38,10 +38,9 @@
         <div class="col text-center">
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
-              <span class="badge fs-6" style="<%= badge_styles(@discipline.swatch) %>">
-                <%= t('.header', project: @project.label, label: @discipline.label)%>
+              <span class="badge fs-5" style="<%= badge_styles(@discipline.swatch) %>">
+                <%= t('.header', label: @discipline.long_label)%>
               </span>
-              <small class="text-muted ms-2"><%= @discipline.name %></small>
             </div>
           </div>
         </div>
@@ -89,6 +88,17 @@
                   </span>
                 <% end %>
               <% end %>
+
+              <% if policy(@project.disciplines.build()).new? %>
+                <%= link_to new_project_discipline_path(@discipline.project),
+                      class: "btn btn-outline-primary",
+                      title: t('actions.new') do %>
+                  <%== bs_icon('plus-square-fill') %>
+                  <span class="d-none d-md-inline">
+                    <%= t('actions.new') %>
+                  </span>
+                <% end %>
+              <% end %>
             </div>
           </div>
         </div>
@@ -99,33 +109,32 @@
       <div class="card-body">
         <div class="row justify-content-center">
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-            <!-- Project Card -->
-            <% if @project.present? %>
-              <div class="row g-3 mb-3">
-                  <%= render 'projects/card', object: @project %>
-              </div>
-            <% else %>
-              <div class="row g-3 mb-3">
-                <div class="alert alert-danger">
-                  <%= t('show.orphan', model: Project.model_name.human.downcase) %>
-                </div>
-              </div>
-            <% end %>
-
             <!-- Discipline Details Card -->
             <div class="row">
               <div class="card mb-4" style="<%= card_styles(@discipline.swatch) %>">
                 <div class="card-body p-3">
+                  <div class="row mb-1">
+                    <div class="col-4 text-muted"><%= t('activerecord.attributes.discipline.notes') %></div>
+                    <div class="col-8"><%= @discipline.notes || '-' %></div>
+                  </div> <!-- end row -->
 
                   <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.discipline.label') %></div>
-                    <div class="col-8"><%= @discipline.label %></div>
+                    <div class="col-4 text-muted"><%= t('activerecord.attributes.discipline.required_role') %></div>
+                    <div class="col-8"><%= @discipline.required_role || '-' %></div>
                   </div>
-                
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.discipline.name') %></div>
-                    <div class="col-8"><%= @discipline.name %></div>
-                  </div>
+
+                  <!-- Project Card -->
+                  <% if @project.present? %>
+                    <div class="row mb-3">
+                        <%= render 'projects/card', object: @project %>
+                    </div>
+                  <% else %>
+                    <div class="row mb-3">
+                      <div class="alert alert-danger">
+                        <%= t('show.orphan', model: Project.model_name.human.downcase) %>
+                      </div>
+                    </div>
+                  <% end %>
 
                   <% if @discipline.prefix_schema.present? %>
                     <%= render 'disciplines/prefix_schema_card', 
@@ -137,11 +146,6 @@
                     </div>
                   <% end %>
 
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.discipline.required_role') %></div>
-                    <div class="col-8"><%= @discipline.required_role || '-' %></div>
-                  </div>
-
                   <% if @discipline.swatch.present? %>
                     <%= render 'swatches/card', 
                       object: @discipline.swatch %>
@@ -151,14 +155,33 @@
                       <div class="col-8"><%= @discipline.swatch.name %></div>
                     </div>
                   <% end %>
-
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.discipline.notes') %></div>
-                    <div class="col-8"><%= @discipline.notes || '-' %></div>
-                  </div> <!-- end row -->
                 </div> <!-- end discipline details card-body -->
               </div> <!-- end discipline card -->
             </div> <!-- end row -->
+            
+            <!-- Tags and Documents Links -->
+            <div class="row mb-3">
+              <div class="d-flex gap-2">
+                <%= link_to discipline_tags_path(@discipline),
+                      class: "btn btn-outline-secondary",
+                      title: t('activerecord.models.tag', count: @discipline.tags.count) do %>
+                  <%== bs_icon('tags') %>
+                  <%= t('activerecord.models.tag', count: @discipline.tags.count) %>
+                  <span class="badge bg-secondary ms-1"><%= @discipline.tags.count %></span>
+                <% end %>
+                
+                <%= link_to discipline_documents_path(@discipline),
+                      class: "btn btn-outline-secondary",
+                      title: t('activerecord.models.document', count: @discipline.documents.count) do %>
+                  <%== bs_icon('file-earmark-text') %>
+                  <%= t('activerecord.models.document', count: @discipline.documents.count) %>
+                  <span class="badge bg-secondary ms-1"><%= @discipline.documents.count %></span>
+                <% end %>
+              </div>
+            </div>
+            
+            <!-- Users Section -->
+            <%= render 'users/users', users: @users, label: @discipline.long_label, project: @discipline.project %>
           </div> <!-- end col -->
         </div> <!-- end justify content row -->
       </div> <!-- end card-body -->

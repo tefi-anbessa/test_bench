@@ -1,0 +1,41 @@
+# frozen_string_literal: true
+
+# Source format is a simple collection of software application references, used to avoid duplication. 
+# The collection is not project related, so any entry is available to all.
+# It is linked to document issues, so a document may change its source format through its life cycle.
+# Avoid using the reverse relationship, unless project context is carefully managed.
+class SourceFormat < ApplicationRecord
+
+# Associatons
+has_many :issues
+
+# Presence validation for required fields.
+validates :title, presence: true, length: { maximum: 50 }
+
+# Uniqueness validation for unique fields.
+validates :revision, uniqueness: { scope: :title }, length: { maximum: 20 }
+
+validates :file_extension, length: { maximum: 10 }, format: { with: /\A\./ }
+  
+def label
+  "#{title} #{revision}"
+end
+
+def self.required_role
+  :document_controller
+end
+
+def self.swatch
+  Swatch.find_by(name: "app_theme")
+end
+
+private
+
+  def self.ransackable_attributes(auth_object = nil)
+    [:vendor, :title, :file_extension, :revision, :notes, :created_at, :updated_at]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    [ :issues ]
+  end
+end

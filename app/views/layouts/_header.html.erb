@@ -78,7 +78,7 @@
             <% end %> <!-- Project section -->
 
             <!-- Change section: if access is available to change models, make a dropdown menu -->
-            <% if policy(ProjectChange::Request).new? %> 
+            <% if current_project && policy(current_project.change_requests.build()).new? %> 
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle"
                     href="#"
@@ -91,21 +91,11 @@
                 <ul class="dropdown-menu" aria-labelledby="project-change-menu-btn">
                   <% if policy(ProjectChange::Request).index? %>
                     <li><%= link_to t('project_change.requests.index.title'),
-                          project_change_requests_path,
+                          project_project_change_requests_path(current_project),
                           class: "dropdown-item" %></li>
                   <% end %>
                 </ul>
               </li> <!-- Change dropdown -->
-
-            <!-- Otherwise, provide a simple change register link -->
-            <% else %>
-              <li class="nav-item">
-                <% test = t('project_change.request', scope: 'activerecord.models').pluralize %>
-                <%= link_to test,
-                  project_change_requests_path,
-                  class: 'nav-link',
-                  aria: { label: test } %>
-              </li>
             <% end %>
 
             <!-- User section -->
@@ -129,7 +119,7 @@
                   edit_user_registration_path,
                   class: "dropdown-item" %>
               </li>
-              <% if current_user.is_admin? || current_user.is_app_owner? %>
+              <% if policy(current_user).index? %>
                 <li>
                   <%= link_to t('user', scope: 'activerecord.models').pluralize,
                     users_path,

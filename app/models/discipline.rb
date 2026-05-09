@@ -8,7 +8,7 @@ class Discipline < ApplicationRecord
   has_many :tags, dependent: :destroy
   has_many :documents, dependent: :destroy
   has_many :electrical_cable_types, class_name: 'Electrical::CableType', dependent: :destroy
-  has_many :doc_types, class_name: 'DocumentControl::DocType', dependent: :destroy
+  has_many :doc_types, dependent: :destroy
 
   # Scopes
   default_scope { order(project_id: :asc, label: :asc) }
@@ -20,6 +20,10 @@ class Discipline < ApplicationRecord
   validates :prefix_schema, presence: true
   validate :validate_required_role
   validate :validate_prefix_schema
+
+  def long_label
+    "#{label}: #{name}"
+  end
 
   def self.required_role
     :project_admin

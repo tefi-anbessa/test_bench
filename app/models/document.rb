@@ -6,8 +6,8 @@ class Document < ApplicationRecord
   # Associatons
   belongs_to :discipline
   delegate :project, to: :discipline
-  belongs_to :doc_type, class_name: "DocumentControl::DocType"
-  has_many :issues, class_name: "DocumentControl::Issue"
+  belongs_to :doc_type
+  has_many :issues, dependent: :destroy
 
   # Default scope to sort by document number
   default_scope { order(:doc_number) }
@@ -49,8 +49,8 @@ class Document < ApplicationRecord
                             .maximum(:serial) || 0
         self.serial = max_serial.to_i + 1
         
-        separator = Constants.document_control.separator
-        self.doc_number = "#{discipline.project.label}#{separator}#{discipline.label}#{separator}#{doc_type.code}#{separator}#{serial.to_s.rjust(Constants.document_control.serial_digits, '0')}"
+        separator = Constants.documents.separator
+        self.doc_number = "#{discipline.project.label}#{separator}#{discipline.label}#{separator}#{doc_type.code}#{separator}#{serial.to_s.rjust(Constants.documents.serial_digits, '0')}"
         
         # Continue with the create (yield runs the actual save)
         yield

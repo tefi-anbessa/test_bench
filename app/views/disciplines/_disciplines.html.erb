@@ -1,30 +1,98 @@
+<!-- List project disciplines for project dashboard -->
 <% project = object %>
-<%= render 'components/collapsible',
-  id: "disciplines_index",
-  title: t('disciplines.index.header', project: @project.label),
-  expanded: params[:disciplines_expanded] == '1',
-  header_class: 'py-1' do %>
-  
-    <div class="container-fluid">
-      <% if policy(Discipline).new? %>
-        <%= link_to new_project_discipline_path(@project),
-              class: "btn btn-outline-primary actions",
-              data: { turbo: false },
-              aria: { label: t('actions.new') },
-              title: t('actions.new') do %>
-          <%== bs_icon('plus-square-fill') %>
-          <%= [t('actions.new'), t('activerecord.models.discipline')].join(' ') %>
-        <% end %>
+<% disciplines = project.disciplines.where.not(id: nil) %>
+<!-- Disciplines Dashboard Panel -->
+<div class="card mb-4" style="<%= card_styles(@swatch) %>">
+  <div class="card-header d-flex justify-content-between align-items-center py-2" style="<%= card_header_styles(@swatch) %>">
+    <h5 class="mb-0"><%= t('disciplines.index.header', project: @project.label) %></h5>
+    <% if policy(project.disciplines.build()).new? %>
+      <%= link_to new_project_discipline_path(@project),
+            class: "btn btn-outline-primary btn-sm",
+            data: { turbo: false },
+            aria: { label: t('actions.new') } do %>
+        <%== bs_icon('plus') %>
+        <%= t('actions.new') %>
       <% end %>
-      <div class="table-responsive">
-        <table class="table table-sm table-striped">
-          <%= render 'disciplines/header', q: @q %>
-          <tbody>
-            <% @disciplines.each do |discipline| %>
-              <%= render 'disciplines/row', discipline: discipline %>
+    <% end %>
+  </div>
+  
+  <div class="card-body p-3">
+    <% disciplines.each do |discipline| %>
+      <div class="row align-items-center py-2 border-bottom">
+        <!-- Discipline Name Column -->
+        <div class="col-md-4">
+          <%= link_to discipline, 
+              class: "fw-bold text-decoration-none",
+              style: "color: #{discipline.swatch&.text || '#000'}" do %>
+            <%= discipline.label %>:
+            <%= discipline.name %>
+          <% end %>
+        </div>
+        
+        <!-- Counts Column -->
+        <div class="col-md-4">
+          <div class="d-flex gap-2">
+            <%= link_to discipline_tags_path(discipline),
+                class: "btn btn-outline-secondary btn-sm",
+                aria: { 
+                  label: t('activerecord.models.tag', count: discipline.tags.count)
+                } do %>
+              <%== bs_icon('tag') %>
+              <%= t('activerecord.models.tag', count: discipline.tags.count) %>
+              <span class="badge bg-secondary ms-1"><%= discipline.tags.count %></span>
             <% end %>
-          </tbody>
-        </table>
+            
+            <%= link_to discipline_documents_path(discipline),
+                class: "btn btn-outline-secondary btn-sm",
+                aria: { 
+                  label: t('activerecord.models.document', count: discipline.documents.count)
+                } do %>
+              <%== bs_icon('file') %>
+              <%= t('activerecord.models.document', count: discipline.documents.count) %>
+              <span class="badge bg-secondary ms-1"><%= discipline.documents.count %></span>
+            <% end %>
+          </div>
+        </div>
+        
+        <!-- Actions Column -->
+        <div class="col-md-4 text-end">
+          <div class="d-flex gap-1 justify-content-end">
+            <% if policy(discipline).show? %>
+              <%= link_to discipline_path(discipline),
+                    class: "btn btn-outline-info btn-sm",
+                    aria: { label: t('actions.show') } do %>
+                <%== bs_icon('eye') %>
+                <%= t('actions.show') %>
+              <% end %>
+            <% end %>
+            
+            <% if policy(discipline).edit? %>
+              <%= link_to edit_discipline_path(discipline),
+                    class: "btn btn-outline-warning btn-sm",
+                    aria: { label: t('actions.edit') } do %>
+                <%== bs_icon('pencil') %>
+                <%= t('actions.edit') %>
+              <% end %>
+            <% end %>
+            
+            <% if policy(discipline).destroy? %>
+              <%= link_to discipline_path(discipline),
+                      data: { method: :delete, confirm: t('actions.delete_sure') },
+                      class: "btn btn-outline-danger btn-sm",
+                      aria: { label: t('actions.delete') } do %>
+                <%== bs_icon('trash') %>
+                <%= t('actions.delete') %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
       </div>
-    </div>
-  <% end %>
+    <% end %>
+    
+    <% if disciplines.empty? %>
+      <div class="text-center text-muted py-3">
+        <%= t('disciplines.index.empty') %>
+      </div>
+    <% end %>
+  </div>
+</div>

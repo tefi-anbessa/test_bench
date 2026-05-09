@@ -13,6 +13,7 @@
     </div>
 
     <%= bootstrap_form_with(model: motor,
+          url: discipline_electrical_motors_path(@discipline),
           layout: :horizontal,
           label_col: "col-sm-4",
           control_col: "col-sm-8",
@@ -133,7 +134,7 @@
 
             <!-- Card Footer with Actions -->
             <div class="card-footer bg-transparent text-end p-2">
-              <%= link_to(motor.persisted? ? motor : electrical_motors_path,
+              <%= link_to(motor.persisted? ? motor : discipline_electrical_motors_path(@discipline),
                     class: 'btn btn-warning',
                     data: { confirm: t('actions.sure'), turbo: false }) do %>
                 <%= t('actions.discard') %>

@@ -1,0 +1,10 @@
+<thead>
+  <% unless current_project %>
+    <th scope="col"><%= sort_link(@q, :project_code, Project.model_name.human) %></th>
+  <% end %>
+  <th scope="col"><%= sort_link(@q, :discipline, t("activerecord.models.discipline")) %></th>
+  <th scope="col"><%= sort_link(@q, :code, t("activerecord.attributes.doc_type.code")) %></th>
+  <th scope="col"><%= sort_link(@q, :name, t("activerecord.attributes.doc_type.name")) %></th>
+  <th scope="col"><%= sort_link(@q, :description, t("activerecord.attributes.doc_type.description")) %></th>
+  <th scope="col" width="150px"><%= t('table.links')%></th>
+</thead>

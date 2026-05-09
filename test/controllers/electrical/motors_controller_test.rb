@@ -16,7 +16,7 @@ module Electrical
     end
 
     # Set the minimum required params for a valid resource
-    def valid_resource_params
+    def create_params
       {
         motor_type: :induction,
         frame_size: '132',
@@ -28,7 +28,7 @@ module Electrical
     end
 
     # Set invalid resource params for tests
-    def invalid_resource_param
+    def invalid_param
       { motor_type: 999 }  # Invalid motor type (enum only allows 0-7)
     end
 

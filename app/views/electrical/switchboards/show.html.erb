@@ -9,7 +9,7 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@switchboard).index? %>
-              <%= link_to electrical_switchboards_path,
+              <%= link_to discipline_electrical_switchboards_path(@discipline),
                     class: "btn btn-sm btn-outline-secondary me-2",
                     title: t('actions.index') do %>
                 <%== bs_icon('list-columns-reverse') %>
@@ -88,6 +88,18 @@
                   <%== bs_icon('trash') %>
                   <span class="d-none d-md-inline">
                     <%= t('actions.delete') %>
+                  </span>
+                <% end %>
+              <% end %>
+
+              <% if policy(@switchboard).new? %>
+                <%= link_to new_discipline_electrical_switchboards_path(@discipline),
+                  class: "btn btn-outline-primary actions",
+                  aria: { label: t('actions.new') },
+                  title: t('actions.new') do %>
+                  <%== bs_icon('plus-square-fill') %>
+                  <span class="ms-1">
+                    <%= [t('actions.new'), t('activerecord.models.electrical.switchboard.one')].join(' ') %>
                   </span>
                 <% end %>
               <% end %>
@@ -179,7 +191,7 @@
 
                   <div class="row mb-1">
                     <div class="col-4 text-muted"><%= @switchboard.class.human_attribute_name(:circuit).pluralize %></div>
-                    <div class="col-8"><%= @switchboard.electrical_circuits.count || '-' %></div>
+                    <div class="col-8"><%= @switchboard.circuits.count || '-' %></div>
                   </div>
                   
                   <div class="row mb-1">

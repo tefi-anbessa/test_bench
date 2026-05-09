@@ -10,7 +10,7 @@ module <%= module_name %>
 
     # GET /<%= controller_file_path %>
     def index
-      authorize <%= class_name %>, :index?
+      authorize <%= class_name %>.new()
       @q = policy_scope(<%= class_name %>).ransack(params[:q])
       @pagy, @<%= plural_name %> = pagy(@q.result, limit: 20)
     end
@@ -84,7 +84,8 @@ module <%= module_name %>
     private
 
       def set_<%= singular_name %>
-        @<%= singular_name %> = <%= class_name %>.find(params[:id])
+        @<%= singular_name %> = policy_scope(<%= class_name %>).find_by!(id: params[:id])
+        raise ApplicationController::ConflictError, :out_of_scope if @<%= singular_name %>.nil?
       end
 
       def set_swatch

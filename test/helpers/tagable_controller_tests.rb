@@ -50,19 +50,19 @@ module TagableControllerTests
   end
 
   def test_unauthenticated_users_are_redirected_to_sign_in
-    get :index
+    get :index, params: { discipline_id: @discipline.id }
     assert_unauthenticated
   end
 
   def test_regular_user_cannot_access_index
     sign_in_and_set_project(@regular_user, @project)
-    get :index
-    assert_forbidden
+    get :index, params: { discipline_id: @discipline.id }
+    assert_conflict # out of scope
   end
 
   def test_team_member_can_access_index
     sign_in_and_set_project(@team_member, @project)
-    get :index
+    get :index, params: { discipline_id: @discipline.id }
     assert_response :success
   end
 
@@ -95,7 +95,7 @@ module TagableControllerTests
 
   def test_accredited_user_can_access_new_form_with_no_tag
     sign_in_and_set_project(@accredited_user, @project)
-    get :new
+    get :new, params: { discipline_id: @discipline.id }
     assert_response :success
   end
 
@@ -114,10 +114,11 @@ module TagableControllerTests
 
   def test_accredited_user_can_create_new_resource_and_tag
     sign_in_and_set_project(@accredited_user, @project)
-    # [TODO] add check of tag count as well
+    before_tag_count = Tag.count
     assert_difference("#{resource_class}.count", 1) do
       post :create, params: params_with_new_tag
     end
+    assert_equal Tag.count, before_tag_count + 1
     # Find the created resource and tag
     created_tag = Tag.find_by(params_with_new_tag[resource_name][:tag].merge(tagable_type: resource_class.name).except(:tagable_id))
     assert_redirected_to created_tag.tagable
@@ -158,20 +159,20 @@ module TagableControllerTests
     assert_conflict
   end
 
-  def test_cannot_create_with_existing_tag_and_invalid_resource_param
-    skip "Invalid resource param not defined" unless invalid_resource_param.present?
+  def test_cannot_create_with_existing_tag_and_invalid_param
+    skip "Invalid param not defined" unless invalid_param.present?
     sign_in_and_set_project(@accredited_user, @project)
     assert_no_difference("#{resource_class}.count") do
-      post :create, params: params_with_new_tag.deep_merge(resource_name => invalid_resource_param)
+      post :create, params: params_with_new_tag.deep_merge(resource_name => invalid_param)
     end
 
-    if invalid_resource_param.keys.any? { |key| 
+    if invalid_param.keys.any? { |key| 
           resource_class.defined_enums.key?(key.to_s) && 
-          invalid_resource_param[key].present? && 
-          !resource_class.defined_enums[key.to_s].include?(invalid_resource_param[key])
+          invalid_param[key].present? && 
+          !resource_class.defined_enums[key.to_s].include?(invalid_param[key])
         }
       # Invalid enum values should raise conflict error
-        assert_conflict
+      assert_conflict
     else
       # Regular validation errors should render form with errors
       assert_response :unprocessable_content
@@ -191,15 +192,15 @@ module TagableControllerTests
   end
 
   def test_cannot_create_both_with_invalid_resource
-    skip "Invalid resource param not defined" unless invalid_resource_param.present?
+    skip "Invalid param not defined" unless invalid_param.present?
     sign_in_and_set_project(@accredited_user, @project)
     assert_no_difference("#{resource_class}.count") do
-      post :create, params: params_with_new_tag.deep_merge(resource_name => invalid_resource_param)
+      post :create, params: params_with_new_tag.deep_merge(resource_name => invalid_param)
     end
-    if invalid_resource_param.keys.any? { |key| 
+    if invalid_param.keys.any? { |key| 
           resource_class.defined_enums.key?(key.to_s) && 
-          invalid_resource_param[key].present? && 
-          !resource_class.defined_enums[key.to_s].include?(invalid_resource_param[key])
+          invalid_param[key].present? && 
+          !resource_class.defined_enums[key.to_s].include?(invalid_param[key])
         }
       # Invalid enum values should return conflict response
       assert_conflict
@@ -245,16 +246,16 @@ module TagableControllerTests
   end
 
   def test_accredited_user_cannot_update_with_invalid_param
-    skip "Invalid resource param not defined" unless invalid_resource_param.present?
+    skip "Invalid param not defined" unless invalid_param.present?
     sign_in_and_set_project(@accredited_user, @project)
     original_value = @resource.send(update_attribute_name)
     patch :update, params: 
-      { id: @resource.id, resource_name => { update_attribute_name => updated_attribute_value }.merge(invalid_resource_param) }
+      { id: @resource.id, resource_name => { update_attribute_name => updated_attribute_value }.merge(invalid_param) }
 
-    if invalid_resource_param.keys.any? { |key|
+    if invalid_param.keys.any? { |key|
           resource_class.defined_enums.key?(key.to_s) &&
-          invalid_resource_param[key].present? &&
-          !resource_class.defined_enums[key.to_s].include?(invalid_resource_param[key])
+          invalid_param[key].present? &&
+          !resource_class.defined_enums[key.to_s].include?(invalid_param[key])
         }
       # Invalid enum values should return conflict response
       assert_conflict
@@ -308,8 +309,7 @@ module TagableControllerTests
 
     def resource_index_path
       # Handle both namespaced and non-namespaced resources
-      path_helper = "#{resource_name.to_s.pluralize}_path".to_sym
-      send(path_helper)
+      send("discipline_#{resource_name.to_s.pluralize}_path", @discipline)
     end
 
     def new_tag_params
@@ -327,16 +327,20 @@ module TagableControllerTests
 
     # These methods may be overridden by the including test class
     def params_with_existing_tag
-      { tag_id: @unassigned_tag.id, resource_name => valid_resource_params }
+      { tag_id: @unassigned_tag.id, resource_name => create_params }
     end
 
     # [TODO] - a more reliable way of generating a unique serial number would be a good idea.
     def params_with_new_tag
-      { resource_name => valid_resource_params.merge(new_tag_params) }
+      { discipline_id: @discipline.id, resource_name => create_params.merge(new_tag_params) }
     end
 
-    def valid_resource_params
-      raise NotImplementedError, "Including class must implement valid_resource_params"
+    def create_params
+      raise NotImplementedError, "Including class must implement create_params"
+    end
+
+    def invalid_param
+      raise NotImplementedError, "Including class must implement invalid_param"
     end
 
     def updated_attribute_value(original_value)

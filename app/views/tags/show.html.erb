@@ -1,4 +1,4 @@
-<% content_for :title, "#{t('activerecord.models.tag') + ' ' + @tag.full_tag}" %>
+<% content_for :title, t('.title') %>
 <div class="container mt-3 themed" style="<%= swatch_variables(@swatch) %>">
   <!-- Tag Header Card -->
   <div class="card mb-4">
@@ -8,7 +8,7 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Index Button -->
-            <%= link_to tags_path,
+            <%= link_to discipline_tags_path(@discipline),
                   class: "btn btn-sm btn-outline-secondary me-2",
                   title: t('actions.index') do %>
               <%== bs_icon('list-columns-reverse') %>
@@ -38,11 +38,8 @@
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
               <span class="badge fs-6">
-                <%= [t('activerecord.models.tag'), @tag.full_tag].join(': ') %>
+                <%= t('.header', label: [@tag.full_tag, @tag.service].compact.join(' - ')) %>
               </span>
-              <% if @tag.service.present? %>
-                <small class="text-muted ms-2"><%= @tag.service %></small>
-              <% end %>
             </div>
           </div>
         </div>
@@ -92,7 +89,7 @@
               <% end %>
 
               <% if policy(@tag).new? %>
-                <%= link_to new_tag_path, 
+                <%= link_to new_discipline_tag_path(@discipline), 
                   class: "btn btn-outline-primary actions",
                   aria: { label: t('actions.new') },
                   title: t('actions.new') do %>
@@ -205,7 +202,7 @@
                 <% if @tag.tagable_type.present? %>
                   <% if Tag.tagable_types.include?(@tag.tagable_type) %>
                     <% text = @tag.tagable_type.constantize.model_name.name.sub('::', ' ') %>
-                    <% if policy(@tag.tagable_type.constantize).new? %>
+                    <% if policy(@tag.build_tagable()).new? %>
                       <!-- Setup a link to create the tagable. -->
                       <% resource = @tag.tagable_type.constantize.model_name.singular %>
                       <%= link_to eval("new_tag_#{resource}_path(#{@tag.id})"),

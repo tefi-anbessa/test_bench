@@ -47,7 +47,7 @@ module Electrical
       def resource_params
         params.require(:electrical_socket_cct).permit(:socket_type, :quantity, :notes,
           tag: [
-            :id, :project_id, :discipline_id, :prefix, :serial,
+            :discipline_id, :prefix, :serial,
             :suffix, :service, :stage, :notes, :tagable_type
           ])
       end

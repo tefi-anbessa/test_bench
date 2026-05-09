@@ -8,7 +8,7 @@ module Electrical
       if @switchboard.present?
         # Cater for index on given switchboard
         authorize @switchboard
-        @q = @switchboard.electrical_circuits.ransack(params[:q])
+        @q = @switchboard.circuits.ransack(params[:q])
         @pagy, @circuits = pagy(@q.result)
       else
         # Cater for index on all circuits in current project
@@ -21,13 +21,13 @@ module Electrical
     end
     
     def show
-      authorize @circuit.electrical_switchboard
+      authorize @circuit.switchboard
       set_swatch
     end
     
     def new
       authorize @switchboard
-      @circuit = @switchboard.electrical_circuits.new
+      @circuit = @switchboard.circuits.new
       setup_form
     end
     
@@ -35,7 +35,7 @@ module Electrical
       authorize @switchboard
       # Catch enum validation errors
       begin
-        @circuit = @switchboard.electrical_circuits.build
+        @circuit = @switchboard.circuits.build
         @circuit.assign_attributes(circuit_params.except(:cable))
       rescue ArgumentError => _
         # Handle invalid enum values as a conflict
@@ -63,7 +63,7 @@ module Electrical
           end
         end
         flash[:success] = [t("flash.create.notice",
-                          resource_name: t("activerecord.models.electrical.circuit"))]
+                          resource_name: t("activerecord.models.electrical.circuit.one"))]
         flash[:success] << t("flash.assigned",
           resource_name: t("activerecord.attributes.electrical.circuit.feeder")) if @feeder.present?
         flash[:success] << t("flash.assigned",
@@ -73,7 +73,7 @@ module Electrical
         # Handle validation errors
         setup_form
         flash.now[:alert] = t("flash.create.alert", 
-          resource_name: t("activerecord.models.electrical.circuit").downcase)
+          resource_name: t("activerecord.models.electrical.circuit.one").downcase)
         render :new, status: :unprocessable_content
       end
     end
@@ -131,8 +131,8 @@ module Electrical
             end
           end
         end
-        flash[:success] = [t("flash.actions.update.notice",
-                          resource_name: t("activerecord.models.electrical.circuit"))]
+        flash[:success] = [t("flash.update.notice",
+                          resource_name: t("activerecord.models.electrical.circuit.one"))]
         flash[:success] << t("flash.assigned",
           resource_name: t("activerecord.attributes.electrical.circuit.feeder")) if @feeder.present?
         flash[:success] << t("flash.assigned",
@@ -141,7 +141,7 @@ module Electrical
       rescue ActiveRecord::RecordInvalid
         # Handle validation errors
         flash.now[:alert] = t("flash.update.alert",
-          resource_name: t("activerecord.models.electrical.circuit").downcase)
+          resource_name: t("activerecord.models.electrical.circuit.one").downcase)
         setup_form
         render :edit, status: :unprocessable_content
       end
@@ -198,11 +198,11 @@ module Electrical
       end
       
       def set_circuit
-        @circuit = Electrical::Circuit.joins(:electrical_switchboard)
+        @circuit = Electrical::Circuit.joins(:switchboard)
               .merge(policy_scope(Electrical::Switchboard))
               .find_by(id: params[:id])
         raise ApplicationController::ConflictError, :out_of_scope if @circuit.nil?
-        @switchboard = @circuit.electrical_switchboard
+        @switchboard = @circuit.switchboard
       end
 
       def set_swatch

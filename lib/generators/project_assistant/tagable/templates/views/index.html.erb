@@ -14,7 +14,7 @@
 
         <!-- New Button (Right) -->
         <%% if policy(<%= class_name %>).new? %>
-            <%%= link_to new_<%= singular_table_name %>_path, 
+            <%%= link_to new_discipline_<%= singular_route_name %>_path(@discipline), 
               class: "btn btn-outline-primary actions",
               aria: { label: t('actions.new') },
               title: t('actions.new') do %>
@@ -29,7 +29,7 @@
 
     <div class="card-body">
       <div class="row search-form">
-        <%%= search_form_for @q do |f| %>
+        <%%= search_form_for @q, discipline_<%= plural_route_name %>_path(@discipline) do |f| %>
         <%- @fields.select { |field| SEARCHABLE_TYPES.include?(field[:type]) }.each do |field| -%>
           <%%= f.search_field :<%= field[:name] %>_cont,
                 class: "search_field",

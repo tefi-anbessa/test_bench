@@ -7,7 +7,7 @@ class TagsController < ApplicationController
 
   # GET /tags or /tags.json
   def index
-    authorize Tag
+    authorize @discipline.tags.build()
     @q = policy_scope(Tag).ransack(params[:q])
     @pagy, @tags = pagy(@q.result.includes(discipline: :project), limit: 20)
   end
@@ -19,17 +19,17 @@ class TagsController < ApplicationController
 
   # GET /tags/new
   def new
-    authorize @tag = @discipline.tag.build()
+    authorize @tag = @discipline.tags.build()
   end
 
   # POST /tags or /tags.json
   def create
-    @tag = authorize Tag.new(tag_params)
+    @tag = authorize @discipline.tags.build(tag_params)
     if @tag.save
-      flash[:success] = I18n.t('flash.create.notice', resource_name: I18n.t('activerecord.models.tag'))
+      flash[:success] = I18n.t('flash.create.notice', resource_name: I18n.t('activerecord.models.tag.one'))
       redirect_to @tag
     else
-      flash[:alert] = I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.tag'))
+      flash[:alert] = I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.tag.one'))
       set_swatch
       render :new, status: :unprocessable_content
     end
@@ -44,11 +44,11 @@ class TagsController < ApplicationController
   def update
     authorize @tag
     if @tag.update(tag_params)
-      flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.tag'))
+      flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.tag.one'))
       redirect_to @tag
     else
       flash[:alert] = I18n.t('flash.update.alert', 
-      resource_name: I18n.t('activerecord.models.tag'))
+      resource_name: I18n.t('activerecord.models.tag.one'))
       set_swatch
       render :edit, status: :unprocessable_content
     end
@@ -59,11 +59,11 @@ class TagsController < ApplicationController
     authorize @tag
     if @tag.destroy
       flash[:success] = I18n.t('flash.destroy.notice', 
-        resource_name: I18n.t('activerecord.models.tag'))
+        resource_name: I18n.t('activerecord.models.tag.one'))
       redirect_back fallback_location: discipline_tags_path(@discipline)
     else
       flash.now[:danger] = I18n.t('flash.destroy.alert', 
-        resource_name: I18n.t('activerecord.models.tag'))
+        resource_name: I18n.t('activerecord.models.tag.one'))
       render :show, status: :unprocessable_content
     end
   end

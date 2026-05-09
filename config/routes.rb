@@ -25,61 +25,53 @@ Rails.application.routes.draw do
       # Project nested resources
       resources :disciplines, shallow: true do
         get :schema, on: :member, constraints: { format: 'json' }
-      end
-    end
-
-    namespace :document_control do
-        resources :source_formats
-    end
-
-    # Top-level disciplines routes (shallow from projects nesting)
-    resources :disciplines, only: [], shallow: true do
-      resources :tags, :documents
-      namespace :document_control do
+        # Discipline nested resources
+        # Tagable models have discipline level new and create routes to allow creation 
+        # of tagable and tag in a single operation
+        # Tagables override index from the shallow nesting under tags, 
+        # there is no sense in nesting a 1:1 relationship.
+        namespace :electrical do
+          # INSERTION POINT 1 FOR SUBMODULES
+          # INSERTION POINT 1 FOR TAGABLE GENERATOR
+          resources :heaters, :cables, :motors, :light_ccts, 
+                    :socket_ccts, only: [:index, :new, :create]
+          resources :switchboards, only: [:index, :new, :create] do
+            resources :circuits, shallow: true
+          end
+          # Define discipline level index routes for circuits, demands, to allow complete 
+          # discipline load listings.
+          resources :circuits, :demands, only: [:index]
+        end # electrical namespace
+        # INSERTION POINT 1 FOR MODULE GENERATOR
+        resources :tags, shallow: true do
+          # tagables differ from shallow routes because they require index to be treated
+          # like a member route. No point in nesting index under tag.
+          namespace :electrical do
+            resources :heaters, :cables, :motors, :light_ccts, 
+              :socket_ccts, :switchboards, except: [:index]
+            # Demands are special case, not tagable but require tagable for create and update, 
+            # nested under tag for this requirement.
+            resources :demands, except: [:index]
+          end
+          # INSERTION POINT 2 FOR MODULE GENERATOR
+        end # tag nested resources (tagables)
+        # Continue discipline nested resources
+        resources :documents, shallow: true do
+          resources :issues
+        end
+        namespace :electrical do
+          resources :cable_types, shallow: true
+        end
         resources :doc_types
-      end
+      end # discipline nested resources
 
-      namespace :electrical do
-        resources :cable_types, shallow: true
+      # Change namespace for change management
+      namespace :project_change do
+        resources :requests, shallow: true
       end
-    end
-    
-    # Tagable models have top level new and create routes to allow creation 
-    # of tagable and tag in a single operation
-    # Tagables override index from the shallow nesting under tags, 
-    # there is no sense in nesting a 1:1 relationship.
-    namespace :electrical do
-      # INSERTION POINT 1 FOR SUBMODULES
-      # INSERTION POINT 1 FOR TAGABLE GENERATOR
-      resources :heaters, :cables, :motors, :light_ccts, 
-                :socket_ccts, only: [:index, :new, :create]
-      resources :switchboards, only: [:index, :new, :create] do
-        resources :circuits, shallow: true
-      end
-      # Define top level index routes for circuits, demands, to allow complete load listings.
-      resources :circuits, :demands, only: [:index]
-    end
-    # INSERTION POINT 1 FOR MODULE GENERATOR
-    # Change namespace for change management
-    namespace :project_change do
-      resources :requests
-      # INSERTION POINT 1 FOR TAGABLE GENERATOR
-      # Insert change member routes here with only: [:index, :new, :create]
-    end
+    end # project nested routes
 
-    # Then define the shallow nested routes which require the tag
-    resources :tags, shallow: true, only: [] do
-      namespace :electrical do
-        # INSERTION POINT 2 FOR SUBMODULES
-        # INSERTION POINT 2 FOR TAGABLE GENERATOR
-        resources :heaters, :cables, :motors, :light_ccts, 
-                  :socket_ccts, except: [:index]
-        resources :switchboards, except: [:index]
-        resources :demands, except: [:index]
-      end
-    # INSERTION POINT 2 FOR MODULE GENERATOR
-
-    end
+    resources :source_formats
 
     # Routes for the RBAC system. 
     # Destroy requires both the role id and the user id to allow rolify to remove the correct HABTM entry.
@@ -90,11 +82,6 @@ Rails.application.routes.draw do
     resources :roles, only: [:index, :new, :create]
 
     resources :swatches
-    resources :documents, only: [], shallow: true do
-      namespace :document_control do
-        resources :issues
-      end
-    end
   end
 
 # Defines the root path route ("/")

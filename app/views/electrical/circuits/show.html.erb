@@ -8,7 +8,7 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Index Button -->
-            <% if policy(@circuit.electrical_switchboard).index? %>
+            <% if policy(@circuit.switchboard).index? %>
               <%= link_to electrical_switchboard_circuits_path(@switchboard),
                     class: "btn btn-sm btn-outline-secondary me-2",
                     title: t('actions.index') do %>
@@ -39,11 +39,11 @@
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
               <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
-                <%= t('.header', label: [@circuit.electrical_switchboard&.label, @circuit.label].join(': ')) %>
+                <%= t('.header', label: [@circuit.switchboard&.label, @circuit.label].join(': ')) %>
               </span>
-              <% if @circuit.electrical_switchboard&.tag&.present? %>
+              <% if @circuit.switchboard&.tag&.present? %>
                 <small class="text-muted ms-2">
-                  <%= @circuit.electrical_switchboard.tag.service %>
+                  <%= @circuit.switchboard.tag.service %>
                 </small>
               <% end %>
             </div>
@@ -70,7 +70,7 @@
 
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
-              <% if policy(@circuit.electrical_switchboard).edit? %>
+              <% if policy(@circuit.switchboard).edit? %>
                 <%= link_to edit_electrical_circuit_path(@circuit),
                       class: "btn btn-outline-warning",
                       title: t('actions.edit') do %>
@@ -81,7 +81,7 @@
                 <% end %>
               <% end %>
 
-              <% if policy(@circuit.electrical_switchboard).destroy? %>
+              <% if policy(@circuit.switchboard).destroy? %>
                 <%= link_to @circuit,
                       method: :delete,
                       data: { confirm: t('actions.delete_sure') },
@@ -106,7 +106,7 @@
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
             <!-- Switchboard Card -->
               <div class="row g-3 mb-3">
-                <%= render 'electrical/switchboards/card', object: @circuit.electrical_switchboard %>
+                <%= render 'electrical/switchboards/card', object: @circuit.switchboard %>
               </div>
         
             <!-- Circuit Details Card -->

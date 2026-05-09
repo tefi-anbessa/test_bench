@@ -1,0 +1,65 @@
+<% provide(:title, t('.title')) %>
+<div class="container mt-3 mx-auto"style="<%= container_styles(@swatch)%>"
+  <!-- Header Card -->
+  <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+      <div class="d-flex justify-content-between align-items-center">
+        <!-- Header Text (Left) -->
+        <div class="ms-2">
+          <h5 class="mb-0"><%= t('source_formats.index.header') %></h5>
+        </div>
+
+        <!-- New Button (Right) -->
+        <% if policy(SourceFormat.new()).new? %>
+            <%= link_to new_source_format_path, 
+              class: "btn btn-outline-primary actions",
+              aria: { label: t('actions.new') },
+              title: t('actions.new') do %>
+              <%== bs_icon('plus-square-fill') %>
+              <span class="ms-1">
+                <%= [t('actions.new'), t("activerecord.models.source_format")].join(' ') %>
+              </span>
+            <% end %>
+        <% end %>
+      </div> <!-- end of d-flex -->
+    </div> <!-- end of card header -->
+
+    <div class="card-body">
+      <div class="row search-form">
+        <%= search_form_for @q do |f| %>
+          <%= f.search_field :vendor_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.source_format.vendor") %>
+          <%= f.search_field :title_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.source_format.title") %>
+          <%= f.search_field :file_extension_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.source_format.file_extension") %>
+          <%= f.search_field :revision_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.source_format.revision") %>
+          <%= f.search_field :notes_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.source_format.notes") %>
+          <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
+            <%== bs_icon('search') %>
+          <% end %>
+        <% end %>
+      </div>
+
+      <!--  -->
+      <table id='source_formats' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
+        <%= render 'header' %>
+        <tbody>
+          <% @source_formats.each do |row| %>
+            <%= render 'row', row: row %>
+          <% end %>
+        </tbody>
+      </table>
+    <div class="card-footer">
+      <%== pagy_bootstrap_nav(@pagy) %>
+      <%== pagy_info(@pagy) %>
+    </div>
+  </div> <!-- end of card -->
+</div> <!-- end of container -->

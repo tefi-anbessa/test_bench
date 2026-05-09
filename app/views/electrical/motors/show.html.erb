@@ -9,8 +9,8 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@motor).index? %>
-              <%= link_to electrical_motors_path,
-                    class: "btn btn-sm btn-outline-secondary me-2",
+              <%= link_to discipline_electrical_motors_path(@discipline),
+                    class: "btn btn-sm btn-outline-info me-2",
                     title: t('actions.index') do %>
                 <%== bs_icon('list-columns-reverse') %>
                 <span class="d-none d-md-inline"><%= t('actions.index') %></span>

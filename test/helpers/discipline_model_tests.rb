@@ -12,7 +12,8 @@ module DisciplineModelTests
     @project = create(:project, title: "#{resource_class} Model Test")
 
     # Set resource discipline using the class' module name
-    @discipline = @project.disciplines.find_by(name: resource_class.module_parent_name)
+    @discipline = @project.disciplines.find_by(name: resource_class.module_parent_name) || 
+      @project.disciplines.first
   end
 
   # Common test patterns used for all model tests

@@ -18,7 +18,7 @@
               <%== bs_icon('box-arrow-down-right') %>
             <% end %>
       <% else %>
-        <% if policy(t.tagable_type.constantize).new? %>
+        <% if policy(t.build_tagable()).new? %>
           <% resource = t.tagable_type.constantize.model_name.singular %>
           <%= link_to eval("new_tag_#{resource}_path(#{t.id})"),
               class: "btn btn-sm btn-outline-primary mb-2 icon-link",

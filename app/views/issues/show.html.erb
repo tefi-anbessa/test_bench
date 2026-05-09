@@ -1,0 +1,146 @@
+<% provide(:title, t('.title')) %>
+<div class="container mt-3" style="<%= container_styles(@swatch) %>">
+  <!-- Issue Header Card -->
+  <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+      <div class="row align-items-center">
+        <!-- Left Navigation -->
+        <div class="col-auto">
+          <div class="d-flex align-items-center">
+            <!-- Index Button -->
+            <% if policy(@issue).index? %>
+              <%= link_to document_issues_path(@document),
+                    class: "btn btn-sm btn-outline-secondary me-2",
+                    title: t('actions.index') do %>
+                <%== bs_icon('list-columns-reverse') %>
+                <span class="d-none d-md-inline"><%= t('actions.index') %></span>
+              <% end %>
+            <% end %>
+
+            <!-- Previous Button -->
+            <% prev_issue = @issue.prev %>
+            <% if prev_issue.present? %>
+              <% disabled = prev_issue == @issue %>
+              <% title_text = t('actions.previous') + ": " + prev_issue.label %>
+              <%= link_to prev_issue,
+                    disabled: disabled,
+                    class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
+                    title: title_text do %>
+                <%== bs_icon('box-arrow-in-left') %>
+                <span class="d-none d-md-inline">
+                  <%= t('actions.previous') %>
+                </span>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Center Badge Info -->
+        <div class="col text-center">
+          <div class="d-flex flex-column align-items-center">
+            <div class="mt-1">
+              <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
+                <%= t('.header', label: @issue.label)%>
+              </span>
+              <!-- Add descriptor here if available -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Navigation and Actions -->
+        <div class="col-auto">
+          <div class="d-flex align-items-center">
+            <!-- Next Button -->
+            <% next_issue = @issue.next %>
+            <% if next_issue.present? %>
+              <% title_text = t('actions.next') + ": " + next_issue.label %>
+              <% disabled = next_issue == @issue %>
+              <%= link_to next_issue,
+                    disabled: disabled,
+                    class: "btn btn-sm btn-outline-secondary me-2 #{'disabled' if disabled}",
+                    title: title_text do %>
+                <span class="d-none d-md-inline">
+                  <%= t('actions.next') %>
+                </span>
+                <%== bs_icon('box-arrow-in-right') %>
+              <% end %>
+            <% end %>
+
+            <!-- Action Buttons -->
+            <div class="btn-group btn-group-sm gap-1">
+              <% if policy(@issue).edit? %>
+                <%= link_to edit_issue_path(@issue),
+                      class: "btn btn-outline-warning",
+                      title: t('actions.edit') do %>
+                  <%== bs_icon('pencil-square') %>
+                  <span class="d-none d-md-inline">
+                    <%= t('actions.edit') %>
+                  </span>
+                <% end %>
+              <% end %>
+
+              <% if policy(@issue).destroy? %>
+                <%= link_to @issue,
+                      method: :delete,
+                      data: { confirm: t('actions.delete_sure') },
+                      class: "btn btn-outline-danger",
+                      title: t('actions.delete') do %>
+                  <%== bs_icon('trash') %>
+                  <span class="d-none d-md-inline">
+                    <%= t('actions.delete') %>
+                  </span>
+                <% end %>
+              <% end %>
+
+              <% if policy(@document.issues.build()).new? %>
+                <%= link_to new_document_issue_path, 
+                  class: "btn btn-outline-primary actions",
+                  aria: { label: t('actions.new') },
+                  title: t('actions.new') do %>
+                  <%== bs_icon('plus-square-fill') %>
+                  <span class="ms-1">
+                    <%= [t('actions.new'), t("activerecord.models.issue")].join(' ') %>
+                  </span>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body">
+
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+
+          <!-- Issue Details Card -->
+          <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
+              <h4 class="mb-0"><%= t('show.details', model: @issue.model_name.human) %></h4>
+            </div>
+
+            <div class="card-body p-3">
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= @issue.class.human_attribute_name(:document) %></div>
+                <div class="col-8"><%= render "documents/card", object: @issue.document %></div>
+              </div> <!-- end row -->
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= @issue.class.human_attribute_name(:code) %></div>
+                <div class="col-8"><%= @issue.code || '-' %></div>
+              </div> <!-- end row -->
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= @issue.class.human_attribute_name(:reason) %></div>
+                <div class="col-8"><%= @issue.reason || '-' %></div>
+              </div> <!-- end row -->
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= @issue.class.human_attribute_name(:source_format) %></div>
+                <div class="col-8"><%= render "source_formats/card", object: @issue.source_format %></div>
+              </div> <!-- end row -->
+            </div>  <!-- end inner card body -->
+          </div> <!-- end inner card -->
+        </div> <!-- end responsive columns -->
+      </div> <!-- end justify-content-center -->
+    </div> <!-- end card body -->
+  </div> <!-- end card -->
+</div> <!-- end container -->

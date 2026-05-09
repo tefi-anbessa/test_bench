@@ -3,7 +3,9 @@ cn:
   activerecord:
     models:
       project_change:
-        request: Request
+        request: 
+          one: Change Request
+          other: Change Requests
     attributes:
       project_change:
         request:

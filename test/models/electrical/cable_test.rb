@@ -27,7 +27,7 @@ module Electrical
 
     test "should associate with circuit feeder" do
       swbd = create(:electrical_switchboard, discipline: @resource_discipline)
-      circuit = swbd.electrical_circuits.create(serial: 1)
+      circuit = swbd.circuits.create(serial: 1)
       @cable.from = circuit
       @cable.save
       assert_not_nil circuit.feeder
@@ -36,7 +36,7 @@ module Electrical
 
     test "destroy circuit should nullify cable from" do
       swbd = create(:electrical_switchboard, discipline: @resource_discipline)
-      circuit = swbd.electrical_circuits.create(serial: 1)
+      circuit = swbd.circuits.create(serial: 1)
       @cable.from = circuit
       @cable.save
       circuit.destroy

@@ -2,6 +2,7 @@ module Electrical
   class DemandsController < ApplicationController
     before_action :authenticate_user!
     before_action :set_tag, only: %i[new create]
+    before_action :set_discipline, only: %i[index]
     before_action :set_demand, only: %i[ show edit update destroy ]
     before_action :set_swatch, only: %i[index show new edit]
 
@@ -29,13 +30,13 @@ module Electrical
       authorize @demand
       if @demand.save
         flash[:success] = I18n.t('flash.create.notice', 
-          resource_name: I18n.t('activerecord.models.electrical.demand'))
+          resource_name: I18n.t('activerecord.models.electrical.demand.one'))
         redirect_to @demand
         return
       else
         set_swatch
         flash.now[:alert] = I18n.t('flash.create.alert', 
-          resource_name: I18n.t('activerecord.models.electrical.demand'))
+          resource_name: I18n.t('activerecord.models.electrical.demand.one'))
         render 'new', status: :unprocessable_entity
       end
     end
@@ -50,11 +51,11 @@ module Electrical
     def update
       authorize @demand
       if @demand.update(demand_params)
-        flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.electrical.demand'))
+        flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.electrical.demand.one'))
         redirect_to @demand
       else
         set_swatch
-        flash.now[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.electrical.demand'))
+        flash.now[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.electrical.demand.one'))
         render :edit, status: :unprocessable_entity
       end
     end
@@ -63,15 +64,20 @@ module Electrical
     def destroy
       authorize @demand
       if @demand.destroy
-        flash[:success] = I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.electrical.demand'))
+        flash[:success] = I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.electrical.demand.one'))
       else
-        flash.now[:alert] = I18n.t('flash.destroy.alert', resource_name: I18n.t('activerecord.models.electrical.demand'))
+        flash.now[:alert] = I18n.t('flash.destroy.alert', resource_name: I18n.t('activerecord.models.electrical.demand.one'))
       end
-      redirect_to electrical_demands_url, status: :see_other
+      redirect_to discipline_electrical_demands_url(@discipline), status: :see_other
     end
 
     private
-      # Use callbacks to share common setup or constraints between actions.
+
+      def set_discipline
+        @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
+        raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
+      end
+
       def set_demand
         @demand = policy_scope(Electrical::Demand).find_by(id: params[:id])
         raise ApplicationController::ConflictError, 
@@ -82,6 +88,7 @@ module Electrical
           raise ApplicationController::ConflictError, 
             :record_is_orphan
         end
+        @discipline = @demand.demandable.tag.discipline
       end
 
       def set_tag
@@ -94,6 +101,7 @@ module Electrical
           :tag_not_demandable unless Electrical::Demand.demandable_types.include?(@tag.tagable.class.name)
         raise ApplicationController::ConflictError, 
           :tag_already_assigned if @tag.tagable.electrical_demand.present?
+        @discipline = @tag.discipline
       end
 
       def set_swatch

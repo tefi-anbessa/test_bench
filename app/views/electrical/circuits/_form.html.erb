@@ -6,7 +6,7 @@
           <div class="badge fs-6" style="<%= badge_styles(@swatch) %>">
             <%= yield(:header) %>
             <small class="text-muted ms-2">
-              <%= switchboard&.tag&.service || circuit.electrical_switchboard&.tag&.service %>
+              <%= switchboard&.tag&.service || circuit.switchboard&.tag&.service %>
             </small>
           </div>
         </div>

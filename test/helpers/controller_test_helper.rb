@@ -14,7 +14,7 @@ module ControllerTestHelper
   # Use setup_discipline_resources or setup_project_resources,
   # or manage special cases.
   def setup_controller_test
-    setup_projects_and_users # In test/helpers/test_login_helpers.rb
+    setup_projects_and_users # In test/helpers/test_setup_helpers.rb
     setup_disciplines # Will default to resource discipline
     setup_accredited_users
     @request.env["devise.mapping"] = Devise.mappings[:user]
@@ -293,20 +293,26 @@ module ControllerTestHelper
   end
 
   def assert_successful_create_flash_message
+    resource_name = I18n.t("activerecord.models.#{resource_class.model_name.i18n_key.to_s.gsub('/', '.')}")
+    resource_name = resource_name[:one] if resource_name.is_a?(Hash)
     expected = I18n.t('flash.create.notice',
-      resource_name: I18n.t("activerecord.models.#{resource_class.model_name.i18n_key.to_s.gsub('/', '.')}"))
+      resource_name: resource_name)
     assert_flash_message :success, expected
   end
 
   def assert_successful_update_flash_message
+    resource_name = I18n.t("activerecord.models.#{resource_class.model_name.i18n_key.to_s.gsub('/', '.')}")
+    resource_name = resource_name[:one] if resource_name.is_a?(Hash)
     expected = I18n.t('flash.update.notice',
-      resource_name: I18n.t("activerecord.models.#{resource_class.model_name.i18n_key.to_s.gsub('/', '.')}"))
+      resource_name: resource_name)
     assert_flash_message :success, expected
   end
 
   def assert_successful_destroy_flash_message
+    resource_name = I18n.t("activerecord.models.#{resource_class.model_name.i18n_key.to_s.gsub('/', '.')}")
+    resource_name = resource_name[:one] if resource_name.is_a?(Hash)
     expected = I18n.t('flash.destroy.notice',
-      resource_name: I18n.t("activerecord.models.#{resource_class.model_name.i18n_key.to_s.gsub('/', '.')}"))
+      resource_name: resource_name)
     assert_flash_message :success, expected
   end
 end

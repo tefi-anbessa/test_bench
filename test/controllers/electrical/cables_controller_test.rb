@@ -12,11 +12,11 @@ module Electrical
     end
 
     def setup_model_specific_data
-      @cable_type = create(:electrical_cable_type, project: @project)
+      @cable_type = create(:electrical_cable_type, discipline: @discipline)
     end
 
     # Set the expected params for a valid resource create
-    def valid_resource_params
+    def create_params
       { 
         electrical_cable_type_id: @cable_type.id,
         route_length: 10.0,
@@ -29,7 +29,7 @@ module Electrical
     end
 
     # Set invalid resource params for tests
-    def invalid_resource_param
+    def invalid_param
         { electrical_cable_type_id: nil }
     end
 

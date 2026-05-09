@@ -5,7 +5,9 @@ en:
       document_control:
         issue: "Issue"
         source_format: "Source Format"
-        doc_type: "Document Type"
+        doc_type:
+          one: "Document Type"
+          other: "Document Types"
     attributes:
       document_control:
         issue:

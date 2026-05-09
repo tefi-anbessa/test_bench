@@ -4,6 +4,7 @@ class DisciplinesController < ApplicationController
   before_action :require_project!, only: %i[ new create edit update]
   before_action :set_project, only: %i[ index new create ]
   before_action :set_discipline, only: %i[ show edit update destroy schema ]
+  before_action :setup_discipline_users, only: %i[ show ]
   before_action :validate_required_role, only: %i[ create update ]
 
   # GET /disciplines or /disciplines.json
@@ -153,6 +154,15 @@ class DisciplinesController < ApplicationController
       end
     end
     
+    # Sets up users with roles on this discipline for the show view
+    def setup_discipline_users
+      @users = User.joins(:roles)
+                   .where(roles: { resource_type: 'Discipline', resource_id: @discipline.id })
+                   .select('users.*, roles.name as role_name, roles.resource_type, roles.resource_id')
+                   .distinct
+                   .order(:name)
+    end
+
     # Only allow a list of trusted parameters through.
     def discipline_params
       params.require(:discipline).permit(

@@ -47,21 +47,32 @@ class DisciplineResourcePolicy < ApplicationPolicy
   end
 
   def new?
+    # Discipline nested resources must call new? with an instance object belonging to discipline,
+    # not a class.
     # Protect against url injection
     return false if user.nil?
+    # Ensure record is an instance, not a class
+    unless record.is_a?(ApplicationRecord)
+      Rails.logger.warn "Policy Error: #{record.class}.new? called with class instead of instance. " \
+                       "Use an instance variable with discipline association."
+      return false
+    end
     # Content modification actions require current project to be set
     return false unless current_project.present?
     # new? action is a special case for discipline scoped resources. 
     # User must have at least one discpline role to access new, or have admin role.
-    user_has_a_required_role?(current_project) || 
-      user&.is_admin? || 
-      user&.is_app_owner? ||
-      user&.is_project_admin_of?(current_project)
+    user_is_accredited?(current_project)
   end
 
   def create?
     # Protect against url injection
     return false if user.nil?
+    # Ensure record is an instance, not a class
+    unless record.is_a?(ApplicationRecord)
+      Rails.logger.warn "Policy Error: #{record.class}.new? called with class instead of instance. " \
+                       "Use an instance variable with discipline association."
+      return false
+    end
     # Content modification actions require current project to be set
     return false unless current_project.present?
     user_is_accredited?(current_project) && record.project == current_project
@@ -95,7 +106,7 @@ class DisciplineResourcePolicy < ApplicationPolicy
 
     # This method returns true when the user has permission for content modification actions.
     def user_is_accredited?(project)
-      rr = record.discipline.required_role? ? 
+      rr = record.discipline.required_role.present? ? 
           record.discipline.required_role.to_s : 
           "#{record.discipline.name}::Base".safe_constantize&.required_role.to_s
       user.has_role?(rr, record.discipline) || 

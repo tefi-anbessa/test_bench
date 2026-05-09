@@ -29,7 +29,7 @@
 
     <div class="card-body">
       <div class="row search-form">
-        <%= search_form_for @q do |f| %>
+        <%= search_form_for @q, url: discipline_electrical_heaters_path(@discipline) do |f| %>
           <%= f.search_field :heater_type_cont,
                 class: "search_field",
                 placeholder: t("activerecord.attributes.electrical.heater.heater_type") %>

@@ -15,7 +15,7 @@ module Electrical
     end
 
     # Set the minimum required params for a valid resource
-    def valid_resource_params
+    def create_params
       {
         light_fitting_type: :general,
         quantity: 2,
@@ -24,7 +24,7 @@ module Electrical
     end
 
     # Set invalid resource params for tests
-    def invalid_resource_param
+    def invalid_param
       { quantity: 0 }  # Invalid quantity
     end
 

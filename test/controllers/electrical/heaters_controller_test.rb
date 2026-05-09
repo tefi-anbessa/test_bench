@@ -17,7 +17,7 @@ module Electrical
     end
 
     # Set the expected params for a valid resource create
-    def valid_resource_params
+    def create_params
       {
         heater_type: 'cast_in',
         application: 'annealing_heat_treating',
@@ -31,7 +31,7 @@ module Electrical
     end
 
     # Set invalid resource params for tests
-    def invalid_resource_param
+    def invalid_param
       { insulation_material: 'magnesia' }  # Set invalid value for an attribute AI concocted!!!
     end
 

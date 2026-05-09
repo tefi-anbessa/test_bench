@@ -50,7 +50,7 @@ FactoryBot.define do
       after(:create) do |switchboard, evaluator|
         # Create circuits with this switchboard
         evaluator.circuits_count.times do |i|
-          create(:electrical_circuit, electrical_switchboard: switchboard, serial: i + 1)
+          create(:electrical_circuit, switchboard: switchboard, serial: i + 1)
         end
       end
     end

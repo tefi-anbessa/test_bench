@@ -15,11 +15,12 @@
     </div>
 
     <%= bootstrap_form_with(model: tag,
+      url: tag.persisted? ? edit_tag_path(tag) : discipline_tags_path(@discipline),
       layout: :horizontal,
       label_col: "col-sm-4",
       control_col: "col-sm-8",
       wrapper: { class: 'mb-1' },
-      data: { controller: 'tag', 'tag-model-name-value': t('activerecord.models.tag') }) do |f| %>
+      data: { controller: 'tag', 'tag-model-name-value': t('activerecord.models.tag.one') }) do |f| %>
 
       <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
       <%= render 'shared/error_messages', object: f.object %>
@@ -35,19 +36,6 @@
                     min: 0,
                     max: 10,
                     title: t('activerecord.help.tag.stage') %>
-            </div>
-
-            <!-- Discipline -->
-            <div class="row">
-              <%= f.select :discipline_id,
-                    options_for_select(
-                      @disciplines.map { |label, name, id| 
-                        ["#{label}: #{t("discipline.name.#{name}", default: name)}", id] 
-                      },
-                      tag.discipline_id
-                    ),
-                    { class: 'form-select' },
-                    { data: { action: 'change->tag#updateFormStructure' } } %>
             </div>
 
             <!-- Prefix Fields - Dynamic based on discipline schema -->
@@ -117,7 +105,7 @@
 
       <!-- Card Footer with Actions -->
       <div class="card-footer bg-transparent text-end p-2">
-        <%= link_to(tag.persisted? ? tag_path(tag) : tags_path,
+        <%= link_to(tag.persisted? ? tag_path(tag) : discipline_tags_path(@discipline),
               class: 'btn btn-warning',
               data: { confirm: t('actions.sure'), turbo: false }) do %>
           <%= t('actions.discard') %>

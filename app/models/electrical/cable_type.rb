@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 module Electrical
   class CableType < Base
+    # Scopes
+    default_scope { order(:id) }
+
     # Associations
     belongs_to :discipline, required: true
     delegate :project, to: :discipline
@@ -19,8 +22,6 @@ module Electrical
     enum :temperature_rating, Constants.electrical.temperature_rating.each_with_index.to_h
     validates :conductor_material, :groups, :construction, :csa, presence: true
     before_save :generate_code
-    # Default scope to sort by idgroups
-    default_scope { order(:id) }
     
     def code
       self[:code].presence || generate_code

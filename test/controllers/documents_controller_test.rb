@@ -16,12 +16,24 @@ class DocumentsControllerTest < ActionController::TestCase
 
   def setup_model_specific_data
     # Set up an instance of document
-    @dt = create(:document_control_doc_type, discipline: @discipline)
+    @dt = create(:doc_type, discipline: @discipline)
     @resource = create(:document, discipline: @discipline, doc_type: @dt)
-    @other_resource = create(:document, discipline: @other_discipline, doc_type: @dt)
+    # Set up an out of scope instance of document
+    @other_dt = create(:doc_type, discipline: @other_discipline)
+    @other_resource = create(:document, discipline: @other_discipline, doc_type: @other_dt)
   end
 
   private
+
+    # Required for nested routes
+    def new_nesting_params
+      { discipline_id: @discipline.id }
+    end
+
+    # Required for nested routes
+    def index_nesting_params
+      new_nesting_params
+    end
   
     # Set the expected params for a valid create
     def create_params
@@ -38,7 +50,12 @@ class DocumentsControllerTest < ActionController::TestCase
     # Some models have read only attributes, these need to be excluded from update tests
     # to avoid validation errors
     def update_params
-        create_params
+        { document: 
+          { 
+          title: 'Test Document',
+          notes: 'Test document notes'
+          } 
+        }
     end
 
     # Set an invalid resource param to test controller response

@@ -69,7 +69,8 @@ class SwatchesController < ApplicationController
   private
 
     def set_swatch
-      @swatch = Swatch.find(params[:id])
+      @swatch = Swatch.find_by(id: params[:id])
+      raise ApplicationController::ConflictError, :out_of_scope if @swatch.nil?
     end
 
     def setup_form

@@ -12,7 +12,7 @@ class ProjectPolicy < ApplicationPolicy
         # or on any discipline belonging to the project
         project_ids = user.roles.where(resource_type: "Project").select(:resource_id)
         discipline_project_ids = Discipline.where(id: user.roles.where(resource_type: "Discipline").select(:resource_id)).select(:project_id)
-        scope.where(id: project_ids).or(scope.where(id: discipline_project_ids))
+        scope.where(id: project_ids).or(Project.where(id: discipline_project_ids))
       end
     end
   end

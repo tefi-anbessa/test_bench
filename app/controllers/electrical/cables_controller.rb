@@ -59,7 +59,7 @@ module Electrical
         @cable_type_options = @cable_types.map { |ct| ["#{ct.id}: #{ct.code}", ct.id] }
 
         # Dynamically build options for all models in constants
-        # @id_options is used for the select dropdowns in the cable form for from and to selection
+        # @id_options is used for the select dropdowns in the cable form for :from and :to selection
         @id_options = Constants.electrical.connect_options.each_with_object({}) do |model_name, options|
           model_class = model_name.constantize
 
@@ -86,7 +86,7 @@ module Electrical
           :route_length, :vertical_allowance, :termination_allowance,
           :start_mark, :end_mark, :from_id, :from_type, :to_id, :to_type, :notes,
           tag: [
-            :id, :project_id, :discipline_id, :prefix, :serial,
+            :discipline_id, :prefix, :serial,
             :suffix, :service, :stage, :notes, :tagable_type
           ])
       end

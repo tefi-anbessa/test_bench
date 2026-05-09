@@ -14,8 +14,8 @@
       </div>
     </div>
 
-    <%= bootstrap_form_with(model: demand, 
-        url: demand.persisted? ? electrical_demand_path(demand) : tag_electrical_demands_path(tag),
+    <%= bootstrap_form_with(model: demand,
+        url: demand.persisted? ? edit_electrical_demand_path(demand) : tag_electrical_demands_path(tag),
         layout: :horizontal, 
         label_col: "col-sm-4", 
         control_col: "col-sm-8") do |f| %>

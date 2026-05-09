@@ -13,7 +13,7 @@
         </div>
 
         <!-- New Button (Right) -->
-        <% if policy(Swatch).new? %>
+        <% if policy(Swatch.new()).new? %>
             <%= link_to new_swatch_path, 
               class: "btn btn-outline-primary actions",
               aria: { label: t('actions.new') },

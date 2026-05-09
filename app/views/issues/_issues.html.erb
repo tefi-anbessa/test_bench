@@ -1,0 +1,35 @@
+<% document = object %>
+<%= render 'components/collapsible',
+  id: "issues",
+  title: t('issues.index.header', document: document.doc_number),
+  expanded: params[:issues_expanded] == '1',
+  header_class: 'py-1' do %>
+  
+    <div class="container-fluid">
+      <% if policy(document).new? %>
+        <%= link_to new_document_issue_path(document),
+              class: "btn btn-primary actions",
+              data: { turbo: false },
+              aria: { label: t('actions.new') },
+              title: t('actions.new') do %>
+          <%== bs_icon('plus-square-fill') %>
+          <%= [t('actions.new'), t("activerecord.models.issue")].join(' ') %>
+        <% end %>
+      <% end %>
+      <div class="table-responsive">
+        <table class="table table-sm table-striped">
+          <thead>
+            <th scope="col"><%= t("activerecord.attributes.issue.code") %></th>
+            <th scope="col"><%= t("activerecord.attributes.issue.reason") %></th>
+            <th scope="col"><%= t("activerecord.attributes.issue.source_format") %></th>
+            <th scope="col" width="150px"><%= t('table.links')%></th>
+          </thead>
+          <tbody>
+            <% document.issues.each do |row| %>
+              <%= render 'issues/row', row: row %>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% end %>

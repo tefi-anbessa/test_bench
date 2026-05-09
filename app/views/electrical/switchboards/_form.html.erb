@@ -1,25 +1,26 @@
-<div class="container mt-3" style="<%= container_styles(@swatch) %>">
-  <div class="card" style="<%= card_styles(@swatch) %>">
-    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+<div class="container mt-3" style="<%= container_styles(swatch) %>">
+  <div class="card" style="<%= card_styles(swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(swatch) %>">
 
       <!-- Center Tag Info -->
       <div class="col text-center">
         <div class="d-flex flex-column align-items-center">
-          <div class="badge fs-6" style="<%= badge_styles(@swatch) %>">
+          <div class="badge fs-6" style="<%= badge_styles(swatch) %>">
             <%= yield(:header) %>
           </div>
         </div>
       </div>
     </div>
 
-    <%= bootstrap_form_with(model: switchboard, 
+    <%= bootstrap_form_with(model: switchboard,
+          url: discipline_electrical_switchboards_path(discipline),
           layout: :horizontal, 
           label_col: "col-sm-4", 
           control_col: "col-sm-8",
           wrapper_class: 'mb-1',
           ) do |f| %>
 
-      <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
+      <div class="card-body p-2" style="<%= form_styles(swatch) %>">
         <div class="row justify-content-center">
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
@@ -51,7 +52,7 @@
                     <div class="col-4">
                       <div class="row">
                       <%= select_tag :ip_1,
-                        options_for_select(@ip_1.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] }, 
+                        options_for_select(ip_1.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] }, 
                           switchboard.ingress_protection&.first),
                         {
                           class: 'form-select mb-0',
@@ -65,7 +66,7 @@
                       </div>
                       <div class="row">
                         <%= select_tag :ip_2,
-                          options_for_select(@ip_2.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] }, 
+                          options_for_select(ip_2.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] }, 
                             switchboard.ingress_protection&.last),
                             {
                               class: 'form-select mb-0',
@@ -156,7 +157,7 @@
 
                 <div class="row mb-1">
                   <label class="col-form-label col-sm-4" for="circuits">
-                    <%= t('activerecord.models.electrical.circuit').pluralize %>
+                    <%= t('activerecord.models.electrical.circuit.one').pluralize %>
                   </label>
                   <div class="col-sm-8">
                     <%= number_field_tag :circuits,
@@ -169,7 +170,7 @@
 
             <!-- Card Footer with Actions -->
             <div class="card-footer bg-transparent text-end p-2">
-              <%= link_to(switchboard.persisted? ? switchboard : electrical_switchboards_path, 
+              <%= link_to(switchboard.persisted? ? switchboard : discipline_electrical_switchboards_path(discipline), 
                     class: 'btn btn-warning',
                     data: { confirm: t('actions.sure'), turbo: false }) do %>
                 <%= t('actions.discard') %>

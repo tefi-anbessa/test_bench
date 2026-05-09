@@ -4,7 +4,9 @@ class ProjectsControllerTest < ActionController::TestCase
   include Devise::Test::ControllerHelpers
 
   setup do
-    @request.env["devise.mapping"] = Devise.mappings[:user]
+    # Project default swatch must be present
+    @swatch= create(:swatch, name: "app_theme")
+    @project = create(:project, swatch: @swatch)
 
     @app_owner = create(:user)
     @app_owner.add_role(:app_owner)
@@ -13,7 +15,6 @@ class ProjectsControllerTest < ActionController::TestCase
     @admin.add_role(:admin)
 
     @project_manager = create(:user)
-    @project = create(:project)
     @project_manager.add_role(:project_manager, @project)
 
     @team_member = create(:user)
@@ -23,8 +24,7 @@ class ProjectsControllerTest < ActionController::TestCase
 
     # Set the current project for all tests that need it
     set_current_project(@project) if defined?(set_current_project)
-    # Project default swatch must be present
-    @swatch= create(:swatch, name: "app_theme")
+    @request.env["devise.mapping"] = Devise.mappings[:user]
   end
 
   # Index action tests
@@ -43,7 +43,7 @@ class ProjectsControllerTest < ActionController::TestCase
   test "user cannot view project details without a project role" do
     sign_in @regular_user
     get :show, params: { id: @project.id }
-    assert_response :forbidden
+    assert_response :conflict
   end
 
   test "team member can view their project details" do

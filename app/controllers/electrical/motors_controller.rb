@@ -59,7 +59,7 @@ module Electrical
       params.require(:electrical_motor).permit(:motor_type, :frame_size, :poles, :ingress_protection, :speed_rated,
         :notes,
         tag: [
-          :id, :project_id, :discipline_id, :prefix, :serial,
+          :discipline_id, :prefix, :serial,
           :suffix, :service, :stage, :notes, :tagable_type
         ])
     end

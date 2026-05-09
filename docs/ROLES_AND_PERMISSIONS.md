@@ -24,11 +24,11 @@ The application's resources fall into a number of categories for implementation 
 
 1. Project resources.
 
-   Resources scoped to projects use a common permissions system.
+   Resources scoped to projects use a common permissions policy.
 
 1. Discipline resources.
 
-   Resources scoped to disciplines/modules use a common permissions system.
+   Resources scoped to disciplines/modules use a common permissions policy.
 
 ## Roles
 
@@ -64,7 +64,7 @@ Global roles are provided for system administration purposes. Users with global 
 
 - Some permissions are managed through the project resource, with content modification actions requiring a designated role scoped to the project instance.
 - Project teams should be self managed as far as is practicable. Global admins create a project and assign a user with the :project_manager role, who then assigns the necessary roles for completing the project.
-- If a project is large, it may not want to depend on the small number of global admins for record deletion, so can request that a :project_admin role be assigned. 
+- If a project is large, it may not want to depend on the small number of global admins for record deletion and other system maintenance tasks, so can request that a :project_admin role be assigned.
 
 1. **Project Manager**
    - The :project_manager role can only be granted by a global admin.
@@ -89,7 +89,7 @@ Global roles are provided for system administration purposes. Users with global 
 1. **Functional Roles**
    - The primary functional role is :designer.
    - Additional roles are used for workflow approval: :checker, :approver.
-   - The role :custodian may be required for catalog type models, e.g. CableTypes.
+   - The role :custodian is required for catalog type models, e.g. CableTypes.
 
 ### Role Assignment
 
@@ -102,7 +102,7 @@ Global roles are provided for system administration purposes. Users with global 
 
 - The user interface for granting and revoking global and resource wide roles is the new roles form, available from the roles index if authorised.
 - The form is only accessible to admins and app_owner.
-- The user interface for project and discipline specific roles is a sub-form on the resource edit page, present only if the user has the required permissions to grant or revoke roles on that project.
+- The user interface for project and discipline specific roles is a sub-form on the resource edit page, present only if the user has the required permissions to grant or revoke roles on that project or discipline.
 
 ## Permissions and Scopes
 
@@ -134,8 +134,8 @@ The application RBAC system uses the [pundit gem](https://github.com/varvet/pund
 #### Required Role
 
 - By default, tagable resource models define their own required role. This is inherited from the module Base class, but may be overridden in individual classes.
-- Projects may override the class defined required role by setting the associated discipline's :required_role attribute, which must be a permitted role for the Discipline class. This should be left as nil to use the default, which is :designer for most engineering resources.
-- Tags and documents are core models, they don't belong to any module, so until a discipline is assigned, they don't know the intended discipline or module that should control permissions. For this reason, access to the new action on these resources is available to any user with an appropriate role for any discipline. The form will only allow selection of a discipline for which the user has the required role.
+- Projects may override the class defined required role by setting the associated discipline's :required_role attribute, which must be a permitted role for the Discipline class. This should be left as nil to use the default, which is :designer for engineering resources.
+- Tags and documents are core models, they don't belong to any module and don't have a required role. They are nested under discipline in routes, so a discipline must be provided to enable permissions checking for the new action.
 
 ## PERMISSIONS DETAILS
 
@@ -180,7 +180,7 @@ As well as the checks in the matrices, policies also check that the action does 
 
 ## PERMISSIONS AND SCOPE FOR PROJECT MODEL
 
-The Project model is a "walled garden" in the application. For the most part, users are only working on one project at any time. Most roles assigned to users are scoped to a project instance.
+The Project model is a "walled garden" in the application. For the most part, users are only working on one project (current_project) at any time. Most roles assigned to users are scoped to a project instance.
 
 - Only a user with :admin or :app_owner role can create a new project.
 - Only a user with :app_owner role can delete a project, because this would result in destruction of all subsidiary data history.
@@ -199,10 +199,10 @@ The Project model is a "walled garden" in the application. For the most part, us
 
 ## PERMISSIONS AND SCOPE FOR DISCIPLINE MODEL
 
-The disciplines model is used to categorize tags, documents, etc. Disciplines generally correspond to software modules within the application.
+The disciplines model is used to categorize tags, documents, etc. Disciplines belong to a project, which enables all child objects to determine their scope. Disciplines generally correspond to software modules within the application.
 
 - Disciplines are created by the system at project creation.
-- Disciplines can only be created by admins, required in case new modules get added.
+- More disciplines can only be created by admins.
 - A user with :project_manager role can edit disciplines for their project.
 - Admins have full access to disciplines.
 - Scope for the discipline model includes all disciplines for the current project.
@@ -222,13 +222,12 @@ The disciplines model is used to categorize tags, documents, etc. Disciplines ge
 Tags are the building block for engineering elements data. Ultimately, most tags will be linked to a tagable resource, but this is not a requirement.
 
 - Tags belong to a discipline, which determines their project association.
-- Tags initially use their discipline association to determine their required role. If this is nil, they will determine the required role from the discipline's module (by name) Base class.
-- For new tags, prior to assigning the discipline association, permission is determined by whether the user has any relevant discipline roles.
-- At create and update time, the user must have the required role for the discipline to which the tag is assigned.
+- Tags use their discipline association to determine their required role. If this is nil, they will determine the required role from the discipline's module (by name) Base class.
+- Tags are shallow nested under discipline in routes, so discipline must be provided for index, new and create actions.
 - Admins have full access to tags.
 - Only a user with an admin role can delete a tag, because this would result in destruction of all associated tag data history.
 - Users with any role on the current project can view tag details.
-- Scope for the tag model includes all tags belonging to the current project.
+- Scope for the tag model includes all tags belonging to the current project, but in practice the index view will be scoped to the discipline.
 
 ### Permission Matrix for Tag Model
 
@@ -263,16 +262,15 @@ Tagable models are the database equivalent to datasheets for engineering element
 
 ## PERMISSIONS FOR DOCUMENT MODEL
 
-The Document model provides the document register for the project. 
+The Document model provides the document register for the project.
 
 - Like tags, documents belong to a discipline, which determines their project association.
 - Also like tags, documents initially use their discipline association to determine their required role. If this is nil, they will determine the required role from the discipline's module (by name) Base class.
-- For new documents, prior to assigning the discipline association, permission is determined by whether the user has any relevant discipline roles.
-- At create and update time, the user must have the required role for the discipline to which the document is assigned.
+- Documents are shallow nested under discipline in routes, so discipline must be provided for index, new and create actions.
 - Admins have full access to document resources.
 - Only a user with an admin role can delete a document, because this would result in destruction of associated data history.
 - Users with any role on the current project can view document details.
-- Scope for the document model includes all documents belonging to the current project.
+- Scope for the document model includes all documents belonging to the current project, but in practice the index view will be scoped to the discipline.
 
 ### Permission Matrix for Document Model
 
@@ -288,9 +286,9 @@ The Document model provides the document register for the project.
 The DocTypes model provides a list of available document types for each discipline. The doc_type association of a document determines its workflow.
 
 - DocTypes belong to a discipline, which determines their project association.
-- The required role for doc_types is :document_controller scoped to current project.
+- The required role for doc_types is :document_controller scoped either to current project or discipline.
 - Global admins and project admins have full access to doc_type resources.
-- Scope for the doc_type model includes all doc_types belonging to the current project.
+- Scope for the doc_type model includes all doc_types belonging to the current project, but in practice the index view will be scoped to the discipline.
 
 ### Permission Matrix for DocTypes Model
 
@@ -301,7 +299,7 @@ The DocTypes model provides a list of available document types for each discipli
 | Edit DocType                   | ✓      | ✓               | x           |
 | Delete DocType                 | ✓      | x               | x           |
 
-The SourceFormats model provides a list of available software source formats. This is a system wide list, so is primarily controlled by global admins. However, as it is not critical data, individual projects are allowed to contribute to the list. Any user with document_controller role can create entries, but not edit or delete.
+The SourceFormats model provides a list of available software source formats. This is a system wide list, so is primarily controlled by global admins. However, as it is not critical data, individual projects are allowed to contribute to the list. Any user with a document_controller role can create entries, but not edit or delete.
 
 - Source formats have no project association.
 - The required role for source_formats is document controller scoped to any project.
@@ -319,7 +317,7 @@ The SourceFormats model provides a list of available software source formats. Th
 
 ## PERMISSIONS FOR CHANGE CONTROL MODELS
 
-The ProjectChange module tracks and manages changes on a project. The Request model records the instigation of change management processes. If a change request (CR) is considered beneficial, it is assigned to a lead discipline to develop a change proposal (CP). The CP fully evaluates the options, assess cost vs benefit, risk, and completes detailed engineering design of the proposed change. After submission, the CP is reviewed and either approved, sent for revision, or rejected. If approved, a Change Order (CO) is raised and assigned to an implementation team.
+The ChangeManagement module tracks and manages changes on a project. The Request model records the instigation of change management processes. If a change request (CR) is considered beneficial, it is assigned to a lead discipline to develop a change proposal (CP). The CP fully evaluates the options, assess cost vs benefit, risk, and completes detailed engineering design of the proposed change. After submission, the CP is reviewed and either approved, sent for revision, or rejected. If approved, a Change Order (CO) is raised and assigned to an implementation team.
 
 - Requests belong to a project.
 - Proposals and orders have a one to one association with the initiating request, which determines their project association.
@@ -327,7 +325,7 @@ The ProjectChange module tracks and manages changes on a project. The Request mo
 - Only project managers and admins can initiate CPs and COs.
 - Users with the lead discipline's required role can edit CPs and COs.
 - Admins have full access to all change control resources.
-- Scope for all change models is the current project.
+- Scope for all change_management models is the current project.
 
 ### Permission Matrix for ProjectChange Models
 

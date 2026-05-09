@@ -34,7 +34,7 @@ module Electrical
       @cable = create(:electrical_cable, tag: @cable_tag)
 
       # Create a circuit on the switchboard
-      @circuit = create(:electrical_circuit, electrical_switchboard: @switchboard)
+      @circuit = create(:electrical_circuit, switchboard: @switchboard)
 
       # Create unassigned tag for building new demand
       @unassigned_tag = create(:tag, :unique_tag, discipline: @discipline)
@@ -76,6 +76,11 @@ module Electrical
         { tag_id: @unassigned_tag.id }
       end
 
+      # Required for nested routes to new and create
+      def index_nesting_params
+        { discipline_id: @discipline.id }
+      end
+
       # Set the minimum required params for a valid resource
       def create_params
           { electrical_demand: { 
@@ -111,12 +116,6 @@ module Electrical
       # Nominate a valid value to update the attribute to
       def updated_attribute_value
         200.0
-      end
-
-      # Override the index path, because demands (like tagables) is shallow nested excluding index.
-      def resource_index_path
-        path_helper = "electrical_demands_path"
-        send(path_helper)
       end
   end
 end

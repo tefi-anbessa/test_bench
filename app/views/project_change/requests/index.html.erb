@@ -14,7 +14,7 @@
 
         <!-- New Button (Right) -->
         <% if policy(ProjectChange::Request).new? %>
-            <%= link_to new_project_change_request_path, 
+            <%= link_to new_project_project_change_request_path(@project), 
               class: "btn btn-outline-primary actions",
               aria: { label: t('actions.new') },
               title: t('actions.new') do %>
@@ -29,7 +29,7 @@
 
     <div class="card-body">
       <div class="row search-form">
-        <%= search_form_for @q do |f| %>
+        <%= search_form_for @q, url: project_project_change_requests_path(@project) do |f| %>
           <%= f.search_field :reason_cont,
                 class: "search_field",
                 placeholder: t("activerecord.attributes.project_change.request.reason") %>

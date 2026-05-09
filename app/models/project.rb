@@ -3,7 +3,7 @@ class Project < ApplicationRecord
   resourcify
 
   # Callbacks
-  before_save { self.code = code.upcase }
+  before_validation { self.code = code.upcase }
   after_create :create_disciplines
 
   # Associations
@@ -12,6 +12,7 @@ class Project < ApplicationRecord
   has_many :tags, through: :disciplines
   has_many :change_requests, class_name: 'ProjectChange::Request', dependent: :destroy
 
+  # Validations
   VALID_CODE_REGEX = /[A-Z][A-Z]/
   validates :code,        presence: true, length: { is: 2},
                           format: { with: VALID_CODE_REGEX },
@@ -20,6 +21,10 @@ class Project < ApplicationRecord
 
   def label
       "#{code}"
+  end
+
+  def long_label
+    "#{code}: #{title}"
   end
 
   def self.swatch

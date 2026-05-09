@@ -1,12 +1,12 @@
 module Electrical
   class Circuit < Base
-    belongs_to :electrical_switchboard, class_name: 'Electrical::Switchboard'
-    delegate :tag, :discipline, :project, to: :electrical_switchboard
+    belongs_to :switchboard, class_name: 'Electrical::Switchboard', foreign_key: :electrical_switchboard_id
+    delegate :tag, :discipline, :project, to: :switchboard
 
     has_one :feeder, as: :from, class_name: 'Electrical::Cable', dependent: :nullify
 
     validates :serial, numericality: { in: 1..36 }
-    validates :serial, uniqueness: { scope: :electrical_switchboard_id }
+    validates :serial, uniqueness: { scope: :switchboard }
     enum :phase, Constants.electrical.phase_designation.to_h
     enum :device, Constants.electrical.protection.device.to_h
     validates :poles, inclusion: { in: 1..6 }, allow_nil: true
@@ -18,7 +18,7 @@ module Electrical
     end
 
     def long_label
-      electrical_switchboard.label + " " + label
+      switchboard.label + " " + label
     end
     
     def demand
@@ -32,7 +32,7 @@ module Electrical
     end
 
     def self.ransackable_associations(auth_object = nil)
-      [ :electrical_switchboard, :electrical_demand, :feeder ]
+      [ :switchboard, :electrical_demand, :feeder ]
     end
   end
 end

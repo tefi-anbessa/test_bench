@@ -41,10 +41,10 @@
             <div class="mt-1">
               <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
                 <%= t('.header', label: @project.code) %>
-              </span>
-              <% if @project.title.present? %>
-                <small class="text-muted ms-2"><%= @project.title %></small>
-              <% end %>
+                <% if @project.title.present? %>
+                  <%= @project.title %>
+                <% end %>
+              </span> <!-- end badge -->
             </div>
           </div>
         </div>
@@ -108,29 +108,28 @@
             <div class="card-body p-3">
 
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t('activerecord.attributes.project.code') %></div>
-                <div class="col-8"><%= @project.code %></div>
-              </div>
-
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t('activerecord.attributes.project.title') %></div>
-                <div class="col-8"><%= @project.title %></div>
-              </div>
-
-              <div class="row mb-1">
                 <div class="col-4 text-muted"><%= t('activerecord.attributes.project.description') %></div>
                 <div class="col-8"><%= @project.description || '-' %></div>
               </div>
 
-              <% if @project.swatch.present? %>
-                <%= render 'swatches/card', 
-                  object: @project.swatch %>
-              <% else %>
-                <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= t('activerecord.models.swatch') %></div>
-                  <div class="col-8"><%= @project.swatch&.name || '-' %></div>
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= t('activerecord.models.swatch') %></div>
+                <div class="col-6">
+                  <%= @project.swatch&.name || '-' %>
                 </div>
-              <% end %>
+                <div class="col-2 text-end">
+                  <% if @project.swatch && policy(@project.swatch).show? %>
+                    <%= link_to @project.swatch, 
+                        class: "btn btn-sm btn-outline-info",
+                        aria: { 
+                          label: t('actions.show', model: t('activerecord.models.swatch', count: 1)) 
+                        } do %>
+                      <%= t('actions.show') %>
+                      <%== bs_icon('eye') %>
+                    <% end %>
+                  <% end %>
+                </div>
+              </div>
             </div> <!-- end project card body -->
           </div> <!-- end project card -->
 
@@ -138,6 +137,9 @@
 
         <!-- Disciplines Section -->
         <%= render 'disciplines/disciplines', object: @project %>
+        
+        <!-- Users Section -->
+        <%= render 'users/users', users: @users, label: @project.long_label, project: @project %>
       </div> <!-- end justify content center -->
     </div> <!-- end form card body -->
   </div> <!-- end form card -->

@@ -9,7 +9,7 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@heater).index? %>
-              <%= link_to electrical_heaters_path,
+              <%= link_to discipline_electrical_heaters_path(@discipline),
                     class: "btn btn-sm btn-outline-secondary me-2",
                     title: t('actions.index') do %>
                 <%== bs_icon('list-columns-reverse') %>
@@ -90,6 +90,18 @@
                   <%== bs_icon('trash') %>
                   <span class="d-none d-md-inline">
                     <%= t('actions.delete') %>
+                  </span>
+                <% end %>
+              <% end %>
+
+              <% if policy(@heater).new? %>
+                <%= link_to new_discipline_electrical_heater_path(@discipline),
+                  class: "btn btn-outline-primary actions",
+                  aria: { label: t('actions.new') },
+                  title: t('actions.new') do %>
+                  <%== bs_icon('plus-square-fill') %>
+                  <span class="ms-1">
+                    <%= [t('actions.new'), t('activerecord.models.electrical.heater.one')].join(' ') %>
                   </span>
                 <% end %>
               <% end %>

@@ -3,6 +3,5 @@ class TagPolicy < DisciplineResourcePolicy
     record
   end
 
-
   private
 end

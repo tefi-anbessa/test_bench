@@ -30,6 +30,7 @@
           <%= link_to new_tag_electrical_demand_path(row.tag.id),
             class: "btn btn-sm btn-outline-primary",
             title: text do %>
+              <%== bs_icon('link') %>
               <%= text %>
             <% end %>
         <% else %>

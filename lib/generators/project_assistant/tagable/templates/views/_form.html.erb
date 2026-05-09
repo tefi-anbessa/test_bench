@@ -15,13 +15,14 @@
     </div>
 
     <%%= bootstrap_form_with(model: <%= singular_name %>,
+          url: discipline_<%= plural_route_name %>_path(@discipline),
           layout: :horizontal,
           label_col: "col-sm-4",
           control_col: "col-sm-8",
           wrapper_class: 'mb-1',
           ) do |f| %>
 
-      <div class="card-body p-2" style="<%= card_styles(@swatch) %>">
+      <div class="card-body p-2" style="<%%= card_styles(@swatch) %>">
         <div class="row justify-content-center">
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">        <!-- Adjust to fit field width requirements -->
 
@@ -39,7 +40,7 @@
 
             <!-- <%= human_name %> Details -->
             <div class="card mb-1" style="<%%= card_styles(@swatch) %>">
-              <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
+              <div class="card-body p-2" style="<%%= form_styles(@swatch) %>">
                 <%%= render 'shared/error_messages', object: f.object %>
 
 <%- @fields.each do |field| -%>
@@ -64,13 +65,8 @@
     <%- when "float", "decimal" -%>
                 <%%= f.number_field :<%= field[:name] %>,
                         class: 'form-control form-control-sm',
-                        qppend: 'x'                             <!-- Customize engineering units -->
+                        append: 'x'                             <!-- Customize engineering units -->
                         step: 0.01,                             <!-- Customize as required -->
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8"%>
-    <%- when "datetime", "timestamp", "time", "date" -%>
-                <%%= f.datetime_select :<%= field[:name] %>,     <!-- Customize as required -->
-                        class: 'form-control form-control-sm',
                         label_col: "col-sm-4",
                         control_col: "col-sm-8"%>
     <%- when "datetime", "timestamp", "time", "date" -%>
@@ -97,7 +93,6 @@
                     { include_blank: <%= required ? "t('form.required')" : "t('form.optional')" %> },
                     class: 'form-control form-control-sm' %>
     <%- when "enum_translated" -%>
-                <%- required = field[:options].include? ('required') %>
                 <%%= f.select :<%= field[:name] %>,
                     options_for_select(
                       <%= class_name%>.<%= field[:name].pluralize %>.keys.collect 
@@ -122,11 +117,9 @@
 
             <!-- Card Footer with Actions -->
             <div class="card-footer bg-transparent text-end p-2">
-              <%%= link_to(<%= singular_name %>.persisted? ? 
-              <%= singular_name %> : 
-              <%= plural_route_name %>_path,
+              <%%= link_to <%= singular_name %>.persisted? ? <%= singular_name %> : discipline_<%= plural_route_name %>_path(@discipline),
                     class: 'btn btn-warning',
-                    data: { confirm: t('actions.sure'), turbo: false }) do %>
+                    data: { confirm: t('actions.sure'), turbo: false } do %>
                 <%%= t('actions.discard') %>
                 <%%== bs_icon('x-square') %>
               <%% end %>

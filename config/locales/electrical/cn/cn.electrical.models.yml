@@ -1,15 +1,34 @@
 cn:
   activerecord:
     models:
-      electrical/heater:             "Heater"
-      electrical/cable_type:         "Cable Type"
-      electrical/cable:              "Cable"
-      electrical/demand:             "Load"
-      electrical/switchboard:        "Switchboard"
-      electrical/circuit:            "Circuit"
-      electrical/motor:              "Motor"
-      electrical/socket_cct:         "Socket Circuit"
-      electrical/light_cct:          "Light Circuit"
+      electrical:
+        heater:
+          one: "Heater"
+          other: "Heaters"
+        cable_type:
+          one: "Cable Type"
+          other: "Cable Types"
+        cable:
+          one: "Cable"
+          other: "Cables"
+        demand:
+          one: "Load"
+          other: "Loads"
+        switchboard:
+          one: "Switchboard"
+          other: "Switchboards"
+        circuit:
+          one: "Circuit"
+          other: "Circuits"
+        motor:
+          one: "Motor"
+          other: "Motors"
+        socket_cct:
+          one: "Socket Circuit"
+          other: "Socket Circuits"
+        light_cct:
+          one: "Light Circuit"
+          other: "Light Circuits"
     attributes:
       electrical/heater:
         heater_type: "Heater Type"

@@ -18,7 +18,7 @@ module Electrical
       # Create switchboard with the switchboard tag
       @switchboard = create(:electrical_switchboard, tag: @switchboard_tag)      
       # Create circuit for the switchboard 
-      @circuit = create(:electrical_circuit, serial: 1, electrical_switchboard: @switchboard)
+      @circuit = create(:electrical_circuit, serial: 1, switchboard: @switchboard)
       @resource = @circuit
 
       # Create switchboard tag on other project
@@ -26,11 +26,11 @@ module Electrical
       # Create switchboard with the switchboard tag on other project
       @other_switchboard = create(:electrical_switchboard, tag: @other_switchboard_tag)      
       # Create circuit for the switchboard on other project
-      @other_circuit = create(:electrical_circuit, serial: 1, electrical_switchboard: @other_switchboard)
+      @other_circuit = create(:electrical_circuit, serial: 1, switchboard: @other_switchboard)
       @other_resource = @other_circuit
 
       # Create cable type for the project
-      @cable_type = create(:electrical_cable_type, project: @project)    
+      @cable_type = create(:electrical_cable_type, discipline: @discipline)    
       # Create cable tags
       @cable_tag1 = create(:tag, prefix: 'EC', serial: 1001, discipline: @discipline)
       @cable_tag2 = create(:tag, prefix: 'EC', serial: 1002, discipline: @discipline)
@@ -40,7 +40,7 @@ module Electrical
       # Assign @cable1 as the feeder for @circuit. @cable2 remains unassigned.
       @cable1.update(from: @circuit)
       # Create out of scope cable type and cable
-      @other_cable_type = create(:electrical_cable_type, project: @other_project)
+      @other_cable_type = create(:electrical_cable_type, discipline: @other_discipline)
       @other_cable_tag = create(:tag, prefix: 'EC', serial: 1003, discipline: @other_discipline)
       @other_cable = create(:electrical_cable, tag: @other_cable_tag, electrical_cable_type: @other_cable_type)
       
@@ -110,19 +110,19 @@ module Electrical
 
     test "accredited user can create circuit with feeder and demand" do
       sign_in_and_set_project @accredited_user, @project
-      new_serial = (@switchboard.electrical_circuits.maximum(:serial) || 0) + 1
+      new_serial = (@switchboard.circuits.maximum(:serial) || 0) + 1
       assert_difference('Electrical::Circuit.count', 1) do
         post :create, params: new_nesting_params.merge(
           create_params.deep_merge(electrical_circuit: { serial: new_serial })
         ).merge({ electrical_cable: { from_id: @cable2.id, to_id: @motor_demand.id } })
       end
-      new_circuit = Electrical::Circuit.find_by(electrical_switchboard: @switchboard,
+      new_circuit = Electrical::Circuit.find_by(switchboard: @switchboard,
        serial: new_serial)
       assert_equal @cable2, new_circuit.feeder
       assert_equal @motor_demand, new_circuit.demand
       assert_redirected_to new_circuit
       expected_messages = [
-        I18n.t('flash.create.notice', resource_name: I18n.t("activerecord.models.electrical.circuit")),
+        I18n.t('flash.create.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
         I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder")),
         I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.demand"))
       ]
@@ -135,7 +135,7 @@ module Electrical
         { electrical_cable: { from_id: @cable2.id } })
       assert_redirected_to @circuit
       expected_messages = [
-        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit")),
+        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
         I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder"))
       ]
       assert_flash_messages :success, expected_messages
@@ -146,7 +146,7 @@ module Electrical
       patch :update, params: update_params.merge(id: @circuit.id).merge(
         { electrical_cable: { from_id: @cable2.id, to_id: @motor_demand.id } })
       expected_messages = [
-        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit")),
+        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
         I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder")),
         I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.demand"))
       ]
@@ -164,8 +164,8 @@ module Electrical
     test "accredited user can re-assign feeder to circuit" do
       sign_in_and_set_project @accredited_user, @project
       # set up another circuit - feeder - load
-      new_serial = (@switchboard.electrical_circuits.maximum(:serial) || 0) + 1
-      @new_circuit = create(:electrical_circuit, electrical_switchboard: @switchboard, serial: new_serial)
+      new_serial = (@switchboard.circuits.maximum(:serial) || 0) + 1
+      @new_circuit = create(:electrical_circuit, switchboard: @switchboard, serial: new_serial)
       @cable2.update(from: @new_circuit)
       @cable2.update(to: @motor_demand)
       # Re-assign the @circuit feeder to @cable2
@@ -178,7 +178,7 @@ module Electrical
       assert_nil @cable1.from
       assert_redirected_to @circuit
       expected_messages = [
-        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit")),
+        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
         I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder"))
       ]
       assert_flash_messages :success, expected_messages
@@ -187,8 +187,8 @@ module Electrical
     test "accredited user cannot assign demand without feeder" do
       sign_in_and_set_project @accredited_user, @project
       # set up another circuit with no feeder
-      new_serial = (@switchboard.electrical_circuits.maximum(:serial) || 0) + 1
-      @new_circuit = create(:electrical_circuit, electrical_switchboard: @switchboard, serial: new_serial)
+      new_serial = (@switchboard.circuits.maximum(:serial) || 0) + 1
+      @new_circuit = create(:electrical_circuit, switchboard: @switchboard, serial: new_serial)
       patch :update, params: update_params.merge(
         id: @new_circuit.id).deep_merge(
           electrical_circuit: { serial: new_serial }).merge(
@@ -203,8 +203,8 @@ module Electrical
     test "accredited user can re-assign demand" do
       sign_in_and_set_project @accredited_user, @project
       # Set up another circuit with feeder and demand
-      new_serial = (@switchboard.electrical_circuits.maximum(:serial) || 0) + 1
-      @new_circuit = create(:electrical_circuit, electrical_switchboard: @switchboard, serial: new_serial)
+      new_serial = (@switchboard.circuits.maximum(:serial) || 0) + 1
+      @new_circuit = create(:electrical_circuit, switchboard: @switchboard, serial: new_serial)
       @cable2.update(from: @new_circuit)
       @cable2.update(to: @motor_demand)
 
@@ -217,7 +217,7 @@ module Electrical
       assert_nil @cable2.to
       assert_redirected_to @circuit
       expected_messages = [
-        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit")),
+        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
         I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder"))
       ]
       assert_flash_messages :success, expected_messages

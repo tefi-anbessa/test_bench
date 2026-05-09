@@ -17,7 +17,7 @@ module Electrical
     end
 
     # Set the expected params for a valid resource
-    def valid_resource_params
+    def create_params
       {
         voltage_rating: '600/1000V',
         busbar_rating: '600A',
@@ -34,7 +34,7 @@ module Electrical
     end
 
     # Set invalid resource params for tests
-    def invalid_resource_param
+    def invalid_param
       { voltage_rating: 999 }  # Invalid voltage rating (enum only allows 0-9)
     end
 
@@ -55,6 +55,7 @@ module Electrical
       assert_difference('Switchboard.count', 1) do
         assert_difference('Circuit.count', 2) do
           post :create, params: {
+            discipline_id: @discipline.id,
             electrical_switchboard: {
               voltage_rating: '600/1000V',
               busbar_rating: 200.0,
@@ -68,7 +69,6 @@ module Electrical
               ingress_protection: '20',
               notes: 'Test switchboard',
               tag: {
-                discipline_id: @discipline.id,
                 prefix: 'EX',
                 serial: 2002,
                 suffix: '',

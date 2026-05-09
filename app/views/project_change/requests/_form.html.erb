@@ -13,6 +13,7 @@
     </div>
 
     <%= bootstrap_form_with(model: request,
+          url: project_project_change_requests_path(@project),
           layout: :horizontal,
           label_col: "col-sm-4",
           control_col: "col-sm-8",
@@ -62,7 +63,7 @@
             <div class="card-footer bg-transparent text-end p-2">
               <%= link_to(request.persisted? ? 
               request : 
-              project_change_requests_path,
+              project_project_change_requests_path(@project),
                     class: 'btn btn-warning',
                     data: { confirm: t('actions.sure'), turbo: false }) do %>
                 <%= t('actions.discard') %>

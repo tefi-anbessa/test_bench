@@ -16,7 +16,7 @@ module Electrical
     end
 
     # Set the expected params for a valid resource
-    def valid_resource_params
+    def create_params
       {
         socket_type: "10A",
         quantity: 1,
@@ -25,7 +25,7 @@ module Electrical
     end
 
     # Set invalid resource params for tests
-    def invalid_resource_param
+    def invalid_param
       { socket_type: 'new' }  # Invalid socket type 
     end
 

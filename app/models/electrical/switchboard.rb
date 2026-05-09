@@ -4,7 +4,7 @@ module Electrical
     include Electrical::Demandable
     include TagableNavigation
     
-    has_many :electrical_circuits, class_name: 'Electrical::Circuit', 
+    has_many :circuits, class_name: 'Electrical::Circuit', 
               foreign_key: 'electrical_switchboard_id', dependent: :destroy
     enum :voltage_rating, Constants.electrical.voltage_ratings.to_h
 
@@ -21,7 +21,7 @@ module Electrical
       end
 
       def self.ransackable_associations(auth_object = nil)
-        [ :electrical_circuits, :tag, :tag_discipline, :tag_discipline_project, :electrical_demand ]
+        [ :circuits, :tag, :tag_discipline, :tag_discipline_project, :electrical_demand ]
       end
 
   end

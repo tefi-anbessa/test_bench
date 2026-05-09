@@ -3,8 +3,9 @@ module ProjectChange
   class RequestsController < ApplicationController
     before_action :authenticate_user!
     before_action :require_project!, only: %i[ new create edit update ]
+    before_action :set_project, only: [:index, :new, :create]
     before_action :set_request, only: [:show, :edit, :update, :destroy]
-    before_action :set_swatch, only: [:index, :show, :new, :edit]
+    before_action :set_swatch, only: [:index, :show]
 
     # GET /change/requests
     def index
@@ -27,18 +28,17 @@ module ProjectChange
 
     # POST /change/requests
     def create
-      @request = current_project.change_requests.build(request_params)
+      @request = @project.change_requests.build(request_params)
       authorize @request
 
       if @request.save
         flash[:success] = t('flash.create.notice', 
-          resource_name: @request.model_name.human)
-        set_swatch
+          resource_name: t("activerecord.models.project_change.request.one"))
         redirect_to @request
       else
-        flash[:alert] = t('flash.create.alert', 
-          resource_name: @request.model_name.human.downcase)
-        set_swatch
+        flash[:alert] = t('flash.create.alert',
+          resource_name: t("activerecord.models.project_change.request.one").downcase)
+        setup_form
         render :new, status: :unprocessable_content
       end
     end
@@ -53,14 +53,13 @@ module ProjectChange
     def update
       authorize @request
       if @request.update(request_params)
-        flash[:success] = t('flash.update.notice', 
-          resource_name: @request.model_name.human)
-        set_swatch
+        flash[:success] = t('flash.update.notice',
+          resource_name: t("activerecord.models.project_change.request.one"))
         redirect_to @request
       else
         flash[:alert] = t('flash.update.alert', 
-          resource_name: @request.model_name.human.downcase)
-        set_swatch
+          resource_name: t("activerecord.models.project_change.request.one").downcase)
+        setup_form
         render :edit, status: :unprocessable_content 
       end
     end
@@ -69,34 +68,37 @@ module ProjectChange
     def destroy
       authorize @request
       if @request.destroy
-        flash[:success] = t('flash.destroy.notice', 
-          resource_name: @request.model_name.human)
+        flash[:success] = t('flash.destroy.notice',
+          resource_name: t("activerecord.models.project_change.request.one"))
       else
         flash[:alert] = t('flash.destroy.alert', 
-          resource_name: @request.model_name.human.downcase)
+          resource_name: t("activerecord.models.project_change.request.one").downcase)
       end
-      set_swatch
-      redirect_to project_change_requests_path
+      redirect_to project_project_change_requests_path(@project)
     end
 
     private
 
+      def set_project
+        @project = policy_scope(Project).find_by(id: params[:project_id])
+        raise ApplicationController::ConflictError, :out_of_scope if @project.nil?
+      end
+
       def set_request
-        begin
-          @request = policy_scope(ProjectChange::Request).find(params[:id])
-        rescue ActiveRecord::RecordNotFound
-          raise Pundit::NotAuthorizedError
-        end
+        @request = policy_scope(ProjectChange::Request).find_by(id: params[:id])
+        raise ApplicationController::ConflictError, :out_of_scope if @request.nil?
+        @project = @request.project
       end
 
       def set_swatch
-        @swatch = ProjectChange::Request.swatch
+        @swatch = @project.swatch.presence || ProjectChange::Request.swatch
       end
 
       def setup_form
         @disciplines = policy_scope(Discipline)
         .select('disciplines.id, disciplines.label, disciplines.name')
         .order('disciplines.label ASC')
+        set_swatch
       end
 
       def request_params

@@ -3,8 +3,9 @@
 # Base policy for resources that are tagable.
 # Scope and access are based on current project, user, and the resource's class.
 # View actions (show and index) only require users to have a project role on the current project
-# The policy uses the resource's class to find the required role for content modification actions.
-# Resources will generally inherit the required role from the discipline's base class.
+# The policy uses the resource's discipline to find the required role for content modification actions.
+# If not required role is specified for the discipline, the resource's class required role will be used.
+# Resources generally inherit the required role from the discipline's base class.
 # Delete action is only available to admins.
 # The policy delegates checking of the associated tag's project to the tag policy, 
 # controllers must authorize both tag and tagable when required. 

@@ -40,7 +40,7 @@ module Electrical
     private
 
     def setup_additional_form_data
-      @circuits = @switchboard.persisted? ? @switchboard.electrical_circuits.count : 0
+      @circuits = @switchboard.persisted? ? @switchboard.circuits.count : 0
       @voltage_ratings = Constants.electrical.voltage_ratings
       @ip_1 = Constants.electrical.ingress_protection.first_digit.to_h
       @ip_2 = Constants.electrical.ingress_protection.second_digit.to_h
@@ -60,19 +60,19 @@ module Electrical
     def update_circuits(switchboard, desired_count = nil)
       return unless desired_count && desired_count > 0
 
-      current_count = switchboard.electrical_circuits.count
+      current_count = switchboard.circuits.count
       count = desired_count - current_count
       if count > 0
         authorize switchboard, :create?
         
         count.times do |i|
-          switchboard.electrical_circuits.create(serial: current_count + i + 1)
+          switchboard.circuits.create(serial: current_count + i + 1)
         end
         resource_name = Electrical::Circuit.model_name.human(count: count)
         flash[:success] << t("flash.assigned", count: count, resource_name: resource_name)
       elsif count < 0
         authorize switchboard, :destroy?
-        switchboard.electrical_circuits
+        switchboard.circuits
                   .order(serial: :desc)
                   .limit(current_count - desired_count)
                   .destroy_all
@@ -88,7 +88,7 @@ module Electrical
           :cable_entry, :incomer_protection, :metering, 
           :neutral_bar_connections, :earth_bar_connections, :notes,
           tag: [
-            :id, :project_id, :discipline_id, :prefix, :serial, 
+            :discipline_id, :prefix, :serial, 
             :suffix, :service, :stage, :notes, :tagable_type
           ])
       end

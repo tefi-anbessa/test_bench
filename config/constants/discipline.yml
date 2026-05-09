@@ -9,62 +9,51 @@
 
 disciplines:
 
-  Administration:
-    label: A
-    prefix_schema: { name: 'default' }
-    sort_order: 10
-    required_role: :designer
-
-  Architecture:
-    label: B
-    prefix_schema: { name: 'default' }
-    sort_order: 20
-    required_role: :designer
-
-  DocumentControl:
-    label: DC
-    prefix_schema: { name: 'default' }
-    sort_order: 25
-    required_role: :document_controller
-
   Process:
     label: P
     prefix_schema: { name: 'default' }
     sort_order: 30
     required_role: :designer
+    catalog_required_role: :custodian
 
   Electrical:
     label: E
     prefix_schema: { name: 'default' }
     sort_order: 10
     required_role: :designer
+    catalog_required_role: :custodian
 
   Instrument:
     label: J
     prefix_schema: { name: 'isa51' }
     sort_order: 40
     required_role: :designer
+    catalog_required_role: :custodian
 
   InformationTechnology:
     label: IT
     prefix_schema: { name: 'default' }
     sort_order: 50
     required_role: :designer
+    catalog_required_role: :custodian
 
   Mechanical:
     label: M
     prefix_schema: { name: 'default' }
     sort_order: 60
     required_role: :designer
+    catalog_required_role: :custodian
 
   Piping:
     label: PIP
     prefix_schema: { name: 'default' }
     sort_order: 70
     required_role: :designer
+    catalog_required_role: :custodian
 
   Civil:
     label: C
     prefix_schema: { name: 'default' }
     sort_order: 80
     required_role: :designer
+    catalog_required_role: :custodian
