@@ -11,6 +11,7 @@ module TagableModelTests
     @resource_discipline = @project.disciplines.find_by(name: resource_class.module_parent_name)
     # Factory default unique tag will be "A:AA-0001"
     @tag = create(:tag, :unique_tag, discipline: @resource_discipline)
+    setup_resource_prerequisites if defined?(setup_resource_prerequisites)
     @resource = create(resource_class.model_name.singular, tag: @tag)
   end
 

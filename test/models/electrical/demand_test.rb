@@ -58,7 +58,7 @@ class DemandTest < ActiveSupport::TestCase
   test "power factor must not be zero" do
     @demand.power_factor = 0.0
     refute @demand.valid?, "Demand with power factor 0.0 should not be valid. Errors: #{@demand.errors.full_messages}"
-    assert_includes @demand.errors[:power_factor], I18n.t("activerecord.errors.attributes.electrical/demand.power_factor.zero_pf")
+    assert_includes @demand.errors[:power_factor], I18n.t("activerecord.errors.attributes.electrical.demand.power_factor.zero_pf")
   end
 
   test "duty must be in range" do
@@ -130,7 +130,7 @@ class DemandTest < ActiveSupport::TestCase
     refute demand.valid?, "Demand should not be valid with demandable without a tag"
     # puts "Demand errors: #{demand.errors.full_messages}"
     assert_includes demand.errors[:base], 
-          I18n.t("activerecord.errors.messages.attributes.demand.demandable.tag_association",
+          I18n.t("activerecord.errors.attributes.electrical.demand.demandable.tag_association",
                   model: demandable.class.model_name.human)
     
     # Now assign the tag and it should be valid

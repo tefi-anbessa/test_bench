@@ -10,7 +10,7 @@
             <!-- Index Button -->
             <% if policy(@switchboard).index? %>
               <%= link_to discipline_electrical_switchboards_path(@discipline),
-                    class: "btn btn-sm btn-outline-secondary me-2",
+                    class: "btn btn-sm btn-outline-info me-2",
                     title: t('actions.index') do %>
                 <%== bs_icon('list-columns-reverse') %>
                 <span class="d-none d-md-inline"><%= t('actions.index') %></span>
@@ -40,10 +40,8 @@
             <div class="mt-1">
               <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
                 <%= t('.header', label: @switchboard.label)%>
+                <%= @switchboard.tag.service.presence %>
               </span>
-              <% if @switchboard.tag&.service.present? %>
-                <small class="text-muted ms-2"><%= @switchboard.tag.service %></small>
-              <% end %>
             </div>
           </div>
         </div>
@@ -93,7 +91,7 @@
               <% end %>
 
               <% if policy(@switchboard).new? %>
-                <%= link_to new_discipline_electrical_switchboards_path(@discipline),
+                <%= link_to new_discipline_electrical_switchboard_path(@discipline),
                   class: "btn btn-outline-primary actions",
                   aria: { label: t('actions.new') },
                   title: t('actions.new') do %>
@@ -208,7 +206,7 @@
 
                   <div class="row mb-1">
                     <div class="col-4 text-muted">
-                      <% text = t('activerecord.models.electrical.demand') %>
+                      <% text = t('activerecord.models.electrical.demand.one') %>
                       <% if @switchboard.electrical_demand.present? %>
                         <%= link_to @switchboard.electrical_demand,
                           class: "btn btn-sm btn-outline-secondary",

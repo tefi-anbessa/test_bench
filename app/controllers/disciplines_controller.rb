@@ -19,6 +19,7 @@ class DisciplinesController < ApplicationController
   # GET /disciplines/1 or /disciplines/1.json
   def show
     authorize @discipline
+    setup_dashboard
   end
 
   # GET /disciplines/new
@@ -114,6 +115,14 @@ class DisciplinesController < ApplicationController
       set_prefix_schema_selection
       @swatch = @discipline.swatch || Swatch.find_by(name: 'app_theme')
       @swatches = policy_scope(Swatch)
+    end
+
+    def setup_dashboard
+      Rails.application.eager_load! if Rails.env.development?
+      models = ActiveRecord::Base.descendants
+      .select { |model| model.module_parent_name == @discipline.name && model.model_name.human != "Base" }
+      .sort_by(&:model_name)
+      @model_links = models.map { |m| [m.model_name.human.pluralize, m.model_name.route_key] }
     end
 
     def set_prefix_schema_selection

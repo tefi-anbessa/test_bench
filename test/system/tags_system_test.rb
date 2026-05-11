@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 require "helpers/test_setup_helpers"
-# frozen_string_literal: true
-require "helpers/test_setup_helpers"
-# frozen_string_literal: true
-require "helpers/test_setup_helpers"
 require "application_system_test_case"
 
 class TagsSystemTest < ApplicationSystemTestCase

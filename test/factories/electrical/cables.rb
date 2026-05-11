@@ -46,8 +46,9 @@ FactoryBot.define do
         else
           cable_type = cable.electrical_cable_type
           project = cable_type&.discipline&.project || create(:project)
+          project.save! if project.new_record?
           discipline = project.disciplines.find_by(name: cable.class.module_parent_name) ||
-               create(:discipline, name: cable.class.module_parent_name, project: project)
+               project.disciplines.create(name: cable.class.module_parent_name)
           cable.tag = create(:tag, :unique_tag, discipline: discipline)
         end
       end

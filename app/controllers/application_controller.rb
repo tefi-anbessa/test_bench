@@ -7,6 +7,7 @@ class ApplicationController < ActionController::Base
 
   around_action :switch_locale
   before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :set_paper_trail_whodunnit
 
   # Custom error handling for trapped bad requests
   class ConflictError < StandardError; end
@@ -39,6 +40,8 @@ class ApplicationController < ActionController::Base
       format.any { head :not_acceptable }
     end
   end
+
+
   # rescue_from ActionController::Redirecting::UnsafeRedirectError do
   #   redirect_to root_url
   # end
@@ -103,7 +106,7 @@ class ApplicationController < ActionController::Base
     end
 
     def info_for_paper_trail
-      { ip: request.remote_ip, user_agent: request.user_agent }
+      { ip: request.remote_ip, user_agent: request.user_agent, current_project_id: current_project&.id }
     end
 
     def switch_locale(&action)

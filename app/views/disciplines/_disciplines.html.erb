@@ -4,7 +4,7 @@
 <!-- Disciplines Dashboard Panel -->
 <div class="card mb-4" style="<%= card_styles(@swatch) %>">
   <div class="card-header d-flex justify-content-between align-items-center py-2" style="<%= card_header_styles(@swatch) %>">
-    <h5 class="mb-0"><%= t('disciplines.index.header', project: @project.label) %></h5>
+    <h5 class="mb-0"><%= t('disciplines.index.header', scope_text: @project.label) %></h5>
     <% if policy(project.disciplines.build()).new? %>
       <%= link_to new_project_discipline_path(@project),
             class: "btn btn-outline-primary btn-sm",

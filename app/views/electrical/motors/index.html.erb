@@ -1,29 +1,37 @@
 <% provide(:title, t('.title')) %>
 <div class="container mt-3 mx-auto" style="<%= container_styles(@swatch)%>">
   <!-- Motor Schedule Card Header -->
-  <div class="card mb-4" style="<%= card_styles(@swatch) %>">
-    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
-      <div class="d-flex justify-content-between align-items-center">
+  <div class="card mb-1" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-1" style="<%= card_header_styles(@swatch) %>">
+      <div class="row align-items-center p-2">
+
+        <div class="col-2">
+            <%= link_to discipline_path(@discipline), class: "btn btn-sm btn-outline-info" do %>
+              <%= @discipline.name %>
+              <%= bs_icon('collection', class: "me-1") %>
+            <% end %>
+        </div>
+
         <!-- Header Text (Left) -->
-        <div class="ms-2">
-          <% project_text = current_project.present? ? 
+        <div class="col-8">
+          <% scope_text = current_project.present? ? 
           [current_project.class.model_name.human, current_project.label].join(': ') : 
           t('index.all', models: t('activerecord.models.project').pluralize) %>
-          <h5 class="mb-0"><%= t('.header', project: project_text) %></h5>
+          <h5 class="mb-1"><%= t('.header', scope_text: scope_text) %></h5>
         </div>
 
         <!-- New Button (Right) -->
-        <% if policy(Electrical::Motor).new? %>
-            <%= link_to new_electrical_motor_path, 
-              class: "btn btn-outline-primary actions",
-              aria: { label: t('actions.new') },
-              title: t('actions.new') do %>
-              <%== bs_icon('plus-square-fill') %>
-              <span class="ms-1">
-                <%= [t('actions.new'), t('activerecord.models.electrical.motor')].join(' ') %>
-              </span>
-            <% end %>
-        <% end %>
+        <div class="col-2 text-end">
+          <% if policy(Electrical::Motor).new? %>
+              <%= link_to new_discipline_electrical_motor_path(@discipline), 
+                class: "btn btn-sm btn-outline-primary actions",
+                aria: { label: t('actions.new') },
+                title: t('actions.new') do %>
+                <%== bs_icon('plus-square-fill') %>
+                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical.motor.one')].join(' ') %></span>
+              <% end %>
+          <% end %>
+        </div>
       </div> <!-- end of d-flex -->
     </div> <!-- end of card header -->
     
@@ -60,7 +68,9 @@
           <thead>
             <tr class="table-danger">
               <th colspan="9">
-                <%= t('index.link_broken', models: t("activerecord.models.motor").tableize) %>
+                <%= t('index.link_broken', 
+                      count: @link_broken.count,
+                      models: t("activerecord.models.electrical.motor", count: @link_broken.count)) %>
               </th>
             </tr>
             <%= render 'tags/header' %>
@@ -77,7 +87,9 @@
           <thead>
             <tr class="table-warning">
               <th colspan="9">
-                <%= t('index.link_incomplete', models: t("activerecord.models.motor").tableize) %>
+                <%= t('index.link_incomplete', 
+                      count: @link_incomplete.count,
+                      models: t("activerecord.models.electrical.motor", count: @link_incomplete.count)) %>
               </th>
             </tr>
             <%= render 'tags/header' %>

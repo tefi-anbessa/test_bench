@@ -1,17 +1,23 @@
 class Tag < ApplicationRecord
+
+  # Gem invocation
+  has_paper_trail
+
+  # Scopes
+  # default_scope -> { joins(discipline: [:project]).order('projects.code', 'disciplines.label') }
+  # Sort by loop_id, then by full_tag
+  # scope :sort_by_loop, -> { order(:loop_id, :prefix, :suffix) }
+  # Sort by prefix/serial/suffix
+  # scope :sort_by_tag, -> { order(:prefix, :serial, :suffix) }
+
+  # Callbacks
+
+  # Associations
   delegated_type :tagable, types: Constants.tagable, optional: true, dependent: :destroy
   belongs_to :discipline
   delegate :project, to: :discipline
 
-  has_paper_trail(
-    meta: {
-      project_id: ->(tag) { tag.project&.id }
-    }
-  )
-
-  # Default scope to sort by loop_id, then by full_tag
-  default_scope { order(:loop_id, :prefix, :suffix) }
-
+  # Validations
   validates :prefix, presence: true
   validates :prefix, format: { with: /\A[a-zA-Z]+\z/, message: :only_letters }
   validates :prefix, length: { in: 1..6 }
@@ -43,6 +49,7 @@ class Tag < ApplicationRecord
   # suffix, which may be null.
   validate :validate_tag_uniqueness
 
+  # Methods
   def label
     full_tag
   end
@@ -203,7 +210,7 @@ class Tag < ApplicationRecord
       ).where.not(id: id).exists?
       
       if existing_tag
-        errors.add(:tagable, I18n::t("activerecord.errors.custom_messages.already_associated", 
+        errors.add(:tagable, I18n.t("activerecord.errors.custom_messages.already_associated", 
           child: tagable_type.constantize.model_name.human,
           parent: self.class.model_name.human))
       end

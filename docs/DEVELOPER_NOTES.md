@@ -387,7 +387,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Fix previous and next functionality in tagable navigation, and generatise it for non tagables. All models next and prev should only look inside policy scope. At present can raise forbidden.
 - [ ] RBAC still has anomalous behaviour when resource wide roles are applied. Scope will include all projects, and alow selection of any project as current, but accessing the project without a specific role will result in forbidden. Either block resource wide roles or implement them in policies.
 - [ ] Clean up responsive views - test all on simulator.
-- [ ] Next
+- [ ] Issue policy has been removed. Assess whether it is required or just use document policy, like circuits.
 
 ## Refactoring Opportunities
 

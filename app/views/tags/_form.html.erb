@@ -5,10 +5,12 @@
       <div class="col text-center">
         <div class="d-flex flex-column align-items-center">
           <div class="mt-1">
-            <%= yield(:header) %>
-            <% if tag.persisted? && tag.service.present? %>
-              <small class="text-muted ms-2"><%= tag.service %></small>
-            <% end %>
+            <span class="badge fs-6">
+              <%= yield(:header) %>
+              <% if tag.persisted? && tag.service.present? %>
+                <%= tag.service %>
+              <% end %>
+            </span>
           </div>
         </div>
       </div>
@@ -37,6 +39,9 @@
                     max: 10,
                     title: t('activerecord.help.tag.stage') %>
             </div>
+
+            <!-- Discipline -->
+            <%= f.hidden_field :discipline_id, value: @discipline.id %>
 
             <!-- Prefix Fields - Dynamic based on discipline schema -->
             <%= render 'tags/prefix_fields', tag: tag, f: f %>

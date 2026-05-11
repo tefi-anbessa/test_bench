@@ -11,8 +11,9 @@ class UserPolicy < ApplicationPolicy
       # Get all users with any role on the current project
       user_ids = User.joins(:roles).where(roles: 
       { resource_type: 'Project', resource_id: current_project.id }).pluck(:id)
-      # Add admins and super admins
-      user_ids += User.joins(:roles).where(name: ['admin', 'app_owner']).pluck(:id)
+      # Add admins and app owners (global roles have resource_type: nil)
+      user_ids += User.joins(:roles).where(roles: 
+      { name: ['admin', 'app_owner'], resource_type: nil }).pluck(:id)
       scope.where(id: user_ids.uniq)
       elsif user&.is_admin? || user&.is_app_owner?
         scope.all

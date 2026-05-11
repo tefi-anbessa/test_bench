@@ -22,6 +22,13 @@ class DisciplinesControllerTest < ActionController::TestCase
     @other_resource = @other_project.disciplines.find_by(name: "Electrical")
   end
 
+  # Override out of scope test - discipline authorises before scope check
+  def test_regular_user_cannot_access_index
+    sign_in_and_set_project @regular_user, @project
+    get :index, params: index_nesting_params
+    assert_forbidden
+  end
+
   test "returns conflict response for invalid required_role injection attempt" do
     sign_in_and_set_project(@project_manager, @project)
     assert_no_difference('Discipline.count') do

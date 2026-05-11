@@ -40,10 +40,8 @@
             <div class="mt-1">
               <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
                 <%= t('.header', label: @cable.label) %>
+                <%= @cable.tag.service.presence %>
               </span>
-              <% if @cable.tag.service.present? %>
-                <small class="text-muted ms-2"><%= @cable.tag.service %></small>
-              <% end %>
             </div>
           </div>
         </div>
@@ -150,7 +148,7 @@
                               <%= link_to @cable.from,
                                 class: "btn btn-sm btn-outline-secondary mb-2",
                                 title: t('show.linked', model: text) do %>
-                                  <%== bs_icon('link-45deg') %>
+                                  <%== bs_icon('box-arrow-in-down-right') %>
                                   <span class="d-none d-md-inline">
                                     <%= t('show.linked', model: text) %>
                                   </span>
@@ -186,7 +184,7 @@
                               <%= link_to @cable.to,
                                 class: "btn btn-sm btn-outline-secondary mb-2",
                                 title: t('show.linked', model: text) do %>
-                                  <%== bs_icon('link-45deg') %>
+                                  <%== bs_icon('box-arrow-in-down-right') %>
                                   <span class="d-none d-md-inline">
                                     <%= t('show.linked', model: text) %>
                                   </span>

@@ -96,7 +96,7 @@ module Electrical
       return unless demandable?
       return if demandable.respond_to?(:tag) && demandable.tag.present?
       
-      errors.add(:base, message: I18n.t("activerecord.errors.messages.attributes.demand.demandable.tag_association",
+      errors.add(:base, message: I18n.t("activerecord.errors.attributes.electrical.demand.demandable.tag_association",
                                         model: demandable_type.constantize.model_name.human))
     end
 

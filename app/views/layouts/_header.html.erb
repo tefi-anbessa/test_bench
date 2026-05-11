@@ -121,7 +121,7 @@
               </li>
               <% if policy(current_user).index? %>
                 <li>
-                  <%= link_to t('user', scope: 'activerecord.models').pluralize,
+                  <%= link_to t('activerecord.models.user.other'),
                     users_path,
                     class: 'dropdown-item' %>
                 </li>

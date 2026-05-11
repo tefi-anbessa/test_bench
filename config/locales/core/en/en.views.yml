@@ -79,7 +79,7 @@ en:
   disciplines:
     index:
       title:            "Disciplines"
-      header:           "Disciplines for %{project}"
+      header:           "Disciplines for %{scope_text}"
     new:
       title:            "New Discipline"
       header:           "New Discipline"
@@ -92,10 +92,10 @@ en:
   tags:
     index:
       title:            "Tags"
-      header:           "Tag List for %{project}"
+      header:           "Tag List for %{scope_text}"
     new:
       title:            "New Tag"
-      header:           "New Tag"
+      header:           "New Tag in Discipline %{discipline}"
     show:
       title:            "Tag"
       header:           "Tag: %{label}"

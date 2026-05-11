@@ -10,7 +10,7 @@
             <!-- Index Button -->
             <% if policy(@demand).index? %>
               <%= link_to discipline_electrical_demands_path(@discipline),
-                    class: "icon-link btn btn-sm btn-outline-secondary me-2 actions",
+                    class: "icon-link btn btn-sm btn-outline-info me-2 actions",
                     title: t('actions.index') do %>
                 <%== bs_icon('list-columns-reverse') %>
                 <%= t('actions.index') %>
@@ -40,10 +40,8 @@
             <div class="mt-1">
               <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
                 <%= t('.header', label: @demand.label)%>
+                <%= @demand.tag.service %>
               </span>
-              <% if @demand.tag&.service.present? %>
-                <small class="text-muted ms-2"><%= @demand.tag.service %></small>
-              <% end %>
             </div>
           </div>
         </div>
@@ -113,7 +111,7 @@
               </div>
             <% else %>
               <div class="row mb-1">
-                <% model_text = t("activerecord.models.#{@demand.demandable_type.split("::").map(&:underscore).join(".")}") %>
+                <% model_text = t("activerecord.models.#{@demand.demandable_type.split("::").map(&:underscore).join(".")}.one") %>
                 <% text = t("actions.jump_to", model: model_text) %>
                 <% path = begin
                   polymorphic_path([@demand.demandable])
@@ -137,23 +135,23 @@
                   <!-- Circuit Section -->
                   <div class="row mb-1">
                     <div class="col-4 text-muted">
-                      <%= @demand.class.human_attribute_name(:electrical_circuit) %>
+                      <%= @demand.class.human_attribute_name(:circuit) %>
                     </div>
                     <div class="col-8">
                       <% if @demand.circuit.present? %>
-                        <% text = t("activerecord.models.electrical.circuit") %>
+                        <% text = t("activerecord.models.electrical.circuit.one") %>
                         <div class="d-flex justify-content-between align-items-center">
                           <span><%= @demand.circuit.label %></span>
                           <%= link_to @demand.circuit,
                                 class: "btn btn-sm btn-outline-secondary mb-2",
                                 title: t('show.linked', model: text) do %>
-                                  <%== bs_icon('link-45deg') %>
+                                  <%== bs_icon('box-arrow-in-right') %>
                                   <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
                                 <% end %>
                         </div>
                       <% else %>
                         <span class="text-muted">
-                          <%= t('show.unassigned', model: t("activerecord.models.electrical.circuit")) %>
+                          <%= t('show.unassigned', model: t("activerecord.models.electrical.circuit.one")) %>
                         </span>
                       <% end %>
                     </div>
@@ -166,13 +164,13 @@
                     </div>
                     <div class="col-8">
                       <% if @demand.incomer.present? %>
-                        <% text = t("activerecord.models.electrical.cable") %>
+                        <% text = t("activerecord.models.electrical.cable.one") %>
                         <div class="d-flex justify-content-between align-items-center">
                           <span><%= @demand.incomer.label %></span>
                           <%= link_to @demand.incomer,
                                 class: "btn btn-sm btn-outline-secondary mb-2",
                                 title: t('show.linked', model: text) do %>
-                                  <%== bs_icon('link-45deg') %>
+                                  <%== bs_icon('box-arrow-in-right') %>
                                   <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
                                 <% end %>
                         </div>

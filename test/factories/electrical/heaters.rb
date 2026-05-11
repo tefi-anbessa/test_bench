@@ -27,7 +27,7 @@ FactoryBot.define do
             raise "Tag is already associated with another record: #{evaluator.tag.tagable_type}##{evaluator.tag.tagable_id}"
           end
           heater.tag = evaluator.tag
-        elsif evaluator.disciplineß
+        elsif evaluator.discipline
           heater.tag = create(:tag, :unique_tag, discipline: evaluator.discipline)
         else
           # Create project with auto-created disciplines

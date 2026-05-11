@@ -10,7 +10,7 @@
             <!-- Index Button -->
             <% if policy(@light_cct).index? %>
               <%= link_to discipline_electrical_light_ccts_path(@discipline),
-                    class: "btn btn-sm btn-outline-secondary me-2",
+                    class: "btn btn-sm btn-outline-info me-2",
                     title: t('actions.index') do %>
                 <%== bs_icon('list-columns-reverse') %>
                 <span class="d-none d-md-inline"><%= t('actions.index') %></span>
@@ -25,10 +25,8 @@
             <div class="mt-1">
               <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
                 <%= t('.header', label: @light_cct.label)%>
+                <%= @light_cct.tag.service.presence %>
               </span>
-              <% if @light_cct.tag&.service.present? %>
-                <small class="text-muted ms-2"><%= @light_cct.tag.service %></small>
-              <% end %>
             </div>
           </div>
         </div>
@@ -120,16 +118,16 @@
 
                   <div class="row mb-1">
                     <div class="col-4 text-muted">
-                      <% text = t('activerecord.models.electrical.demand') %>
+                      <% text = t('activerecord.models.electrical.demand.one') %>
                       <% if @light_cct.electrical_demand.present? %>
-                        <%= link_to electrical_demand_path(@light_cct.demand),
+                        <%= link_to electrical_demand_path(@light_cct.electrical_demand),
                           class: "btn btn-sm btn-outline-secondary",
                           title: text do %>
                             <%= text %>
                             <%== bs_icon('box-arrow-in-down-right') %>
                         <% end %>
                       <% else %>
-                      <% text = t("actions.link", resource: t("activerecord.models.electrical.demand")) %>
+                      <% text = t("actions.link", resource: t("activerecord.models.electrical.demand.one")) %>
                         <% if policy(Electrical::Demand).new? %>
                           <%= link_to new_tag_electrical_demand_path(@light_cct.tag.id),
                               class: "btn btn-sm btn-outline-primary mb-2",

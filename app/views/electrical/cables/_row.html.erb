@@ -55,7 +55,7 @@
       <%= t('show.unassigned', model: row.class.human_attribute_name(:to)) %>
     <% end %>
   </td>
-  <td><%= link_to row.electrical_cable_type.code, electrical_cable_type_path(row.electrical_cable_type_id) %></td>
+  <td><%= link_to row.electrical_cable_type.id, electrical_cable_type_path(row.electrical_cable_type_id) %></td>
   <td><%= row.route_length %></td>
   <td>
     <% if policy(row).show? %>

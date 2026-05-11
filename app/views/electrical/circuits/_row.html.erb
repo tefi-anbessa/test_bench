@@ -1,5 +1,5 @@
 <tr>
-  <td><%= row.label %></td>
+  <td><%= row.long_label %></td>
   <td><%= row.phase %></td>
   <td><%= row.device %></td>
   <td><%= row.poles %></td>
@@ -18,7 +18,7 @@
     <% if row.demand.present? && policy(row.demand).show? %>
       <%= link_to row.demand.label, row.demand %>
     <% else %>
-      <%= t("show.unassigned", model: t("activerecord.models.electrical.demand")) %>
+      <%= t("show.unassigned", model: t("activerecord.models.electrical.demand.one")) %>
     <% end %>
   </td>
   <!-- Links -->

@@ -9,20 +9,20 @@ module Electrical
 
     def setup
       setup_common_test_data
-      @cable_type = create(:electrical_cable_type, project: @project)
       @cable = @resource
+    end
+
+    def setup_resource_prerequisites
+      @cable_type = create(:electrical_cable_type, discipline: @resource_discipline)
     end
     
     test "should require electrical_cable_type" do
-      cable = build(:electrical_cable,
-        tag: create(:tag, discipline: @resource_discipline),
-        electrical_cable_type: nil
-      )
-      refute cable.valid?
+      @cable.electrical_cable_type = nil
+      refute @cable.valid?
       assert_no_difference 'Electrical::Cable.count' do
-        cable.save
+        @cable.save
       end
-      assert_includes cable.errors[:electrical_cable_type], I18n.t('errors.messages.required')
+      assert_includes @cable.errors[:electrical_cable_type], I18n.t('errors.messages.required')
     end
 
     test "should associate with circuit feeder" do
@@ -65,7 +65,7 @@ module Electrical
 
     test "cable from should be unique" do
       swbd = create(:electrical_switchboard, discipline: @resource_discipline)
-      circuit = swbd.electrical_circuits.create(serial: 1)
+      circuit = swbd.circuits.create(serial: 1)
       cable1 = create(:electrical_cable, from: circuit,
         tag: create(:tag, :unique_tag, prefix: "EC", discipline: @resource_discipline),
         electrical_cable_type: @cable_type)

@@ -8,6 +8,7 @@ class TagsController < ApplicationController
   # GET /tags or /tags.json
   def index
     authorize @discipline.tags.build()
+    @orphans = Tag.where(discipline_id: nil)
     @q = policy_scope(Tag).ransack(params[:q])
     @pagy, @tags = pagy(@q.result.includes(discipline: :project), limit: 20)
   end

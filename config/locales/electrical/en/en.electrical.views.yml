@@ -3,7 +3,7 @@ en:
     cable_types:
       index:
         title:            "Cable Types"
-        header:           "Catalog of Cable Types for %{project}"
+        header:           "Catalog of Cable Types for %{scope_text}"
       edit:
         title:            "Edit Cable Type"
         header:           "Edit Cable Type %{label}"
@@ -17,7 +17,7 @@ en:
     cables:
       index:
         title:            "Cables"
-        header:           "Cable Schedule for %{project}"
+        header:           "Cable Schedule for %{scope_text}"
       edit:
         title:            "Edit Cable"
         header:           "Edit Cable %{label}"
@@ -31,7 +31,7 @@ en:
     switchboards:
       index:
         title:            "Switchboards"
-        header:           "Switchboards List for %{project}"
+        header:           "Switchboards List for %{scope_text}"
       edit:
         title:            "Edit Switchboard"
         header:           "Edit Switchboard %{label}"
@@ -45,7 +45,7 @@ en:
     circuits:
       index:
         title:            "Circuits"
-        header:           "%{switchboard} Circuits Schedule"
+        header:           "%{scope_text} Circuits Schedule"
       edit:
         title:            "Edit Circuit"
         header:           "Edit Circuit %{label}"
@@ -59,7 +59,7 @@ en:
     motors:
       index:
         title:            "Motors"
-        header:           "Motors Schedule for %{project}"
+        header:           "Motors Schedule for %{scope_text}"
       edit:
         title:            "Edit Motor"
         header:           "Edit Motor %{label}"
@@ -73,7 +73,7 @@ en:
     socket_ccts:
       index:
         title:            "Socket Circuits"
-        header:           "Socket Circuits Schedule for %{project}"
+        header:           "Socket Circuits Schedule for %{scope_text}"
       edit:
         title:            "Edit Socket Circuit"
         header:           "Edit Socket Circuit %{label}"
@@ -87,7 +87,7 @@ en:
     light_ccts:
       index:
         title:            "Light Circuits"
-        header:           "Light Circuits Schedule for %{project}"
+        header:           "Light Circuits Schedule for %{scope_text}"
       edit:
         title:            "Edit Light Circuit"
         header:           "Edit Light Circuit %{label}"
@@ -101,7 +101,7 @@ en:
     demands:
       index:
         title:            "Load List"
-        header:           "Load List for %{project}"
+        header:           "Load List for %{scope_text}"
       edit:
         title:            "Edit Load"
         header:           "Edit Load for %{label}"
@@ -115,7 +115,7 @@ en:
     heaters:
       index:
         title:            "Heaters"
-        header:           "Heaters Schedule for %{project}"
+        header:           "Heaters Schedule for %{scope_text}"
       edit:
         title:            "Edit Heater"
         header:           "Edit Heater %{label}"

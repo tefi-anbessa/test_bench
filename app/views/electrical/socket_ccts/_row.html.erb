@@ -12,7 +12,7 @@
   <td><%= row.class.human_enum_name(:socket_type, row.socket_type) %></td>
   <td><%= row.quantity %></td>
   <td>
-    <% text = t('activerecord.models.electrical.demand') %>
+    <% text = t('activerecord.models.electrical.demand.one') %>
     <% if row.electrical_demand.present? %>
       <%= link_to row.electrical_demand,
         class: "btn btn-sm btn-outline-info",

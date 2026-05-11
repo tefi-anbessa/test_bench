@@ -13,7 +13,7 @@ module Electrical
       else
         # Cater for index on all circuits in current project
         authorize Electrical::Switchboard
-        @q = Electrical::Circuit.joins(:electrical_switchboard)
+        @q = Electrical::Circuit.joins(switchboard: [tag: [discipline: :project]])
               .merge(policy_scope(Electrical::Switchboard)).ransack(params[:q])
         @pagy, @circuits = pagy(@q.result)
       end
@@ -191,9 +191,12 @@ module Electrical
           # Index for single switchboard
           @switchboard = policy_scope(Electrical::Switchboard).find_by(id: params[:switchboard_id])
           raise ApplicationController::ConflictError, :out_of_scope if @switchboard.nil?
+          @discipline = @switchboard.discipline
         else
-          # Index for complete project
+          # Index for complete discipline
           @switchboard = nil
+          @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
+          raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
         end
       end
       

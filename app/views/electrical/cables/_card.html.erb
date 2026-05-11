@@ -6,7 +6,7 @@
         <span class="badge bg-primary"><%= cable.tag.full_tag %></span>
         <span class="ms-2"><%= cable.tag.service %></span>
       <% else %>
-        <span class="text-muted"><%= t('show.orphan', model: t("activerecord.models.tag").tableize) %></span>
+        <span class="text-muted"><%= t('show.orphan', model: t("activerecord.models.tag.one")) %></span>
       <% end %>
     </h4>
   </div>

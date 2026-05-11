@@ -8,7 +8,7 @@ class DocumentTest < ActiveSupport::TestCase
   def setup
     @project = create(:project)
     @discipline = @project.disciplines.find_by(name: 'Electrical')
-    @dt = create(:document_control_doc_type, discipline: @discipline, code: "DOC", label: "Test Document Type")
+    @dt = create(:doc_type, discipline: @discipline, code: "DOC", name: "Test Document Type")
     @resource = create(:document, discipline: @discipline, doc_type: @dt)
   end
 
@@ -33,8 +33,9 @@ class DocumentTest < ActiveSupport::TestCase
     doc = create(:document, discipline: @discipline, doc_type: @dt)
     
     # Use the same logic as the model to generate expected format
-    separator = Constants.document_control.separator
-    expected_format = "#{@discipline.project.label}#{separator}#{@discipline.label}#{separator}#{@dt.code}#{separator}#{serial.to_s.rjust(5, '0')}"
+    separator = Constants.documents.separator
+    digits = Constants.documents.serial_digits
+    expected_format = "#{@discipline.project.label}#{separator}#{@discipline.label}#{separator}#{@dt.code}#{separator}#{serial.to_s.rjust(digits, '0')}"
     
     assert_equal expected_format, doc.doc_number
     assert_equal serial, doc.serial
@@ -42,16 +43,16 @@ class DocumentTest < ActiveSupport::TestCase
 
   test "default scope sorts by discipline label, doc type code, then serial" do
     # Create documents with different disciplines and doc types
-    discipline_a = @project.disciplines.find_by(label: "A")
-    discipline_b = @project.disciplines.find_by(label: "B")
+    discipline_e = @project.disciplines.find_by(label: "E")
+    discipline_j = @project.disciplines.find_by(label: "J")
     
-    doc_type_a = create(:document_control_doc_type, code: "AAA", discipline: discipline_a)
-    doc_type_b = create(:document_control_doc_type, code: "BBB", discipline: discipline_b)
+    doc_type_a = create(:doc_type, code: "AAA", discipline: discipline_e)
+    doc_type_b = create(:doc_type, code: "BBB", discipline: discipline_j)
     
     # Create documents in a specific order to test sorting
-    doc1 = create(:document, discipline: discipline_b, doc_type: doc_type_b, title: "Doc 1")
-    doc2 = create(:document, discipline: discipline_a, doc_type: doc_type_a, title: "Doc 2")
-    doc3 = create(:document, discipline: discipline_a, doc_type: doc_type_a, title: "Doc 3")
+    doc1 = create(:document, discipline: discipline_j, doc_type: doc_type_b, title: "Doc 1")
+    doc2 = create(:document, discipline: discipline_e, doc_type: doc_type_a, title: "Doc 2")
+    doc3 = create(:document, discipline: discipline_e, doc_type: doc_type_a, title: "Doc 3")
     
     # Get all documents and verify order
     documents = Document.all
@@ -66,23 +67,23 @@ class DocumentTest < ActiveSupport::TestCase
     # Verify the actual order matches the expected order
     assert_equal ordered_test_docs, test_docs
     
-    # Specifically verify A discipline docs come before B discipline docs
-    a_docs = test_docs.select { |doc| doc.discipline.label == "A" }
-    # b_docs = test_docs.select { |doc| doc.discipline.label == "B" }
+    # Specifically verify E discipline docs come before J discipline docs
+    e_docs = test_docs.select { |doc| doc.discipline.label == "E" }
+    # j_docs = test_docs.select { |doc| doc.discipline.label == "J" }
     
-    # Within A discipline, verify serial ordering
-    assert a_docs.first.serial < a_docs.last.serial
+    # Within E discipline, verify serial ordering
+    assert e_docs.first.serial < e_docs.last.serial
   end
 
   test "readonly attributes cannot be changed" do
     # Test discipline_id cannot be changed
-    new_discipline = create(:discipline, project: @discipline.project)
+    new_discipline = @project.disciplines.find_by(name: 'Mechanical')
     assert_raises(ActiveRecord::ReadonlyAttributeError) do
       @resource.update(discipline: new_discipline)
     end
     
     # Test doc_type_id cannot be changed
-    new_doc_type = create(:document_control_doc_type, discipline: @discipline)
+    new_doc_type = create(:doc_type, discipline: @discipline)
     assert_raises(ActiveRecord::ReadonlyAttributeError) do
       @resource.update(doc_type: new_doc_type)
     end

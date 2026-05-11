@@ -7,7 +7,7 @@
               aria: { label: t('actions.new') },
               title: t('actions.new')  do %>
           <%== bs_icon('plus-square-fill') %>
-          <%= t('actions.new') + " " + t('activerecord.models.user') %>
+          <%= t('actions.new') + " " + t('activerecord.models.user.one') %>
         <% end %>
       </li>
       <span class="nav-text ms-5 me-5 h2">
@@ -30,7 +30,6 @@
         <th scope="col" width="150px"><%= t('.gravatar')%></th>
         <th scope="col"><%= sort_link(@q, :name) %></th>
         <th scope="col"><%= sort_link(@q, :email) %></th>
-        <th scope="col"><%= t('.index.admin') %></th>
         <th scope="col" width="150px"><%= t('table.links')%></th>
       </thead>
       <tbody>
@@ -39,7 +38,6 @@
             <td><%= gravatar_for u, size: 20 %></td>
             <td><%= link_to u.name, user_path(u) %></td>
             <td><%= highlight u.email, params.dig(:q, :email_cont)  %></td>
-            <td><%= u.has_role?(:admin) ? '✓' : '' %></td>
             <td>
               <%= link_to user_path(u), class: "btn btn-secondary btn-sm icon-link",
                     aria: { label: t('actions.show') },

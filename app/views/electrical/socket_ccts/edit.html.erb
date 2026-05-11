@@ -1,5 +1,5 @@
 <% provide(:title, t('.title')) %>
-<% provide(:header, t('.header')) %>
+<% provide(:header, t('.header', label: @socket_cct.label)) %>
 <% provide(:button_text, t('actions.update')) %>
 <%= render "form",
   socket_cct: @socket_cct,

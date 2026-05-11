@@ -32,12 +32,18 @@ en:
 
   index:
     admin:            "Admin"
-    orphans:          "The following %{models} do not have an associated tag:"
-    link_incomplete:  "The following tags are listed as %{models} but are not yet assigned:"
-    link_broken:      "The following tags are listed as %{models} but the %{models} do not exist:"
+    orphans:
+      one:            "The following %{models} does not have an associated tag:"
+      other:          "The following %{models} do not have an associated tag:"
+    link_incomplete:
+      one:            "The following tag is listed as %{models} type but is not yet assigned:"
+      other:          "The following tags are listed as %{models} type but are not yet assigned:"
+    link_broken:
+      one:            "The following tag is listed as %{models} type but the %{models} does not exist:"
+      other:          "The following tags are listed as %{models} type but the %{models} do not exist:"
     all:              "All Accessible %{models}"
     link_unassigned:  "%{model} not assigned"
-    invalid_type:     "%{type} is not valid type"
+    invalid_type:     "%{type} is not a valid type"
 
   show:
     orphan:       "No associated parent %{model}"

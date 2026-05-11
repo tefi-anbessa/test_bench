@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_05_105807) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_11_025516) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -329,11 +329,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_05_105807) do
     t.string "item_type", null: false
     t.string "event", null: false
     t.jsonb "object"
-    t.bigint "project_id"
+    t.bigint "current_project_id"
     t.string "ip"
     t.string "user_agent"
+    t.index ["current_project_id"], name: "index_versions_on_current_project_id"
     t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
-    t.index ["project_id"], name: "index_versions_on_project_id"
   end
 
   add_foreign_key "disciplines", "projects"

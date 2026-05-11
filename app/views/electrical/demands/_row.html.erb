@@ -9,7 +9,7 @@
       <% if d.incomer&.from&.present? %>
         <%= link_to d.incomer.from.long_label, d.incomer.from %>
       <% else %>
-        <%= t('show.unassigned', model: t("activerecord.models.electrical.circuit")) %>
+        <%= t('show.unassigned', model: t("activerecord.models.electrical.circuit.one")) %>
       <% end %>
     </td>
     <!-- incomer -->
@@ -17,7 +17,7 @@
       <% if d.incomer&.present? %>
         <%= link_to d.incomer.label, d.incomer %>
       <% else %>
-        <%= t('show.unassigned', model: t("activerecord.models.electrical.cable")) %>
+        <%= t('show.unassigned', model: t("activerecord.models.electrical.cable.one")) %>
       <% end %>
     </td>
     <td><%= d.class.human_enum_name(:basis, d.basis) %></td>
@@ -30,7 +30,7 @@
     <td><%= d.power_factor.presence || '-' %></td>
     <td><%= d.duty.presence || '-' %></td>
     <% if d.demandable.present? %>
-      <td><%= link_to d.demandable_type, d.demandable %></td>
+      <td><%= link_to d.demandable.model_name.human, url_for(d.demandable) %></td>
     <% else %>
       <td><%= d.demandable_type || '-' %></td>
     <% end %>

@@ -6,9 +6,13 @@ en:
         other: "Documents"
       swatch:             "Swatch"
       resource:           "Resource"
-      user:               "User"
+      user:
+        one:              "User"
+        other:            "Users"
       project:            "Project"
-      discipline:         "Discipline"
+      discipline:
+        one:              "Discipline"
+        other:            "Disciplines"
       tag:
         one: "Tag"
         other: "Tags"
@@ -40,10 +44,11 @@ en:
       resource:
         id:               "ID"
       user:
-        user_name:        "User"
+        name:        "User"
         email:            "Email"
         password:         "Password"
         password_confirmation:  "Confirm password"
+        gravatar:         "Gravatar"
       project:
         code:             "Code"
         title:            "Title"

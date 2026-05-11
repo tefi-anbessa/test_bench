@@ -1,6 +1,16 @@
 class Project < ApplicationRecord
+  # Gem invocation
+  # Record all changes to this model's data
+  has_paper_trail(
+    meta: {
+      project_id: ->(tag) { tag.project&.id }
+    }
+  )
   # Rolify can set roles scoped to project
   resourcify
+
+  # Scopes
+  scope :ordered, -> { order(:code) }
 
   # Callbacks
   before_validation { self.code = code.upcase }
@@ -19,6 +29,7 @@ class Project < ApplicationRecord
                           uniqueness: true
   validates :title, presence: true, length: { maximum: 50 }
 
+  # Methods
   def label
       "#{code}"
   end
@@ -30,9 +41,6 @@ class Project < ApplicationRecord
   def self.swatch
     Swatch.find_by(name: "app_theme")
   end
-
-  # Default scope for ordering projects
-  scope :ordered, -> { order(:code) }
 
   private
 

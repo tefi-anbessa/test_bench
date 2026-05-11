@@ -8,9 +8,9 @@
           <%= tag.persisted? ? t('actions.edit') : t('actions.new') %>
           <span data-tag-target="preview">
             <% if tag.persisted? %>
-              <%= [t('activerecord.models.tag'), tag.long_label].join(': ') %>
+              <%= [t('activerecord.models.tag.one'), tag.long_label].join(': ') %>
             <% else %>
-              <%= t('activerecord.models.tag') %>
+              <%= t('activerecord.models.tag.one') %>
             <% end %>
           </span>
           <% if tag.persisted? && tag.service.present? %>
@@ -90,7 +90,7 @@
         <%= tag_f.text_field :tagable_type,
                 label_col: "col-sm-3",
                 control_col: "col-sm-9",
-                disabled: true %>%
+                disabled: true %>
       </div>
   </div>
 
