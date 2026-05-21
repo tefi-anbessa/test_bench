@@ -1,6 +1,7 @@
 <% provide(:title, t('.title')) %>
-<% provide(:header, t('.header', label: @doc_type.label )) %>
+<% provide(:header, t('.header', label: @doc_type.long_label )) %>
 <% provide(:button_text, t('actions.update')) %>
 <%= render "form",
-  doc_type: @doc_type
+  doc_type: @doc_type,
+  discipline: @discipline
 %>

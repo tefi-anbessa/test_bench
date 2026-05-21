@@ -8,9 +8,15 @@ class DocTypesController < ApplicationController
 
   # GET /disciplines/:discipline_id/doc_types
   def index
-    authorize DocType, :index?
-    @q = @discipline.doc_types.ransack(params[:q])
-    @pagy, @doc_types = pagy(@q.result, limit: 20)
+    if @discipline.present?
+      authorize @discipline.doc_types.build()
+      @q = @discipline.doc_types.merge(policy_scope(DocType)).ransack(params[:q])
+      @pagy, @doc_types = pagy(@q.result, limit: 20)
+    else
+      authorize DocType
+      @q = policy_scope(DocType).ransack(params[:q])
+      @pagy, @doc_types = pagy(@q.result, limit: 20)
+    end
   end
 
   # GET /doc_types/1
@@ -84,8 +90,14 @@ class DocTypesController < ApplicationController
   private
 
     def set_discipline
-      @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
-      raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
+      if params[:discipline_id].present?
+        @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
+        raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
+      elsif params[:project_id].present?
+        @discipline = nil
+        @project = policy_scope(Project).find_by(id: params[:project_id])
+        raise ApplicationController::ConflictError, :out_of_scope if @project.nil?
+      end
     end
 
     def set_doc_type
@@ -101,7 +113,7 @@ class DocTypesController < ApplicationController
     end
 
     def set_swatch
-      @swatch = DocType.swatch
+      @swatch = @discipline&.swatch || @project&.swatch || DocType.swatch || Swatch.find_by(name: 'app_theme')
     end
 
     def setup_form

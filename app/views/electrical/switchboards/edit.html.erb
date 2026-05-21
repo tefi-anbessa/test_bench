@@ -1,6 +1,6 @@
 <% provide(:title, t('.title')) %>
-<% provide(:header, t('.header', label: @switchboard.label)) %>
-<% provide(:button_text, t('actions.save')) %>
+<% provide(:header, t('.header', label: @switchboard.long_label)) %>
+<% provide(:button_text, t('actions.update')) %>
 <%= render "form", 
   switchboard: @switchboard,
   tag: @tag,

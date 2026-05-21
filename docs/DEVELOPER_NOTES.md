@@ -113,6 +113,12 @@ Documents can be generated from the application database, or stored in a content
 
 [HOLD At present, no repository is included, only a document register].
 
+#### Modules
+
+Generally, tagable models are segregated into modules according to their discipline. This is primarily to keep the file structure manageable, but flows into the presentation of views, which are accessed by project or discipline. Disciplines are able to impart some default properties to their members through inheritance from the Base model for each module.
+
+Exceptions to this structure are the Cable and Cable Types models, which are used by the electrical, instrument, and communication disciplines, so reside in the application core.
+
 ### Internationalization
 
 The application has been designed for international use from the outset.
@@ -137,7 +143,7 @@ The application has been designed for international use from the outset.
 
 ### MVC Guidelines
 
-Ruby on rails implements the Model View Controller (MVC) pattern for data driven web applications.
+Ruby on Rails implements the Model View Controller (MVC) pattern for data driven web applications.
 
 #### Models
 
@@ -175,6 +181,17 @@ In addition, a card partial should be provided for drop down view on other pages
 
 - `_card`
 
+- All views shall provide a page title which appears on the browser tab, which includes the view and the model name.
+- Index and show views shall have a header line which includes the header and a standard set of navigation buttons.
+- The index header shall specify whether the index is for project, discipline, or all projects (only available to global admins).
+- The show view header shall include the resource model name, the record's long_label, and optionally a title or service description.
+- The new view header shall include the scope where the resource is to be created e.g. discipline label.
+- The edit view header shall include the resource's long_label.
+- Navigation buttons for index and show views shall include "return" index buttons to the higher level views, locate to the left of the header.
+- Navigation buttons for show views shall also include previous and next buttons, located left and right of the header.
+- Index views shall also include new "action" button to the right of the header, conditional on user permissions.
+- Show views shall also include edit, delete, and new "action" buttons to the right of the header, conditional on user permissions.
+- Title and header shall be translated using a `views.yml` file in the locales structure, see [INTERNATIONALIZATION](../config/locales/INTERNATIONALIZATION.md).
 - Views should not include complex logical processing.
 - Conditionals should be controlled by pundit policy calls where applicable.
 - Conditionals may also use presence or otherwise of variables set in the controller.
@@ -359,7 +376,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Update index view header lines.
 - [ ] Custom 404 not found error page. E.g. Case where admin deletes a record than uses browser back button.
 - [ ] Translation of html5 messages on required fields. Alternatively, suppress html 5 and use client side js.
-- [ ] Complete discipline system tests.
+- [x] Complete discipline system tests.
 - [ ] Complete swatch system tests.
 - [x] Complete switchboard controller test.
 - [ ] Complete cable system tests for from and to after switchboard, demand, and circuit tests are working.
@@ -388,12 +405,16 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] RBAC still has anomalous behaviour when resource wide roles are applied. Scope will include all projects, and alow selection of any project as current, but accessing the project without a specific role will result in forbidden. Either block resource wide roles or implement them in policies.
 - [ ] Clean up responsive views - test all on simulator.
 - [ ] Issue policy has been removed. Assess whether it is required or just use document policy, like circuits.
+- [x] Fix update test in tag system test.
+- [ ] Fix error in doc_types system test (edit).
+- [ ] Decide on a standard clear presentation for booleans in show views, add it to show view for circuits, and add it to generic tests and generator templates.
+- [ ] Refactor cable and cable type system tests after restructure to core.
 
 ## Refactoring Opportunities
 
 - [x] Improve role and permissions implementation and workflow.
 - [x] Refactor models to include a universal "label" attribute to be used when presenting polymorphic associations.
-- [ ] Refactor projects controller with improved workflow.
+- [x] Refactor projects controller with improved workflow.
 - [ ] Add type checking with Sorbet or RBS
 - [ ] Implement caching for frequently accessed data
 - [x] Upgrade to Rails 8 (Completed in rails8 branch)
@@ -446,6 +467,9 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Revert activerecord translations to convention with / instead of . key for module.
 - [ ] Rename project change module to change management.
 - [ ] Set up ransack to sort on translated attributes where relevant.
+- [ ] Add a prefix breakdown drop down on tags show view.
+- [ ] Use scopify to simplify setup for role assignment views.
+- [ ] Refactor show views in style of documents, include generator templates.
 
 ## Potential Features
 
@@ -471,7 +495,8 @@ It is possible to create multiple tags referencing the same tagable element, des
 
 - [x] Move Electrical to a module or namespace.
 - [x] Nest routes for project related resource under projects to improve security around assignment to other than the current project.
-- [ ] Consider API versioning strategy
+- [ ] Nest tag, document resources under disciplines.
+- [ ] Move cable and cable type back to core, as they are shared by electrical and instrument disciplines, also communications.
 - [ ] Plan for database scaling as data grows
 
 ## Notes

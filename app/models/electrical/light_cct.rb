@@ -11,7 +11,7 @@ module Electrical
     private
 
       def self.ransackable_attributes(auth_object = nil)
-        ["light_fitting_type", "quantity", "created_at", "updated_at"]
+        [:light_fitting_type, :quantity, :notes, :created_at, :updated_at]
       end
 
       def self.ransackable_associations(auth_object = nil)

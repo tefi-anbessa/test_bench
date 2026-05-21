@@ -14,6 +14,10 @@ class DisciplinePolicy < ProjectResourcePolicy
   # Disciplines are auto-created and cannot be created/destroyed by project managers
   # Only admins can create or destroy disciplines
   # Current project must be set
+  def new?
+    create?
+  end
+
   def create?
     return false if user.nil?
     return false if current_project.nil?

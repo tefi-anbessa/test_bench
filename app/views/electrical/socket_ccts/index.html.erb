@@ -12,12 +12,10 @@
             <% end %>
         </div>
 
-        <!-- Header Text (Left) -->
+        <!-- Header Text (Left - 8 columns) -->
         <div class="col-8">
-          <% scope_text = current_project.present? ? 
-          [current_project.class.model_name.human, current_project.label].join(': ') : 
-          t('index.all', models: t('activerecord.models.project').pluralize) %>
-          <h5 class="mb-1"><%= t('.header', scope_text: scope_text) %></h5>
+          <h5><%= t('.header', 
+            scope_text: [@discipline.project.code, t("activerecord.models.discipline.one"), @discipline.label].join(' ')) %></h5>
         </div>
 
         <!-- New Button (Right) -->
@@ -32,7 +30,7 @@
               <% end %>
           <% end %>
         </div>
-      </div> <!-- end of d-flex -->
+      </div> <!-- end of row-->
     </div> <!-- end of card header -->
     <div class="card-body">
       <div class="row search-form">
@@ -40,6 +38,9 @@
           <%= f.search_field :socket_type_cont,
                 class: "search_field",
                 placeholder: t('activerecord.attributes.electrical.socket_cct.socket_type') %>
+          <%= f.search_field :notes_cont,
+                class: "search_field",
+                placeholder: t('activerecord.attributes.electrical.socket_cct.notes') %>
           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
             <%== bs_icon('search') %>
           <% end %>

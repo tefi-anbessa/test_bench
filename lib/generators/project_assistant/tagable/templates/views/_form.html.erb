@@ -1,12 +1,12 @@
-<div class="container mt-3" style="<%%= container_styles(@swatch) %>">
-  <div class="card" style="<%%= card_styles(@swatch) %>">
-    <div class="card-header p-2" style="<%%= card_header_styles(@swatch) %>">
+<div class="container mt-3" style="<%%= container_styles(swatch) %>">
+  <div class="card" style="<%%= card_styles(swatch) %>">
+    <div class="card-header p-2" style="<%%= card_header_styles(swatch) %>">
 
       <!-- Center Tag Info -->
       <div class="col text-center">
         <div class="d-flex flex-column align-items-center">
           <div class ="mt-1">
-            <span class="badge fs-6" style="<%%= badge_styles(@swatch) %>">
+            <span class="badge fs-6" style="<%%= badge_styles(swatch) %>">
               <%= yield(:header) %>
             </span>
           </div>
@@ -15,14 +15,18 @@
     </div>
 
     <%%= bootstrap_form_with(model: <%= singular_name %>,
-          url: discipline_<%= plural_route_name %>_path(@discipline),
+          url: <%= singular_name %>.persisted? ?
+            <%= singular_name %> : 
+            ( tag.persisted? ?
+              tag_<%= plural_route_name %>_path(tag) :
+              discipline_<%= plural_route_name %>_path(discipline)),
           layout: :horizontal,
           label_col: "col-sm-4",
           control_col: "col-sm-8",
           wrapper_class: 'mb-1',
           ) do |f| %>
 
-      <div class="card-body p-2" style="<%%= card_styles(@swatch) %>">
+      <div class="card-body p-2" style="<%%= form_styles(swatch) %>">
         <div class="row justify-content-center">
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">        <!-- Adjust to fit field width requirements -->
 
@@ -39,8 +43,11 @@
             </div>
 
             <!-- <%= human_name %> Details -->
-            <div class="card mb-1" style="<%%= card_styles(@swatch) %>">
-              <div class="card-body p-2" style="<%%= form_styles(@swatch) %>">
+            <div class="card mb-1" style="<%%= card_styles(swatch) %>">
+              <div class="card-header p-2" style="<%= card_header_styles(swatch) %>">
+                <h5><%= t('activerecord.models.<%= singular_name %>.one') %></h5>
+              </div>
+              <div class="card-body p-2" style="<%%= form_styles(swatch) %>">
                 <%%= render 'shared/error_messages', object: f.object %>
 
 <%- @fields.each do |field| -%>

@@ -24,6 +24,9 @@
   <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
     <%= render 'shared/error_messages', object: tag %>
 
+      <!-- Discipline -->
+      <%= tag_f.hidden_field :discipline_id, value: @discipline.id %>
+
       <!-- Stage -->
       <div class="row">
         <%= tag_f.number_field :stage,

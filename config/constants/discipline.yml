@@ -11,14 +11,14 @@ disciplines:
 
   Process:
     label: P
-    prefix_schema: { name: 'default' }
+    prefix_schema: { name: 'dim2' }
     sort_order: 30
     required_role: :designer
     catalog_required_role: :custodian
 
   Electrical:
     label: E
-    prefix_schema: { name: 'default' }
+    prefix_schema: { name: 'dim1' }
     sort_order: 10
     required_role: :designer
     catalog_required_role: :custodian
@@ -39,7 +39,7 @@ disciplines:
 
   Mechanical:
     label: M
-    prefix_schema: { name: 'default' }
+    prefix_schema: { name: 'dim1' }
     sort_order: 60
     required_role: :designer
     catalog_required_role: :custodian

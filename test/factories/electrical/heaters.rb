@@ -17,6 +17,7 @@ FactoryBot.define do
     power_density_max { 99.9 } 
     sheath_material { "aluminium" } 
     insulation_material { "ceramic" }
+    notes { Faker::Lorem.paragraph(sentence_count: 2) }
 
     # Create tag association in a single transaction
     after(:build) do |heater, evaluator|

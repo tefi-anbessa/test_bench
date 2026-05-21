@@ -3,18 +3,27 @@
   <!-- Motor Schedule Card Header -->
   <div class="card mb-4" style="<%= card_styles(@swatch) %>">
     <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
-      <div class="d-flex justify-content-between align-items-center">
-        <!-- Header Text (Left) -->
-        <div class="ms-2">
+      <div class="row align-items-center p-2 mb-1">
+
+        <!-- Discipline link -->
+        <div class="col-2">
+            <%= link_to discipline_path(@discipline), class: "btn btn-sm btn-outline-info" do %>
+              <%= @discipline.name %>
+              <%= bs_icon('collection', class: "me-1") %>
+            <% end %>
+        </div>
+
+        <!-- Header Text (Left - 8 columns) -->
+        <div class="col-8">
           <% scope_text = current_project.present? ? 
           [current_project.class.model_name.human, current_project.label].join(': ') : 
           t('index.all', models: t('activerecord.models.project').pluralize) %>
-          <h5 class="mb-0"><%= t('.header', scope_text: scope_text) %></h5>
+          <h5><%= t('.header', scope_text: scope_text) %></h5>
         </div>
 
         <!-- New Button (Right) -->
         <!-- No new button from index, demand requires a tag -->
-      </div> <!-- end of d-flex -->
+      </div> <!-- end of row -->
     </div> <!-- end of card header -->
     
     <div class="card-body">

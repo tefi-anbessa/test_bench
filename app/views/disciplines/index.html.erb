@@ -26,7 +26,7 @@
 
         <!-- New Button (Right) -->
         <div class="col-2 align-content-end">
-          <% if current_project.present? && policy(Discipline).new? %>
+          <% if current_project.present? && policy(@project.disciplines.build()).new? %>
               <%= link_to new_project_discipline_path(current_project),
                 class: "btn btn-sm btn-outline-primary actions",
                 aria: { label: t('actions.new') },

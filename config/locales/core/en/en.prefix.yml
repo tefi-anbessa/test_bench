@@ -1,4 +1,25 @@
 en:
+  prefix_schema:
+    key:
+      custom: "Custom"
+      default: "Default"
+      isa51: "ISA-5.1"
+      dim1: "1 Dimension"
+      dim2: "2 Dimensions"
+      alternate_inst: "Alternate ISA-5.1"
+    type:
+      default: "Default"
+      isa51: "ISA-5.1"
+      dim1: "1 Dimension"
+      dim2: "2 Dimensions"
+    messages:
+      sure: "Are you sure? Changing schema will discard any existing customizations."
+      initialize: "Initialize from Template"
+    viewing_schema: "Viewing Schema"
+    select_template: "Select Template"
+    template_help: "Select a template to initialize the schema"
+    custom_schema: "Custom Schema"
+    schema_help: "TODO: help for schema editor"
   prefix:
     isa51:
       measured_variables:

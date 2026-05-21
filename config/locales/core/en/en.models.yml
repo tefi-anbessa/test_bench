@@ -4,12 +4,16 @@ en:
       document:
         one: "Document"
         other: "Documents"
-      swatch:             "Swatch"
+      swatch: 
+        one: "Swatch"
+        other: "Swatches"
       resource:           "Resource"
       user:
         one:              "User"
         other:            "Users"
-      project:            "Project"
+      project:
+        one:                "Project"
+        other:              "Projects"
       discipline:
         one:              "Discipline"
         other:            "Disciplines"
@@ -129,36 +133,29 @@ en:
         notes:            "Additional information"
         required_role:    "Role required to work with elements in this discipline"
     errors:
-      custom_messages:
+      custom:
         invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
         unique: "%{model} %{attribute} has already been taken, must be unique"
         custom_required: "%{model} %{attribute} is required"
         already_associated: "%{child} is already associated with another %{parent}"
         record_invalid: "Record is invalid"
       models:
-        role:
-          attributes:
-            name:
-              blank: "Role must be selected"
-              invalid: "%{value} is not a valid role"
         tag:
           base:
             taken: "Tag %{tag} already exists"
           attributes:
             prefix:
               only_letters: "must contain only letters"
-      attributes:
-        tag:
-          prefix:
-            only_letters: "must contain only letters"
-          tagable_type:
-            not_assigned: "Not assigned"
-            change_tagable: "Cannot change tagable association once set"
-            invalid: "Invalid type %{tagable_type}"
+            tagable_type:
+              not_assigned: "Not assigned"
+              change_tagable: "Cannot change tagable association once set"
+              invalid: "Invalid type %{tagable_type}"
         role:
-          name:
-            blank: "Role must be selected"
-            invalid: "%{name} is not a valid role for %{resource}"
+          attributes:
+            name:
+              blank: "Role must be selected"
+              invalid: "%{name} is not a valid role for %{resource}"
+      attributes:
         code:
           invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
       jsonb_fields:

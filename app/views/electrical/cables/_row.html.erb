@@ -9,6 +9,11 @@
     <td><%= row.tag.stage %></td>  
     <td><%= link_to row.tag.label, tag_path(row.tag) %></td>  
   <% end %>
+  <td>
+    <span title="<%= row.notes %>">
+      <%= truncate(strip_tags(row.notes.to_s), length: 20) %>
+    </span>
+  </td>
 
   <td>
     <!-- From -->

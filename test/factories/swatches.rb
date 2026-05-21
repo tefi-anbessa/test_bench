@@ -17,8 +17,5 @@ FactoryBot.define do
     trait :app_theme do
       name { 'app_theme' }
     end
-    
-    # Find existing or initialize new
-    initialize_with { Swatch.find_or_initialize_by(name: name) }
   end
 end

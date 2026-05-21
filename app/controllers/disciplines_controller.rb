@@ -1,11 +1,12 @@
 class DisciplinesController < ApplicationController
   include RolesHelper
   before_action :authenticate_user!
-  before_action :require_project!, only: %i[ new create edit update]
-  before_action :set_project, only: %i[ index new create ]
-  before_action :set_discipline, only: %i[ show edit update destroy schema ]
-  before_action :setup_discipline_users, only: %i[ show ]
-  before_action :validate_required_role, only: %i[ create update ]
+  before_action :require_project!, only: [:new, :create, :edit, :update]
+  before_action :set_project, only: [:index, :new, :create]
+  before_action :set_discipline, only: [:show, :edit, :update, :destroy, :schema]
+  before_action :set_swatch, only: [:index, :show]
+  before_action :setup_discipline_users, only: :show
+  before_action :validate_required_role, only: [:create, :update]
 
   # GET /disciplines or /disciplines.json
   def index
@@ -13,7 +14,6 @@ class DisciplinesController < ApplicationController
     @pagy, @disciplines = pagy(@q.result, limit: 20)
     @discipline = @project.disciplines.build()
     authorize @discipline
-    @swatch = Swatch.find_by(name: 'app_theme')
   end
 
   # GET /disciplines/1 or /disciplines/1.json
@@ -26,8 +26,6 @@ class DisciplinesController < ApplicationController
   def new
     @discipline = @project.disciplines.build()
     authorize @discipline
-    # Set default theme for new discipline
-    @swatch = Swatch.find_by(name: 'app_theme')
     setup_form
   end
 
@@ -36,11 +34,11 @@ class DisciplinesController < ApplicationController
     @discipline = @project.disciplines.build(discipline_params)
     authorize @discipline
     if @discipline.save
-      flash[:success] = I18n.t('flash.create.notice', resource_name: I18n.t('activerecord.models.discipline'))
+      flash[:success] = I18n.t('flash.create.notice', resource_name: I18n.t('activerecord.models.discipline', count: 1))
       redirect_to @discipline
     else
       setup_form
-      flash.now[:alert] = I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.discipline'))
+      flash.now[:alert] = I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.discipline', count: 1))
       render :new, status: :unprocessable_content
     end
   end
@@ -63,11 +61,11 @@ class DisciplinesController < ApplicationController
     authorize @discipline
     
     if @discipline.save
-      flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.discipline'))
+      flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.discipline', count: 1))
       redirect_to @discipline
     else
       setup_form
-      flash.now[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.discipline'))
+      flash.now[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.discipline', count: 1))
       render :edit, status: :unprocessable_content
     end
   end
@@ -77,10 +75,10 @@ class DisciplinesController < ApplicationController
     authorize @discipline
     
     if @discipline.destroy
-        flash[:success] = I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.discipline'))
+        flash[:success] = I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.discipline', count: 1))
         redirect_to project_disciplines_url(@project)
     else
-        flash.now[:alert] = I18n.t('flash.destroy.alert', resource_name: I18n.t('activerecord.models.discipline'))
+        flash.now[:alert] = I18n.t('flash.destroy.alert', resource_name: I18n.t('activerecord.models.discipline', count: 1))
         redirect_back_or_to project_disciplines_url(@project)
     end
   end
@@ -108,12 +106,15 @@ class DisciplinesController < ApplicationController
       @discipline = policy_scope(Discipline).find_by(id: params[:id])
       raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
       @project = @discipline.project
-      @swatch = @discipline.swatch
+    end
+
+    def set_swatch
+      @swatch = @discipline&.swatch || @discipline&.project&.swatch || Project.swatch || Swatch.find_by(name: 'app_theme')
     end
 
     def setup_form
       set_prefix_schema_selection
-      @swatch = @discipline.swatch || Swatch.find_by(name: 'app_theme')
+      set_swatch
       @swatches = policy_scope(Swatch)
     end
 
@@ -148,10 +149,6 @@ class DisciplinesController < ApplicationController
 
     def handle_schema_error(e)
       @discipline.errors.add(:prefix_schema, I18n.t('errors.messages.invalid'))
-    end
-
-    def set_swatches
-      @swatches = policy_scope(Swatch)
     end
 
     def validate_required_role

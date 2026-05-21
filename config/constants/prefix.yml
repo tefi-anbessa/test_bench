@@ -95,6 +95,13 @@ prefix_schemata:
     prefixes:
       'A': 'Package'
       'B': 'Building'
+      'EC': 'Electrical Cable'
+      'EH': 'Electrical Heater'
+      'EL': 'Light Circuit'
+      'EM': 'Motor'
+      'ES': 'Socket Circuit'
+      'EX': 'Switchboard'
+      'PM': 'Pump Motor'
   dim2:
     type: 'dim2'
     part1:
@@ -108,7 +115,7 @@ prefix_schemata:
       'K': 'Fan'
     part2:
       'M': 'Motor'
-      'B': 'Building'
+      'B': 'Box'
   alternate_inst:
     type: 'isa51'
     measured_variables:
@@ -147,7 +154,23 @@ prefix_schemata:
       'K': 'Time rate of change'
       'M': 'Momentary'
       'Q': 'Integrate, totalizer'
-      'Z': 'SIL rated'
+      'Z': 'Safety (SIL rated)'
+
+    # Readout or Passive Functions
+    readout_functions:
+      'A': 'Alarm'
+      'B': 'User''s choice'
+      'E': 'Sensor (primary element)'
+      'G': 'Glass, viewing device'
+      'I': 'Indication'
+      'L': 'Light'
+      'N': 'User''s choice'
+      'O': 'Orifice, restriction'
+      'P': 'Point (test connection)'
+      'R': 'Record'
+      'U': 'Multifunction'
+      'W': 'Well'
+      'X': 'Unclassified'
 
     # Output Functions
     output_functions:

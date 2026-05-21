@@ -10,7 +10,7 @@
             <!-- Index Button -->
             <% if policy(@swatch).index? %>
               <%= link_to swatches_path,
-                    class: "btn btn-sm btn-outline-secondary me-2",
+                    class: "btn btn-sm btn-outline-info me-2",
                     title: t('actions.index') do %>
                 <%== bs_icon('list-columns-reverse') %>
                 <span class="d-none d-md-inline"><%= t('actions.index') %></span>
@@ -87,6 +87,18 @@
                   <%== bs_icon('trash') %>
                   <span class="d-none d-md-inline">
                     <%= t('actions.delete') %>
+                  </span>
+                <% end %>
+              <% end %>
+
+              <% if policy(@swatch).new? %>
+                <%= link_to new_swatch_path, 
+                  class: "btn btn-outline-primary actions",
+                  aria: { label: t('actions.new') },
+                  title: t('actions.new') do %>
+                  <%== bs_icon('plus-square-fill') %>
+                  <span class="ms-1">
+                    <%= [t('actions.new'), t('activerecord.models.swatch', count: 1)].join(' ') %>
                   </span>
                 <% end %>
               <% end %>

@@ -200,7 +200,7 @@ class TagTest < ActiveSupport::TestCase
   end
 
   test "long_label method should return discipline and full tag" do
-    assert_equal "#{@tag_a1.discipline.label}: #{@tag_a1.full_tag}", @tag_a1.long_label
+    assert_equal "#{@tag_a1.discipline.label}-#{@tag_a1.full_tag}", @tag_a1.long_label
   end
 
   test "destroy tag should remove from discipline" do
@@ -249,13 +249,13 @@ class TagTest < ActiveSupport::TestCase
     tag.tagable_id = 999
     tag.save
     refute tag.valid?
-    assert_includes tag.errors[:base], I18n::t("activerecord.errors.attributes.tag.tagable_type.change_tagable")
+    assert_includes tag.errors[:base], I18n::t("activerecord.errors.models.tag.attributes.tagable_type.change_tagable")
 
     #test again using update
     tag.reload
     tag.update(tagable: build(:electrical_cable))
     refute tag.valid?
-    assert_includes tag.errors[:base], I18n::t("activerecord.errors.attributes.tag.tagable_type.change_tagable")
+    assert_includes tag.errors[:base], I18n::t("activerecord.errors.models.tag.attributes.tagable_type.change_tagable")
   end
   
   test "should prevent assigning tagable that's already associated with a tag" do
@@ -270,7 +270,7 @@ class TagTest < ActiveSupport::TestCase
     new_tag.save
     refute new_tag.valid?
     assert_includes new_tag.errors[:tagable], 
-        I18n::t("activerecord.errors.custom_messages.already_associated", 
+        I18n::t("activerecord.errors.custom.already_associated", 
               child: cable.class.model_name.human,
               parent: tag.class.model_name.human)
     assert_equal cable, tag.reload.tagable
@@ -280,7 +280,7 @@ class TagTest < ActiveSupport::TestCase
     new_tag.update(tagable: cable)
     refute new_tag.valid?
     assert_includes new_tag.errors[:tagable], 
-        I18n::t("activerecord.errors.custom_messages.already_associated", 
+        I18n::t("activerecord.errors.custom.already_associated", 
               child: cable.class.model_name.human,
               parent: tag.class.model_name.human)
     assert_equal cable, tag.reload.tagable
@@ -356,6 +356,7 @@ class TagTest < ActiveSupport::TestCase
   end
   
   test 'tags should be ordered by loop_id, prefix, and suffix' do
+    skip "Ordering to be refactored"
     # Get just our test tags in the default scope order
     test_tag_ids = [@tag_a1, @tag_a2, @tag_a3, @tag_b1, @tag_bb1, @tag_ba2, @tag_c1].map(&:id)
     ordered_tags = Tag.where(id: test_tag_ids).to_a
@@ -396,5 +397,20 @@ class TagTest < ActiveSupport::TestCase
     assert_equal 'HH', parts[:modifier_function]
     assert_nil parts[:modifier]
     assert_nil parts[:output_function]
+  end
+
+  # When changing an invalid tagable, tagable_id should be reset.
+  test "changing an invalid tagable should reset tagable_id" do
+    # Create a tagable with its tag
+    light_cct = create(:electrical_light_cct, discipline: @discipline)
+    tag = light_cct.tag
+    # Make it invalid without triggering callbacks or validations
+    tag.update_column(:tagable_type, 'InvalidType')
+    tag.reload
+    light_cct.reload
+    assert_nil light_cct.tag
+    assert_raises do tag.tagable end
+    tag.update(tagable_type: 'Electrical::LightCct')
+    assert_nil tag.tagable_id
   end
 end

@@ -41,7 +41,7 @@ class RolesController < ApplicationController
     @role = Role.new # Required as vehicle for error_messages
     authorize @role
     setup_role_assignment
-
+debugger
   end
 
   # POST /roles or /roles.json
@@ -146,7 +146,7 @@ class RolesController < ApplicationController
       # Check user_id
       @user_id = create_role_params[:user_id].presence
       unless @user_id
-        flash[:warning] = I18n.t("rolify.flash.user_id_blank")
+        flash[:alert] = I18n.t("rolify.flash.user_id_blank")
         # Return to form with warning - user error (should be caught by required field)
         redirect_back(fallback_location: @role_return_path, status: :unprocessable_content)
         return false
@@ -160,16 +160,16 @@ class RolesController < ApplicationController
 
       # Check name
       @role_name = create_role_params[:name].presence
-      unless @role_name
+      unless @role_name.present?
         # Return to form with warning - user error (should be caught by required field)
-        flash.now[:warning] = I18n.t("rolify.flash.name_blank")
+        flash.now[:alert] = I18n.t("rolify.flash.name_blank")
         redirect_back(fallback_location: @role_return_path, status: :unprocessable_content)
         return false
       end
 
       @role_name = @role_name.to_sym
       unless Role.valid_role?(@role_name, @resource_type, @resource_id)
-        flash.now[:warning] = I18n.t("rolify.flash.name_invalid",
+        flash.now[:alert] = I18n.t("rolify.flash.name_invalid",
           name: I18n.t("rolify.names.#{@role_name}", default: @role_name.to_s.humanize),
           resource: @resource_type ? I18n.t("activerecord.models.#{@resource_type.downcase}", default: @resource_type) : I18n.t('rolify.role_types.global')
         )
@@ -278,7 +278,7 @@ class RolesController < ApplicationController
       @resources = Rolify.resource_types.uniq
 
       # Set flash message if not already set
-      flash[:warning] ||= flash.now[:warning]
+      flash[:alert] ||= flash.now[:alert]
 
       # Use roles_path as the fallback if no return path is specified
       redirect_back(

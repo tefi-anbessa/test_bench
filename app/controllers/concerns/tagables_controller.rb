@@ -145,16 +145,10 @@ module TagablesController
     def destroy_tagable
       authorize @resource, :destroy?
       if @resource.destroy
-        respond_to do |format|
-          format.html do
-            flash[:success] = t('flash.destroy.notice',
-                              resource_name: @resource.model_name.human)
-            redirect_to send("discipline_#{resource_path.to_s}_path", @discipline), 
-                        status: :see_other
-          end
-          format.json { head :no_content }
-        end
-
+        flash[:success] = t('flash.destroy.notice',
+                          resource_name: @resource.model_name.human)
+        redirect_to send("discipline_#{resource_path.to_s}_path", @discipline), 
+                    status: :see_other
       else
         flash.now[:alert] = t("flash.destroy.alert",
                             resource_name: @resource.model_name.human.downcase)
@@ -191,7 +185,7 @@ module TagablesController
         set_discipline
         if tag_params.present?
           # Handle case with tag parameters - [HOLD - how can this be initiated?]
-          @tag = @discipline.tags.build(tag_params)
+          @tag = @discipline.tags.build(tag_params.merge(tagable_type: controller_path.classify))
         else
           # No tag parameters: new tag and resource
           @tag = @discipline.tags.build(tagable_type: controller_path.classify)

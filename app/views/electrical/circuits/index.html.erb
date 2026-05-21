@@ -24,14 +24,14 @@
         <!-- Header Text (Left - 8 columns) -->
         <div class="col-8">
           <% scope_text = @switchboard.present? ? 
-            [@switchboard.class.model_name.human, @switchboard.label].join(' ') : 
+            [@switchboard.class.model_name.human, @switchboard.long_label].join(' ') : 
             t('index.all', models: t('activerecord.models.electrical.switchboard.other')) %>
           <h5><%= t('.header', scope_text: scope_text) %></h5>
         </div>
 
         <!-- New Button (Right) -->
         <div class="col-2 align-content-end">
-          <% if policy(Electrical::Switchboard).new? %>
+          <% if @switchboard.present? && policy(@switchboard).new? %>
               <%= link_to new_electrical_switchboard_circuit_path(@switchboard), 
                 class: "btn btn-sm btn-outline-primary actions",
                 aria: { label: t('actions.new') },

@@ -1,7 +1,7 @@
 <!-- Project Users Dashboard Panel -->
 <div class="card mb-4" style="<%= card_styles(@swatch) %>">
   <div class="card-header d-flex justify-content-between align-items-center py-2" style="<%= card_header_styles(@swatch) %>">
-    <h5 class="mb-0"><%= t('.header', team: label) %></h5>
+    <h5 class="mb-0"><%= t('.header', scope_text: label) %></h5>
     <% if policy(User).new? %>
       <%= link_to new_user_path,
             class: "btn btn-outline-primary btn-sm",
@@ -40,7 +40,7 @@
               
               <% project_roles.each do |role| %>
                 <span class="badge bg-primary">
-                  <%= role.name %>
+                  <%= t("rolify.names.#{role.name}") %>
                 </span>
               <% end %>
               
@@ -90,7 +90,7 @@
       <% end %>
     <% else %>
       <div class="text-center text-muted py-3">
-        <%= t('.no_users', team: label) %>
+        <%= t('.no_users', scope_text: label) %>
       </div>
     <% end %>
   </div>

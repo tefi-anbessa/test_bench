@@ -1,19 +1,29 @@
 <% provide(:title, t('.title')) %>
-<div class="container mt-3" style="<%= container_styles(@discipline.swatch) %>">
+<div class="container mt-3" style="<%= container_styles(@swatch) %>">
   <!-- Discipline Outer Card Header -->
-  <div class="card mb-4" style="<%= container_styles(@discipline.swatch) %>">
-    <div class="card-header p-2" style="<%= card_header_styles(@discipline.swatch) %>">
+  <div class="card mb-4" style="<%= container_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
       <div class="row align-items-center">
         <!-- Left Navigation -->
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Index Button -->
-            <% if policy(@discipline).index? %>
-              <%= link_to project_disciplines_path(@project),
-                    class: "btn btn-sm btn-outline-info me-2",
-                    title: t('actions.index') do %>
-                <%== bs_icon('list-columns-reverse') %>
-                <span class="d-none d-md-inline"><%= t('actions.index') %></span>
+            <% if @discipline.present? %>
+              <% if policy(@discipline.project).show? %>
+                <%= link_to project_path(@discipline.project),
+                      class: "btn btn-sm btn-outline-info me-2",
+                      title: t('actions.show') do %>
+                  <%== bs_icon('layers') %>
+                  <span class="d-none d-md-inline"><%= @discipline.project.code %></span>
+                <% end %>
+              <% end %>
+              <% if policy(@discipline).index? %>
+                <%= link_to project_disciplines_path(@project),
+                      class: "btn btn-sm btn-outline-info me-2",
+                      title: t('actions.index') do %>
+                  <%== bs_icon('list-columns-reverse') %>
+                  <span class="d-none d-md-inline"><%= t('actions.index') %></span>
+                <% end %>
               <% end %>
             <% end %>
             <!-- Previous Button -->
@@ -38,7 +48,7 @@
         <div class="col text-center">
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
-              <span class="badge fs-5" style="<%= badge_styles(@discipline.swatch) %>">
+              <span class="badge fs-5" style="<%= badge_styles(@swatch) %>">
                 <%= t('.header', label: @discipline.long_label)%>
               </span>
             </div>
@@ -111,7 +121,7 @@
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
             <!-- Discipline Details Card -->
             <div class="row">
-              <div class="card mb-4" style="<%= card_styles(@discipline.swatch) %>">
+              <div class="card mb-4" style="<%= card_styles(@swatch) %>">
                 <div class="card-body p-3">
                   <div class="row mb-1">
                     <div class="col-4 text-muted"><%= t('activerecord.attributes.discipline.notes') %></div>
@@ -151,8 +161,8 @@
                       object: @discipline.swatch %>
                   <% else %>
                     <div class="row mb-1">
-                      <div class="col-4 text-muted"><%= t('activerecord.modules.swatch') %></div>
-                      <div class="col-8"><%= @discipline.swatch.name %></div>
+                      <div class="col-4 text-muted"><%= t('activerecord.models.swatch', count: 1) %></div>
+                      <div class="col-8"><%= '-' %></div>
                     </div>
                   <% end %>
                 </div> <!-- end discipline details card-body -->
@@ -177,6 +187,14 @@
                   <%== bs_icon('file-earmark-text') %>
                   <%= t('activerecord.models.document', count: @discipline.documents.count) %>
                   <span class="badge bg-info ms-1"><%= @discipline.documents.count %></span>
+                <% end %>
+                
+                <%= link_to discipline_doc_types_path(@discipline),
+                      class: "btn btn-outline-info",
+                      title: t('activerecord.models.doc_type', count: @discipline.doc_types.count) do %>
+                  <%== bs_icon('file-earmark-text') %>
+                  <%= t('activerecord.models.doc_type', count: @discipline.doc_types.count) %>
+                  <span class="badge bg-info ms-1"><%= @discipline.doc_types.count %></span>
                 <% end %>
               </div>
             </div> <!-- Tags and Documents row -->

@@ -1,11 +1,7 @@
 class Project < ApplicationRecord
   # Gem invocation
   # Record all changes to this model's data
-  has_paper_trail(
-    meta: {
-      project_id: ->(tag) { tag.project&.id }
-    }
-  )
+  has_paper_trail
   # Rolify can set roles scoped to project
   resourcify
 
@@ -20,6 +16,8 @@ class Project < ApplicationRecord
   belongs_to :swatch, optional: true
   has_many :disciplines, dependent: :destroy
   has_many :tags, through: :disciplines
+  has_many :documents, through: :disciplines
+  has_many :doc_types, through: :disciplines
   has_many :change_requests, class_name: 'ProjectChange::Request', dependent: :destroy
 
   # Validations

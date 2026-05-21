@@ -22,11 +22,12 @@
 - At level 3, the core application provides all translations for the core functions in a file named simply with the language code (e.g. core/en/en.yml, core/km/km.yml). Extension modules should not use these file names.
 - Core functions are generally applicable to rails workflow, such as actions, views, menu items, etc.
 - The core/xx/ folder also includes files for:
-  - views: the views.yml files include all translations that can be short-cut using the i18n system based on the controller name, for the core resources with UI: users, roles, projects, tags.
-  - models: the models.yml files include the activerecord translations that rails uses by default for validation messages, labels for fields, field help, etc.
-  - a devise.yml file for translations required for the devise gem, externally provided. Translations are available for many languages at github.
-  - a rolify.yml file for translations associated with the Role Based Access Control (RBAC) system.
-  - a discipline.yml file for translations of some "standard" disciplines, along with translations for the tag prefix schema and parsing system.
+  - views: the [views.yml](core/en/en.views.yml) files include all translations that can be short-cut using the i18n system based on the controller name, for the core resources with UI: users, roles, projects, tags, documents.
+  - models: the [models.yml](core/en/en.models.yml) files include the activerecord translations that rails uses by default for validation messages, labels for fields, field help, etc.
+  - a [devise.yml](core/en/en.devise.yml) file for translations required for the devise gem, externally provided. Translations are available for many languages at [devise wiki](https://github.com/heartcombo/devise/wiki/I18n) on github.
+  - a [rolify.yml](core/en/en.rolify.yml) file for translations associated with the Role Based Access Control (RBAC) system.
+  - a [discipline.yml](core/en/en.discipline.yml) file for translations of the "standard" disciplines.
+  - a [prefix.yml](core/en/en.prefix.yml) file providing translations for the tag prefix schema and parsing system.
 
 #### Extension Modules
 
@@ -46,11 +47,11 @@ ALTERNATIVELY:
 ## Adding a New Language
 
 - Use ISO 639 international language codes from [www.unicode.org/iso15924/iso15924-codes.html](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes).
-- Edit config/application.rb to add the new language code to the I18n.available_locales array.
+- Edit [application.rb](../application.rb) to add the new language code to the I18n.available_locales array.
 - Choose a flag for the new language from the flag icons in app/assets/images/flags. This icon is presented in the application header for selecting locale, in case the user does not recognise the language of the text.
 - If the new language code is not the same as an appropriate flag code in the flag icons, add the code translation in app/helpers/application_helper.rb flag_code helper.
 - Be sensitive around flags, many language groups don't necessarily respect the national flag of the land where they live.
-- Add the new language to each core language locale file (core/en.yml etc). under :locales. [HOLD]- there doesn't seem to be much sense in translating language names - users need to recognise their own language when selecting a locale.
+- Add the new language to each core language locale file (core/en.yml etc) under :locales. [HOLD]- there doesn't seem to be much sense in translating language names - users need to recognise their own language when selecting a locale.
 - Add the new language folder to each module folder.
 - Copy all files from one of the existing languages to the new language, for each module.
 - Rename the files with the new language code.
@@ -69,21 +70,33 @@ config/locales/
 │   │   ├── en.discipline.yml # Discipline names and codes
 │   │   ├── en.rolify.yml   # RBAC role translations
 │   │   └── en.discipline.yml      # Discipline translations
-│   └── km/                 # Khmer language
-│       ├── km.yml
-│       ├── km.models.yml
-│       ├── km.views.yml
-│       └── km.discipline.yml      # Discipline translations
-└── [module]/
-    ├── en/                         # English language for module
-    │   ├── en.[module].yml         # Module-specific translations if required
-    │   ├── en.[module].models.yml  # ActiveRecord model and attribute translations
-    │   ├── en.[module].views.yml   # View translations - headers, tiles, messages
-    │   └── (additional files if required)
-    └── km/                         # Khmer language for module
-        ├── km.[module].yml
-        ├── km.[module].models.yml
-        └── etc.
+│   │
+│   ├── km/                        # Khmer language
+│   │   ├── km.yml
+│   │   ├── km.models.yml
+│   │   ├── km.views.yml
+│   │   ├── km.discipline.yml      # Discipline translations
+│   │   ├── km.rolify.yml   # RBAC role translations
+│   │   └── km.discipline.yml      # Discipline translations
+│   │
+│   └──> more languages
+│
+├── [module]/
+│   ├── en/                         # English language for module
+│   │   ├── en.[module].yml         # Module-specific translations if required
+│   │   ├── en.[module].models.yml  # ActiveRecord model and attribute translations
+│   │   ├── en.[module].views.yml   # View translations - headers, tiles, messages
+│   │   └── (additional files if required)
+│   │
+│   ├── km/                         # Khmer language for module
+│   │   ├── km.[module].yml         # Module-specific translations if required
+│   │   ├── km.[module].models.yml  # ActiveRecord model and attribute translations
+│   │   ├── km.[module].views.yml   # View translations - headers, tiles, messages
+│   │   └── (additional files if required)
+│   │
+│   └──> more languages
+│
+└──> more modules
 ```
 
 ## Usage

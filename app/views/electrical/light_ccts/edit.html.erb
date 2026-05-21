@@ -1,5 +1,5 @@
 <% provide(:title, t('.title')) %>
-<% provide(:header, t('.header', label: @light_cct.label)) %>
+<% provide(:header, t('.header', label: @light_cct.long_label)) %>
 <% provide(:button_text, t('actions.update')) %>
 <%= render "form",
   light_cct: @light_cct,

@@ -1,13 +1,13 @@
 <% discipline = object %>
 <%= render 'components/collapsible',
   id: "discipline_#{discipline.id}_details",
-  title: t("disciplines.show.header", project: discipline.project.label, label: discipline.label),
+  title: t("disciplines.show.header", label: discipline.long_label),
   expanded: false,
   header_class: 'py-1' do %>
   
     <div class="container-fluid">
       <div class="row mb-1">
-        <% text = t("actions.jump_to", model: t("activerecord.models.discipline")) %>
+        <% text = t("actions.jump_to", model: t("activerecord.models.discipline", count: 1)) %>
         <%= link_to discipline, 
             class: "btn btn-sm btn-outline-secondary me-2",
             title: text do %>
@@ -43,8 +43,8 @@
       </div>
 
       <div class="row mb-1">
-        <div class="col-4 text-muted"><%= discipline.swatch.model_name.human %></div>
-        <div class="col-8"><%= discipline.swatch.name || '-' %></div>
+        <div class="col-4 text-muted"><%= t("activerecord.models.swatch.one") %></div>
+        <div class="col-8"><%= discipline&.swatch&.name || '-' %></div>
 
       <div class="row mb-1">
         <div class="col-4 text-muted"><%= discipline.class.human_attribute_name(:notes) %></div>

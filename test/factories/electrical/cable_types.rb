@@ -20,6 +20,6 @@ FactoryBot.define do
     voltage_rating { '450/750V' }
     bedding_od { 10.0 }
     overall_od { 12.0 }
-    notes { 'Standard power cable' }
+    notes { Faker::Lorem.paragraph(sentence_count: 2) }
   end
 end

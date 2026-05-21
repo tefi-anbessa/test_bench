@@ -1,11 +1,11 @@
-<div class="container mt-3" style="<%= container_styles(@swatch) %>">
-  <div class="card" style="<%= card_styles(@swatch) %>">
-    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+<div class="container mt-3" style="<%= container_styles(swatch) %>">
+  <div class="card" style="<%= card_styles(swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(swatch) %>">
 
       <!-- Center Tag Info -->
       <div class="col text-center">
         <div class="d-flex flex-column align-items-center">
-          <div class="badge fs-6" style="<%= badge_styles(@swatch) %>">
+          <div class="badge fs-6" style="<%= badge_styles(swatch) %>">
             <%= yield(:header) %>
           </div>
         </div>
@@ -13,36 +13,35 @@
     </div>
 
     <%= bootstrap_form_with(model: heater,
-          url: discipline_electrical_heaters_path(@discipline),
+          url: heater.persisted? ?
+            heater : 
+            ( tag.persisted? ?
+              tag_electrical_heaters_path(tag) :
+              discipline_electrical_heaters_path(discipline) ),
           layout: :horizontal,
           label_col: "col-sm-4",
           control_col: "col-sm-8",
           wrapper_class: 'mb-1',
           ) do |f| %>
 
-      <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
+      <div class="card-body p-2" style="<%= form_styles(swatch) %>">
         <div class="row justify-content-center">
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">        <!-- Adjust to fit requirements -->
 
             <!-- Tag -->
             <div class="card mb-1">
-              <% if tag.persisted? %>
-                <%= render 'tags/card', tag: tag %>
-                <%= hidden_field_tag :tag_id, tag.id %>
-              <% else %>
-                <%= f.fields_for tag do |tag_f| %>
-                  <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
-                <% end %>
+              <%= f.fields_for tag do |tag_f| %>
+                <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
               <% end %>
             </div>
 
             <!-- Heater Details -->
-            <div class="card mb-1">
-              <div class="card-header p-2">
+            <div class="card mb-1" style="<%= card_styles(swatch) %>">
+              <div class="card-header p-2" style="<%= card_header_styles(swatch) %>">
                 <h5><%= t('activerecord.models.electrical.heater.one') %></h5>
               </div>
 
-              <div class="card-body p-2">
+              <div class="card-body p-2" style="<%= form_styles(swatch) %>">
                 <%= render 'shared/error_messages', object: f.object %>
 
                 <%= f.select :heater_type,
@@ -60,11 +59,48 @@
                     ),
                     { include_blank: t('form.required') },
                     class: 'form-control form-control-sm' %>
-                    
-                <%= f.text_field :ingress_protection,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8" %>
+
+                <div class="card p-2 mb-2" data-controller="ip-rating">
+                  <div class="row">
+                    <div class="col-4">
+                      <%= f.text_field :ingress_protection,
+                              class: 'form-control form-control-sm',
+                              layout: :vertical,
+                              prepend: 'IP',
+                              data: { 'ip-rating-target': 'output' } %>
+                    </div>
+                    <div class="col-6">
+                      <div class="row">
+                      <%= select_tag :ip_1,
+                        options_for_select(ip_1.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] }, 
+                          heater.ingress_protection&.first),
+                        {
+                          class: 'form-select mb-0',
+                          label_col: "col-sm-4",
+                          control_col: "col-sm-3",
+                          data: { 
+                            action: 'change->ip-rating#update',
+                            'ip-rating-target': 'firstDigit' 
+                          } 
+                        } %>
+                      </div>
+                      <div class="row">
+                        <%= select_tag :ip_2,
+                          options_for_select(ip_2.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] }, 
+                            heater.ingress_protection&.last),
+                            {
+                              class: 'form-select mb-0',
+                              label_col: "col-sm-2",
+                              control_col: "col-sm-10",
+                              data: { 
+                                action: 'change->ip-rating#update',
+                                'ip-rating-target': 'secondDigit' 
+                              } 
+                            } %>
+                      </div>
+                    </div>
+                  </div>
+                </div> <!-- end ip Card -->
 
                 <%= f.number_field :sheath_temperature_max,
                         class: 'form-control form-control-sm',

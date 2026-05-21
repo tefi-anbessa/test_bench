@@ -20,6 +20,7 @@ FactoryBot.define do
     termination_allowance { 4 }  # meters per end
     start_mark { 1001 }
     end_mark { 1010 }
+    notes { Faker::Lorem.paragraph(sentence_count: 2) }
 
     # Handle associations for both build and create
     after(:build) do |cable, evaluator|

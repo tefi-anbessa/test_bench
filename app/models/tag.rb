@@ -11,6 +11,7 @@ class Tag < ApplicationRecord
   # scope :sort_by_tag, -> { order(:prefix, :serial, :suffix) }
 
   # Callbacks
+  before_validation :clear_tagable_id_if_invalid, on: :update
 
   # Associations
   delegated_type :tagable, types: Constants.tagable, optional: true, dependent: :destroy
@@ -23,12 +24,13 @@ class Tag < ApplicationRecord
   validates :prefix, length: { in: 1..6 }
 
   validates :serial, presence: true
-  validates :serial, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 9999 }
+  validates :serial, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than: 10**Constants.tags.serial_digits.to_i }
   validates :suffix, length: { maximum: 5 }
   validates :service, length: { maximum: 40 }
   validates :stage, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 10 }
 
   # Prevent changing tagable association if it's already set and valid
+  # Allow reset if existing is not valid.
   validate :validate_tagable_reassignment, on: :update
   validate :validate_tagable_assignment, on: [:create, :update], 
                 if: -> { tagable_type.present? && tagable_id.present? }
@@ -55,7 +57,7 @@ class Tag < ApplicationRecord
   end
 
   def long_label
-    "#{discipline.label}: #{full_tag}"
+    "#{discipline.label}#{Constants.tags.separator}#{full_tag}"
   end
 
   # Track original values to detect changes
@@ -179,6 +181,16 @@ class Tag < ApplicationRecord
       
       self.class.find_by_sql([sql, { discipline_id: discipline_id, current_id: id }]).first
     end
+
+    def clear_tagable_id_if_invalid
+      # Do nothing if previous association was valid.
+      type_was = tagable_type_in_database
+      klass = type_was.present? ? type_was.safe_constantize : nil
+      return if klass && klass.find_by(id: tagable_id_in_database).present?
+      if will_save_change_to_tagable_type?
+        self.tagable_id = nil
+      end
+    end
   
     # Custom validation to handle suffix uniqueness with NULL values in the database
     def validate_tag_uniqueness
@@ -210,7 +222,7 @@ class Tag < ApplicationRecord
       ).where.not(id: id).exists?
       
       if existing_tag
-        errors.add(:tagable, I18n.t("activerecord.errors.custom_messages.already_associated", 
+        errors.add(:tagable, I18n.t("activerecord.errors.custom.already_associated", 
           child: tagable_type.constantize.model_name.human,
           parent: self.class.model_name.human))
       end
@@ -218,14 +230,16 @@ class Tag < ApplicationRecord
 
     # Prevent changing tagable association if it's already set and valid
     def validate_tagable_reassignment
-      return unless tagable_type_changed? || tagable_id_changed?
-      return if tagable_id_was.blank? || tagable_type_was.blank?
+      return unless will_save_change_to_tagable_type? || will_save_change_to_tagable_id?
+      type_was = tagable_type_in_database
+      id_was = tagable_id_in_database
+      return if id_was.blank? || type_was.blank?
       
       # Allow changes if the current association is invalid
-      return unless self.class.tagable_types.include?(tagable_type_was)
-      return if tagable_type_was.constantize.where(id: tagable_id_was).none?
+      return unless self.class.tagable_types.include?(type_was)
+      return if type_was.constantize.where(id: id_was).none?
       
-      errors.add(:base, I18n::t("activerecord.errors.attributes.tag.tagable_type.change_tagable")) 
+      errors.add(:base, I18n::t("activerecord.errors.models.tag.attributes.tagable_type.change_tagable")) 
     end
 
     # Prevent setting tagable association to an invalid resource

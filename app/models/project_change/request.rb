@@ -24,6 +24,10 @@ module ProjectChange
     attr_readonly :project_id, :serial
 
     def label
+      "CR #{serial}"
+    end
+
+    def long_label
       "CR #{project.label}-#{serial}"
     end
 

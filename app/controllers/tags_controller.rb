@@ -7,10 +7,17 @@ class TagsController < ApplicationController
 
   # GET /tags or /tags.json
   def index
-    authorize @discipline.tags.build()
-    @orphans = Tag.where(discipline_id: nil)
-    @q = policy_scope(Tag).ransack(params[:q])
-    @pagy, @tags = pagy(@q.result.includes(discipline: :project), limit: 20)
+    if @discipline.present?
+      authorize @discipline.tags.build()
+      @orphans = Tag.where(discipline_id: nil)
+      @q = @discipline.tags.merge(policy_scope(Tag)).ransack(params[:q])
+      @pagy, @tags = pagy(@q.result.includes(discipline: :project), limit: 20)
+    else
+      authorize Tag
+      @orphans = Tag.where(discipline_id: nil)
+      @q = policy_scope(Tag).ransack(params[:q])
+      @pagy, @tags = pagy(@q.result, limit: 20)
+    end
   end
 
   # GET /tags/1 or /tags/1.json
@@ -48,8 +55,7 @@ class TagsController < ApplicationController
       flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.tag.one'))
       redirect_to @tag
     else
-      flash[:alert] = I18n.t('flash.update.alert', 
-      resource_name: I18n.t('activerecord.models.tag.one'))
+      flash[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.tag.one'))
       set_swatch
       render :edit, status: :unprocessable_content
     end
@@ -61,19 +67,26 @@ class TagsController < ApplicationController
     if @tag.destroy
       flash[:success] = I18n.t('flash.destroy.notice', 
         resource_name: I18n.t('activerecord.models.tag.one'))
-      redirect_back fallback_location: discipline_tags_path(@discipline)
+      redirect_to discipline_tags_path(@discipline)
     else
       flash.now[:danger] = I18n.t('flash.destroy.alert', 
         resource_name: I18n.t('activerecord.models.tag.one'))
-      render :show, status: :unprocessable_content
+      redirect_back fallback_location: project_tags_path(current_project)
     end
+    
   end
 
   private
 
     def set_discipline
-      @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
-      raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
+      if params[:discipline_id].present?
+        @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
+        raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
+      elsif params[:project_id].present?
+        @discipline = nil
+        @project = policy_scope(Project).find_by(id: params[:project_id])
+        raise ApplicationController::ConflictError, :out_of_scope if @project.nil?
+      end
     end
 
     def set_tag
@@ -95,12 +108,12 @@ class TagsController < ApplicationController
     end
 
     def set_swatch
-      @swatch = @discipline.swatch || Swatch.find_by(name: 'app_theme')
+      @swatch = @discipline&.swatch || @project&.swatch || Swatch.find_by(name: 'app_theme')
     end
 
     def tag_params
       params.require(:tag).permit(:discipline_id, :stage, :prefix, :serial, :suffix,
-                                  :service, :location, :notes, :tagable_type, :tagable_id)
+                                  :service, :location, :notes, :tagable_type)
     end
 
 

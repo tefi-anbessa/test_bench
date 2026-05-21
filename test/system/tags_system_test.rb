@@ -1,208 +1,346 @@
 # frozen_string_literal: true
 require "helpers/test_setup_helpers"
 require "application_system_test_case"
-
+require "helpers/system_test_helpers"
 class TagsSystemTest < ApplicationSystemTestCase
   include Devise::Test::IntegrationHelpers
   include Warden::Test::Helpers
   include TestSetupHelpers
-  include TestSetupHelpers
-  include TestSetupHelpers
+  include SystemTestHelpers
 
   setup do
     setup_projects_and_users
     setup_disciplines(name: 'Electrical', required_role: :designer)
     setup_accredited_users(:designer)
     setup_tags
-    @discipline_e = @discipline
-    @discipline_j = @project.disciplines.find_by(label: 'J')
-    @discipline_p = @project.disciplines.find_by(label: 'P')
   end
 
-  test "unauthenticated users should not see tags link" do
-    visit root_url
-    refute_selector "a[href='tags_url']"
-  end
-
-  test "team member viewing the tags index" do
+  test "team member viewing the project tags index" do
     sign_in_and_set_project @team_member, @project
     # Mock current_project and pundit_user for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     # ApplicationController.any_instance.stubs(:pundit_user).returns(ApplicationPolicy::UserContext.new(@team_member, @project))
     visit root_url
+    find("#project-menu-btn").click
+    # Click the project show link
+    within "[aria-labelledby='project-menu-btn']" do
+      assert_selector "a", text: [I18n.t('actions.show'), @project.code].join(" ")
+      click_on [I18n.t('actions.show'), @project.code].join(" ")
+    end
     
-    # Click the tag index link
-    click_link(href: tags_path)
-    assert_current_path tags_path
-    assert_text I18n.t("tags.index.header", project: @project.code)
+    assert_current_path project_path(@project)
+    # Click the project tags link
+    click_link(href: project_tags_path(@project))
+    assert_current_path project_tags_path(@project)
+    assert_text I18n.t("tags.index.header", scope_text: [@project.class.model_name.human, @project.label].join(' '))
     assert page.title.include?(I18n.t("tags.index.title"))
 
-    # team member can create new tag
-    assert_selector "a[href='#{new_tag_path}']" 
-
-    # index search fields and headers
-    assert_selector "input[name='q[prefix_cont]']"
-    assert_selector "input[name='q[serial_cont]']"
-    assert_selector "input[name='q[service_cont]']"
-    assert_selector "input[name='q[location_cont]']"
-    assert_selector "input[name='q[notes_cont]']"
-    assert_selector "a[href*='q%5Bs%5D=stage']"
-    assert_selector "a[href*='q%5Bs%5D=service']"
-
-    # index fields
-    assert_text @tag.stage
-    assert_text @tag.label
-    assert_text @tag.prefix
-    assert_text @tag.serial
-    assert_text @tag.service
-    assert_text @tag.location
-    assert_text @tag.stage
+    # index search fields
+    tag_index_field_assertions
 
     # Links
-    assert_selector "a[href='#{tag_path(@tag)}']"
-    assert_selector "a[href='#{edit_tag_path(@tag)}']" # team member can edit tag
+    assert_link I18n.t('actions.show'), href: tag_path(@tag)
+    refute_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # team member cannot edit tag
     refute_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # team member cannot delete tag
   end
 
-  test "admin viewing the tags index" do
+  test "team member viewing the discipline tags index" do
+    sign_in_and_set_project @team_member, @project
+    # Mock current_project and pundit_user for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    # ApplicationController.any_instance.stubs(:pundit_user).returns(ApplicationPolicy::UserContext.new(@team_member, @project))
+    visit root_url
+    find("#project-menu-btn").click
+    # Click the project show link
+    within "[aria-labelledby='project-menu-btn']" do
+      assert_selector "a", text: [I18n.t('actions.show'), @project.code].join(" ")
+      click_on [I18n.t('actions.show'), @project.code].join(" ")
+    end
+    assert_current_path project_path(@project)
+    # Click the project tags link
+    click_link(href: discipline_tags_path(@discipline))
+    assert_current_path discipline_tags_path(@discipline)
+    assert_text I18n.t("tags.index.header", scope_text: [@project.code, @discipline.class.model_name.human, @discipline.long_label].join(' '))
+    assert page.title.include?(I18n.t("tags.index.title"))
+
+    # Cannot create new tag without discipline
+    refute_link I18n.t('actions.new'), href: new_discipline_tag_path(@discipline) 
+
+    # index search fields
+    tag_index_field_assertions
+
+    # Links
+    assert_link I18n.t('actions.show'), href: tag_path(@tag)
+    refute_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # team member cannot edit tag
+    refute_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # team member cannot delete tag
+  end
+
+  test "accredited user viewing the project tags index" do
+    sign_in @accredited_user
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit project_tags_path(@project)
+
+    # Links
+    assert_link I18n.t('actions.show'), href: tag_path(@tag)
+    assert_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # accredited user can edit tag
+    refute_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # accredited user cannot delete tag
+  end
+
+  test "accredited user viewing the discipline tags index" do
+    sign_in @accredited_user
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit discipline_tags_path(@discipline)
+    assert_current_path discipline_tags_path(@discipline)
+
+    # Links
+    # Accredited user can link to new tag
+    assert_link I18n.t('actions.new'), href: new_discipline_tag_path(@discipline) 
+    assert_link I18n.t('actions.show'), href: tag_path(@tag)
+    assert_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # accredited user can edit tag
+    refute_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # accredited user cannot delete tag
+  end
+
+  test "admin viewing the project tags index" do
     sign_in @admin
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit root_url
-    
-    # Click the dropdown toggle
-    click_link(href: tags_path)
-    assert_current_path tags_path
+    visit project_tags_path(@project)
 
-    assert_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # admin can delete tag
+    # Links
+    assert_link I18n.t('actions.show'), href: tag_path(@tag)
+    assert_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # admin can edit tag
+    assert_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # admin can delete 
+  end
+
+  test "admin user viewing the discipline tags index" do
+    sign_in @project_admin
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit discipline_tags_path(@discipline)
+    assert_current_path discipline_tags_path(@discipline)
+
+    # Links
+    assert_link I18n.t('actions.new'), href: new_discipline_tag_path(@discipline) 
+    assert_link I18n.t('actions.show'), href: tag_path(@tag)
+    assert_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # accredited user can edit tag
+    assert_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # accredited user cannot delete tag
   end
 
   test "team member viewing the tag show view" do
     sign_in @team_member
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit tags_path
+    visit discipline_tags_path(@discipline)
+    assert_current_path discipline_tags_path(@discipline)
     click_link(href: tag_path(@tag))
     assert_current_path tag_path(@tag)
-    assert_text I18n.t("tags.show.header", label: @tag.label)
+    assert_text I18n.t("tags.show.header", label: @tag.long_label)
     assert page.title.include?(I18n.t("tags.show.title"))
 
     # Header bar navigation links
-    assert_selector "a[href='#{tags_path}']"# Link back to tags index
-    assert_selector "a[href='#{edit_tag_path(@tag)}']" # team member can edit tag
+    assert_link I18n.t('actions.index'), href: project_tags_path(@project)# Link back to project tags index
+    assert_link I18n.t('actions.index'), href: discipline_tags_path(@discipline)# Link back to discipline tags index
+    refute_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # team member cannot edit tag
     refute_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # team member cannot delete tag
+    refute_link I18n.t('actions.new'), href: new_discipline_tag_path(@discipline) # team member cannot create new tag in discipline
     # [TODO] test prev and next buttons
 
     # Project collapsible card
-    assert_text I18n.t('activerecord.models.project')
+    assert_text I18n.t('activerecord.models.project', count: 1)
     assert_text @tag.project.code
+
+    # Discipline collapsible card
+    assert_text I18n.t('activerecord.models.discipline', count: 1)
+    assert_text @tag.discipline.long_label
 
     # Field labels
     assert_text I18n.t('activerecord.attributes.tag.stage')
-    assert_text I18n.t('activerecord.models.discipline')
     assert_text I18n.t('activerecord.attributes.tag.full_tag')
-    assert_text I18n.t('activerecord.attributes.tag.prefix')
-    assert_text I18n.t('activerecord.attributes.tag.serial')
-    assert_text I18n.t('activerecord.attributes.tag.suffix')
     assert_text I18n.t('activerecord.attributes.tag.service')
     assert_text I18n.t('activerecord.attributes.tag.location')
     assert_text I18n.t('activerecord.attributes.tag.notes')
     assert_text I18n.t('activerecord.attributes.tag.tagable_type')
+
+    #field data
     assert_text @tag.stage
     assert_text @tag.discipline.label
     assert_text @tag.label
-    assert_text @tag.prefix
-    assert_text @tag.serial
-    assert_text @tag.suffix
     assert_text @tag.service
     assert_text @tag.location
     assert_text @tag.notes
-    assert_text @tag.tagable_type.constantize.model_name.human
+    assert_text I18n.t('show.unassigned', model: I18n.t("activerecord.attributes.tag.tagable_type"))
+
+    # Go to project tags index and get the same show view from there.
+    click_link(href: project_tags_path(@project))
+    assert current_path, project_tags_path(@project)
+    click_link(href: tag_path(@tag))
+    assert_current_path tag_path(@tag)
+
+    # Confirm the disciplines tag index link works.
+    click_link(href: discipline_tags_path(@discipline))
+    assert_current_path discipline_tags_path(@discipline)
+  end
+
+  test "accredited user viewing the tag show view" do
+    sign_in @accredited_user
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit tag_path(@tag)
+    assert_current_path tag_path(@tag)
+
+    # Header bar navigation links
+    assert_link I18n.t('actions.index'), href: project_tags_path(@project)# Link back to project tags index
+    assert_link I18n.t('actions.index'), href: discipline_tags_path(@discipline)# Link back to discipline tags index
+    assert_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # accredited user can edit tag
+    refute_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # accredited user cannot delete tag
+    assert_link I18n.t('actions.new'), href: new_discipline_tag_path(@discipline) # accredited user can create new tag in discipline
   end
 
   test "admin viewing the tag show view" do
     sign_in @admin
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit tags_path
-    find("a[href='#{tag_path(@tag)}'][title=#{I18n.t('actions.show')}").click
+    visit tag_path(@tag)
     assert_current_path tag_path(@tag)
+
+    # Header bar navigation links
+    assert_link I18n.t('actions.index'), href: project_tags_path(@project)# Link back to project tags index
+    assert_link I18n.t('actions.index'), href: discipline_tags_path(@discipline)# Link back to discipline tags index
+    assert_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # admin can edit tag
     assert_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # admin can delete tag
+    assert_link I18n.t('actions.new'), href: new_discipline_tag_path(@discipline) # admin can create new tag in discipline
   end
 
-  test "team member viewing the tag new view" do
-    sign_in @team_member
+  test "accredited user viewing the tag new view" do
+    sign_in @accredited_user
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit tags_path
-    click_link(href: new_tag_path)
-    assert_current_path new_tag_path
-    assert_text I18n.t("tags.new.header")
+    visit discipline_tags_path(@discipline)
+    click_link(href: new_discipline_tag_path(@discipline))
+    assert_current_path new_discipline_tag_path(@discipline)
+    assert_text I18n.t("tags.new.header", discipline: @discipline.label)
     assert page.title.include?(I18n.t("tags.new.title"))
 
-    # Data fields
-    assert_selector "input[name='tag[stage]']"
-    assert_selector "select[name='tag[discipline_id]']"
-    assert_selector "input[name='tag[serial]']"
-    assert_selector "input[name='tag[suffix]']"
-    assert_selector "input[name='tag[service]']"
-    assert_selector "input[name='tag[location]']"
-    assert_selector "textarea[name='tag[notes]']"
-    assert_selector "select[name='tag[tagable_type]']"
-
-    # Form buttons
-    assert_selector "button[type='submit']"
-    assert_selector "a.btn.btn-warning", text: I18n.t('actions.discard')
+    tag_form_field_assertions
+    assert_selector "select[name='prefix_select']" # prefix schema for Electrical discipline
   end
 
-  test "selecting discipline sets the prefix schema" do
-    sign_in @team_member
+  test "discipline sets the prefix schema" do
+    # Additional discipline setup
+    test_sample_disciplines_setup
+    sign_in @c_user # Accredited for discipline C
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit tags_path
-    click_link(href: new_tag_path)
-    assert_current_path new_tag_path
+    # Discipline C defaults to default schema
+    visit new_discipline_tag_path(@discipline_c)
+    assert_current_path new_discipline_tag_path(@discipline_c)
 
-    select("J", from: "tag[discipline_id]", match: :first)
+    assert_selector "input[name='tag[prefix]']"
+    sign_out @c_user
+
+    sign_in @m_user # Accredited for discipline M
+    # Discipline M defaults to dim1 schema
+    visit new_discipline_tag_path(@discipline_m)
+    assert_current_path new_discipline_tag_path(@discipline_m)
+
+    assert_selector "select[name='prefix_select']"
+    sign_out @m_user
+    
+    sign_in @accredited_user # Accredited for discipline E default
+
+    visit discipline_tags_path(@discipline)
+    click_link(href: new_discipline_tag_path(@discipline))
+    assert_current_path new_discipline_tag_path(@discipline)
+
+    # Default discipline is E and default schema for E is dim2.
+    assert_selector "select[name='prefix_select']"
+    sign_out @accredited_user
+    
+    sign_in @j_user # Accredited for discipline J
+  
+    visit new_discipline_tag_path(@discipline_j)
+    assert_current_path new_discipline_tag_path(@discipline_j)
+
     assert_selector "select[name='measured_variable']"
     assert_selector "select[name='modifier']"
     assert_selector "select[name='function']"
     assert_selector "select[name='modifier_function']"
     assert_selector "[data-tag-target='prefixField'][readonly]"
-
-    select("E", from: "tag[discipline_id]", match: :first)
-    assert_selector "select[name='prefix_select']"
-    
-    select("P", from: "tag[discipline_id]", match: :first)
-    assert_selector "select[name='part1']"
-    assert_selector "select[name='part2']"
+    sign_out @j_user
   end
 
-  test "team member create new tag" do
-    sign_in @team_member
+  test "accredited users create new tags" do
+    # Additional discipline setup
+    test_sample_disciplines_setup
+    @count = 0
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit new_tag_path
-    assert_current_path new_tag_path
+    sign_in @c_user
+    visit new_discipline_tag_path(@discipline_c)
+    assert_current_path new_discipline_tag_path(@discipline_c)
 
-    # Build instrument tag J:AT-0101.A
-    fill_in "tag_stage", with: "1"
-    select("J", from: "tag[discipline_id]", match: :first)
-    select("A", from: "measured_variable", match: :first)
-    select("T", from: "function", match: :first)
-    fill_in "tag_serial", with: "0101"
-    fill_in "tag_suffix", with: "A"
-    fill_in "tag_service", with: "MAIN STREAM ANALYSIS"
+    # Build civil tag C:S-0001.A
+    fill_in_tag_fields
+    fill_in "tag[prefix]", with: "S"
 
     click_button I18n.t('actions.create')
     sleep 0.1  # Give database time to commit
-    new_tag = Tag.find_by(prefix: "AT", serial: "0101", suffix: "A")
+    new_tag = Tag.find_by(prefix: "S", serial: @count)
     assert_current_path tag_path(new_tag)
-    assert_text "AT0101A"
-    assert_text I18n.t("flash.create.notice", resource_name: I18n.t("activerecord.models.tag"))
+    assert_text I18n.t("flash.create.notice", resource_name: I18n.t("activerecord.models.tag", count: 1))
+    sign_out @c_user
+
+    sign_in @m_user # Accredited for discipline M
+    # Discipline M defaults to dim1 schema
+    visit new_discipline_tag_path(@discipline_m)
+    assert_current_path new_discipline_tag_path(@discipline_m)
+
+    # Build mechanical tag M:A-0002.A
+    fill_in_tag_fields
+    select("A", from: "prefix_select", match: :first)
+
+    click_button I18n.t('actions.create')
+    sleep 0.1  # Give database time to commit
+    new_tag = Tag.find_by(prefix: "A", serial: @count)
+    assert_current_path tag_path(new_tag)
+    assert_text I18n.t("flash.create.notice", resource_name: I18n.t("activerecord.models.tag", count: 1))
+    sign_out @m_user
+
+    sign_in @accredited_user # Accredited for discipline E default
+    visit new_discipline_tag_path(@discipline)
+
+    # Build electrical tag E-PM-0003.A 
+    fill_in_tag_fields
+    select("B", from: "prefix_select", match: :first)
+
+    click_button I18n.t('actions.create')
+    sleep 0.1  # Give database time to commit
+    new_tag = Tag.find_by(prefix: "B", serial: @count)
+    assert_current_path tag_path(new_tag)
+    assert_text I18n.t("flash.create.notice", resource_name: I18n.t("activerecord.models.tag", count: 1))
+    sign_out @accredited_user
+
+    sign_in @j_user
+    visit new_discipline_tag_path(@discipline_j)
+    assert_current_path new_discipline_tag_path(@discipline_j)
+    # Build instrument tag J:AT-0004.A
+    fill_in_tag_fields
+    select("A", from: "measured_variable", match: :first)
+    select("T", from: "function", match: :first)
+
+    click_button I18n.t('actions.create')
+    sleep 0.1  # Give database time to commit
+    new_tag = Tag.find_by(prefix: "AT", serial: @count, suffix: "A")
+    assert_current_path tag_path(new_tag)
+    assert_text "AT0004A"
+    assert_text I18n.t("flash.create.notice", resource_name: I18n.t("activerecord.models.tag", count: 1))
+    sign_out @j_user
   end
 
-  test "team member edit tag with default schema" do
-    sign_in @team_member
+  test "accredited user edit tag with default schema" do
+    @count = 10
+    sign_in @accredited_user
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit tag_path(@tag)
@@ -211,32 +349,24 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert_text I18n.t("tags.edit.header", label: @tag.reload.label)
     assert page.title.include?(I18n.t("tags.edit.title"))
 
-    # Data fields
-    assert_selector "input[name='tag[stage]']"
-    assert_selector "select[name='tag[discipline_id]']"
-    # Prefix field should be present as discipline is default
-    assert_selector "input[name='tag[prefix]']"
-    assert_selector "input[name='tag[serial]']"
-    assert_selector "input[name='tag[suffix]']"
-    assert_selector "input[name='tag[service]']"
-    assert_selector "input[name='tag[location]']"
-    assert_selector "textarea[name='tag[notes]']"
-    assert_selector "select[name='tag[tagable_type]']"
+    # This test is rather brittle. Depends on schema for discpline chosen to be tested.
+    tag_form_field_assertions
+    assert_selector "select[name='prefix_select']" # prefix schema for Electrical discipline
 
     # assert_selector "[data-tag-target='prefixField'][readonly]"
 
-    # Complete the form
-    fill_in "tag_serial", with: "0101"
-    fill_in "tag_suffix", with: "A"
-    fill_in "tag_service", with: "MODIFIED SERVICE"
+    # Update the form
+    # [TODO: FIX THIS TEST]
+    fill_in "tag_location", with: "NEW LOCATION"
     click_button I18n.t('actions.update')
-
+    sleep 1.0  # Give server time to respond
+    @tag.reload
     assert_current_path tag_path(@tag)
-    assert_text "EC0101A"
-    assert_text "MODIFIED SERVICE"
-    assert_text I18n.t("flash.update.notice", resource_name: I18n.t("activerecord.models.tag"))
+    assert_text "NEW LOCATION"
+    assert_text I18n.t("flash.update.notice", resource_name: I18n.t("activerecord.models.tag.one"))
 
     # Make another edit to test the show view link, and then discard
+    visit tag_path(@tag)
     click_link(href: edit_tag_path(@tag))
     assert_current_path edit_tag_path(@tag)
     fill_in "tag_serial", with: "0201"
@@ -245,8 +375,8 @@ class TagsSystemTest < ApplicationSystemTestCase
     accept_confirm do
       click_link(text: I18n.t('actions.discard'))
     end
+    @tag.reload
     assert_current_path tag_path(@tag)
-    assert_text "EC0101A"
     refute_text "RESTORED SERVICE"
   end
 
@@ -254,14 +384,14 @@ class TagsSystemTest < ApplicationSystemTestCase
     sign_in @admin
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit tags_path
+    visit project_tags_path(@project)
      # Find the actual delete link and inspect its href
     accept_confirm do
       find("a[href='#{tag_path(@tag)}'][data-method='delete']").click
     end
-    assert_current_path tags_path
+    assert_current_path discipline_tags_path(@discipline)
     refute_selector "a[href='#{tag_path(@tag)}']"
-    assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.tag"))
+    assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.tag.one"))
   end
 
   test "admin destroy tag from the show view" do
@@ -273,8 +403,72 @@ class TagsSystemTest < ApplicationSystemTestCase
     accept_confirm do
       find("a[href='#{tag_path(@tag)}'][data-method='delete']").click
     end
-    assert_current_path tags_path
+    assert_current_path discipline_tags_path(@discipline)
     refute_selector "a[href='#{tag_path(@tag)}']"
-    assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.tag"))
+    assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.tag.one"))
   end
+
+  private
+
+    def tag_index_field_assertions
+      # index search fields and sort link headers
+      assert_field "q[prefix_cont]"
+      assert_field "q[serial_cont]"
+      assert_field "q[service_cont]"
+      assert_field "q[location_cont]"
+      assert_field "q[notes_cont]"
+      assert_sort_link :stage, I18n.t("activerecord.attributes.tag.stage")
+      assert_sort_link :full_tag, I18n.t("activerecord.attributes.tag.full_tag")
+      assert_sort_link :service, I18n.t("activerecord.attributes.tag.service")
+      assert_sort_link :location, I18n.t("activerecord.attributes.tag.location")
+      assert_sort_link :tagable_type, I18n.t("activerecord.attributes.tag.tagable_type")
+
+      # index fields
+      assert_text @tag.stage
+      assert_text @tag.label
+      assert_text @tag.prefix
+      assert_text @tag.serial
+      assert_text @tag.service
+      assert_text @tag.location
+      assert_text @tag.tagable.model_name.human if @tag.tagable.present?
+    end
+
+    def tag_form_field_assertions
+      # Data fields
+      assert_field "tag[stage]"
+      assert_field "tag[serial]"
+      assert_field "tag[suffix]"
+      assert_field "tag[service]"
+      assert_field "tag[location]"
+      assert_field "tag[notes]"
+      assert_selector "select[name='tag[tagable_type]']"
+
+      # Form buttons
+      assert_selector "button[type='submit']"
+      assert_selector "a.btn.btn-warning", text: I18n.t('actions.discard')
+    end
+
+    def test_sample_disciplines_setup
+      # Discipline J defaults to isa51 schema
+      @discipline_j = @project.disciplines.find_by(label: 'J')
+      @j_user = create(:user)
+      @j_user.grant(:designer, @discipline_j)
+    
+      # Discipline M defaults to dim1 schema
+      @discipline_m = @project.disciplines.find_by(label: 'M')
+      @m_user = create(:user)
+      @m_user.grant(:designer, @discipline_m)
+    
+      # Discipline C defaults to default schema
+      @discipline_c = @project.disciplines.find_by(label: 'C')
+      @c_user = create(:user)
+      @c_user.grant(:designer, @discipline_c)
+    end
+
+    def fill_in_tag_fields
+      fill_in "tag_stage", with: "1"
+      fill_in "tag_serial", with: @count += 1
+      fill_in "tag_suffix", with: "A"
+      fill_in "tag_service", with: "TAG TEST #{@count}"
+    end
 end

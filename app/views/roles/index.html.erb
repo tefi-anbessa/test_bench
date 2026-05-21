@@ -8,14 +8,12 @@
 </div>
 
 <div class="container">
-  <%== pagy_bootstrap_nav(@pagy) %>
-
   <% @grouped_roles.each do |resource_type, resources| %>
     <div class="card mb-3">
       <div class="card-header py-1 cursor-pointer d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#collapse-<%= resource_type.parameterize %>" role="button" aria-expanded="true" aria-controls="collapse-<%= resource_type.parameterize %>">
         <h6 class="mb-0 small">
           <i class="bi bi-chevron-down me-1"></i>
-          <%= (resource_type == 'global' || resource_type == '-') ? t('rolify.role_types.global') : t("activerecord.models.#{resource_type.constantize.model_name.i18n_key}") %>
+          <%= (resource_type == 'global' || resource_type == '-') ? t('rolify.role_types.global') : t("activerecord.models.#{resource_type.constantize.model_name.i18n_key}", count: 1) %>
           <span class="badge bg-secondary ms-1"><%= resources.values.sum { |r| r.values.sum(&:count) } %></span>
         </h6>
         <div class="d-flex align-items-center">
@@ -30,7 +28,7 @@
             <div class="row g-1 mb-1 fw-bold border-bottom pb-1 small">
               <div class="col-md-4"><%= t('activerecord.attributes.role.resource_type') %></div>
               <div class="col-md-3"><%= t('activerecord.models.role') %></div>
-              <div class="col-md-4"><%= t('activerecord.models.user') %></div>
+              <div class="col-md-4"><%= t('activerecord.models.user', count: 1) %></div>
               <div class="col-md-1 text-end pe-3"><%= t('actions.actions') %></div>
             </div>
 

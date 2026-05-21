@@ -10,7 +10,7 @@
             class: "btn btn-outline-primary btn-sm",
             data: { turbo: false },
             aria: { label: t('actions.new') } do %>
-        <%== bs_icon('plus') %>
+        <%== bs_icon('plus-square-fill') %>
         <%= t('actions.new') %>
       <% end %>
     <% end %>
@@ -23,7 +23,7 @@
         <div class="col-md-4">
           <%= link_to discipline, 
               class: "fw-bold text-decoration-none",
-              style: "color: #{discipline.swatch&.text || '#000'}" do %>
+              style: "color: #{@swatch&.text || '#000'}" do %>
             <%= discipline.label %>:
             <%= discipline.name %>
           <% end %>
@@ -50,6 +50,16 @@
               <%== bs_icon('file') %>
               <%= t('activerecord.models.document', count: discipline.documents.count) %>
               <span class="badge bg-secondary ms-1"><%= discipline.documents.count %></span>
+            <% end %>
+            
+            <%= link_to discipline_doc_types_path(discipline),
+                class: "btn btn-outline-secondary btn-sm",
+                aria: { 
+                  label: t('activerecord.models.doc_type', count: discipline.doc_types.count)
+                } do %>
+              <%== bs_icon('file') %>
+              <%= t('activerecord.models.doc_type', count: discipline.doc_types.count) %>
+              <span class="badge bg-secondary ms-1"><%= discipline.doc_types.count %></span>
             <% end %>
           </div>
         </div>

@@ -2,5 +2,6 @@
 <% provide(:header, t('.header')) %>
 <% provide(:button_text, t('actions.create')) %>
 <%= render "form",
-  doc_type: @doc_type
+  doc_type: @doc_type,
+  discipline: @discipline
 %>

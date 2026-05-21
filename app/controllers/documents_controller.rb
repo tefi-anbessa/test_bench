@@ -8,9 +8,15 @@
 
     # GET /documents
     def index
-      authorize @discipline.documents.build()
-      @q = @discipline.documents.ransack(params[:q])
-      @pagy, @documents = pagy(@q.result, limit: 20)
+      if @discipline.present?
+        authorize @discipline.documents.build()
+        @q = @discipline.documents.merge(policy_scope(Document)).ransack(params[:q])
+        @pagy, @documents = pagy(@q.result, limit: 20)
+      else
+        authorize Document
+        @q = policy_scope(Document).ransack(params[:q])
+        @pagy, @documents = pagy(@q.result, limit: 20)
+      end
     end
 
     # GET /documents/1
@@ -82,8 +88,14 @@
     private
 
       def set_discipline
-        @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
-        raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
+        if params[:discipline_id].present?
+          @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
+          raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
+        elsif params[:project_id].present?
+          @discipline = nil
+          @project = policy_scope(Project).find_by(id: params[:project_id])
+          raise ApplicationController::ConflictError, :out_of_scope if @project.nil?
+        end
       end
 
       def set_document
@@ -94,7 +106,7 @@
       end
 
       def set_swatch
-        @swatch = @discipline.swatch || Swatch.find_by(name: "app_theme")
+      @swatch = @discipline&.swatch || @project&.swatch || Swatch.find_by(name: 'app_theme')
       end
 
       def setup_form
@@ -104,7 +116,7 @@
 
       def create_params
         params.require(:document)
-        .permit(:discipline_id, :doc_type_id, :serial, :title, :notes)
+        .permit(:doc_type_id, :title, :notes)
       end
 
       def update_params

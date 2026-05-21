@@ -3,33 +3,53 @@
   <!-- Tagable Resource Header Card -->
   <div class="card mb-4" style="<%= card_styles(@swatch) %>">
     <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
-      <div class="d-flex justify-content-between align-items-center">
-        <!-- Header Text (Left) -->
-        <div class="ms-2">
-          <% project_text = current_project.present? ? 
+      <div class="row align-items-center p-2">
+
+        <!-- Discipline or project link -->
+        <div class="col-2">
+          <% if @discipline.present? %>
+            <%= link_to discipline_path(@discipline), class: "btn btn-sm btn-outline-info" do %>
+              <%= @discipline.name %>
+              <%= bs_icon('collection', class: "me-1") %>
+            <% end %>
+          <% elsif current_project.present? %>
+            <%= link_to project_path(current_project), class: "btn btn-sm btn-outline-info" do %>
+              <%= current_project.label %>
+              <%= bs_icon('layers', class: "me-1") %>
+            <% end %>
+          <% end %>
+        </div>
+
+        <!-- Header Text (Left - 8 columns) -->
+        <div class="col-8">
+          <% scope_text = @discipline.present? ? 
+          [@discipline.project.code, @discipline.class.model_name.human, @discipline.long_label].join(' ') : 
+          current_project.present? ? 
           [current_project.class.model_name.human, current_project.label].join(': ') : 
-          t('index.all', models: t('activerecord.models.project').pluralize) %>
-          <h5 class="mb-0"><%= t('.header', project: project_text) %></h5>
+          t('index.all', models: t('activerecord.models.project.other')) %>
+          <h5><%= t('.header', scope_text: scope_text) %></h5>
         </div>
 
         <!-- New Button (Right) -->
-        <% if policy(@discipline.documents.build()).new? %>
-            <%= link_to new_discipline_document_path(@discipline), 
-              class: "btn btn-outline-primary actions",
-              aria: { label: t('actions.new') },
-              title: t('actions.new') do %>
-              <%== bs_icon('plus-square-fill') %>
-              <span class="ms-1">
-                <%= [t('actions.new'), t('activerecord.models.document')].join(' ') %>
-              </span>
-            <% end %>
-        <% end %>
-      </div> <!-- end of d-flex -->
+        <div class="col-2 align-content-end">
+          <% if @discipline.present? && policy(@discipline.documents.build()).new? %>
+              <%= link_to new_discipline_document_path(@discipline),
+                class: "btn btn-sm btn-outline-primary actions",
+                aria: { label: t('actions.new') },
+                title: t('actions.new') do %>
+                <%== bs_icon('plus-square-fill') %>
+                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.document.one')].join(' ') %></span>
+              <% end %>
+          <% end %>
+        </div>
+      </div> <!-- end of row -->
     </div> <!-- end of card header -->
 
     <div class="card-body">
       <div class="row search-form">
-        <%= search_form_for @q, url: discipline_documents_path(@discipline) do |f| %>
+        <%= search_form_for @q, url: @discipline.present? ?
+        discipline_documents_path(@discipline) :
+        project_documents_path(@project) do |f| %>
           <%= f.search_field :discipline_name_cont,
                 class: "search_field",
                 placeholder: t("activerecord.models.discipline") %>

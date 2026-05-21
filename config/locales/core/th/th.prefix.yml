@@ -1,0 +1,102 @@
+en:
+  prefix_schema:
+    key:
+      custom: "กำหนดเอง"
+      default: "ค่าเริ่มต้น"
+      isa51: "ISA-5.1"
+      dim1: "1 มิติ"
+      dim2: "2 มิติ"
+      alternate_inst: "ISA-5.1 ทางเลือก"
+    type:
+      default: "ค่าเริ่มต้น"
+      isa51: "ISA-5.1"
+      dim1: "1 มิติ"
+      dim2: "2 มิติ"
+    messages:
+      sure: "คุณแน่ใจหรือไม่? การเปลี่ยนสคีมาจะลบการปรับแต่งที่มีอยู่"
+      initialize: "เริ่มต้นจากเทมเพลต"
+    viewing_schema: "กำลังดูสคีมา"
+    select_template: "เลือกเทมเพลต"
+    template_help: "เลือกเทมเพลตเพื่อเริ่มต้นสคีมา"
+    custom_schema: "สคีมากำหนดเอง"
+    schema_help: "TODO: ความช่วยเหลือสำหรับตัวแก้ไขสคีมา"
+  prefix:
+    isa51:
+      measured_variables:
+        'A': 'Analysis'
+        'B': 'Burner, combustion'
+        'C': 'User''s choice'
+        'D': 'User''s choice'
+        'E': 'Voltage'
+        'F': 'Flow rate'
+        'G': 'User''s choice'
+        'H': 'Hand'
+        'I': 'Current (electrical)'
+        'J': 'Power'
+        'K': 'Time, time schedule'
+        'L': 'Level'
+        'M': 'User''s choice'
+        'N': 'User''s choice'
+        'O': 'User''s choice'
+        'P': 'Pressure, vacuum'
+        'Q': 'Quantity'
+        'R': 'Radiation'
+        'S': 'Speed, frequency'
+        'T': 'Temperature'
+        'U': 'Multivariable'
+        'V': 'Vibration, mechanical analyses'
+        'W': 'Weight, force'
+        'X': 'Unclassified'
+        'Y': 'Event, state or presence'
+        'Z': 'Position, dimension'
+      modifiers:
+        'D': 'Differential'
+        'F': 'Ration (fraction)'
+        'J': 'Scan'
+        'K': 'Time rate of change'
+        'M': 'Momentary'
+        'Q': 'Integrate, totalizer'
+        'S': 'Safety'
+        'X': 'X-axis'
+        'Y': 'Y-axis'
+        'Z': 'Z-axis'
+      readout_functions:
+        'A': 'Alarm'
+        'B': 'User''s choice'
+        'E': 'Sensor (primary element)'
+        'G': 'Glass, viewing device'
+        'I': 'Indication'
+        'L': 'Light'
+        'N': 'User''s choice'
+        'O': 'Orifice, restriction'
+        'P': 'Point (test connection)'
+        'R': 'Record'
+        'U': 'Multifunction'
+        'W': 'Well'
+        'X': 'Unclassified'
+      output_functions:
+        'B': 'User''s choice'
+        'C': 'Control'
+        'K': 'Control Station'
+        'N': 'User''s choice'
+        'S': 'Switch'
+        'T': 'Transmit'
+        'U': 'Multifunction'
+        'V': 'Valve, damper, louver'
+        'X': 'Unclassified'
+        'Y': 'Relay, compute, convert'
+        'Z': 'Driver, actuator'
+      modifier_functions:
+        'B': 'User''s choice'
+        'H': 'High'
+        'HH': 'High high'
+        'L': 'Low'
+        'LL': 'Low low'
+        'M': 'Middle, intermediate'
+        'N': 'User''s choice'
+        'U': 'Multifunction'
+        'X': 'Unclassified'
+    dim1:
+    dim2:
+      1:
+      2:

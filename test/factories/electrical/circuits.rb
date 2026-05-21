@@ -13,7 +13,7 @@ FactoryBot.define do
     rating { 16.0 }  # Amps
     elcb { 'None' }    # Using string value from enum
     contactor { false }
-    notes { nil }
+    notes { Faker::Lorem.paragraph(sentence_count: 2) }
 
     # Circuits must belong to a switchboard
     association :switchboard, factory: :electrical_switchboard

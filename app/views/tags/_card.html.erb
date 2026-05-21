@@ -1,7 +1,7 @@
 
 <%= render 'components/collapsible',
   id: "tag_#{tag.id}_details",
-  title: t("tags.show.header", label: tag.label),
+  title: t("tags.show.header", label: [tag.label, tag.service].join(' ')),
   expanded: false,
   header_class: 'py-1' do %>
 
@@ -17,33 +17,26 @@
 
     <div class="row mb-1">
       <div class="col-12">
-        <div class="d-flex align-items-center">
-          <span class="text-muted me-2">
-            <%= link_to t('activerecord.models.project'), project_path(tag.project), class: 'text-decoration-none' %>:
-          </span>
-          <span><%= tag.project.title %></span>
-          <span class="ms-3">
-            <span class="text-muted me-1"><%= t('activerecord.attributes.tag.stage') %>:</span>
-            <span><%= tag.stage %></span>
-          </span>
-        </div>
+        <%= link_to [t('activerecord.models.project.one') + ':',
+                      tag.project.code,
+                      tag.project.title].join(' '),
+          project_path(tag.project), 
+          class: 'text-decoration-none' %>
       </div>
     </div>
 
     <div class="row mb-1">
       <div class="col-12">
-        <div class="d-flex align-items-center">
-          <span class="text-muted me-2">
-            <%= t('activerecord.models.tag.one') %>:
-          </span>
-          <span><%= tag.label %></span>
-          <% if tag.service.present? %>
-            <span class="ms-2"><%= tag.service %></span>
-          <% end %>
-        </div>
+        <%= [t('activerecord.attributes.tag.stage'), tag.stage].join(': ') %>
       </div>
     </div>
-    
+
+    <div class="row mb-1">
+      <div class="col-12">
+        <%= t("activerecord.attributes.tag.location") %>: <%= tag.location || '-' %>
+      </div>
+    </div>
+
     <% if tag.notes.present? %>
       <div class="row mb-1">
         <div class="col-12">

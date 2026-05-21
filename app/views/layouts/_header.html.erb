@@ -33,10 +33,10 @@
 
             <% if policy(Swatch).create? %>
               <li class="nav-item">
-                <%= link_to t('swatch', scope: 'activerecord.models').pluralize,
+                <%= link_to t('activerecord.models.swatch.other'),
                   swatches_path,
                   class: 'nav-link',
-                  aria: { label: t('swatch', scope: 'activerecord.models').pluralize } %>
+                  aria: { label: t('activerecord.models.swatch.other') } %>
               </li>
             <% end %>
 
@@ -50,8 +50,8 @@
                     role="button"
                     aria-expanded="false">
                     <%= project_selected? ?
-                      t('project', scope: 'activerecord.models') + ": " + current_project.code :
-                      t('project', scope: 'activerecord.models').pluralize %>
+                      [t('activerecord.models.project.one'), current_project.code].join(": ") :
+                      t('activerecord.models.project.other') %>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="project-menu-btn">
                   <% if project_selected? %>
@@ -70,7 +70,7 @@
                   <li><%= link_to t('actions.select'),
                         select_projects_path,
                         class: "dropdown-item" %></li>
-                  <li><%= link_to t('project', scope: 'activerecord.models').pluralize,
+                  <li><%= link_to t('activerecord.models.project.other'),
                         projects_path,
                         class: "dropdown-item" %></li>
                 </ul>

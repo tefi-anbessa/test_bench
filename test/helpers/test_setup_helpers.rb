@@ -80,9 +80,9 @@ module TestSetupHelpers
   end
 
   def setup_tags
-    @tag = create(:tag, :unique_tag, discipline: @discipline)
-    @other_tag = create(:tag, :unique_tag, discipline: @other_discipline)
-    @unassigned_tag = create(:tag, :unique_tag, discipline: @discipline)
+    @tag = create(:tag, :unique_tag, discipline: @discipline, service: "Tag in current project")
+    @other_tag = create(:tag, :unique_tag, discipline: @other_discipline, service: "Tag in other project")
+    @unassigned_tag = create(:tag, :unique_tag, discipline: @discipline, service: "Unassigned tag")
   end
 
   # Including class must implement resource_class method

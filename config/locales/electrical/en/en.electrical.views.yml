@@ -9,7 +9,7 @@ en:
         header:           "Edit Cable Type %{label}"
       new:
         title:            "New Cable Type"
-        header:           "New Cable Type"
+        header:           "New Cable Type in %{scope_text}"
       show:
         title:            "Cable Type"
         header:           "Cable Type %{label}"
@@ -23,7 +23,7 @@ en:
         header:           "Edit Cable %{label}"
       new:
         title:            "New Cable"
-        header:           "New Cable"
+        header:           "New Cable in %{scope_text}"
       show:
         title:            "Cable"
         header:           "Cable %{label}"
@@ -37,7 +37,7 @@ en:
         header:           "Edit Switchboard %{label}"
       new:
         title:            "New Switchboard"
-        header:           "New Switchboard"
+        header:           "New Switchboard in %{scope_text}"
       show:
         title:            "Switchboard"
         header:           "Switchboard %{label}"
@@ -65,7 +65,7 @@ en:
         header:           "Edit Motor %{label}"
       new:
         title:            "New Motor"
-        header:           "New Motor"
+        header:           "New Motor in %{scope_text}"
       show:
         title:            "Motor"
         header:           "Motor %{label}"
@@ -79,7 +79,7 @@ en:
         header:           "Edit Socket Circuit %{label}"
       new:
         title:            "New Socket Circuit"
-        header:           "New Socket Circuit"
+        header:           "New Socket Circuit in %{scope_text}"
       show:
         title:            "Socket Circuit"
         header:           "Socket Circuit %{label}"
@@ -121,7 +121,7 @@ en:
         header:           "Edit Heater %{label}"
       new:
         title:            "New Heater"
-        header:           "New Heater"
+        header:           "New Heater in %{scope_text}"
       show:
         title:            "Heater"
         header:           "Heater %{label}"

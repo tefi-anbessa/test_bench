@@ -1,5 +1,5 @@
 <% provide(:title, t('.title')) %>
-<% provide(:header, t('.header'), discipline: @discipline.label) %>
+<% provide(:header, t('.header', discipline: @discipline.label)) %>
 <% provide(:button_text, t('actions.create')) %>
 <%= render 'form', 
           tag: @tag,

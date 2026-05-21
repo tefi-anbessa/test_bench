@@ -3,6 +3,11 @@
     <td scope = "col"><%= row.project.code %></td>
   <% end %>
   <td><%= row.id %></td>
+  <td>
+    <span title="<%= row.notes %>">
+      <%= truncate(strip_tags(row.notes.to_s), length: 20) %>
+    </span>
+  </td>
   <td><%= row.code %></td>
   <td>
     <% if policy(row).show? %>

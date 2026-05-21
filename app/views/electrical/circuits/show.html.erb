@@ -39,10 +39,7 @@
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
               <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
-                <% if @circuit.switchboard&.tag&.present? %>
-                  <%= [@circuit.switchboard&.label, @circuit.switchboard.tag.service].join(': ') %>
-                <% end %>
-                <%= t('.header', label: @circuit.label) %>
+                <%= [@switchboard.service, t('.header', label: @circuit.long_label)].join(' - ') %>
               </span>
             </div>
           </div>

@@ -22,6 +22,9 @@ Rails.application.routes.draw do
         post "set"
       end
 
+      # Project nested index routes
+      resources :tags, :documents, :doc_types, only: [:index]
+
       # Project nested resources
       resources :disciplines, shallow: true do
         get :schema, on: :member, constraints: { format: 'json' }

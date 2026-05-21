@@ -7,12 +7,18 @@
         <!-- Left Navigation -->
         <div class="col-auto">
           <div class="d-flex align-items-center">
-            <!-- Index Button -->
+            <!-- Index Buttons -->
+            <%= link_to project_tags_path(@discipline.project),
+                  class: "btn btn-sm btn-outline-secondary me-2",
+                  title: t('actions.index') do %>
+              <%== bs_icon('layers') %>
+              <span class="d-none d-md-inline"><%= [@discipline.project.label, t('actions.index')].join(' ') %></span>
+            <% end %>
             <%= link_to discipline_tags_path(@discipline),
                   class: "btn btn-sm btn-outline-secondary me-2",
                   title: t('actions.index') do %>
-              <%== bs_icon('list-columns-reverse') %>
-              <span class="d-none d-md-inline"><%= t('actions.index') %></span>
+              <%== bs_icon('collection') %>
+              <span class="d-none d-md-inline"><%= [@discipline.label, t('actions.index')].join(' ') %></span>
             <% end %>
 
             <!-- Previous Button -->
@@ -38,7 +44,7 @@
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
               <span class="badge fs-6">
-                <%= t('.header', label: [@tag.full_tag, @tag.service].compact.join(' - ')) %>
+                <%= t('.header', label: [@tag.long_label, @tag.service].compact.join(' - ')) %>
               </span>
             </div>
           </div>
@@ -95,7 +101,7 @@
                   title: t('actions.new') do %>
                   <%== bs_icon('plus-square-fill') %>
                   <span class="ms-1">
-                    <%= [t('actions.new'), t('activerecord.models.tag')].join(' ') %>
+                    <%= [t('actions.new'), t('activerecord.models.tag', count: 1)].join(' ') %>
                   </span>
                 <% end %>
               <% end %>
@@ -114,40 +120,21 @@
             <%= render 'projects/card', object: @tag.project %>
           </div>
 
+          <!-- Discipline card -->
+          <div class="row mb-1">
+            <%= render 'disciplines/card', object: @discipline %>
+          </div>
+
           <!-- Project stage -->
           <div class="row mb-1">
             <div class="col-4"><%= t('activerecord.attributes.tag.stage') %></div>
             <div class="col-8"><%= @tag.stage %></div>
           </div>
 
-          <!-- Discipline Info -->
-          <div class="row mb-1">
-            <div class="col-4 text-muted"><%= t('activerecord.models.discipline') %></div>
-            <div class="col-8"><%= [@tag.discipline.label, " - ", @tag.discipline.name].join %></div>
-          </div>
-
           <!-- Tag Details -->
           <div class="row mb-1">
             <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.full_tag') %></div>
             <div class="col-8"><%= @tag.full_tag %></div>
-          </div>
-
-          <!-- Prefix -->        
-          <div class="row mb-1">
-            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.prefix') %></div>
-            <div class="col-8"><%= @tag.prefix %></div>
-          </div>
-
-          <!-- Serial -->
-          <div class="row mb-1">
-            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.serial') %></div>
-            <div class="col-8"><%= @tag.serial.to_s.rjust(4, '0') %></div>
-          </div>
-          
-          <!-- Suffix -->
-          <div class="row mb-1">
-            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.suffix') %></div>
-            <div class="col-8"><%= @tag.suffix %></div>
           </div>
           
           <!-- Service -->
@@ -220,7 +207,7 @@
                     <% end %>         <!-- policy -->
                   <% else %>        <!-- invalid tagable_type -->
                     <span class="text-muted">
-                      <%= t("activerecord.errors.models.tagable_type.invalid", tagable_type: @tag.tagable_type) %>
+                      <%= t("activerecord.errors.models.tag.attributes.tagable_type.invalid", tagable_type: @tag.tagable_type) %>
                     </span>
                   <% end %>         <!-- valid tagable_type -->
                 <% else %>          <!-- tagable_type not present? -->

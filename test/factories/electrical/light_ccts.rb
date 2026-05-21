@@ -10,6 +10,7 @@ FactoryBot.define do
     # Attributes
     light_fitting_type { :general }
     quantity { 1 }
+    notes { Faker::Lorem.paragraph(sentence_count: 2) }
 
     # Create tag association in a single transaction
     after(:build) do |light_cct, evaluator|

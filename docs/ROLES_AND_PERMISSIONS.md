@@ -8,7 +8,7 @@ The objective of the RBAC system is to provide projects with a framework with wh
 
 The first level of access control is provided by restricting users from creating and editing resource content, unless they have been granted the required role for the resource. Required role is the same for create and edit actions in most cases.
 
-The default required role is defined by the resource module's `base.rb` model, from which all its classes inherit. Classes may override the required role in special cases. Projects may override the class required role by defining a required role for a module in the Discipline model, using the `:required_role` attribute. Discipline is linked to modules by their `:name` attribute in the Discipline model.
+The default required role is defined by the resource module's `base.rb` model, from which all its classes inherit. Classes may override the required role in special cases. Projects may override the class required role by defining a required role for a module in the Discipline model, using the `:required_role` attribute. Disciplines are linked to modules by their `:name` attribute in the Discipline model.
 
 The second level of access control is provided by restricting users from actioning workflow steps, unless they have been granted the designated role for the step.
 
@@ -20,7 +20,7 @@ The application's resources fall into a number of categories for implementation 
 
 1. System resources.
 
-   High level resources such as the Role model, the User model, the Project model and the Discipline model must define their roles and responsibilities individually. There are a small number of other system wide resources that have their own individual access control.
+   High level resources such as the Role model, the User model, the Project model and the Discipline model must define their roles and responsibilities individually. There are a small number of other system wide resources that have their own individual access control, including colour swatches and software source titles.
 
 1. Project resources.
 
@@ -36,7 +36,7 @@ The application RBAC system uses the [rolify gem](https://github.com/RolifyCommu
 
 ### Constraints
 
-To avoid proliferation of ad hoc roles and rules which may lead to confusion, the RBAC is quite tightly controlled. Role names cannot be assigned by users: the available role names in the application are constrained by a constant hash built from `config/constants/role.yml`. Translation of role names and descriptions is provided in `config/locales/core/xx/xx.rolify.yml` where `xx` is the locale code. Assignment of a role name other than those permitted in the constant set up will result in a permissions error. Details are in the implementation section.
+To avoid proliferation of ad hoc roles and rules which may lead to confusion, the RBAC is quite tightly controlled. Role names cannot be assigned by users: the available role names in the application are constrained by a constant hash built from [role.yml](../config/constants/role.yml). Translation of role names and descriptions is provided in `config/locales/core/xx/xx.rolify.yml` where `xx` is the locale code. Assignment of a role name other than those permitted in the constant set up will result in a permissions error. Details are in the implementation section.
 
 ### Hierarchy
 
@@ -52,7 +52,7 @@ Global roles are provided for system administration purposes. Users with global 
 2. **Admin**
    - Permission for all controller actions, including destroy.
    - Scope includes all records when no project is selected.
-   - Can assign any available role to any user, except :admin, :project_admin, and other :app_owner roles.
+   - Can assign any available role to any user, except :admin, :project_admin, and :app_owner roles.
 
 #### Resource Wide Roles
 
@@ -68,18 +68,16 @@ Global roles are provided for system administration purposes. Users with global 
 
 1. **Project Manager**
    - The :project_manager role can only be granted by a global admin.
-   - A user with :project_manager role has control over the assigned project.
-   - A project manager can modify project details and settings.
-   - A project manager can grant and revoke other further roles to users for the assigned project, with the exception of the :project_manager and :project_admin roles.
+   - A user with :project_manager role has control over the assigned project, and can modify project details and settings.
+   - A project manager can grant and revoke other permitted roles to users for the assigned project, with the exception of the :project_manager and :project_admin roles.
 
 1. **Project Administrator**
    - The :project_admin role can only be granted by an :app_owner role.
    - A user with :project_admin role has permission for all controller actions, including destroy, for records belonging to the project.
-   - The :project_admin role does not give permission to grant or revoke roles.
+   - The :project_admin role does not give permission to grant or revoke other roles.
 
 1. **Team Member**
-   - A user with :team_member role can view project content.
-   - [TODO: any create permissions? E.g. comments?]
+   - A user with :team_member role can view project content and can raise change requests.
 
 ### Discipline Instance Roles
 
@@ -101,7 +99,7 @@ Global roles are provided for system administration purposes. Users with global 
 #### User Interface
 
 - The user interface for granting and revoking global and resource wide roles is the new roles form, available from the roles index if authorised.
-- The form is only accessible to admins and app_owner.
+- The form is only accessible to global admins.
 - The user interface for project and discipline specific roles is a sub-form on the resource edit page, present only if the user has the required permissions to grant or revoke roles on that project or discipline.
 
 ## Permissions and Scopes
@@ -113,11 +111,11 @@ The application RBAC system uses the [pundit gem](https://github.com/varvet/pund
 - Pundit uses policy objects, one for each resource to be managed.
 - Policies provide a boolean permission for each action in a resource's controller.
 - Policies also provide a scope object which enables restricting the list of resource instances available to a user.
-- By design, pundit policies use the signed in user (current user) and either the resource class, or the resource instance being managed to determine permissions.
+- Conventionally, pundit policies use the signed in user (current user) and either the resource class, or the resource instance being managed to determine permissions.
 - This application has extended pundit to include the current project as a context for permissions and scopes.
   - Scope is used to limit visibility of records to only include those that belong to the current project.
   - Permissions are checked to ensure that user has the required role scoped to the current project before allowing action.
-  - Index and show actions are generally available to any user with any role on the current project.
+  - Index and show actions are generally available to a user with any role on the current project.
   - Content modification actions (new/create and edit/update) are usually available only to users with the required role scoped to the current project.
   - Users with global admin roles are not constrained by current project context for viewing, but current project must be set in order to create or edit a record.
 
@@ -147,7 +145,7 @@ As well as the checks in the matrices, policies also check that the action does 
 
 - The terminology used in this document does not necessarily agree exactly with the code implementation. [HOLD make it do so?]
 - Because they mostly have the same permissions, global admin roles (:app_owner and :admin) and :project_admin role are grouped together under the column "Admin", unless there are permissions differences (such as for the Role model).
-- "Team member" is used in the matrices to mean any user with any project role, with the exception of users who may have more specific roles in other columns. This is not the same as a user with a :team_member role.
+- "Team member" is used in the matrices to mean any user with any project role, with the exception of users who may have more specific permissions in other columns. This is not the same as a user with a :team_member role.
 - "Accredited user" is used in the matrices to include any user with a required role specific to the action in that row. The same term is used in code to include __any__ user with permission for the action, i.e. including the admin roles.
 
 ### PERMISSIONS AND SCOPE FOR ROLE MODEL

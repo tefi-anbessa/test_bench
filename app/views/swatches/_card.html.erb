@@ -7,7 +7,7 @@
   
     <div class="container-fluid">
       <div class="row mb-1">
-        <% text = t("actions.jump_to", model: t("activerecord.models.swatch")) %>
+        <% text = t("actions.jump_to", model: t("activerecord.models.swatch", count: 1)) %>
         <% if policy(resource).show? %>
           <%= link_to resource, 
             class: "btn btn-sm btn-outline-secondary me-2",

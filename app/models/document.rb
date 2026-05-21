@@ -1,5 +1,13 @@
 # frozen_string_literal: true
 class Document < ApplicationRecord
+
+  # Gem invocation
+  has_paper_trail
+
+  # Scopes
+  # Default scope to sort by document number
+  default_scope { order(:doc_number) }
+
   # Callbacks
   around_create :set_document_number
 
@@ -9,18 +17,20 @@ class Document < ApplicationRecord
   belongs_to :doc_type
   has_many :issues, dependent: :destroy
 
-  # Default scope to sort by document number
-  default_scope { order(:doc_number) }
-
+  # Validations
   # Presence validation for required fields.
   validates :title, presence: true, length: { maximum: 50 }
   
   # Lock discipline_id, doc_type_id, serial (therefore document number) after creation
   attr_readonly :discipline_id, :doc_type_id, :serial
 
-
+  # Class Methods
   def self.required_role
     :document_controller
+  end
+
+  def self.swatch
+    Swatch.find_by(name: "app_theme")
   end
 
   # Default discipline to reference back to this module, used in testing. 
@@ -33,8 +43,9 @@ class Document < ApplicationRecord
     doc_number
   end
 
-  def self.swatch
-    Swatch.find_by(name: "app_theme")
+  def long_label
+    # Document number already includes discipline label
+    doc_number
   end
 
   private

@@ -1,8 +1,8 @@
 <% provide(:title, t('.title')) %>
-<div class="container mt-3 mx-auto" style="<%= container_styles(Electrical::CableType.swatch) %>">
+<div class="container mt-3 mx-auto" style="<%= container_styles(@swatch) %>">
   <!-- Cable Type Header Card -->
-  <div class="card mb-1" style="<%= card_styles(Electrical::CableType.swatch) %>">
-    <div class="card-header p-1" style="<%= card_header_styles(Electrical::CableType.swatch) %>">
+  <div class="card mb-1" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-1" style="<%= card_header_styles(@swatch) %>">
       <div class="row align-items-center p-2">
 
         <!-- discipline return -->
@@ -17,7 +17,7 @@
         <div class="col-8">
           <% scope_text = @project.present? ? 
           [@project.class.model_name.human, @project.label].join(': ') : 
-          t('index.all', models: t('activerecord.models.project').pluralize) %>
+          t('index.all', models: t('activerecord.models.project.other')) %>
           <h5 class="mb-1"><%= t('.header', scope_text: scope_text) %></h5>
         </div>
 
@@ -34,7 +34,7 @@
             <% end %>
           <% end %>
         </div>
-      </div>
+      </div> <!-- row -->
     </div> <!-- end of card header -->
     
     <div class="card-body">

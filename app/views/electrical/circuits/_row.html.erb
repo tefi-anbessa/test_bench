@@ -1,5 +1,10 @@
 <tr>
   <td><%= row.long_label %></td>
+  <td>
+    <span title="<%= row.notes %>">
+      <%= truncate(strip_tags(row.notes.to_s), length: 20) %>
+    </span>
+  </td>
   <td><%= row.phase %></td>
   <td><%= row.device %></td>
   <td><%= row.poles %></td>

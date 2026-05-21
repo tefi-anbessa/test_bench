@@ -9,11 +9,22 @@ module Electrical
     include ActionView::Helpers::NumberHelper
 
     setup do
-      setup_common_tagable_data
+      # Cables cannot use standard tagable setup, as cables need associated cable types.
+      # setup_common_tagable_data setup_common_tagable_data
+      setup_projects_and_users
+      setup_disciplines(name: "Electrical", required_role: :designer)
+      setup_accredited_users(role = :designer)
+      setup_tags
       setup_model_specific_data
     end
 
     def setup_model_specific_data
+      @tag.update(prefix: "EC")
+      @tag.reload
+      @unassigned_tag.update(prefix: "EC")
+      @unassigned_tag.reload
+      @cable_type = create(:electrical_cable_type, discipline: @discipline)
+      @resource = create(:electrical_cable, cable_type: @cable_type, tag: @tag)
       # List fields that should appear in index. 
       @index_fields = %w[ electrical_cable_type_id route_length ]
 
@@ -27,11 +38,6 @@ module Electrical
       # List all fields that should appear in forms (should be all)
       @form_fields = %w[ electrical_cable_type_id route_length vertical_allowance 
         termination_allowance start_mark end_mark from_type to_type notes ]
-
-      @cable_type1 = create(:electrical_cable_type, project: @project)
-      @cable_type2 = create(:electrical_cable_type, csa: 4.0, project: @project)
-
-      @resource.update(electrical_cable_type_id: @cable_type1.id)
 
     end
   end

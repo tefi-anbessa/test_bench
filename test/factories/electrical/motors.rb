@@ -13,6 +13,7 @@ FactoryBot.define do
     ingress_protection { '55' }
     poles { 4 }
     speed_rated { 1500 }
+    notes { Faker::Lorem.paragraph(sentence_count: 2) }
 
     # Create tag association in a single transaction
     after(:build) do |motor, evaluator|

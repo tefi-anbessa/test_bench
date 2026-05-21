@@ -10,6 +10,7 @@ FactoryBot.define do
     # Attributes
     socket_type { "10A" }
     quantity { 1 }
+    notes { Faker::Lorem.paragraph(sentence_count: 2) }
 
     # Create tag association in a single transaction
     after(:build) do |socket_cct, evaluator|

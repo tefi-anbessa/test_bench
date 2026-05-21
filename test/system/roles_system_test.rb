@@ -40,38 +40,29 @@ class RolesTest < ApplicationSystemTestCase
   test "admin can view roles index" do
     sign_in @admin
     visit roles_path
+    assert_current_path roles_path
     assert_selector "h3", text: I18n.t('roles.index.header')
     assert_selector "#roles-index"
     sign_out @admin
   end
   
-  test "admin cannot grant restricted role" do
+  test "admin cannot see restricted role" do
     sign_in @admin
     visit roles_path
-    
-    # Select user
-    select @team_member.name, from: 'role_user_id'
-    select I18n.t('rolify.names.admin'), from: 'role_name'
-    
-    # Submit the form - should be denied
-    assert_no_difference("@team_member.roles.count") do
-      click_button I18n.t('actions.grant')
-      end
-    @team_member.reload
-    refute @team_member.has_role?(:admin)
-    assert_selector 'h1', text: I18n.t('errors.forbidden.header')
+    assert_current_path roles_path
+    within('select#role_name') do
+      assert_no_selector :xpath, ".//option[normalize-space(text())='#{I18n.t('rolify.names.admin')}']"
+    end
     sign_out @admin
   end
   
-  test "admin can grant functional role to user" do
-    # Use a valid functional role from constants
-    role_name = 'electrical_designer'  # From config/constants/role.yml
+  test "admin can grant global role to user" do
+    # Use a valid global role from constants
+    role_name = 'document_controller'  # From config/constants/role.yml
     
     sign_in @admin
     visit roles_path
-    
-    # Wait for the page to load
-    assert_selector 'h3', text: I18n.t('roles.index.header')
+    assert_current_path roles_path
     
     # Select the user and role
     select @regular_user.name, from: 'role_user_id'

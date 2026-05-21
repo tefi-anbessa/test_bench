@@ -21,8 +21,9 @@ class Discipline < ApplicationRecord
   validate :validate_required_role
   validate :validate_prefix_schema
 
+  # Methods
   def long_label
-    "#{label}: #{name}"
+    "#{project.label} - #{label}"
   end
 
   def self.required_role
@@ -146,6 +147,6 @@ class Discipline < ApplicationRecord
     end
 
     def self.ransackable_associations(auth_object = nil)
-      ["tags", "documents", "swatches"]
+      ["tags", "documents", "doc_types", "swatches"]
     end
 end

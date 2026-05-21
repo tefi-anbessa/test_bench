@@ -20,8 +20,8 @@ en:
       message:      "Sign in"
       gravatar:     "Gravatar"
     users:
-      header:       "Team for %{team}"
-      no_users:     "No users in %{team}"
+      header:       "Team for %{scope_text}"
+      no_users:     "No users in %{scope_text}"
   errors:
     forbidden:
       title:        "Forbidden"
@@ -131,7 +131,7 @@ en:
   documents:
     index:
       title:            "Documents"
-      header:           "Documents Register for %{project}"
+      header:           "Documents Register for %{scope_text}"
     edit:
       title:            "Edit Document"
       header:           "Edit Document: %{label}"
@@ -144,7 +144,7 @@ en:
   doc_types:
     index:
       title:            "Document types"
-      header:           "Document types list for %{project}"
+      header:           "Document types list for %{scope_text}"
     edit:
       title:            "Edit Document Type"
       header:           "Edit Document Type: %{label}"

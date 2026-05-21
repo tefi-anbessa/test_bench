@@ -95,7 +95,7 @@ module Electrical
       end
 
       def set_swatch
-        @swatch = @discipline.swatch || Electrical::CableType.swatch
+        @swatch = @discipline&.swatch || @discipline&.project.swatch || Electrical::CableType.swatch || Swatch.find-by(name: "app_theme")
       end
 
       def setup_form

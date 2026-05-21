@@ -4,21 +4,20 @@ class ProjectsController < ApplicationController
   include ProjectRolesConcern
   
   before_action :authenticate_user!
-  before_action :get_project, only: %i[ show edit update destroy ]
-  before_action :set_project, only: %i[ set ]
-  before_action :ensure_html_format, except: [:show]
+  before_action :get_project, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_project, only: :set
+  before_action :set_swatch, only: [ :index, :show ]
+  before_action :ensure_html_format, except: [ :show ]
   # GET /projects or /projects.json
   def index
     authorize Project.new()
     @q = policy_scope(Project).ransack(params[:q])
     @pagy, @projects = pagy(@q.result.ordered, limit: 20)
-    set_swatch
   end
 
   # GET /projects/1 or /projects/1.json
   def show
     authorize @project
-    set_swatch
     setup_user_roles
   end
 
@@ -35,10 +34,10 @@ class ProjectsController < ApplicationController
     authorize @project
 
     if @project.save
-      flash[:success] = I18n.t('flash.create.notice', resource_name: I18n.t('activerecord.models.project'))
+      flash[:success] = I18n.t('flash.create.notice', resource_name: I18n.t('activerecord.models.project', count: 1))
       redirect_to @project
     else
-      flash.now[:alert] = I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.project'))
+      flash.now[:alert] = I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.project', count: 1))
       setup_form
       render :new, status: :unprocessable_content
     end
@@ -60,11 +59,11 @@ class ProjectsController < ApplicationController
     authorize @project
     
     if @project.update(project_params)
-      flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.project'))
+      flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.project', count: 1))
       redirect_to @project
     else
       setup_role_assignment(@project)
-      flash.now[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.project'))
+      flash.now[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.project', count: 1))
       setup_form
       render :edit, status: :unprocessable_content
     end
@@ -75,10 +74,10 @@ class ProjectsController < ApplicationController
     authorize @project
     
     if @project.destroy
-        flash[:success] = I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.project'))
+        flash[:success] = I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.project', count: 1))
         redirect_to projects_url
     else
-        flash.now[:danger] = I18n.t('flash.destroy.alert', resource_name: I18n.t('activerecord.models.project'))
+        flash.now[:danger] = I18n.t('flash.destroy.alert', resource_name: I18n.t('activerecord.models.project', count: 1))
         redirect_to projects_url
     end
   end
@@ -144,11 +143,7 @@ class ProjectsController < ApplicationController
     end
 
     def set_swatch
-      if @project&.persisted? && @project.swatch
-        @swatch = @project.swatch
-      else
-        @swatch = Project.swatch
-      end
+      @swatch = @project&.swatch || Project.swatch
     end
 
     def setup_user_roles

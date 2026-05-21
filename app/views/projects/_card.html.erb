@@ -2,7 +2,7 @@
 <% project = object %>
 <div class="card-body">
 	<%= render 'components/collapsible',
-		title: [t("activerecord.models.project"), project.label].join(": "),
+		title: [t("activerecord.models.project", count: 1), project.label].join(": "),
 		id: 'project-collapse',
 		expanded: false,
 		show_icon: true,
@@ -24,7 +24,7 @@
 			<div class="row mb-2">
 				<div class="col-12">
 					<div class="d-flex align-items-center">
-						<span><%= [t("activerecord.models.swatch"), project.swatch&.name].join(': ') %></span>
+						<span><%= [t("activerecord.models.swatch", count: 1), project.swatch&.name].join(': ') %></span>
 					</div>
 				</div>
 			</div>

@@ -40,7 +40,7 @@
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
               <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
-                <%= t('.header', label: @heater.label)%>
+                <%= t('.header', label: @heater.long_label)%>
                 <%= @heater.tag.service.presence %>
               </span>
             </div>
@@ -110,7 +110,6 @@
     </div>
 
     <div class="card-body">
-
       <div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-8 col-xl-6">
           <!-- Tag Card -->
@@ -137,40 +136,44 @@
                 <div class="col-4 text-muted"><%= @heater.class.human_attribute_name(:heater_type) %></div>
                 <div class="col-8"><%= @heater.class.human_enum_name(:heater_type, @heater.heater_type) %></div>
               </div> <!-- end row -->
+
               <div class="row mb-1">
                 <div class="col-4 text-muted"><%= @heater.class.human_attribute_name(:application) %></div>
                 <div class="col-8"><%= @heater.class.human_enum_name(:application, @heater.application) %></div>
               </div> <!-- end row -->
+                  
               <div class="row mb-1">
                 <div class="col-4 text-muted"><%= @heater.class.human_attribute_name(:ingress_protection) %></div>
-                <div class="col-8"><%= @heater.ingress_protection || '-' %></div>
+                <div class="col-8"><%= @heater.ingress_protection.present? ? 
+                  ["IP", @heater.ingress_protection].join('') : '-' %></div>
+              </div>
 
-              </div> <!-- end row -->
               <div class="row mb-1">
                 <div class="col-4 text-muted"><%= @heater.class.human_attribute_name(:sheath_temperature_max) %></div>
                 <div class="col-8"><%= number_to_human(@heater.sheath_temperature_max, 
                   precision: 4, 
                   units: { unit: "°C" }) || '-' %></div>
-
               </div> <!-- end row -->
+
               <div class="row mb-1">
                 <div class="col-4 text-muted"><%= @heater.class.human_attribute_name(:power_density_min) %></div>
                 <div class="col-8"><%= number_to_human(@heater.power_density_min, 
                   precision: 4, 
                   units: { unit: "W/m²" , thousand: "kW/m²", million: "MW/m²" }) || '-' %></div>
-
               </div> <!-- end row -->
+
               <div class="row mb-1">
                 <div class="col-4 text-muted"><%= @heater.class.human_attribute_name(:power_density_max) %></div>
                 <div class="col-8"><%= number_to_human(@heater.power_density_max, 
                   precision: 4, 
                   units: { unit: "W/m²" , thousand: "kW/m²", million: "MW/m²" }) || '-' %></div>
-
               </div> <!-- end row -->
+              
               <div class="row mb-1">
                 <div class="col-4 text-muted"><%= @heater.class.human_attribute_name(:sheath_material) %></div>
                 <div class="col-8"><%= @heater.class.human_enum_name(:sheath_material, @heater.sheath_material) %></div>
               </div> <!-- end row -->
+              
               <div class="row mb-1">
                 <div class="col-4 text-muted"><%= @heater.class.human_attribute_name(:insulation_material) %></div>
                 <div class="col-8"><%= @heater.class.human_enum_name(:insulation_material, @heater.insulation_material) %></div>

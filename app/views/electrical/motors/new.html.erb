@@ -1,7 +1,10 @@
 <% provide(:title, t('.title')) %>
-<% provide(:header, t('.header')) %>
+<% provide(:header, t('.header', scope_text: @discipline.long_label)) %>
 <% provide(:button_text, t('actions.create')) %>
 <%= render "form",
   motor: @motor,
-  tag: @tag
+  tag: @tag,
+  ip_1: @ip_1,
+  ip_2: @ip_2,
+  swatch: @swatch
 %>

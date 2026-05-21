@@ -1,4 +1,4 @@
-<div id="<%= dom_id cable_type %>" style="<%= card_styles(cable_type.class.swatch)%>">
+<div id="<%= dom_id cable_type %>" style="<%= card_styles(@swatch)%>">
 
   <%= render 'components/collapsible',
     id: "cable_type_#{cable_type.id}_details",

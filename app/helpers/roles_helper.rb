@@ -22,10 +22,9 @@ module RolesHelper
     begin
       @resource_types = [
         [t('rolify.role_types.global'), '']
-      ] + (Rolify.resource_types || []).map do |r|
+      ] + (Rolify.resource_types.uniq || []).map do |r|
         [r.constantize.model_name.human, r] rescue [r, r]
       end
-      
       @grouped_role_names = role_names(resource, current_user)
       @users = User.all
 

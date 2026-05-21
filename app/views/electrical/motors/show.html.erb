@@ -39,7 +39,7 @@
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
               <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
-                <%= t('.header', label: @motor.label)%>
+                <%= t('.header', label: @motor.long_label)%>
                 <%= @motor.tag.service.presence %>
               </span>
             </div>
@@ -88,12 +88,22 @@
                     <%= t('actions.delete') %>
                   </span>
                 <% end %>
+              <% end %><!-- New Button (Right) -->
+
+              <% if policy(Electrical::Motor).new? %>
+                  <%= link_to new_discipline_electrical_motor_path(@discipline), 
+                    class: "btn btn-sm btn-outline-primary actions",
+                    aria: { label: t('actions.new') },
+                    title: t('actions.new') do %>
+                    <%== bs_icon('plus-square-fill') %>
+                    <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical.motor.one')].join(' ') %></span>
+                  <% end %>
               <% end %>
-            </div>
-          </div>
-        </div> <!-- end right column -->
-      </div>
-    </div>
+            </div> <!-- end button group -->
+          </div> <!-- end d-flex -->
+        </div> <!-- end col-auto -->
+      </div> <!-- end row -->
+    </div> <!-- end card header -->
 
     <div class="card-body">
 

@@ -6,11 +6,13 @@ FactoryBot.define do
     
     # Basic demand attributes
     basis { 'power_pf' }
+    basis_notes { "Test setup" }
     supply { 240.0 }
     config { 'three_3c' }  # Using valid enum value
     power { 1000.0 }
     power_factor { 0.9 }
     duty { 1.0 }
+    notes { Faker::Lorem.paragraph(sentence_count: 2) }
     
     # Define basis-specific traits
     trait :power_pf_basis do

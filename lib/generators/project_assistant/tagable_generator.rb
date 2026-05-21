@@ -311,13 +311,13 @@ module ProjectAssistant
           views_section = "    #{plural_name}:\n" +
             "      index:\n" +
             "        title:            \"#{human_name.pluralize}\"\n" +
-            "        header:           \"#{human_name.pluralize} Schedule for %{project}\"\n" +
+            "        header:           \"#{human_name.pluralize} Schedule for %{scope_text}\"\n" +
             "      edit:\n" +
             "        title:            \"Edit #{human_name}\"\n" +
             "        header:           \"Edit #{human_name}: %{label}\"\n" +
             "      new:\n" +
             "        title:            \"New #{human_name}\"\n" +
-            "        header:           \"New #{human_name}\"\n" +
+            "        header:           \"New #{human_name} in %{scope_text}\"\n" +
             "      show:\n" +
             "        title:            \"#{human_name}\"\n" +
             "        header:           \"#{human_name}: %{label}\"\n"

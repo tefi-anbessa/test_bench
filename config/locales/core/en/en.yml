@@ -44,6 +44,8 @@ en:
     all:              "All Accessible %{models}"
     link_unassigned:  "%{model} not assigned"
     invalid_type:     "%{type} is not a valid type"
+    invalid:          "Invalid"
+    unassigned:       "Unassigned"
 
   show:
     orphan:       "No associated parent %{model}"
@@ -52,6 +54,7 @@ en:
     model:        "model"
     label:        "Label"
     details:      "%{model} Details"
+    associations: "Associations"
 
   form:
     other:        "Other"

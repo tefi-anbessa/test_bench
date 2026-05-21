@@ -5,6 +5,7 @@ en:
       admin: "Administrator"
       project_owner: "Project Owner"
       project_manager: "Project Manager"
+      project_admin: "Project Administrator"
       team_member: "Team Member"
       designer: "Designer"
       checker: "Checker"

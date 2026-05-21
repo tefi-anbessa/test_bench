@@ -39,8 +39,8 @@
         <div class="col text-center">
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
-              <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
-                <%= t('.header', label: @document.label)%>
+              <span class="badge fs-5" style="<%= badge_styles(@swatch) %>">
+                <%= t('.header', label: @document.long_label)%>
               </span>
             </div>
           </div>
@@ -91,43 +91,35 @@
                 <% end %>
               <% end %>
 
-              <% if policy(@discipline.documents.build()).new? %>
+              <% if @discipline && policy(@discipline.documents.build()).new? %>
                 <%= link_to new_discipline_document_path(@discipline), 
                   class: "btn btn-outline-primary actions",
                   aria: { label: t('actions.new') },
                   title: t('actions.new') do %>
                   <%== bs_icon('plus-square-fill') %>
                   <span class="ms-1">
-                    <%= [t('actions.new'), t('activerecord.models.document')].join(' ') %>
+                    <%= [t('actions.new'), t('activerecord.models.document', count: 1)].join(' ') %>
                   </span>
                 <% end %>
               <% end %>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            </div> <!-- button group -->
+          </div> <!-- d-flex align-items-center -->
+        </div> <!-- right navigation and actions -->
+      </div> <!-- row align-items-center -->
+    </div> <!-- card header -->
 
     <div class="card-body">
 
       <div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
-          <!-- Document Details Card -->
+          <!-- Inner Card -->
+          <!-- Document Details -->
           <div class="card mb-4" style="<%= card_styles(@swatch) %>">
             <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
               <h4 class="mb-0"><%= t('show.details', model: @document.model_name.human) %></h4>
             </div>
-
-            <div class="card-body p-3">
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @document.class.human_attribute_name(:discipline) %></div>
-                <div class="col-8"><%= render "disciplines/card", object: @document.discipline %></div>
-              </div> <!-- end row -->
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @document.class.human_attribute_name(:doc_type) %></div>
-                <div class="col-8"><%= render "doc_types/card", object: @document.doc_type %></div>
-              </div> <!-- end row -->
+            <div class="card-body">
               <div class="row mb-1">
                 <div class="col-4 text-muted"><%= @document.class.human_attribute_name(:doc_number) %></div>
                 <div class="col-8"><%= @document.doc_number || '-' %></div>
@@ -140,10 +132,25 @@
                 <div class="col-4 text-muted"><%= @document.class.human_attribute_name(:notes) %></div>
                 <div class="col-8"><%= simple_format(@document.notes || '-') %></div>
               </div> <!-- end row -->
+            </div>  <!-- temporary end inner card body -->
+
+            <!-- Document Associations -->
+            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
+              <h4 class="mb-0"><%= t('show.associations', model: @document.model_name.human) %></h4>
+            </div>
+
+            <div class="card-body p-3">
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= @document.class.human_attribute_name(:discipline) %></div>
+                <div class="col-8"><%= render "disciplines/card", object: @document.discipline %></div>
+              </div> <!-- end row -->
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= @document.class.human_attribute_name(:document_control_type) %></div>
+                <div class="col-8"><%= render "doc_types/card", object: @document.doc_type %></div>
+              </div> <!-- end row -->
               <div class="row mb-1">
                 <%= render "issues/issues", object: @document %>
               </div> <!-- end row -->
-
             </div>  <!-- end inner card body -->
           </div> <!-- end inner card -->
         </div> <!-- end responsive columns -->

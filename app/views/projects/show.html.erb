@@ -113,7 +113,7 @@
               </div>
 
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t('activerecord.models.swatch') %></div>
+                <div class="col-4 text-muted"><%= t('activerecord.models.swatch', count: 1) %></div>
                 <div class="col-6">
                   <%= @project.swatch&.name || '-' %>
                 </div>
@@ -130,6 +130,44 @@
                   <% end %>
                 </div>
               </div>
+
+              <!-- Tags and document links -->
+              <div class="row mb-1">
+                <div class="col-md-2">
+                  <div class="d-flex gap-2">
+                    <%= link_to project_tags_path(@project),
+                        class: "btn btn-outline-info btn-sm",
+                        aria: { 
+                          label: t('activerecord.models.tag', count: @project.tags.count)
+                        } do %>
+                      <%== bs_icon('tag') %>
+                      <%= t('activerecord.models.tag', count: @project.tags.count) %>
+                      <span class="badge bg-secondary ms-1"><%= @project.tags.count %></span>
+                    <% end %>
+                    
+                    <%= link_to project_documents_path(@project),
+                        class: "btn btn-outline-info btn-sm",
+                        aria: { 
+                          label: t('activerecord.models.document', count: @project.documents.count)
+                        } do %>
+                      <%== bs_icon('file') %>
+                      <%= t('activerecord.models.document', count: @project.documents.count) %>
+                      <span class="badge bg-secondary ms-1"><%= @project.documents.count %></span>
+                    <% end %>
+                    
+                    <%= link_to project_doc_types_path(@project),
+                        class: "btn btn-outline-info btn-sm",
+                        aria: { 
+                          label: t('activerecord.models.doc_type', count: @project.doc_types.count)
+                        } do %>
+                      <%== bs_icon('file') %>
+                      <%= t('activerecord.models.doc_type', count: @project.doc_types.count) %>
+                      <span class="badge bg-secondary ms-1"><%= @project.doc_types.count %></span>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+
             </div> <!-- end project card body -->
           </div> <!-- end project card -->
 
@@ -139,7 +177,11 @@
         <%= render 'disciplines/disciplines', object: @project %>
         
         <!-- Users Section -->
-        <%= render 'users/users', users: @users, label: @project.long_label, project: @project %>
+        <% if @users.any? %>
+          <%= render 'users/users', users: @users, label: @project.long_label, project: @project %>
+        <% else %>
+          <%= t("users.users.no_users", scope_text: @project.long_label) %>
+        <% end %>
       </div> <!-- end justify content center -->
     </div> <!-- end form card body -->
   </div> <!-- end form card -->

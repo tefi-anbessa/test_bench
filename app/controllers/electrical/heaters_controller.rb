@@ -40,7 +40,8 @@ module Electrical
     private
 
       def setup_additional_form_data
-        # Include setup for form variables such as select fields.
+        @ip_1 = Constants.electrical.ingress_protection.first_digit.to_h
+        @ip_2 = Constants.electrical.ingress_protection.second_digit.to_h
       end
 
       def after_create_hook(resource)

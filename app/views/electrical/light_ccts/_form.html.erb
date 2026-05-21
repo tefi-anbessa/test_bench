@@ -12,7 +12,11 @@
     </div>
 
     <%= bootstrap_form_with(model: light_cct,
-          url: discipline_electrical_light_ccts_path(discipline),
+          url: light_cct.persisted? ?
+            light_cct : 
+            ( tag.persisted? ?
+              tag_electrical_light_ccts_path(tag) :
+              discipline_electrical_light_ccts_path(discipline) ),
           layout: :horizontal,
           label_col: "col-sm-4",
           control_col: "col-sm-8",
@@ -25,13 +29,8 @@
 
             <!-- Tag -->
             <div class="card mb-1">
-              <% if tag.persisted? %>
-                <%= render 'tags/card', tag: tag %>
-                <%= hidden_field_tag :tag_id, tag.id %>
-              <% else %>
-                <%= f.fields_for tag do |tag_f| %>
-                  <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
-                <% end %>
+              <%= f.fields_for tag do |tag_f| %>
+                <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
               <% end %>
             </div>
 
