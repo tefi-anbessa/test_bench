@@ -401,13 +401,12 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Add model tests for read only attributes - documents, tags.
 - [x] Review security of all controllers wrt injection attacks.
 - [ ] Check that usage of accepts_nested_attributes_for is correct for tagable concern.
-- [ ] Fix previous and next functionality in tagable navigation, and generatise it for non tagables. All models next and prev should only look inside policy scope. At present can raise forbidden.
+- [ ] Fix previous and next functionality in tagable navigation, and generalise it for non tagables. All models next and prev should only look inside policy scope. At present can raise forbidden.
 - [ ] RBAC still has anomalous behaviour when resource wide roles are applied. Scope will include all projects, and alow selection of any project as current, but accessing the project without a specific role will result in forbidden. Either block resource wide roles or implement them in policies.
 - [ ] Clean up responsive views - test all on simulator.
 - [ ] Issue policy has been removed. Assess whether it is required or just use document policy, like circuits.
 - [x] Fix update test in tag system test.
-- [ ] Fix error in doc_types system test (edit).
-- [ ] Decide on a standard clear presentation for booleans in show views, add it to show view for circuits, and add it to generic tests and generator templates.
+- [x] Fix error in doc_types system test (edit).
 - [ ] Refactor cable and cable type system tests after restructure to core.
 
 ## Refactoring Opportunities
@@ -434,7 +433,7 @@ It is possible to create multiple tags referencing the same tagable element, des
   - [x] convert motor type to enum.
   - [x] convert frame size to enum.
   - [ ] build a ruby structure for ingress protection, convert ingress protection to this type.
-- [ ] Redesign tag module:
+- [x] Redesign tag module:
   - [x] builder/parser model for each discipline which creates the string according to the required format, and can parse the string back into the components.
   - [x] provide default format for each discipline, e.g. isa5.1
   - [x] add next/previous functionality
@@ -449,27 +448,28 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Add user profile info.
 - [x] Refactor RBAC system with functional roles limited to project scope, and project admin roles.
 - [ ] Refactor all controllers to use the preferred safe params expect rather than require.
-- [ ] Refactor test helpers to minimise code duplication, and simplify generation of new models.
+- [x] Refactor test helpers to minimise code duplication, and simplify generation of new models.
 - [ ] Improve forbidden error logging messages, include user. Consider automatic sign out.
 - [ ] Move document issues to change module, generalise so it can be used for other entities (polymorphic).
 - [ ] Abstract controllers for project linked models, similar to tagables controller.
 - [ ] Add catalog required roles in disciplines, to allow different role for cable types and doc types, etc.
-- [ ] Refactor cable types to be core module available to electrical, instruments, telecoms (any module). Should belong to discipline.
+- [ ] Refactor cable and cable types to be core module available to electrical, instruments, telecoms (any module). Should belong to discipline.
 - [ ] Index views should preload permissions and not check every row.
 - [ ] Scaffold generators should include enum configuration, or build a separate generator.
-- [ ] Include a valid value for fields in generators.
+- [ ] Include a valid value for fields in generators args.
 - [ ] Consider whether the same improvement applies to demand.
-- [ ] Remove unnecessary namespacing within electrical module naming, e.g. switchboard has many electrical_circuits. Switchboards can refer to circuits, and circuits can refer to switchboards, without the module prefix.
+- [x] Remove unnecessary namespacing within electrical module naming, e.g. switchboard has many electrical_circuits. Switchboards can refer to circuits, and circuits can refer to switchboards, without the module prefix.
 - [x] Transition documents to discipline nested.
 - [x] Transition cable types to core module, discipline nested. This should allow other disciplines (instrument, communication) to create appropriate cable types.
 - [ ] Revise index views to get credentials once and use for links, for all resources where the credentials are not granular, i.e. everything except projects and disciplines.
-- [ ] Refactor model translations with count.
+- [x] Refactor model translations with count.
 - [ ] Revert activerecord translations to convention with / instead of . key for module.
 - [ ] Rename project change module to change management.
 - [ ] Set up ransack to sort on translated attributes where relevant.
 - [ ] Add a prefix breakdown drop down on tags show view.
 - [ ] Use scopify to simplify setup for role assignment views.
 - [ ] Refactor show views in style of documents, include generator templates.
+- [ ] Decide on a standard clear presentation for booleans in show views, add it to show view for circuits, and add it to generic tests and generator templates.
 
 ## Potential Features
 
@@ -495,7 +495,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 
 - [x] Move Electrical to a module or namespace.
 - [x] Nest routes for project related resource under projects to improve security around assignment to other than the current project.
-- [ ] Nest tag, document resources under disciplines.
+- [x] Nest tag, document resources under disciplines.
 - [ ] Move cable and cable type back to core, as they are shared by electrical and instrument disciplines, also communications.
 - [ ] Plan for database scaling as data grows
 

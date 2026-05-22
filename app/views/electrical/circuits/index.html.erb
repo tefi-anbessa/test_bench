@@ -25,7 +25,7 @@
         <div class="col-8">
           <% scope_text = @switchboard.present? ? 
             [@switchboard.class.model_name.human, @switchboard.long_label].join(' ') : 
-            t('index.all', models: t('activerecord.models.electrical.switchboard.other')) %>
+            t('index.all', models: t('activerecord.models.electrical/switchboard.other')) %>
           <h5><%= t('.header', scope_text: scope_text) %></h5>
         </div>
 
@@ -38,7 +38,7 @@
                 title: t('actions.new') do %>
                 <%== bs_icon('plus-square-fill') %>
                 <span class="ms-1">
-                  <%= [t('actions.new'), t('activerecord.models.electrical.circuit.one')].join(' ') %>
+                  <%= [t('actions.new'), t('activerecord.models.electrical/circuit.one')].join(' ') %>
                 </span>
               <% end %>
           <% end %>
@@ -54,7 +54,7 @@
               discipline_electrical_circuits_path(@discipline) do |f| %>
           <%= f.search_field :phase_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical.circuit.phase') %>
+                placeholder: t('activerecord.attributes.electrical/circuit.phase') %>
           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
             <%== bs_icon('search') %>
           <% end %>

@@ -29,27 +29,27 @@
             <div class="row">
               <%= f.select :basis, 
                     demand.class.bases.keys.collect { |basis| [demand.class.human_enum_name(:basis, basis), basis] },
-                    help: t('activerecord.help.electrical.demand.basis') %>
+                    help: t('activerecord.help.electrical/demand.basis') %>
             </div>
             
             <div class="row">
               <%= f.text_area :basis_notes,
-                  help: t('activerecord.help.electrical.demand.basis_notes') %>
+                  help: t('activerecord.help.electrical/demand.basis_notes') %>
             </div>
 
             <div class="row">
               <%= f.select :config, 
                     demand.class.configs.keys.collect { |config| [demand.class.human_enum_name(:config, config), config] },
-                    help: t('activerecord.help.electrical.demand.config') %>
+                    help: t('activerecord.help.electrical/demand.config') %>
             </div>
 
             <div class="row">
               <%= f.select :supply, Constants.electrical.supply.to_h.invert,
                   include_blank: t("form.other"),
-                  help: t('activerecord.help.electrical.demand.supply') %>
+                  help: t('activerecord.help.electrical/demand.supply') %>
               <%= f.number_field :other_supply,
                 append: "V",
-                  help: t('activerecord.help.electrical.demand.other_supply') %>
+                  help: t('activerecord.help.electrical/demand.other_supply') %>
             </div>
 
             <% disabled = [:current, :power, :vector, :power_factor] %>
@@ -94,7 +94,7 @@
 
             <div class="row">
               <%= f.number_field :duty, in: 0.0 .. 1.0, step: 0.01,
-                    help: t('activerecord.help.electrical.demand.duty') %>
+                    help: t('activerecord.help.electrical/demand.duty') %>
             </div>
           </div> <!-- end responsive columns --> 
         </div>

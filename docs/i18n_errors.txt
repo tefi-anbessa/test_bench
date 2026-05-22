@@ -1,0 +1,182 @@
+test/controllers/electrical/circuits_controller_test.rb:125:        I18n.t('flash.create.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
+test/controllers/electrical/circuits_controller_test.rb:126:        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder")),
+test/controllers/electrical/circuits_controller_test.rb:127:        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.demand"))
+test/controllers/electrical/circuits_controller_test.rb:138:        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
+test/controllers/electrical/circuits_controller_test.rb:139:        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder"))
+test/controllers/electrical/circuits_controller_test.rb:149:        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
+test/controllers/electrical/circuits_controller_test.rb:150:        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder")),
+test/controllers/electrical/circuits_controller_test.rb:151:        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.demand"))
+test/controllers/electrical/circuits_controller_test.rb:181:        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
+test/controllers/electrical/circuits_controller_test.rb:182:        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder"))
+test/controllers/electrical/circuits_controller_test.rb:199:        resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder"))
+test/controllers/electrical/circuits_controller_test.rb:220:        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
+test/controllers/electrical/circuits_controller_test.rb:221:        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder"))
+test/system/electrical/circuits_system_test.rb:145:      assert_text I18n.t("activerecord.attributes.electrical.circuit.serial")
+test/models/electrical/demand_test.rb:61:    assert_includes @demand.errors[:power_factor], I18n.t("activerecord.errors.attributes.electrical.demand.power_factor.zero_pf")
+test/models/electrical/demand_test.rb:133:          I18n.t("activerecord.errors.attributes.electrical.demand.demandable.tag_association",
+app/controllers/electrical/circuits_controller.rb:66:                          resource_name: t("activerecord.models.electrical.circuit.one"))]
+app/controllers/electrical/circuits_controller.rb:68:          resource_name: t("activerecord.attributes.electrical.circuit.feeder")) if @feeder.present?
+app/controllers/electrical/circuits_controller.rb:70:          resource_name: t("activerecord.attributes.electrical.circuit.demand")) if @demand.present?
+app/controllers/electrical/circuits_controller.rb:76:          resource_name: t("activerecord.models.electrical.circuit.one").downcase)
+app/controllers/electrical/circuits_controller.rb:135:                          resource_name: t("activerecord.models.electrical.circuit.one"))]
+app/controllers/electrical/circuits_controller.rb:137:          resource_name: t("activerecord.attributes.electrical.circuit.feeder")) if @feeder.present?
+app/controllers/electrical/circuits_controller.rb:139:          resource_name: t("activerecord.attributes.electrical.circuit.demand")) if @demand.present?
+app/controllers/electrical/circuits_controller.rb:144:          resource_name: t("activerecord.models.electrical.circuit.one").downcase)
+app/controllers/electrical/cable_types_controller.rb:38:        flash[:success] = t('flash.create.notice', resource_name: t("activerecord.models.electrical.cable_type.one"))
+app/controllers/electrical/cable_types_controller.rb:41:        flash[:alert] = t('flash.create.alert', resource_name: t("activerecord.models.electrical.cable_type.one").downcase)
+app/controllers/electrical/cable_types_controller.rb:63:        flash[:success] = t('flash.update.notice', resource_name: t("activerecord.models.electrical.cable_type.one"))
+app/controllers/electrical/cable_types_controller.rb:66:        flash[:alert] = t('flash.update.alert', resource_name: t("activerecord.models.electrical.cable_type.one").downcase)
+app/controllers/electrical/cable_types_controller.rb:76:        flash[:success] = t('flash.destroy.notice', resource_name: t("activerecord.models.electrical.cable_type.one"))
+app/controllers/electrical/cable_types_controller.rb:79:        flash[:alert] = t('flash.destroy.alert', resource_name: t("activerecord.models.electrical.cable_type.one").downcase)
+app/controllers/electrical/demands_controller.rb:33:          resource_name: I18n.t('activerecord.models.electrical.demand.one'))
+app/controllers/electrical/demands_controller.rb:39:          resource_name: I18n.t('activerecord.models.electrical.demand.one'))
+app/controllers/electrical/demands_controller.rb:54:        flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.electrical.demand.one'))
+app/controllers/electrical/demands_controller.rb:58:        flash.now[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.electrical.demand.one'))
+app/controllers/electrical/demands_controller.rb:67:        flash[:success] = I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.electrical.demand.one'))
+app/controllers/electrical/demands_controller.rb:69:        flash.now[:alert] = I18n.t('flash.destroy.alert', resource_name: I18n.t('activerecord.models.electrical.demand.one'))
+app/models/electrical/demand.rb:33:      exclusion: { in: [0.0], message: I18n.t("activerecord.errors.attributes.electrical.demand.power_factor.zero_pf") }
+app/models/electrical/demand.rb:99:      errors.add(:base, message: I18n.t("activerecord.errors.attributes.electrical.demand.demandable.tag_association",
+app/views/electrical/cable_types/_form.html.erb:11:                <%= [t('activerecord.models.electrical.cable_type'), cable_type.label].join(': ') %>
+app/views/electrical/cable_types/_form.html.erb:14:                <%= t('activerecord.models.electrical.cable_type') %>
+app/views/electrical/cable_types/_form.html.erb:52:                      Electrical::CableType.constructions.map { |k, v| [t("activerecord.attributes.electrical.cable_type.constructions.#{k}"), k] },
+app/views/electrical/cable_types/_header.html.erb:5:  <th scope="col"><%= sort_link(@q, :id, t('activerecord.attributes.electrical.cable_type.id')) %></th>
+app/views/electrical/cable_types/_header.html.erb:6:  <th scope="col"><%= t('activerecord.attributes.electrical.cable_type.notes') %></th>
+app/views/electrical/cable_types/_header.html.erb:7:  <th scope="col"><%= sort_link(@q, :code, t('activerecord.attributes.electrical.cable_type.code')) %></th>
+app/views/electrical/cable_types/index.html.erb:33:              <span class="d-none d-md-inline"><%= " " + t('activerecord.models.electrical.cable_type') %></span>
+app/views/electrical/cable_types/index.html.erb:45:                placeholder: t('activerecord.attributes.electrical.cable_type.conductor_material') %>
+app/views/electrical/cable_types/index.html.erb:48:                placeholder: t('activerecord.attributes.electrical.cable_type.groups') %>
+app/views/electrical/cable_types/index.html.erb:51:                placeholder: t('activerecord.attributes.electrical.cable_type.construction') %>
+app/views/electrical/cable_types/index.html.erb:54:                placeholder: t('activerecord.attributes.electrical.cable_type.csa') %>
+app/views/electrical/cable_types/index.html.erb:57:                placeholder: t('activerecord.attributes.electrical.cable_type.insulation') %>
+app/views/electrical/cables/_form.html.erb:42:                <h5><%= t('activerecord.models.electrical.cable') %></h5>
+app/views/electrical/cables/show.html.erb:100:                    <%= [t('actions.new'), t('activerecord.models.electrical.cable.one')].join(' ') %>
+app/views/electrical/cables/_header.html.erb:7:  <th scope="col"><%= t('activerecord.attributes.electrical.cable.notes') %></th>
+app/views/electrical/cables/_header.html.erb:8:  <th scope="col"><%= t("activerecord.attributes.electrical.cable.from") %></th>
+app/views/electrical/cables/_header.html.erb:9:  <th scope="col"><%= t("activerecord.attributes.electrical.cable.to") %></th>
+app/views/electrical/cables/_header.html.erb:10:  <th scope="col"><%= sort_link(@q, :electrical_cable_type_id, t("activerecord.models.electrical.cable_type")) %></th>
+app/views/electrical/cables/_header.html.erb:11:  <th scope="col"><%= sort_link(@q, :route_length, t("activerecord.attributes.electrical.cable.route_length")) %><br>(m)</th>
+app/views/electrical/cables/index.html.erb:31:                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical.cable.one')].join(' ') %></span>
+app/views/electrical/cables/index.html.erb:42:                placeholder: t('activerecord.models.electrical.cable_type') %>
+app/views/electrical/cables/index.html.erb:45:                placeholder: t('activerecord.attributes.electrical.cable.notes') %>
+app/views/electrical/cables/index.html.erb:60:                models: t('activerecord.models.electrical.cable', count: @link_broken.count)) %>
+app/views/electrical/cables/index.html.erb:79:                models: t('activerecord.models.electrical.cable', count: @link_incomplete.count)) %>
+app/views/electrical/cables/index.html.erb:101:                      models: t('activerecord.models.electrical.cable', count: @orphans.count)) %>
+app/views/electrical/circuits/_form.html.erb:80:                    label: t('activerecord.attributes.electrical.circuit.contactor') %>
+app/views/electrical/circuits/_form.html.erb:85:                    label: t('activerecord.attributes.electrical.circuit.notes'),
+app/views/electrical/circuits/_form.html.erb:98:                        label: t('activerecord.attributes.electrical.circuit.feeder') } %>
+app/views/electrical/circuits/_form.html.erb:111:                        label: t('activerecord.attributes.electrical.circuit.demand') } %>
+app/views/electrical/circuits/_row.html.erb:19:      <%= t("show.unassigned", model: t("activerecord.attributes.electrical.circuit.feeder")) %>
+app/views/electrical/circuits/_row.html.erb:26:      <%= t("show.unassigned", model: t("activerecord.models.electrical.demand.one")) %>
+app/views/electrical/circuits/show.html.erb:113:                  <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.serial') %></div>
+app/views/electrical/circuits/show.html.erb:118:                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.phase') %></div>
+app/views/electrical/circuits/show.html.erb:123:                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.device') %></div>
+app/views/electrical/circuits/show.html.erb:128:                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.poles') %></div>
+app/views/electrical/circuits/show.html.erb:133:                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.curve') %></div>
+app/views/electrical/circuits/show.html.erb:138:                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.rating') %></div>
+app/views/electrical/circuits/show.html.erb:143:                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.elcb') %></div>
+app/views/electrical/circuits/show.html.erb:148:                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.contactor') %></div>
+app/views/electrical/circuits/show.html.erb:153:                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.notes') %></div>
+app/views/electrical/circuits/show.html.erb:160:                      <%= t('activerecord.attributes.electrical.circuit.feeder') %>
+app/views/electrical/circuits/show.html.erb:164:                        <% text = t("activerecord.models.electrical.cable.one") %>
+app/views/electrical/circuits/show.html.erb:176:                          <%= t('show.unassigned', model: t("activerecord.attributes.electrical.circuit.feeder")) %>
+app/views/electrical/circuits/show.html.erb:185:                      <%= t('activerecord.attributes.electrical.circuit.demand') %>
+app/views/electrical/circuits/show.html.erb:189:                        <% text = t("activerecord.models.electrical.demand.one") %>
+app/views/electrical/circuits/show.html.erb:201:                          <%= t('show.unassigned', model: t("activerecord.attributes.electrical.circuit.demand")) %>
+app/views/electrical/light_ccts/show.html.erb:70:                    <%= [t('actions.new'), t('activerecord.models.electrical.light_cct.one')].join(' ') %>
+app/views/electrical/light_ccts/show.html.erb:121:                      <% text = t('activerecord.models.electrical.demand.one') %>
+app/views/electrical/light_ccts/show.html.erb:130:                      <% text = t("actions.link", resource: t("activerecord.models.electrical.demand.one")) %>
+app/views/electrical/circuits/_header.html.erb:3:    <th scope="col"><%= sort_link(@q, :serial, t("activerecord.attributes.electrical.circuit.serial")) %></th>
+app/views/electrical/circuits/_header.html.erb:4:    <th scope="col"><%= t('activerecord.attributes.electrical.circuit.notes') %></th>
+app/views/electrical/circuits/_header.html.erb:5:    <th scope="col"><%= sort_link(@q, :phase, t("activerecord.attributes.electrical.circuit.phase")) %></th>
+app/views/electrical/circuits/_header.html.erb:6:    <th scope="col"><%= sort_link(@q, :device, t("activerecord.attributes.electrical.circuit.device")) %></th>
+app/views/electrical/circuits/_header.html.erb:7:    <th scope="col"><%= sort_link(@q, :poles, t("activerecord.attributes.electrical.circuit.poles")) %></th>
+app/views/electrical/circuits/_header.html.erb:8:    <th scope="col"><%= sort_link(@q, :rating, t("activerecord.attributes.electrical.circuit.rating")) %></th>
+app/views/electrical/circuits/_header.html.erb:9:    <th scope="col"><%= sort_link(@q, :curve, t("activerecord.attributes.electrical.circuit.curve")) %></th>
+app/views/electrical/circuits/_header.html.erb:10:    <th scope="col"><%= sort_link(@q, :elcb, t("activerecord.attributes.electrical.circuit.elcb")) %></th>
+app/views/electrical/circuits/_header.html.erb:11:    <th scope="col"><%= sort_link(@q, :contactor, t("activerecord.attributes.electrical.circuit.contactor")) %></th>
+app/views/electrical/circuits/_header.html.erb:12:    <th scope="col"><%= sort_link(@q, :feeder, t("activerecord.attributes.electrical.circuit.feeder")) %></th>
+app/views/electrical/circuits/_header.html.erb:13:    <th scope="col"><%= sort_link(@q, :demand, t("activerecord.attributes.electrical.circuit.demand")) %></th>
+app/views/electrical/light_ccts/_header.html.erb:7:  <th scope="col"><%= t('activerecord.attributes.electrical.light_cct.notes') %></th>
+app/views/electrical/light_ccts/_header.html.erb:10:  <th scope="col"><%= t('activerecord.models.electrical.demand.one') %></th>
+app/views/electrical/circuits/index.html.erb:28:            t('index.all', models: t('activerecord.models.electrical.switchboard.other')) %>
+app/views/electrical/circuits/index.html.erb:41:                  <%= [t('actions.new'), t('activerecord.models.electrical.circuit.one')].join(' ') %>
+app/views/electrical/circuits/index.html.erb:57:                placeholder: t('activerecord.attributes.electrical.circuit.phase') %>
+app/views/electrical/light_ccts/index.html.erb:33:                  <%= [t('actions.new'), t('activerecord.models.electrical.light_cct.one')].join(' ') %>
+app/views/electrical/light_ccts/index.html.erb:45:                placeholder: t('activerecord.attributes.electrical.light_cct.light_fitting_type') %>
+app/views/electrical/light_ccts/index.html.erb:48:                placeholder: t('activerecord.attributes.electrical.light_cct.notes') %>
+app/views/electrical/light_ccts/index.html.erb:63:                      models: t("activerecord.models.electrical.light_cct", count: @link_broken.count)) %>
+app/views/electrical/light_ccts/index.html.erb:82:                      models: t("activerecord.models.electrical.light_cct", count: @link_incomplete.count)) %>
+app/views/electrical/light_ccts/index.html.erb:102:                <%= t('index.orphans', models: t("activerecord.models.electrical.light_cct").tableize) %>
+app/views/electrical/demands/_form.html.erb:32:                    help: t('activerecord.help.electrical.demand.basis') %>
+app/views/electrical/demands/_form.html.erb:37:                  help: t('activerecord.help.electrical.demand.basis_notes') %>
+app/views/electrical/demands/_form.html.erb:43:                    help: t('activerecord.help.electrical.demand.config') %>
+app/views/electrical/demands/_form.html.erb:49:                  help: t('activerecord.help.electrical.demand.supply') %>
+app/views/electrical/demands/_form.html.erb:52:                  help: t('activerecord.help.electrical.demand.other_supply') %>
+app/views/electrical/demands/_form.html.erb:97:                    help: t('activerecord.help.electrical.demand.duty') %>
+app/views/electrical/heaters/_form.html.erb:41:                <h5><%= t('activerecord.models.electrical.heater.one') %></h5>
+app/views/electrical/motors/_form.html.erb:41:                <h5><%= t('activerecord.models.electrical.motor.one') %></h5>
+app/views/electrical/switchboards/_form.html.erb:40:                <h5><%= t('activerecord.models.electrical.switchboard.one') %></h5>
+app/views/electrical/switchboards/_form.html.erb:163:                    <%= t('activerecord.models.electrical.circuit.one').pluralize %>
+app/views/electrical/socket_ccts/show.html.erb:70:                    <%= [t('actions.new'), t('activerecord.models.electrical.socket_cct.one')].join(' ') %>
+app/views/electrical/socket_ccts/show.html.erb:122:                  <% text = t('activerecord.models.electrical.demand.one') %>
+app/views/electrical/demands/_row.html.erb:17:      <%= t('show.unassigned', model: t("activerecord.models.electrical.circuit.one")) %>
+app/views/electrical/demands/_row.html.erb:25:      <%= t('show.unassigned', model: t("activerecord.models.electrical.cable.one")) %>
+app/views/electrical/heaters/_card.html.erb:10:        <% text = t("actions.jump_to", model: t("activerecord.models.electrical.heater.one")) %>
+app/views/electrical/motors/_card.html.erb:10:      <% text = t("actions.jump_to", model: t("activerecord.models.electrical.motor.one")) %>
+app/views/electrical/demands/show.html.erb:142:                        <% text = t("activerecord.models.electrical.circuit.one") %>
+app/views/electrical/demands/show.html.erb:154:                          <%= t('show.unassigned', model: t("activerecord.models.electrical.circuit.one")) %>
+app/views/electrical/demands/show.html.erb:167:                        <% text = t("activerecord.models.electrical.cable.one") %>
+app/views/electrical/switchboards/_card.html.erb:72:      <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.switchboard.circuits') %></div>
+app/views/electrical/socket_ccts/_header.html.erb:7:  <th scope="col"><%= t('activerecord.attributes.electrical.socket_cct.notes') %></th>
+app/views/electrical/socket_ccts/_header.html.erb:10:  <th scope="col"><%= t('activerecord.models.electrical.demand.one') %></th>
+app/views/electrical/heaters/show.html.erb:102:                    <%= [t('actions.new'), t('activerecord.models.electrical.heater.one')].join(' ') %>
+app/views/electrical/heaters/show.html.erb:190:                  <% text = t('activerecord.models.electrical.demand.one') %>
+app/views/electrical/motors/show.html.erb:99:                    <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical.motor.one')].join(' ') %></span>
+app/views/electrical/motors/show.html.erb:168:                  <% text = t('activerecord.models.electrical.demand.one') %>
+app/views/electrical/switchboards/show.html.erb:100:                    <%= [t('actions.new'), t('activerecord.models.electrical.switchboard.one')].join(' ') %>
+app/views/electrical/switchboards/show.html.erb:194:                    <% text = t('activerecord.attributes.electrical.switchboard.circuits') %>
+app/views/electrical/switchboards/show.html.erb:206:                    <% text = t('activerecord.models.electrical.demand.one') %>
+app/views/electrical/socket_ccts/index.html.erb:29:                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical.socket_cct.one')].join(' ') %></span>
+app/views/electrical/socket_ccts/index.html.erb:40:                placeholder: t('activerecord.attributes.electrical.socket_cct.socket_type') %>
+app/views/electrical/socket_ccts/index.html.erb:43:                placeholder: t('activerecord.attributes.electrical.socket_cct.notes') %>
+app/views/electrical/heaters/_header.html.erb:7:  <th scope="col"><%= t('activerecord.attributes.electrical.heater.notes') %></th>
+app/views/electrical/heaters/_header.html.erb:16:  <th scope="col"><%= t('activerecord.models.electrical.demand.one') %></th>
+app/views/electrical/motors/_header.html.erb:7:  <th scope="col"><%= t('activerecord.attributes.electrical.motor.notes') %></th>
+app/views/electrical/motors/_header.html.erb:13:  <th scope="col"><%= t('activerecord.models.electrical.demand.one') %></th>
+app/views/electrical/demands/_header.html.erb:3:  <th scope="col"><%= t('activerecord.attributes.electrical.demand.notes') %></th>
+app/views/electrical/demands/_header.html.erb:4:  <th scope="col"><%= t('activerecord.attributes.electrical.demand.circuit') %></th>
+app/views/electrical/demands/_header.html.erb:5:  <th scope="col"><%= t('activerecord.attributes.electrical.demand.incomer') %></th>
+app/views/electrical/demands/_header.html.erb:14:  <th scope="col"><%= sort_link(@q, :demandable_type, t("activerecord.attributes.electrical.demand.demandable_type")) %></th>
+app/views/electrical/switchboards/_header.html.erb:7:  <th scope="col"><%= t('activerecord.attributes.electrical.switchboard.notes') %></th>
+app/views/electrical/switchboards/_header.html.erb:13:  <th scope="col"><%= t("activerecord.models.electrical.demand.one") %></th>
+app/views/electrical/switchboards/_header.html.erb:14:  <th scope="col"><%= t("activerecord.attributes.electrical.switchboard.circuits") %></th>
+app/views/electrical/demands/index.html.erb:34:                placeholder: t('activerecord.attributes.electrical.demand.basis') %>
+app/views/electrical/demands/index.html.erb:37:                placeholder: t('activerecord.attributes.electrical.demand.basis_notes') %>
+app/views/electrical/demands/index.html.erb:40:                placeholder: t('activerecord.attributes.electrical.demand.config') %>
+app/views/electrical/heaters/index.html.erb:32:                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical.heater.one')].join(' ') %></span>
+app/views/electrical/heaters/index.html.erb:44:                placeholder: t("activerecord.attributes.electrical.heater.heater_type") %>
+app/views/electrical/heaters/index.html.erb:47:                placeholder: t("activerecord.attributes.electrical.heater.application") %>
+app/views/electrical/heaters/index.html.erb:50:                placeholder: t("activerecord.attributes.electrical.heater.ingress_protection") %>
+app/views/electrical/heaters/index.html.erb:53:                placeholder: t("activerecord.attributes.electrical.heater.sheath_material") %>
+app/views/electrical/heaters/index.html.erb:56:                placeholder: t("activerecord.attributes.electrical.heater.insulation_material") %>
+app/views/electrical/heaters/index.html.erb:71:                      models: t("activerecord.models.electrical.heater", count: @link_broken.count)) %>
+app/views/electrical/heaters/index.html.erb:90:                      models: t("activerecord.models.electrical.heater", count: @link_incomplete.count)) %>
+app/views/electrical/heaters/index.html.erb:111:                <%= t('index.orphans', models: t("activerecord.models.electrical.heater").tableize) %>
+app/views/electrical/motors/index.html.erb:32:                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical.motor.one')].join(' ') %></span>
+app/views/electrical/motors/index.html.erb:44:                placeholder: t('activerecord.attributes.electrical.motor.motor_type') %>
+app/views/electrical/motors/index.html.erb:47:                placeholder: t('activerecord.attributes.electrical.motor.frame_size') %>
+app/views/electrical/motors/index.html.erb:50:                placeholder: t('activerecord.attributes.electrical.motor.poles') %>
+app/views/electrical/motors/index.html.erb:53:                placeholder: t('activerecord.attributes.electrical.motor.ingress_protection') %>
+app/views/electrical/motors/index.html.erb:56:                placeholder: t('activerecord.attributes.electrical.motor.speed_rated') %>
+app/views/electrical/motors/index.html.erb:59:                placeholder: t('activerecord.attributes.electrical.motor.notes') %>
+app/views/electrical/motors/index.html.erb:74:                      models: t("activerecord.models.electrical.motor", count: @link_broken.count)) %>
+app/views/electrical/motors/index.html.erb:93:                      models: t("activerecord.models.electrical.motor", count: @link_incomplete.count)) %>
+app/views/electrical/demands/_index_link.html.erb:1:<% text = t('activerecord.models.electrical.demand.one') %>
+app/views/electrical/switchboards/index.html.erb:31:                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical.switchboard.one')].join(' ') %></span>
+app/views/electrical/switchboards/index.html.erb:43:                placeholder: t('activerecord.attributes.electrical.switchboard.voltage_rating') %>
+app/views/electrical/switchboards/index.html.erb:46:                placeholder: t('activerecord.attributes.electrical.switchboard.busbar_rating') %>
+app/views/electrical/switchboards/index.html.erb:49:                placeholder: t('activerecord.attributes.electrical.switchboard.incomer_protection') %>
+app/views/electrical/switchboards/index.html.erb:52:                placeholder: t('activerecord.attributes.electrical.switchboard.metering') %>
+app/views/electrical/switchboards/index.html.erb:55:                placeholder: t('activerecord.attributes.electrical.switchboard.notes') %>
+app/views/electrical/switchboards/index.html.erb:70:                      models: t("activerecord.models.electrical.switchboard", count: @link_broken.count)) %>
+app/views/electrical/switchboards/index.html.erb:89:                      models: t("activerecord.models.electrical.switchboard", count: @link_incomplete.count)) %>

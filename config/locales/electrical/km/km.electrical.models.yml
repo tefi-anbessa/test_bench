@@ -1,34 +1,34 @@
-km:
+en:
   activerecord:
     models:
-      electrical:
-        heater:
-          one: "Heater"
-          other: "Heaters"
-        cable_type:
-          one: "Cable Type"
-          other: "Cable Types"
-        cable:
-          one: "Cable"
-          other: "Cables"
-        demand:
-          one: "Load"
-          other: "Loads"
-        switchboard:
-          one: "Switchboard"
-          other: "Switchboards"
-        circuit:
-          one: "Circuit"
-          other: "Circuits"
-        motor:
-          one: "Motor"
-          other: "Motors"
-        socket_cct:
-          one: "Socket Circuit"
-          other: "Socket Circuits"
-        light_cct:
-          one: "Light Circuit"
-          other: "Light Circuits"
+      electrical/heater:
+        one: "Heater"
+        other: "Heaters"
+      electrical/cable_type:
+        one: "Cable Type"
+        other: "Cable Types"
+      electrical/cable:
+        one: "Cable"
+        other: "Cables"
+      electrical/demand:
+        one: "Load"
+        other: "Loads"
+      electrical/switchboard:
+        one: "Switchboard"
+        other: "Switchboards"
+      electrical/circuit:
+        one: "Circuit"
+        other: "Circuits"
+      electrical/motor:
+        one: "Motor"
+        other: "Motors"
+      electrical/socket_cct:
+        one: "Socket Circuit"
+        other: "Socket Circuits"
+      electrical/light_cct:
+        one: "Light Circuit"
+        other: "Light Circuits"
+
     attributes:
       electrical/heater:
         heater_type: "Heater Type"
@@ -61,12 +61,12 @@ km:
         application: "Application"
         applications:
           application_other: Other application
-          annealing_heat_treating: Annealing / Heat Treating
-          curing_tempering: Curing / Tempering
+          annealing_heat_treating: Annealing _ Heat Treating
+          curing_tempering: Curing _ Tempering
           drying: Drying
           melting: Melting
-          oem_custom: OEM / Custom
-          gases_vapors: Gases / Vapors
+          oem_custom: OEM _ Custom
+          gases_vapors: Gases _ Vapors
           clean_water: Clean Water Heating
           process_waters: Process Waters
           high_purity_waters: High Purity Waters
@@ -107,108 +107,122 @@ km:
           mineral: Mineral Insulation
           fluoropolymer: Fluoropolymer (Teflon)
           fiberglass: Fiberglass Insulation
+
       electrical/cable_type:
         id: ID
-        conductor_material:	Conductor Material
-        cores:	Conductor Cores
-        csa:	CSA
-        csa_units:  mm²
-        neutral:	Neutral
-        neutral_csa:	Neutral CSA
-        earth:	Earth
-        earth_csa:	Earth CSA
-        insulation:	Insulation
-        bedding:	Bedding
-        armour:	Armour
-        sheath:	Sheath
-        bedding_od:	Bedding OD
-        overall_od:	Overall OD
+        code: "Code"
+        conductor_material: Conductor Material
+        groups: Conductor Groups
+        construction: Construction
+        constructions:
+          core: "Core"
+          pair: "Pair"
+          triple: "Triple"
+        csa: CSA
+        csa_units: mm²
+        neutral: Neutral
+        neutral_csa: Neutral CSA
+        earth: Earth
+        earth_csa: Earth CSA
+        insulation: Insulation
+        bedding: Bedding
+        armour: Armour
+        sheath: Sheath
+        bedding_od: Bedding OD
+        overall_od: Overall OD
         od_units: mm
-        temperature_rating:	Temperature Rating
-        voltage_rating:	Voltage Rating
-        notes:                "Notes"
+        temperature_rating: Temperature Rating
+        voltage_rating: Voltage Rating
+        notes: "Notes"
+
       electrical/cable:
-        from:                 "From"
-        to:                   "To"
-        route_length:         "Route Length"
-        vertical_allowance:   "Vertical Allowance"
-        termination_allowance:  "Termination Allowance"
-        start_mark:           "Installed Start Mark"
-        end_mark:             "Installed End Mark"
-        notes:                "Notes"
+        from: "From"
+        to: "To"
+        route_length: "Route Length"
+        vertical_allowance: "Vertical Allowance"
+        termination_allowance: "Termination Allowance"
+        start_mark: "Installed Start Mark"
+        end_mark: "Installed End Mark"
+        notes: "Notes"
+
       electrical/demand:
-        incomer:          "Incomer"
-        feeder:           "Feeder"
-        basis:            "Basis"
+        incomer: "Incomer"
+        feeder: "Feeder"
+        basis: "Basis"
         bases:
-          summation:      "Summation of outgoing feeders"
-          power_pf:       "Calculate current from power and power factor"
-          vector_pf:      "Calculate current from vector and power factor"
-          current_pf:     "Calculate power, vector from current and power factor"
-          current_power:  "Calculate vector, power factor from current and power"
-        basis_notes:      "Load Basis Notes"
-        config:           "Configuration"
+          summation: "Summation of outgoing feeders"
+          power_pf: "Calculate current from power and power factor"
+          vector_pf: "Calculate current from vector and power factor"
+          current_pf: "Calculate power, vector from current and power factor"
+          current_power: "Calculate vector, power factor from current and power"
+        basis_notes: "Load Basis Notes"
+        config: "Configuration"
         configs:
-          dc:             "DC"
-          one:            "AC L-N 1 phase"
-          two_120:        "AC L-N 2 phase 120˚"
-          two_180:        "AC L-N 2 phase 180˚"
-          three_3c:       "AC L-L 3 phase 3 wire"
-          three_4c:       "AC L-N 3 phase 4 wire"
-        supply:           "Supply (V)"
-        power:            "Power (W)"
-        vector:           "Vector (VA)"
-        power_factor:     "Power Factor"
-        current:          "Current (A)"
-        duty:             "Duty"
-        demandable_type:  "Load Type"
-        demandable:       "Equipment"
-        notes:            "Notes"
+          dc: "DC"
+          one: "AC L-N 1 phase"
+          two_120: "AC L-N 2 phase 120˚"
+          two_180: "AC L-N 2 phase 180˚"
+          three_3c: "AC L-L 3 phase 3 wire"
+          three_4c: "AC L-N 3 phase 4 wire"
+        supply: "Supply (V)"
+        power: "Power (W)"
+        vector: "Vector (VA)"
+        power_factor: "Power Factor"
+        current: "Current (A)"
+        duty: "Duty"
+        demandable_type: "Load Type"
+        demandable: "Equipment"
+        notes: "Notes"
+        circuit: "Circuit"
+
       electrical/switchboard:
         ingress_protection: "Ingress Protection"
-        ip_1:             "1st digit"
-        ip_2:             "2nd digit"
-        voltage_rating:   "Voltage Rating"
-        busbar_rating:    "Busbar Rating"
-        busbar_fault_rating:  "Busbar Fault Rating"
-        busbar_fault_duration:  "Busbar Fault Duration"
-        cable_entry:      "Cable Entry"
+        ip_1: "1st digit"
+        ip_2: "2nd digit"
+        voltage_rating: "Voltage Rating"
+        busbar_rating: "Busbar Rating"
+        busbar_fault_rating: "Busbar Fault Rating"
+        busbar_fault_duration: "Busbar Fault Duration"
+        cable_entry: "Cable Entry"
         incomer_protection: "Incomer Protection"
-        metering:         "Metering"
-        neutral_bar_connections:  "Neutral Bar Connections"
-        earth_bar_connections:  "Earth Bar Connections"
-        circuits:         "Circuits"
-        notes:            "Notes"
+        metering: "Metering"
+        neutral_bar_connections: "Neutral Bar Connections"
+        earth_bar_connections: "Earth Bar Connections"
+        circuits: "Circuits"
+        notes: "Notes"
+
       electrical/circuit:
-        serial:           "Circuit Number"
-        phase:            "Phase Designation"
-        device:           "Protection Device"
-        poles:            "Poles"
-        curve:            "Curve"
-        rating:           "Rating (A)"
-        elcb:             "ELCB"
-        contactor:        "Contactor"
-        feeder:           "Feeder"
-        demand:           "Load"
-        notes:            "Notes"
+        serial: "Circuit Number"
+        phase: "Phase Designation"
+        device: "Protection Device"
+        poles: "Poles"
+        curve: "Curve"
+        rating: "Rating (A)"
+        elcb: "ELCB"
+        contactor: "Contactor"
+        feeder: "Feeder"
+        demand: "Load"
+        notes: "Notes"
+
       electrical/motor:
-        motor_type:       "Motor Type"
+        motor_type: "Motor Type"
         motor_types:
-          induction:      "Induction"
-          synchronous:    "Synchronous"
-          dc:             "DC"
-          servo:          "Servo"
-          stepper:        "Stepper"
-          brushless_dc:   "Brushless DC"
-          universal:      "Universal"
-          other:          "Other"
-        frame_size:       "Frame Size"
-        poles:            "Poles"
-        ingress_protection:   "Ingress Protection"
-        speed_rated:      "Speed At Rated Load"
-        notes:            "Notes"
+          induction: "Induction"
+          synchronous: "Synchronous"
+          dc: "DC"
+          servo: "Servo"
+          stepper: "Stepper"
+          brushless_dc: "Brushless DC"
+          universal: "Universal"
+          other: "Other"
+        frame_size: "Frame Size"
+        poles: "Poles"
+        ingress_protection: "Ingress Protection"
+        speed_rated: "Speed At Rated Load"
+        notes: "Notes"
+
       electrical/socket_cct:
-        socket_type:      "Socket Type"
+        socket_type: "Socket Type"
         socket_types:
           other: "Other"
           "10A": "10A: AS3000 bi) Socket, 10A, general, no HVAC room"
@@ -222,43 +236,46 @@ km:
           "80A": "80A: AS3000 biii) Socket 80A, general use"
           "100A": "100A: AS3000 biii) Socket 100A, general use"
           "125A": "125A: AS3000 biii) Socket 125A, general use"
-        quantity:         "Quantity"
-        notes:            "Notes"
+        quantity: "Quantity"
+        notes: "Notes"
+
       electrical/light_cct:
         light_fitting_type: "Light Fitting Type"
         light_fitting_types:
           other: "Other"
           general: "General: AS3000 ai) Light, general"
           outdoor: "Outdoor > 1000W: AS3000 aii) Light, outdoor > 1000W"
-        quantity:         "Quantity"
-        notes:            "Notes"
+        quantity: "Quantity"
+        notes: "Notes"
+
     help:
       electrical/cable_type:
-        notes:       "Record useful cable type design information here"
+        notes: "Record useful cable type design information here"
       electrical/cable:
-        route_length:    "Route length of cable run, plan view"
-        vertical_allowance:  "Cable length to be added to plan view, e.g. for riser to switchboard. If routes are 3D modeled, set to zero."
+        route_length: "Route length of cable run, plan view"
+        vertical_allowance: "Cable length to be added to plan view, e.g. for riser to switchboard. If routes are 3D modeled, set to zero."
         termination_allowance: "Allowance for cable routing inside boxes"
-        notes:       "Record useful cable related design references here"
+        notes: "Record useful cable related design references here"
       electrical/demand:
-        basis:       "Defines which load parameters are given and which are calculated"
+        basis: "Defines which load parameters are given and which are calculated"
         basis_notes: "Record references for derivation of the load parameters"
-        config:      "Select the power system for the load"
-        supply:      "Select the supply voltage for the load. Leave blank for other supply."
-        duty:        "Proportional ON time for the load, for total load estimates"
-        demandable:  "Equipment datasheet"
-        notes:       "Record additional load related design references here"
-      electrical/switchboard:
+        config: "Select the power system for the load"
+        supply: "Select the supply voltage for the load. Leave blank for other supply."
+        other_supply: "Enter the supply voltage for the load if not in the list"
+        duty: "Proportional ON time for the load, for total load estimates"
+        demandable: "Equipment datasheet"
+        notes: "Record additional load related design references here"
       electrical/circuit:
-        notes:       "Record additional circuit related design references here"
+        notes: "Record additional circuit related design references here"
       electrical/motor:
-        notes:       "Record additional motor related design references here"
+        notes: "Record additional motor related design references here"
       electrical/socket_cct:
-        socket_type:      "AS3000 load classes"
-        notes:       "Record additional socket circuit related design references here"
+        socket_type: "AS3000 load classes"
+        notes: "Record additional socket circuit related design references here"
       electrical/light_cct:
-        light_fitting_type:  "AS3000 load classes"
-        notes:       "Record additional light circuit related design references here"
+        light_fitting_type: "AS3000 load classes"
+        notes: "Record additional light circuit related design references here"
+
     errors:
       custom_messages:
       attributes:

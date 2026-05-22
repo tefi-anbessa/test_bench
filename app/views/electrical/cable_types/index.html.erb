@@ -30,7 +30,7 @@
               title: t('actions.new') do %>
               <%== bs_icon('plus-square-fill') %>
               <span class="ms-1"><%= t('actions.new') %></span>
-              <span class="d-none d-md-inline"><%= " " + t('activerecord.models.electrical.cable_type') %></span>
+              <span class="d-none d-md-inline"><%= " " + t('activerecord.models.electrical/cable_type') %></span>
             <% end %>
           <% end %>
         </div>
@@ -42,19 +42,19 @@
         <%= search_form_for @q, url: discipline_electrical_cable_types_path(@discipline) do |f| %>
           <%= f.search_field :conductor_material_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical.cable_type.conductor_material') %>
+                placeholder: t('activerecord.attributes.electrical/cable_type.conductor_material') %>
           <%= f.search_field :groups_eq,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical.cable_type.groups') %>
+                placeholder: t('activerecord.attributes.electrical/cable_type.groups') %>
           <%= f.search_field :construction_eq,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical.cable_type.construction') %>
+                placeholder: t('activerecord.attributes.electrical/cable_type.construction') %>
           <%= f.search_field :csa_eq,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical.cable_type.csa') %>
+                placeholder: t('activerecord.attributes.electrical/cable_type.csa') %>
           <%= f.search_field :insulation_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical.cable_type.insulation') %>
+                placeholder: t('activerecord.attributes.electrical/cable_type.insulation') %>
           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
             <%== bs_icon('search') %>
           <% end %>

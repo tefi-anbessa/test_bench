@@ -28,7 +28,7 @@
                 aria: { label: t('actions.new') },
                 title: t('actions.new') do %>
                 <%== bs_icon('plus-square-fill') %>
-                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical.switchboard.one')].join(' ') %></span>
+                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical/switchboard.one')].join(' ') %></span>
               <% end %>
           <% end %>
         </div>
@@ -40,19 +40,19 @@
         <%= search_form_for @q, url: discipline_electrical_switchboards_path(@discipline) do |f| %>
           <%= f.search_field :voltage_rating_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical.switchboard.voltage_rating') %>
+                placeholder: t('activerecord.attributes.electrical/switchboard.voltage_rating') %>
           <%= f.search_field :busbar_rating_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical.switchboard.busbar_rating') %>
+                placeholder: t('activerecord.attributes.electrical/switchboard.busbar_rating') %>
           <%= f.search_field :incomer_protection_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical.switchboard.incomer_protection') %>
+                placeholder: t('activerecord.attributes.electrical/switchboard.incomer_protection') %>
           <%= f.search_field :metering_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical.switchboard.metering') %>
+                placeholder: t('activerecord.attributes.electrical/switchboard.metering') %>
           <%= f.search_field :notes_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical.switchboard.notes') %>
+                placeholder: t('activerecord.attributes.electrical/switchboard.notes') %>
           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
             <%== bs_icon('search') %>
           <% end %>
@@ -67,7 +67,7 @@
               <th colspan="9">
                 <%= t('index.link_broken', 
                       count: @link_broken.count,
-                      models: t("activerecord.models.electrical.switchboard", count: @link_broken.count)) %>
+                      models: t("activerecord.models.electrical/switchboard", count: @link_broken.count)) %>
               </th>
             </tr>
             <%= render 'tags/header' %>
@@ -86,7 +86,7 @@
               <th colspan="9">
                 <%= t('index.link_incomplete', 
                       count: @link_incomplete.count,
-                      models: t("activerecord.models.electrical.switchboard", count: @link_incomplete.count)) %>
+                      models: t("activerecord.models.electrical/switchboard", count: @link_incomplete.count)) %>
               </th>
             </tr>
             <%= render 'tags/header' %>

@@ -30,7 +30,7 @@ module Electrical
     validates :power_factor, 
       numericality: { in: -1.0..1.0 }, 
       allow_nil: true,
-      exclusion: { in: [0.0], message: I18n.t("activerecord.errors.attributes.electrical.demand.power_factor.zero_pf") }
+      exclusion: { in: [0.0], message: I18n.t("activerecord.errors.attributes.electrical/demand.power_factor.zero_pf") }
       
     validates :duty, numericality: { in: 0.0..1.0 }, allow_nil: true
     
@@ -96,7 +96,7 @@ module Electrical
       return unless demandable?
       return if demandable.respond_to?(:tag) && demandable.tag.present?
       
-      errors.add(:base, message: I18n.t("activerecord.errors.attributes.electrical.demand.demandable.tag_association",
+      errors.add(:base, message: I18n.t("activerecord.errors.attributes.electrical/demand.demandable.tag_association",
                                         model: demandable_type.constantize.model_name.human))
     end
 

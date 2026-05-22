@@ -67,7 +67,7 @@
                   title: t('actions.new') do %>
                   <%== bs_icon('plus-square-fill') %>
                   <span class="ms-1">
-                    <%= [t('actions.new'), t('activerecord.models.electrical.socket_cct.one')].join(' ') %>
+                    <%= [t('actions.new'), t('activerecord.models.electrical/socket_cct.one')].join(' ') %>
                   </span>
                 <% end %>
               <% end %>
@@ -119,7 +119,7 @@
               <!-- Demand section -->
               <div class="row mb-1">
                 <div class="col-4 text-muted">
-                  <% text = t('activerecord.models.electrical.demand.one') %>
+                  <% text = t('activerecord.models.electrical/demand.one') %>
                   <% if @socket_cct.electrical_demand.present? %>
                     <%= link_to @socket_cct.electrical_demand,
                       class: "btn btn-sm btn-outline-secondary",

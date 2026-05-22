@@ -35,10 +35,10 @@ module Electrical
       end
       authorize @cable_type
       if @cable_type.save
-        flash[:success] = t('flash.create.notice', resource_name: t("activerecord.models.electrical.cable_type.one"))
+        flash[:success] = t('flash.create.notice', resource_name: t("activerecord.models.electrical/cable_type.one"))
         redirect_to @cable_type
       else
-        flash[:alert] = t('flash.create.alert', resource_name: t("activerecord.models.electrical.cable_type.one").downcase)
+        flash[:alert] = t('flash.create.alert', resource_name: t("activerecord.models.electrical/cable_type.one").downcase)
         setup_form
         render :new, status: :unprocessable_content
       end
@@ -60,10 +60,10 @@ module Electrical
         raise ApplicationController::ConflictError, :invalid_enum
       end
       if @cable_type.save
-        flash[:success] = t('flash.update.notice', resource_name: t("activerecord.models.electrical.cable_type.one"))
+        flash[:success] = t('flash.update.notice', resource_name: t("activerecord.models.electrical/cable_type.one"))
         redirect_to @cable_type
       else
-        flash[:alert] = t('flash.update.alert', resource_name: t("activerecord.models.electrical.cable_type.one").downcase)
+        flash[:alert] = t('flash.update.alert', resource_name: t("activerecord.models.electrical/cable_type.one").downcase)
         setup_form
         render :edit, status: :unprocessable_entity
       end
@@ -73,10 +73,10 @@ module Electrical
     def destroy
       authorize @cable_type
       if @cable_type.destroy
-        flash[:success] = t('flash.destroy.notice', resource_name: t("activerecord.models.electrical.cable_type.one"))
+        flash[:success] = t('flash.destroy.notice', resource_name: t("activerecord.models.electrical/cable_type.one"))
         redirect_to discipline_electrical_cable_types_path(@discipline), status: :see_other
       else
-        flash[:alert] = t('flash.destroy.alert', resource_name: t("activerecord.models.electrical.cable_type.one").downcase)
+        flash[:alert] = t('flash.destroy.alert', resource_name: t("activerecord.models.electrical/cable_type.one").downcase)
         redirect_to discipline_electrical_cable_types_path(@discipline), status: :see_other
       end
     end

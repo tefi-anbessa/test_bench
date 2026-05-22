@@ -4,10 +4,10 @@
   <% end %>
   <th scope="col"><%= sort_link(@q, :tag_stage, t("activerecord.attributes.tag.stage")) %></th>
   <th scope="col"><%= sort_link(@q, :tag, t("activerecord.attributes.tag.full_tag")) %></th>
-  <th scope="col"><%= t('activerecord.attributes.electrical.cable.notes') %></th>
-  <th scope="col"><%= t("activerecord.attributes.electrical.cable.from") %></th>
-  <th scope="col"><%= t("activerecord.attributes.electrical.cable.to") %></th>
-  <th scope="col"><%= sort_link(@q, :electrical_cable_type_id, t("activerecord.models.electrical.cable_type")) %></th>
-  <th scope="col"><%= sort_link(@q, :route_length, t("activerecord.attributes.electrical.cable.route_length")) %><br>(m)</th>
+  <th scope="col"><%= t('activerecord.attributes.electrical/cable.notes') %></th>
+  <th scope="col"><%= t("activerecord.attributes.electrical/cable.from") %></th>
+  <th scope="col"><%= t("activerecord.attributes.electrical/cable.to") %></th>
+  <th scope="col"><%= sort_link(@q, :electrical_cable_type_id, t("activerecord.models.electrical/cable_type")) %></th>
+  <th scope="col"><%= sort_link(@q, :route_length, t("activerecord.attributes.electrical/cable.route_length")) %><br>(m)</th>
   <th scope="col" width="150px"><%= t('table.links')%></th>
 </tr>

@@ -122,9 +122,9 @@ module Electrical
       assert_equal @motor_demand, new_circuit.demand
       assert_redirected_to new_circuit
       expected_messages = [
-        I18n.t('flash.create.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder")),
-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.demand"))
+        I18n.t('flash.create.notice', resource_name: I18n.t("activerecord.models.electrical/circuit.one")),
+        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder")),
+        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.demand"))
       ]
       assert_flash_messages :success, expected_messages
     end
@@ -135,8 +135,8 @@ module Electrical
         { electrical_cable: { from_id: @cable2.id } })
       assert_redirected_to @circuit
       expected_messages = [
-        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder"))
+        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical/circuit.one")),
+        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder"))
       ]
       assert_flash_messages :success, expected_messages
     end
@@ -146,9 +146,9 @@ module Electrical
       patch :update, params: update_params.merge(id: @circuit.id).merge(
         { electrical_cable: { from_id: @cable2.id, to_id: @motor_demand.id } })
       expected_messages = [
-        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder")),
-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.demand"))
+        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical/circuit.one")),
+        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder")),
+        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.demand"))
       ]
       assert_flash_messages :success, expected_messages
       assert_redirected_to @circuit
@@ -178,8 +178,8 @@ module Electrical
       assert_nil @cable1.from
       assert_redirected_to @circuit
       expected_messages = [
-        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder"))
+        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical/circuit.one")),
+        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder"))
       ]
       assert_flash_messages :success, expected_messages
     end
@@ -196,7 +196,7 @@ module Electrical
       assert_template :edit
       assert_response :unprocessable_content
       expected = I18n.t('flash.required', 
-        resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder"))
+        resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder"))
       assert_flash_message :alert, expected
     end
 
@@ -217,8 +217,8 @@ module Electrical
       assert_nil @cable2.to
       assert_redirected_to @circuit
       expected_messages = [
-        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder"))
+        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical/circuit.one")),
+        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder"))
       ]
       assert_flash_messages :success, expected_messages
     end

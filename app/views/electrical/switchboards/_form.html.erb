@@ -37,7 +37,7 @@
             <!-- Switchboard Details -->
             <div class="card mb-1" style="<%= card_styles(swatch) %>">
               <div class="card-header p-2" style="<%= card_header_styles(swatch) %>">
-                <h5><%= t('activerecord.models.electrical.switchboard.one') %></h5>
+                <h5><%= t('activerecord.models.electrical/switchboard.one') %></h5>
               </div>
 
               <div class="card-body p-2" style="<%= form_styles(swatch) %>">
@@ -160,7 +160,7 @@
 
                 <div class="row mb-1">
                   <label class="col-form-label col-sm-4" for="circuits">
-                    <%= t('activerecord.models.electrical.circuit.one').pluralize %>
+                    <%= t('activerecord.models.electrical/circuit.one').pluralize %>
                   </label>
                   <div class="col-sm-8">
                     <%= number_field_tag :circuits,

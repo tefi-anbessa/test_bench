@@ -30,7 +30,7 @@
                 title: t('actions.new') do %>
                 <%== bs_icon('plus-square-fill') %>
                 <span class="ms-1">
-                  <%= [t('actions.new'), t('activerecord.models.electrical.light_cct.one')].join(' ') %>
+                  <%= [t('actions.new'), t('activerecord.models.electrical/light_cct.one')].join(' ') %>
                 </span>
               <% end %>
           <% end %>
@@ -42,10 +42,10 @@
         <%= search_form_for @q, url: discipline_electrical_light_ccts_path(@discipline) do |f| %>
           <%= f.search_field :light_fitting_type_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical.light_cct.light_fitting_type') %>
+                placeholder: t('activerecord.attributes.electrical/light_cct.light_fitting_type') %>
           <%= f.search_field :notes_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical.light_cct.notes') %>
+                placeholder: t('activerecord.attributes.electrical/light_cct.notes') %>
           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
             <%== bs_icon('search') %>
           <% end %>
@@ -60,7 +60,7 @@
               <th colspan="9">
                 <%= t('index.link_broken', 
                       count: @link_broken.count,
-                      models: t("activerecord.models.electrical.light_cct", count: @link_broken.count)) %>
+                      models: t("activerecord.models.electrical/light_cct", count: @link_broken.count)) %>
               </th>
             </tr>
             <%= render 'tags/header' %>
@@ -79,7 +79,7 @@
               <th colspan="9">
                 <%= t('index.link_incomplete', 
                       count: @link_incomplete.count,
-                      models: t("activerecord.models.electrical.light_cct", count: @link_incomplete.count)) %>
+                      models: t("activerecord.models.electrical/light_cct", count: @link_incomplete.count)) %>
               </th>
             </tr>
             <%= render 'tags/header' %>
@@ -99,7 +99,7 @@
           <% unless @orphans.empty? %>
             <tr class="table-danger">
               <td colspan="<%= 4 + (current_project ? 1 : 0) %>">
-                <%= t('index.orphans', models: t("activerecord.models.electrical.light_cct").tableize) %>
+                <%= t('index.orphans', models: t("activerecord.models.electrical/light_cct").tableize) %>
               </td>
             </tr>
             <% @orphans.each do |row| %>

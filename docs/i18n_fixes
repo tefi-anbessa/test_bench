@@ -1,0 +1,1400 @@
+Running in PRETEND mode (no files will be modified)
+Found files:
+test/models/electrical/demand_test.rb
+test/system/electrical/circuits_system_test.rb
+test/controllers/electrical/circuits_controller_test.rb
+app/controllers/electrical/circuits_controller.rb
+app/controllers/electrical/cable_types_controller.rb
+app/models/electrical/demand.rb
+app/controllers/electrical/demands_controller.rb
+app/views/electrical/cable_types/_form.html.erb
+app/views/electrical/cable_types/_header.html.erb
+app/views/electrical/cable_types/index.html.erb
+app/views/electrical/cables/_form.html.erb
+app/views/electrical/cables/show.html.erb
+app/views/electrical/cables/_header.html.erb
+app/views/electrical/cables/index.html.erb
+app/views/electrical/light_ccts/show.html.erb
+app/views/electrical/light_ccts/_header.html.erb
+app/views/electrical/light_ccts/index.html.erb
+app/views/electrical/switchboards/_form.html.erb
+app/views/electrical/switchboards/_card.html.erb
+app/views/electrical/switchboards/show.html.erb
+app/views/electrical/switchboards/_header.html.erb
+app/views/electrical/switchboards/index.html.erb
+app/views/electrical/motors/_form.html.erb
+app/views/electrical/motors/_card.html.erb
+app/views/electrical/motors/show.html.erb
+app/views/electrical/motors/_header.html.erb
+app/views/electrical/motors/index.html.erb
+app/views/electrical/circuits/_form.html.erb
+app/views/electrical/circuits/_row.html.erb
+app/views/electrical/circuits/show.html.erb
+app/views/electrical/circuits/_header.html.erb
+app/views/electrical/circuits/index.html.erb
+app/views/electrical/socket_ccts/show.html.erb
+app/views/electrical/demands/_form.html.erb
+app/views/electrical/demands/_header.html.erb
+app/views/electrical/heaters/_form.html.erb
+app/views/electrical/demands/show.html.erb
+app/views/electrical/demands/_index_link.html.erb
+app/views/electrical/socket_ccts/_header.html.erb
+app/views/electrical/demands/_row.html.erb
+app/views/electrical/heaters/_header.html.erb
+app/views/electrical/heaters/show.html.erb
+app/views/electrical/heaters/_card.html.erb
+app/views/electrical/heaters/index.html.erb
+app/views/electrical/demands/index.html.erb
+app/views/electrical/socket_ccts/index.html.erb
+
+Previewing changes...
+---- test/models/electrical/demand_test.rb ----
+--- test/models/electrical/demand_test.rb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -58,7 +58,7 @@
+   test "power factor must not be zero" do
+     @demand.power_factor = 0.0
+     refute @demand.valid?, "Demand with power factor 0.0 should not be valid. Errors: #{@demand.errors.full_messages}"
+-    assert_includes @demand.errors[:power_factor], I18n.t("activerecord.errors.attributes.electrical.demand.power_factor.zero_pf")
++    assert_includes @demand.errors[:power_factor], I18n.t("activerecord.errors.attributes.electrical/demand.power_factor.zero_pf")
+   end
+ 
+   test "duty must be in range" do
+@@ -130,7 +130,7 @@
+     refute demand.valid?, "Demand should not be valid with demandable without a tag"
+     # puts "Demand errors: #{demand.errors.full_messages}"
+     assert_includes demand.errors[:base], 
+-          I18n.t("activerecord.errors.attributes.electrical.demand.demandable.tag_association",
++          I18n.t("activerecord.errors.attributes.electrical/demand.demandable.tag_association",
+                   model: demandable.class.model_name.human)
+     
+     # Now assign the tag and it should be valid
+---- test/system/electrical/circuits_system_test.rb ----
+--- test/system/electrical/circuits_system_test.rb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -142,7 +142,7 @@
+       assert_current_path electrical_circuit_path(@circuit)
+       
+       show_assertions
+-      assert_text I18n.t("activerecord.attributes.electrical.circuit.serial")
++      assert_text I18n.t("activerecord.attributes.electrical/circuit.serial")
+ 
+       # Variable assertions
+       assert_selector "a[href='#{electrical_switchboard_circuits_path(@switchboard1)}']"
+---- test/controllers/electrical/circuits_controller_test.rb ----
+--- test/controllers/electrical/circuits_controller_test.rb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -122,9 +122,9 @@
+       assert_equal @motor_demand, new_circuit.demand
+       assert_redirected_to new_circuit
+       expected_messages = [
+-        I18n.t('flash.create.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
+-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder")),
+-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.demand"))
++        I18n.t('flash.create.notice', resource_name: I18n.t("activerecord.models.electrical/circuit.one")),
++        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder")),
++        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.demand"))
+       ]
+       assert_flash_messages :success, expected_messages
+     end
+@@ -135,8 +135,8 @@
+         { electrical_cable: { from_id: @cable2.id } })
+       assert_redirected_to @circuit
+       expected_messages = [
+-        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
+-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder"))
++        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical/circuit.one")),
++        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder"))
+       ]
+       assert_flash_messages :success, expected_messages
+     end
+@@ -146,9 +146,9 @@
+       patch :update, params: update_params.merge(id: @circuit.id).merge(
+         { electrical_cable: { from_id: @cable2.id, to_id: @motor_demand.id } })
+       expected_messages = [
+-        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
+-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder")),
+-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.demand"))
++        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical/circuit.one")),
++        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder")),
++        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.demand"))
+       ]
+       assert_flash_messages :success, expected_messages
+       assert_redirected_to @circuit
+@@ -178,8 +178,8 @@
+       assert_nil @cable1.from
+       assert_redirected_to @circuit
+       expected_messages = [
+-        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
+-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder"))
++        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical/circuit.one")),
++        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder"))
+       ]
+       assert_flash_messages :success, expected_messages
+     end
+@@ -196,7 +196,7 @@
+       assert_template :edit
+       assert_response :unprocessable_content
+       expected = I18n.t('flash.required', 
+-        resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder"))
++        resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder"))
+       assert_flash_message :alert, expected
+     end
+ 
+@@ -217,8 +217,8 @@
+       assert_nil @cable2.to
+       assert_redirected_to @circuit
+       expected_messages = [
+-        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical.circuit.one")),
+-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical.circuit.feeder"))
++        I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical/circuit.one")),
++        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder"))
+       ]
+       assert_flash_messages :success, expected_messages
+     end
+---- app/controllers/electrical/circuits_controller.rb ----
+--- app/controllers/electrical/circuits_controller.rb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -63,17 +63,17 @@
+           end
+         end
+         flash[:success] = [t("flash.create.notice",
+-                          resource_name: t("activerecord.models.electrical.circuit.one"))]
++                          resource_name: t("activerecord.models.electrical/circuit.one"))]
+         flash[:success] << t("flash.assigned",
+-          resource_name: t("activerecord.attributes.electrical.circuit.feeder")) if @feeder.present?
++          resource_name: t("activerecord.attributes.electrical/circuit.feeder")) if @feeder.present?
+         flash[:success] << t("flash.assigned",
+-          resource_name: t("activerecord.attributes.electrical.circuit.demand")) if @demand.present?
++          resource_name: t("activerecord.attributes.electrical/circuit.demand")) if @demand.present?
+         redirect_to @circuit
+       rescue ActiveRecord::RecordInvalid => _e
+         # Handle validation errors
+         setup_form
+         flash.now[:alert] = t("flash.create.alert", 
+-          resource_name: t("activerecord.models.electrical.circuit.one").downcase)
++          resource_name: t("activerecord.models.electrical/circuit.one").downcase)
+         render :new, status: :unprocessable_content
+       end
+     end
+@@ -132,16 +132,16 @@
+           end
+         end
+         flash[:success] = [t("flash.update.notice",
+-                          resource_name: t("activerecord.models.electrical.circuit.one"))]
++                          resource_name: t("activerecord.models.electrical/circuit.one"))]
+         flash[:success] << t("flash.assigned",
+-          resource_name: t("activerecord.attributes.electrical.circuit.feeder")) if @feeder.present?
++          resource_name: t("activerecord.attributes.electrical/circuit.feeder")) if @feeder.present?
+         flash[:success] << t("flash.assigned",
+-          resource_name: t("activerecord.attributes.electrical.circuit.demand")) if @demand.present?
++          resource_name: t("activerecord.attributes.electrical/circuit.demand")) if @demand.present?
+         redirect_to @circuit
+       rescue ActiveRecord::RecordInvalid
+         # Handle validation errors
+         flash.now[:alert] = t("flash.update.alert",
+-          resource_name: t("activerecord.models.electrical.circuit.one").downcase)
++          resource_name: t("activerecord.models.electrical/circuit.one").downcase)
+         setup_form
+         render :edit, status: :unprocessable_content
+       end
+---- app/controllers/electrical/cable_types_controller.rb ----
+--- app/controllers/electrical/cable_types_controller.rb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -35,10 +35,10 @@
+       end
+       authorize @cable_type
+       if @cable_type.save
+-        flash[:success] = t('flash.create.notice', resource_name: t("activerecord.models.electrical.cable_type.one"))
++        flash[:success] = t('flash.create.notice', resource_name: t("activerecord.models.electrical/cable_type.one"))
+         redirect_to @cable_type
+       else
+-        flash[:alert] = t('flash.create.alert', resource_name: t("activerecord.models.electrical.cable_type.one").downcase)
++        flash[:alert] = t('flash.create.alert', resource_name: t("activerecord.models.electrical/cable_type.one").downcase)
+         setup_form
+         render :new, status: :unprocessable_content
+       end
+@@ -60,10 +60,10 @@
+         raise ApplicationController::ConflictError, :invalid_enum
+       end
+       if @cable_type.save
+-        flash[:success] = t('flash.update.notice', resource_name: t("activerecord.models.electrical.cable_type.one"))
++        flash[:success] = t('flash.update.notice', resource_name: t("activerecord.models.electrical/cable_type.one"))
+         redirect_to @cable_type
+       else
+-        flash[:alert] = t('flash.update.alert', resource_name: t("activerecord.models.electrical.cable_type.one").downcase)
++        flash[:alert] = t('flash.update.alert', resource_name: t("activerecord.models.electrical/cable_type.one").downcase)
+         setup_form
+         render :edit, status: :unprocessable_entity
+       end
+@@ -73,10 +73,10 @@
+     def destroy
+       authorize @cable_type
+       if @cable_type.destroy
+-        flash[:success] = t('flash.destroy.notice', resource_name: t("activerecord.models.electrical.cable_type.one"))
++        flash[:success] = t('flash.destroy.notice', resource_name: t("activerecord.models.electrical/cable_type.one"))
+         redirect_to discipline_electrical_cable_types_path(@discipline), status: :see_other
+       else
+-        flash[:alert] = t('flash.destroy.alert', resource_name: t("activerecord.models.electrical.cable_type.one").downcase)
++        flash[:alert] = t('flash.destroy.alert', resource_name: t("activerecord.models.electrical/cable_type.one").downcase)
+         redirect_to discipline_electrical_cable_types_path(@discipline), status: :see_other
+       end
+     end
+---- app/models/electrical/demand.rb ----
+--- app/models/electrical/demand.rb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -30,7 +30,7 @@
+     validates :power_factor, 
+       numericality: { in: -1.0..1.0 }, 
+       allow_nil: true,
+-      exclusion: { in: [0.0], message: I18n.t("activerecord.errors.attributes.electrical.demand.power_factor.zero_pf") }
++      exclusion: { in: [0.0], message: I18n.t("activerecord.errors.attributes.electrical/demand.power_factor.zero_pf") }
+       
+     validates :duty, numericality: { in: 0.0..1.0 }, allow_nil: true
+     
+@@ -96,7 +96,7 @@
+       return unless demandable?
+       return if demandable.respond_to?(:tag) && demandable.tag.present?
+       
+-      errors.add(:base, message: I18n.t("activerecord.errors.attributes.electrical.demand.demandable.tag_association",
++      errors.add(:base, message: I18n.t("activerecord.errors.attributes.electrical/demand.demandable.tag_association",
+                                         model: demandable_type.constantize.model_name.human))
+     end
+ 
+---- app/controllers/electrical/demands_controller.rb ----
+--- app/controllers/electrical/demands_controller.rb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -30,13 +30,13 @@
+       authorize @demand
+       if @demand.save
+         flash[:success] = I18n.t('flash.create.notice', 
+-          resource_name: I18n.t('activerecord.models.electrical.demand.one'))
++          resource_name: I18n.t('activerecord.models.electrical/demand.one'))
+         redirect_to @demand
+         return
+       else
+         set_swatch
+         flash.now[:alert] = I18n.t('flash.create.alert', 
+-          resource_name: I18n.t('activerecord.models.electrical.demand.one'))
++          resource_name: I18n.t('activerecord.models.electrical/demand.one'))
+         render 'new', status: :unprocessable_entity
+       end
+     end
+@@ -51,11 +51,11 @@
+     def update
+       authorize @demand
+       if @demand.update(demand_params)
+-        flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.electrical.demand.one'))
++        flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.electrical/demand.one'))
+         redirect_to @demand
+       else
+         set_swatch
+-        flash.now[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.electrical.demand.one'))
++        flash.now[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.electrical/demand.one'))
+         render :edit, status: :unprocessable_entity
+       end
+     end
+@@ -64,9 +64,9 @@
+     def destroy
+       authorize @demand
+       if @demand.destroy
+-        flash[:success] = I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.electrical.demand.one'))
++        flash[:success] = I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.electrical/demand.one'))
+       else
+-        flash.now[:alert] = I18n.t('flash.destroy.alert', resource_name: I18n.t('activerecord.models.electrical.demand.one'))
++        flash.now[:alert] = I18n.t('flash.destroy.alert', resource_name: I18n.t('activerecord.models.electrical/demand.one'))
+       end
+       redirect_to discipline_electrical_demands_url(@discipline), status: :see_other
+     end
+---- app/views/electrical/cable_types/_form.html.erb ----
+--- app/views/electrical/cable_types/_form.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -8,10 +8,10 @@
+           <div class="badge fs-6" style="<%= badge_styles(@swatch) %>">
+               <%= cable_type.persisted? ? t('actions.edit') : t('actions.new') %> 
+               <% if cable_type.present? && cable_type.persisted? %>
+-                <%= [t('activerecord.models.electrical.cable_type'), cable_type.label].join(': ') %>
++                <%= [t('activerecord.models.electrical/cable_type'), cable_type.label].join(': ') %>
+                 <small class="text-muted ms-2"><%= cable_type.long_label %></small>
+               <% else %>
+-                <%= t('activerecord.models.electrical.cable_type') %>
++                <%= t('activerecord.models.electrical/cable_type') %>
+               <% end %>
+           </div>
+         </div>
+@@ -49,7 +49,7 @@
+             </div>
+             <div class="row">
+                 <%= f.select :construction,
+-                      Electrical::CableType.constructions.map { |k, v| [t("activerecord.attributes.electrical.cable_type.constructions.#{k}"), k] },
++                      Electrical::CableType.constructions.map { |k, v| [t("activerecord.attributes.electrical/cable_type.constructions.#{k}"), k] },
+                       { wrapper: { class: 'mb-1' },
+                         class: 'form-select' } %>
+             </div>
+---- app/views/electrical/cable_types/_header.html.erb ----
+--- app/views/electrical/cable_types/_header.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -2,8 +2,8 @@
+   <% unless current_project %>
+     <th scope = "col"><%= sort_link(@q, "#{Project.model_name.human}", :project_id) %>
+   <% end %>
+-  <th scope="col"><%= sort_link(@q, :id, t('activerecord.attributes.electrical.cable_type.id')) %></th>
+-  <th scope="col"><%= t('activerecord.attributes.electrical.cable_type.notes') %></th>
+-  <th scope="col"><%= sort_link(@q, :code, t('activerecord.attributes.electrical.cable_type.code')) %></th>
++  <th scope="col"><%= sort_link(@q, :id, t('activerecord.attributes.electrical/cable_type.id')) %></th>
++  <th scope="col"><%= t('activerecord.attributes.electrical/cable_type.notes') %></th>
++  <th scope="col"><%= sort_link(@q, :code, t('activerecord.attributes.electrical/cable_type.code')) %></th>
+   <th scope="col" width="150px"><%= t('table.links')%></th>
+ </thead>
+---- app/views/electrical/cable_types/index.html.erb ----
+--- app/views/electrical/cable_types/index.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -30,7 +30,7 @@
+               title: t('actions.new') do %>
+               <%== bs_icon('plus-square-fill') %>
+               <span class="ms-1"><%= t('actions.new') %></span>
+-              <span class="d-none d-md-inline"><%= " " + t('activerecord.models.electrical.cable_type') %></span>
++              <span class="d-none d-md-inline"><%= " " + t('activerecord.models.electrical/cable_type') %></span>
+             <% end %>
+           <% end %>
+         </div>
+@@ -42,19 +42,19 @@
+         <%= search_form_for @q, url: discipline_electrical_cable_types_path(@discipline) do |f| %>
+           <%= f.search_field :conductor_material_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.cable_type.conductor_material') %>
++                placeholder: t('activerecord.attributes.electrical/cable_type.conductor_material') %>
+           <%= f.search_field :groups_eq,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.cable_type.groups') %>
++                placeholder: t('activerecord.attributes.electrical/cable_type.groups') %>
+           <%= f.search_field :construction_eq,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.cable_type.construction') %>
++                placeholder: t('activerecord.attributes.electrical/cable_type.construction') %>
+           <%= f.search_field :csa_eq,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.cable_type.csa') %>
++                placeholder: t('activerecord.attributes.electrical/cable_type.csa') %>
+           <%= f.search_field :insulation_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.cable_type.insulation') %>
++                placeholder: t('activerecord.attributes.electrical/cable_type.insulation') %>
+           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
+             <%== bs_icon('search') %>
+           <% end %>
+---- app/views/electrical/cables/_form.html.erb ----
+--- app/views/electrical/cables/_form.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -39,7 +39,7 @@
+             <!-- Cable Details -->
+             <div class="card mb-1">
+               <div class="card-header p-2">
+-                <h5><%= t('activerecord.models.electrical.cable') %></h5>
++                <h5><%= t('activerecord.models.electrical/cable') %></h5>
+               </div>
+               
+               <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
+---- app/views/electrical/cables/show.html.erb ----
+--- app/views/electrical/cables/show.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -97,7 +97,7 @@
+                   title: t('actions.new') do %>
+                   <%== bs_icon('plus-square-fill') %>
+                   <span class="ms-1">
+-                    <%= [t('actions.new'), t('activerecord.models.electrical.cable.one')].join(' ') %>
++                    <%= [t('actions.new'), t('activerecord.models.electrical/cable.one')].join(' ') %>
+                   </span>
+                 <% end %>
+               <% end %>
+---- app/views/electrical/cables/_header.html.erb ----
+--- app/views/electrical/cables/_header.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -4,10 +4,10 @@
+   <% end %>
+   <th scope="col"><%= sort_link(@q, :tag_stage, t("activerecord.attributes.tag.stage")) %></th>
+   <th scope="col"><%= sort_link(@q, :tag, t("activerecord.attributes.tag.full_tag")) %></th>
+-  <th scope="col"><%= t('activerecord.attributes.electrical.cable.notes') %></th>
+-  <th scope="col"><%= t("activerecord.attributes.electrical.cable.from") %></th>
+-  <th scope="col"><%= t("activerecord.attributes.electrical.cable.to") %></th>
+-  <th scope="col"><%= sort_link(@q, :electrical_cable_type_id, t("activerecord.models.electrical.cable_type")) %></th>
+-  <th scope="col"><%= sort_link(@q, :route_length, t("activerecord.attributes.electrical.cable.route_length")) %><br>(m)</th>
++  <th scope="col"><%= t('activerecord.attributes.electrical/cable.notes') %></th>
++  <th scope="col"><%= t("activerecord.attributes.electrical/cable.from") %></th>
++  <th scope="col"><%= t("activerecord.attributes.electrical/cable.to") %></th>
++  <th scope="col"><%= sort_link(@q, :electrical_cable_type_id, t("activerecord.models.electrical/cable_type")) %></th>
++  <th scope="col"><%= sort_link(@q, :route_length, t("activerecord.attributes.electrical/cable.route_length")) %><br>(m)</th>
+   <th scope="col" width="150px"><%= t('table.links')%></th>
+ </tr>
+---- app/views/electrical/cables/index.html.erb ----
+--- app/views/electrical/cables/index.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -28,7 +28,7 @@
+                 aria: { label: t('actions.new') },
+                 title: t('actions.new') do %>
+                 <%== bs_icon('plus-square-fill') %>
+-                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical.cable.one')].join(' ') %></span>
++                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical/cable.one')].join(' ') %></span>
+               <% end %>
+           <% end %>
+         </div>
+@@ -39,10 +39,10 @@
+         <%= search_form_for @q, url: discipline_electrical_cables_path(@discipline) do |f| %>
+           <%= f.search_field :electrical_cable_type_code_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.models.electrical.cable_type') %>
++                placeholder: t('activerecord.models.electrical/cable_type') %>
+           <%= f.search_field :notes_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.cable.notes') %>
++                placeholder: t('activerecord.attributes.electrical/cable.notes') %>
+           <%= f.button class: "btn btn-outline-primary btn-sm mb-1", type: :submit do %>
+             <%== bs_icon('search') %>
+           <% end %>
+@@ -57,7 +57,7 @@
+               <td colspan="<%= 9 + (current_project ? 1 : 0) %>">
+                 <%= t('index.link_broken', 
+                 count: @link_broken.count,
+-                models: t('activerecord.models.electrical.cable', count: @link_broken.count)) %>
++                models: t('activerecord.models.electrical/cable', count: @link_broken.count)) %>
+               </th>
+             </tr>
+             <%= render 'tags/header' %>
+@@ -76,7 +76,7 @@
+               <td colspan="<%= 9 + (current_project ? 1 : 0) %>">
+                 <%= t('index.link_incomplete', 
+                 count: @link_incomplete.count,
+-                models: t('activerecord.models.electrical.cable', count: @link_incomplete.count)) %>
++                models: t('activerecord.models.electrical/cable', count: @link_incomplete.count)) %>
+               </td>
+             </tr>
+             <%= render 'tags/header' %>
+@@ -98,7 +98,7 @@
+               <td colspan="10">
+                 <%= t('index.orphans', 
+                       count: @orphans.count,
+-                      models: t('activerecord.models.electrical.cable', count: @orphans.count)) %>
++                      models: t('activerecord.models.electrical/cable', count: @orphans.count)) %>
+               </td>
+             </tr>
+             <% @orphans.each do |row| %>
+---- app/views/electrical/light_ccts/show.html.erb ----
+--- app/views/electrical/light_ccts/show.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -67,7 +67,7 @@
+                   title: t('actions.new') do %>
+                   <%== bs_icon('plus-square-fill') %>
+                   <span class="ms-1">
+-                    <%= [t('actions.new'), t('activerecord.models.electrical.light_cct.one')].join(' ') %>
++                    <%= [t('actions.new'), t('activerecord.models.electrical/light_cct.one')].join(' ') %>
+                   </span>
+                 <% end %>
+               <% end %>
+@@ -118,7 +118,7 @@
+ 
+                   <div class="row mb-1">
+                     <div class="col-4 text-muted">
+-                      <% text = t('activerecord.models.electrical.demand.one') %>
++                      <% text = t('activerecord.models.electrical/demand.one') %>
+                       <% if @light_cct.electrical_demand.present? %>
+                         <%= link_to electrical_demand_path(@light_cct.electrical_demand),
+                           class: "btn btn-sm btn-outline-secondary",
+@@ -127,7 +127,7 @@
+                             <%== bs_icon('box-arrow-in-down-right') %>
+                         <% end %>
+                       <% else %>
+-                      <% text = t("actions.link", resource: t("activerecord.models.electrical.demand.one")) %>
++                      <% text = t("actions.link", resource: t("activerecord.models.electrical/demand.one")) %>
+                         <% if policy(Electrical::Demand).new? %>
+                           <%= link_to new_tag_electrical_demand_path(@light_cct.tag.id),
+                               class: "btn btn-sm btn-outline-primary mb-2",
+---- app/views/electrical/light_ccts/_header.html.erb ----
+--- app/views/electrical/light_ccts/_header.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -4,9 +4,9 @@
+   <% end %>
+   <th scope="col"><%= sort_link(@q, :tag_stage) %></th>
+   <th scope="col"><%= sort_link(@q, :tag) %></th>
+-  <th scope="col"><%= t('activerecord.attributes.electrical.light_cct.notes') %></th>
++  <th scope="col"><%= t('activerecord.attributes.electrical/light_cct.notes') %></th>
+   <th scope="col"><%= sort_link(@q, :light_fitting_type) %></th>
+   <th scope="col"><%= sort_link(@q, :quantity) %></th>
+-  <th scope="col"><%= t('activerecord.models.electrical.demand.one') %></th>
++  <th scope="col"><%= t('activerecord.models.electrical/demand.one') %></th>
+   <th scope="col" width="150px"><%= t('table.links')%></th>
+ </thead>
+\ No newline at end of file
+---- app/views/electrical/light_ccts/index.html.erb ----
+--- app/views/electrical/light_ccts/index.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -30,7 +30,7 @@
+                 title: t('actions.new') do %>
+                 <%== bs_icon('plus-square-fill') %>
+                 <span class="ms-1">
+-                  <%= [t('actions.new'), t('activerecord.models.electrical.light_cct.one')].join(' ') %>
++                  <%= [t('actions.new'), t('activerecord.models.electrical/light_cct.one')].join(' ') %>
+                 </span>
+               <% end %>
+           <% end %>
+@@ -42,10 +42,10 @@
+         <%= search_form_for @q, url: discipline_electrical_light_ccts_path(@discipline) do |f| %>
+           <%= f.search_field :light_fitting_type_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.light_cct.light_fitting_type') %>
++                placeholder: t('activerecord.attributes.electrical/light_cct.light_fitting_type') %>
+           <%= f.search_field :notes_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.light_cct.notes') %>
++                placeholder: t('activerecord.attributes.electrical/light_cct.notes') %>
+           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
+             <%== bs_icon('search') %>
+           <% end %>
+@@ -60,7 +60,7 @@
+               <th colspan="9">
+                 <%= t('index.link_broken', 
+                       count: @link_broken.count,
+-                      models: t("activerecord.models.electrical.light_cct", count: @link_broken.count)) %>
++                      models: t("activerecord.models.electrical/light_cct", count: @link_broken.count)) %>
+               </th>
+             </tr>
+             <%= render 'tags/header' %>
+@@ -79,7 +79,7 @@
+               <th colspan="9">
+                 <%= t('index.link_incomplete', 
+                       count: @link_incomplete.count,
+-                      models: t("activerecord.models.electrical.light_cct", count: @link_incomplete.count)) %>
++                      models: t("activerecord.models.electrical/light_cct", count: @link_incomplete.count)) %>
+               </th>
+             </tr>
+             <%= render 'tags/header' %>
+@@ -99,7 +99,7 @@
+           <% unless @orphans.empty? %>
+             <tr class="table-danger">
+               <td colspan="<%= 4 + (current_project ? 1 : 0) %>">
+-                <%= t('index.orphans', models: t("activerecord.models.electrical.light_cct").tableize) %>
++                <%= t('index.orphans', models: t("activerecord.models.electrical/light_cct").tableize) %>
+               </td>
+             </tr>
+             <% @orphans.each do |row| %>
+---- app/views/electrical/switchboards/_form.html.erb ----
+--- app/views/electrical/switchboards/_form.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -37,7 +37,7 @@
+             <!-- Switchboard Details -->
+             <div class="card mb-1" style="<%= card_styles(swatch) %>">
+               <div class="card-header p-2" style="<%= card_header_styles(swatch) %>">
+-                <h5><%= t('activerecord.models.electrical.switchboard.one') %></h5>
++                <h5><%= t('activerecord.models.electrical/switchboard.one') %></h5>
+               </div>
+ 
+               <div class="card-body p-2" style="<%= form_styles(swatch) %>">
+@@ -160,7 +160,7 @@
+ 
+                 <div class="row mb-1">
+                   <label class="col-form-label col-sm-4" for="circuits">
+-                    <%= t('activerecord.models.electrical.circuit.one').pluralize %>
++                    <%= t('activerecord.models.electrical/circuit.one').pluralize %>
+                   </label>
+                   <div class="col-sm-8">
+                     <%= number_field_tag :circuits,
+---- app/views/electrical/switchboards/_card.html.erb ----
+--- app/views/electrical/switchboards/_card.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -69,7 +69,7 @@
+     </div>
+     
+     <div class="row mb-1">
+-      <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.switchboard.circuits') %></div>
++      <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/switchboard.circuits') %></div>
+       <div class="col-8"><%= switchboard.circuits.count %></div>
+     </div>
+   </div>
+---- app/views/electrical/switchboards/show.html.erb ----
+--- app/views/electrical/switchboards/show.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -97,7 +97,7 @@
+                   title: t('actions.new') do %>
+                   <%== bs_icon('plus-square-fill') %>
+                   <span class="ms-1">
+-                    <%= [t('actions.new'), t('activerecord.models.electrical.switchboard.one')].join(' ') %>
++                    <%= [t('actions.new'), t('activerecord.models.electrical/switchboard.one')].join(' ') %>
+                   </span>
+                 <% end %>
+               <% end %>
+@@ -191,7 +191,7 @@
+                 
+                 <div class="row mb-1">
+                   <div class="col-4 text-muted">
+-                    <% text = t('activerecord.attributes.electrical.switchboard.circuits') %>
++                    <% text = t('activerecord.attributes.electrical/switchboard.circuits') %>
+                     <%= link_to electrical_switchboard_circuits_path(@switchboard),
+                       class: "btn btn-sm btn-outline-secondary",
+                       title: text do %>
+@@ -203,7 +203,7 @@
+ 
+                 <div class="row mb-1">
+                   <div class="col-4 text-muted">
+-                    <% text = t('activerecord.models.electrical.demand.one') %>
++                    <% text = t('activerecord.models.electrical/demand.one') %>
+                     <% if @switchboard.electrical_demand.present? %>
+                       <%= link_to @switchboard.electrical_demand,
+                         class: "btn btn-sm btn-outline-secondary",
+---- app/views/electrical/switchboards/_header.html.erb ----
+--- app/views/electrical/switchboards/_header.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -4,13 +4,13 @@
+   <% end %>
+   <th scope="col"><%= sort_link(@q, :tag_stage) %></th>
+   <th scope="col"><%= sort_link(@q, :tag) %></th>
+-  <th scope="col"><%= t('activerecord.attributes.electrical.switchboard.notes') %></th>
++  <th scope="col"><%= t('activerecord.attributes.electrical/switchboard.notes') %></th>
+   <th scope="col"><%= sort_link(@q, :ingress_protection) %></th>
+   <th scope="col"><%= sort_link(@q, :voltage_rating) %></th>
+   <th scope="col"><%= sort_link(@q, :busbar_rating) %><br>(A)</th>
+   <th scope="col"><%= sort_link(@q, :busbar_fault_rating) %><br>(A)</th>
+   <th scope="col"><%= sort_link(@q, :busbar_fault_duration) %><br>(s)</th>
+-  <th scope="col"><%= t("activerecord.models.electrical.demand.one") %></th>
+-  <th scope="col"><%= t("activerecord.attributes.electrical.switchboard.circuits") %></th>
++  <th scope="col"><%= t("activerecord.models.electrical/demand.one") %></th>
++  <th scope="col"><%= t("activerecord.attributes.electrical/switchboard.circuits") %></th>
+   <th scope="col" width="150px"><%= t('table.links')%></th>
+ </thead>
+---- app/views/electrical/switchboards/index.html.erb ----
+--- app/views/electrical/switchboards/index.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:18
+@@ -28,7 +28,7 @@
+                 aria: { label: t('actions.new') },
+                 title: t('actions.new') do %>
+                 <%== bs_icon('plus-square-fill') %>
+-                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical.switchboard.one')].join(' ') %></span>
++                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical/switchboard.one')].join(' ') %></span>
+               <% end %>
+           <% end %>
+         </div>
+@@ -40,19 +40,19 @@
+         <%= search_form_for @q, url: discipline_electrical_switchboards_path(@discipline) do |f| %>
+           <%= f.search_field :voltage_rating_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.switchboard.voltage_rating') %>
++                placeholder: t('activerecord.attributes.electrical/switchboard.voltage_rating') %>
+           <%= f.search_field :busbar_rating_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.switchboard.busbar_rating') %>
++                placeholder: t('activerecord.attributes.electrical/switchboard.busbar_rating') %>
+           <%= f.search_field :incomer_protection_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.switchboard.incomer_protection') %>
++                placeholder: t('activerecord.attributes.electrical/switchboard.incomer_protection') %>
+           <%= f.search_field :metering_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.switchboard.metering') %>
++                placeholder: t('activerecord.attributes.electrical/switchboard.metering') %>
+           <%= f.search_field :notes_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.switchboard.notes') %>
++                placeholder: t('activerecord.attributes.electrical/switchboard.notes') %>
+           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
+             <%== bs_icon('search') %>
+           <% end %>
+@@ -67,7 +67,7 @@
+               <th colspan="9">
+                 <%= t('index.link_broken', 
+                       count: @link_broken.count,
+-                      models: t("activerecord.models.electrical.switchboard", count: @link_broken.count)) %>
++                      models: t("activerecord.models.electrical/switchboard", count: @link_broken.count)) %>
+               </th>
+             </tr>
+             <%= render 'tags/header' %>
+@@ -86,7 +86,7 @@
+               <th colspan="9">
+                 <%= t('index.link_incomplete', 
+                       count: @link_incomplete.count,
+-                      models: t("activerecord.models.electrical.switchboard", count: @link_incomplete.count)) %>
++                      models: t("activerecord.models.electrical/switchboard", count: @link_incomplete.count)) %>
+               </th>
+             </tr>
+             <%= render 'tags/header' %>
+---- app/views/electrical/motors/_form.html.erb ----
+--- app/views/electrical/motors/_form.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -38,7 +38,7 @@
+             <!-- Motor Details -->
+             <div class="card mb-1" style="<%= form_styles(swatch) %>">
+               <div class="card-header p-2" style="<%= card_header_styles(swatch) %>">
+-                <h5><%= t('activerecord.models.electrical.motor.one') %></h5>
++                <h5><%= t('activerecord.models.electrical/motor.one') %></h5>
+               </div>
+ 
+               <div class="card-body p-2" style="<%= form_styles(swatch) %>">
+---- app/views/electrical/motors/_card.html.erb ----
+--- app/views/electrical/motors/_card.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -7,7 +7,7 @@
+   
+   <div class="container-fluid">
+     <div class="row mb-1">
+-      <% text = t("actions.jump_to", model: t("activerecord.models.electrical.motor.one")) %>
++      <% text = t("actions.jump_to", model: t("activerecord.models.electrical/motor.one")) %>
+       <%= link_to motor, 
+           class: "btn btn-sm btn-outline-secondary me-2",
+           title: text do %>
+---- app/views/electrical/motors/show.html.erb ----
+--- app/views/electrical/motors/show.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -96,7 +96,7 @@
+                     aria: { label: t('actions.new') },
+                     title: t('actions.new') do %>
+                     <%== bs_icon('plus-square-fill') %>
+-                    <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical.motor.one')].join(' ') %></span>
++                    <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical/motor.one')].join(' ') %></span>
+                   <% end %>
+               <% end %>
+             </div> <!-- end button group -->
+@@ -165,7 +165,7 @@
+               <!-- Demand section -->
+               <div class="row mb-1">
+                 <div class="col-4 text-muted">
+-                  <% text = t('activerecord.models.electrical.demand.one') %>
++                  <% text = t('activerecord.models.electrical/demand.one') %>
+                   <% if @motor.electrical_demand.present? %>
+                     <%= link_to @motor.electrical_demand,
+                       class: "btn btn-sm btn-outline-secondary",
+---- app/views/electrical/motors/_header.html.erb ----
+--- app/views/electrical/motors/_header.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -4,12 +4,12 @@
+   <% end %>
+   <th scope="col"><%= sort_link(@q, :tag_stage) %></th>
+   <th scope="col"><%= sort_link(@q, :tag) %></th>
+-  <th scope="col"><%= t('activerecord.attributes.electrical.motor.notes') %></th>
++  <th scope="col"><%= t('activerecord.attributes.electrical/motor.notes') %></th>
+   <th scope="col"><%= sort_link(@q, :motor_type) %></th>
+   <th scope="col"><%= sort_link(@q, :frame_size) %></th>
+   <th scope="col"><%= sort_link(@q, :poles) %></th>
+   <th scope="col"><%= sort_link(@q, :ingress_protection) %></th>
+   <th scope="col"><%= sort_link(@q, :speed_rated) %></th>
+-  <th scope="col"><%= t('activerecord.models.electrical.demand.one') %></th>
++  <th scope="col"><%= t('activerecord.models.electrical/demand.one') %></th>
+   <th scope="col" width="150px"><%= t('table.links')%></th>
+ </thead>
+---- app/views/electrical/motors/index.html.erb ----
+--- app/views/electrical/motors/index.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -29,7 +29,7 @@
+                 aria: { label: t('actions.new') },
+                 title: t('actions.new') do %>
+                 <%== bs_icon('plus-square-fill') %>
+-                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical.motor.one')].join(' ') %></span>
++                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical/motor.one')].join(' ') %></span>
+               <% end %>
+           <% end %>
+         </div>
+@@ -41,22 +41,22 @@
+         <%= search_form_for @q, url: discipline_electrical_motors_path(@discipline) do |f| %>
+           <%= f.search_field :motor_type_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.motor.motor_type') %>
++                placeholder: t('activerecord.attributes.electrical/motor.motor_type') %>
+           <%= f.search_field :frame_size_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.motor.frame_size') %>
++                placeholder: t('activerecord.attributes.electrical/motor.frame_size') %>
+           <%= f.search_field :poles_eq,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.motor.poles') %>
++                placeholder: t('activerecord.attributes.electrical/motor.poles') %>
+           <%= f.search_field :ingress_protection_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.motor.ingress_protection') %>
++                placeholder: t('activerecord.attributes.electrical/motor.ingress_protection') %>
+           <%= f.search_field :speed_rated_eq,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.motor.speed_rated') %>
++                placeholder: t('activerecord.attributes.electrical/motor.speed_rated') %>
+           <%= f.search_field :notes_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.motor.notes') %>
++                placeholder: t('activerecord.attributes.electrical/motor.notes') %>
+           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
+             <%== bs_icon('search') %>
+           <% end %>
+@@ -71,7 +71,7 @@
+               <th colspan="9">
+                 <%= t('index.link_broken', 
+                       count: @link_broken.count,
+-                      models: t("activerecord.models.electrical.motor", count: @link_broken.count)) %>
++                      models: t("activerecord.models.electrical/motor", count: @link_broken.count)) %>
+               </th>
+             </tr>
+             <%= render 'tags/header' %>
+@@ -90,7 +90,7 @@
+               <th colspan="9">
+                 <%= t('index.link_incomplete', 
+                       count: @link_incomplete.count,
+-                      models: t("activerecord.models.electrical.motor", count: @link_incomplete.count)) %>
++                      models: t("activerecord.models.electrical/motor", count: @link_incomplete.count)) %>
+               </th>
+             </tr>
+             <%= render 'tags/header' %>
+---- app/views/electrical/circuits/_form.html.erb ----
+--- app/views/electrical/circuits/_form.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -77,12 +77,12 @@
+ 
+             <div class="row">
+               <%= f.check_box :contactor, 
+-                    label: t('activerecord.attributes.electrical.circuit.contactor') %>
++                    label: t('activerecord.attributes.electrical/circuit.contactor') %>
+             </div>
+ 
+             <div class="row">
+               <%= f.text_area :notes,
+-                    label: t('activerecord.attributes.electrical.circuit.notes'),
++                    label: t('activerecord.attributes.electrical/circuit.notes'),
+                     rows: 2 %>
+             </div>
+ 
+@@ -95,7 +95,7 @@
+                         layout: :horizontal,
+                         label_col: "col-sm-4", 
+                         control_col: "col-sm-8",
+-                        label: t('activerecord.attributes.electrical.circuit.feeder') } %>
++                        label: t('activerecord.attributes.electrical/circuit.feeder') } %>
+               <% end %>
+             </div>
+ 
+@@ -108,7 +108,7 @@
+                         layout: :horizontal,
+                         label_col: "col-sm-4", 
+                         control_col: "col-sm-8",
+-                        label: t('activerecord.attributes.electrical.circuit.demand') } %>
++                        label: t('activerecord.attributes.electrical/circuit.demand') } %>
+               <% end %>
+             </div>
+           </div>
+---- app/views/electrical/circuits/_row.html.erb ----
+--- app/views/electrical/circuits/_row.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -16,14 +16,14 @@
+     <% if row.feeder.present? && policy(row.feeder).show? %>
+       <%= link_to row.feeder.label, row.feeder %>
+     <% else %>
+-      <%= t("show.unassigned", model: t("activerecord.attributes.electrical.circuit.feeder")) %>
++      <%= t("show.unassigned", model: t("activerecord.attributes.electrical/circuit.feeder")) %>
+     <% end %>
+   </td>
+   <td>
+     <% if row.demand.present? && policy(row.demand).show? %>
+       <%= link_to row.demand.label, row.demand %>
+     <% else %>
+-      <%= t("show.unassigned", model: t("activerecord.models.electrical.demand.one")) %>
++      <%= t("show.unassigned", model: t("activerecord.models.electrical/demand.one")) %>
+     <% end %>
+   </td>
+   <!-- Links -->
+---- app/views/electrical/circuits/show.html.erb ----
+--- app/views/electrical/circuits/show.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -110,58 +110,58 @@
+                 <div class="card-body p-3">
+                   
+                 <div class="row mb-1">
+-                  <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.serial') %></div>
++                  <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/circuit.serial') %></div>
+                   <div class="col-8"><%= @circuit.label.presence || '-' %></div>
+                 </div>
+                   
+                   <div class="row mb-1">
+-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.phase') %></div>
++                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/circuit.phase') %></div>
+                     <div class="col-8"><%= @circuit.phase.presence || '-' %></div>
+                   </div>
+                   
+                   <div class="row mb-1">
+-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.device') %></div>
++                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/circuit.device') %></div>
+                     <div class="col-8"><%= @circuit.device.presence || '-' %></div>
+                   </div>
+                   
+                   <div class="row mb-1">
+-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.poles') %></div>
++                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/circuit.poles') %></div>
+                     <div class="col-8"><%= @circuit.poles.presence || '-' %></div>
+                   </div>
+                   
+                   <div class="row mb-1">
+-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.curve') %></div>
++                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/circuit.curve') %></div>
+                     <div class="col-8"><%= @circuit.curve.presence || '-' %></div>
+                   </div>
+                   
+                   <div class="row mb-1">
+-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.rating') %></div>
++                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/circuit.rating') %></div>
+                     <div class="col-8"><%= @circuit.rating.presence || '-' %></div>
+                   </div>
+                   
+                   <div class="row mb-1">
+-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.elcb') %></div>
++                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/circuit.elcb') %></div>
+                     <div class="col-8"><%= @circuit.elcb.presence || '-' %></div>
+                   </div>
+                   
+                   <div class="row mb-1">
+-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.contactor') %></div>
++                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/circuit.contactor') %></div>
+                     <div class="col-8"><%= @circuit.contactor ? t("form.true") : '-' %></div>
+                   </div>
+                   
+                   <div class="row mb-1">
+-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical.circuit.notes') %></div>
++                    <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/circuit.notes') %></div>
+                     <div class="col-8"><%= @circuit.notes.presence || '-' %></div>
+                   </div>
+ 
+                   <!-- Feeder Section -->
+                   <div class="row mb-1">
+                     <div class="col-4 text-muted">
+-                      <%= t('activerecord.attributes.electrical.circuit.feeder') %>
++                      <%= t('activerecord.attributes.electrical/circuit.feeder') %>
+                     </div>
+                     <div class="col-8">
+                       <% if @circuit.feeder.present? %>
+-                        <% text = t("activerecord.models.electrical.cable.one") %>
++                        <% text = t("activerecord.models.electrical/cable.one") %>
+                         <div class="d-flex justify-content-between align-items-center">
+                           <span><%= @circuit.feeder.label %></span>
+                           <%= link_to @circuit.feeder,
+@@ -173,7 +173,7 @@
+                         </div>
+                       <% else %>
+                         <span class="text-muted">
+-                          <%= t('show.unassigned', model: t("activerecord.attributes.electrical.circuit.feeder")) %>
++                          <%= t('show.unassigned', model: t("activerecord.attributes.electrical/circuit.feeder")) %>
+                         </span>
+                       <% end %>
+                     </div>
+@@ -182,11 +182,11 @@
+                   <!-- Load Section -->
+                   <div class="row mb-1">
+                     <div class="col-4 text-muted">
+-                      <%= t('activerecord.attributes.electrical.circuit.demand') %>
++                      <%= t('activerecord.attributes.electrical/circuit.demand') %>
+                     </div>
+                     <div class="col-8">
+                       <% if @circuit.demand.present? %>
+-                        <% text = t("activerecord.models.electrical.demand.one") %>
++                        <% text = t("activerecord.models.electrical/demand.one") %>
+                         <div class="d-flex justify-content-between align-items-center">
+                           <span><%= @circuit.demand.label %></span>
+                           <%= link_to @circuit.demand,
+@@ -198,7 +198,7 @@
+                         </div>
+                       <% else %>
+                         <span class="text-muted">
+-                          <%= t('show.unassigned', model: t("activerecord.attributes.electrical.circuit.demand")) %>
++                          <%= t('show.unassigned', model: t("activerecord.attributes.electrical/circuit.demand")) %>
+                         </span>
+                       <% end %>
+                     </div>
+---- app/views/electrical/circuits/_header.html.erb ----
+--- app/views/electrical/circuits/_header.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -1,16 +1,16 @@
+ <thead>
+   <tr>
+-    <th scope="col"><%= sort_link(@q, :serial, t("activerecord.attributes.electrical.circuit.serial")) %></th>
+-    <th scope="col"><%= t('activerecord.attributes.electrical.circuit.notes') %></th>
+-    <th scope="col"><%= sort_link(@q, :phase, t("activerecord.attributes.electrical.circuit.phase")) %></th>
+-    <th scope="col"><%= sort_link(@q, :device, t("activerecord.attributes.electrical.circuit.device")) %></th>
+-    <th scope="col"><%= sort_link(@q, :poles, t("activerecord.attributes.electrical.circuit.poles")) %></th>
+-    <th scope="col"><%= sort_link(@q, :rating, t("activerecord.attributes.electrical.circuit.rating")) %></th>
+-    <th scope="col"><%= sort_link(@q, :curve, t("activerecord.attributes.electrical.circuit.curve")) %></th>
+-    <th scope="col"><%= sort_link(@q, :elcb, t("activerecord.attributes.electrical.circuit.elcb")) %></th>
+-    <th scope="col"><%= sort_link(@q, :contactor, t("activerecord.attributes.electrical.circuit.contactor")) %></th>
+-    <th scope="col"><%= sort_link(@q, :feeder, t("activerecord.attributes.electrical.circuit.feeder")) %></th>
+-    <th scope="col"><%= sort_link(@q, :demand, t("activerecord.attributes.electrical.circuit.demand")) %></th>
++    <th scope="col"><%= sort_link(@q, :serial, t("activerecord.attributes.electrical/circuit.serial")) %></th>
++    <th scope="col"><%= t('activerecord.attributes.electrical/circuit.notes') %></th>
++    <th scope="col"><%= sort_link(@q, :phase, t("activerecord.attributes.electrical/circuit.phase")) %></th>
++    <th scope="col"><%= sort_link(@q, :device, t("activerecord.attributes.electrical/circuit.device")) %></th>
++    <th scope="col"><%= sort_link(@q, :poles, t("activerecord.attributes.electrical/circuit.poles")) %></th>
++    <th scope="col"><%= sort_link(@q, :rating, t("activerecord.attributes.electrical/circuit.rating")) %></th>
++    <th scope="col"><%= sort_link(@q, :curve, t("activerecord.attributes.electrical/circuit.curve")) %></th>
++    <th scope="col"><%= sort_link(@q, :elcb, t("activerecord.attributes.electrical/circuit.elcb")) %></th>
++    <th scope="col"><%= sort_link(@q, :contactor, t("activerecord.attributes.electrical/circuit.contactor")) %></th>
++    <th scope="col"><%= sort_link(@q, :feeder, t("activerecord.attributes.electrical/circuit.feeder")) %></th>
++    <th scope="col"><%= sort_link(@q, :demand, t("activerecord.attributes.electrical/circuit.demand")) %></th>
+     <th class="text-center"><%= t('table.links') %></th>
+   </tr>
+ </thead>
+\ No newline at end of file
+---- app/views/electrical/circuits/index.html.erb ----
+--- app/views/electrical/circuits/index.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -25,7 +25,7 @@
+         <div class="col-8">
+           <% scope_text = @switchboard.present? ? 
+             [@switchboard.class.model_name.human, @switchboard.long_label].join(' ') : 
+-            t('index.all', models: t('activerecord.models.electrical.switchboard.other')) %>
++            t('index.all', models: t('activerecord.models.electrical/switchboard.other')) %>
+           <h5><%= t('.header', scope_text: scope_text) %></h5>
+         </div>
+ 
+@@ -38,7 +38,7 @@
+                 title: t('actions.new') do %>
+                 <%== bs_icon('plus-square-fill') %>
+                 <span class="ms-1">
+-                  <%= [t('actions.new'), t('activerecord.models.electrical.circuit.one')].join(' ') %>
++                  <%= [t('actions.new'), t('activerecord.models.electrical/circuit.one')].join(' ') %>
+                 </span>
+               <% end %>
+           <% end %>
+@@ -54,7 +54,7 @@
+               discipline_electrical_circuits_path(@discipline) do |f| %>
+           <%= f.search_field :phase_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.circuit.phase') %>
++                placeholder: t('activerecord.attributes.electrical/circuit.phase') %>
+           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
+             <%== bs_icon('search') %>
+           <% end %>
+---- app/views/electrical/socket_ccts/show.html.erb ----
+--- app/views/electrical/socket_ccts/show.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -67,7 +67,7 @@
+                   title: t('actions.new') do %>
+                   <%== bs_icon('plus-square-fill') %>
+                   <span class="ms-1">
+-                    <%= [t('actions.new'), t('activerecord.models.electrical.socket_cct.one')].join(' ') %>
++                    <%= [t('actions.new'), t('activerecord.models.electrical/socket_cct.one')].join(' ') %>
+                   </span>
+                 <% end %>
+               <% end %>
+@@ -119,7 +119,7 @@
+               <!-- Demand section -->
+               <div class="row mb-1">
+                 <div class="col-4 text-muted">
+-                  <% text = t('activerecord.models.electrical.demand.one') %>
++                  <% text = t('activerecord.models.electrical/demand.one') %>
+                   <% if @socket_cct.electrical_demand.present? %>
+                     <%= link_to @socket_cct.electrical_demand,
+                       class: "btn btn-sm btn-outline-secondary",
+---- app/views/electrical/demands/_form.html.erb ----
+--- app/views/electrical/demands/_form.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -29,27 +29,27 @@
+             <div class="row">
+               <%= f.select :basis, 
+                     demand.class.bases.keys.collect { |basis| [demand.class.human_enum_name(:basis, basis), basis] },
+-                    help: t('activerecord.help.electrical.demand.basis') %>
++                    help: t('activerecord.help.electrical/demand.basis') %>
+             </div>
+             
+             <div class="row">
+               <%= f.text_area :basis_notes,
+-                  help: t('activerecord.help.electrical.demand.basis_notes') %>
++                  help: t('activerecord.help.electrical/demand.basis_notes') %>
+             </div>
+ 
+             <div class="row">
+               <%= f.select :config, 
+                     demand.class.configs.keys.collect { |config| [demand.class.human_enum_name(:config, config), config] },
+-                    help: t('activerecord.help.electrical.demand.config') %>
++                    help: t('activerecord.help.electrical/demand.config') %>
+             </div>
+ 
+             <div class="row">
+               <%= f.select :supply, Constants.electrical.supply.to_h.invert,
+                   include_blank: t("form.other"),
+-                  help: t('activerecord.help.electrical.demand.supply') %>
++                  help: t('activerecord.help.electrical/demand.supply') %>
+               <%= f.number_field :other_supply,
+                 append: "V",
+-                  help: t('activerecord.help.electrical.demand.other_supply') %>
++                  help: t('activerecord.help.electrical/demand.other_supply') %>
+             </div>
+ 
+             <% disabled = [:current, :power, :vector, :power_factor] %>
+@@ -94,7 +94,7 @@
+ 
+             <div class="row">
+               <%= f.number_field :duty, in: 0.0 .. 1.0, step: 0.01,
+-                    help: t('activerecord.help.electrical.demand.duty') %>
++                    help: t('activerecord.help.electrical/demand.duty') %>
+             </div>
+           </div> <!-- end responsive columns --> 
+         </div>
+---- app/views/electrical/demands/_header.html.erb ----
+--- app/views/electrical/demands/_header.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -1,8 +1,8 @@
+ <thead>
+   <th scope="col"><%= sort_link(@q, 'tags.full_tag', t('activerecord.attributes.tag.full_tag')) %></th>
+-  <th scope="col"><%= t('activerecord.attributes.electrical.demand.notes') %></th>
+-  <th scope="col"><%= t('activerecord.attributes.electrical.demand.circuit') %></th>
+-  <th scope="col"><%= t('activerecord.attributes.electrical.demand.incomer') %></th>
++  <th scope="col"><%= t('activerecord.attributes.electrical/demand.notes') %></th>
++  <th scope="col"><%= t('activerecord.attributes.electrical/demand.circuit') %></th>
++  <th scope="col"><%= t('activerecord.attributes.electrical/demand.incomer') %></th>
+   <th scope="col"><%= sort_link(@q, :basis) %></th>
+   <th scope="col"><%= sort_link(@q, :config) %></th>
+   <th scope="col"><%= sort_link(@q, :supply) %></th>
+@@ -11,6 +11,6 @@
+   <th scope="col"><%= sort_link(@q, :current) %></th>
+   <th scope="col"><%= sort_link(@q, :power_factor) %></th>
+   <th scope="col"><%= sort_link(@q, :duty) %></th>
+-  <th scope="col"><%= sort_link(@q, :demandable_type, t("activerecord.attributes.electrical.demand.demandable_type")) %></th>
++  <th scope="col"><%= sort_link(@q, :demandable_type, t("activerecord.attributes.electrical/demand.demandable_type")) %></th>
+   <th scope="col" width="150px"><%= t('table.links')%></th>
+ </thead>
+---- app/views/electrical/heaters/_form.html.erb ----
+--- app/views/electrical/heaters/_form.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -38,7 +38,7 @@
+             <!-- Heater Details -->
+             <div class="card mb-1" style="<%= card_styles(swatch) %>">
+               <div class="card-header p-2" style="<%= card_header_styles(swatch) %>">
+-                <h5><%= t('activerecord.models.electrical.heater.one') %></h5>
++                <h5><%= t('activerecord.models.electrical/heater.one') %></h5>
+               </div>
+ 
+               <div class="card-body p-2" style="<%= form_styles(swatch) %>">
+---- app/views/electrical/demands/show.html.erb ----
+--- app/views/electrical/demands/show.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -139,7 +139,7 @@
+                     </div>
+                     <div class="col-8">
+                       <% if @demand.circuit.present? %>
+-                        <% text = t("activerecord.models.electrical.circuit.one") %>
++                        <% text = t("activerecord.models.electrical/circuit.one") %>
+                         <div class="d-flex justify-content-between align-items-center">
+                           <span><%= @demand.circuit.label %></span>
+                           <%= link_to @demand.circuit,
+@@ -151,7 +151,7 @@
+                         </div>
+                       <% else %>
+                         <span class="text-muted">
+-                          <%= t('show.unassigned', model: t("activerecord.models.electrical.circuit.one")) %>
++                          <%= t('show.unassigned', model: t("activerecord.models.electrical/circuit.one")) %>
+                         </span>
+                       <% end %>
+                     </div>
+@@ -164,7 +164,7 @@
+                     </div>
+                     <div class="col-8">
+                       <% if @demand.incomer.present? %>
+-                        <% text = t("activerecord.models.electrical.cable.one") %>
++                        <% text = t("activerecord.models.electrical/cable.one") %>
+                         <div class="d-flex justify-content-between align-items-center">
+                           <span><%= @demand.incomer.label %></span>
+                           <%= link_to @demand.incomer,
+---- app/views/electrical/demands/_index_link.html.erb ----
+--- app/views/electrical/demands/_index_link.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -1,4 +1,4 @@
+-<% text = t('activerecord.models.electrical.demand.one') %>
++<% text = t('activerecord.models.electrical/demand.one') %>
+ <% if row.electrical_demand.present? %>
+   <%= link_to row.electrical_demand,
+     class: "btn btn-sm btn-outline-info",
+---- app/views/electrical/socket_ccts/_header.html.erb ----
+--- app/views/electrical/socket_ccts/_header.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -4,9 +4,9 @@
+   <% end %>
+   <th scope="col"><%= sort_link(@q, :tag_stage) %></th>
+   <th scope="col"><%= sort_link(@q, :tag) %></th>
+-  <th scope="col"><%= t('activerecord.attributes.electrical.socket_cct.notes') %></th>
++  <th scope="col"><%= t('activerecord.attributes.electrical/socket_cct.notes') %></th>
+   <th scope="col"><%= sort_link(@q, :socket_type) %></th>
+   <th scope="col"><%= sort_link(@q, :quantity) %></th>
+-  <th scope="col"><%= t('activerecord.models.electrical.demand.one') %></th>
++  <th scope="col"><%= t('activerecord.models.electrical/demand.one') %></th>
+   <th scope="col" width="150px"><%= t('table.links')%></th>
+ </thead>
+\ No newline at end of file
+---- app/views/electrical/demands/_row.html.erb ----
+--- app/views/electrical/demands/_row.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -14,7 +14,7 @@
+     <% if d.incomer&.from&.present? %>
+       <%= link_to d.incomer.from.long_label, d.incomer.from %>
+     <% else %>
+-      <%= t('show.unassigned', model: t("activerecord.models.electrical.circuit.one")) %>
++      <%= t('show.unassigned', model: t("activerecord.models.electrical/circuit.one")) %>
+     <% end %>
+   </td>
+   <!-- incomer -->
+@@ -22,7 +22,7 @@
+     <% if d.incomer&.present? %>
+       <%= link_to d.incomer.label, d.incomer %>
+     <% else %>
+-      <%= t('show.unassigned', model: t("activerecord.models.electrical.cable.one")) %>
++      <%= t('show.unassigned', model: t("activerecord.models.electrical/cable.one")) %>
+     <% end %>
+   </td>
+   <td><%= d.class.human_enum_name(:basis, d.basis) %></td>
+---- app/views/electrical/heaters/_header.html.erb ----
+--- app/views/electrical/heaters/_header.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -4,7 +4,7 @@
+   <% end %>
+   <th scope="col"><%= sort_link(@q, :tag_stage) %></th>
+   <th scope="col"><%= sort_link(@q, :tag) %></th>
+-  <th scope="col"><%= t('activerecord.attributes.electrical.heater.notes') %></th>
++  <th scope="col"><%= t('activerecord.attributes.electrical/heater.notes') %></th>
+   <th scope="col"><%= sort_link(@q, :heater_type) %></th>
+   <th scope="col"><%= sort_link(@q, :application) %></th>
+   <th scope="col"><%= sort_link(@q, :ingress_protection) %></th>
+@@ -13,6 +13,6 @@
+   <th scope="col"><%= sort_link(@q, :power_density_max) %></th>
+   <th scope="col"><%= sort_link(@q, :sheath_material) %></th>
+   <th scope="col"><%= sort_link(@q, :insulation_material) %></th>
+-  <th scope="col"><%= t('activerecord.models.electrical.demand.one') %></th>
++  <th scope="col"><%= t('activerecord.models.electrical/demand.one') %></th>
+   <th scope="col" width="150px"><%= t('table.links')%></th>
+ </thead>
+---- app/views/electrical/heaters/show.html.erb ----
+--- app/views/electrical/heaters/show.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -99,7 +99,7 @@
+                   title: t('actions.new') do %>
+                   <%== bs_icon('plus-square-fill') %>
+                   <span class="ms-1">
+-                    <%= [t('actions.new'), t('activerecord.models.electrical.heater.one')].join(' ') %>
++                    <%= [t('actions.new'), t('activerecord.models.electrical/heater.one')].join(' ') %>
+                   </span>
+                 <% end %>
+               <% end %>
+@@ -187,7 +187,7 @@
+               <!-- Demand section -->
+               <div class="row mb-1">
+                 <div class="col-4 text-muted">
+-                  <% text = t('activerecord.models.electrical.demand.one') %>
++                  <% text = t('activerecord.models.electrical/demand.one') %>
+                   <% if @heater.electrical_demand.present? %>
+                     <%= link_to @heater.electrical_demand,
+                       class: "btn btn-sm btn-outline-secondary",
+---- app/views/electrical/heaters/_card.html.erb ----
+--- app/views/electrical/heaters/_card.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -7,7 +7,7 @@
+   
+     <div class="container-fluid">
+       <div class="row mb-1">
+-        <% text = t("actions.jump_to", model: t("activerecord.models.electrical.heater.one")) %>
++        <% text = t("actions.jump_to", model: t("activerecord.models.electrical/heater.one")) %>
+         <%= link_to resource, 
+             class: "btn btn-sm btn-outline-secondary me-2",
+             title: text do %>
+---- app/views/electrical/heaters/index.html.erb ----
+--- app/views/electrical/heaters/index.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -29,7 +29,7 @@
+                 aria: { label: t('actions.new') },
+                 title: t('actions.new') do %>
+                 <%== bs_icon('plus-square-fill') %>
+-                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical.heater.one')].join(' ') %></span>
++                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical/heater.one')].join(' ') %></span>
+               <% end %>
+           <% end %>
+         </div>
+@@ -41,19 +41,19 @@
+         <%= search_form_for @q, url: discipline_electrical_heaters_path(@discipline) do |f| %>
+           <%= f.search_field :heater_type_cont,
+                 class: "search_field",
+-                placeholder: t("activerecord.attributes.electrical.heater.heater_type") %>
++                placeholder: t("activerecord.attributes.electrical/heater.heater_type") %>
+           <%= f.search_field :application_cont,
+                 class: "search_field",
+-                placeholder: t("activerecord.attributes.electrical.heater.application") %>
++                placeholder: t("activerecord.attributes.electrical/heater.application") %>
+           <%= f.search_field :ingress_protection_cont,
+                 class: "search_field",
+-                placeholder: t("activerecord.attributes.electrical.heater.ingress_protection") %>
++                placeholder: t("activerecord.attributes.electrical/heater.ingress_protection") %>
+           <%= f.search_field :sheath_material_cont,
+                 class: "search_field",
+-                placeholder: t("activerecord.attributes.electrical.heater.sheath_material") %>
++                placeholder: t("activerecord.attributes.electrical/heater.sheath_material") %>
+           <%= f.search_field :insulation_material_cont,
+                 class: "search_field",
+-                placeholder: t("activerecord.attributes.electrical.heater.insulation_material") %>
++                placeholder: t("activerecord.attributes.electrical/heater.insulation_material") %>
+           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
+             <%== bs_icon('search') %>
+           <% end %>
+@@ -68,7 +68,7 @@
+               <th colspan="9">
+                 <%= t('index.link_broken', 
+                       count: @link_broken.count,
+-                      models: t("activerecord.models.electrical.heater", count: @link_broken.count)) %>
++                      models: t("activerecord.models.electrical/heater", count: @link_broken.count)) %>
+               </th>
+             </tr>
+             <%= render 'tags/header' %>
+@@ -87,7 +87,7 @@
+               <th colspan="9">
+                 <%= t('index.link_incomplete', 
+                       count: @link_incomplete.count,
+-                      models: t("activerecord.models.electrical.heater", count: @link_incomplete.count)) %>
++                      models: t("activerecord.models.electrical/heater", count: @link_incomplete.count)) %>
+               </th>
+             </tr>
+             <%= render 'tags/header' %>
+@@ -108,7 +108,7 @@
+             <tr class="table-danger">
+ 
+               <td colspan="<%= columns + (current_project ? 0 : 1) %>">
+-                <%= t('index.orphans', models: t("activerecord.models.electrical.heater").tableize) %>
++                <%= t('index.orphans', models: t("activerecord.models.electrical/heater").tableize) %>
+               </td>
+             </tr>
+             <% @orphans.each do |row| %>
+---- app/views/electrical/demands/index.html.erb ----
+--- app/views/electrical/demands/index.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -31,13 +31,13 @@
+         <%= search_form_for @q, url: discipline_electrical_demands_path(@discipline) do |f| %>
+           <%= f.search_field :basis_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.demand.basis') %>
++                placeholder: t('activerecord.attributes.electrical/demand.basis') %>
+           <%= f.search_field :basis_notes_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.demand.basis_notes') %>
++                placeholder: t('activerecord.attributes.electrical/demand.basis_notes') %>
+           <%= f.search_field :config_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.demand.config') %>
++                placeholder: t('activerecord.attributes.electrical/demand.config') %>
+           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
+             <%== bs_icon('search') %>
+           <% end %>
+---- app/views/electrical/socket_ccts/index.html.erb ----
+--- app/views/electrical/socket_ccts/index.html.erb	2026-05-22 07:08:56
++++ -	2026-05-22 07:24:19
+@@ -26,7 +26,7 @@
+                 aria: { label: t('actions.new') },
+                 title: t('actions.new') do %>
+                 <%== bs_icon('plus-square-fill') %>
+-                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical.socket_cct.one')].join(' ') %></span>
++                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical/socket_cct.one')].join(' ') %></span>
+               <% end %>
+           <% end %>
+         </div>
+@@ -37,10 +37,10 @@
+         <%= search_form_for @q, url: discipline_electrical_socket_ccts_path(@discipline) do |f| %>
+           <%= f.search_field :socket_type_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.socket_cct.socket_type') %>
++                placeholder: t('activerecord.attributes.electrical/socket_cct.socket_type') %>
+           <%= f.search_field :notes_cont,
+                 class: "search_field",
+-                placeholder: t('activerecord.attributes.electrical.socket_cct.notes') %>
++                placeholder: t('activerecord.attributes.electrical/socket_cct.notes') %>
+           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
+             <%== bs_icon('search') %>
+           <% end %>

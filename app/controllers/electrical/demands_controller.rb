@@ -30,13 +30,13 @@ module Electrical
       authorize @demand
       if @demand.save
         flash[:success] = I18n.t('flash.create.notice', 
-          resource_name: I18n.t('activerecord.models.electrical.demand.one'))
+          resource_name: I18n.t('activerecord.models.electrical/demand.one'))
         redirect_to @demand
         return
       else
         set_swatch
         flash.now[:alert] = I18n.t('flash.create.alert', 
-          resource_name: I18n.t('activerecord.models.electrical.demand.one'))
+          resource_name: I18n.t('activerecord.models.electrical/demand.one'))
         render 'new', status: :unprocessable_entity
       end
     end
@@ -51,11 +51,11 @@ module Electrical
     def update
       authorize @demand
       if @demand.update(demand_params)
-        flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.electrical.demand.one'))
+        flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.electrical/demand.one'))
         redirect_to @demand
       else
         set_swatch
-        flash.now[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.electrical.demand.one'))
+        flash.now[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.electrical/demand.one'))
         render :edit, status: :unprocessable_entity
       end
     end
@@ -64,9 +64,9 @@ module Electrical
     def destroy
       authorize @demand
       if @demand.destroy
-        flash[:success] = I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.electrical.demand.one'))
+        flash[:success] = I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.electrical/demand.one'))
       else
-        flash.now[:alert] = I18n.t('flash.destroy.alert', resource_name: I18n.t('activerecord.models.electrical.demand.one'))
+        flash.now[:alert] = I18n.t('flash.destroy.alert', resource_name: I18n.t('activerecord.models.electrical/demand.one'))
       end
       redirect_to discipline_electrical_demands_url(@discipline), status: :see_other
     end

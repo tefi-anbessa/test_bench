@@ -8,10 +8,10 @@
           <div class="badge fs-6" style="<%= badge_styles(@swatch) %>">
               <%= cable_type.persisted? ? t('actions.edit') : t('actions.new') %> 
               <% if cable_type.present? && cable_type.persisted? %>
-                <%= [t('activerecord.models.electrical.cable_type'), cable_type.label].join(': ') %>
+                <%= [t('activerecord.models.electrical/cable_type'), cable_type.label].join(': ') %>
                 <small class="text-muted ms-2"><%= cable_type.long_label %></small>
               <% else %>
-                <%= t('activerecord.models.electrical.cable_type') %>
+                <%= t('activerecord.models.electrical/cable_type') %>
               <% end %>
           </div>
         </div>
@@ -49,7 +49,7 @@
             </div>
             <div class="row">
                 <%= f.select :construction,
-                      Electrical::CableType.constructions.map { |k, v| [t("activerecord.attributes.electrical.cable_type.constructions.#{k}"), k] },
+                      Electrical::CableType.constructions.map { |k, v| [t("activerecord.attributes.electrical/cable_type.constructions.#{k}"), k] },
                       { wrapper: { class: 'mb-1' },
                         class: 'form-select' } %>
             </div>

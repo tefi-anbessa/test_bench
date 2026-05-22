@@ -96,7 +96,7 @@
                     aria: { label: t('actions.new') },
                     title: t('actions.new') do %>
                     <%== bs_icon('plus-square-fill') %>
-                    <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical.motor.one')].join(' ') %></span>
+                    <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical/motor.one')].join(' ') %></span>
                   <% end %>
               <% end %>
             </div> <!-- end button group -->
@@ -165,7 +165,7 @@
               <!-- Demand section -->
               <div class="row mb-1">
                 <div class="col-4 text-muted">
-                  <% text = t('activerecord.models.electrical.demand.one') %>
+                  <% text = t('activerecord.models.electrical/demand.one') %>
                   <% if @motor.electrical_demand.present? %>
                     <%= link_to @motor.electrical_demand,
                       class: "btn btn-sm btn-outline-secondary",

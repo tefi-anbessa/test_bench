@@ -142,7 +142,7 @@ module Electrical
       assert_current_path electrical_circuit_path(@circuit)
       
       show_assertions
-      assert_text I18n.t("activerecord.attributes.electrical.circuit.serial")
+      assert_text I18n.t("activerecord.attributes.electrical/circuit.serial")
 
       # Variable assertions
       assert_selector "a[href='#{electrical_switchboard_circuits_path(@switchboard1)}']"

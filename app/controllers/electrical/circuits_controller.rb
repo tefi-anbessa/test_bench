@@ -63,17 +63,17 @@ module Electrical
           end
         end
         flash[:success] = [t("flash.create.notice",
-                          resource_name: t("activerecord.models.electrical.circuit.one"))]
+                          resource_name: t("activerecord.models.electrical/circuit.one"))]
         flash[:success] << t("flash.assigned",
-          resource_name: t("activerecord.attributes.electrical.circuit.feeder")) if @feeder.present?
+          resource_name: t("activerecord.attributes.electrical/circuit.feeder")) if @feeder.present?
         flash[:success] << t("flash.assigned",
-          resource_name: t("activerecord.attributes.electrical.circuit.demand")) if @demand.present?
+          resource_name: t("activerecord.attributes.electrical/circuit.demand")) if @demand.present?
         redirect_to @circuit
       rescue ActiveRecord::RecordInvalid => _e
         # Handle validation errors
         setup_form
         flash.now[:alert] = t("flash.create.alert", 
-          resource_name: t("activerecord.models.electrical.circuit.one").downcase)
+          resource_name: t("activerecord.models.electrical/circuit.one").downcase)
         render :new, status: :unprocessable_content
       end
     end
@@ -132,16 +132,16 @@ module Electrical
           end
         end
         flash[:success] = [t("flash.update.notice",
-                          resource_name: t("activerecord.models.electrical.circuit.one"))]
+                          resource_name: t("activerecord.models.electrical/circuit.one"))]
         flash[:success] << t("flash.assigned",
-          resource_name: t("activerecord.attributes.electrical.circuit.feeder")) if @feeder.present?
+          resource_name: t("activerecord.attributes.electrical/circuit.feeder")) if @feeder.present?
         flash[:success] << t("flash.assigned",
-          resource_name: t("activerecord.attributes.electrical.circuit.demand")) if @demand.present?
+          resource_name: t("activerecord.attributes.electrical/circuit.demand")) if @demand.present?
         redirect_to @circuit
       rescue ActiveRecord::RecordInvalid
         # Handle validation errors
         flash.now[:alert] = t("flash.update.alert",
-          resource_name: t("activerecord.models.electrical.circuit.one").downcase)
+          resource_name: t("activerecord.models.electrical/circuit.one").downcase)
         setup_form
         render :edit, status: :unprocessable_content
       end

@@ -28,7 +28,7 @@
                 aria: { label: t('actions.new') },
                 title: t('actions.new') do %>
                 <%== bs_icon('plus-square-fill') %>
-                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical.cable.one')].join(' ') %></span>
+                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical/cable.one')].join(' ') %></span>
               <% end %>
           <% end %>
         </div>
@@ -39,10 +39,10 @@
         <%= search_form_for @q, url: discipline_electrical_cables_path(@discipline) do |f| %>
           <%= f.search_field :electrical_cable_type_code_cont,
                 class: "search_field",
-                placeholder: t('activerecord.models.electrical.cable_type') %>
+                placeholder: t('activerecord.models.electrical/cable_type') %>
           <%= f.search_field :notes_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical.cable.notes') %>
+                placeholder: t('activerecord.attributes.electrical/cable.notes') %>
           <%= f.button class: "btn btn-outline-primary btn-sm mb-1", type: :submit do %>
             <%== bs_icon('search') %>
           <% end %>
@@ -57,7 +57,7 @@
               <td colspan="<%= 9 + (current_project ? 1 : 0) %>">
                 <%= t('index.link_broken', 
                 count: @link_broken.count,
-                models: t('activerecord.models.electrical.cable', count: @link_broken.count)) %>
+                models: t('activerecord.models.electrical/cable', count: @link_broken.count)) %>
               </th>
             </tr>
             <%= render 'tags/header' %>
@@ -76,7 +76,7 @@
               <td colspan="<%= 9 + (current_project ? 1 : 0) %>">
                 <%= t('index.link_incomplete', 
                 count: @link_incomplete.count,
-                models: t('activerecord.models.electrical.cable', count: @link_incomplete.count)) %>
+                models: t('activerecord.models.electrical/cable', count: @link_incomplete.count)) %>
               </td>
             </tr>
             <%= render 'tags/header' %>
@@ -98,7 +98,7 @@
               <td colspan="10">
                 <%= t('index.orphans', 
                       count: @orphans.count,
-                      models: t('activerecord.models.electrical.cable', count: @orphans.count)) %>
+                      models: t('activerecord.models.electrical/cable', count: @orphans.count)) %>
               </td>
             </tr>
             <% @orphans.each do |row| %>
