@@ -24,7 +24,7 @@
         <!-- Header Text (Left - 8 columns) -->
         <div class="col-8">
           <% scope_text = @switchboard.present? ? 
-            [@switchboard.class.model_name.human, @switchboard.long_label].join(' ') : 
+            [t("activerecord.models.electrical/switchboard.one"), @switchboard.long_label].join(' ') : 
             t('index.all', models: t('activerecord.models.electrical/switchboard.other')) %>
           <h5><%= t('.header', scope_text: scope_text) %></h5>
         </div>

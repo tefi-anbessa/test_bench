@@ -141,7 +141,7 @@
                   <% else %>
                     <div class="row mb-3">
                       <div class="alert alert-danger">
-                        <%= t('show.orphan', model: Project.model_name.human.downcase) %>
+                        <%= t('show.orphan', model: t("activerecord.models.project.one")) %>
                       </div>
                     </div>
                   <% end %>

@@ -11,6 +11,6 @@ class ApplicationRecord < ActiveRecord::Base
   
   def self.human_enum_name(enum_name, enum_value)
     return "" if enum_value.nil?
-    I18n.t("activerecord.attributes.#{self.model_name.i18n_key.to_s.gsub('/', '.')}.#{enum_name.to_s.pluralize}.#{enum_value.to_sym}")
+    I18n.t("activerecord.attributes.#{self.model_name.i18n_key.to_s}.#{enum_name.to_s.pluralize}.#{enum_value.to_sym}")
   end
 end

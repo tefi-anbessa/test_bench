@@ -121,51 +121,51 @@
 
             <div class="card-body p-3">
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @swatch.class.human_attribute_name(:name) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.swatch.name") %></div>
                 <div class="col-8"><%= @swatch.name || '-' %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @swatch.class.human_attribute_name(:bg) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.swatch.bg") %></div>
                 <div class="col-8" style="<%= container_styles(@swatch) %>"><%= @swatch.bg || '-' %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @swatch.class.human_attribute_name(:text) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.swatch.text") %></div>
                 <div class="col-8" style="<%= container_styles(@swatch) %>"><%= @swatch.text || '-' %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @swatch.class.human_attribute_name(:form_bg) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.swatch.form_bg") %></div>
                 <div class="col-8" style="<%= form_styles(@swatch) %>"><%= @swatch.form_bg || '-' %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @swatch.class.human_attribute_name(:form_field) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.swatch.form_field") %></div>
                 <div class="col-8" style="<%= form_field_styles(@swatch) %>"><%= @swatch.form_field || '-' %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @swatch.class.human_attribute_name(:card_bg) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.swatch.card_bg") %></div>
                 <div class="col-8" style="<%= card_styles(@swatch) %>"><%= @swatch.card_bg || '-' %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @swatch.class.human_attribute_name(:card_header_bg) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.swatch.card_header_bg") %></div>
                 <div class="col-8" style="<%= card_header_styles(@swatch) %>"><%= @swatch.card_header_bg || '-' %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @swatch.class.human_attribute_name(:card_border) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.swatch.card_border") %></div>
                 <div class="col-8" style="background-color: #{@swatch.card_border}"><%= @swatch.card_border || '-' %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @swatch.class.human_attribute_name(:badge_bg) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.swatch.badge_bg") %></div>
                 <div class="col-8" style="<%= badge_styles(@swatch) %>"><%= @swatch.badge_bg || '-' %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @swatch.class.human_attribute_name(:badge_text) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.swatch.badge_text") %></div>
                 <div class="col-8" style="<%= badge_styles(@swatch) %>"><%= @swatch.badge_text || '-' %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @swatch.class.human_attribute_name(:link_text) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.swatch.link_text") %></div>
                 <div class="col-8" style="<%= link_styles(@swatch) %>"><%= @swatch.link_text || '-' %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @swatch.class.human_attribute_name(:link_hover) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.swatch.link_hover") %></div>
                 <div class="col-8" style="<%= link_hover_styles(@swatch) %>"><%= @swatch.link_hover || '-' %></div>
               </div> <!-- end row -->
             </div>  <!-- end inner card body -->

@@ -107,6 +107,7 @@ en:
           mineral: Mineral Insulation
           fluoropolymer: Fluoropolymer (Teflon)
           fiberglass: Fiberglass Insulation
+        notes: "Notes"
 
       electrical/cable_type:
         id: ID

@@ -17,7 +17,7 @@
       </div>
 <%- @fields.each do |field| -%>
       <div class="row mb-1">
-        <div class="col-4 text-muted"><%%= resource.class.human_attribute_name(:<%= field[:name] %>) %></div>
+        <div class="col-4 text-muted"><%%= t("activerecord.attributes.<%= route_url %>.<%= field[:name] %>") %></div>
   <%- case field[:type] -%>
   <%- when "string", "enum", "integer", "bigint", "decimal" -%>
         <div class="col-8"><%%= resource.<%= field[:name] %> || '-' %></div>

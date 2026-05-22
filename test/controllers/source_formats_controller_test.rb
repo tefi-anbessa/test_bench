@@ -18,8 +18,6 @@ class SourceFormatsControllerTest < ActionController::TestCase
     # Set up an instance of source_format
     @source_format = create(:source_format)
 
-    @swatch = create(:swatch, name: 'app_theme')
-
     @request.env["devise.mapping"] = Devise.mappings[:user]
   end
 
@@ -95,7 +93,7 @@ class SourceFormatsControllerTest < ActionController::TestCase
       created_resource = SourceFormat.last
       assert_redirected_to created_resource
       assert_equal I18n.t("flash.create.notice", 
-        resource_name: created_resource.model_name.human), 
+        resource_name: I18n.t("activerecord.models.source_format.one")), 
         flash[:success]
   end
 
@@ -138,7 +136,7 @@ class SourceFormatsControllerTest < ActionController::TestCase
     assert_equal updated_attribute_value, @source_format.reload.send(update_attribute_name)
     assert_redirected_to @source_format
     assert_equal I18n.t("flash.update.notice",
-      resource_name: @source_format.model_name.human),
+      resource_name: I18n.t("activerecord.models.source_format.one")),
       flash[:success]
   end
 
@@ -158,7 +156,7 @@ class SourceFormatsControllerTest < ActionController::TestCase
     end
     assert_redirected_to source_formats_path
     assert_equal I18n.t("flash.destroy.notice", 
-      resource_name: @source_format.model_name.human), 
+      resource_name: I18n.t("activerecord.models.source_format.one")), 
       flash[:success]
   end
 
@@ -207,7 +205,7 @@ class SourceFormatsControllerTest < ActionController::TestCase
 
   # Helper methods
     def assert_successful_creation_flash_message(resource = @resource)
-      assert_equal I18n.t("flash.create.notice", resource: resource.model_name.human), flash[:notice]
+      assert_equal I18n.t("flash.create.notice", resource: I18n.t("activerecord.models.source_format.one")), flash[:notice]
     end
 
 end

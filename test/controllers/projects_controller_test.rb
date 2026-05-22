@@ -98,7 +98,7 @@ class ProjectsControllerTest < ActionController::TestCase
       }
     end
     assert_redirected_to project_url(Project.last)
-    assert_equal I18n.t('flash.create.notice', resource_name: I18n.t('activerecord.models.project')), flash[:success]
+    assert_equal I18n.t('flash.create.notice', resource_name: I18n.t('activerecord.models.project.one')), flash[:success]
   end
 
   test "cannot create project via JSON" do
@@ -128,7 +128,7 @@ class ProjectsControllerTest < ActionController::TestCase
       }
     end
     assert_template :new
-    assert_equal I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.project')), flash[:alert]
+    assert_equal I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.project.one')), flash[:alert]
   end
 
   # Edit action tests
@@ -190,7 +190,7 @@ class ProjectsControllerTest < ActionController::TestCase
     }
     assert_template :edit
     assert_equal original_title, @project.reload.title
-    assert_equal I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.project')), flash[:alert]
+    assert_equal I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.project.one')), flash[:alert]
   end
 
   test "project owner can update their project" do
@@ -204,7 +204,7 @@ class ProjectsControllerTest < ActionController::TestCase
     }
     assert_redirected_to project_url(@project)
     assert_equal 'Owner Updated Title', @project.reload.title
-    assert_equal I18n.t('flash.actions.update.notice', resource_name: I18n.t('activerecord.models.project')), flash[:success]
+    assert_equal I18n.t('flash.actions.update.notice', resource_name: I18n.t('activerecord.models.project.one')), flash[:success]
   end
 
   # Destroy action tests
@@ -230,7 +230,7 @@ class ProjectsControllerTest < ActionController::TestCase
       delete :destroy, params: { id: @project.id }
     end
     assert_redirected_to projects_url
-    assert_equal I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.project')), flash[:success]
+    assert_equal I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.project.one')), flash[:success]
   end
 
   # Select action tests

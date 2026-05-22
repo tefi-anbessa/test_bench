@@ -13,19 +13,19 @@ class DisciplinePolicyTest < ActiveSupport::TestCase
 
     # Setup discipline policy specific requirements (alternate to test setup helpers)
     @accredited_user = create(:user)
-    @accredited_user.grant(:project_manager, @project)
+    @accredited_user.grant(:project_admin, @project)
     @accredited_user_other_project = create(:user)
-    @accredited_user_other_project.grant(:project_manager, @other_project)
+    @accredited_user_other_project.grant(:project_admin, @other_project)
   end
 
-  # Override abstracted test for special case: accredited user cannot create disciplines.
+  # Override abstracted test for special case: accredited user is an admin and can create disciplines.
   # Line 195
   undef test_create_allows_admins_and_accredited_users_to_create_resource_on_the_current_project if method_defined?(:test_create_allows_admins_and_accredited_users_to_create_resource_on_the_current_project)
   test 'create allows admins and accredited users to create resource on the current project' do
     assert policy(@admin, @project, @new_resource).create?
     assert policy(@app_owner, @project, @new_resource).create?
     assert policy(@project_admin, @project, @new_resource).create?
-    refute policy(@accredited_user, @project, @new_resource).create?
+    assert policy(@accredited_user, @project, @new_resource).create?
   end
 
   # Override abstracted test for special case: global admins actually can create disciplines on 
@@ -36,5 +36,15 @@ class DisciplinePolicyTest < ActiveSupport::TestCase
     assert policy(@admin, @project, @new_other_resource).create?
     assert policy(@app_owner, @project, @new_other_resource).create?
   end
+
+  # Accredited user is an admin in this case, so they can destroy
+  undef test_destroy_denies_users_other_than_admins if method_defined?(:test_destroy_denies_users_other_than_admins)
+  test 'destroy denies users other than admins' do
+      refute policy(@project_manager, @project, @resource).destroy?
+      assert policy(@accredited_user, @project, @resource).destroy?
+      refute policy(@team_member, @project, @resource).destroy?
+      refute policy(@regular_user, @project, @resource).destroy?
+      refute policy(nil, @project, @resource).destroy?
+    end
 end
 

@@ -149,7 +149,8 @@ Ruby on Rails implements the Model View Controller (MVC) pattern for data driven
 
 - Model classes include all logic pertaining to the object.
 - Model classes should include custom validations where required. Custom validations must include i18n translation of custom error messages.
-- All resource models should have a label method, which is used to present a human readable identifier, preferably unique, for the model. This can (and in most cases will be) simply a reference to another attribute. It will be used in views as a card header, link id, etc.
+- All resource models should have a label method, which is used to present a human readable, non language specific identifier, preferably unique, for the model. This can (and in most cases will be) simply a reference to another attribute. It will be used in views as a card header, link id, etc.
+- All resources should have a long label method, which includes a parent identifier as well as the instance identifier. This will be used for view headers.
 
 #### Controllers
 
@@ -198,14 +199,14 @@ In addition, a card partial should be provided for drop down view on other pages
 - Views should use model constants such as enums to generate select options directly. Use human_enum_name from [application_record](../app/models/application_record.rb) to provide the translations.
 - Views should include i18n translations for all user facing text, including:
   - Model names.
-    - Use @tag.model_name.human in most cases [HOLD: Human is not working correctly with the present activerecord translation setup.]
-    - Use Tag.model_name.human if a model instance is not available
-    - Use of I18n::t('activerecord.models.tag') is also acceptable and may be faster.
+    - Model name translations are pluralized for English: two options are provided, :one and :other. Either provide a count, or include the explicit key required in the translation call.
+    - Future refactor may be required for other language pluralization.
+    - Use of I18n::t('activerecord.models.tag.one') is preferred, as it is a strict translation and raises "translation missing" in dev environment, if required.
+    - Use of @tag.model_name.human is acceptable, but if the translation is missing it will fall back to humanize the coded model name, which won't look good in other locales.
   - Attribute labels.
     - In forms, use bootstrap_form fields, which automatically wrap with a translated label.
-    - Use @tag.class.human_attribute_name(:prefix) in other cases.
-    - Use Tag.human_attribute_name(:prefix) if a model instance is not available.
-    - Use of I18n::t('activerecord.attributes.tag.prefix') is also acceptable and may be faster.
+    - Use of I18n::t('activerecord.attributes.tag.prefix') is preferred in other cases.
+    - Use @tag.class.human_attribute_name(:prefix) may be used but uses fallbacks to the coded attribute name.
   - Attribute help text.
     - In bootstrap_form fields, use help: I18n::t('activerecord.help.tag.prefix') option.
     - Use I18n::t('activerecord.help.tag.prefix') if required in other cases.

@@ -2,23 +2,20 @@
 en:
   activerecord:
     models:
-      project_change:
-        request: 
-          one: Change Request
-          other: Change Requests
+      project_change/request: 
+        one: Change Request
+        other: Change Requests
     attributes:
-      project_change:
-        request:
-          serial: "Number"
-          title: "Title"
-          reason: "Reason"
-          summary: "Summary"
-          duration: "Duration"
-          durations:
-            permanent: "Permanent"
-            trial: "Trial"
-            temporary: "Temporary"
+      project_change/request:
+        serial: "Number"
+        title: "Title"
+        reason: "Reason"
+        summary: "Summary"
+        duration: "Duration"
+        durations:
+          permanent: "Permanent"
+          trial: "Trial"
+          temporary: "Temporary"
     errors:
-      project_change:
-        request:
-          none: None
+      project_change/request:
+        none: None

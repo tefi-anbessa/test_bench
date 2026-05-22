@@ -150,9 +150,9 @@ module Electrical
     def destroy
       authorize @switchboard
       if @circuit.destroy
-        flash[:success] = t("flash.destroy.notice", resource_name: @circuit.model_name.human)
+        flash[:success] = t("flash.destroy.notice", resource_name: t("activerecord.models.electrical/circuit.one"))
       else
-        flash.now[:alert] = t("flash.destroy.alert", resource_name: @circuit.model_name.human)
+        flash.now[:alert] = t("flash.destroy.alert", resource_name: t("activerecord.models.electrical/circuit.one").downcase)
       end
       redirect_to electrical_switchboard_circuits_path(@switchboard)
     end
@@ -260,7 +260,7 @@ module Electrical
         # Required to set demand (as feeder.to)
         feeder = @feeder || @circuit.feeder
         unless feeder&.persisted?
-          flash[:alert] = t("flash.required", resource_name: Electrical::Circuit.human_attribute_name(:feeder))
+          flash[:alert] = t("flash.required", resource_name: t("activerecord.attributes.electrical/circuit.feeder"))
           return nil
         end
 

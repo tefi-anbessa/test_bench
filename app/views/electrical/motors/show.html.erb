@@ -130,35 +130,35 @@
 
             <div class="card-body p-3">
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:motor_type) %></div>
+                <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/motor.motor_type') %></div>
                 <div class="col-8"><%= @motor.class.human_enum_name(:motor_type, @motor.motor_type) %></div>
               </div>
 
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:frame_size) %></div>
+                <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/motor.frame_size') %></div>
                 <div class="col-8"><%= "frame_#{@motor.frame_size}" %></div>
               </div>
 
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:poles) %></div>
+                <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/motor.poles') %></div>
                 <div class="col-8"><%= @motor.poles || '-' %></div>
               </div>
 
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:ingress_protection) %></div>
+                <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/motor.ingress_protection') %></div>
                 <div class="col-8"><%= @motor.ingress_protection.present? ?
                 ["IP", @motor.ingress_protection].join(' ') : '-' %></div>
               </div>
 
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:speed_rated) %></div>
+                <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/motor.speed_rated') %></div>
                 <div class="col-8"><%= @motor.speed_rated.present? ? 
                                         number_to_human(@motor.speed_rated, precision: 4, units: { unit: "rpm"}) : 
                                         '-' %></div>
               </div>
 
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @motor.class.human_attribute_name(:notes) %></div>
+                <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/motor.notes') %></div>
                 <div class="col-8"><%= @motor.notes.present? ? simple_format(@motor.notes) : '-' %></div>
               </div>
 

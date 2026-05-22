@@ -18,7 +18,7 @@ module SystemTestHelpers
 
     def field_type(field)
       if resource_class.defined_enums.key?(field.to_s)
-        if I18n.exists?("activerecord.attributes.#{resource_class.model_name.i18n_key.to_s.gsub("/", ".")}.#{field.to_s.pluralize}")
+        if I18n.exists?("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field.to_s.pluralize}")
           :translated_enum
         else
           :enum
@@ -89,13 +89,6 @@ module SystemTestHelpers
       resource_class.model_name.name.gsub("::", ".").underscore.pluralize
     end
 
-    # Electrical::Cable -> electrical.cable
-    # Revert after reversion to i18n models namespacing
-    # Not used at present
-    def model_key
-      resource_class.model_name.i18n_key.gsub("/", ".")
-    end
-
     def assert_sort_link(field, label)
       link = find("table thead a", text: label, exact_text: true)
       uri = URI.parse(link[:href])
@@ -140,7 +133,7 @@ module SystemTestHelpers
 
       # Field labels
       @show_fields.each do |field|
-        assert_text resource_class.human_attribute_name(field)
+        assert_text I18n.t("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field}")
       end
 
       # Field data 
@@ -170,7 +163,7 @@ module SystemTestHelpers
     def new_resource_form_assertions
       # Field labels
       @new_fields.each do |field, value|
-        assert_text resource_class.human_attribute_name(field)
+        assert_text I18n.t("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field}")
       end
       # Data fields - test existence only for new forms
       field_form_new_assertions(@new_fields)
@@ -182,7 +175,7 @@ module SystemTestHelpers
     def edit_resource_form_assertions
       # Field labels
       @edit_fields.each do |field, value|
-        assert_text resource_class.human_attribute_name(field)
+        assert_text I18nt("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field}")
       end
       # Data fields - test values for edit forms
       field_form_edit_assertions(@edit_fields)

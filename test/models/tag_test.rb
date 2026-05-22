@@ -144,7 +144,7 @@ class TagTest < ActiveSupport::TestCase
     
     @tag.serial = 10000
     refute @tag.valid?
-    assert_includes @tag.errors[:serial], I18n.t("errors.messages.less_than_or_equal_to", count: 9999)
+    assert_includes @tag.errors[:serial], I18n.t("errors.messages.less_than", count: 10**Constants.tags.serial_digits.to_i)
     
     @tag.serial = 0
     assert @tag.valid?
@@ -262,12 +262,12 @@ class TagTest < ActiveSupport::TestCase
     # Create a cable with a tag
     tag = create(:tag, :unique_tag, prefix: 'EC', discipline: @discipline)
     cable = create(:electrical_cable, tag: tag)
+    assert_equal cable, tag.tagable
     # Create a new tag with no association
     new_tag = create(:tag, :unique_tag, prefix: 'EC', discipline: @discipline)
 
     # Try to associate the new tag with existing tagable by assignment
     new_tag.tagable = cable
-    new_tag.save
     refute new_tag.valid?
     assert_includes new_tag.errors[:tagable], 
         I18n::t("activerecord.errors.custom.already_associated", 

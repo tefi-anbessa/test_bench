@@ -203,7 +203,8 @@ module DisciplineResourceSystemTests
       assert_text value
       assert @resource.send(field) == value
     end
-    assert_text I18n.t("flash.update.notice", resource_name: resource_class.model_name.human)
+    assert_text I18n.t("flash.update.notice", 
+      resource_name: I18n.t("activerecord.models.#{resource_class.model_name.i18n_key}.one"))
 
     # Edit again to test the show view link
     find("a[href='#{edit_resource_path(@resource)}']").click
@@ -236,7 +237,8 @@ module DisciplineResourceSystemTests
     end
     assert_current_path discipline_resource_index_path(@discipline)
     refute_selector "a[href='#{resource_path(@resource)}']"
-    assert_text I18n.t("flash.destroy.notice", resource_name: @resource.model_name.human)
+    assert_text I18n.t("flash.destroy.notice", 
+      resource_name: I18n.t("activerecord.models.#{resource_class.model_name.i18n_key}.one"))
   end
 
   def test_admin_destroy_resource_from_the_show_view

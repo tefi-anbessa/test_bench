@@ -16,7 +16,7 @@ module Electrical
     def setup_model_specific_data
       @resource = create(:electrical_cable_type, discipline: @discipline)
       @discipline_resource_index_header = I18n.t('electrical.cable_types.index.header', 
-        scope_text: [@discipline.project.code, @discipline.class.model_name.human, @discipline.long_label].join(' '))
+        scope_text: [@discipline.project.code, I18n.t("activerecord.models.discipline.one"), @discipline.long_label].join(' '))
       @project_resource_index_header = I18n.t('electrical.cable_types.index.header', 
         scope_text: [I18n.t("activerecord.models.project.one"), @project.label].join(': '))
       @project_resource_index_title = @discipline_resource_index_title = I18n.t('electrical.cable_types.index.title')

@@ -1,6 +1,6 @@
 <thead>
   <%% unless current_project %>
-    <th scope="col"><%%= sort_link(@q, 'project_code', Project.model_name.human) %></th>
+    <th scope="col"><%%= sort_link(@q, 'project_code', t('activerecord.models.project.one')) %></th>
   <%% end %>
 <%- @fields.select { |field| INDEX_TYPES.include?(field[:type]) }.each do |field| -%>
   <th scope="col"><%%= sort_link(@q, <%= ":#{field[:name]}" %>) %></th>

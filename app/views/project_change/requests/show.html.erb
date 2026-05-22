@@ -99,7 +99,7 @@
                   title: t('actions.new') do %>
                   <%== bs_icon('plus-square-fill') %>
                   <span class="ms-1">
-                    <%= [t('actions.new'), t('activerecord.models.project_change.request')].join(' ') %>
+                    <%= [t('actions.new'), t('activerecord.models.project_change/request.one')].join(' ') %>
                   </span>
                 <% end %>
               <% end %>
@@ -122,27 +122,27 @@
 
             <div class="card-body p-3">
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @request.class.human_attribute_name(:project) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.models.project.one") %></div>
                 <div class="col-8"><%= render "projects/card", object: @request.project %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @request.class.human_attribute_name(:serial) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.project_change/request.serial") %></div>
                 <div class="col-8"><%= @request.label || '-' %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @request.class.human_attribute_name(:title) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.project_change/request.title") %></div>
                 <div class="col-8"><%= @request.title || '-' %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @request.class.human_attribute_name(:duration) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.project_change/request.duration") %></div>
                 <div class="col-8"><%= @request.class.human_enum_name(:duration, @request.duration) %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @request.class.human_attribute_name(:reason) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.project_change/request.reason") %></div>
                 <div class="col-8"><%= simple_format(@request.reason || '-') %></div>
               </div> <!-- end row -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @request.class.human_attribute_name(:summary) %></div>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.project_change/request.summary") %></div>
                 <div class="col-8"><%= simple_format(@request.summary || '-') %></div>
               </div> <!-- end row -->
             </div>  <!-- end inner card body -->

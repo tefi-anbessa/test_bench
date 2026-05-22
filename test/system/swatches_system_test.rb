@@ -51,7 +51,7 @@ class SwatchesSystemTest < ApplicationSystemTestCase
     refute_selector "a[href='#{swatch_path(@swatch)}'][data-method='delete']" # team member cannot delete resource
 
     @show_fields.each do |field|
-      assert_text Swatch.human_attribute_name(field)
+      assert_text I18n.t("activerecord.attributes.swatch.#{field}")
     end
 
     # Field data 

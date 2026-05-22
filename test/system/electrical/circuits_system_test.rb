@@ -243,7 +243,7 @@ module Electrical
       assert_current_path circuit_path(new_circuit)
       assert_selector "span.badge", text: /#{circuit_label}/
       assert_text I18n.t('flash.actions.create.notice',
-                              resource_name: Circuit.model_name.human)
+                              resource_name: I18n.t("activerecord.models.circuit.one"))
 
       # Circuit card fields
       assert_text next_circuit
@@ -299,7 +299,7 @@ module Electrical
       refute_text I18n.t("form.true")
       assert_text "CIRCUIT NOTES EDIT"
       assert_text I18n.t('flash.actions.update.notice',
-                              resource_name: Circuit.model_name.human)
+                          resource_name: I18n.t("activerecord.models.circuit.one"))
                               
       # Make another edit to test the show view link, and then discard
       click_link(href: edit_circuit_path(@circuit1))

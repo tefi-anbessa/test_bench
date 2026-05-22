@@ -359,7 +359,7 @@ module TagableControllerTests
     def assert_successful_assignment_flash_message(resource)
       expected = I18n.t('flash.tagables.assigned_to',
         tag: @unassigned_tag.full_tag,
-        resource_name: resource_class.model_name.human,
+        resource_name: I18n.t("activerecord.models.#{resource_class.model_name.i18n_key}.one"),
         id: resource.id)
       assert_flash_message :success, expected
     end
@@ -367,20 +367,20 @@ module TagableControllerTests
     def assert_successful_creation_flash_message(resource, tag)
       expected = I18n.t('flash.tagables.created_and_assigned',
         tag: tag.full_tag,
-        resource_name: resource_class.model_name.human,
+        resource_name: I18n.t("activerecord.models.#{resource_class.model_name.i18n_key}.one"),
         id: resource.id)
       assert_flash_message :success, expected
     end
 
     def assert_successful_update_flash_message
       expected = I18n.t('flash.update.notice',
-        resource_name: resource_class.model_name.human)
+        resource_name: I18n.t("activerecord.models.#{resource_class.model_name.i18n_key}.one"))
       assert_flash_message :success, expected
     end
 
     def assert_successful_destroy_flash_message
       expected = I18n.t('flash.destroy.notice',
-        resource_name: resource_class.model_name.human)
+        resource_name: I18n.t("activerecord.models.#{resource_class.model_name.i18n_key}.one"))
       assert_flash_message :success, expected
     end
 end

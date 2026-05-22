@@ -86,7 +86,7 @@ class SwatchesControllerTest < ActionController::TestCase
       created_resource = Swatch.last
       assert_redirected_to created_resource
       assert_equal I18n.t("flash.create.notice", 
-        resource_name: @swatch.model_name.human), flash[:success]
+        resource_name: I18n.t("activerecord.models.swatch.one")), flash[:success]
   end
 
   # Create Action Tests - Failure Cases
@@ -127,7 +127,7 @@ class SwatchesControllerTest < ActionController::TestCase
       { id: @swatch.id, swatch: { update_attribute_name => updated_attribute_value } }
     assert_equal updated_attribute_value, @swatch.reload.send(update_attribute_name)
     assert_redirected_to @swatch
-    assert_equal I18n.t("flash.update.notice", resource_name: @swatch.model_name.human), flash[:success]
+    assert_equal I18n.t("flash.update.notice", resource_name: I18n.t("activerecord.models.swatch.one")), flash[:success]
   end
 
   # Destroy Action Tests
@@ -145,7 +145,7 @@ class SwatchesControllerTest < ActionController::TestCase
       delete :destroy, params: { id: @swatch.id }
     end
     assert_redirected_to swatches_path
-    assert_equal I18n.t("flash.destroy.notice", resource_name: @swatch.model_name.human), flash[:success]
+    assert_equal I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.swatch.one")), flash[:success]
   end
 
   private

@@ -33,11 +33,11 @@ module ProjectChange
 
       if @request.save
         flash[:success] = t('flash.create.notice', 
-          resource_name: t("activerecord.models.project_change.request.one"))
+          resource_name: t("activerecord.models.project_change/request.one"))
         redirect_to @request
       else
         flash[:alert] = t('flash.create.alert',
-          resource_name: t("activerecord.models.project_change.request.one").downcase)
+          resource_name: t("activerecord.models.project_change/request.one").downcase)
         setup_form
         render :new, status: :unprocessable_content
       end
@@ -54,11 +54,11 @@ module ProjectChange
       authorize @request
       if @request.update(request_params)
         flash[:success] = t('flash.update.notice',
-          resource_name: t("activerecord.models.project_change.request.one"))
+          resource_name: t("activerecord.models.project_change/request.one"))
         redirect_to @request
       else
         flash[:alert] = t('flash.update.alert', 
-          resource_name: t("activerecord.models.project_change.request.one").downcase)
+          resource_name: t("activerecord.models.project_change/request.one").downcase)
         setup_form
         render :edit, status: :unprocessable_content 
       end
@@ -69,10 +69,10 @@ module ProjectChange
       authorize @request
       if @request.destroy
         flash[:success] = t('flash.destroy.notice',
-          resource_name: t("activerecord.models.project_change.request.one"))
+          resource_name: t("activerecord.models.project_change/request.one"))
       else
         flash[:alert] = t('flash.destroy.alert', 
-          resource_name: t("activerecord.models.project_change.request.one").downcase)
+          resource_name: t("activerecord.models.project_change/request.one").downcase)
       end
       redirect_to project_project_change_requests_path(@project)
     end

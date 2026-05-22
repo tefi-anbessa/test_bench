@@ -32,12 +32,12 @@ class IssuesController < ApplicationController
 
     if @issue.save
       flash[:success] = t('flash.create.notice', 
-        resource_name: @issue.model_name.human)
+        resource_name: t('activerecord.models.issue.one'))
       set_swatch
       redirect_to @issue
     else
       flash[:alert] = t('flash.create.alert', 
-        resource_name: @issue.model_name.human.downcase)
+        resource_name: t('activerecord.models.issue.one').downcase)
       setup_form
       render :new, status: :unprocessable_content
     end
@@ -54,12 +54,12 @@ class IssuesController < ApplicationController
     authorize @document
     if @issue.update(issue_params)
       flash[:success] = t('flash.update.notice', 
-        resource_name: @issue.model_name.human)
+        resource_name: t('activerecord.models.issue.one'))
       set_swatch
       redirect_to @issue
     else
       flash[:alert] = t('flash.update.alert', 
-        resource_name: @issue.model_name.human.downcase)
+        resource_name: t('activerecord.models.issue.one').downcase)
       setup_form
       render :edit, status: :unprocessable_content 
     end
@@ -70,10 +70,10 @@ class IssuesController < ApplicationController
     authorize @document
     if @issue.destroy
       flash[:success] = t('flash.destroy.notice', 
-        resource_name: @issue.model_name.human)
+        resource_name: t('activerecord.models.issue.one'))
     else
       flash[:alert] = t('flash.destroy.alert', 
-        resource_name: @issue.model_name.human.downcase)
+        resource_name: t('activerecord.models.issue.one').downcase)
     end
     set_swatch
     redirect_to document_issues_path(@document)

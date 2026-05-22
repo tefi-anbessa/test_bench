@@ -23,8 +23,12 @@ en:
       doc_type:
         one: "Document Type"
         other: "Document Types"
-      issue: "Issue"
-      source_format: "Source Format"
+      issue:
+        one: "Issue"
+        other: "Issues"
+      source_format: 
+        one: "Source Format"
+        other: "Source Formats"
       role:               "Role"
     attributes:
       document:
@@ -72,15 +76,12 @@ en:
         required_role:    "Required Role"
         copy_from_standard: "Copy from Standard" # Form label
       doc_type:
-        discipline: "Discipline"
         code: "Code"
         name: "Type"
         description: "Description"
       issue:
-        document: "Document"
         code: "Code"
         reason: "Reason for Issue"
-        source_format: "Source Format"
       source_format:
         vendor: "Vendor"
         title: "Software Title"

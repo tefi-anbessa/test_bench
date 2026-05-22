@@ -70,7 +70,7 @@ module TagablesController
 
       unless @tag.valid?
         flash.now[:alert] = t("flash.create.alert",
-                            resource_name: @tag.model_name.human.downcase)
+                            resource_name: t("activerecord.models.tag.one").downcase)
         failed_to_save
         return
       end
@@ -78,7 +78,7 @@ module TagablesController
       authorize @resource, :create?
       unless @resource.valid?
         flash[:alert] = t('flash.create.alert', 
-          resource_name: t("activerecord.models.#{@resource.model_name.i18n_key.to_s.gsub('/', '.')}.one").downcase)
+          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
         failed_to_save
         return
       end
@@ -109,7 +109,7 @@ module TagablesController
 
       unless @tag.valid?
         flash.now[:alert] = t("flash.create.alert",
-                            resource_name: @tag.model_name.human.downcase)
+                            resource_name: t("activerecord.models.tag.one").downcase)
         failed_to_save
         return
       end
@@ -124,7 +124,7 @@ module TagablesController
 
       unless @resource.valid?
         flash.now[:alert] = t("flash.update.alert",
-                            resource_name: @resource.model_name.human.downcase)
+                            resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
         failed_to_save
         return
       end
@@ -146,12 +146,12 @@ module TagablesController
       authorize @resource, :destroy?
       if @resource.destroy
         flash[:success] = t('flash.destroy.notice',
-                          resource_name: @resource.model_name.human)
+                          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one"))
         redirect_to send("discipline_#{resource_path.to_s}_path", @discipline), 
                     status: :see_other
       else
         flash.now[:alert] = t("flash.destroy.alert",
-                            resource_name: @resource.model_name.human.downcase)
+                            resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
         failed_to_save
       end
     end
@@ -204,7 +204,7 @@ module TagablesController
       begin
         @tag.update(tagable: @resource)
         flash[:success] = [t('flash.tagables.assigned_to',
-                          resource_name: @resource.model_name.human,
+                          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one"),
                           id: @resource.id,
                           tag: @tag.label)]
         after_create_hook(@resource)
@@ -213,7 +213,7 @@ module TagablesController
       rescue ActiveRecord::RecordInvalid => _
         # Should not reach here - @tag and @resource have been validated
         flash.now[:alert] = t("flash.create.alert",
-                          resource_name: @resource.model_name.human.downcase)
+                          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
         failed_to_save
       end
     end
@@ -227,7 +227,7 @@ module TagablesController
         end
         @tag.reload
         flash[:success] = [t('flash.tagables.created_and_assigned',
-                          resource_name: @resource.model_name.human,
+                          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one"),
                           id: @resource.id,
                           tag: @tag.label)]
         after_create_hook(@resource)
@@ -236,7 +236,7 @@ module TagablesController
       rescue ActiveRecord::RecordInvalid => _
         # Should not reach here - @tag and @resource have already been validated
         flash.now[:alert] = t("flash.create.alert",
-                          resource_name: @resource.model_name.human.downcase)
+                          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
         failed_to_save
       end
     end
@@ -248,14 +248,14 @@ module TagablesController
           @resource.update!(resource_params.except(:tag))
         end
         flash[:success] = [t("flash.update.notice", 
-          resource_name: @resource.model_name.human)]
+          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one"))]
         after_update_hook(@resource)
         redirect_after_save
         return
       rescue ActiveRecord::RecordInvalid
         # Should not reach here - @tag and @resource have already been validated
         flash.now[:alert] = t("flash.update.alert",
-                          resource_name: @resource.model_name.human.downcase)
+                          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
         failed_to_save
       end
     end
@@ -268,7 +268,7 @@ module TagablesController
           @tag = Tag.create!(tag_params.merge(tagable: @resource))
         end
         flash[:success] = [t("flash.tagables.assigned_to", 
-          resource_name: @resource.model_name.human,
+          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one"),
           id: @resource.id,
           tag: @tag.label)]
         after_update_hook(@resource)
@@ -276,7 +276,7 @@ module TagablesController
       rescue ActiveRecord::RecordInvalid
         # Should not reach here - @tag and @resource have been validated
         flash.now[:alert] = t("flash.update.alert",
-                          resource_name: @resource.model_name.human.downcase)
+                          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
         failed_to_save
         return
       end

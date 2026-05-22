@@ -111,7 +111,7 @@
               </div>
             <% else %>
               <div class="row mb-1">
-                <% model_text = t("activerecord.models.#{@demand.demandable_type.split("::").map(&:underscore).join(".")}.one") %>
+                <% model_text = t("activerecord.models.#{@demand.demandable.model_name.i18n_key}.one") %>
                 <% text = t("actions.jump_to", model: model_text) %>
                 <% path = begin
                   polymorphic_path([@demand.demandable])
@@ -183,57 +183,57 @@
                   </div>
 
                 <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= @demand.class.human_attribute_name(:basis) %></div>
+                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.basis") %></div>
                   <div class="col-8"><%= @demand.class.human_enum_name(:basis, @demand.basis) %></div>
                 </div>
 
                 <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= @demand.class.human_attribute_name(:basis_notes) %></div>
+                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.basis_notes") %></div>
                   <div class="col-8"><%= @demand.basis_notes.present? ?
                     simple_format(@demand.basis_notes) : '-' %></div>
                 </div>
 
                 <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= @demand.class.human_attribute_name(:supply) %></div>
+                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.supply") %></div>
                   <div class="col-8"><%= number_to_human(@demand.supply, precision: 4,
                                           units: { unit: "V", thousand: "kV"}) %></div>
                 </div>
 
                 <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= @demand.class.human_attribute_name(:config) %></div>
+                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.config") %></div>
                   <div class="col-8"><%= @demand.class.human_enum_name(:config, @demand.config) %></div>
                 </div>
 
                 <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= @demand.class.human_attribute_name(:power) %></div>
+                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.power") %></div>
                   <div class="col-8"><%= number_to_human(@demand.power, precision: 4,
                                           units: { unit: "W", thousand: "kW", million: "MW"}) %></div>
                 </div>
 
                 <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= @demand.class.human_attribute_name(:vector) %></div>
+                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.vector") %></div>
                   <div class="col-8"><%= number_to_human(@demand.vector, precision: 4,
                                           units: { unit: "VA", thousand: "kVA", million: "MVA"}) %></div>
                 </div>
 
                 <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= @demand.class.human_attribute_name(:power_factor) %></div>
+                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.power_factor") %></div>
                   <div class="col-8"><%= @demand.power_factor || '-'%></div>
                 </div>
 
                 <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= @demand.class.human_attribute_name(:current) %></div>
+                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.current") %></div>
                   <div class="col-8"><%= number_to_human(@demand.current, precision: 4,
                                           units: { unit: "A", thousand: "kA", million: "MA"}) %></div>
                 </div>
 
                 <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= @demand.class.human_attribute_name(:duty) %></div>
+                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.duty") %></div>
                   <div class="col-8"><%= @demand.duty %></div>
                 </div>
 
                 <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= @demand.class.human_attribute_name(:notes) %></div>
+                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.notes") %></div>
                   <div class="col-8"><%= @demand.notes.present? ?
                     simple_format(@demand.notes) : '-' %></div>
                 </div>

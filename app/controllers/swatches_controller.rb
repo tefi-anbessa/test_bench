@@ -29,10 +29,10 @@ class SwatchesController < ApplicationController
     authorize @swatch
 
     if @swatch.save
-      flash[:success] = t('flash.create.notice', resource_name: @swatch.model_name.human)
+      flash[:success] = t('flash.create.notice', resource_name: t('activerecord.models.swatch.one'))
       redirect_to @swatch
     else
-      flash[:alert] = t('flash.create.alert', resource_name: @swatch.model_name.human.downcase)
+      flash[:alert] = t('flash.create.alert', resource_name: t('activerecord.models.swatch.one').downcase)
       render :new, status: :unprocessable_content
     end
   end
@@ -47,10 +47,10 @@ class SwatchesController < ApplicationController
   def update
     authorize @swatch
     if @swatch.update(swatch_params)
-      flash[:success] = t('flash.update.notice', resource_name: @swatch.model_name.human)
+      flash[:success] = t('flash.update.notice', resource_name: t('activerecord.models.swatch.one'))
       redirect_to @swatch
     else
-      flash[:alert] = t('flash.update.alert', resource_name: @swatch.model_name.human.downcase)
+      flash[:alert] = t('flash.update.alert', resource_name: t('activerecord.models.swatch.one').downcase)
       render :edit, status: :unprocessable_content 
     end
   end
@@ -59,9 +59,9 @@ class SwatchesController < ApplicationController
   def destroy
     authorize @swatch
     if @swatch.destroy
-      flash[:success] = t('flash.destroy.notice', resource_name: @swatch.model_name.human)
+      flash[:success] = t('flash.destroy.notice', resource_name: t('activerecord.models.swatch.one'))
     else
-      flash[:alert] = t('flash.destroy.alert', resource_name: @swatch.model_name.human.downcase)
+      flash[:alert] = t('flash.destroy.alert', resource_name: t('activerecord.models.swatch.one').downcase)
     end
     redirect_to swatches_path
   end

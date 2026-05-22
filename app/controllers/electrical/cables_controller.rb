@@ -76,7 +76,7 @@ module Electrical
 
         # For Stimulus - translated option names
         @connect_options = Constants.electrical.connect_options.map do |option|
-          [t("activerecord.models.#{option.to_s.split('::').map(&:underscore).join('.')}"), option]
+          [option.safe_constantize.model_name.human, option]
         end
       end
 

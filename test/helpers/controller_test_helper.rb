@@ -293,7 +293,7 @@ module ControllerTestHelper
   end
 
   def assert_successful_create_flash_message
-    resource_name = I18n.t("activerecord.models.#{resource_class.model_name.i18n_key.to_s.gsub('/', '.')}")
+    resource_name = I18n.t("activerecord.models.#{resource_class.model_name.i18n_key}")
     resource_name = resource_name[:one] if resource_name.is_a?(Hash)
     expected = I18n.t('flash.create.notice',
       resource_name: resource_name)
@@ -301,7 +301,7 @@ module ControllerTestHelper
   end
 
   def assert_successful_update_flash_message
-    resource_name = I18n.t("activerecord.models.#{resource_class.model_name.i18n_key.to_s.gsub('/', '.')}")
+    resource_name = I18n.t("activerecord.models.#{resource_class.model_name.i18n_key}")
     resource_name = resource_name[:one] if resource_name.is_a?(Hash)
     expected = I18n.t('flash.update.notice',
       resource_name: resource_name)
@@ -309,7 +309,7 @@ module ControllerTestHelper
   end
 
   def assert_successful_destroy_flash_message
-    resource_name = I18n.t("activerecord.models.#{resource_class.model_name.i18n_key.to_s.gsub('/', '.')}")
+    resource_name = I18n.t("activerecord.models.#{resource_class.model_name.i18n_key}")
     resource_name = resource_name[:one] if resource_name.is_a?(Hash)
     expected = I18n.t('flash.destroy.notice',
       resource_name: resource_name)

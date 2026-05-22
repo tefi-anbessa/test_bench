@@ -31,12 +31,12 @@ class SourceFormatsController < ApplicationController
 
     if @source_format.save
       flash[:success] = t('flash.create.notice', 
-        resource_name: @source_format.model_name.human)
+        resource_name: t('activerecord.models.source_format.one'))
       set_swatch
       redirect_to @source_format
     else
       flash[:alert] = t('flash.create.alert', 
-        resource_name: @source_format.model_name.human.downcase)
+        resource_name: t('activerecord.models.source_format.one').downcase)
       setup_form
       set_swatch
       render :new, status: :unprocessable_content
@@ -54,12 +54,12 @@ class SourceFormatsController < ApplicationController
     authorize @source_format
     if @source_format.update(resource_params)
       flash[:success] = t('flash.update.notice', 
-        resource_name: @source_format.model_name.human)
+        resource_name: t('activerecord.models.source_format.one'))
       set_swatch
       redirect_to @source_format
     else
       flash[:alert] = t('flash.update.alert', 
-        resource_name: @source_format.model_name.human.downcase)
+        resource_name: t('activerecord.models.source_format.one').downcase)
       set_swatch
       setup_form
       render :edit, status: :unprocessable_content 
@@ -71,10 +71,10 @@ class SourceFormatsController < ApplicationController
     authorize @source_format
     if @source_format.destroy
       flash[:success] = t('flash.destroy.notice', 
-        resource_name: @source_format.model_name.human)
+        resource_name: t('activerecord.models.source_format.one'))
     else
       flash[:alert] = t('flash.destroy.alert', 
-        resource_name: @source_format.model_name.human.downcase)
+        resource_name: t('activerecord.models.source_format.one').downcase)
     end
     set_swatch
     redirect_to source_formats_path

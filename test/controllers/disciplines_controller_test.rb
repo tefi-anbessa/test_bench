@@ -54,7 +54,7 @@ class DisciplinesControllerTest < ActionController::TestCase
     }
     assert_template :edit
     assert_equal original_name, @discipline.reload.name
-    assert_equal I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.discipline')), flash[:alert]
+    assert_equal I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.discipline.one')), flash[:alert]
   end
 
   test "project manager can update discipline on their project" do
@@ -67,7 +67,7 @@ class DisciplinesControllerTest < ActionController::TestCase
     }
     assert_redirected_to discipline_url(@discipline)
     assert_equal 'Owner Updated Title', @discipline.reload.name
-    assert_equal I18n.t('flash.actions.update.notice', resource_name: I18n.t('activerecord.models.discipline')), flash[:success]
+    assert_equal I18n.t('flash.actions.update.notice', resource_name: I18n.t('activerecord.models.discipline.one')), flash[:success]
   end
 
   # Destroy action tests
@@ -79,7 +79,7 @@ class DisciplinesControllerTest < ActionController::TestCase
       delete :destroy, params: { id: @discipline.id }
     end
     assert_redirected_to project_disciplines_url(@discipline.project)
-    assert_equal I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.discipline')), 
+    assert_equal I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.discipline.one')), 
                   flash[:success]
   end
 
@@ -89,7 +89,7 @@ class DisciplinesControllerTest < ActionController::TestCase
       delete :destroy, params: { id: @discipline.id }
     end
     assert_redirected_to project_disciplines_url(@discipline.project)
-    assert_equal I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.discipline')), 
+    assert_equal I18n.t('flash.destroy.notice', resource_name: I18n.t('activerecord.models.discipline.one')), 
                   flash[:success]
   end
 

@@ -19,7 +19,7 @@
         <!-- Header Text (Left - 8 columns) -->
         <div class="col-8">
           <% scope_text = current_project.present? ? 
-            [current_project.class.model_name.human, current_project.label].join(': ') : 
+            [t("activerecord.models.project.one"), current_project.label].join(': ') : 
             t('index.all', models: t('activerecord.models.project.other')) %>
           <h5><%= t('.header', scope_text: scope_text) %></h5>
         </div>

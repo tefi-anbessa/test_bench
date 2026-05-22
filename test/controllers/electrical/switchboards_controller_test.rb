@@ -86,7 +86,7 @@ module Electrical
           resource_name: Electrical::Switchboard.model_name.human,
           id: tag.tagable.id,
           tag: tag.label),
-        I18n.t('flash.assigned', count: 2, resource_name: Electrical::Circuit.model_name.human)
+        I18n.t('flash.assigned', count: 2, resource_name: I18n.t('activerecord.models.electrical/circuit', count: 2))
       ]
       assert_flash_messages :success, expected_messages
     end

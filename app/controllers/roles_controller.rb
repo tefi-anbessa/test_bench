@@ -171,7 +171,9 @@ debugger
       unless Role.valid_role?(@role_name, @resource_type, @resource_id)
         flash.now[:alert] = I18n.t("rolify.flash.name_invalid",
           name: I18n.t("rolify.names.#{@role_name}", default: @role_name.to_s.humanize),
-          resource: @resource_type ? I18n.t("activerecord.models.#{@resource_type.downcase}", default: @resource_type) : I18n.t('rolify.role_types.global')
+          resource: @resource_type ? 
+            I18n.t("activerecord.models.#{@resource_type}.one", default: @resource_type) : 
+            I18n.t('rolify.role_types.global')
         )
           # Return to form with warning - user error [TODO] Check whether this should be upgraded to security after
           # the name select is upgraded with only valid names available.

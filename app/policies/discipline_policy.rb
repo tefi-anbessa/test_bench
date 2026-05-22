@@ -15,10 +15,20 @@ class DisciplinePolicy < ProjectResourcePolicy
   # Only admins can create or destroy disciplines
   # Current project must be set
   def new?
-    create?
+    return false if user.nil?
+    return false if current_project.nil?
+    user.is_admin? || 
+      user.is_app_owner? || 
+      user.is_project_admin_of?(current_project)
   end
 
   def create?
+    # Ensure record is an instance, not a class
+    unless record.is_a?(ApplicationRecord)
+      Rails.logger.warn "Policy Error: #{record.class}.create? called with class instead of instance. " \
+                       "Use an instance variable with discipline association."
+      return false
+    end
     return false if user.nil?
     return false if current_project.nil?
       user.is_admin? || 

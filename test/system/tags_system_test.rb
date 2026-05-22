@@ -32,7 +32,8 @@ class TagsSystemTest < ApplicationSystemTestCase
     # Click the project tags link
     click_link(href: project_tags_path(@project))
     assert_current_path project_tags_path(@project)
-    assert_text I18n.t("tags.index.header", scope_text: [@project.class.model_name.human, @project.label].join(' '))
+    assert_text I18n.t("tags.index.header", 
+      scope_text: [I18n.t("activerecord.models.project.one"), @project.label].join(' '))
     assert page.title.include?(I18n.t("tags.index.title"))
 
     # index search fields
@@ -60,7 +61,8 @@ class TagsSystemTest < ApplicationSystemTestCase
     # Click the project tags link
     click_link(href: discipline_tags_path(@discipline))
     assert_current_path discipline_tags_path(@discipline)
-    assert_text I18n.t("tags.index.header", scope_text: [@project.code, @discipline.class.model_name.human, @discipline.long_label].join(' '))
+    assert_text I18n.t("tags.index.header", 
+      scope_text: [@project.code, I18n.t("activerecord.models.discipline.one"), @discipline.long_label].join(' '))
     assert page.title.include?(I18n.t("tags.index.title"))
 
     # Cannot create new tag without discipline

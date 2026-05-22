@@ -105,7 +105,7 @@ class RolesControllerTest < ActionController::TestCase
         } 
       }
     end
-    assert_equal I18n.t('rolify.flash.user_id_blank'), flash[:warning]
+    assert_equal I18n.t('rolify.flash.user_id_blank'), flash[:alert]
     assert_response :unprocessable_content
     sign_out @admin
   end
@@ -143,7 +143,7 @@ class RolesControllerTest < ActionController::TestCase
         } 
       }
     end
-    assert_equal I18n.t("rolify.flash.name_blank"), flash[:warning]
+    assert_equal I18n.t("rolify.flash.name_blank"), flash.now[:alert]
     assert_response :unprocessable_content
     sign_out @admin
   end
@@ -163,7 +163,7 @@ class RolesControllerTest < ActionController::TestCase
     end
     assert_equal I18n.t("rolify.flash.name_invalid", 
       name: I18n.t("rolify.names.designer"), 
-      resource: I18n.t("activerecord.models.#{@project.class.model_name.i18n_key}")), flash[:warning]
+      resource: I18n.t("activerecord.models.project.one")), flash.now[:alert]
     assert_response :unprocessable_content
     sign_out @admin
   end

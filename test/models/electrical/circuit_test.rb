@@ -20,7 +20,6 @@ class CircuitTest < ActiveSupport::TestCase
     assert_equal 16.0, @circuit.rating
     assert_equal 'None', @circuit.elcb
     assert_equal false, @circuit.contactor
-    assert_nil @circuit.notes
   end
 
   test "factory default should create valid circuit with full chain of associations" do

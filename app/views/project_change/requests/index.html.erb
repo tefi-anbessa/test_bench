@@ -7,8 +7,8 @@
         <!-- Header Text (Left) -->
         <div class="ms-2">
           <% project_text = current_project.present? ? 
-          [current_project.class.model_name.human, current_project.label].join(': ') : 
-          t('index.all', models: t('activerecord.models.project').pluralize) %>
+          [t("activerecord.models.project.one"), current_project.label].join(': ') : 
+          t('index.all', models: t('activerecord.models.project.other')) %>
           <h5 class="mb-0"><%= t('.header', project: project_text) %></h5>
         </div>
 
@@ -20,7 +20,7 @@
               title: t('actions.new') do %>
               <%== bs_icon('plus-square-fill') %>
               <span class="ms-1">
-                <%= [t('actions.new'), t('activerecord.models.project_change.request')].join(' ') %>
+                <%= [t('actions.new'), t('activerecord.models.project_change/request.one')].join(' ') %>
               </span>
             <% end %>
         <% end %>
@@ -32,13 +32,13 @@
         <%= search_form_for @q, url: project_project_change_requests_path(@project) do |f| %>
           <%= f.search_field :reason_cont,
                 class: "search_field",
-                placeholder: t("activerecord.attributes.project_change.request.reason") %>
+                placeholder: t("activerecord.attributes.project_change/request.reason") %>
           <%= f.search_field :summary_cont,
                 class: "search_field",
-                placeholder: t("activerecord.attributes.project_change.request.summary") %>
+                placeholder: t("activerecord.attributes.project_change/request.summary") %>
           <%= f.search_field :duration_cont,
                 class: "search_field",
-                placeholder: t("activerecord.attributes.project_change.request.duration") %>
+                placeholder: t("activerecord.attributes.project_change/request.duration") %>
           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
             <%== bs_icon('search') %>
           <% end %>
