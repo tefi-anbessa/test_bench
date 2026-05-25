@@ -63,7 +63,7 @@ en:
         description:      "Description"
       discipline:
         name:             "Name"
-        label:            "Label"
+        code:             "Code"
         sort_order:       "Sort Order"
         prefix_schema:    "Prefix Schema"
         default_prefix_schema_name: "user_defined"
@@ -107,6 +107,8 @@ en:
         notes:            "Notes"
         full_tag:         "Tag"
         tagable_type:     "Tag Type"
+        parent:           "Parent"
+        children:         "Children"
       role:
         name:             "Name"
         resource_type:    "Resource"
@@ -127,7 +129,7 @@ en:
         resource_type:    "Leave blank for global role"
       discipline:
         name:             "Descriptive name, maximum 50 characters"
-        label:            "Unique label, maximum 5 characters"
+        code:             "Unique code, maximum 5 characters"
         sort_order:       "Sort order - deprecated"
         prefix_schema:    "Select a standard schema or define a custom schema. Custom schema must have a unique name, defaults to project code + discipline code"
         module_name:      "Links the discipline to a module in the application"
@@ -151,6 +153,11 @@ en:
               not_assigned: "Not assigned"
               change_tagable: "Cannot change tagable association once set"
               invalid: "Invalid type %{tagable_type}"
+              taken: "This %{tagable_type} is already associated with another tag"
+            parent:
+              self: "cannot be itself"
+              circular: "cannot create a circular reference"
+              project: "must be in the same project"
         role:
           attributes:
             name:

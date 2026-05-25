@@ -210,10 +210,17 @@ module TagablesController
         after_create_hook(@resource)
         redirect_after_save
         return
+      rescue ActiveRecord::RecordNotUnique
+        # Tag already assigned to another resource
+        flash.now[:alert] = t("flash.update.alert",
+          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
+        @tag.errors.add(:tagable, t("activerecord.errors.models.tag.attributes.tagable_type.taken", 
+          tagable_type: resource_class.model_name.human.downcase))
+        failed_to_save
       rescue ActiveRecord::RecordInvalid => _
         # Should not reach here - @tag and @resource have been validated
-        flash.now[:alert] = t("flash.create.alert",
-                          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
+        flash.now[:alert] = t("flash.update.alert",
+          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
         failed_to_save
       end
     end

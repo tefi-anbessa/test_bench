@@ -24,7 +24,7 @@
           <%= link_to discipline, 
               class: "fw-bold text-decoration-none",
               style: "color: #{@swatch&.text || '#000'}" do %>
-            <%= discipline.label %>:
+            <%= discipline.code %>:
             <%= discipline.name %>
           <% end %>
         </div>
@@ -52,14 +52,17 @@
               <span class="badge bg-secondary ms-1"><%= discipline.documents.count %></span>
             <% end %>
             
-            <%= link_to discipline_doc_types_path(discipline),
-                class: "btn btn-outline-secondary btn-sm",
-                aria: { 
-                  label: t('activerecord.models.doc_type', count: discipline.doc_types.count)
-                } do %>
-              <%== bs_icon('file') %>
-              <%= t('activerecord.models.doc_type', count: discipline.doc_types.count) %>
-              <span class="badge bg-secondary ms-1"><%= discipline.doc_types.count %></span>
+            <!-- Only show the doc_types index link to users that can create doc_types. -->
+            <% if policy(discipline.doc_types.build()).new? %>
+              <%= link_to discipline_doc_types_path(discipline),
+                  class: "btn btn-outline-secondary btn-sm",
+                  aria: { 
+                    label: t('activerecord.models.doc_type', count: discipline.doc_types.count)
+                  } do %>
+                <%== bs_icon('file') %>
+                <%= t('activerecord.models.doc_type', count: discipline.doc_types.count) %>
+                <span class="badge bg-secondary ms-1"><%= discipline.doc_types.count %></span>
+              <% end %>
             <% end %>
           </div>
         </div>

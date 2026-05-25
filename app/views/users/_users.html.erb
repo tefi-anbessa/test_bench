@@ -37,22 +37,24 @@
             <div class="d-flex flex-wrap gap-1">
               <% project_roles = user.roles.where(resource_type: 'Project', resource_id: project.id) %>
               <% discipline_roles = user.roles.where(resource_type: 'Discipline', resource_id: project.discipline_ids) %>
+              <% global_roles = user.roles.where(resource_type: nil)%>
               
               <% project_roles.each do |role| %>
                 <span class="badge bg-primary">
-                  <%= t("rolify.names.#{role.name}") %>
+                  <%= t("rolify.names.#{role.name}", default: "*#{role.name}") %>
                 </span>
               <% end %>
               
               <% discipline_roles.each do |role| %>
                 <span class="badge bg-secondary">
-                  <%= role.resource.name %>: <%= role.name %>
+                  <%= t("activerecord.models.#{role.resource.model_name.i18n_key}", count: 1) %>: 
+                  <%= t("rolify.names.#{role.name}", default: "*#{role.name}") %>
                 </span>
               <% end %>
               
-              <% if user.has_role?(:admin) %>
+              <% global_roles.each do |role| %>
                 <span class="badge bg-danger">
-                  <%= t('activerecord.attributes.user.admin') %>
+                  <%= t("rolify.names.#{role.name}", default: "*#{role.name}") %>
                 </span>
               <% end %>
             </div>

@@ -32,7 +32,7 @@
         <%== bs_icon('eye') %>
       <% end %>
     <% end %>
-    <% if policy(row).edit? %>
+    <% if can_edit %>
       <%= link_to edit_electrical_switchboard_path(row), class: "btn btn-outline-warning btn-sm icon-link",
             aria: { label: t('actions.edit') },
             title: t('actions.edit'),

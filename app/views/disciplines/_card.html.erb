@@ -1,55 +1,52 @@
 <% discipline = object %>
 <%= render 'components/collapsible',
-  id: "discipline_#{discipline.id}_details",
-  title: t("disciplines.show.header", label: discipline.long_label),
-  expanded: false,
-  header_class: 'py-1' do %>
+      id: "discipline_#{discipline.id}_details",
+      title: t("disciplines.show.header", 
+        label: [discipline.code, t("discipline.name.#{discipline.name}")].join(': ')),
+      expanded: false,
+      header_class: 'py-1' do %>
   
-    <div class="container-fluid">
-      <div class="row mb-1">
-        <% text = t("actions.jump_to", model: t("activerecord.models.discipline", count: 1)) %>
-        <%= link_to discipline, 
-            class: "btn btn-sm btn-outline-secondary me-2",
-            title: text do %>
-          <%== bs_icon('box-arrow-in-up-left') %>
-          <span class="d-none d-md-inline"><%= text %></span>
-        <% end %>
-      </div>
+  <div class="container-fluid">
+    <div class="row mb-1">
+      <% text = [t("actions.jump_to", model: t("activerecord.models.discipline", count: 1)),
+        discipline.code, discipline.name].join(' ') %>
+      <%= link_to discipline, 
+          class: "btn btn-sm btn-outline-secondary me-2",
+          title: text do %>
+        <%== bs_icon('layers') %>
+        <span class="d-none d-md-inline"><%= text %></span>
+      <% end %>
+    </div>
 
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t("activerecord.attributes.discipline.label") %></div>
-        <div class="col-8"><%= discipline.label %></div>
-      </div>
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t("activerecord.attributes.discipline.notes") %></div>
+    </div>
+    <div class="row mb-1">
+      <div class="col-12"><%= simple_format(discipline.notes) %></div>
+    </div>
 
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t("activerecord.attributes.discipline.name") %></div>
-        <div class="col-8"><%= discipline.name %></div>
-      </div>
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t("activerecord.models.project.one") %></div>
+      <% if discipline.project.present? %>
+        <div class="col-8"><%= discipline.project.code %></div>
+      <% else %>
+        <div class="col-8 alert alert-danger">
+          <%= t('show.orphan', model: Project.model_name.human.downcase) %>
+        </div>
+      <% end %>
+    </div>
 
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t("activerecord.models.project.one") %></div>
-        <% if discipline.project.present? %>
-          <div class="col-8"><%= discipline.project.code %></div>
-        <% else %>
-          <div class="col-8 alert alert-danger">
-            <%= t('show.orphan', model: Project.model_name.human.downcase) %>
-          </div>
-        <% end %>
-      </div>
+    <div class="row mb-1">
+      <div class="col-4 text-muted"><%= t("activerecord.attributes.discipline.prefix_schema") %></div>
+      <div class="col-8"><%= discipline.prefix_schema["name"] || '-' %></div>
+    </div>
 
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t("activerecord.attributes.discipline.prefix_schema") %></div>
-        <div class="col-8"><%= discipline.prefix_schema["name"] || '-' %></div>
-      </div>
-
+    <% if policy(discipline).edit? %>
       <div class="row mb-1">
         <div class="col-4 text-muted"><%= t("activerecord.models.swatch.one") %></div>
         <div class="col-8"><%= discipline&.swatch&.name || '-' %></div>
-
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t("activerecord.attributes.discipline.notes") %></div>
-        <div class="col-8"><%= discipline.notes.present? ? simple_format(discipline.notes) : '-' %></div>
       </div>
+    <% end %>
 
-    </div> <!-- end container-fluid -->
+  </div> <!-- end container-fluid -->
 <% end %>

@@ -2,19 +2,6 @@
 # Custom content is not translated.
 en:
   discipline:
-    label:
-      "A": 'A'
-      "B": 'B'
-      "C": 'C'
-      "COMP": 'COMP'
-      "E": 'E'
-      "HVAC": 'HVAC'
-      "IT": 'IT'
-      "J": 'J'
-      "M": 'M'
-      "P": 'P'
-      "PIP": 'PIP'
-      "S": 'S'
     name:
       Administration: 'Administration'
       Architecture: 'Architecture'
@@ -23,7 +10,7 @@ en:
       Electrical: 'Electrical'
       Hvac: 'HVAC'
       Instrument: 'Instrument'
-      It: 'IT'
+      InformationTechnology: 'Information Technology'
       Mechanical: 'Mechanical'
       Piping: 'Piping'
       Process: 'Process'

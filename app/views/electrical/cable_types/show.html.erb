@@ -99,21 +99,26 @@
                   </span>
                 <% end %>
               <% end %>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>  <!-- end of card header -->
+            </div> <!-- end button group -->
+          </div> <!-- end d-flex -->
+        </div> <!-- end col-auto -->
+      </div> <!-- end row -->
+    </div> <!-- end card header -->
 
     <div class="card-body">
       <div class="row justify-content-center">
-      <div class="col-sm-12 col-10 col-md-8 col-lg-6 col-xl-4">
+        <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
-          <!-- Project collapsible card -->
-          <%= render 'projects/card', object: @cable_type.project %>
+          <!-- Cable Type Details Card -->
+          <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
+              <h4 class="mb-0"><%= t('show.details', model: @cable_type.model_name.human) %></h4>
+            </div> <!-- end inner card header -->
+
+            <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
       
 
-          <!-- Cable Type Details Inner Card -->
+              <!-- Cable Type Details Inner Card -->
               <div class="table-responsive">
                 <table class="table table-sm mb-0" style="width: auto;">
                   <tbody>
@@ -179,8 +184,34 @@
               <div class="scrollable-box">
                 <%= @cable_type&.notes %>
               </div>
-        </div>
-      </div>
-    
-  </div>
-</div>
+            </div>  <!-- temporary end inner card body -->
+
+            <!-- Associations -->
+            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
+              <h4 class="mb-0"><%= t('show.associations', model: @cable_type.class.model_name.human) %></h4>
+            </div>
+
+            <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
+
+              <!-- Project collapsible card -->
+              <div class="row mb-1">
+                <%= render 'projects/card', object: @cable_type.project %>
+              </div>
+
+              <!-- Discipline card -->
+              <div class="row mb-1">
+                <%= render 'disciplines/card', object: @cable_type.discipline %>
+              </div>
+
+              <!-- Children card -->
+              <div class="row mb-1">
+                <%= render 'shared/children', parent: @cable_type, association: :electrical_cables %>
+              </div>
+            </div>  <!-- end inner card body -->
+          </div> <!-- end inner card -->
+        </div> <!-- end responsive columns -->
+      </div> <!-- justify-content-center -->
+    </div> <!-- end outer card body -->
+  </div> <!-- end card -->
+</div> <!-- end container -->
+

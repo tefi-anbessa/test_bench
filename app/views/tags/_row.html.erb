@@ -3,41 +3,18 @@
     <td><%= t.project.label %></td>
   <% end %>
   <td><%= t.stage %></td>
-  <td><%= t.discipline.label %></td>
-  <td><%= t.full_tag %></td>
+  <td><%= t.long_label %></td>
+  <td>
+    <span title="<%= t.notes %>">
+      <%= truncate(strip_tags(t.notes.to_s), length: 20) %>
+    </span>
+  </td>
   <td><%= t.service %></td>
   <td><%= t.location %></td>
-  <td><%= t.notes %></td>
+  <td><%= t.parent.present? ? link_to(t.parent.long_label, t.parent) : "-" %></td>
+  <td><%= t.children.count %></td>
   <td>
-    <% if t.tagable_type.present? && Tag.tagable_types.include?(t.tagable_type)%>
-      <% text = t.tagable_type.constantize.model_name.human %>
-      <% if t.tagable.present? %>
-        <%= link_to t.tagable,
-            class: "btn btn-sm btn-outline-info mb-2 icon-link",
-            title: t('show.linked', model: t.tagable_type.constantize.model_name.human) do %>
-              <%== bs_icon('box-arrow-down-right') %>
-              <%= text %>
-            <% end %>
-      <% else %>
-        <% if policy(t.build_tagable()).new? %>
-          <% resource = t.tagable_type.constantize.model_name.singular %>
-          <%= link_to eval("new_tag_#{resource}_path(#{t.id})"),
-              class: "btn btn-sm btn-outline-primary mb-2 icon-link",
-              title: t('actions.link', resource: resource) do %>
-                <%== bs_icon('link') %>
-              <%= text %>
-              <% end %>
-        <% else %>
-          <%= t.tagable_type.constantize.model_name.human %>
-        <% end %>
-      <% end %>
-    <% else %>
-      <span class="text-muted">
-        <%= t.tagable_type.nil? ? 
-          t('index.unassigned') :
-          t('index.invalid') %>
-      </span>
-    <% end %>
+    <%= render "tags/tagable_link", t: t, view: "index" %>
   </td>
   <td>
     <% if policy(t).show? %>

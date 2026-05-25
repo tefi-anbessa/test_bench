@@ -13,4 +13,13 @@ class ApplicationRecord < ActiveRecord::Base
     return "" if enum_value.nil?
     I18n.t("activerecord.attributes.#{self.model_name.i18n_key.to_s}.#{enum_name.to_s.pluralize}.#{enum_value.to_sym}")
   end
+
+  def self.nilifies_blank(*attrs)
+    before_validation do
+      attrs.each do |attr|
+        self[attr] = nil if self[attr].blank?
+      end
+    end
+  end
+
 end

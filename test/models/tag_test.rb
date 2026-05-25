@@ -1,10 +1,10 @@
 require "test_helper"
-
 class TagTest < ActiveSupport::TestCase
+
   setup do
     # Set up project with standard disciplines
     @project = create(:project)
-    @discipline = @project.disciplines.find_by(name: "Electrical")  # Using electrical discipline as an example
+    @discipline = @project.disciplines.find_by(name: "Electrical")
     
     # Create test tags 
     @tag_a1 = create(:tag, discipline: @discipline, 
@@ -200,7 +200,7 @@ class TagTest < ActiveSupport::TestCase
   end
 
   test "long_label method should return discipline and full tag" do
-    assert_equal "#{@tag_a1.discipline.label}-#{@tag_a1.full_tag}", @tag_a1.long_label
+    assert_equal "#{@tag_a1.discipline.code}-#{@tag_a1.full_tag}", @tag_a1.long_label
   end
 
   test "destroy tag should remove from discipline" do
@@ -264,7 +264,7 @@ class TagTest < ActiveSupport::TestCase
     cable = create(:electrical_cable, tag: tag)
     assert_equal cable, tag.tagable
     # Create a new tag with no association
-    new_tag = create(:tag, :unique_tag, prefix: 'EC', discipline: @discipline)
+    new_tag = build(:tag, :unique_tag, prefix: 'EC', discipline: @discipline)
 
     # Try to associate the new tag with existing tagable by assignment
     new_tag.tagable = cable
@@ -273,8 +273,8 @@ class TagTest < ActiveSupport::TestCase
         I18n::t("activerecord.errors.custom.already_associated", 
               child: cable.class.model_name.human,
               parent: tag.class.model_name.human)
-    assert_equal cable, tag.reload.tagable
-    assert_nil new_tag.reload.tagable
+    tag.reload
+    assert_equal cable, tag.tagable
 
     # Try the same using update method
     new_tag.update(tagable: cable)
@@ -283,8 +283,8 @@ class TagTest < ActiveSupport::TestCase
         I18n::t("activerecord.errors.custom.already_associated", 
               child: cable.class.model_name.human,
               parent: tag.class.model_name.human)
-    assert_equal cable, tag.reload.tagable
-    assert_nil new_tag.reload.tagable
+    assert_equal cable, tag.tagable
+    refute new_tag.persisted?
   end
   
   test "should allow creating tagable with existing tag" do
@@ -300,14 +300,6 @@ class TagTest < ActiveSupport::TestCase
       )
       assert_equal tag.reload.tagable, cable
     end
-  end
-  
-  test "should validate tagable existence" do
-    @tag.tagable_type = 'Electrical::Cable'
-    @tag.tagable_id = 9999 # Non-existent ID
-    
-    refute @tag.valid?
-    assert_includes @tag.errors[:tagable], I18n::t("errors.messages.invalid")
   end
   
   test "should nullify both type and id when associated tagable is destroyed" do
@@ -401,16 +393,49 @@ class TagTest < ActiveSupport::TestCase
 
   # When changing an invalid tagable, tagable_id should be reset.
   test "changing an invalid tagable should reset tagable_id" do
-    # Create a tagable with its tag
+    # Create a valid tagable + tag
     light_cct = create(:electrical_light_cct, discipline: @discipline)
     tag = light_cct.tag
-    # Make it invalid without triggering callbacks or validations
+
+    original_id = tag.tagable_id
+
+    # Break the association at the DB level (skip callbacks)
     tag.update_column(:tagable_type, 'InvalidType')
     tag.reload
-    light_cct.reload
-    assert_nil light_cct.tag
-    assert_raises do tag.tagable end
-    tag.update(tagable_type: 'Electrical::LightCct')
+
+    # Accessing tagable should now raise
+    assert_raises(NameError) { tag.tagable }
+
+    # Now update tagable_type back to a valid type
+    tag.update!(tagable_type: 'Electrical::LightCct')
+
+    # Callback should have cleared the stale FK
     assert_nil tag.tagable_id
+
+    # And ensure it's actually changed
+    refute_equal original_id, tag.tagable_id
+  end
+
+  test "tag parent cannot reference itself" do
+    @tag.parent = @tag
+    refute @tag.valid?
+    assert_includes @tag.errors[:parent], I18n::t("activerecord.errors.models.tag.attributes.parent.self")
+  end
+
+  test "tag parent cannot create circular reference" do
+    child = create(:tag, discipline: @discipline)
+    child.update!(parent: @tag)
+    @tag.parent = child
+    refute @tag.valid?
+    assert_includes @tag.errors[:parent], I18n::t("activerecord.errors.models.tag.attributes.parent.circular")
+  end
+
+  test "tag parent cannot be in a different project" do
+    other_project = create(:project)
+    other_discipline = other_project.disciplines.find_by(name: "Electrical")
+    other_tag = create(:tag, :unique_tag, discipline: other_discipline)
+    @tag.parent = other_tag
+    refute @tag.valid?
+    assert_includes @tag.errors[:parent], I18n::t("activerecord.errors.models.tag.attributes.parent.project")
   end
 end

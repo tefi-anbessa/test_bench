@@ -11,19 +11,23 @@ class Discipline < ApplicationRecord
   has_many :doc_types, dependent: :destroy
 
   # Scopes
-  default_scope { order(project_id: :asc, label: :asc) }
+  default_scope { order(project_id: :asc, code: :asc) }
 
   # Valications
   before_validation :normalize_prefix_schema
   validates :name, presence: true, length: { maximum: 50 }, uniqueness: { scope: :project_id }
-  validates :label, presence: true, length: { maximum: 5 }, uniqueness: { scope: :project_id }
+  validates :code, presence: true, length: { maximum: 5 }, uniqueness: { scope: :project_id }
   validates :prefix_schema, presence: true
   validate :validate_required_role
   validate :validate_prefix_schema
 
   # Methods
+  def label
+    code
+  end
+
   def long_label
-    "#{project.label} - #{label}"
+    "#{project.label} - #{code}"
   end
 
   def self.required_role
@@ -38,7 +42,7 @@ class Discipline < ApplicationRecord
       create!(
         project: project,
         name: name.to_s,
-        label: attrs[:label],
+        code: attrs[:code],
         prefix_schema: attrs[:prefix_schema],
         sort_order: attrs[:sort_order],
         required_role: attrs[:required_role]
@@ -52,7 +56,7 @@ class Discipline < ApplicationRecord
 
   def default_prefix_schema_name
     return prefix_schema['name'] if prefix_schema.present? && prefix_schema['name'].present?
-    "#{project&.label}_#{label}".parameterize.underscore
+    "#{project&.label}_#{code}".parameterize.underscore
   end
 
   def schema_for_form
@@ -143,7 +147,7 @@ class Discipline < ApplicationRecord
     end
 
     def self.ransackable_attributes(auth_object = nil)
-      ["label", "name", "prefix_schema", "sort_order", "notes", "required_role"]
+      ["code", "name", "prefix_schema", "sort_order", "notes", "required_role"]
     end
 
     def self.ransackable_associations(auth_object = nil)

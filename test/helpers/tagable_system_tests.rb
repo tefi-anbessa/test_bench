@@ -291,7 +291,7 @@ module TagableSystemTests
       assert_text I18n.t("#{view_key}.index.header", 
         scope_text: [@discipline.project.code, 
           I18n.t("activerecord.models.discipline.one"), 
-          @discipline.label].join(' '))
+          @discipline.code].join(' '))
       assert page.title.include?(I18n.t("#{view_key}.index.title"))
       
       index_field_assertions

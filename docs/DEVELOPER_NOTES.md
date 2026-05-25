@@ -403,9 +403,9 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Review security of all controllers wrt injection attacks.
 - [ ] Check that usage of accepts_nested_attributes_for is correct for tagable concern.
 - [ ] Fix previous and next functionality in tagable navigation, and generalise it for non tagables. All models next and prev should only look inside policy scope. At present can raise forbidden.
-- [ ] RBAC still has anomalous behaviour when resource wide roles are applied. Scope will include all projects, and alow selection of any project as current, but accessing the project without a specific role will result in forbidden. Either block resource wide roles or implement them in policies.
+- [ ] RBAC still has anomalous behaviour when resource wide roles are applied. Scope will include all projects, and allow selection of any project as current, but accessing the project without a specific role will result in forbidden. Either block resource wide roles or implement them in policies.
 - [ ] Clean up responsive views - test all on simulator.
-- [ ] Issue policy has been removed. Assess whether it is required or just use document policy, like circuits.
+- [x] Issue policy has been removed. Assess whether it is required or just use document policy, like circuits.
 - [x] Fix update test in tag system test.
 - [x] Fix error in doc_types system test (edit).
 - [ ] Refactor cable and cable type system tests after restructure to core.
@@ -464,7 +464,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Transition cable types to core module, discipline nested. This should allow other disciplines (instrument, communication) to create appropriate cable types.
 - [ ] Revise index views to get credentials once and use for links, for all resources where the credentials are not granular, i.e. everything except projects and disciplines.
 - [x] Refactor model translations with count.
-- [ ] Revert activerecord translations to convention with / instead of . key for module.
+- [x] Revert activerecord translations to convention with / instead of . key for namespaced models.
 - [ ] Rename project change module to change management.
 - [ ] Set up ransack to sort on translated attributes where relevant.
 - [ ] Add a prefix breakdown drop down on tags show view.

@@ -3,7 +3,7 @@
     <td scope = "col"><%= row.project.code %></td>
   <% end %>
   <td><%= row.discipline.present? ?
-    link_to(row.discipline.label, row.discipline) : 
+    link_to(row.discipline.code, row.discipline) : 
     '-' %></td>
   <td><%= row.code || '-' %></td>
   <td><%= row.name || '-' %></td>

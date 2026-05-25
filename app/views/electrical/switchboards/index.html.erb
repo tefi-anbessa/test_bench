@@ -17,12 +17,12 @@
         <!-- Header Text (Left - 8 columns) -->
         <div class="col-8">
           <h5><%= t('.header', 
-            scope_text: [@discipline.project.code, t("activerecord.models.discipline.one"), @discipline.label].join(' ')) %></h5>
+            scope_text: [@discipline.project.code, t("activerecord.models.discipline.one"), @discipline.code].join(' ')) %></h5>
         </div>
 
         <!-- New Button (Right) -->
         <div class="col-2 align-content-end">
-          <% if policy(Electrical::Switchboard).new? %>
+          <% if policy(@discipline.tags.build()).new? %>
               <%= link_to new_discipline_electrical_switchboard_path(@discipline),
                 class: "btn btn-sm btn-outline-primary actions",
                 aria: { label: t('actions.new') },
@@ -100,6 +100,7 @@
       <% end %>
 
       <!-- Switchboards -->
+      <% can_edit = policy(@discipline.tags.build()).edit? %>
       <table id='switchboards' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
         <%= render 'header' %>
         <tbody>
@@ -110,7 +111,7 @@
               </td>
             </tr>
             <% @orphans.each do |row| %>
-              <%= render 'row', row: row %>
+              <%= render 'row', row: row, can_edit: can_edit %>
             <% end %>
             <tr class="table-success">
               <td colspan="<%= 9 + (current_project ? 1 : 0) %>">
@@ -119,7 +120,7 @@
             </tr>
           <% end %>
           <% @switchboards.each do |row| %>
-            <%= render 'row', row: row %>
+            <%= render 'row', row: row, can_edit: can_edit %>
           <% end %>
         </tbody>
       </table>

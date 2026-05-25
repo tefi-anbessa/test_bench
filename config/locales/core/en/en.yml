@@ -50,6 +50,7 @@ en:
   show:
     orphan:       "No associated parent %{model}"
     unassigned:   "%{model} not assigned"
+    invalid:      "%{model} is invalid or missing"
     linked:       "Show %{model}"
     model:        "model"
     label:        "Label"

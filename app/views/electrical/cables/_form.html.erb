@@ -1,11 +1,11 @@
-<div class="container mt-3" style="<%= container_styles(@swatch) %>">
-  <div class="card" style="<%= card_styles(@swatch) %>">
-    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+<div class="container mt-3" style="<%= container_styles(swatch) %>">
+  <div class="card" style="<%= card_styles(swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(swatch) %>">
 
       <!-- Center Tag Info -->
       <div class="col text-center">
         <div class="d-flex flex-column align-items-center">
-          <div class="badge fs-6" style="<%= badge_styles(@swatch) %>">
+          <div class="badge fs-6" style="<%= badge_styles(swatch) %>">
             <%= yield(:header) %>
           </div>
         </div>
@@ -13,36 +13,31 @@
     </div>
 
     <%= bootstrap_form_with(model: cable,
-          url: discipline_electrical_cables_path(@discipline),
+          url: cable.persisted? ? cable : discipline_electrical_cables_path(@discipline),
           layout: :horizontal, 
           label_col: "col-sm-4", 
           control_col: "col-sm-8",
           wrapper_class: 'mb-1'
           ) do |f| %>
 
-      <div class="card-body p-2" style="<%= card_styles(@swatch) %>">
+      <div class="card-body p-2" style="<%= card_styles(swatch) %>">
         <div class="row justify-content-center">
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
             <!-- Tag -->
             <div class="card mb-1">
-              <% if tag.persisted? %>
-                <%= render 'tags/card', tag: tag %>
-                <%= hidden_field_tag :tag_id, tag.id %>
-              <% else %>
-                <%= f.fields_for tag do |tag_f| %>
-                  <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
-                <% end %>
+              <%= f.fields_for tag do |tag_f| %>
+                <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
               <% end %>
             </div>
 
-            <!-- Cable Details -->
-            <div class="card mb-1">
-              <div class="card-header p-2">
-                <h5><%= t('activerecord.models.electrical/cable') %></h5>
+            <!-- Switchboard Details -->
+            <div class="card mb-1" style="<%= card_styles(swatch) %>">
+              <div class="card-header p-2" style="<%= card_header_styles(swatch) %>">
+                <h5><%= t('activerecord.models.electrical/cable.one') %></h5>
               </div>
               
-              <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
+              <div class="card-body p-2" style="<%= form_styles(swatch) %>">
                 <%= render 'shared/error_messages', object: f.object %>
 
                 <!-- Cable Type -->

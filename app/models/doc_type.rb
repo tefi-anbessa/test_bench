@@ -15,7 +15,7 @@ class DocType < ApplicationRecord
   end
 
   def long_label
-    "#{discipline.label}: #{code}"
+    "#{discipline.code}: #{code}"
   end
 
   def self.swatch

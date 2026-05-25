@@ -83,9 +83,16 @@ module Electrical
 
     private
       # Use callbacks to share common setup or constraints between actions.
+
       def set_discipline
-        @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
-        raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
+        if params[:discipline_id].present?
+          @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
+          raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
+        elsif params[:project_id].present?
+          @discipline = nil
+          @project = policy_scope(Project).find_by(id: params[:project_id])
+          raise ApplicationController::ConflictError, :out_of_scope if @project.nil?
+        end
       end
 
       def set_cable_type

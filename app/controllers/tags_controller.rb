@@ -3,7 +3,7 @@ class TagsController < ApplicationController
   before_action :require_project!, only: %i[ new create edit update]
   before_action :set_discipline, only: %i[ index new create ]
   before_action :set_tag, only: %i[ show edit update destroy ]
-  before_action :set_swatch, only: %i[ index show new edit ]
+  before_action :set_swatch, only: %i[ index show ]
 
   # GET /tags or /tags.json
   def index
@@ -28,6 +28,7 @@ class TagsController < ApplicationController
   # GET /tags/new
   def new
     authorize @tag = @discipline.tags.build()
+    setup_form
   end
 
   # POST /tags or /tags.json
@@ -38,7 +39,7 @@ class TagsController < ApplicationController
       redirect_to @tag
     else
       flash[:alert] = I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.tag.one'))
-      set_swatch
+      setup_form
       render :new, status: :unprocessable_content
     end
   end
@@ -46,6 +47,7 @@ class TagsController < ApplicationController
   # GET /tags/1/edit
   def edit
     authorize @tag
+    setup_form
   end
 
   # PATCH/PUT /tags/1 or /tags/1.json
@@ -56,7 +58,7 @@ class TagsController < ApplicationController
       redirect_to @tag
     else
       flash[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.tag.one'))
-      set_swatch
+      setup_form
       render :edit, status: :unprocessable_content
     end
   end
@@ -107,13 +109,19 @@ class TagsController < ApplicationController
       discipline_data[:prefix_schema] == :isa51
     end
 
+    def setup_form
+      set_swatch
+      @safe_tagable_types = Tag.safe_tagable_types
+      @parents = @tag.prospective_parents(policy_scope(Tag)).order(:discipline_id, :full_tag)
+    end
+
     def set_swatch
       @swatch = @discipline&.swatch || @project&.swatch || Swatch.find_by(name: 'app_theme')
     end
 
     def tag_params
       params.require(:tag).permit(:discipline_id, :stage, :prefix, :serial, :suffix,
-                                  :service, :location, :notes, :tagable_type)
+                                  :service, :location, :notes, :tagable_type, :parent_id)
     end
 
 

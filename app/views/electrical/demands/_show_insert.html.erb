@@ -1,0 +1,36 @@
+
+<div class="row mb-1">
+  <!-- Demand section -->
+  <% text = t("activerecord.models.electrical/demand", count: 1) %>
+  <% if demand.present? %>
+    <%= render "electrical/demands/card", object: demand %>
+  <% else %> 
+    <div class="col-4 text-muted">
+      <% text %>
+    </div>
+    <div class="col-8">
+      <!-- Cannot create a new demand without a tag. -->
+      <% link_text = t("actions.link", resource: text) %>
+      <% if tag&.present? %>
+        <% if policy(Electrical::Demand).new? %> 
+          <%= link_to new_tag_electrical_demand_path(tag.id),
+              class: "btn btn-sm btn-outline-primary mb-2",
+              title: link_text do %>
+                <span class="d-none d-md-inline">
+                  <%= link_text %>
+                </span>
+                <%== bs_icon('link') %>
+              <% end %>
+        <% else %>
+          <span class="d-none d-md-inline">
+            <%= t('show.unassigned', model: text) %>
+          </span>
+        <% end %>
+      <% else %>
+        <span class="bg-danger">
+          <%= t('show.orphan', model: text) %>
+        </span>
+      <% end %>
+    </div> <!-- end column -->
+  <% end %>
+</div> <!-- end demand row -->

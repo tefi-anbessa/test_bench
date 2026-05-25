@@ -1,0 +1,121 @@
+<!-- List project disciplines for project dashboard -->
+<% switchboard = object %>
+<% circuits = switchboard.circuits %>
+<!-- Disciplines Dashboard Panel -->
+<div class="card mb-4" style="<%= card_styles(@swatch) %>">
+  <div class="card-header d-flex justify-content-between align-items-center py-2" style="<%= card_header_styles(@swatch) %>">
+    <h5 class="mb-0"><%= t('electrical.circuits.index.header', scope_text: switchboard.label) %></h5>
+    <% if policy(switchboard).new? %>
+      <%= link_to new_electrical_switchboard_circuit_path(switchboard),
+            class: "btn btn-outline-primary btn-sm",
+            data: { turbo: false },
+            aria: { label: t('actions.new') } do %>
+        <%== bs_icon('plus-square-fill') %>
+        <%= [t('actions.new'), t('activerecord.models.electrical/circuit.one')].join(' ') %>
+      <% end %>
+    <% end %>
+  </div>
+  <% can_edit = policy(switchboard).edit? %>
+  <% can_destroy = policy(switchboard).destroy? %>
+  <div class="card-body p-3">
+    <div class="row align-items-center py-2 border-bottom">
+      <div class="col-2">
+        <%= t("activerecord.attributes.electrical/circuit.serial") %>
+      </div>
+      <div class="col-2">
+        <%= t("activerecord.attributes.electrical/circuit.phase") %>
+      </div>
+      <div class="col-2">
+        <%= t("activerecord.attributes.electrical/circuit.device") %>
+      </div>
+      <div class="col-2">
+        <%= t("activerecord.attributes.electrical/circuit.feeder") %>
+      </div>
+      <div class="col-2">
+        <%= t("activerecord.attributes.electrical/circuit.demand") %>
+      </div>
+      <div class="col-2 text-end">
+        <%= t('table.links') %>
+      </div>
+    </div>
+    <% circuits.each do |circuit| %>
+      <div class="row align-items-center py-2 border-bottom">
+        <!-- Circuit Label Column -->
+        <div class="col-md-2">
+          <%= link_to circuit, 
+              class: "fw-bold text-decoration-none" do %>
+            <%= circuit.long_label %>
+          <% end %>
+        </div>
+        
+        <!-- Phase -->
+        <div class="col-md-2">
+          <%= circuit.phase %>
+        </div>
+        
+        <!-- Device -->
+        <div class="col-md-2">
+          <%= circuit.device %>
+        </div>
+        
+        <!-- Feeder -->
+        <div class="col-md-2">
+          <% if circuit.feeder.present? && policy(circuit.feeder).show? %>
+            <%= link_to circuit.feeder.label, circuit.feeder %>
+          <% else %>
+            <%= t("index.unassigned") %>
+          <% end %>
+        </div>
+        
+        <!-- Demand -->
+        <div class="col-md-2">
+          <% if circuit.demand.present? && policy(circuit.demand).show? %>
+            <%= link_to circuit.demand.label, circuit.demand %>
+          <% else %>
+            <%= t("index.unassigned") %>
+          <% end %>
+        </div>
+        
+        <!-- Actions Column -->
+        <div class="col-md-2 text-end">
+          <div class="d-flex gap-1 justify-content-end">
+            <% text = t('actions.show') %>
+            <%= link_to electrical_circuit_path(circuit),
+                  class: "btn btn-outline-info btn-sm",
+                  aria: { label: text },
+                  title: [text, circuit.long_label].join(' ') do %>
+              <%== bs_icon('eye') %>
+            <% end %>
+            
+            <% if can_edit %>
+            <% text = t('actions.edit') %>
+              <%= link_to edit_electrical_circuit_path(circuit),
+                    class: "btn btn-outline-warning btn-sm",
+                    aria: { label: text },
+                    title: [text, circuit.long_label].join(' ') do %>
+                <%== bs_icon('pencil') %>
+              <% end %>
+            <% end %>
+            
+            <% if can_destroy %>
+            <% text = t('actions.delete') %>
+              <%= link_to electrical_circuit_path(circuit),
+                      data: { method: :delete, confirm: t('actions.delete_sure') },
+                      class: "btn btn-outline-danger btn-sm",
+                      aria: { label: text },
+                      title: [text, circuit.long_label].join(' ') do %>
+                <%== bs_icon('trash') %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+    
+    <% if circuits.empty? %>
+      <div class="text-center text-muted py-3">
+        <%= t('electrical.circuits.index.empty') %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -19,7 +19,7 @@
     </div> <!-- end of card header -->
 
     <%= bootstrap_form_with(model: cable_type,
-            url: discipline_electrical_cable_types_path(@discipline),
+            url: cable_type.persisted? ? cable_type : discipline_electrical_cable_types_path(@discipline),
             layout: :horizontal,
             label_col: "col-sm-6",
             control_col: "col-sm-6",

@@ -18,7 +18,7 @@
                   class: "btn btn-sm btn-outline-secondary me-2",
                   title: t('actions.index') do %>
               <%== bs_icon('collection') %>
-              <span class="d-none d-md-inline"><%= [@discipline.label, t('actions.index')].join(' ') %></span>
+              <span class="d-none d-md-inline"><%= [@discipline.code, t('actions.index')].join(' ') %></span>
             <% end %>
 
             <!-- Previous Button -->
@@ -113,111 +113,132 @@
 
     <div class="card-body">
       <div class="row justify-content-center">
-        <div class="col-sm-12 col-10 col-md-8 col-lg-6 col-xl-4">
+        <div class="col-sm-12 col-10 col-md-8 col-lg-6 col-xl-6">
 
-          <!-- Project collapsible card -->
-          <div class="row mb-1">
-            <%= render 'projects/card', object: @tag.project %>
-          </div>
-
-          <!-- Discipline card -->
-          <div class="row mb-1">
-            <%= render 'disciplines/card', object: @discipline %>
-          </div>
-
-          <!-- Project stage -->
-          <div class="row mb-1">
-            <div class="col-4"><%= t('activerecord.attributes.tag.stage') %></div>
-            <div class="col-8"><%= @tag.stage %></div>
-          </div>
-
-          <!-- Tag Details -->
-          <div class="row mb-1">
-            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.full_tag') %></div>
-            <div class="col-8"><%= @tag.full_tag %></div>
-          </div>
+          <!-- Inner Card -->
+          <!-- Resource Details -->
+          <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
+              <h4 class="mb-0"><%= t('show.details', model: t("activerecord.models.tag.one")) %></h4>
+            </div>
+            <div class="card-body">
           
-          <!-- Service -->
-          <div class="row mb-1">
-            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.service') %></div>
-            <div class="col-8"><%= @tag.service %></div>
-          </div>
-          
-          <!-- Location -->
-          <div class="row mb-1">
-            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.location') %></div>
-            <div class="col-8"><%= @tag.location %></div>
-          </div>
-          
-          <!-- Notes -->
-          <div class="row mb-1">
-            <div class="col-4 text-muted"><%= t('activerecord.attributes.tag.notes') %></div>
-            <div class="col-8"><%= @tag.notes %></div>
-          </div>
-
-          <!-- Tagable Section -->
-          <% if (@tag.tagable.present? rescue false) %>
-            <% partial = "#{@tag.tagable.class.model_name.plural}/card" %>
-            <% if lookup_context.exists?(partial, [], true) %>
-              <!-- Show a collapsible card for tagable. -->
-              <div class="row g-3 mb-1">
-                <%= render partial, object: @tag.tagable %>
-              </div>
-            <% else %>
-              <!-- Show a link to tagable. -->
+              <!-- Notes -->
               <div class="row mb-1">
-                <div class="col-4 text-muted">
-                  <%= t('activerecord.attributes.tag.tagable_type') %>
-                </div>
-                <div class="col-8">
-                  <% text = @tag.tagable.class.model_name.human %>
-                  <%= link_to @tag.tagable,
-                        class: "btn btn-sm btn-outline-secondary mb-2",
-                        title: t('show.linked', model: text) do %>
-                          <%== bs_icon('box-arrow-down-right') %>
-                          <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
-                      <% end %>
-                </div>
+                <div class="col-4 "><%= t('activerecord.attributes.tag.notes') %></div>
+                <div class="col-8"><%= simple_format(@tag.notes || '-') %></div>
               </div>
-            <% end %>
-          <% else %> <!-- valid tagable not present -->
-            <div class="row mb-1">
-              <div class="col-4 text-muted">
-                <%= t('activerecord.attributes.tag.tagable_type') %>
+
+              <!-- Project stage -->
+              <div class="row mb-1">
+                <div class="col-4"><%= t('activerecord.attributes.tag.stage') %></div>
+                <div class="col-8"><%= @tag.stage %></div>
               </div>
-              <div class="col-8">
-                <% if @tag.tagable_type.present? %>
-                  <% if Tag.tagable_types.include?(@tag.tagable_type) %>
-                    <% text = @tag.tagable_type.constantize.model_name.name.sub('::', ' ') %>
-                    <% if policy(@tag.build_tagable()).new? %>
-                      <!-- Setup a link to create the tagable. -->
-                      <% resource = @tag.tagable_type.constantize.model_name.singular %>
-                      <%= link_to eval("new_tag_#{resource}_path(#{@tag.id})"),
-                            class: "btn btn-sm btn-outline-primary mb-2",
-                            title: t('actions.link', resource: text) do %>
-                              <%== bs_icon('link') %>
-                              <span class="d-none d-md-inline">
-                                <%= t('actions.link', resource: text) %>
-                              </span>
-                            <% end %>
-                    <% else %>        <!-- policy: no permission -->
-                      <span class="text-muted">
-                        <%= text %>
+              
+              <!-- Location -->
+              <div class="row mb-1">
+                <div class="col-4 "><%= t('activerecord.attributes.tag.location') %></div>
+                <div class="col-8"><%= @tag.location %></div>
+              </div>
+            </div>  <!-- temporary end inner card body -->
+
+            <!-- Associations -->
+            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
+              <h4 class="mb-0"><%= t('show.associations', model: t("activerecord.models.tag.one")) %></h4>
+            </div>
+
+            <div class="card-body p-3">
+
+              <!-- Project collapsible card -->
+              <div class="row mb-1">
+                <%= render 'projects/card', object: @tag.project %>
+              </div>
+
+              <!-- Discipline card -->
+              <div class="row mb-1">
+                <%= render 'disciplines/card', object: @discipline %>
+              </div>
+
+              <!-- Tagable Section -->
+              <div class="row mb-3">
+                <% if (@tag.tagable.present? rescue false) %>
+                  <% partial = "#{@tag.tagable.class.model_name.collection}/card" %>
+                  <% if lookup_context.exists?(partial, [], true) %>
+                    <!-- Show a collapsible card for tagable. -->
+                    <%= render partial, object: @tag.tagable %>
+                  <% else %>
+                    <!-- Show a link to tagable. -->
+                    <div class="col-4">
+                      <%= t('activerecord.attributes.tag.tagable_type') %>
+                    </div>
+                    <div class="col-8">
+                      <% text = @tag.tagable.class.model_name.human %>
+                      <%= link_to @tag.tagable,
+                            class: "btn btn-sm btn-outline-secondary mb-2",
+                            title: t('show.linked', model: text) do %>
+                              <%== bs_icon('box-arrow-down-right') %>
+                              <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
+                          <% end %>
+                    </div>
+                  <% end %>
+                <% else %> <!-- valid tagable not present -->
+                  <div class="col-4 ">
+                    <%= t('activerecord.attributes.tag.tagable_type') %>
+                  </div>
+                  <div class="col-8">
+                    <% if @tag.tagable_type.present? %>
+                      <% if Tag.tagable_types.include?(@tag.tagable_type) %>
+                        <% text = @tag.tagable_type.constantize.model_name.name.sub('::', ' ') %>
+                        <% if policy(@tag.build_tagable()).new? %>
+                          <!-- Setup a link to create the tagable. -->
+                          <% resource = @tag.tagable_type.constantize.model_name.singular %>
+                          <%= link_to eval("new_tag_#{resource}_path(#{@tag.id})"),
+                                class: "btn btn-sm btn-outline-primary mb-2",
+                                title: t('actions.link', resource: text) do %>
+                                  <%== bs_icon('link') %>
+                                  <span class="d-none d-md-inline">
+                                    <%= t('actions.link', resource: text) %>
+                                  </span>
+                                <% end %>
+                        <% else %>        <!-- policy: no permission -->
+                          <span class="">
+                            <%= text %>
+                          </span>
+                        <% end %>         <!-- policy -->
+                      <% else %>        <!-- invalid tagable_type -->
+                        <span class="">
+                          <%= t("activerecord.errors.models.tag.attributes.tagable_type.invalid", tagable_type: @tag.tagable_type) %>
+                        </span>
+                      <% end %>         <!-- valid tagable_type -->
+                    <% else %>          <!-- tagable_type not present? -->
+                      <span class="">
+                        <%= t('show.unassigned', model: t("activerecord.attributes.tag.tagable_type")) %>
                       </span>
-                    <% end %>         <!-- policy -->
-                  <% else %>        <!-- invalid tagable_type -->
-                    <span class="text-muted">
-                      <%= t("activerecord.errors.models.tag.attributes.tagable_type.invalid", tagable_type: @tag.tagable_type) %>
+                    <% end %>           <!-- tagable_type.present? -->
+                  </div> <!-- col -->
+                <% end %>         <!-- tagable.present? -->
+              </div> <!-- row -->
+
+              <!-- Parent card -->
+              <div class="row mb-3">
+                <% if @tag.parent %>
+                  <%= render 'tags/card', object: @tag.parent, context: :parent %>
+                <% else %>
+                  <div class="col-12 mb-2">
+                    <span>
+                      <%= t('show.unassigned', model: t("activerecord.attributes.tag.parent")) %>
                     </span>
-                  <% end %>         <!-- valid tagable_type -->
-                <% else %>          <!-- tagable_type not present? -->
-                  <span class="text-muted">
-                    <%= t('show.unassigned', model: t("activerecord.attributes.tag.tagable_type")) %>
-                  </span>
-                <% end %>           <!-- tagable_type.present? -->
-              </div> <!-- col -->
-            </div> <!-- row -->
-          <% end %>         <!-- tagable.present? -->
+                  </div>
+                <% end %>
+
+              <!-- Children cards -->
+              <div class="row mb-1">
+                <% @tag.children.each do |child| %>
+                  <%= render 'tags/card', object: child, context: :child %>
+                <% end %>
+              </div>
+            </div> <!-- inner card body -->
+          </div> <!-- inner card -->
         </div> <!-- responsive columns -->
       </div> <!-- row -->
     </div> <!-- card body -->

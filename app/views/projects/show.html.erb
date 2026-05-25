@@ -112,24 +112,27 @@
                 <div class="col-8"><%= @project.description || '-' %></div>
               </div>
 
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t('activerecord.models.swatch', count: 1) %></div>
-                <div class="col-6">
-                  <%= @project.swatch&.name || '-' %>
-                </div>
-                <div class="col-2 text-end">
-                  <% if @project.swatch && policy(@project.swatch).show? %>
-                    <%= link_to @project.swatch, 
-                        class: "btn btn-sm btn-outline-info",
-                        aria: { 
-                          label: t('actions.show', model: t('activerecord.models.swatch', count: 1)) 
-                        } do %>
-                      <%= t('actions.show') %>
-                      <%== bs_icon('eye') %>
+              <!-- Only show the swatch to users that can change it. -->
+              <% if policy(@project).edit? %>
+                <div class="row mb-1">
+                  <div class="col-4 text-muted"><%= t('activerecord.models.swatch', count: 1) %></div>
+                  <div class="col-6">
+                    <%= @project.swatch&.name || '-' %>
+                  </div>
+                  <div class="col-2 text-end">
+                    <% if @project.swatch && policy(@project.swatch).show? %>
+                      <%= link_to @project.swatch, 
+                          class: "btn btn-sm btn-outline-info",
+                          aria: { 
+                            label: t('actions.show', model: t('activerecord.models.swatch', count: 1)) 
+                          } do %>
+                        <%= t('actions.show') %>
+                        <%== bs_icon('eye') %>
+                      <% end %>
                     <% end %>
-                  <% end %>
+                  </div>
                 </div>
-              </div>
+              <% end %>
 
               <!-- Tags and document links -->
               <div class="row mb-1">
@@ -153,16 +156,6 @@
                       <%== bs_icon('file') %>
                       <%= t('activerecord.models.document', count: @project.documents.count) %>
                       <span class="badge bg-secondary ms-1"><%= @project.documents.count %></span>
-                    <% end %>
-                    
-                    <%= link_to project_doc_types_path(@project),
-                        class: "btn btn-outline-info btn-sm",
-                        aria: { 
-                          label: t('activerecord.models.doc_type', count: @project.doc_types.count)
-                        } do %>
-                      <%== bs_icon('file') %>
-                      <%= t('activerecord.models.doc_type', count: @project.doc_types.count) %>
-                      <span class="badge bg-secondary ms-1"><%= @project.doc_types.count %></span>
                     <% end %>
                   </div>
                 </div>

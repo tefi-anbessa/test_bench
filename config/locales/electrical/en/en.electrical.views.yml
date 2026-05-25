@@ -46,6 +46,7 @@ en:
       index:
         title:            "Circuits"
         header:           "%{scope_text} Circuits Schedule"
+        empty:            "No circuits to show"
       edit:
         title:            "Edit Circuit"
         header:           "Edit Circuit %{label}"

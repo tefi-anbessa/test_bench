@@ -89,159 +89,123 @@
                   </span>
                 <% end %>
               <% end %>
-            </div>
-          </div>
-        </div> <!--- end of col auto -->
-      </div> <!--- end of header row -->
-    </div> <!--- end of outer card header -->
+            </div> <!-- end button group -->
+          </div> <!-- end d-flex -->
+        </div> <!-- end col-auto -->
+      </div> <!-- end row -->
+    </div> <!-- end card header -->
 
+    <div class="card-body">
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
-    <div class="card-body"> <!--- outer card body -->
-      <div class="d-flex flex-column justify-content-center">
+          <!-- Load Details Card -->
+          <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
+              <h4 class="mb-0"><%= t('show.details', model: @demand.model_name.human) %></h4>
+            </div> <!-- end inner card header -->
 
-        <div class="row justify-content-center">
-          <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+            <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
 
-            <!-- Demandable Card -->
-            <% model = @demand.demandable_type.tableize.singularize %>
-            <% partial = "#{model.pluralize}/card" %>
-            <% if lookup_context.exists?(partial, [], true) %>
-              <div class="row g-3 mb-3">
-                <%= render partial, object: @demand.demandable %>
-              </div>
-            <% else %>
+              <span class="border">
+                <div class="row mb-1">
+                  <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/demand.notes') %></div>
+                </div>
+                <div class="row mb-1">
+                  <div class="col-12"><%= simple_format(@demand.notes) %></div>
+                </div>
+              </span>
+
               <div class="row mb-1">
-                <% model_text = t("activerecord.models.#{@demand.demandable.model_name.i18n_key}.one") %>
-                <% text = t("actions.jump_to", model: model_text) %>
-                <% path = begin
-                  polymorphic_path([@demand.demandable])
-                rescue NoMethodError, ActionController::UrlGenerationError
-                  '#'
-                end %>
-                <% text = t("actions.jump_to", model: model_text) %>
-                <%= link_to path,
-                    class: "btn btn-sm btn-outline-secondary me-2",
-                    title: text do %>
-                  <%== bs_icon('box-arrow-in-up-left') %>
-                  <span class="d-none d-md-inline"><%= text %></span>
-                <% end %>
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.basis") %></div>
+                <div class="col-8"><%= @demand.class.human_enum_name(:basis, @demand.basis) %></div>
               </div>
-            <% end %>
 
-            <!-- Load Details Card -->
-            <div class="card mb-4" style="<%= card_styles(@swatch) %>"> <!-- load details inner card -->
-              <div class="card-body p-3">
-
-                  <!-- Circuit Section -->
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted">
-                      <%= @demand.class.human_attribute_name(:circuit) %>
-                    </div>
-                    <div class="col-8">
-                      <% if @demand.circuit.present? %>
-                        <% text = t("activerecord.models.electrical/circuit.one") %>
-                        <div class="d-flex justify-content-between align-items-center">
-                          <span><%= @demand.circuit.label %></span>
-                          <%= link_to @demand.circuit,
-                                class: "btn btn-sm btn-outline-secondary mb-2",
-                                title: t('show.linked', model: text) do %>
-                                  <%== bs_icon('box-arrow-in-right') %>
-                                  <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
-                                <% end %>
-                        </div>
-                      <% else %>
-                        <span class="text-muted">
-                          <%= t('show.unassigned', model: t("activerecord.models.electrical/circuit.one")) %>
-                        </span>
-                      <% end %>
-                    </div>
-                  </div>
-
-                  <!-- Incomer Section -->
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted">
-                      <%= @demand.class.human_attribute_name(:incomer) %>
-                    </div>
-                    <div class="col-8">
-                      <% if @demand.incomer.present? %>
-                        <% text = t("activerecord.models.electrical/cable.one") %>
-                        <div class="d-flex justify-content-between align-items-center">
-                          <span><%= @demand.incomer.label %></span>
-                          <%= link_to @demand.incomer,
-                                class: "btn btn-sm btn-outline-secondary mb-2",
-                                title: t('show.linked', model: text) do %>
-                                  <%== bs_icon('box-arrow-in-right') %>
-                                  <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
-                                <% end %>
-                        </div>
-                      <% else %>
-                        <span class="text-muted">
-                          <%= t('show.unassigned', model: @demand.class.human_attribute_name(:incomer)) %>
-                        </span>
-                      <% end %>
-                    </div>
-                  </div>
-
+              <span class="border">
                 <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.basis") %></div>
-                  <div class="col-8"><%= @demand.class.human_enum_name(:basis, @demand.basis) %></div>
+                  <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/demand.basis_notes') %></div>
                 </div>
-
                 <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.basis_notes") %></div>
-                  <div class="col-8"><%= @demand.basis_notes.present? ?
-                    simple_format(@demand.basis_notes) : '-' %></div>
+                  <div class="col-12"><%= simple_format(@demand.basis_notes) %></div>
                 </div>
+              </span>
 
-                <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.supply") %></div>
-                  <div class="col-8"><%= number_to_human(@demand.supply, precision: 4,
-                                          units: { unit: "V", thousand: "kV"}) %></div>
-                </div>
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.supply") %></div>
+                <div class="col-8"><%= number_to_human(@demand.supply, precision: 4,
+                                        units: { unit: "V", thousand: "kV"}) %></div>
+              </div>
 
-                <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.config") %></div>
-                  <div class="col-8"><%= @demand.class.human_enum_name(:config, @demand.config) %></div>
-                </div>
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.config") %></div>
+                <div class="col-8"><%= @demand.class.human_enum_name(:config, @demand.config) %></div>
+              </div>
 
-                <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.power") %></div>
-                  <div class="col-8"><%= number_to_human(@demand.power, precision: 4,
-                                          units: { unit: "W", thousand: "kW", million: "MW"}) %></div>
-                </div>
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.power") %></div>
+                <div class="col-8"><%= number_to_human(@demand.power, precision: 4,
+                                        units: { unit: "W", thousand: "kW", million: "MW"}) %></div>
+              </div>
 
-                <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.vector") %></div>
-                  <div class="col-8"><%= number_to_human(@demand.vector, precision: 4,
-                                          units: { unit: "VA", thousand: "kVA", million: "MVA"}) %></div>
-                </div>
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.vector") %></div>
+                <div class="col-8"><%= number_to_human(@demand.vector, precision: 4,
+                                        units: { unit: "VA", thousand: "kVA", million: "MVA"}) %></div>
+              </div>
 
-                <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.power_factor") %></div>
-                  <div class="col-8"><%= @demand.power_factor || '-'%></div>
-                </div>
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.power_factor") %></div>
+                <div class="col-8"><%= @demand.power_factor || '-'%></div>
+              </div>
 
-                <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.current") %></div>
-                  <div class="col-8"><%= number_to_human(@demand.current, precision: 4,
-                                          units: { unit: "A", thousand: "kA", million: "MA"}) %></div>
-                </div>
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.current") %></div>
+                <div class="col-8"><%= number_to_human(@demand.current, precision: 4,
+                                        units: { unit: "A", thousand: "kA", million: "MA"}) %></div>
+              </div>
 
-                <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.duty") %></div>
-                  <div class="col-8"><%= @demand.duty %></div>
-                </div>
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.duty") %></div>
+                <div class="col-8"><%= @demand.duty %></div>
+              </div>  <!-- temporary end inner card body -->
 
-                <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.notes") %></div>
-                  <div class="col-8"><%= @demand.notes.present? ?
-                    simple_format(@demand.notes) : '-' %></div>
-                </div>
-              </div> <!-- end of load details inner card body -->
-            </div> <!-- end of load details inner card -->
-          </div> <!-- end of responsive columns -->
-        </div> <!-- end of row -->
-      </div> <!-- end of d-flex column -->
-    </div> <!-- end of outer card body -->
-  </div> <!-- end of outer card -->
-</div> <!-- end of container -->
+            <!-- Associations -->
+            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
+              <h4 class="mb-0"><%= t('show.associations', model: @demand.model_name.human) %></h4>
+            </div>
+
+            <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
+
+              <!-- Demandable Card -->
+              <div class="row mb-1">
+                <%= render 'shared/association', 
+                  object_type: @demand.demandable_type, 
+                  object_id: @demand.demandable_id,
+                  allowed_types: Electrical::Demand.demandable_types,
+                  context: @demand.demandable.model_name.human %>
+              </div>
+
+              <!-- Circuit Section -->
+              <div class="row mb-1">
+                <%= render 'shared/association', 
+                  object_type: "Electrical::Circuit", 
+                  object_id: @demand.circuit&.id, 
+                  allowed_types: ["Electrical::Circuit"],
+                  context: t("activerecord.attributes.electrical/demand.circuit") %>
+              </div>
+
+              <!-- Incomer Section -->
+              <div class="row mb-1">
+                <%= render 'shared/association', 
+                  object_type: "Electrical::Cable", 
+                  object_id: @demand.incomer&.id, 
+                  allowed_types: ["Electrical::Cable"],
+                  context: t("activerecord.attributes.electrical/demand.incomer") %>
+              </div>
+            </div>  <!-- end inner card body -->
+          </div> <!-- end inner card -->
+        </div> <!-- end responsive columns -->
+      </div> <!-- justify-content-center -->
+    </div> <!-- end outer card body -->
+  </div> <!-- end card -->
+</div> <!-- end container -->

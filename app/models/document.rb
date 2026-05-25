@@ -44,7 +44,7 @@ class Document < ApplicationRecord
   end
 
   def long_label
-    # Document number already includes discipline label
+    # Document number already includes discipline.code
     doc_number
   end
 
@@ -61,7 +61,7 @@ class Document < ApplicationRecord
         self.serial = max_serial.to_i + 1
         
         separator = Constants.documents.separator
-        self.doc_number = "#{discipline.project.label}#{separator}#{discipline.label}#{separator}#{doc_type.code}#{separator}#{serial.to_s.rjust(Constants.documents.serial_digits, '0')}"
+        self.doc_number = "#{discipline.project.label}#{separator}#{discipline.code}#{separator}#{doc_type.code}#{separator}#{serial.to_s.rjust(Constants.documents.serial_digits, '0')}"
         
         # Continue with the create (yield runs the actual save)
         yield

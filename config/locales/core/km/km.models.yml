@@ -1,213 +1,171 @@
 km:
   activerecord:
     models:
-      document: "Document"
-      swatch: "Swatch"
-      resource:           "ធនធាន"
-      user:               "អ្នកប្រើប្រាស់"
-      project:            "គម្រោង"
-      discipline:         "វិស័យ"
-      tag:                "ស្លាក"
-      role:               "តួនាទី"
-      cable_type:         "ប្រភេទកាប៊ែល"
-      cable:              "កាប៊ែល"
-      demand:             "បន្ទុក"
-      switchboard:        "បន្ទះចែកចាយ"
-      circuit:            "សៀគ្វី"
-      motor:              "ម៉ូទ័រ"
-      socket_cct:         "ច្រកចូលអគ្គិសនី"
-      light_cct:          "សៀគ្វីភ្លើង"
+      document:
+        one: "Document"
+        other: "Documents"
+      swatch: 
+        one: "Swatch"
+        other: "Swatches"
+      resource:           "Resource"
+      user:
+        one:              "User"
+        other:            "Users"
+      project:
+        one:                "Project"
+        other:              "Projects"
+      discipline:
+        one:              "Discipline"
+        other:            "Disciplines"
+      tag:
+        one: "Tag"
+        other: "Tags"
+      doc_type:
+        one: "Document Type"
+        other: "Document Types"
+      issue:
+        one: "Issue"
+        other: "Issues"
+      source_format: 
+        one: "Source Format"
+        other: "Source Formats"
+      role:               "Role"
     attributes:
       document:
         serial: "Serial"
+        doc_number: "Document Number"
         title: "Title"
         notes: "Notes"
       swatch:
         name: "Name"
-        bg: "Bg"
+        bg: "Background"
         text: "Text"
-        form_bg: "Form bg"
+        form_bg: "Form background"
         form_field: "Form field"
-        card_bg: "Card bg"
-        card_header_bg: "Card header bg"
+        card_bg: "Card background"
+        card_header_bg: "Card header background"
         card_border: "Card border"
-        badge_bg: "Badge bg"
+        badge_bg: "Badge background"
         badge_text: "Badge text"
         link_text: "Link text"
         link_hover: "Link hover"
-
       resource:
-        id:               "ល.រ"
+        id:               "ID"
       user:
-        user_name:        "ឈ្មោះអ្នកប្រើប្រាស់"
-        email:            "អ៊ីមែល"
-        password:         "ពាក្យសម្ងាត់"
-        password_confirmation:  "បញ្ជាក់ពាក្យសម្ងាត់"
+        name:        "User"
+        email:            "Email"
+        password:         "Password"
+        password_confirmation:  "Confirm password"
+        gravatar:         "Gravatar"
       project:
-        code:             "កូដ"
-        code_help:        "អក្សរធំ 2 តួរ"
-        title:            "ចំណងជើង"
-        title_help:       "អតិបរមា 50 តួរអក្សរ"
-        description:      "ការពិពណ៌នា"
+        code:             "Code"
+        title:            "Title"
+        description:      "Description"
       discipline:
-        code:             "កូដ"
-        name:             "ឈ្មោះ"
+        name:             "Name"
+        code:            "Label"
+        sort_order:       "Sort Order"
+        prefix_schema:    "Prefix Schema"
+        default_prefix_schema_name: "user_defined"
+        prefix_schema_keys:
+          name:             "Name"
+          type:             "Type"
+          schema:           "Schema"
+        module_name:      "Module Name"
+        notes:            "Notes"
+        required_role:    "Required Role"
+        copy_from_standard: "Copy from Standard" # Form label
+      doc_type:
+        code: "Code"
+        name: "Type"
+        description: "Description"
+      issue:
+        code: "Code"
+        reason: "Reason for Issue"
+      source_format:
+        vendor: "Vendor"
+        title: "Software Title"
+        file_extension: "File extension"
+        revision: "Revision"
+        notes: "Notes"
       tag:
-        prefix:           "បុព្វបទ"
-        prefix_help:      "គួរជ្រើសរើសបុព្វបទពីបញ្ជីដែលមានស្រាប់"
-        serial:           "ចំនួនរៀង"
-        serial_help:      "ចំនួនរៀងគួរមាន 4 ខ្ទង់"
-        suffix:           "ឃ្លាបន្ថែម"
-        suffix_help:      "ឃ្លាបន្ថែមជាទូទៅគឺមួយតួរអក្សរ ទុកចោលបើមិនត្រូវការ"
-        service:          "សេវាកម្ម"
-        service_help:     "ការពិពណ៌នាសេវាកម្ម (អតិបរមា 40 តួរអក្សរ)"
-        stage:            "ដំណាក់កាល"
-        notes:            "កំណត់សម្គាល់"
-        notes_help:       "កត់ត្រាព័ត៌មានដែលមានប្រយោជន៍សម្រាប់ការរចនានៅទីនេះ"
-        full_tag:         "ស្លាក"
-        tagable_type:     "ប្រភេទស្លាក"
+        prefix:           "Prefix"
+        prefix_parts:
+          measured_variable: "Measured Variable"
+          modifier: "Modifier"
+          function: "Function"
+          readout_function: "Readout Function"
+          output_function: "Output Function"
+          modifier_function: "Modifier Function"
+          part1: "Part 1"
+          part2: "Part 2"
+        serial:           "Loop"
+        suffix:           "Suffix"
+        service:          "Service"
+        location:         "Location"
+        stage:            "Stage"
+        notes:            "Notes"
+        full_tag:         "Tag"
+        tagable_type:     "Tag Type"
       role:
-        name:             "ឈ្មោះ"
-        resource_type:    "ប្រភេទធនធាន"
-        resource_type_help: "ទុកចោលសម្រាប់តួនាទីទូទៅ"
-        resource_id:      "ឧទាហរណ៍"
-      cable_type:
-        conductor_material:  "សម្ភារៈចំហាយអគ្គិសនី"
-        cores:          "ចំនួនសរសៃ"
-        csa:            "ការ៉េមីលីម៉ែត្រ"
-        csa_units:      "ម.ម.²"
-        neutral:        "ខ្សែនឺត្រ"
-        neutral_csa:    "ការ៉េខ្សែនឺត្រ"
-        earth:          "ខ្សែដី"
-        earth_csa:      "ការ៉េខ្សែដី"
-        insulation:     "វត្ថុអ៊ីសូឡាក់"
-        bedding:        "ស្រទាប់ការពារ"
-        armour:         "សំពត់ការពារ"
-        sheath:         "សំពត់ខាងក្រៅ"
-        bedding_od:     "អង្កាញ់ស្រទាប់ការពារ"
-        overall_od:     "អង្កាញ់សរុប"
-        od_units:       "ម.ម."
-        temperature_rating:  "សីតុណ្ហភាពអនុញ្ញាត"
-        voltage_rating: "វ៉ុលអនុញ្ញាត"
-      cable:
-        cable_type_id:        "ប្រភេទកាប៊ែល"
-        route_length:         "ប្រវែងផ្លូវ"
-        route_length_help:    "ប្រវែងផ្លូវកាប៊ែលដែលអាចមើលឃើញក្នុងផែនការ"
-        vertical_allowance:   "អនុគ្រោះបញ្ឈរ"
-        vertical_allowance_help: "ប្រវែងកាប៊ែលដែលត្រូវបន្ថែមទៅលើផែនការមើលឃើញ"
-        termination_allowance: "អនុគ្រោះចុង"
-        termination_allowance_help: "អនុគ្រោះសម្រាប់ដាក់កាប៊ែលនៅក្នុងប្រអប់"
-        start_mark:           "សញ្ញាចាប់ផ្តើមដំឡើង"
-        end_mark:             "សញ្ញាបញ្ចប់ដំឡើង"
-      demand:
-        basis:            "មូលដ្ឋាន"
-        bases:
-          summation:      "ផលបូកនៃខ្សែចេញ"
-          power_pf:       "គណនាចរន្តពីថាមពល និងកត្តាថាមពល"
-          vector_pf:      "គណនាចរន្តពីវ៉ិចទ័រ និងកត្តាថាមពល"
-          current_pf:     "គណនាថាមពល វ៉ិចទ័រពីចរន្ត និងកត្តាថាមពល"
-          current_power:  "គណនាវ៉ិចទ័រ កត្តាថាមពលពីចរន្ត និងថាមពល"
-        basis_help:       "កំណត់ប៉ារ៉ាម៉ែត្របន្ទុកដែលត្រូវផ្តល់ និងដែលត្រូវគណនា"
-        basis_notes:      "កំណត់សម្គាល់មូលដ្ឋានបន្ទុក"
-        basis_notes_help: "កត់ត្រាឯកសារយោងសម្រាប់ការគណនាប៉ារ៉ាម៉ែត្របន្ទុក"
-        config:           "ការកំណត់រចនាសម្ព័ន្ធ"
-        configs:
-          dc:             "ចរន្តឥតខ្សែ"
-          one:            "AC L-N 1 ផាស"
-          two_120:        "AC L-N 2 ផាស 120˚"
-          two_180:        "AC L-N 2 ផាស 180˚"
-          three_3c:       "AC L-L 3 ខ្សែ 3 ផាស"
-          three_4c:       "AC L-N 3 ផាស 4 ខ្សែ"
-        config_help:      "ជ្រើសរើប្រព័ន្ធថាមពលសម្រាប់បន្ទុក"
-        supply:           "វ៉ុលផ្គត់ផ្គង់ (V)"
-        supply_help:      "ជ្រើសរើសវ៉ុលផ្គត់ផ្គង់សម្រាប់បន្ទុក។ ទុកចោលសម្រាប់វ៉ុលផ្សេងៗទៀត។"
-        power:            "ថាមពល (W)"
-        vector:           "វ៉ិចទ័រ (VA)"
-        power_factor:     "កត្តាថាមពល"
-        current:          "ចរន្ត (A)"
-        duty:             "ពេលវេលាដំណើរការ"
-        duty_help:        "សមាមាត្រពេលវេលាបើកសម្រាប់ការប៉ាន់ស្មានបន្ទុកសរុប"
-        demandable_type:  "ប្រភេទបន្ទុក"
-        demandable:       "បរិក្ខារ"
-        demandable_help:  "ឯកសារលម្អិតអំពីបរិក្ខារ"
-      switchboard:
-        location:         "ទីតាំង"
-        ingress_protection: "ការការពារចូល"
-        busbar_rating:    "អត្រាប៊ាស់បារ"
-        busbar_fault_rating:  "អត្រាកំហុសប៊ាស់បារ"
-        busbar_fault_duration:  "រយៈពេលកំហុសប៊ាស់បារ"
-        cable_entry:      "ច្រកចូលកាប៊ែល"
-        incomer_protection: "ការការពារចូល"
-        metering:         "ការវាស់វែង"
-        neutral_bar_connections:  "ការតភ្ជាប់ខ្សែនឺត្រ"
-        earth_bar_connections:  "ការតភ្ជាប់ខ្សែដី"
-      circuit:
-        serial:           "លេខសៀរៀល"
-        phase:            "ការកំណត់ផាស"
-        device:           "ឧបករណ៍ការពារ"
-        poles:            "ប៉ូល"
-        curve:            "ខ្សែកោង"
-        rating:           "អត្រា (A)"
-        elcb:             "ELCB"
-        contactor:        "កុងតាក់ទ័រ"
-        notes:            "កំណត់សម្គាល់"
-      motor:
-        motor_type:       "ប្រភេទម៉ូទ័រ"
-        frame_size:       "ទំហំគ្រឹះ"
-        poles:            "ចំនួនប៉ូល"
-        ingress_protection: "ការការពារចូល"
-        speed_rated:      "ល្បឿននៅបន្ទុកពេញ"
-      socket_ccts:
-        socket_type:      "ប្រភេទព្រីភ្លើង"
-        quantity:         "ចំនួន"
-      light_ccts:
-        light_fitting_type: "ប្រភេទឧបករណ៍ភ្លើង"
-        light_fitting_type_help: ""
-        quantity: "ចំនួន"
-
+        name:             "Name"
+        resource_type:    "Resource"
+        resource_id:      "Instance"
+    help:
+      project:
+        code:             "2 uppercase characters"
+        title:            "Maximum 50 characters"
+      tag: 
+        prefix:           "Build prefix using discipline specific schema"
+        serial:           "Loop should be 4 digits"
+        suffix:           "Suffix should be typically one character, blank if not required"
+        service:          "Service description (40 characters maximum)"
+        location:         "Physical location of design element"
+        stage:            "Construction stage or phase (0 to 10)"
+        notes:            "Record useful tag related design information here"
+      role:
+        resource_type:    "Leave blank for global role"
+      discipline:
+        name:             "Descriptive name, maximum 50 characters"
+        code:             "Unique code, maximum 5 characters"
+        sort_order:       "Sort order - deprecated"
+        prefix_schema:    "Select a standard schema or define a custom schema. Custom schema must have a unique name, defaults to project code + discipline code"
+        module_name:      "Links the discipline to a module in the application"
+        notes:            "Additional information"
+        required_role:    "Role required to work with elements in this discipline"
     errors:
-      unique: "%{model} %{attribute} ត្រូវបានយករួចហើយ ត្រូវតែមានតែមួយ"
-      blank: "%{model} %{attribute} ត្រូវបំពេញ"
+      custom:
+        invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
+        unique: "%{model} %{attribute} has already been taken, must be unique"
+        custom_required: "%{model} %{attribute} is required"
+        already_associated: "%{child} is already associated with another %{parent}"
+        record_invalid: "Record is invalid"
       models:
+        tag:
+          base:
+            taken: "Tag %{tag} already exists"
+          attributes:
+            prefix:
+              only_letters: "must contain only letters"
+            tagable_type:
+              not_assigned: "Not assigned"
+              change_tagable: "Cannot change tagable association once set"
+              invalid: "Invalid type %{tagable_type}"
+              taken: "This %{tagable_type} is already associated with another tag"
+            parent:
+              self: "cannot be itself"
+              circular: "cannot create a circular reference"
+              project: "must be in the same project"
         role:
           attributes:
             name:
-              blank: "ត្រូវជ្រើសរើសតួនាទី"
-              invalid: "%{name} មិនមែនជាតួនាទីត្រឹមត្រូវសម្រាប់ %{resource}"
-        tag:
-          full_tag: "ស្លាកត្រូវតែមានតែមួយក្នុងគម្រោង"
-          tagable_type:
-            not_assigned: "មិនទាន់បានកំណត់"
-
-    helpers:
-      select:
-        prompt: "សូមជ្រើសរើស"
-      submit:
-        create: "បង្កើត %{model}"
-        submit: "រក្សាទុក %{model}"
-        update: "ធ្វើបច្ចុប្បន្នភាព %{model}"
-      label:
-        cable:
-          cable_type: "ប្រភេទកាប៊ែល"
-        cable_type:
-          conductor_material: "សម្ភារៈចំហាយអគ្គិសនី"
-          cores: "ចំនួនសរសៃ"
-          csa: "ការ៉េមីលីម៉ែត្រ"
-          neutral_csa: "ការ៉េខ្សែនឺត្រ"
-          earth_csa: "ការ៉េខ្សែដី"
-          insulation: "វត្ថុអ៊ីសូឡាក់"
-          bedding: "ស្រទាប់ការពារ"
-          armour: "សំពត់ការពារ"
-          sheath: "សំពត់ខាងក្រៅ"
-          bedding_od: "អង្កាញ់ស្រទាប់ការពារ"
-          overall_od: "អង្កាញ់សរុប"
-          temperature_rating: "សីតុណ្ហភាពអនុញ្ញាត"
-          voltage_rating: "វ៉ុលអនុញ្ញាត"
-
-  views:
-    pagination:
-      first: "ដំបូង"
-      last: "ចុងក្រោយ"
-      previous: "មុន"
-      next: "បន្ទាប់"
-      truncate: "..."
+              blank: "Role must be selected"
+              invalid: "%{name} is not a valid role for %{resource}"
+      attributes:
+        code:
+          invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
+      jsonb_fields:
+        blank: "%{field} can''t be blank"
+        invalid: "%{field} is invalid"
+        included: "%{field} must be included in the allowed list"
+        taken: "%{field} has already been taken"

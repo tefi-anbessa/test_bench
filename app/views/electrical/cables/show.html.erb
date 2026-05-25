@@ -1,4 +1,4 @@
-<% provide :title, "#{t('activerecord.models.' + @cable.model_name.i18n_key.to_s, default: @cable.model_name.human)} #{@cable.tag.full_tag}" %>
+<% provide(:title, t('.title')) %>
 <div class="container mt-3" style="<%= container_styles(@swatch) %>">
   <!-- Cable Header Card -->
   <div class="card mb-4" style="<%= card_styles(@swatch) %>">
@@ -10,7 +10,7 @@
             <!-- Index Button -->
             <% if policy(@cable).index? %>
               <%= link_to discipline_electrical_cables_path(@discipline),
-                    class: "btn btn-sm btn-outline-secondary me-2",
+                    class: "btn btn-sm btn-outline-info me-2",
                     title: t('actions.index') do %>
                 <%== bs_icon('list-columns-reverse') %>
                 <span class="d-none d-md-inline"><%= t('actions.index') %></span>
@@ -101,147 +101,103 @@
                   </span>
                 <% end %>
               <% end %>
-            </div>
-          </div>
-        </div> <!-- col-auto -->
-      </div> <!-- row -->
-    </div> <!-- card header -->
+            </div> <!-- end button group -->
+          </div> <!-- end d-flex -->
+        </div> <!-- end col-auto -->
+      </div> <!-- end row -->
+    </div> <!-- end card header -->
 
+    <div class="card-body">
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
-    <div class="d-flex flex-column justify-content-center">
-      <div class="card-body">
-      
-        <div class="row justify-content-center">
-          <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-            <!-- Tag Card -->
-            <div class="row g-3 mb-3">
-                <%= render 'tags/card', tag: @cable.tag %>
-            </div>
-          
-            <!-- Cable Type Card -->
-            <div class="row g-3 mb-3">
-                <%= render 'electrical/cable_types/card', cable_type: @cable.electrical_cable_type %>
-            </div>
-        
-            <!-- Cable Details Card -->
-            <div class="row">
-              <div class="card mb-4" style="<%= card_styles(@swatch) %>">
-                <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
-                  <h4 class="mb-0"><%= t('show.details', model: @cable.model_name.human) %></h4>
+          <!-- Cable Details Card -->
+          <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
+              <h4 class="mb-0"><%= t('show.details', model: @cable.model_name.human) %></h4>
+            </div> <!-- end inner card header -->
+
+            <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
+
+              <span class="border">
+                <div class="row mb-1">
+                  <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/cable.notes') %></div>
                 </div>
-
-                <div class="card-body p-3">
-                  
-                  <!-- From Section -->
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted">
-                      <%= @cable.class.human_attribute_name(:from) %>
-                    </div>
-                    <div class="col-8">
-                      <span>
-                        <% if @cable.from_type.present? && 
-                          Constants.electrical.connect_options.include?(@cable.from_type) %>
-                          <% text = @cable.from_type.constantize.model_name.human %>
-                          <div class="d-flex justify-content-between align-items-center">  
-                            <% if @cable.from.present? %>
-                              <span><%= @cable.from.label %></span>
-                              <%= link_to @cable.from,
-                                class: "btn btn-sm btn-outline-secondary mb-2",
-                                title: t('show.linked', model: text) do %>
-                                  <%== bs_icon('box-arrow-in-down-right') %>
-                                  <span class="d-none d-md-inline">
-                                    <%= t('show.linked', model: text) %>
-                                  </span>
-                                <% end %>
-                            <% else %>
-                              <span class="text-muted">
-                                <%= t('show.unassigned', model: text) %>
-                              </span>
-                            <% end %>
-                          </div>
-                        <% else %>
-                          <span class="text-muted">
-                            <%= t('show.unassigned', model: @cable.class.human_attribute_name(:from)) %>
-                          </span>
-                        <% end %>
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <!-- To Section -->
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted">
-                      <%= @cable.class.human_attribute_name(:to) %>
-                    </div>
-                    <div class="col-8">
-                      <span>
-                        <% if @cable.to_type.present? && 
-                          Constants.electrical.connect_options.include?(@cable.to_type) %>
-                          <% text = @cable.to_type.constantize.model_name.human %>
-                          <div class="d-flex justify-content-between align-items-center">  
-                            <% if @cable.to.present? %>
-                              <span><%= @cable.to.label %></span>
-                              <%= link_to @cable.to,
-                                class: "btn btn-sm btn-outline-secondary mb-2",
-                                title: t('show.linked', model: text) do %>
-                                  <%== bs_icon('box-arrow-in-down-right') %>
-                                  <span class="d-none d-md-inline">
-                                    <%= t('show.linked', model: text) %>
-                                  </span>
-                                <% end %>
-                            <% else %>
-                              <span class="text-muted">
-                                <%= t('show.unassigned', model: text) %>
-                              </span>
-                            <% end %>
-                          </div>
-                        <% else %>
-                          <span class="text-muted">
-                            <%= t('show.unassigned', model: @cable.class.human_attribute_name(:to)) %>
-                          </span>
-                        <% end %>
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= @cable.class.human_attribute_name(:route_length) %></div>
-                    <div class="col-8"><%= number_to_human(@cable.route_length, 
-                      units: { unit: "m" }, precision: 2) || '-' %></div>
-                  </div>
-                  
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= @cable.class.human_attribute_name(:vertical_allowance) %></div>
-                    <div class="col-8"><%= number_to_human(@cable.vertical_allowance, 
-                      units: { unit: "m" }, precision: 2) || '-' %></div>
-                  </div>
-                  
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= @cable.class.human_attribute_name(:termination_allowance) %></div>
-                    <div class="col-8"><%= number_to_human(@cable.termination_allowance, 
-                      units: { unit: "m" }, precision: 2) || '-' %></div>
-                  </div>
-                  
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= @cable.class.human_attribute_name(:start_mark) %></div>
-                    <div class="col-8"><%= @cable.start_mark.presence || '-' %></div>
-                  </div>
-                  
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= @cable.class.human_attribute_name(:end_mark) %></div>
-                    <div class="col-8"><%= @cable.end_mark.presence || '-' %></div>
-                  </div>
-                  
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= @cable.class.human_attribute_name(:notes) %></div>
-                    <div class="col-8"><%= @cable.notes.presence || '-' %></div>
-                  </div>
+                <div class="row mb-1">
+                  <div class="col-12"><%= simple_format(@cable.notes) %></div>
                 </div>
+              </span>
+
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= @cable.class.human_attribute_name(:route_length) %></div>
+                <div class="col-8"><%= number_to_human(@cable.route_length, 
+                  units: { unit: "m" }, precision: 2) || '-' %></div>
               </div>
+              
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= @cable.class.human_attribute_name(:vertical_allowance) %></div>
+                <div class="col-8"><%= number_to_human(@cable.vertical_allowance, 
+                  units: { unit: "m" }, precision: 2) || '-' %></div>
+              </div>
+              
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= @cable.class.human_attribute_name(:termination_allowance) %></div>
+                <div class="col-8"><%= number_to_human(@cable.termination_allowance, 
+                  units: { unit: "m" }, precision: 2) || '-' %></div>
+              </div>
+              
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= @cable.class.human_attribute_name(:start_mark) %></div>
+                <div class="col-8"><%= @cable.start_mark.presence || '-' %></div>
+              </div>
+              
+              <div class="row mb-1">
+                <div class="col-4 text-muted"><%= @cable.class.human_attribute_name(:end_mark) %></div>
+                <div class="col-8"><%= @cable.end_mark.presence || '-' %></div>
+              </div>
+            </div> <!-- temporary end inner card body -->
+
+            <!-- Associations -->
+            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
+              <h4 class="mb-0"><%= t('show.associations', model: @cable.class.model_name.human) %></h4>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+
+            <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
+              <!-- Tag Card -->
+              <div class="row mb-1">
+                  <%= render 'tags/card', 
+                    object: @cable.tag, 
+                    context: t("activerecord.models.tag.one") %>
+              </div>
+          
+              <!-- Cable Type Card -->
+              <div class="row mb-1">
+                  <%= render 'electrical/cable_types/card', 
+                    object: @cable.electrical_cable_type, 
+                    context: t("activerecord.models.electrical/cable_type.one") %>
+              </div>
+              
+              <!-- From Section -->
+              <div class="row mb-1">
+                  <%= render 'shared/association', 
+                    object_type: @cable.from_type, 
+                    object_id: @cable.from_id,
+                    allowed_types: Constants.electrical.connect_options,
+                    context: t("activerecord.attributes.electrical/cable.from") %>
+              </div>
+              
+              <!-- To Section -->
+              <div class="row mb-1">
+                  <%= render 'shared/association', 
+                    object_type: @cable.to_type, 
+                    object_id: @cable.to_id, 
+                    allowed_types: Constants.electrical.connect_options, 
+                    context: t("activerecord.attributes.electrical/cable.to") %>
+              </div>
+            </div>  <!-- end inner card body -->
+          </div> <!-- end inner card -->
+        </div> <!-- end responsive columns -->
+      </div> <!-- justify-content-center -->
+    </div> <!-- end outer card body -->
+  </div> <!-- end card -->
+</div> <!-- end container -->

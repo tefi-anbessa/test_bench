@@ -37,8 +37,8 @@ class DocTypeTest < ActiveSupport::TestCase
     assert_equal @resource.code, @resource.label
   end
 
-  test "long_label returns discipline label and code" do
-    expected = "#{@discipline.label}: DOC"
+  test "long_label returns discipline.code and code" do
+    expected = "#{@discipline.code}: DOC"
     assert_equal expected, @resource.long_label
   end
 

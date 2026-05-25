@@ -2,12 +2,13 @@
   <% unless @project.present? %>
     <th scope="col"><%= sort_link(@q, :project_id, t("activerecord.models.project")) %></th>
   <% end %>
-  <th scope="col"><%= sort_link(@q, :stage) %></th>
-  <th scope="col"><%= sort_link(@q, :discipline_id) %></th>
-  <th scope="col"><%= sort_link(@q, :full_tag) %></th>
-  <th scope="col"><%= sort_link(@q, :service) %></th>
-  <th scope="col"><%= sort_link(@q, :location) %></th>
+  <th scope="col"><%= sort_link(@q, :stage, t("activerecord.attributes.tag.stage")) %></th>
+  <th scope="col"><%= sort_link(@q, :full_tag, t("activerecord.attributes.tag.full_tag")) %></th>
   <th scope="col"><%= t('activerecord.attributes.tag.notes') %></th>
-  <th scope="col"><%= sort_link(@q, :tagable_type) %></th>
+  <th scope="col"><%= sort_link(@q, :service, t("activerecord.attributes.tag.service")) %></th>
+  <th scope="col"><%= sort_link(@q, :location, t("activerecord.attributes.tag.location")) %></th>
+  <th scope="col"><%= sort_link(@q, :parent, t("activerecord.attributes.tag.parent")) %></th>
+  <th scope="col"><%= t('activerecord.attributes.tag.children') %></th>
+  <th scope="col"><%= sort_link(@q, :tagable_type, t("activerecord.attributes.tag.tagable_type")) %></th>
   <th scope="col" width="150px"><%= t('table.links')%></th>
 </thead>

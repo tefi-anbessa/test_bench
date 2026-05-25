@@ -194,8 +194,8 @@ en:
 
       electrical/circuit:
         serial: "Circuit Number"
-        phase: "Phase Designation"
-        device: "Protection Device"
+        phase: "Phase"
+        device: "Protection"
         poles: "Poles"
         curve: "Curve"
         rating: "Rating (A)"

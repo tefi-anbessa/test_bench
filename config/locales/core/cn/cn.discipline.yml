@@ -2,19 +2,6 @@
 # Custom content is not translated.
 cn:
   discipline:
-    label:
-      "A": 'A'
-      "B": 'B'
-      "C": 'C'
-      "COMP": 'COMP'
-      "E": 'E'
-      "HVAC": '暖通'
-      "IT": 'IT'
-      "J": 'J'
-      "M": 'M'
-      "P": 'P'
-      "PIP": 'PIP'
-      "S": 'S'
     name:
       Administration: '管理'
       Architecture: '建筑'
@@ -23,7 +10,7 @@ cn:
       Electrical: '电气'
       Hvac: '暖通空调'
       Instrument: '仪表'
-      It: '信息技术'
+      InformationTechnology: '信息技术'
       Mechanical: '机械'
       Piping: '管道'
       Process: '工艺'

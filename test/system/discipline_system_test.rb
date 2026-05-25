@@ -164,7 +164,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
 
     # Complete the form
     fill_in "discipline_name", with: "Alternative"
-    fill_in "discipline_label", with: "ALT"
+    fill_in "discipline_code", with: "ALT"
     select "default", from: "discipline_schema_key"
     select "Designer", from: "discipline_required_role"
     select "app_theme", from: "discipline_swatch_id"
@@ -172,7 +172,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     # Save the new project
     click_button I18n.t('actions.create')
     sleep 0.1  # Give database time to commit
-    new_discipline = @project.disciplines.find_by(label: "ALT")
+    new_discipline = @project.disciplines.find_by(code: "ALT")
     assert_not_nil new_discipline
     assert_current_path discipline_path(new_discipline) 
     assert_text "Alternative"
@@ -186,7 +186,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     visit discipline_path(@discipline)
     click_link(href: edit_discipline_path(@discipline))
     assert_current_path edit_discipline_path(@discipline)
-    assert_text I18n.t("disciplines.edit.header", label: @discipline.label)
+    assert_text I18n.t("disciplines.edit.header", label: @discipline.code)
     assert page.title.include?(I18n.t("disciplines.edit.title"))
 
     discipline_form_field_assertions
@@ -258,7 +258,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
   private
 
     def discipline_form_field_assertions
-      assert_selector "input[name='discipline[label]']"
+      assert_selector "input[name='discipline.code]']"
       assert_selector "input[name='discipline[name]']"
       assert_selector "select[name='discipline[schema_key]']"
       assert_selector "select[name='discipline[swatch_id]']"

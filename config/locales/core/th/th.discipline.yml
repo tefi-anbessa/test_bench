@@ -2,19 +2,6 @@
 # Custom content is not translated.
 th:
   discipline:
-    label:
-      "A": 'A'
-      "B": 'B'
-      "C": 'C'
-      "COMP": 'COMP'
-      "E": 'E'
-      "HVAC": 'HVAC'
-      "IT": 'IT'
-      "J": 'J'
-      "M": 'M'
-      "P": 'P'
-      "PIP": 'PIP'
-      "S": 'S'
     name:
       Administration: 'บริหาร'
       Architecture: 'สถาปัตยกรรม'
@@ -23,7 +10,7 @@ th:
       Electrical: 'ไฟฟ้า'
       Hvac: 'เครื่องปรับอากาศ'
       Instrument: 'เครื่องมือวัด'
-      It: 'ไอที'
+      InformationTechnology: 'ไอที'
       Mechanical: 'เครื่องกล'
       Piping: 'ท่อ'
       Process: 'กระบวนการ'

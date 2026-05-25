@@ -12,11 +12,16 @@ class Tag < ApplicationRecord
 
   # Callbacks
   before_validation :clear_tagable_id_if_invalid, on: :update
+  nilifies_blank :tagable_type
 
   # Associations
   delegated_type :tagable, types: Constants.tagable, optional: true, dependent: :destroy
   belongs_to :discipline
   delegate :project, to: :discipline
+
+  belongs_to :parent, class_name: 'Tag', optional: true
+  has_many :children, class_name: 'Tag', foreign_key: 'parent_id', inverse_of: :parent, 
+    dependent: :nullify
 
   # Validations
   validates :prefix, presence: true
@@ -32,16 +37,13 @@ class Tag < ApplicationRecord
   # Prevent changing tagable association if it's already set and valid
   # Allow reset if existing is not valid.
   validate :validate_tagable_reassignment, on: :update
-  validate :validate_tagable_assignment, on: [:create, :update], 
-                if: -> { tagable_type.present? && tagable_id.present? }
 
   # Allow setting tagable_type without tagable_id to indicate intended type
   # Only validate presence of tagable_id if we're setting a non-nil value
   # validates :tagable_id, presence: { message: 'must be present when setting a tagable' }, 
   #                       if: -> { tagable_type.present? && tagable_id_changed? && tagable_id.present? }
   validates :tagable_type, inclusion: { in: Constants.tagable }, 
-                           allow_nil: true,
-                           allow_blank: true
+                           allow_nil: true
   
   # Ensure a tagable is only associated with one tag
   validate :tagable_not_already_associated, if: -> { tagable_id.present? && tagable_type.present? }
@@ -51,20 +53,22 @@ class Tag < ApplicationRecord
   # suffix, which may be null.
   validate :validate_tag_uniqueness
 
-  # Methods
+  # Validations for the parent child relationship
+  validate :prevent_circular_reference
+  validate :prevent_cross_project_reference
+
+  # Class Methods
+  def self.safe_tagable_types
+    Tag.tagable_types.select{ |type| type.safe_constantize.present? }.map { |type| [type.safe_constantize.model_name.human, type] }
+  end
+
+  # Instance Methods
   def label
     full_tag
   end
 
   def long_label
-    "#{discipline.label}#{Constants.tags.separator}#{full_tag}"
-  end
-
-  # Track original values to detect changes
-  def initialize(*)
-    super
-    @original_tagable_type = tagable_type
-    @original_tagable_id = tagable_id
+    "#{discipline.code}#{Constants.tags.separator}#{full_tag}"
   end
 
   # Get the next tag in the discipline, ordered by loop_id, prefix, and suffix
@@ -155,8 +159,62 @@ class Tag < ApplicationRecord
       return parts
     end
   end
+
+  # Parent child methods
+  def root?
+    parent_id.nil?
+  end
+
+  def leaf?
+    children.empty?
+  end
+
+  def depth
+    return 0 if root?
+    1 + parent.depth
+  end
+
+  def ancestor_ids
+    return [] if root?
+    current = parent
+    found = Set.new
+    while current && !found.include?(current.id)
+      found.add(current.id)
+      current = current.parent
+    end
+    found.to_a
+  end
+
+  def ancestors
+    Tag.where(id: ancestor_ids)
+  end
+
+  def descendant_ids
+    return [] if leaf? || new_record?
+    queue = children.to_a
+    found = Set.new
+
+    while queue.any?
+      node = queue.shift
+      next if found.include?(node.id)
+
+      found.add(node.id)
+      queue.concat(node.children)
+    end
+    found.to_a
+  end
+
+  def prospective_parents(scope)
+    # Return all tags from the provided scope that are not descendants of this tag, or this tag itself
+    return scope if new_record?
+    scope.where.not(id: descendant_ids + [id])
+  end
   
   private
+
+    def normalize_tagable_type
+      self.tagable_type = self.tagable_type&.to_s&.classify
+    end
   
     # Find adjacent tag (next or previous) based on the given join condition
     def adjacent_tag(join_column)
@@ -233,7 +291,7 @@ class Tag < ApplicationRecord
       return unless will_save_change_to_tagable_type? || will_save_change_to_tagable_id?
       type_was = tagable_type_in_database
       id_was = tagable_id_in_database
-      return if id_was.blank? || type_was.blank?
+      return if id_was.nil? || type_was.nil?
       
       # Allow changes if the current association is invalid
       return unless self.class.tagable_types.include?(type_was)
@@ -242,10 +300,21 @@ class Tag < ApplicationRecord
       errors.add(:base, I18n::t("activerecord.errors.models.tag.attributes.tagable_type.change_tagable")) 
     end
 
-    # Prevent setting tagable association to an invalid resource
-    def validate_tagable_assignment
-      if (tagable_type.constantize rescue nil)&.where(id: tagable_id)&.none?
-        errors.add(:tagable, :invalid)
+    # Parent child association validations
+    def prevent_circular_reference
+      return unless parent
+
+      if parent == self
+        errors.add(:parent, :self)
+      elsif id && parent.ancestor_ids.include?(id)
+        errors.add(:parent, :circular)
+      end
+    end
+
+    def prevent_cross_project_reference
+      return unless parent
+      if parent.project.id != project.id
+        errors.add(:parent, I18n.t("activerecord.errors.models.tag.attributes.parent.project"))
       end
     end
 
@@ -257,10 +326,10 @@ class Tag < ApplicationRecord
 
     def self.ransackable_attributes(auth_object = nil)
       ["discipline_id", "prefix", "serial", "suffix", "full_tag", "loop_id", "service", "location", "stage",
-        "notes", "created_at", "updated_at"]
+        "notes", "parent_id", "created_at", "updated_at"]
     end
 
     def self.ransackable_associations(auth_object = nil)
-      ["discipline", "project"] + Tag.tagable_types.map { |type| type.underscore.pluralize }
+      ["discipline", "project", "parent", "children"] + Tag.tagable_types.map { |type| type.underscore.pluralize }
     end
 end

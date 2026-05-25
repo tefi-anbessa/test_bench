@@ -103,11 +103,11 @@
                   </span>
                 <%% end %>
               <%% end %>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            </div> <!-- button group -->
+          </div> <!-- d-flex align-items-center -->
+        </div> <!-- right navigation and actions -->
+      </div> <!-- row align-items-center -->
+    </div> <!-- card header -->
 
     <div class="card-body">
 
@@ -135,18 +135,29 @@
                 <div class="col-8"><%%= @<%= singular_name %>.class.human_enum_name(:<%= field[:name] %>, @<%= singular_name %>.<%= field[:name] %>) %></div>
   <%- when "text", "jsonb" -%> 
                 <div class="col-8"><%%= simple_format(@<%= singular_name %>.<%= field[:name] %> || '-') %></div>
-  <%- when "datetime", "timestamp", "time", "date" -%> # Default to time_tag
+  <%- when "datetime", "timestamp", "time", "date" -%> <!-- Default to time_tag -->
                 <div class="col-8"><%%= time_tag(@<%= singular_name %>.<%= field[:name] %> || '-') %></div>
   <%- when "binary" -%> 
                 <div class="col-8"><%%= 'PLACEHOLDER FOR BINARY FIELD' %></div>
-  <%- when "references" -%>
-                <div class="col-8"><%%= render "<%= File.join(*class_path, field[:name].pluralize, "card") %>", object: @<%= singular_name %>.<%= field[:name] %> %></div>
+  <%- when "references", "belongs_to" -%>
+                <!-- <%= field %> is in associations section -->
   <%- else -%> <!-- Other type: Fallback to show whatever content is in the field. -->
                 <div class="col-8"><%%= @<%= singular_name %>.<%= field[:name] %> || '-' %></div>
   <%- end -%>
               </div> <!-- end row -->
 <%- end -%>
-            </div>  <!-- end inner card body -->
+            </div>   <!-- temporary end inner card body -->
+
+            <!-- <%= model_class %> Associations -->
+            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
+              <h4 class="mb-0"><%= t('show.associations', model: @<%= singular_name %>.model_name.human) %></h4>
+            </div>
+
+<%- @fields.select { |field| field[:type] == "references" || field[:type] == "belongs_to" }.each do |field| -%>
+          <div class="col-12 col-md-6 col-lg-4">
+            <%%= render "<%= File.join(*class_path, field[:name].pluralize, "card") %>", object: @<%= singular_name %>.<%= field[:name] %> %>
+          </div>
+        <%- end -%>
           </div> <!-- end inner card -->
         </div> <!-- end responsive columns -->
       </div> <!-- end justify-content-center -->

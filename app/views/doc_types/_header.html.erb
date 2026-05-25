@@ -2,7 +2,7 @@
   <% unless current_project %>
     <th scope="col"><%= sort_link(@q, :project_code, t("activerecord.models.project.one")) %></th>
   <% end %>
-  <th scope="col"><%= sort_link(@q, :discipline_label, t("activerecord.models.discipline.one")) %></th>
+  <th scope="col"><%= sort_link(@q, :discipline.code, t("activerecord.models.discipline.one")) %></th>
   <th scope="col"><%= sort_link(@q, :code) %></th>
   <th scope="col"><%= sort_link(@q, :name) %></th>
   <th scope="col"><%= sort_link(@q, :description) %></th>

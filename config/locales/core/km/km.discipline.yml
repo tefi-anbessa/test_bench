@@ -2,19 +2,6 @@
 # Custom content is not translated.
 km:
   discipline:
-    label:
-      "A": 'A'
-      "B": 'B'
-      "C": 'C'
-      "COMP": 'COMP'
-      "E": 'E'
-      "HVAC": 'HVAC'
-      "IT": 'IT'
-      "J": 'J'
-      "M": 'M'
-      "P": 'P'
-      "PIP": 'PIP'
-      "S": 'S'
     name:
       Administration: 'រដ្ឋបាល'
       Architecture: 'ស្ថាបត្យកម្ម'
@@ -23,7 +10,7 @@ km:
       Electrical: 'អគ្គិសនី'
       Hvac: 'ប្រព័ន្ធកង្ហារអាកាស'
       Instrument: 'ឧបករណ៍វัดឌិន'
-      It: 'ព័ត៌មានវិទ្យា'
+      InformationTechnology: 'ព័ត៌មានវិទ្យា'
       Mechanical: 'មេកានិក'
       Piping: 'បំពង់'
       Process: 'ដំណើរការ'

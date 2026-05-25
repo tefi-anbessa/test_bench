@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_11_025516) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_23_105955) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -18,12 +18,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_11_025516) do
     t.string "name"
     t.bigint "project_id", null: false
     t.jsonb "prefix_schema"
-    t.string "label", comment: "Short 2-3 character code for display"
+    t.string "code", comment: "Short 2-3 character code for display"
     t.integer "sort_order", default: 100, comment: "Display order in UI (lower numbers first)"
     t.text "notes"
     t.bigint "swatch_id"
     t.string "required_role"
-    t.index ["project_id", "label"], name: "index_disciplines_on_project_id_and_label", unique: true
+    t.index ["project_id", "code"], name: "index_disciplines_on_project_id_and_code", unique: true
     t.index ["project_id", "name"], name: "index_disciplines_on_project_id_and_name", unique: true
     t.index ["project_id"], name: "index_disciplines_on_project_id"
     t.index ["sort_order"], name: "index_disciplines_on_sort_order"
@@ -281,10 +281,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_11_025516) do
     t.string "location"
     t.virtual "full_tag", type: :string, as: "(((COALESCE(prefix, ''::character varying))::text || lpad((serial)::text, 4, '0'::text)) || (COALESCE(suffix, ''::character varying))::text)", stored: true
     t.virtual "loop_id", type: :string, as: "(upper(\"left\"((COALESCE(prefix, ''::character varying))::text, 1)) || lpad((serial)::text, 4, '0'::text))", stored: true
+    t.bigint "parent_id"
     t.index ["discipline_id", "full_tag"], name: "index_tags_on_discipline_and_full_tag", unique: true
     t.index ["discipline_id"], name: "index_tags_on_discipline_id"
     t.index ["loop_id"], name: "index_tags_on_loop_id"
+    t.index ["parent_id"], name: "index_tags_on_parent_id"
     t.index ["tagable_type", "tagable_id"], name: "index_tags_on_tagable"
+    t.index ["tagable_type", "tagable_id"], name: "index_tags_on_tagable_unique", unique: true, where: "(tagable_id IS NOT NULL)"
   end
 
   create_table "users", force: :cascade do |t|
@@ -347,4 +350,5 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_11_025516) do
   add_foreign_key "issues", "source_formats"
   add_foreign_key "projects", "swatches"
   add_foreign_key "tags", "disciplines"
+  add_foreign_key "tags", "tags", column: "parent_id"
 end

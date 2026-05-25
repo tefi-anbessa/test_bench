@@ -1,0 +1,29 @@
+<% if t.tagable_type.present? && Tag.tagable_types.include?(t.tagable_type)%>
+  <% text = t.tagable_type.constantize.model_name.human %>
+  <% if t.tagable.present? %>
+    <%= link_to t.tagable,
+        class: "btn btn-sm btn-outline-info mb-2 icon-link",
+        title: t('show.linked', model: t.tagable_type.constantize.model_name.human) do %>
+          <%== bs_icon('box-arrow-down-right') %>
+          <%= text %>
+        <% end %>
+  <% else %>
+    <% if policy(t.build_tagable()).new? %>
+      <% resource = t.tagable_type.constantize.model_name.singular %>
+      <%= link_to eval("new_tag_#{resource}_path(#{t.id})"),
+          class: "btn btn-sm btn-outline-primary mb-2 icon-link",
+          title: t('actions.link', resource: resource) do %>
+            <%== bs_icon('link') %>
+          <%= text %>
+          <% end %>
+    <% else %>
+      <%= t.tagable_type.constantize.model_name.human %>
+    <% end %>
+  <% end %>
+<% else %>
+  <span class="text-muted">
+    <%= t.tagable_type.nil? ? 
+      t('index.unassigned') :
+      t('index.invalid') %>
+  </span>
+<% end %>

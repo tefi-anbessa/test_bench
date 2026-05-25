@@ -113,26 +113,14 @@
     <div class="card-body">
       <div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-          <!-- Tag Card -->
-          <%% if @<%= singular_name %>.tag.present? %>
-            <div class="row g-3 mb-3">
-                <%%= render 'tags/card', tag: @<%= singular_name %>.tag %>
-            </div>
-          <%% else %>
-            <div class="row g-3 mb-3">
-              <div class="alert alert-danger">
-                <%%= t('show.orphan', model: Tag.model_name.human.downcase) %>
-              </div>
-            </div>
-          <%% end %>
 
-          <!-- Resource Details Card -->
-          <div class="card mb-4" style="<%%= card_styles(@swatch) %>">
-            <div class="card-header py-1" style="<%%= card_header_styles(@swatch) %>">
-              <h4 class="mb-0"><%%= t('show.details', model: @<%= singular_name %>.model_name.human) %></h4>
-            </div>
+          <!-- <%= human_name %> Details Card -->
+          <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
+              <h4 class="mb-0"><%= t('show.details', model: @<%= singular_name %>.model_name.human) %></h4>
+            </div> <!-- end inner card header -->
 
-            <div class="card-body p-3">
+            <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
 <%- @fields.each do |field| -%>
               <div class="row mb-1">
                 <div class="col-4 text-muted"><%%= @<%= singular_name %>.class.human_attribute_name(:<%= field[:name] %>) %></div>
@@ -145,9 +133,11 @@
                   units: { unit: "x", thousand: "kx", million: "Mx" }) || '-' %></div>
   <%- when "enum_translated" -%>
                 <div class="col-8"><%%= @<%= singular_name %>.class.human_enum_name(:<%= field[:name] %>, @<%= singular_name %>.<%= field[:name] %>) %></div>
-  <%- when "text", "jsonb" -%> # TODO: Add json formatting
-                <div class="col-8"><%%= simple_format(@<%= singular_name %>.<%= field[:name] %> || '-') %></div>
-  <%- when "datetime", "timestamp", "time", "date" -%> # Default to time_tag
+  <%- when "text", "jsonb" -%> <!-- TODO: Add json formatting -->
+              </div>
+              <div class="row mb-1">
+                <div class="col-12"><%%= simple_format(@<%= singular_name %>.<%= field[:name] %> || '-') %></div>
+  <%- when "datetime", "timestamp", "time", "date" -%> <!-- Default to time_tag -->
                 <div class="col-8"><%%= time_tag(@<%= singular_name %>.<%= field[:name] %> || '-') %></div>
   <%- when "binary" -%> <!-- TODO: Add binary field support -->
                 <div class="col-8"><%%= 'PLACEHOLDER FOR BINARY FIELD' %></div>
@@ -158,10 +148,31 @@
   <%- end -%>
               </div> <!-- end row -->
 <%- end -%>
+            </div>  <!-- temporary end inner card body -->
+
+            <!-- Associations -->
+            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
+              <h4 class="mb-0"><%= t('show.associations', model: @<%= singular_name %>.class.model_name.human) %></h4>
+            </div>
+
+            <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
+              
+              <!-- Tag Card -->
+              <% if @switchboard.tag.present? %>
+                <div class="row g-3 mb-3">
+                    <%= render 'tags/card', object: @switchboard.tag, context: t('activerecord.models.tag.one') %>
+                </div>
+              <% else %>
+                <div class="row g-3 mb-3">
+                  <div class="alert alert-danger">
+                    <%= t('show.orphan', model: Tag.model_name.human.downcase) %>
+                  </div>
+                </div>
+              <% end %>
             </div>  <!-- end inner card body -->
           </div> <!-- end inner card -->
         </div> <!-- end responsive columns -->
-      </div> <!-- end justify-content-center -->
-    </div> <!-- end card body -->
+      </div> <!-- justify-content-center -->
+    </div> <!-- end outer card body -->
   </div> <!-- end card -->
 </div> <!-- end container -->

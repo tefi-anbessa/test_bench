@@ -9,10 +9,43 @@ class TagsSystemTest < ApplicationSystemTestCase
   include SystemTestHelpers
 
   setup do
-    setup_projects_and_users
-    setup_disciplines(name: 'Electrical', required_role: :designer)
+    setup_common_data
     setup_accredited_users(:designer)
     setup_tags
+  end
+
+  def setup_model_specific_data
+    @resource = @tag
+    @discipline_resource_index_header = I18n.t('tags.index.header', 
+      scope_text: [@discipline.project.code, I18n.t("activerecord.models.discipline.one"), @discipline.long_label].join(' '))
+    @project_resource_index_header = I18n.t('tags.index.header', 
+      scope_text: [I18n.t("activerecord.models.project.one"), @project.label].join(': '))
+    @project_resource_index_title = @discipline_resource_index_title = I18n.t('tags.index.title')
+    # List fields that should appear in index. 
+    # The generator will include test for sort link header for each column, 
+    # and try to find an appropriate value field for the type.
+    @index_fields = [:stage, :full_tag, :service, :location, :notes]
+
+    # List index fields that should have ransack search capability.
+    # The generator will only test for "contains" fields (_cont).
+    # Don't include numeric or date fields, add model specific tests for these later in this file.
+    @search_fields = [:prefix, :loop_id, :service, :location, :notes]
+
+    # List all fields that should appear in show (usually all)
+    @show_fields = [:stage, :location, :notes]
+    @show_associations = [:parent, :tagable, :project, :discipline]
+
+    # List all fields that should appear in forms (usually all).
+    # New and edit required separately because some models have read only fields that can't be edited.
+    # Set a valid value for each field if required to be unique, set nil for factory default.
+    # Document model has its own way to ensure uniqueness by setting serial internally.
+    @new_fields = {doc_type_id: nil, title: nil, notes: nil}
+    @edit_fields = {title: nil, notes: nil}
+
+    @model_special_cases = { parent: nil, tagable: nil }
+    # Set an attribute/s to be modified in edit test
+    # Only working with text fields at present
+    @edit_attributes = { service: "REVISED FOR TEST" }
   end
 
   test "team member viewing the project tags index" do
@@ -166,7 +199,7 @@ class TagsSystemTest < ApplicationSystemTestCase
 
     #field data
     assert_text @tag.stage
-    assert_text @tag.discipline.label
+    assert_text @tag.discipline.code
     assert_text @tag.label
     assert_text @tag.service
     assert_text @tag.location
@@ -221,7 +254,7 @@ class TagsSystemTest < ApplicationSystemTestCase
     visit discipline_tags_path(@discipline)
     click_link(href: new_discipline_tag_path(@discipline))
     assert_current_path new_discipline_tag_path(@discipline)
-    assert_text I18n.t("tags.new.header", discipline: @discipline.label)
+    assert_text I18n.t("tags.new.header", discipline: @discipline.code)
     assert page.title.include?(I18n.t("tags.new.title"))
 
     tag_form_field_assertions
@@ -415,7 +448,7 @@ class TagsSystemTest < ApplicationSystemTestCase
     def tag_index_field_assertions
       # index search fields and sort link headers
       assert_field "q[prefix_cont]"
-      assert_field "q[serial_cont]"
+      assert_field "q[loop_id_cont]"
       assert_field "q[service_cont]"
       assert_field "q[location_cont]"
       assert_field "q[notes_cont]"
@@ -452,17 +485,17 @@ class TagsSystemTest < ApplicationSystemTestCase
 
     def test_sample_disciplines_setup
       # Discipline J defaults to isa51 schema
-      @discipline_j = @project.disciplines.find_by(label: 'J')
+      @discipline_j = @project.disciplines.find_by(code: 'J')
       @j_user = create(:user)
       @j_user.grant(:designer, @discipline_j)
     
       # Discipline M defaults to dim1 schema
-      @discipline_m = @project.disciplines.find_by(label: 'M')
+      @discipline_m = @project.disciplines.find_by(code: 'M')
       @m_user = create(:user)
       @m_user.grant(:designer, @discipline_m)
     
       # Discipline C defaults to default schema
-      @discipline_c = @project.disciplines.find_by(label: 'C')
+      @discipline_c = @project.disciplines.find_by(code: 'C')
       @c_user = create(:user)
       @c_user.grant(:designer, @discipline_c)
     end

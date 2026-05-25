@@ -5,16 +5,20 @@
     <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
       <div class="row align-items-center p-2">
 
-        <!-- Discipline or project link -->
+        <!-- Discipline and project link -->
         <div class="col-2">
           <% if @discipline.present? %>
+            <%= link_to project_path(@discipline.project), class: "btn btn-sm btn-outline-info" do %>
+              <%= @discipline.project.label %>
+              <%= bs_icon('layers', class: "me-1") %>
+            <% end %>
             <%= link_to discipline_path(@discipline), class: "btn btn-sm btn-outline-info" do %>
               <%= @discipline.name %>
               <%= bs_icon('collection', class: "me-1") %>
             <% end %>
-          <% elsif current_project.present? %>
-            <%= link_to project_path(current_project), class: "btn btn-sm btn-outline-info" do %>
-              <%= current_project.label %>
+          <% elsif @project.present? %>
+            <%= link_to project_path(@project), class: "btn btn-sm btn-outline-info" do %>
+              <%= @project.label %>
               <%= bs_icon('layers', class: "me-1") %>
             <% end %>
           <% end %>
@@ -33,10 +37,11 @@
         <!-- New Button (Right) -->
         <div class="col-2 align-content-end">
           <% if @discipline.present? && policy(@discipline.documents.build()).new? %>
+          <% text = [t('actions.new'), t('activerecord.models.document.one')].join(' ') %>
               <%= link_to new_discipline_document_path(@discipline),
                 class: "btn btn-sm btn-outline-primary actions",
-                aria: { label: t('actions.new') },
-                title: t('actions.new') do %>
+                aria: { label: text },
+                title: text do %>
                 <%== bs_icon('plus-square-fill') %>
                 <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.document.one')].join(' ') %></span>
               <% end %>

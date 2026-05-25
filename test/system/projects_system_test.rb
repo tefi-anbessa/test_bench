@@ -165,7 +165,7 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     # Discipline links 
     assert_selector "h5", text: I18n.t('disciplines.index.header', scope_text: @project.label)
     @project.disciplines.each do |discipline|
-      assert_selector "a[href='#{discipline_path(discipline)}']", text: "#{discipline.label}: #{discipline.name}"
+      assert_selector "a[href='#{discipline_path(discipline)}']", text: "#{discipline.code}: #{discipline.name}"
       assert_selector "a[href='#{discipline_path(discipline)}']", text: I18n.t('actions.show')
       assert_selector "a[href='#{discipline_tags_path(discipline)}']"
       assert_selector "a[href='#{discipline_documents_path(discipline)}']"

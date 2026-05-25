@@ -21,7 +21,7 @@ namespace :documents do
       
       # Set doc_number
       separator = Constants.document_control.separator
-      document.doc_number = "#{document.discipline.project.label}#{separator}#{document.discipline.label}#{separator}#{document.doc_type.code}#{separator}#{document.serial.to_s.rjust(Constants.document_control.serial_digits, '0')}"
+      document.doc_number = "#{document.discipline.project.label}#{separator}#{document.discipline.code}#{separator}#{document.doc_type.code}#{separator}#{document.serial.to_s.rjust(Constants.document_control.serial_digits, '0')}"
       
       if document.save(validate: false) # Skip validations since we're fixing data
         puts "Updated document ##{document.id}: #{document.doc_number}"

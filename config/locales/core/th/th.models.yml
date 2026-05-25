@@ -1,62 +1,94 @@
 th:
   activerecord:
     models:
-      document: "Document"
-      swatch: "Swatch"
+      document:
+        one: "Document"
+        other: "Documents"
+      swatch: 
+        one: "Swatch"
+        other: "Swatches"
       resource:           "Resource"
-      user:               "User"
-      project:            "Project"
-      discipline:         "Discipline"
-      tag:                "Tag"
+      user:
+        one:              "User"
+        other:            "Users"
+      project:
+        one:                "Project"
+        other:              "Projects"
+      discipline:
+        one:              "Discipline"
+        other:            "Disciplines"
+      tag:
+        one: "Tag"
+        other: "Tags"
+      doc_type:
+        one: "Document Type"
+        other: "Document Types"
+      issue:
+        one: "Issue"
+        other: "Issues"
+      source_format: 
+        one: "Source Format"
+        other: "Source Formats"
       role:               "Role"
     attributes:
       document:
         serial: "Serial"
+        doc_number: "Document Number"
         title: "Title"
         notes: "Notes"
       swatch:
         name: "Name"
-        bg: "Bg"
+        bg: "Background"
         text: "Text"
-        form_bg: "Form bg"
+        form_bg: "Form background"
         form_field: "Form field"
-        card_bg: "Card bg"
-        card_header_bg: "Card header bg"
+        card_bg: "Card background"
+        card_header_bg: "Card header background"
         card_border: "Card border"
-        badge_bg: "Badge bg"
+        badge_bg: "Badge background"
         badge_text: "Badge text"
         link_text: "Link text"
         link_hover: "Link hover"
-
       resource:
         id:               "ID"
       user:
-        user_name:        "User"
+        name:        "User"
         email:            "Email"
         password:         "Password"
         password_confirmation:  "Confirm password"
+        gravatar:         "Gravatar"
       project:
         code:             "Code"
-        code_help:        "2 uppercase characters"
         title:            "Title"
-        title_help:       "Maximum 50 characters"
         description:      "Description"
       discipline:
-        code:             "Code"
         name:             "Name"
-        label:            "Label"
+        code:            "Label"
         sort_order:       "Sort Order"
         prefix_schema:    "Prefix Schema"
         default_prefix_schema_name: "user_defined"
         prefix_schema_keys:
+          name:             "Name"
           type:             "Type"
           schema:           "Schema"
         module_name:      "Module Name"
         notes:            "Notes"
+        required_role:    "Required Role"
         copy_from_standard: "Copy from Standard" # Form label
+      doc_type:
+        code: "Code"
+        name: "Type"
+        description: "Description"
+      issue:
+        code: "Code"
+        reason: "Reason for Issue"
+      source_format:
+        vendor: "Vendor"
+        title: "Software Title"
+        file_extension: "File extension"
+        revision: "Revision"
+        notes: "Notes"
       tag:
-        project:          "Project"
-        discipline:       "Discipline"
         prefix:           "Prefix"
         prefix_parts:
           measured_variable: "Measured Variable"
@@ -78,9 +110,11 @@ th:
       role:
         name:             "Name"
         resource_type:    "Resource"
-        resource_type_help: "Leave blank for global role"
         resource_id:      "Instance"
     help:
+      project:
+        code:             "2 uppercase characters"
+        title:            "Maximum 50 characters"
       tag: 
         prefix:           "Build prefix using discipline specific schema"
         serial:           "Loop should be 4 digits"
@@ -89,49 +123,49 @@ th:
         location:         "Physical location of design element"
         stage:            "Construction stage or phase (0 to 10)"
         notes:            "Record useful tag related design information here"
+      role:
+        resource_type:    "Leave blank for global role"
       discipline:
-        code:             "Symbol, maximum 12 characters"
         name:             "Descriptive name, maximum 50 characters"
-        label:            "Display label, maximum 12 characters"
-        sort_order:       "Sort order"
-        prefix_schema:    "Select a standard schema or define a custom schema. Custom schema must have a unique name, set to project code + discipline code"
-        module_name:      "ignore: not implemented"
+        code:             "Unique code, maximum 5 characters"
+        sort_order:       "Sort order - deprecated"
+        prefix_schema:    "Select a standard schema or define a custom schema. Custom schema must have a unique name, defaults to project code + discipline code"
+        module_name:      "Links the discipline to a module in the application"
         notes:            "Additional information"
+        required_role:    "Role required to work with elements in this discipline"
     errors:
-      custom_messages:
+      custom:
         invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
         unique: "%{model} %{attribute} has already been taken, must be unique"
         custom_required: "%{model} %{attribute} is required"
         already_associated: "%{child} is already associated with another %{parent}"
         record_invalid: "Record is invalid"
       models:
+        tag:
+          base:
+            taken: "Tag %{tag} already exists"
+          attributes:
+            prefix:
+              only_letters: "must contain only letters"
+            tagable_type:
+              not_assigned: "Not assigned"
+              change_tagable: "Cannot change tagable association once set"
+              invalid: "Invalid type %{tagable_type}"
+              taken: "This %{tagable_type} is already associated with another tag"
+            parent:
+              self: "cannot be itself"
+              circular: "cannot create a circular reference"
+              project: "must be in the same project"
         role:
           attributes:
             name:
               blank: "Role must be selected"
               invalid: "%{name} is not a valid role for %{resource}"
-        project:
-        discipline:
-          attributes:
-            code:
-              invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
-        tag:
-          base:
-          taken: "Tag %{tag} already exists"
-          attributes:
-            prefix: 
-              only_letters: "must contain only letters"
-        tagable_type:
-          not_assigned: "Not assigned"
-          change_tagable: "Cannot change tagable association once set"
-          invalid: "Invalid type %{tagable_type}"
       attributes:
         code:
           invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
       jsonb_fields:
-        blank: "%{field} can't be blank"
+        blank: "%{field} can''t be blank"
         invalid: "%{field} is invalid"
         included: "%{field} must be included in the allowed list"
         taken: "%{field} has already been taken"
-
-#

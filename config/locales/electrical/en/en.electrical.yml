@@ -1,17 +1,8 @@
 en:
   electrical:
     module: "Electrical"
-    motor_type:
-      induction: "Induction"
-      synchronous: "Synchronous"
-      dc: "DC"
-      servo: "Servo"
-      stepper: "Stepper"
-      brushless_dc: "Brushless DC"
-      universal: "Universal"
-      other: "Other"
-    frame_size: "frame_"
   ingress_protection:
+    ip: "IP"
     first_digit:
       no_protection: "No protection"
       solid_objects_50mm: "Protected against solid objects over 50mm"
