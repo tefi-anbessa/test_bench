@@ -1,7 +1,9 @@
+<!-- Expects object and context (optional) to be passed in -->
 <% switchboard = object %>
+<% context ||= t("activerecord.models.electrical/switchboard.one") %>
 <%= render 'components/collapsible',
   id: "switchboard_#{switchboard.id}_details",
-  title: t('electrical.switchboards.show.header', label: switchboard.label),
+  title: [context, switchboard.long_label].join(': '),
   expanded: false,
   header_class: 'py-1' do %>
   

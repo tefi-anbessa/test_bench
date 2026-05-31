@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_23_105955) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_28_040827) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -23,9 +23,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_23_105955) do
     t.text "notes"
     t.bigint "swatch_id"
     t.string "required_role"
+    t.string "catalog_required_role"
+    t.index ["catalog_required_role"], name: "index_disciplines_on_catalog_required_role"
     t.index ["project_id", "code"], name: "index_disciplines_on_project_id_and_code", unique: true
     t.index ["project_id", "name"], name: "index_disciplines_on_project_id_and_name", unique: true
     t.index ["project_id"], name: "index_disciplines_on_project_id"
+    t.index ["required_role"], name: "index_disciplines_on_required_role"
     t.index ["sort_order"], name: "index_disciplines_on_sort_order"
     t.index ["swatch_id"], name: "index_disciplines_on_swatch_id"
   end

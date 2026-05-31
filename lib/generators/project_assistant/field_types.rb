@@ -7,7 +7,7 @@ module ProjectAssistant
     ].freeze
 
     # Types can be added, but you will have to write the generator and test code to implement them.
-    SPECIAL_FIELD_TYPES = %w[references enum enum_translated].freeze
+    SPECIAL_FIELD_TYPES = %w[references belongs_to enum enum_translated].freeze
 
     # Don't edit this.
     VALID_FIELD_TYPES = (RAILS_FIELD_TYPES + SPECIAL_FIELD_TYPES).freeze
@@ -23,7 +23,7 @@ module ProjectAssistant
     # Number fields are not really searchable for content, they generally require comparison operators. 
     # You can write your own search fields for ransack in the index view.
     SEARCHABLE_TYPES = (VALID_FIELD_TYPES - %w[
-      references integer bigint float decimal 
+      references belongs_to integer bigint float decimal 
       datetime timestamp time date binary boolean primary_key
     ]).freeze
       

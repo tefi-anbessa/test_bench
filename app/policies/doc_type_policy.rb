@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class DocTypePolicy < ApplicationPolicy
+class DocTypePolicy < DisciplineResourcePolicy
 
   class Scope < ApplicationPolicy::Scope
     def resolve
@@ -15,81 +15,38 @@ class DocTypePolicy < ApplicationPolicy
     end
   end
 
+  # Override index? from DisciplineResourcePolicy
+  # Only doc controllers and admins need to see the doc type index
   def index?
     # Protect against url injection
     return false if user.nil?
-    # Global admins can see index irrespective of current project
     return true if user&.is_admin? || user&.is_app_owner?
-    # Other users must have current project set in order to set scope
-    current_project.present? && user_has_project_role?(current_project)
-  end
-
-  def show?
-    # Protect against url injection
-    return false if user.nil?
-    if current_project.present?
-      # Only allow show of records on current project, if it is set
-      (user_has_project_role?(current_project) || user&.is_admin? || user&.is_app_owner?) &&
-        record.discipline.project == current_project
-    else
-      # Global admins can view any record when current project is nil
-      user&.is_admin? || user&.is_app_owner?
+    if record.is_a?(DocType)
+      (user.has_role?(:document_controller, record.discipline) || 
+        user.has_role?(:document_controller, record.discipline.project) || 
+        user.is_project_admin_of?(record.project))
+    # When discipline is not available, use current project to determine permission
+    elsif record == DocType
+      user.has_role?(:document_controller, current_project) || 
+        user.is_project_admin_of?(current_project)
     end
-  end
-
-  def new?
-    # Protect against url injection
-    return false if user.nil?
-    # Content modification actions require current project to be set
-    return false unless current_project.present?
-    # new? action is a special case for discipline scoped resources. 
-    # User must have at least one discpline role to access new, or have admin role.
-    user_is_accredited?(record) || 
-      user&.is_admin? || 
-      user&.is_app_owner? ||
-      user&.is_project_admin_of?(current_project)
-  end
-
-  def create?
-    # Protect against url injection
-    return false if user.nil?
-    # Content modification actions require current project to be set
-    return false unless current_project.present?
-    user_is_accredited?(record) && record.project == current_project
-  end
-
-  def edit?
-    # Protect against url injection
-    return false if user.nil?
-    # Content modification actions require current project to be set
-    return false unless current_project.present?
-    user_is_accredited?(record) && record.project == current_project
-  end
-
-  def update?
-    # Protect against url injection
-    return false if user.nil?
-    # Content modification actions require current project to be set
-    return false unless current_project.present?
-    user_is_accredited?(record) && record.project == current_project
-  end
-
-  def destroy?
-    # Protect against url injection
-    return false if user.nil?
-    user&.is_admin? || 
-    user&.is_app_owner? || 
-    (user&.is_project_admin_of?(current_project) && record.project == current_project)
   end
 
   private
 
-    # This method returns true when the user has permission for content modification actions.
     def user_is_accredited?(record)
-      user.has_role?(:document_controller, record.discipline) || 
+      # Doc type requires a discipline to determine permissions, so policy is only 
+      # available on instance records, not on class.
+      # The rails logger message is only for development transition phase.
+      unless record.is_a?(ApplicationRecord)
+        Rails.logger.warn "Policy Error: #{record.class} called with class instead of instance. " \
+                        "Use an instance variable with discipline association."
+        return false
+      end
+      user&.is_admin? || 
+        user&.is_app_owner? || 
+        user.has_role?(:document_controller, record.discipline) || 
         user.has_role?(:document_controller, record.discipline.project) || 
-        user.is_admin? || 
-        user.is_app_owner? ||
         user.is_project_admin_of?(record.project)
     end
 end

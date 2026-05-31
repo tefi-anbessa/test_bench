@@ -4,6 +4,7 @@
 # Class must delegate or implement project method.
 # Tagable resources should inherit from TagablePolicy.
 
+# Scope to current project
 class DisciplineResourcePolicy < ApplicationPolicy
   class Scope < ApplicationPolicy::Scope
     def resolve
@@ -14,6 +15,9 @@ class DisciplineResourcePolicy < ApplicationPolicy
         elsif scope.reflect_on_association(:project)
           scope.where(project: current_project)
         else
+          if Rails.env.development?
+            raise "Policy Error: #{scope.class} has no discipline or project association."
+          end
           scope.none
         end
       elsif user&.is_admin? || user&.is_app_owner?
@@ -29,21 +33,17 @@ class DisciplineResourcePolicy < ApplicationPolicy
     return false if user.nil?
     # Global admins can see index irrespective of current project
     return true if user&.is_admin? || user&.is_app_owner?
-    # Other users must have current project set in order to set scope
-    current_project.present? && user_has_project_role?(current_project)
+    user_has_project_role?(current_project)
   end
 
   def show?
     # Protect against url injection
     return false if user.nil?
-    if current_project.present?
-      # Only allow show of records on current project, if it is set
-      (user_has_project_role?(current_project) || user&.is_admin? || user&.is_app_owner?) &&
-        record.discipline.project == current_project
-    else
-      # Global admins can view any record when current project is nil
-      user&.is_admin? || user&.is_app_owner?
-    end
+    # Global admins can see any record
+    return true if user&.is_admin? || user&.is_app_owner?
+    # User should have a role on the record's project
+    record.is_a?(ApplicationRecord) &&
+      user_has_project_role?(record.project)
   end
 
   def new?
@@ -51,47 +51,33 @@ class DisciplineResourcePolicy < ApplicationPolicy
     # not a class.
     # Protect against url injection
     return false if user.nil?
-    # Ensure record is an instance, not a class
-    unless record.is_a?(ApplicationRecord)
-      Rails.logger.warn "Policy Error: #{record.class}.new? called with class instead of instance. " \
-                       "Use an instance variable with discipline association."
-      return false
-    end
     # Content modification actions require current project to be set
-    return false unless current_project.present?
-    # new? action is a special case for discipline scoped resources. 
-    # User must have at least one discpline role to access new, or have admin role.
-    user_is_accredited?(current_project)
+    # The controller will require current project to be set.
+    user_is_accredited?(record) && record.project == current_project
   end
 
   def create?
     # Protect against url injection
     return false if user.nil?
-    # Ensure record is an instance, not a class
-    unless record.is_a?(ApplicationRecord)
-      Rails.logger.warn "Policy Error: #{record.class}.new? called with class instead of instance. " \
-                       "Use an instance variable with discipline association."
-      return false
-    end
     # Content modification actions require current project to be set
-    return false unless current_project.present?
-    user_is_accredited?(current_project) && record.project == current_project
+    # The controller will require current project to be set.
+    user_is_accredited?(record) && record.project == current_project
   end
 
   def edit?
     # Protect against url injection
     return false if user.nil?
     # Content modification actions require current project to be set
-    return false unless current_project.present?
-    user_is_accredited?(current_project) && record.project == current_project
+    # The controller will require current project to be set.
+    user_is_accredited?(record) && record.project == current_project
   end
 
   def update?
     # Protect against url injection
     return false if user.nil?
     # Content modification actions require current project to be set
-    return false unless current_project.present?
-    user_is_accredited?(current_project) && record.project == current_project
+    # The controller will require current project to be set.
+    user_is_accredited?(record) && record.project == current_project
   end
 
   def destroy?
@@ -99,19 +85,31 @@ class DisciplineResourcePolicy < ApplicationPolicy
     return false if user.nil?
     user&.is_admin? || 
     user&.is_app_owner? || 
-    (user&.is_project_admin_of?(current_project) && record.project == current_project)
+    (user&.is_project_admin_of?(record.project) && record.project == current_project)
   end
 
   private
 
     # This method returns true when the user has permission for content modification actions.
-    def user_is_accredited?(project)
+    # record must respond to :discipline method
+    def user_is_accredited?(record)
+      # Ensure record is an instance, not a class.
+      # The rails error is only for development transition phase.
+      unless record.is_a?(ApplicationRecord)
+        unless Rails.env.production?
+          raise "Policy Error: #{record.class} called with class instead of instance. " \
+                "Use an instance variable with discipline association."
+        end
+        return false
+      end
+      # Check discipline required role first. If not defined, fall back to discipline's module required role.
       rr = record.discipline.required_role.present? ? 
           record.discipline.required_role.to_s : 
           "#{record.discipline.name}::Base".safe_constantize&.required_role.to_s
+      return false unless rr
       user.has_role?(rr, record.discipline) || 
         user.is_admin? || 
         user.is_app_owner? ||
-        user.is_project_admin_of?(project)
+        user.is_project_admin_of?(record.project)
     end
 end

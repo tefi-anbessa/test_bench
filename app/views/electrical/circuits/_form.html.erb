@@ -14,7 +14,9 @@
     </div>
 
     <%= bootstrap_form_with(model: [switchboard, circuit],
-          url: electrical_switchboard_circuits_path(switchboard),
+          url: circuit.persisted? ?
+            circuit : 
+            electrical_switchboard_circuits_path(switchboard),
           method: circuit.persisted? ? :patch : :post,
           layout: :horizontal, 
           label_col: "col-sm-4", 
@@ -50,9 +52,9 @@
             </div>
 
             <div class="row">
-              <%= f.select :poles,
-                    options_for_select(1..6, circuit.poles),
-                    { include_blank: t("form.none") } %>
+              <%= f.number_field :poles,
+                    min: 0,
+                    max: 6 %>
             </div>
 
             <div class="row">

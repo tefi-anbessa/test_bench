@@ -56,6 +56,16 @@ en:
     label:        "Label"
     details:      "%{model} Details"
     associations: "Associations"
+  field:
+    type:
+      integer:      "integer"
+      float:        "float"
+      string:       "string"
+      text:         "text"
+      boolean:      "boolean"
+      datetime:     "datetime"
+      date:         "date"
+      time:         "time"
 
   form:
     other:        "Other"

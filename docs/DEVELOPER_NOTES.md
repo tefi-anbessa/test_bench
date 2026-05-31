@@ -81,7 +81,7 @@ The application caters for various user scenarios, including:
 - engineering design service for multiple clients, using a shared website app.
 - application installed in house for a single client.
 
-The application has a core structure encompassing Users and the associated access control system, Projects, Disciplines, Tags and Documents. Further functionality is encapsulated in modules, which correspond to disciplines.
+The application has a core structure encompassing Users and the associated access control system, Projects, Disciplines, Tags and Documents. Further functionality is encapsulated in modules, which correspond to engineering disciplines.
 
 Only one level of module nesting is envisaged, however some features have provisioned for sub-modules.
 
@@ -124,7 +124,7 @@ Exceptions to this structure are the Cable and Cable Types models, which are use
 The application has been designed for international use from the outset.
 
 - All user facing text is provided with translations for all implemented languages.
-- To date, the only need for translation of database content identified is for discipline names. This is included as a potential feature below.
+- To date, the only need for translation of database content identified is for discipline names. Further content translation is included in the potential features list below.
 - The application uses the rails-i18n gem to assist with internationalization. This gem provides translations into many languages for the core rails features, including model validation, database errors, time and date functions, currency, etc.
 - For reference, a copy of the en version of the translations is saved in [config/locales/rails-i18n gem en for reference/en.yml.ref](../config/locales/rails-i18n%20gem%20en%20for%20reference/en.yml.ref). This file is not used in the application, it is simply a copy of the en.yml file that is provided by the rails-i18n gem. Check in this file if you are not sure whether a translation is already provided, and *avoid duplicating core translations* if possible. Also note that not all language files include all translations! It is a community work in progress...
 - The locale setting follows the basic guidelines in [Rails Internationalization (I18n) API section 2.2](https://guides.rubyonrails.org/i18n.html#setting-the-locale-from-url-params).
@@ -149,7 +149,7 @@ Ruby on Rails implements the Model View Controller (MVC) pattern for data driven
 
 - Model classes include all logic pertaining to the object.
 - Model classes should include custom validations where required. Custom validations must include i18n translation of custom error messages.
-- All resource models should have a label method, which is used to present a human readable, non language specific identifier, preferably unique, for the model. This can (and in most cases will be) simply a reference to another attribute. It will be used in views as a card header, link id, etc.
+- All resource models should have a label method, which is used to present a human readable, non language specific identifier, preferably unique, for the model. This can be simply a reference to another attribute, or a combination of attributes. It will be used in views as a card header, link id, etc.
 - All resources should have a long label method, which includes a parent identifier as well as the instance identifier. This will be used for view headers.
 
 #### Controllers
@@ -217,10 +217,10 @@ In addition, a card partial should be provided for drop down view on other pages
       ```demand.class.configs.keys.collect { |config| [demand.class.human_enum_name(:config, config), config] },```
       directly in the view.
   - Flash messages
-         - Flash messages should be generated and translated in the controller, and the standard layout will display them. Normally nothing is required in views.
-         - Complex forms may require further flash processing.
+      - Flash messages should be generated and translated in the controller, and the standard layout will display them. Normally nothing is required in views.
+      - Complex forms may require further flash processing.
   - Messages
-         - Occasionally, bespoke explanatory messages are required. Translations should be provided in the appropriate views.yml file.
+          - Occasionally, bespoke explanatory messages are required. Translations should be provided in the appropriate views.yml file.
 
 ### Error Handling
 
@@ -261,11 +261,12 @@ Errors are categorized as:
 
 - These are trapped forbidden operations that should not be possible using normal workflows.
 - They are probably injected HTML or JSON requests in an attempt to defeat the permissions system.
+- Controllers need to be designed carefully to ensure all user provided data is sanitized. Frequent use of enum attributes, length validation, strong parameters, and explicit type checking can help prevent these attacks.
 - When a controller detects invalid parameters, custom error class ConflictError should be raised, with a message key specific to the actual error.
 - ConflictErrors are handled in ApplicationController by rescue_from ConflictError and method handle_conflict.
 - handle_conflict logs the error with the message code, redirects to the custom /409 conflict page, and logs out the current user.
 - At present, the custom /409 page includes a flash alert with the translated error message. This may not be required in production if it is considered that 409 errors are definitely hacking attempts.
-- Controller tests should include thorough test of each path through the controller to ensure that security breach attempts are trapped.
+- Controller tests should include thorough test of each path through the controller to ensure that all security breach attempts are trapped.
 - Tests can use the test helper method assert_conflict.
 
 ### Form Design
@@ -287,19 +288,24 @@ Errors are categorized as:
           <%== bs_icon('save') %>
         <% end %>`
 - Important: The double equals is used to prevent html escaping of the icon.
-- Be consistent in icon usage. Preferred icons are:
-  - "list-columns-reverse" for index views
-  - "box-arrow-in-left" for link to previous object same class
-  - "box-arrow-in-right" for link to next object same class
-  - "box-arrow-down-right" for link to child object
-  - "box-arrow-up-left" for link to parent object
-  - "link" for link to open a form for a new child object
-  - "plus" for new buttons to open a form
-  - "pencil" for edit buttons to open a form
-  - "trash" for delete buttons to delete the object
-  - "search" for search buttons on views
-  - "x-square" for Discard Changes buttons on forms
-  - "save" for save (create or update) buttons on forms
+- Be consistent in icon usage. Preferred icons and colours are:
+  - "list-columns-reverse" class "-info" for index views
+  - "box-arrow-in-left" class "-secondary" for link to previous object same class
+  - "box-arrow-in-right" class "-secondary" for link to next object same class
+  - "box-arrow-down-right" class "-info" for link to child object
+  - "box-arrow-up-left" class "-info" for link to parent object
+  - "folder" class "-info" for link to project object
+  - "layers" class "-info" for link to discipline object
+  - "tag" class "-info" for link to tag object or index
+  - "file" class "-info" for link to document object or index
+  - "eye" class "-info" for link to view other objects
+  - "link" class "-primary" for link to open a form for a new child object
+  - "plus" class "-primary" for new buttons to open a form
+  - "pencil" class "-warning" for edit buttons to open a form
+  - "trash" class "-danger" for delete buttons to delete the object
+  - "search" class "-primary" for search buttons on views
+  - "x-square" class "-warning" for Discard Changes buttons on forms
+  - "save" class "-primary" for save (create or update) buttons on forms
 - Flag icons are used to assist with locale/language selection.
   - The gem rails-icons is used with the library 'flags' to provide the icons.
   
@@ -409,6 +415,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Fix update test in tag system test.
 - [x] Fix error in doc_types system test (edit).
 - [ ] Refactor cable and cable type system tests after restructure to core.
+- [ ] Fix error in discipline system test where the test seems to be building new disciplines.
 
 ## Refactoring Opportunities
 
@@ -451,7 +458,6 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Refactor all controllers to use the preferred safe params expect rather than require.
 - [x] Refactor test helpers to minimise code duplication, and simplify generation of new models.
 - [ ] Improve forbidden error logging messages, include user. Consider automatic sign out.
-- [ ] Move document issues to change module, generalise so it can be used for other entities (polymorphic).
 - [ ] Abstract controllers for project linked models, similar to tagables controller.
 - [ ] Add catalog required roles in disciplines, to allow different role for cable types and doc types, etc.
 - [ ] Refactor cable and cable types to be core module available to electrical, instruments, telecoms (any module). Should belong to discipline.
@@ -462,7 +468,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Remove unnecessary namespacing within electrical module naming, e.g. switchboard has many electrical_circuits. Switchboards can refer to circuits, and circuits can refer to switchboards, without the module prefix.
 - [x] Transition documents to discipline nested.
 - [x] Transition cable types to core module, discipline nested. This should allow other disciplines (instrument, communication) to create appropriate cable types.
-- [ ] Revise index views to get credentials once and use for links, for all resources where the credentials are not granular, i.e. everything except projects and disciplines.
+- [ ] Revise index views to get credentials once and use for links, for all resources where the credentials are not granular, which would be most everything that is discipline nested.
 - [x] Refactor model translations with count.
 - [x] Revert activerecord translations to convention with / instead of . key for namespaced models.
 - [ ] Rename project change module to change management.
@@ -471,6 +477,10 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Use scopify to simplify setup for role assignment views.
 - [ ] Refactor show views in style of documents, include generator templates.
 - [ ] Decide on a standard clear presentation for booleans in show views, add it to show view for circuits, and add it to generic tests and generator templates.
+- [ ] Prettification.
+- [ ] Refactor collapsible component to use only stimulus js.
+- [ ] Consider expanding scope for models to include all projects for which user has a role.
+- [ ] Migrate i18n translations to a database system rather than .YAML.
 
 ## Potential Features
 
@@ -498,6 +508,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Nest routes for project related resource under projects to improve security around assignment to other than the current project.
 - [x] Nest tag, document resources under disciplines.
 - [ ] Move cable and cable type back to core, as they are shared by electrical and instrument disciplines, also communications.
+- [ ] Move document issues to change module, generalise so it can be used for other entities (polymorphic).
 - [ ] Plan for database scaling as data grows
 
 ## Notes

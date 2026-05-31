@@ -155,7 +155,7 @@
 
 <%- @fields.select { |field| field[:type] == "references" || field[:type] == "belongs_to" }.each do |field| -%>
           <div class="col-12 col-md-6 col-lg-4">
-            <%%= render "<%= File.join(*class_path, field[:name].pluralize, "card") %>", object: @<%= singular_name %>.<%= field[:name] %> %>
+            <%%= render "<%= File.join(*class_path, field[:name].pluralize, "card") %>", object: @<%= singular_name %>, association: :<%= field[:name] %> %>
           </div>
         <%- end -%>
           </div> <!-- end inner card -->

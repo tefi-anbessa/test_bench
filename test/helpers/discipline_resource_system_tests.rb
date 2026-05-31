@@ -89,8 +89,7 @@ module DisciplineResourceSystemTests
     click_link href: resource_path(@resource)
     assert_current_path resource_path(@resource)
     show_assertions
-    # Discipline specific assertions: collapsible card
-    discipline_card_assertions
+    # Include discipline in @show_associations
 
     # Variable assertions
     assert_selector "a[href='#{discipline_resource_index_path(@discipline)}']"

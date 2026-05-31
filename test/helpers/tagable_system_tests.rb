@@ -88,16 +88,14 @@ module TagableSystemTests
     click_link(href: resource_path(@resource))
     assert_current_path resource_path(@resource)
 
-    show_assertions
-    # Tagable specific assertion: collapsible card
-    tag_card_assertions
-
     # Variable assertions
     assert_selector "a[href='#{discipline_resource_index_path(@discipline)}']"# Link back to discipline resource index
     refute_selector "a[href='#{edit_resource_path(@resource)}']" # edit resource
     refute_selector "a[href='#{resource_path(@resource)}'][data-method='delete']" # delete resource
     refute_selector "a[href='#{new_discipline_resource_path(@discipline)}']" # Link to new resource
     # [TODO] test prev and next buttons
+
+    show_assertions
   end
 
   def test_accredited_user_resource_show_view
@@ -162,11 +160,11 @@ module TagableSystemTests
 
     # Submit the form data
     click_button I18n.t('actions.create')
-    sleep 1.0  # Give database time to commit
+    sleep 2.0  # Give database time to commit
     # Form data uses @tag as a template, serial increased + 1.
     new_tag = Tag.find_by(discipline: @discipline,
       prefix: @saved_prefix, 
-      serial: @tag.serial.succ,
+      serial: @saved_serial,
       suffix: @tag.suffix)
     assert_current_path resource_path(new_tag.tagable)
     assert_equal new_tag.tagable.class, resource_class
@@ -201,9 +199,10 @@ module TagableSystemTests
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit discipline_resource_index_path(@discipline)
     assert_current_path discipline_resource_index_path(@discipline)
-    original = @resource
+    original = @resource.dup
     find("a[href='#{edit_resource_path(@resource)}']").click
     assert_current_path edit_resource_path(@resource)
+    
     assert_text I18n.t("#{view_key}.edit.header", label: @resource.long_label)
     assert page.title.include?(I18n.t("#{view_key}.edit.title"))
 

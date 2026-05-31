@@ -222,20 +222,18 @@
               <!-- Parent card -->
               <div class="row mb-3">
                 <% if @tag.parent %>
-                  <%= render 'tags/card', object: @tag.parent, context: :parent %>
+                  <%= render 'tags/card', object: @tag, association: 'parent' %>
                 <% else %>
                   <div class="col-12 mb-2">
                     <span>
-                      <%= t('show.unassigned', model: t("activerecord.attributes.tag.parent")) %>
+                      <%= t('show.unassigned', model: t("activerecord.attributes.tag.parent_id")) %>
                     </span>
                   </div>
                 <% end %>
 
-              <!-- Children cards -->
+              <!-- Children card -->
               <div class="row mb-1">
-                <% @tag.children.each do |child| %>
-                  <%= render 'tags/card', object: child, context: :child %>
-                <% end %>
+                <%= render 'shared/children', parent: @tag, association: :children %>
               </div>
             </div> <!-- inner card body -->
           </div> <!-- inner card -->

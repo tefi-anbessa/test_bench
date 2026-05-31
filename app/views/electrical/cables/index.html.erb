@@ -14,10 +14,11 @@
 
         <!-- Header Text (Left) -->
         <div class="col-8">
-          <% scope_text = current_project.present? ? 
-          [current_project.class.model_name.human, current_project.label].join(': ') : 
-          t('index.all', models: t('activerecord.models.project').pluralize) %>
-          <h5 class="mb-1"><%= t('.header', scope_text: scope_text) %></h5>
+          <h5><%= t('.header',
+            scope_text: [@discipline.project.code, 
+                          t("activerecord.models.discipline.one"), 
+                          @discipline.code].join(' ')) %>
+          </h5>
         </div>
 
         <!-- New Button (Right) -->

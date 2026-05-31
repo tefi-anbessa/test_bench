@@ -28,6 +28,9 @@ module Electrical
       @show_fields = %w[heater_type application ingress_protection sheath_temperature_max power_density_min 
       power_density_max sheath_material insulation_material]
 
+      # List all associations that should have a collapsible card on the show view
+      @show_associations = [:tag, :electrical_demand]
+
       # List all fields that should appear in forms (should be all)
       @new_fields = {heater_type: nil, application: nil, sheath_temperature_max: nil, power_density_min: nil, 
       power_density_max: nil, sheath_material: nil, insulation_material: nil}

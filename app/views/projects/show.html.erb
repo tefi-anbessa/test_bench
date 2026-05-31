@@ -93,11 +93,11 @@
                   </span>
                 <% end %>
               <% end %>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            </div> <!-- button group -->
+          </div> <!-- d-flex align-items-center -->
+        </div> <!-- right navigation and actions -->
+      </div> <!-- row align-items-center -->
+    </div> <!-- card header -->
 
     <div class="card-body" style="<%= form_styles(@swatch) %>">
       <div class="row justify-content-center">
@@ -116,19 +116,11 @@
               <% if policy(@project).edit? %>
                 <div class="row mb-1">
                   <div class="col-4 text-muted"><%= t('activerecord.models.swatch', count: 1) %></div>
-                  <div class="col-6">
-                    <%= @project.swatch&.name || '-' %>
-                  </div>
-                  <div class="col-2 text-end">
+                  <div class="col-8">
                     <% if @project.swatch && policy(@project.swatch).show? %>
-                      <%= link_to @project.swatch, 
-                          class: "btn btn-sm btn-outline-info",
-                          aria: { 
-                            label: t('actions.show', model: t('activerecord.models.swatch', count: 1)) 
-                          } do %>
-                        <%= t('actions.show') %>
-                        <%== bs_icon('eye') %>
-                      <% end %>
+                      <%= render 'swatches/card', object: @project.swatch %>
+                    <% else %>
+                      <%= t("show.unassigned", model: t("activerecord.models.swatch", count: 1)) %>
                     <% end %>
                   </div>
                 </div>
@@ -136,7 +128,7 @@
 
               <!-- Tags and document links -->
               <div class="row mb-1">
-                <div class="col-md-2">
+                <div class="col-md-12">
                   <div class="d-flex gap-2">
                     <%= link_to project_tags_path(@project),
                         class: "btn btn-outline-info btn-sm",
@@ -145,7 +137,7 @@
                         } do %>
                       <%== bs_icon('tag') %>
                       <%= t('activerecord.models.tag', count: @project.tags.count) %>
-                      <span class="badge bg-secondary ms-1"><%= @project.tags.count %></span>
+                      <span class="badge bg-info ms-1"><%= @project.tags.count %></span>
                     <% end %>
                     
                     <%= link_to project_documents_path(@project),
@@ -155,15 +147,25 @@
                         } do %>
                       <%== bs_icon('file') %>
                       <%= t('activerecord.models.document', count: @project.documents.count) %>
-                      <span class="badge bg-secondary ms-1"><%= @project.documents.count %></span>
+                      <span class="badge bg-info ms-1"><%= @project.documents.count %></span>
                     <% end %>
-                  </div>
-                </div>
-              </div>
-
+                    
+                    <% if policy(DocType).index? %>
+                      <%= link_to project_doc_types_path(@project),
+                          class: "btn btn-outline-info btn-sm",
+                          aria: { 
+                            label: t('activerecord.models.doc_type', count: @project.doc_types.count)
+                          } do %>
+                        <%== bs_icon('file') %>
+                        <%= t('activerecord.models.doc_type', count: @project.doc_types.count) %>
+                        <span class="badge bg-info ms-1"><%= @project.doc_types.count %></span>
+                      <% end %>
+                    <% end %>
+                  </div> <!-- end d-flex -->
+                </div> <!-- end col -->
+              </div> <!-- end row -->
             </div> <!-- end project card body -->
           </div> <!-- end project card -->
-
         </div> <!-- end responsive columns -->
 
         <!-- Disciplines Section -->

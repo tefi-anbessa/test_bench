@@ -189,7 +189,7 @@
               <!-- Tag Card -->
               <% if @heater.tag.present? %>
                 <div class="row g-3 mb-3">
-                    <%= render 'tags/card', object: @heater.tag, context: :tag %>
+                    <%= render 'tags/card', object: @heater, association: :tag %>
                 </div>
               <% else %>
                 <div class="row g-3 mb-3">

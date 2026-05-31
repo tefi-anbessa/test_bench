@@ -1,5 +1,6 @@
+<!-- Expects object and context (optional) to be passed in -->
 <% cable = object %>
-
+<% context ||= t("activerecord.models.electrical/cable.one") %>
 <%= render 'components/collapsible',
       id: "cable_#{cable.id}_details",
       title: [context, cable.long_label].join(': '),

@@ -19,13 +19,20 @@ module Electrical
       @tag.reload
       @unassigned_tag.update(prefix: "PM")
       @unassigned_tag.reload
+
       # List fields that should appear in index
       @index_fields = %w[motor_type frame_size ingress_protection poles speed_rated]
+
       # List fields that should have ransack search capability
       # Ignore poles and speed rated as they are a numeric fields searched with _eq and standard test does not match.
       @search_fields = %w[motor_type frame_size ingress_protection notes]
+
       # List all fields that should appear in show
       @show_fields = %w[motor_type frame_size ingress_protection poles speed_rated notes]
+
+      # List all associations that should have a collapsible card on the show view
+      @show_associations = [:tag, :demand]
+
       # List all fields that should appear in forms
       @new_fields = {motor_type: nil, frame_size: nil, poles: nil, speed_rated: nil, notes: nil}
       @edit_fields = @new_fields

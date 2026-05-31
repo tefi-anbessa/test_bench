@@ -1,9 +1,19 @@
 <!-- Tag collapsible card -->
-<!-- Expecting 'object' and 'context' variables -->
-<% tag ||= object %>
+<!-- Expecting 'object' and 'association' variables -->
+<!-- The card uses the association name in the id, so more than one tag card can be present on the page -->
+<% return false unless object.respond_to?(association) %>
+<% tag = object.send(association) %>
+<% return false unless tag.present? && tag.is_a?(Tag) %>
+<% if I18n.exists?("activerecord.attributes.#{object.model_name.i18n_key}_id.#{association}_id") %>
+  <!-- The card looks for a tag attribute in the parent object translations. -->
+  <!-- If not found it uses the tag model translation. -->
+  <% model = t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}_id") %>
+<% else %>
+  <% model = t("activerecord.models.tag.one") %>
+<% end %>
 <%= render 'components/collapsible',
-      id: "tag_#{tag.id}_details",
-      title: [context, tag.long_label].join(': '),
+      id: "#{association}_#{tag.id}_details",
+      title: [model, tag.long_label].join(": "),
       expanded: false,
       header_class: 'py-1' do %>
   

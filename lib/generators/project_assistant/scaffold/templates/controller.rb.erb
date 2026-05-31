@@ -99,7 +99,7 @@ module <%= module_name %>
       def <%= singular_name %>_params
         params.require(:<%= singular_table_name %>)
         .permit(<%= @fields.map { |field| 
-          if field[:type] == "references"
+          if field[:type] == "references" || field[:type] == "belongs_to"
             ":#{field[:name]}_id"
           else
             ":#{field[:name]}"

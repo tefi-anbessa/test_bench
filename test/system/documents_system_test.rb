@@ -32,6 +32,7 @@ class DocumentsSystemTest < ApplicationSystemTestCase
 
     # List all fields that should appear in show (usually all)
     @show_fields = [:doc_number, :title, :notes]
+    @show_associations = [:doc_type, :discipline]
 
     # List all fields that should appear in forms (usually all).
     # New and edit required separately because some models have read only fields that can't be edited.

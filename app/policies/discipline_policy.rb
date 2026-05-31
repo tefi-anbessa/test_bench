@@ -5,9 +5,18 @@ class DisciplinePolicy < ProjectResourcePolicy
     record
   end
 
-  def user_is_accredited?(project = current_project)
-    user.is_project_manager_of?(project)  ||
-      user.is_project_admin_of?(project) ||
+  def user_is_accredited?(record)
+    # Ensure record is an instance, not a class.
+    # The rails error is only for development transition phase.
+    unless record.is_a?(ApplicationRecord)
+      unless Rails.env.production?
+        raise "Policy Error: #{record.class} called with class instead of instance. " \
+              "Use an instance variable with discipline association."
+      end
+      return false
+    end
+    user.is_project_manager_of?(record.project)  ||
+      user.is_project_admin_of?(record.project) ||
       user.is_admin? || user.is_app_owner?
   end
 

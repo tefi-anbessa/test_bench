@@ -192,7 +192,7 @@
               <!-- Tag Card -->
               <% if @switchboard.tag.present? %>
                 <div class="row g-3 mb-3">
-                    <%= render 'tags/card', object: @switchboard.tag, context: t('activerecord.models.tag.one') %>
+                    <%= render 'tags/card', object: @switchboard, association: :tag %>
                 </div>
               <% else %>
                 <div class="row g-3 mb-3">

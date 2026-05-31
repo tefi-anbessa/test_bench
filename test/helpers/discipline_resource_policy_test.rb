@@ -93,7 +93,7 @@ module DisciplineResourcePolicyTest
     end
 
     # Index Tests
-    test 'index? is available to admins and team members on current project' do
+    test 'index is available to admins and team members on current project' do
       assert policy(@admin, @project).index?
       assert policy(@app_owner, @project).index?
       assert policy(@project_manager, @project).index?
@@ -102,31 +102,31 @@ module DisciplineResourcePolicyTest
       assert policy(@accredited_user, @project).index?
     end
 
-    test 'index? is available to admins without current project' do
+    test 'index is available to admins without current project' do
       assert policy(@admin, nil).index?
       assert policy(@app_owner, nil).index?
     end
 
-    test 'index? denies team members when no project is selected' do
+    test 'index denies team members when no project is selected' do
       refute policy(@project_manager, nil).index?
       refute policy(@project_admin, nil).index?
       refute policy(@team_member, nil).index?
       refute policy(@accredited_user, nil).index?
     end
 
-    test 'index? is denied to user without a project role' do
+    test 'index is denied to user without a project role' do
       refute policy(@accredited_user_other_project, @project).index?
       refute policy(@regular_user, @project).index?
       refute policy(@regular_user, nil).index?
     end
 
-    test 'index? is denied when user is not set' do
+    test 'index is denied when user is not set' do
       refute policy(nil, @project).index?
       refute policy(nil, nil).index?
     end
 
     # Show Tests
-    test 'show? allows admins and team members on current project to view resource on current project' do
+    test 'show allows admins and team members on current project to view resource on current project' do
       assert policy(@admin, @project, @resource).show?
       assert policy(@app_owner, @project, @resource).show?
       assert policy(@project_manager, @project, @resource).show?
@@ -135,28 +135,28 @@ module DisciplineResourcePolicyTest
       assert policy(@accredited_user, @project, @resource).show?
     end
 
-    test 'show? denies admins and team members on current project to view resource on different project' do
+    test 'show denies team members to view resource on other project where they have no role' do
       refute policy(@project_manager, @project, @other_resource).show?
       refute policy(@project_admin, @project, @other_resource).show?
       refute policy(@team_member, @project, @other_resource).show?
       refute policy(@accredited_user, @project, @other_resource).show?
-      refute policy(@admin, @project, @other_resource).show?
-      refute policy(@app_owner, @project, @other_resource).show?
+      assert policy(@admin, @project, @other_resource).show?
+      assert policy(@app_owner, @project, @other_resource).show?
     end
 
-    test 'show? allows admins with nil current project to view any resource' do
+    test 'show allows admins with nil current project to view any resource' do
       assert policy(@admin, nil, @resource).show?
       assert policy(@admin, nil, @other_resource).show?
     end
     
-    test 'show? denies team members with nil current project to view any resource' do
-      refute policy(@team_member, nil, @resource).show?
+    test 'show does not require current project to view any resource' do
+      assert policy(@team_member, nil, @resource).show?
       refute policy(@team_member, nil, @other_resource).show?
-      refute policy(@project_manager, nil, @resource).show?
+      assert policy(@project_manager, nil, @resource).show?
       refute policy(@project_manager, nil, @other_resource).show?
-      refute policy(@project_admin, nil, @resource).show?
+      assert policy(@project_admin, nil, @resource).show?
       refute policy(@project_admin, nil, @other_resource).show?
-      refute policy(@accredited_user, nil, @resource).show?
+      assert policy(@accredited_user, nil, @resource).show?
       refute policy(@accredited_user, nil, @other_resource).show?
     end
 

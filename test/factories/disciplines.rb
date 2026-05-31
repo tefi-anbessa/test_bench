@@ -5,7 +5,7 @@ FactoryBot.define do
     association :project, factory: :project
     swatch { Swatch.first || create(:swatch) }
     sequence(:name) { |n| "Factory Discipline #{format('%02d', n)}" }
-    sequence(:label) { |n| "D#{format('%02d', n)}" }
+    sequence(:code) { |n| "D#{format('%02d', n)}" }
     notes { Faker::Lorem.sentence }
     required_role { nil }
     sort_order { 100 }

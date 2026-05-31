@@ -31,6 +31,7 @@ en:
 
     attributes:
       electrical/heater:
+        tag_id: "Tag"
         heater_type: "Heater Type"
         heater_types:
           heater_type_other: Other heater type
@@ -110,6 +111,7 @@ en:
         notes: "Notes"
 
       electrical/cable_type:
+        tag_id: "Tag"
         id: ID
         code: "Code"
         conductor_material: Conductor Material
@@ -137,8 +139,12 @@ en:
         notes: "Notes"
 
       electrical/cable:
-        from: "From"
-        to: "To"
+        tag_id: "Tag"
+        from_type: "From type"
+        from_id: "From selection"
+        to_type: "To type"
+        to_id: "To selection"
+        electrical_cable_type_id: "Cable Type"
         route_length: "Route Length"
         vertical_allowance: "Vertical Allowance"
         termination_allowance: "Termination Allowance"
@@ -206,6 +212,7 @@ en:
         notes: "Notes"
 
       electrical/motor:
+        tag_id: "Tag"
         motor_type: "Motor Type"
         motor_types:
           induction: "Induction"
@@ -223,6 +230,7 @@ en:
         notes: "Notes"
 
       electrical/socket_cct:
+        tag_id: "Tag"
         socket_type: "Socket Type"
         socket_types:
           other: "Other"
@@ -241,6 +249,7 @@ en:
         notes: "Notes"
 
       electrical/light_cct:
+        tag_id: "Tag"
         light_fitting_type: "Light Fitting Type"
         light_fitting_types:
           other: "Other"

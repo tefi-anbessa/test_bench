@@ -97,6 +97,7 @@ class ApplicationPolicy
     # Use to find if a user has a required role on any discipline of a project.
     # This allows access to the new form on discipline scoped resources (tags, documents) 
     # before the discipline is known.
+    # Avoid using - this can lead to UI where users can see forms but submission will cause forbidden errors.
     def user_has_a_required_role?(project)
       return false if user.nil? || project.nil?
       user.roles.select { |role| role.resource_type == "Discipline" &&

@@ -23,13 +23,20 @@ module SystemTestHelpers
         else
           :enum
         end
-      elsif field.end_with?('_id')
-        :reference
-      elsif field.end_with?('_type')
-        :polymorphic
+      elsif association = resource_class.reflect_on_association(field)
+        if association.polymorphic?
+          :polymorphic
+        else
+          :reference
+        end
       else
         resource_class.type_for_attribute(field)&.type
       end
+    end
+
+    def association_for_field(klass, field_name)
+      klass.reflect_on_all_associations(:belongs_to)
+           .find { |a| a.foreign_key.to_s == field_name.to_s }
     end
 
     # Electrical::Cable -> Electrical
@@ -115,7 +122,12 @@ module SystemTestHelpers
     def index_field_assertions
       # Ransack search fields
       @search_fields.each do |field|
-        assert_selector "input[name='q[#{field}_cont]']"
+        case field_type(field)
+        when :integer
+          assert_selector "input[name='q[#{field}_eq]']"
+        else
+          assert_selector "input[name='q[#{field}_cont]']"
+        end
       end
 
       # Ransack sort headers
@@ -138,33 +150,55 @@ module SystemTestHelpers
 
       # Field data 
       field_display_assertions(@show_fields)
+
+      # Associations
+      @show_associations.each do |association|
+        if @resource.send(association).present?
+          collapsible_assertions(@resource, association)
+        else
+          # Text for unassigned association varies depending on association type.
+          # If it is important, test it in the calling class.
+        end
+      end
+    end
+
+    def collapsible_assertions(object, association)
+      assert object.respond_to?(association), "Object #{object.class} does not respond to #{association}"
+      record = object.public_send(association)
+      id = record.id
+      component_id = "#{record.class.model_name.element}_#{id}_details"
+      header_id = "#{component_id}_header"
+      # Should start collapsed
+      refute_selector "##{component_id}", visible: true
+      assert_selector "##{component_id}", visible: :all
+      find("##{header_id}").click
+      assert_selector "##{component_id}.show", visible: :all
+      # Card shall include a link to the associated resource
+      assert_link href: polymorphic_path(record)
+    end
+
+    def children_collapsible_assertions(parent, association)
+      record = parent.public_send(association)
+      component_id = "#{parent.model_name.element}_#{association}_links"
+      header_id = "#{component_id}_header"
+      # Should start collapsed
+      refute_selector "##{component_id}", visible: true
+      assert_selector "##{component_id}", visible: :all
+      find("##{header_id}").click
+      assert_selector "##{component_id}.show", visible: :all
+      # Card shall include a link to each child resource
+      record.each do |child|
+        assert_link href: polymorphic_path(child)
+      end
     end
 
     def tag_card_assertions
-      # Find the specific tag card header using the correct ID pattern
-      within "div[data-bs-target='#tag_#{@resource.tag.id}_details']" do
-        assert_text I18n.t('tags.show.header', label: @resource.tag.label)
-      end
-
-      # Verify it's collapsed by default
-      assert_selector "div[data-bs-target='#tag_#{@resource.tag.id}_details'][aria-expanded='false']", visible: true
-    end
-
-    def discipline_card_assertions
-      # Find the specific discipline card header using the correct ID pattern
-      within "div[data-bs-target='#discipline_#{@discipline.id}_details']" do
-        assert_text I18n.t('disciplines.show.header', label: @discipline.long_label)
-      end
-
-      # Verify it's collapsed by default
-      assert_selector "div[data-bs-target='#discipline_#{@discipline.id}_details'][aria-expanded='false']", visible: true
+      collapsible_assertions(@resource, :tag)
     end
 
     def new_resource_form_assertions
       # Field labels
-      @new_fields.each do |field, value|
-        assert_text I18n.t("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field}")
-      end
+      form_labels_assertions(@new_fields)
       # Data fields - test existence only for new forms
       field_form_new_assertions(@new_fields)
       # Form buttons
@@ -174,14 +208,33 @@ module SystemTestHelpers
 
     def edit_resource_form_assertions
       # Field labels
-      @edit_fields.each do |field, value|
-        assert_text I18nt("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field}")
-      end
+      form_labels_assertions(@edit_fields)
       # Data fields - test values for edit forms
       field_form_edit_assertions(@edit_fields)
       # Form buttons
       assert_selector "button[type='submit']"
       assert_selector "a.btn.btn-warning", text: I18n.t('actions.discard')
+    end
+
+    def form_labels_assertions(fields)
+      # Field labels
+      fields.each do |field, value|
+        case field_type(field)
+        when :reference
+          if I18n.exists?("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field}_id")
+            label = I18n.t("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field}_id")
+          else
+            associated = resource_class.reflect_on_association(field).klass
+            label = I18n.t("activerecord.models.#{associated.model_name.i18n_key}.one")
+          end
+          assert_text label
+        when :polymorphic
+          assert_text I18n.t("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field}_id")
+          assert_text I18n.t("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field}_type")
+        else
+          assert_text I18n.t("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field}")
+        end
+      end
     end
 
     # Tag fields for nested form
@@ -213,7 +266,8 @@ module SystemTestHelpers
     def fill_in_tag_fields
       fill_in "#{resource_class.model_name.param_key}[tag][stage]", with: @tag.stage
       fill_in_prefix_field
-      fill_in "#{resource_class.model_name.param_key}[tag][serial]", with: @tag.serial.succ # TODO make this more robust
+      @saved_serial = @tag.next_serial
+      fill_in "#{resource_class.model_name.param_key}[tag][serial]", with: @saved_serial
       fill_in "#{resource_class.model_name.param_key}[tag][suffix]", with: @tag.suffix
       fill_in "#{resource_class.model_name.param_key}[tag][service]", with: @tag.service
       fill_in "#{resource_class.model_name.param_key}[tag][location]", with: @tag.location
@@ -248,15 +302,23 @@ module SystemTestHelpers
     def fill_in_resource_fields
       # Set all attributes to the values provided, default to @resource if nil
       @new_fields.each do |field, value|
-        name = "#{resource_class.model_name.param_key}[#{field}]"
+        key = "#{resource_class.model_name.param_key}"
+        name = "#{key}[#{field}]"
         value = value.nil? ? @resource.send(field) : value
         case field_type(field)
         when :translated_enum
           select(resource_class.human_enum_name(field.to_s.pluralize, value), from: name)
         when :enum
           find("select[name='#{name}'] option[value='#{value}']").select_option
-        when :reference, :polymorphic
-          find("select[name='#{name}'] option[value='#{value}']").select_option
+        when :reference
+          if value.is_a?(ActiveRecord::Base)
+            find("select[name='#{key}[#{field}_id]'] option[value='#{value.id}']").select_option
+          end
+        when :polymorphic
+          if value.is_a?(ActiveRecord::Base)
+            find("select[name='#{key}[#{field}_type]'] option[value='#{value.class.name}']").select_option
+            find("select[name='#{key}[#{field}_id]'] option[value='#{value.id}']").select_option
+          end
         when :integer, :float, :decimal
           fill_in name, with: value.to_s
         when :boolean
@@ -290,6 +352,8 @@ module SystemTestHelpers
           # assert_selector "input[type='checkbox'][checked='#{value}']", visible: false
         when :date, :datetime
           assert_text I18n.l(value, format: :default)
+        when :text
+          assert_text value.to_s.first(10)
         else # string, text, integer, etc.
           assert_text value.to_s
         end
@@ -299,16 +363,20 @@ module SystemTestHelpers
     def field_form_edit_assertions(fields)
       # For edit forms - tests form field values with existing resource data
       fields.each do |field, value|
+        key = "#{resource_class.model_name.param_key}"
+        name = "#{key}[#{field}]"
         value = @resource.send(field) # Value will initially be original value from @resource
-        name = "#{resource_class.model_name.param_key}[#{field}]"
         case field_type(field)
         when :translated_enum
           assert_selector "select[name='#{name}'] option[selected]", 
               text: resource_class.human_enum_name(field.to_s.pluralize, value)
         when :enum
           assert_selector "select[name='#{name}'] option[selected]", text: value
-        when :reference, :polymorphic
-          assert_selector "select[name='#{name}'] option[selected]", text: value
+        when :reference
+          assert_selector "select[name='#{key}[#{field}_id]']"
+        when :polymorphic
+          assert_selector "select[name='#{key}[#{field}_type]']"
+          assert_selector "select[name='#{key}[#{field}_id]']"
         when :integer, :float, :decimal
           assert_field name, with: value.to_s, type: 'number'
         when :boolean
@@ -327,10 +395,16 @@ module SystemTestHelpers
     def field_form_new_assertions(fields)
       # For new forms - tests that form fields exist (no values expected)
       fields.each do |field, value|
-        name = "#{resource_class.model_name.param_key}[#{field}]"
+        key = "#{resource_class.model_name.param_key}"
+        name = "#{key}[#{field}]"
         case field_type(field)
-        when :translated_enum, :enum, :reference, :polymorphic
+        when :translated_enum, :enum
           assert_selector "select[name='#{name}']"
+        when :reference
+          assert_selector "select[name='#{key}[#{field}_id]']"
+        when :polymorphic
+          assert_selector "select[name='#{key}[#{field}_type]']"
+          assert_selector "select[name='#{key}[#{field}_id]']"
         when :integer, :float, :decimal
           assert_field name, type: 'number'
         when :boolean

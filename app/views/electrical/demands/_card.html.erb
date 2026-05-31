@@ -1,9 +1,9 @@
-<!-- expects object variable, accepts context variable for header -->
+<!-- Expects object and context (optional) to be passed in -->
 <% demand = object %>
-<% context ||= t('show.context.demand') %>
+<% context ||= t('activerecord.models.electrical/demand.one') %>
 <%= render 'components/collapsible',
   id: "demand_#{demand.id}_details",
-  title: [context, t('electrical.demands.show.header', label: demand.label)].join(': '),
+  title: [context, demand.long_label].join(': '),
   expanded: false,
   header_class: 'py-1' do %>
   

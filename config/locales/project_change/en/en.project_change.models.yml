@@ -7,6 +7,7 @@ en:
         other: Change Requests
     attributes:
       project_change/request:
+        project_id: "Project"
         serial: "Number"
         title: "Title"
         reason: "Reason"

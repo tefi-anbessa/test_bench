@@ -5,7 +5,7 @@ module ProjectAssistant
   class TagableGenerator < Rails::Generators::NamedBase
     include Rails::Generators::ResourceHelpers
     include FieldTypes
-    desc "Create files from templates and edit config entries for a new tagable model in Project Assistant app"
+    desc "Create scaffolding and config entries for a tagable model"
     source_root File.expand_path("tagable/templates", __dir__)
     
     def initialize(args, *options)
@@ -270,8 +270,6 @@ module ProjectAssistant
           attributes_section = "      #{file_path}:\n"
           
           @fields.each do |field|
-            # Skip translations for references fields - they use their model's translations
-            next if field[:type] == 'references' || field[:type] == 'belongs_to'
             
             # Use field[:name].humanize as dummy translation
             attributes_section += "        #{field[:name]}: #{field[:name].humanize}\n"

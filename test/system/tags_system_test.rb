@@ -5,13 +5,13 @@ require "helpers/system_test_helpers"
 class TagsSystemTest < ApplicationSystemTestCase
   include Devise::Test::IntegrationHelpers
   include Warden::Test::Helpers
-  include TestSetupHelpers
   include SystemTestHelpers
 
   setup do
     setup_common_data
     setup_accredited_users(:designer)
     setup_tags
+    setup_model_specific_data
   end
 
   def setup_model_specific_data
@@ -24,12 +24,12 @@ class TagsSystemTest < ApplicationSystemTestCase
     # List fields that should appear in index. 
     # The generator will include test for sort link header for each column, 
     # and try to find an appropriate value field for the type.
-    @index_fields = [:stage, :full_tag, :service, :location, :notes]
+    @index_fields = [:stage, :full_tag, :service, :location, :parent, :notes]
 
     # List index fields that should have ransack search capability.
     # The generator will only test for "contains" fields (_cont).
     # Don't include numeric or date fields, add model specific tests for these later in this file.
-    @search_fields = [:prefix, :loop_id, :service, :location, :notes]
+    @search_fields = [:prefix, :serial, :service, :location, :notes]
 
     # List all fields that should appear in show (usually all)
     @show_fields = [:stage, :location, :notes]
@@ -39,8 +39,8 @@ class TagsSystemTest < ApplicationSystemTestCase
     # New and edit required separately because some models have read only fields that can't be edited.
     # Set a valid value for each field if required to be unique, set nil for factory default.
     # Document model has its own way to ensure uniqueness by setting serial internally.
-    @new_fields = {doc_type_id: nil, title: nil, notes: nil}
-    @edit_fields = {title: nil, notes: nil}
+    @new_fields = { }
+    @edit_fields = { }
 
     @model_special_cases = { parent: nil, tagable: nil }
     # Set an attribute/s to be modified in edit test
@@ -60,22 +60,24 @@ class TagsSystemTest < ApplicationSystemTestCase
       assert_selector "a", text: [I18n.t('actions.show'), @project.code].join(" ")
       click_on [I18n.t('actions.show'), @project.code].join(" ")
     end
-    
     assert_current_path project_path(@project)
+
     # Click the project tags link
     click_link(href: project_tags_path(@project))
     assert_current_path project_tags_path(@project)
+
     assert_text I18n.t("tags.index.header", 
       scope_text: [I18n.t("activerecord.models.project.one"), @project.label].join(' '))
     assert page.title.include?(I18n.t("tags.index.title"))
 
-    # index search fields
-    tag_index_field_assertions
-
     # Links
+    refute_link I18n.t('actions.new'), href: new_discipline_tag_path(@discipline) 
     assert_link I18n.t('actions.show'), href: tag_path(@tag)
     refute_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # team member cannot edit tag
     refute_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # team member cannot delete tag
+
+    # index search fields, headers, fields
+    index_field_assertions
   end
 
   test "team member viewing the discipline tags index" do
@@ -181,30 +183,14 @@ class TagsSystemTest < ApplicationSystemTestCase
     refute_link I18n.t('actions.new'), href: new_discipline_tag_path(@discipline) # team member cannot create new tag in discipline
     # [TODO] test prev and next buttons
 
-    # Project collapsible card
-    assert_text I18n.t('activerecord.models.project', count: 1)
-    assert_text @tag.project.code
-
-    # Discipline collapsible card
-    assert_text I18n.t('activerecord.models.discipline', count: 1)
-    assert_text @tag.discipline.long_label
-
+    show_assertions
     # Field labels
-    assert_text I18n.t('activerecord.attributes.tag.stage')
-    assert_text I18n.t('activerecord.attributes.tag.full_tag')
-    assert_text I18n.t('activerecord.attributes.tag.service')
-    assert_text I18n.t('activerecord.attributes.tag.location')
-    assert_text I18n.t('activerecord.attributes.tag.notes')
     assert_text I18n.t('activerecord.attributes.tag.tagable_type')
+    assert_text I18n.t('activerecord.attributes.tag.parent')
 
-    #field data
-    assert_text @tag.stage
-    assert_text @tag.discipline.code
-    assert_text @tag.label
-    assert_text @tag.service
-    assert_text @tag.location
-    assert_text @tag.notes
+    # Field data
     assert_text I18n.t('show.unassigned', model: I18n.t("activerecord.attributes.tag.tagable_type"))
+    assert_text I18n.t('show.unassigned', model: I18n.t("activerecord.attributes.tag.parent"))
 
     # Go to project tags index and get the same show view from there.
     click_link(href: project_tags_path(@project))
@@ -309,9 +295,9 @@ class TagsSystemTest < ApplicationSystemTestCase
     # Additional discipline setup
     test_sample_disciplines_setup
     @count = 0
+    sign_in @c_user
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    sign_in @c_user
     visit new_discipline_tag_path(@discipline_c)
     assert_current_path new_discipline_tag_path(@discipline_c)
 
@@ -327,6 +313,8 @@ class TagsSystemTest < ApplicationSystemTestCase
     sign_out @c_user
 
     sign_in @m_user # Accredited for discipline M
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
     # Discipline M defaults to dim1 schema
     visit new_discipline_tag_path(@discipline_m)
     assert_current_path new_discipline_tag_path(@discipline_m)
@@ -343,6 +331,8 @@ class TagsSystemTest < ApplicationSystemTestCase
     sign_out @m_user
 
     sign_in @accredited_user # Accredited for discipline E default
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit new_discipline_tag_path(@discipline)
 
     # Build electrical tag E-PM-0003.A 
@@ -357,6 +347,8 @@ class TagsSystemTest < ApplicationSystemTestCase
     sign_out @accredited_user
 
     sign_in @j_user
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit new_discipline_tag_path(@discipline_j)
     assert_current_path new_discipline_tag_path(@discipline_j)
     # Build instrument tag J:AT-0004.A
@@ -391,7 +383,6 @@ class TagsSystemTest < ApplicationSystemTestCase
     # assert_selector "[data-tag-target='prefixField'][readonly]"
 
     # Update the form
-    # [TODO: FIX THIS TEST]
     fill_in "tag_location", with: "NEW LOCATION"
     click_button I18n.t('actions.update')
     sleep 1.0  # Give server time to respond
@@ -443,12 +434,52 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.tag.one"))
   end
 
+  # Parent hierarchy additions
+  test "create new tag as child" do
+    sign_in @accredited_user # Accredited for discipline E default
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit new_discipline_tag_path(@discipline)
+
+    # Build electrical tag E-PM-0003.A 
+    @count = 11
+    fill_in_tag_fields
+    select("B", from: "prefix_select", match: :first)
+    assert_selector "select[name='tag[parent_id]']"
+    select(@tag.full_tag, from: "tag[parent_id]", match: :first)
+
+    click_button I18n.t('actions.create')
+    sleep 0.1  # Give database time to commit
+    new_tag = Tag.find_by(prefix: "B", serial: @count)
+    assert_current_path tag_path(new_tag)
+    assert_text I18n.t("flash.create.notice", resource_name: I18n.t("activerecord.models.tag", count: 1))
+
+    # Verify parent relationship
+    assert_equal @tag.id, new_tag.parent_id
+
+    # Associations
+    # Parent collapsible card - test assumes @resource is the child tag
+    @resource = new_tag
+    collapsible_assertions(new_tag, :parent)
+    assert_link href: tag_path(@tag)
+
+    find_link(href: tag_path(@tag)).click
+    assert_current_path tag_path(@tag)
+
+    # Children collapsible card
+    @resource = @tag
+    children_collapsible_assertions(@tag, :children)
+    assert_link href: tag_path(new_tag)
+
+    sign_out @accredited_user
+  end
+
   private
 
     def tag_index_field_assertions
       # index search fields and sort link headers
       assert_field "q[prefix_cont]"
-      assert_field "q[loop_id_cont]"
+      assert_field "q[serial_eq]"
       assert_field "q[service_cont]"
       assert_field "q[location_cont]"
       assert_field "q[notes_cont]"

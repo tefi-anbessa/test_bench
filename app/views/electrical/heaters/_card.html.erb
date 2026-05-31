@@ -1,14 +1,16 @@
-<% resource = object %>
+<!-- Expects object and context (optional) to be passed in -->
+<% heater = object %>
+<% context ||= t("activerecord.models.electrical/heater.one") %>
 <%= render 'components/collapsible',
-  id: "heater_#{resource.id}_details",
-  title: t("electrical.heaters.show.header", label: resource.label),
+  id: "heater_#{heater.id}_details",
+  title: [context, heater.long_label].join(': '),
   expanded: false,
   header_class: 'py-1' do %>
   
     <div class="container-fluid">
       <div class="row mb-1">
         <% text = t("actions.jump_to", model: t("activerecord.models.electrical/heater.one")) %>
-        <%= link_to resource, 
+        <%= link_to heater, 
             class: "btn btn-sm btn-outline-secondary me-2",
             title: text do %>
           <%== bs_icon('box-arrow-in-up-left') %>
@@ -18,53 +20,53 @@
 
       <div class="row mb-1">
         <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/heater.heater_type") %></div>
-        <div class="col-8"><%= resource.class.human_enum_name(:heater_type, resource.heater_type) %></div>
+        <div class="col-8"><%= heater.class.human_enum_name(:heater_type, heater.heater_type) %></div>
       </div>
 
       <div class="row mb-1">
         <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/heater.application") %></div>
-        <div class="col-8"><%= resource.class.human_enum_name(:application, resource.application) %></div>
+        <div class="col-8"><%= heater.class.human_enum_name(:application, heater.application) %></div>
       </div>
 
       <div class="row mb-1">
         <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/heater.ingress_protection") %></div>
-        <div class="col-8"><%= resource.ingress_protection || '-' %></div>
+        <div class="col-8"><%= heater.ingress_protection.present? ? ["IP", heater.ingress_protection].join('') : '-' %></div>
       </div>
 
       <div class="row mb-1">
         <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/heater.sheath_temperature_max") %></div>
-        <div class="col-8"><%= number_to_human(resource.sheath_temperature_max, 
+        <div class="col-8"><%= number_to_human(heater.sheath_temperature_max, 
           precision: 4, 
           units: { unit: "°C" }) || '-' %></div>
 
       </div>
       <div class="row mb-1">
         <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/heater.power_density_min") %></div>
-        <div class="col-8"><%= number_to_human(resource.power_density_min, 
+        <div class="col-8"><%= number_to_human(heater.power_density_min, 
           precision: 4, 
           units: { unit: "W/m²" , thousand: "kW/m²", million: "MW/m²" }) || '-' %></div>
 
       </div>
       <div class="row mb-1">
         <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/heater.power_density_max") %></div>
-        <div class="col-8"><%= number_to_human(resource.power_density_max, 
+        <div class="col-8"><%= number_to_human(heater.power_density_max, 
           precision: 4, 
           units: { unit: "W/m²" , thousand: "kW/m²", million: "MW/m²" }) || '-' %></div>
 
       </div>
       <div class="row mb-1">
         <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/heater.sheath_material") %></div>
-        <div class="col-8"><%= resource.class.human_enum_name(:sheath_material, resource.sheath_material) %></div>
+        <div class="col-8"><%= heater.class.human_enum_name(:sheath_material, heater.sheath_material) %></div>
 
       </div>
       <div class="row mb-1">
         <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/heater.insulation_material") %></div>
-        <div class="col-8"><%= resource.class.human_enum_name(:insulation_material, resource.insulation_material) %></div>
+        <div class="col-8"><%= heater.class.human_enum_name(:insulation_material, heater.insulation_material) %></div>
       </div>
 
       <div class="row mb-1">
         <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/heater.notes") %></div>
-        <div class="col-8"><%= resource.notes.present? ? simple_format(resource.notes) : '-' %></div>
+        <div class="col-8"><%= heater.notes.present? ? simple_format(heater.notes) : '-' %></div>
       </div>
 
     </div> <!-- end container-fluid -->

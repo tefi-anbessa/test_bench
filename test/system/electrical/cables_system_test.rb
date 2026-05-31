@@ -1,12 +1,13 @@
-require "application_system_test_case"
-require File.join(Rails.root, 'test', 'helpers', 'tagable_system_test_patterns')
+# frozen_string_literal: true
 
+require "application_system_test_case"
+require "helpers/tagable_system_tests"
 module Electrical
   class CablesSystemTest < ApplicationSystemTestCase
-    include TagableSystemTestPatterns
     include Devise::Test::IntegrationHelpers
     include Warden::Test::Helpers
     include ActionView::Helpers::NumberHelper
+    include TagableSystemTests
 
     setup do
       # Cables cannot use standard tagable setup, as cables need associated cable types.
@@ -33,11 +34,19 @@ module Electrical
 
       # List all fields that should appear in show (should be all)
       @show_fields = %w[ route_length vertical_allowance 
-        termination_allowance start_mark end_mark from to notes ]
+        termination_allowance start_mark end_mark notes ]
+
+      # List all associations that should have a collapsible card on the show view
+      @show_associations = [:tag, :electrical_cable_type, :from, :to]
 
       # List all fields that should appear in forms (should be all)
-      @form_fields = %w[ electrical_cable_type_id route_length vertical_allowance 
-        termination_allowance start_mark end_mark from_type to_type notes ]
+      @new_fields = { electrical_cable_type: nil, route_length: nil, vertical_allowance: nil, 
+        termination_allowance: nil, start_mark: nil, end_mark: nil, from: nil, to: nil, notes: nil }
+      @edit_fields = @new_fields
+
+      # Set an attribute/s to be modified in edit test
+      # Only working with string/text fields at present
+      @edit_attributes = { notes: "Updated notes" }
 
     end
   end

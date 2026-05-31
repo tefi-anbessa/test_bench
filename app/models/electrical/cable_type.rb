@@ -32,7 +32,7 @@ module Electrical
     end
 
     def long_label
-      code
+      "#{discipline.code}-ID##{id}"
     end
 
     def generate_code

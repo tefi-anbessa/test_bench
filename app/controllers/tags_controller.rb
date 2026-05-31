@@ -84,6 +84,7 @@ class TagsController < ApplicationController
       if params[:discipline_id].present?
         @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
         raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
+        @project = @discipline.project
       elsif params[:project_id].present?
         @discipline = nil
         @project = policy_scope(Project).find_by(id: params[:project_id])

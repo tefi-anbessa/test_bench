@@ -48,4 +48,29 @@ class DocTypesSystemTest < ApplicationSystemTestCase
   def fill_in_model_specific_fields
     # No special fields in doc types
   end
+
+  # team_member cannot see doc_types except in selectors.
+  undef test_team_member_navigating_to_project_resource_index
+
+  def test_team_member_navigating_to_project_resource_index
+    @team_member.grant(:document_controller, @project)
+    sign_in @team_member
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit project_path(@project)
+    assert_current_path project_path(@project)
+    click_link(href: project_resource_index_path(@project))
+    assert_current_path project_resource_index_path(@project)
+    
+    project_resource_index_assertions
+    # Variable assertions
+    assert_selector "a[href='#{project_path(@project)}']" # Link back to project show view
+    refute_selector "a[href='#{new_discipline_resource_path(@discipline)}']" # Link to new resource
+    assert_selector "a[href='#{resource_path(@resource)}']" # Link to resource show view
+    assert_selector "a[href='#{edit_resource_path(@resource)}']" # document controller can edit resource
+    refute_selector "a[href='#{resource_path(@resource)}'][data-method='delete']" # document controller cannot delete resource
+  end
+  undef test_team_member_navigating_to_discipline_resource_index
+  undef test_team_member_navigating_to_resource_show_view
+
 end

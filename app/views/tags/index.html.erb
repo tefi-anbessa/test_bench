@@ -8,13 +8,17 @@
         <!-- Discipline or project link -->
         <div class="col-2">
           <% if @discipline.present? %>
+            <%= link_to project_path(@discipline.project), class: "btn btn-sm btn-outline-info" do %>
+              <%= @discipline.project.label %>
+              <%= bs_icon('layers', class: "me-1") %>
+            <% end %>
             <%= link_to discipline_path(@discipline), class: "btn btn-sm btn-outline-info" do %>
               <%= @discipline.name %>
               <%= bs_icon('collection', class: "me-1") %>
             <% end %>
-          <% elsif current_project.present? %>
-            <%= link_to project_path(current_project), class: "btn btn-sm btn-outline-info" do %>
-              <%= current_project.label %>
+          <% elsif @project.present? %>
+            <%= link_to project_path(@project), class: "btn btn-sm btn-outline-info" do %>
+              <%= @project.label %>
               <%= bs_icon('layers', class: "me-1") %>
             <% end %>
           <% end %>
@@ -53,9 +57,11 @@
           <%= f.search_field :prefix_cont,
                 class: "search_field",
                 placeholder: t('activerecord.attributes.tag.prefix') %>
-          <%= f.search_field :serial_cont,
+          <%= f.search_field :serial_eq,
+                inputmode: "numeric",
+                pattern: "\\d*",
                 class: "search_field",
-                placeholder: t('activerecord.attributes.tag.serial') %>
+                placeholder: [t('activerecord.attributes.tag.serial'), ' (', t('field.type.integer'), ')'].join('') %>
           <%= f.search_field :service_cont,
                 class: "search_field",
                 placeholder: t('activerecord.attributes.tag.service') %>

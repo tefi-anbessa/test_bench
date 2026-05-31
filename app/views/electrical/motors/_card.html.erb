@@ -1,7 +1,9 @@
+<!-- Expects object and context (optional) to be passed in -->
 <% motor = object %>
+<% context ||= t("activerecord.models.electrical/motor.one") %>
 <%= render 'components/collapsible',
   id: "motor_#{motor.id}_details",
-  title: t('electrical.motors.show.header', label: motor.label),
+  title: [context, motor.long_label].join(': '),
   expanded: false,
   header_class: 'py-1' do %>
   

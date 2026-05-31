@@ -49,6 +49,8 @@ module ProjectResourcePolicyTest
     assert @resource.persisted?
     assert @other_resource.valid?
     assert @other_resource.persisted?
+    assert @new_resource.valid?
+    refute @new_resource.persisted?
   end
 
     # Scope Tests
@@ -131,29 +133,18 @@ module ProjectResourcePolicyTest
       assert policy(@accredited_user, @project, @resource).show?
     end
 
-    test 'show? denies admins and team members on current project to view resource on different project' do
+    test 'show? denies users without a project role to view resource' do
       refute policy(@project_manager, @project, @other_resource).show?
       refute policy(@project_admin, @project, @other_resource).show?
       refute policy(@team_member, @project, @other_resource).show?
       refute policy(@accredited_user, @project, @other_resource).show?
-      refute policy(@admin, @project, @other_resource).show?
-      refute policy(@app_owner, @project, @other_resource).show?
+      assert policy(@admin, @project, @other_resource).show?
+      assert policy(@app_owner, @project, @other_resource).show?
     end
 
     test 'show? allows admins with nil current project to view any resource' do
       assert policy(@admin, nil, @resource).show?
       assert policy(@admin, nil, @other_resource).show?
-    end
-    
-    test 'show? denies team members with nil current project to view any resource' do
-      refute policy(@team_member, nil, @resource).show?
-      refute policy(@team_member, nil, @other_resource).show?
-      refute policy(@project_manager, nil, @resource).show?
-      refute policy(@project_manager, nil, @other_resource).show?
-      refute policy(@project_admin, nil, @resource).show?
-      refute policy(@project_admin, nil, @other_resource).show?
-      refute policy(@accredited_user, nil, @resource).show?
-      refute policy(@accredited_user, nil, @other_resource).show?
     end
 
     test 'show denies users without project access' do
@@ -161,31 +152,31 @@ module ProjectResourcePolicyTest
       refute policy(@regular_user, @project, @resource).show?
       refute policy(@regular_user, @project, nil).show?
       refute policy(nil, @project, @resource).show?
-      end
+    end
 
-      # New tests
+    # New tests
     test 'new allows admins and accredited users on current project to access new form' do
-      assert policy(@admin, @project, resource_class).new?
-      assert policy(@app_owner, @project, resource_class).new?
-      assert policy(@project_admin, @project, resource_class).new?
-      assert policy(@accredited_user, @project, resource_class).new?
+      assert policy(@admin, @project, @new_resource).new?
+      assert policy(@app_owner, @project, @new_resource).new?
+      assert policy(@project_admin, @project, @new_resource).new?
+      assert policy(@accredited_user, @project, @new_resource).new?
     end
 
     test 'new denies admins and accredited users with nil current project to access new form' do
-      refute policy(@admin, nil, resource_class).new?
-      refute policy(@app_owner, nil, resource_class).new?
-      refute policy(@project_admin, nil, resource_class).new?
-      refute policy(@accredited_user, nil, resource_class).new?
+      refute policy(@admin, nil, @new_resource).new?
+      refute policy(@app_owner, nil, @new_resource).new?
+      refute policy(@project_admin, nil, @new_resource).new?
+      refute policy(@accredited_user, nil, @new_resource).new?
     end
 
     test 'new denies users without required role on current project to access new form' do
-      refute policy(@team_member, @project, resource_class).new?
+      refute policy(@team_member, @project, @new_resource).new?
     end
 
     test 'new denies users without project roles' do
-      refute policy(@team_member_other_project, @project, resource_class).new?
-      refute policy(@regular_user, @project, resource_class).new?
-      refute policy(nil, @project, resource_class).new?
+      refute policy(@team_member_other_project, @project, @new_resource).new?
+      refute policy(@regular_user, @project, @new_resource).new?
+      refute policy(nil, @project, @new_resource).new?
     end
 
     # Create Tests

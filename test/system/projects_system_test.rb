@@ -114,6 +114,8 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit projects_path
+    assert_current_path projects_path
+
     refute_selector "a[href='#{project_path(@project)}'][data-turbo-method='delete']" # only app owner can delete projects
     assert_selector "a[href='#{new_project_path}']" # only admin can create new project
     assert_selector "a[href='#{project_path(@other_project)}']" # Admin can see all projects
@@ -124,6 +126,8 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit projects_path
+    assert_current_path projects_path
+
     assert_selector "a[href='#{new_project_path}']" # only admin and app owner can create new project
     assert_selector "a[href='#{project_path(@project)}'][data-method='delete']" # only app_owner can destroy project
   end
@@ -145,6 +149,7 @@ class ProjectsSystemTest < ApplicationSystemTestCase
       click_on [I18n.t('actions.show'), @project.code].join(" ") # Click on the project link
     end
     assert_current_path project_path(@project)
+
     assert_text I18n.t("projects.show.header", label: @project.code)
     assert page.title.include?(I18n.t("projects.show.title"))
 
@@ -160,7 +165,7 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     # Project scoped tag and document links 
     assert_selector "a[href='#{project_tags_path(@project)}']"
     assert_selector "a[href='#{project_documents_path(@project)}']"
-    assert_selector "a[href='#{project_doc_types_path(@project)}']"
+    refute_selector "a[href='#{project_doc_types_path(@project)}']"
 
     # Discipline links 
     assert_selector "h5", text: I18n.t('disciplines.index.header', scope_text: @project.label)
@@ -188,11 +193,30 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     refute_selector "a[href='#{user_path(@regular_user)}']", text: I18n.t('actions.show')
   end
 
+  test "document controller show project" do
+    @team_member.grant(:document_controller, @project)
+    sign_in @team_member
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit project_path(@project)
+    assert_current_path project_path(@project)
+
+    assert_selector "a[href='#{projects_path}']"# Link back to projects index
+    refute_selector "a[href='#{edit_project_path(@project)}']" # Link to edit project
+    refute_selector "a[href='#{project_path(@project)}'][data-method='delete']" # delete icon
+
+    # Project scoped tag and document links 
+    assert_selector "a[href='#{project_tags_path(@project)}']"
+    assert_selector "a[href='#{project_documents_path(@project)}']"
+    assert_selector "a[href='#{project_doc_types_path(@project)}']"
+  end
+
   test "project manager show project" do
     sign_in @project_manager
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit project_path(@project)
+    assert_current_path project_path(@project)
 
     assert_selector "a[href='#{projects_path}']"# Link back to projects index
     assert_selector "a[href='#{edit_project_path(@project)}']" # Link to edit project
@@ -202,6 +226,7 @@ class ProjectsSystemTest < ApplicationSystemTestCase
   test "app owner show project" do
     sign_in @app_owner
     visit project_path(@project)
+    assert_current_path project_path(@project)
 
     assert_selector "a[href='#{projects_path}']"# Link back to projects index
     assert_selector "a[href='#{edit_project_path(@project)}']" # Link to edit project

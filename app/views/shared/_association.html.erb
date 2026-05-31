@@ -1,61 +1,51 @@
-<!-- Expecting object_type, object_id, allowed_types and optional context to be passed in -->
-<% if object_type.present? %>
-  <% if allowed_types.include?(object_type) && object_type.safe_constantize%>
-    <% type_name = object_type.constantize.model_name.human %>
-    <% object = object_type.constantize.find_by(id: object_id) %>
-    <div class="row mb-1">
-    <% if object.present? %>
-      <% partial = "#{object.model_name.collection}/card" %>
-      <% if lookup_context.exists?(partial, [], true) %>
-        <!-- Show a collapsible card for the associated object. -->
-        <% context ||= type_name %>
-        <%= render partial, object: object, context: context %>
-      <% else %>
-        <!-- No card available for this type, show a link to the object. -->
-        <div class="col-4 text-muted">
-          <%= context %>
-        </div>
-        <% path = begin
-          polymorphic_path([object])
-        rescue NoMethodError, ActionController::UrlGenerationError
-          '#'
-        end %>
-        <div class="col-8">
-          <%= link_to path,
-                class: "btn btn-sm btn-outline-secondary mb-2",
-                title: t('show.linked', model: type_name) do %>
-                  <%== bs_icon('box-arrow-down-right') %>
-                  <span class="d-none d-md-inline"><%= t('show.linked', model: type_name) %></span>
-              <% end %>
-        </div>
-      <% end %>
+<!-- Abstracted display of dropdown collapsible card for associated records on show view. -->
+<!-- Expecting object and association variables. -->
+
+<% if object.respond_to?(association) %>
+<!-- Set label text to attribute translation, if it exists, otherwise model name translation. -->
+<% associated = I18n.exists?("activerecord.attributes.#{object.model_name.i18n_key}.#{association}") ?
+            t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}") :
+            t("activerecord.models.#{object.reflect_on_association(association).klass.model_name.i18n_key}.one") %>
+  <% record = object.send(association) %>
+  <% if record.present? %>
+    <% partial = "#{record.model_name.collection}/card" %>
+    <% if lookup_context.exists?(partial, [], true) %>
+      <!-- Show a collapsible card for the associated object. -->
+      <%= render partial, object: record, context: associated %>
     <% else %>
-      <!-- Valid type but no valid object -->
+      <!-- No card available for this type, show a link to the object. -->
       <div class="col-4 text-muted">
-        <%= context %>
+        <%= object.class.human_attribute_name(association) %>
       </div>
-      <% if object_id.present? %>
-        <div class="col-8">
-          <%= t('show.invalid', model: type_name) %>
-        </div>
-      <% else %>
-        <div class="col-8">
-          <%= t('show.unassigned', model: type_name) %>
-        </div>
-      <% end %>
+      <% path = begin
+        polymorphic_path([record])
+      rescue NoMethodError, ActionController::UrlGenerationError
+        '#'
+      end %>
+      <div class="col-8">
+        <%= link_to path,
+              class: "btn btn-sm btn-outline-info mb-2",
+              title: t('show.linked', model: record.class.model_name.human) do %>
+                <%== bs_icon('box-arrow-down-right') %>
+                <span class="d-none d-md-inline"><%= t('show.linked', model: record.class.model_name.human) %></span>
+            <% end %>
+      </div>
     <% end %>
   <% else %>
-    <!-- Invalid type -->
-    <div class="col-12 text-muted">
-      <%= t("index.invalid_type", type: object_type) %>
+    <!-- No record present, show unassigned -->
+    <div class="col-4 text-muted">
+      <%= t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}") %>
+    </div>
+    <div class="col-8">
+      <%= t('index.unassigned') %>
     </div>
   <% end %>
 <% else %>
-  <!-- No object type specified -->
+  <!-- Invalid association -->
   <div class="col-4 text-muted">
-    <%= context %>
+    <%= t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}") %>
   </div>
   <div class="col-8">
-    <%= t('index.unassigned') %>
+    <%= t('show.invalid', model: association.to_s) %>
   </div>
 <% end %>

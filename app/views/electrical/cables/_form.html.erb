@@ -13,7 +13,11 @@
     </div>
 
     <%= bootstrap_form_with(model: cable,
-          url: cable.persisted? ? cable : discipline_electrical_cables_path(@discipline),
+          url: cable.persisted? ?
+            cable : 
+            ( tag.persisted? ?
+              tag_electrical_cables_path(tag) :
+              discipline_electrical_cables_path(discipline) ),
           layout: :horizontal, 
           label_col: "col-sm-4", 
           control_col: "col-sm-8",
@@ -31,7 +35,7 @@
               <% end %>
             </div>
 
-            <!-- Switchboard Details -->
+            <!-- Cable Details -->
             <div class="card mb-1" style="<%= card_styles(swatch) %>">
               <div class="card-header p-2" style="<%= card_header_styles(swatch) %>">
                 <h5><%= t('activerecord.models.electrical/cable.one') %></h5>

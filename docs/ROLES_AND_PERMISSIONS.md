@@ -139,7 +139,7 @@ The application RBAC system uses the [pundit gem](https://github.com/varvet/pund
 
 This section lists the reasoning for the RBAC implementation for each of the main elements of the application. A matrix of roles and permissions is provided for each resource or group of resources with similar permissions.
 
-As well as the checks in the matrices, policies also check that the action does not breach the current project boundary. If current project is set, policies will deny actions that would affect resources outside of that project. If current_project is not set (only allowed for global admins) then only index, show, and destroy actions will be available.
+As well as the checks in the matrices, policies also check that the action does not breach the current project boundary. If current project is set, policies will deny actions that would affect resources outside of that project. If current_project is not set, then only index, show, and destroy actions will be available.
 
 #### Terminology
 
@@ -284,9 +284,9 @@ The Document model provides the document register for the project.
 The DocTypes model provides a list of available document types for each discipline. The doc_type association of a document determines its workflow.
 
 - DocTypes belong to a discipline, which determines their project association.
-- The required role for doc_types is :document_controller scoped either to current project or discipline.
+- The required role for doc_types is :document_controller scoped either to project or discipline.
 - Global admins and project admins have full access to doc_type resources.
-- Scope for the doc_type model includes all doc_types belonging to the current project, but in practice the index view will be scoped to the discipline.
+- Scope for the doc_type model includes all doc_types belonging to the current project.
 
 ### Permission Matrix for DocTypes Model
 

@@ -1,9 +1,11 @@
+<!-- Expects object and context (optional) to be passed in -->
 <% cable_type = object %>
+<% context ||= t("activerecord.models.electrical/cable_type.one") %>
 <div id="<%= dom_id cable_type %>" style="<%= card_styles(@swatch)%>">
 
   <%= render 'components/collapsible',
-    id: "cable_type_#{cable_type.id}_details",
-    title: t('electrical.cable_types.show.header', label: cable_type.label),
+    id: "electrical_cable_type_#{cable_type.id}_details",
+    title: [context, cable_type.long_label].join(': '),
     expanded: false,
     header_class: "py-1" do %>
 

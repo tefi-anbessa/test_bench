@@ -19,10 +19,10 @@ class DisciplineTest < ActiveSupport::TestCase
     assert discipline.valid?
   end
 
-  test "label must be present" do
+  test "code must be present" do
     @discipline.code = ""
     refute @discipline.valid?
-    assert_includes @discipline.errors[:label], I18n.t("errors.messages.blank")
+    assert_includes @discipline.errors[:code], I18n.t("errors.messages.blank")
   end
 
   test "project must be present" do
@@ -30,23 +30,23 @@ class DisciplineTest < ActiveSupport::TestCase
     refute @discipline.valid?
   end
 
-  test "label must be maximum 5 characters" do
+  test "code must be maximum 5 characters" do
     @discipline.code = "a" * 6
     refute @discipline.valid?
-    assert_includes @discipline.errors[:label], I18n.t("errors.messages.too_long", count: 5)
+    assert_includes @discipline.errors[:code], I18n.t("errors.messages.too_long", count: 5)
   end
 
-  test "label must be unique within project" do
-    duplicate = build(:discipline, label: "E", name: 'Test Discipline 1', project: @project, swatch: @swatch)
+  test "code must be unique within project" do
+    duplicate = build(:discipline, code: "E", name: 'Test Discipline 1', project: @project, swatch: @swatch)
     refute duplicate.valid?, "Should not allow duplicate discipline.codes in same project"
-    assert_includes duplicate.errors[:label], I18n.t("errors.messages.taken")
+    assert_includes duplicate.errors[:code], I18n.t("errors.messages.taken")
   end
 
-  test "label can repeat in different projects" do
-    create(:discipline, label: "Z", name: 'Test Discipline', project: @project, swatch: @swatch)
+  test "code can repeat in different projects" do
+    create(:discipline, code: "Z", name: 'Test Discipline', project: @project, swatch: @swatch)
     
     # Try to create another discipline with the same code in a new project
-    duplicate = create(:discipline, label: "Z", name: 'Test Discipline', project: create(:project), swatch: @swatch)
+    duplicate = create(:discipline, code: "Z", name: 'Test Discipline', project: create(:project), swatch: @swatch)
     assert duplicate.valid?, "Should allow duplicate discipline.codes in different projects"
   end
 
@@ -63,7 +63,7 @@ class DisciplineTest < ActiveSupport::TestCase
   end
 
   test "name must be unique within project" do
-    duplicate = build(:discipline, label: "TEST", name: 'Electrical', project: @project, swatch: @swatch)
+    duplicate = build(:discipline, code: "TEST", name: 'Electrical', project: @project, swatch: @swatch)
     refute duplicate.valid?, "Should not allow duplicate discipline names in same project"
     assert_includes duplicate.errors[:name], I18n.t("errors.messages.taken")
   end

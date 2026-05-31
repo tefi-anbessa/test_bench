@@ -43,6 +43,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     # Discipline links 
     assert_selector "h5", text: I18n.t('disciplines.index.header', scope_text: @project.label)
     @project.disciplines.each do |disc|
+      next unless disc.persisted?
       assert_selector "a[href='#{discipline_path(disc)}']", text: "#{disc.label}: #{disc.name}" # Link to show discipline
       assert_selector "a[href='#{discipline_path(disc)}']", text: I18n.t('actions.show')
       assert_selector "a[href='#{discipline_tags_path(disc)}']"
@@ -51,7 +52,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
       find("a[href='#{discipline_path(disc)}']", text: I18n.t('actions.show')).click
       assert_current_path discipline_path(disc)
       # Header
-      assert_selector "span.badge", text: I18n.t("disciplines.show.header", label: disc.long_label)
+      assert_selector "#discipline-header", text: I18n.t('disciplines.show.header', label: I18n.t("discipline.name.#{disc.name}"))
       assert page.title.include?(I18n.t("disciplines.show.title"))
       # Header links 
       assert_selector "a[href='#{project_path(@project)}']", text: @project.code # Link back to project
@@ -63,12 +64,12 @@ class DisciplineSystemTest < ApplicationSystemTestCase
       assert_text I18n.t('activerecord.attributes.discipline.notes')
       assert_text I18n.t('activerecord.attributes.discipline.required_role')
       assert_text I18n.t('activerecord.attributes.discipline.prefix_schema')
-      assert_text I18n.t('activerecord.models.swatch', count: 1)
+      refute_text I18n.t('activerecord.models.swatch', count: 1)
       # Discipline attributes
       assert_text disc.notes if disc.notes.present?
       assert_text disc.required_role if disc.required_role.present?
       assert_text disc.prefix_schema['name']
-      assert_text disc.swatch&.name if disc.swatch.present?
+      refute_text disc.swatch&.name if disc.swatch.present?
       # Discipline links for tags and documents
       assert_selector "a[href='#{discipline_tags_path(disc)}']", 
         text: I18n.t('activerecord.models.tag', count: disc.tags.count)
@@ -82,13 +83,8 @@ class DisciplineSystemTest < ApplicationSystemTestCase
       assert_current_path discipline_documents_path(disc)
       find("a[href='#{discipline_path(disc)}']").click
       assert_current_path discipline_path(disc)
-      assert_selector "a[href='#{discipline_doc_types_path(disc)}']", 
-        text: I18n.t('activerecord.models.doc_type', count: disc.doc_types.count)
-      find("a[href='#{discipline_doc_types_path(disc)}']").click
-      assert_current_path discipline_doc_types_path(disc)
-      find("a[href='#{discipline_path(disc)}']", text: disc.name).click
-      assert_current_path discipline_path(disc)
-      # Electrical discipline links
+
+      # Model links
       # Mimic the controller setup_dashboard method
       models = ActiveRecord::Base.descendants
         .select { |model| model.module_parent_name == disc.name && model.model_name.human != "Base" }
@@ -125,6 +121,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     @project.disciplines.each do |disc|
+      next unless disc.persisted?
       visit discipline_path(disc)
       # Header links 
       assert_selector "a[href='#{project_path(@project)}']", text: @project.code # Link back to project
@@ -132,6 +129,32 @@ class DisciplineSystemTest < ApplicationSystemTestCase
       assert_selector "a[href='#{edit_discipline_path(disc)}']", text: I18n.t('actions.edit') # Edit discipline link
       refute_selector "a[href='#{discipline_path(disc)}'][data-method='delete']" # Delete discipline link
       refute_selector "a[href='#{new_project_discipline_path(@project)}']", text: I18n.t('actions.new') # New discipline link
+
+      # Field labels
+      assert_text I18n.t('activerecord.models.swatch', count: 1) if disc.swatch.present?
+
+      # Fields
+      assert_text disc.swatch&.name if disc.swatch.present?
+    end
+  end
+
+  test "document controller can see doc_type links" do
+    # Make a document controller user for this test
+    @team_member.grant(:document_controller, @project)
+    sign_in @team_member
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    @project.disciplines.each do |disc|
+      # puts "BEFORE: #{disc.inspect} | persisted?: #{disc.persisted?}"
+      next unless disc.persisted?
+      visit discipline_path(disc)
+      # Doc_types links
+      assert_selector "a[href='#{discipline_doc_types_path(disc)}']", 
+        text: I18n.t('activerecord.models.doc_type', count: disc.doc_types.count)
+      find("a[href='#{discipline_doc_types_path(disc)}']").click
+      assert_current_path discipline_doc_types_path(disc)
+      find("a[href='#{discipline_path(disc)}']", text: disc.name).click
+      assert_current_path discipline_path(disc)
     end
   end
 
@@ -140,6 +163,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     @project.disciplines.each do |disc|
+      next unless disc.persisted?
       visit discipline_path(disc)
       # Header links 
       assert_selector "a[href='#{project_path(@project)}']", text: @project.code # Link back to project
@@ -258,8 +282,8 @@ class DisciplineSystemTest < ApplicationSystemTestCase
   private
 
     def discipline_form_field_assertions
-      assert_selector "input[name='discipline.code]']"
-      assert_selector "input[name='discipline[name]']"
+      assert_field "discipline[code]"
+      assert_field "discipline[name]"
       assert_selector "select[name='discipline[schema_key]']"
       assert_selector "select[name='discipline[swatch_id]']"
       assert_selector "select[name='discipline[required_role]']"

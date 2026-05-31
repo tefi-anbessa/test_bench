@@ -1,4 +1,5 @@
 <%# 
+app/views/components/_collapsible.html.erb
   Collapsible Component
   
   Parameters:
@@ -20,6 +21,7 @@
 
 <div class="card mb-3">
   <%= content_tag(:div, 
+    id: "#{id}_header",
     class: ["card-header", header_class].compact.join(' '),
     data: { 
       controller: "collapsible",

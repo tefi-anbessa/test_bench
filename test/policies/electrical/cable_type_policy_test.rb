@@ -10,8 +10,9 @@ module Electrical
     setup do 
       setup_projects_and_users
       setup_disciplines(name: "Electrical", required_role: :designer)
+      @discipline.update(catalog_required_role: :custodian)
       setup_discipline_resources
-      setup_accredited_users(:designer)
+      setup_accredited_users(:custodian)
     end
   end
 end

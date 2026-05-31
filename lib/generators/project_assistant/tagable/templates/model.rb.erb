@@ -7,7 +7,7 @@ module <%= module_name %>
 
 # Belongs to associatons
     <%- @fields.select { |f| %w[references belongs_to].include?(f[:type]) }.each do |field| -%>
-    belongs_to :<%= field[:name] %>
+    belongs_to :<%= field[:name] %><%- unless field[:options].include?('required') %>, optional: true<%- end %>
     <%- end -%>
     
 # enum declarations

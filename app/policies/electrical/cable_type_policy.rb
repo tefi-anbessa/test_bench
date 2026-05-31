@@ -3,22 +3,28 @@ module Electrical
     def cable_type
       record
     end
+    
+    private
 
-    def user_is_accredited?(project = current_project)
-      # If record is a class, use class required_role
-      # If record is an instance, use discipline required_role with fallback to class required_role
-      required_role = if record.is_a?(Class)
-                        record.required_role
-                      else
-                        record.discipline&.required_role.presence || record.class.required_role
-                      end
-
-      discipline = record.is_a?(Class) ? nil : record.discipline
-
-      user.has_role?(required_role, discipline) ||
-        user.is_admin? ||
+    # Override discipline policy to use catalog_required_role, for catalog model types.
+    def user_is_accredited?(record)
+      # Ensure record is an instance, not a class.
+      # The rails error is only for development transition phase.
+      unless record.is_a?(ApplicationRecord)
+        unless Rails.env.production?
+          raise "Policy Error: #{record.class} called with class instead of instance. " \
+                "Use an instance variable with discipline association."
+        end
+        return false
+      end
+      rr = record.discipline.catalog_required_role.present? ? 
+          record.discipline.catalog_required_role.to_s : 
+          record.class.catalog_required_role.to_s
+      return false unless rr
+      user.has_role?(rr, record.discipline) || 
+        user.is_admin? || 
         user.is_app_owner? ||
-        user.is_project_admin_of?(project)
+        user.is_project_admin_of?(record.project)
     end
   end
 end

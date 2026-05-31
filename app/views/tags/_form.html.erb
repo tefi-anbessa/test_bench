@@ -110,13 +110,6 @@
                     { include_blank: t("form.none") },
                     { class: 'form-select' } %>
             </div>
-
-            <!-- Parent Tag -->
-            <div class="row">
-              <%= f.collection_select :parent_id, @parents, :id, :full_tag,
-                    { include_blank: t("form.none") },
-                    { class: 'form-select' } %>
-            </div>
           </div>
         </div>
       </div>

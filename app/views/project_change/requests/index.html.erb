@@ -13,7 +13,7 @@
         </div>
 
         <!-- New Button (Right) -->
-        <% if policy(ProjectChange::Request).new? %>
+        <% if policy(@project.change_requests.build()).new? %>
             <%= link_to new_project_project_change_request_path(@project), 
               class: "btn btn-outline-primary actions",
               aria: { label: t('actions.new') },

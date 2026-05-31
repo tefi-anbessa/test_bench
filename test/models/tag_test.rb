@@ -190,7 +190,7 @@ class TagTest < ActiveSupport::TestCase
   end
 
   test "loop id method should work on persisted and new tags" do
-    discipline = @project.disciplines.find_by(name: "Instrument", label: "J")
+    discipline = @project.disciplines.find_by(name: "Instrument", code: "J")
     tag1 = create(:tag, prefix: 'PG', serial: 1001, suffix: '', discipline: discipline)
     assert_equal "#{tag1.prefix.first.upcase}#{tag1.serial.to_s.rjust(4, '0')}", tag1.loop_id
   end

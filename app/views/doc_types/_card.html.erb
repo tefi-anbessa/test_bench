@@ -1,6 +1,6 @@
 <% resource = object %>
 <%= render 'components/collapsible',
-  id: "doc_types_#{resource.id}_details",
+  id: "doc_type_#{resource.id}_details",
   title: t("doc_types.show.header", label: resource.code),
   expanded: false,
   header_class: 'py-1' do %>

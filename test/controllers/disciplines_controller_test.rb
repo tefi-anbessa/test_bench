@@ -49,7 +49,7 @@ class DisciplinesControllerTest < ActionController::TestCase
     patch :update, params: {
       id: @discipline.id, project_id: @project.id,
       discipline: {
-        label: 'a'*6  # Invalid: label max length is 5
+        code: 'a'*6  # Invalid: code max length is 5
       }
     }
     assert_template :edit
@@ -110,7 +110,7 @@ class DisciplinesControllerTest < ActionController::TestCase
       { discipline: 
         {
         name: "Test Discipline",
-        label: "TD",
+        code: "TD",
         prefix_schema: "name: default",
         required_role: "designer"
         } 
@@ -124,7 +124,7 @@ class DisciplinesControllerTest < ActionController::TestCase
 
     # Set one invalid resource param for tests
     def invalid_param
-      { discipline: { label: "xxxxxx" } }
+      { discipline: { code: "xxxxxx" } }
     end
 
     # Nominate an attribute to get changed during update tests

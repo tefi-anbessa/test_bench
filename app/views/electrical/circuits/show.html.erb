@@ -170,7 +170,7 @@
               <!-- Feeder Card -->
               <div class="row mb-1">
                 <% if @circuit.feeder.present? %>
-                  <%= render 'electrical/cables/card', object: @circuit.feeder, context: :feeder %>
+                  <%= render 'shared/association', object: @circuit, association: :feeder %>
                 <% else %>
                   <div class="col-4 text-muted">
                     <%= t('activerecord.attributes.electrical/circuit.feeder') %>
@@ -186,7 +186,7 @@
               <!-- Load Card -->
               <div class="row mb-1">
                 <% if @circuit.demand.present? %>
-                  <%= render 'electrical/demands/card', object: @circuit.demand %>
+                  <%= render 'shared/association', object: @circuit, association: :demand %>
                 <% else %>
                   <div class="col-4 text-muted">
                     <%= t('activerecord.attributes.electrical/circuit.demand') %>

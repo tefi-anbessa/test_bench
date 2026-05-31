@@ -32,6 +32,7 @@ en:
       role:               "Role"
     attributes:
       document:
+        doc_type_id: "Document Type"
         serial: "Serial"
         doc_number: "Document Number"
         title: "Title"
@@ -58,10 +59,13 @@ en:
         password_confirmation:  "Confirm password"
         gravatar:         "Gravatar"
       project:
+        swatch_id:        "Swatch"
         code:             "Code"
         title:            "Title"
         description:      "Description"
       discipline:
+        project_id:       "Project"
+        swatch_id:        "Swatch"
         name:             "Name"
         code:             "Code"
         sort_order:       "Sort Order"
@@ -80,6 +84,7 @@ en:
         name: "Type"
         description: "Description"
       issue:
+        source_format_id: "Source Format"
         code: "Code"
         reason: "Reason for Issue"
       source_format:
@@ -89,6 +94,7 @@ en:
         revision: "Revision"
         notes: "Notes"
       tag:
+        discipline_id:    "Discipline"
         prefix:           "Prefix"
         prefix_parts:
           measured_variable: "Measured Variable"
@@ -106,8 +112,9 @@ en:
         stage:            "Stage"
         notes:            "Notes"
         full_tag:         "Tag"
+        tagable_id:       "Tag Type"
         tagable_type:     "Tag Type"
-        parent:           "Parent"
+        parent_id:        "Parent"
         children:         "Children"
       role:
         name:             "Name"

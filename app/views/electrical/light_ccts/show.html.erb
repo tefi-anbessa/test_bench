@@ -16,8 +16,23 @@
                 <span class="d-none d-md-inline"><%= t('actions.index') %></span>
               <% end %>
             <% end %>
-          </div>
-        </div>
+
+            <!-- Previous Button -->
+            <% prev_light_cct = @light_cct.prev %>
+            <% if prev_light_cct.present? %>
+              <% disabled = prev_light_cct == @light_cct %>
+              <%= link_to prev_light_cct,
+                    disabled: disabled,
+                    class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
+                    title: "#{t('actions.previous')}: #{prev_light_cct.label}" do %>
+                <%== bs_icon('box-arrow-in-left') %>
+                <span class="d-none d-md-inline">
+                  <%= t('actions.previous') %>
+                </span>
+              <% end %>
+            <% end %>
+          </div> <!-- end d-flex align-items-center -->
+        </div> <!-- end left column -->
 
         <!-- Center Tag Info -->
         <div class="col text-center">
@@ -34,6 +49,21 @@
         <!-- Right Actions -->
         <div class="col-auto">
           <div class="d-flex align-items-center">
+            <!-- Next Button -->
+            <% next_light_cct = @light_cct.next %>
+            <% if next_light_cct.present? %>
+              <% disabled = next_light_cct == @light_cct %>
+              <%= link_to next_light_cct,
+                    disabled: disabled,
+                    class: "btn btn-sm btn-outline-secondary me-2 #{'disabled' if disabled}",
+                    title: "#{t('actions.next')}: #{next_light_cct.label}" do %>
+                <span class="d-none d-md-inline">
+                  <%= t('actions.next') %>
+                </span>
+                <%== bs_icon('box-arrow-in-right') %>
+              <% end %>
+            <% end %>
+
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
               <% if policy(@light_cct).edit? %>
@@ -119,7 +149,7 @@
               <!-- Tag Card -->
               <% if @light_cct.tag.present? %>
                 <div class="row g-3 mb-3">
-                    <%= render 'tags/card', object: @light_cct.tag, context: :tag %>
+                    <%= render 'tags/card', object: @light_cct, association: :tag %>
                 </div>
               <% else %>
                 <div class="row g-3 mb-3">

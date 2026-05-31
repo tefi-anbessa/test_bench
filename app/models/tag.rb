@@ -17,7 +17,7 @@ class Tag < ApplicationRecord
   # Associations
   delegated_type :tagable, types: Constants.tagable, optional: true, dependent: :destroy
   belongs_to :discipline
-  delegate :project, to: :discipline
+  has_one :project, through: :discipline
 
   belongs_to :parent, class_name: 'Tag', optional: true
   has_many :children, class_name: 'Tag', foreign_key: 'parent_id', inverse_of: :parent, 
@@ -69,6 +69,12 @@ class Tag < ApplicationRecord
 
   def long_label
     "#{discipline.code}#{Constants.tags.separator}#{full_tag}"
+  end
+
+  def next_serial
+    Tag.where(discipline: discipline, prefix: prefix, suffix: suffix)
+      .maximum(:serial)
+      .to_i + 1
   end
 
   # Get the next tag in the discipline, ordered by loop_id, prefix, and suffix

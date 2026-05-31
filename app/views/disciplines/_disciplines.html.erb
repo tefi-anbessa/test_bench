@@ -33,35 +33,35 @@
         <div class="col-md-4">
           <div class="d-flex gap-2">
             <%= link_to discipline_tags_path(discipline),
-                class: "btn btn-outline-secondary btn-sm",
+                class: "btn btn-outline-info btn-sm",
                 aria: { 
                   label: t('activerecord.models.tag', count: discipline.tags.count)
                 } do %>
               <%== bs_icon('tag') %>
               <%= t('activerecord.models.tag', count: discipline.tags.count) %>
-              <span class="badge bg-secondary ms-1"><%= discipline.tags.count %></span>
+              <span class="badge bg-info ms-1"><%= discipline.tags.count %></span>
             <% end %>
             
             <%= link_to discipline_documents_path(discipline),
-                class: "btn btn-outline-secondary btn-sm",
+                class: "btn btn-outline-info btn-sm",
                 aria: { 
                   label: t('activerecord.models.document', count: discipline.documents.count)
                 } do %>
               <%== bs_icon('file') %>
               <%= t('activerecord.models.document', count: discipline.documents.count) %>
-              <span class="badge bg-secondary ms-1"><%= discipline.documents.count %></span>
+              <span class="badge bg-info ms-1"><%= discipline.documents.count %></span>
             <% end %>
             
             <!-- Only show the doc_types index link to users that can create doc_types. -->
-            <% if policy(discipline.doc_types.build()).new? %>
+            <% if policy(DocType).index? %>
               <%= link_to discipline_doc_types_path(discipline),
-                  class: "btn btn-outline-secondary btn-sm",
+                  class: "btn btn-outline-info btn-sm",
                   aria: { 
                     label: t('activerecord.models.doc_type', count: discipline.doc_types.count)
                   } do %>
                 <%== bs_icon('file') %>
                 <%= t('activerecord.models.doc_type', count: discipline.doc_types.count) %>
-                <span class="badge bg-secondary ms-1"><%= discipline.doc_types.count %></span>
+                <span class="badge bg-info ms-1"><%= discipline.doc_types.count %></span>
               <% end %>
             <% end %>
           </div>

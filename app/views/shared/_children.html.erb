@@ -1,7 +1,7 @@
 <!-- Expecting parent, association to be passed in. -->
 <!-- This partial presents a collapsible card with a link to each associated child object of the parent. 
 Child objects should be tagable or at least have a label and service method.
-Relation must reflect to a has_many association. -->
+Relation must reflect a has_many association. -->
 <% reflection = parent.class.reflect_on_association(association) %>
 
 <% unless reflection&.macro == :has_many %>
@@ -10,7 +10,7 @@ Relation must reflect to a has_many association. -->
 
 <% children = parent.public_send(association) %>
 <%= render 'components/collapsible',
-  id: "#{parent.model_name}_#{association}_links",
+  id: "#{parent.model_name.element}_#{association}_links",
     title: [t("activerecord.attributes.#{parent.model_name.i18n_key}.#{association.to_s}", 
       default: association.to_s.humanize), children.count].join(': '),
     expanded: false,

@@ -27,6 +27,9 @@ module Electrical
       # List all fields that should appear in show (should be all)
       @show_fields = [:light_fitting_type, :quantity, :notes]
 
+      # List all associations that should have a collapsible card on the show view
+      @show_associations = [:tag, :electrical_demand]
+
       # List all fields that should appear in forms (should be all)
       @new_fields = {light_fitting_type: nil, quantity: nil, notes: nil}
       @edit_fields = @new_fields

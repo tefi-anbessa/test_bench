@@ -59,6 +59,9 @@ module Electrical
           :cable_entry, :incomer_protection, :metering, 
           :neutral_bar_connections, :earth_bar_connections, :notes]
 
+      # List all associations that should have a collapsible card on the show view
+      @show_associations = [:tag]
+
       # List all fields that should appear in forms (usually all).
       # New and edit required separately because some models have read only fields that can't be edited.
       # Set a valid value for each field if required to be unique, set nil for factory default.
@@ -98,7 +101,7 @@ module Electrical
       # Form data uses @tag as a template, serial increased + 1.
       new_tag = Tag.find_by(discipline: @discipline,
         prefix: @saved_prefix, 
-        serial: @tag.serial.succ,
+        serial: @saved_serial,
         suffix: @tag.suffix)
       assert_current_path resource_path(new_tag.tagable)
       assert_equal new_tag.tagable.class, resource_class

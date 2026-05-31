@@ -14,13 +14,14 @@ module Electrical
     delegate :tag, :discipline, :project, to: :switchboard
 
     has_one :feeder, as: :from, class_name: 'Electrical::Cable', dependent: :nullify
+    has_one :demand, through: :feeder, source: :to, source_type: "Electrical::Demand"
 
     # Validations
     validates :serial, numericality: { in: 1..36 }
     validates :serial, uniqueness: { scope: :switchboard }
     enum :phase, Constants.electrical.phase_designation.to_h
     enum :device, Constants.electrical.protection.device.to_h
-    validates :poles, inclusion: { in: 1..6 }, allow_nil: true
+    validates :poles, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 6 }, allow_nil: true
     enum :curve, Constants.electrical.protection.curve.to_h
     enum :elcb, Constants.electrical.protection.elcb.to_h
 
@@ -32,10 +33,11 @@ module Electrical
     def long_label
       switchboard.label + " " + label
     end
-    
-    def demand
-      # Find the demand that this circuit supplies power to
-      feeder&.to if feeder&.to_type == "Electrical::Demand"
+
+    def next_serial
+      Electrical::Circuit.where(electrical_switchboard_id: electrical_switchboard_id)
+        .maximum(:serial)
+        .to_i + 1
     end
 
     def self.ransackable_attributes(auth_object = nil)

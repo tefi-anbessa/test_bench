@@ -15,25 +15,44 @@ module <%= module_name %>
     end
 
     def setup_model_specific_data
+<%- association_types = %w[references belongs_to] %>
+<%- all_field_names = @fields.map { |field| 
+          case field[:type]
+          when *association_types
+            "#{field[:name]}_id"
+          else
+            "#{field[:name]}"
+          end
+        } %>
+<%- index_fields = @fields.select { |field| ProjectAssistant::FieldTypes::INDEX_TYPES.include?(field[:type]) }.map { |field| "#{field[:name]}" } %>
+<%- searchable_field_names = @fields.select { |field| ProjectAssistant::FieldTypes::SEARCHABLE_TYPES.include?(field[:type]) }.map { |field| "#{field[:name]}" } %>
+<%- fields_partitioned = @fields.partition { |f| association_types.include?(f[:type]) } %>
+<%- association_names, field_names = fields_partitioned.map { |group| group.map { |f| f[:name] } } %>
+
       # List fields that should appear in index. 
-      # The generator will include test for sort link header for each column, 
-      # and try to find an appropriate value field for the type.
-      @index_fields = %w[]
+      # The generator will include test for sort link header for each included field, 
+      # and test for an appropriate value field for the type.
+      @index_fields = %i[<%= index_fields.join(" ") %>]
 
       # List index fields that should have ransack search capability.
       # The generator will only test for "contains" fields (_cont).
       # Don't include numeric or date fields, add model specific tests for these later in this file.
-      @search_fields = %w[]
+      @search_fields = %i[<%= searchable_field_names.join(" ") %>]
+    end
 
       # List all fields that should appear in show (usually all)
-      @show_fields = %w[]
+      @show_fields = %w[<%= field_names.join(" ") %>]
+
+      # List all associations that should have a collapsible card on the show view
+      @show_associations = %w[<%= association_names.join(" ") %>]
 
       # List all fields that should appear in forms (usually all)
-      @form_fields = %w[]
+      @form_fields = %w[<%= all_field_names.join(' ') %>]
     end
 
     def fill_in_model_specific_fields
-      # No special fields in <%= tagable_name%>
+      # Code for filling in any fields that don't follow the assumed pattern of the field type.
+      # E.g. numeric fields with a drop down selector.
     end
   end
 end

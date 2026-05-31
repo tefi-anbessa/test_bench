@@ -18,7 +18,7 @@ module ProjectChange
     # Overwrite tests expecting team member to have no permissions
     undef :test_new_denies_users_without_required_role_on_current_project_to_access_new_form
     test 'new denies users without required role on current project to access new form' do
-      assert policy(@team_member, @project, resource_class).new?
+      assert policy(@team_member, @project, @new_resource).new?
     end
 
     undef :test_create_denies_any_user_without_accreditation_to_create_resource_on_current_project

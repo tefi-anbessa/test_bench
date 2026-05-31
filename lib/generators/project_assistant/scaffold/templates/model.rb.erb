@@ -7,7 +7,7 @@ class <%= model_class %> < ApplicationRecord
 <%- end -%>
 
     # Belongs to associatons
-    <%- @fields.select { |f| %w[references].include?(f[:type]) }.each do |field| -%>
+    <%- @fields.select { |f| %w[references belongs_to].include?(f[:type]) }.each do |field| -%>
     belongs_to :<%= field[:name] %><%- unless field[:options].include?('required') %>, optional: true<%- end %>
     <%- end -%>
     
