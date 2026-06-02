@@ -1,8 +1,13 @@
 class Discipline < ApplicationRecord
+  # === Constants ===
+
+  # === Gem macros ===
   # Rolify can set roles scoped to discipline
   resourcify
 
-  # Associations
+  # === Attributes ===
+
+  # === Associations ===
   belongs_to :project
   belongs_to :swatch, optional: true
   has_many :tags, dependent: :destroy
@@ -10,10 +15,10 @@ class Discipline < ApplicationRecord
   has_many :electrical_cable_types, class_name: 'Electrical::CableType', dependent: :destroy
   has_many :doc_types, dependent: :destroy
 
-  # Scopes
-  default_scope { order(project_id: :asc, code: :asc) }
+  # === Scopes ===
+  default_scope { order(project_id: :asc, sort_order: :asc) }
 
-  # Valications
+  # === Validations ===
   before_validation :normalize_prefix_schema
   validates :name, presence: true, length: { maximum: 50 }, uniqueness: { scope: :project_id }
   validates :code, presence: true, length: { maximum: 5 }, uniqueness: { scope: :project_id }
@@ -21,17 +26,20 @@ class Discipline < ApplicationRecord
   validate :validate_required_role
   validate :validate_prefix_schema
 
-  # Methods
+  # === Callbacks ===
+
+  # === Class methods ===
+  def self.required_role
+    :project_admin
+  end
+
+  # === Public methods ===
   def label
     code
   end
 
   def long_label
     "#{project.label} - #{code}"
-  end
-
-  def self.required_role
-    :project_admin
   end
 
   # Create all disciplines for a new project from constants
@@ -54,6 +62,10 @@ class Discipline < ApplicationRecord
     prefix_schema.present? && !Constants.prefix_schemata.key?(prefix_schema['name']&.to_sym)
   end
 
+  def isa51_type_schema?
+    prefix_schema&.dig('name') == 'isa51' || (custom_schema? && prefix_schema&.dig('type') == 'isa51')
+  end
+
   def default_prefix_schema_name
     return prefix_schema['name'] if prefix_schema.present? && prefix_schema['name'].present?
     "#{project&.label}_#{code}".parameterize.underscore
@@ -67,7 +79,9 @@ class Discipline < ApplicationRecord
       Constants.prefix_schemata[prefix_schema['name']&.to_sym]
     end
   end
-  
+
+  # === Private methods ===
+
   private
   
     def normalize_prefix_schema

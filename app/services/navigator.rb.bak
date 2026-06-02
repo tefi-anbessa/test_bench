@@ -1,0 +1,65 @@
+# app/services/navigator.rb
+class Navigator
+  def initialize(scope:, record:, order:)
+    @scope  = scope
+    @record = record
+    @order  = order
+  end
+
+  def prev
+    window[:prev]
+  end
+
+  def next
+    window[:next]
+  end
+
+  def window
+    @window ||= begin
+      rows = fetch_window
+
+      {
+        prev:    rows.find { |r| r.relative_position == -1 },
+        next:    rows.find { |r| r.relative_position == 1 }
+      }
+    end
+  end
+
+  private
+
+    def fetch_window
+      subquery_sql = ranked_scope.to_sql
+
+      @scope.klass
+        .unscoped
+        .from("(#{subquery_sql}) ranked")
+        .select("ranked.*")
+        .select(<<~SQL)
+          ranked.row_number - (
+            SELECT row_number FROM (#{subquery_sql}) ranked WHERE id = #{@record.id}
+          ) AS relative_position
+        SQL
+        .where(<<~SQL, id: @record.id)
+          ranked.row_number BETWEEN (
+            SELECT row_number - 1 FROM (#{subquery_sql}) ranked WHERE id = :id
+          ) AND (
+            SELECT row_number + 1 FROM (#{subquery_sql}) ranked WHERE id = :id
+          )
+        SQL
+        .to_a
+    end
+
+    def ranked_scope
+      @scope
+        .left_joins(:discipline)
+        .select(<<~SQL)
+          #{@scope.table_name}.*,
+          ROW_NUMBER() OVER (ORDER BY #{order_sql}) AS row_number
+        SQL
+    end
+
+    
+    def order_sql
+      @order.join(", ")
+    end
+end

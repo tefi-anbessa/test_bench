@@ -97,7 +97,7 @@ Disciplines are used to group engineering objects, and associate them to functio
 
 #### Tags
 
-Engineering design elements require a tag to be assigned. Tags are used to label design elements, and link them to their own data, as well as to other elements, to documents, assets and other functionality. Tags belong to a discipline, which determines their available prefixes.
+Engineering design elements require a tag to be assigned. Tags are used to label design elements, and link them to their own data, as well as to other elements, to documents, assets and other functionality. Tags belong to a discipline, which determines their available prefixes, via the prefix_schema attribute.
 
 #### Tagables
 
@@ -376,7 +376,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Revisit the roles policy test. The roles policy is now using the role context from the controller, need to factor this into tests.
 - [x] Roles policy is delegating to resource policies for resource instances. Tests need to consider this.
 - [x] Ensure select for role names does not include restricted roles unless current user has app_owner role.
-- [ ] System tests for all resources.
+- [x] System tests for all resources.
 - [x] Model tests should include test of enums.
 - [ ] Complete workflows with admin and no project selected.
 - [ ] Complete proper ordering by switchboard tag and serial for circuits.
@@ -501,6 +501,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Build an IP55 object to allow fully flexible reusable IP code generation.
 - [ ] Allow projects to add role names.
 - [ ] Add a generator for scaffolding nested models.
+- [ ] Add a "locator" so accessing index view from show view centres the index on the present record.
 
 ## Architecture Considerations
 

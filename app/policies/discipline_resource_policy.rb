@@ -8,25 +8,21 @@
 class DisciplineResourcePolicy < ApplicationPolicy
   class Scope < ApplicationPolicy::Scope
     def resolve
-      if current_project.present? && 
+      if current_project.present? &&
         (user_has_project_role?(current_project) || user&.is_admin? || user&.is_app_owner?)
-        if scope.reflect_on_association(:discipline)
-          scope.joins(:discipline).where(disciplines: { project_id: current_project.id })
-        elsif scope.reflect_on_association(:project)
-          scope.where(project: current_project)
-        else
-          if Rails.env.development?
-            raise "Policy Error: #{scope.class} has no discipline or project association."
-          end
-          scope.none
-        end
+        scope
+          .where(discipline_id: Discipline.where(project_id: current_project.id))
+          .includes(:discipline)
+
       elsif user&.is_admin? || user&.is_app_owner?
-        scope.all
+        scope.includes(:discipline)
+
       else
         scope.none
       end
     end
   end
+  
 
   def index?
     # Protect against url injection

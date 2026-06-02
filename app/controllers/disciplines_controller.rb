@@ -172,7 +172,7 @@ class DisciplinesController < ApplicationController
     # Only allow a list of trusted parameters through.
     def discipline_params
       params.require(:discipline).permit(
-        :code, :name, :required_role,
+        :code, :name, :required_role, :catalog_required_role, 
         :sort_order, :notes, :project_id, :swatch_id,
         :prefix_schema
       )

@@ -1,20 +1,15 @@
 class Tag < ApplicationRecord
+  # === Mixins ===
+  include Navigation
+  
+  # === Constants ===
 
-  # Gem invocation
+  # === Gem macros ===
   has_paper_trail
 
-  # Scopes
-  # default_scope -> { joins(discipline: [:project]).order('projects.code', 'disciplines.label') }
-  # Sort by loop_id, then by full_tag
-  # scope :sort_by_loop, -> { order(:loop_id, :prefix, :suffix) }
-  # Sort by prefix/serial/suffix
-  # scope :sort_by_tag, -> { order(:prefix, :serial, :suffix) }
+  # === Attributes ===
 
-  # Callbacks
-  before_validation :clear_tagable_id_if_invalid, on: :update
-  nilifies_blank :tagable_type
-
-  # Associations
+  # === Associations ===
   delegated_type :tagable, types: Constants.tagable, optional: true, dependent: :destroy
   belongs_to :discipline
   has_one :project, through: :discipline
@@ -23,7 +18,30 @@ class Tag < ApplicationRecord
   has_many :children, class_name: 'Tag', foreign_key: 'parent_id', inverse_of: :parent, 
     dependent: :nullify
 
-  # Validations
+  # === Scopes ===
+  # Sort by loop_id, then by full_tag
+  # scope :sort_by_loop, -> { order(:loop_id, :prefix, :suffix) }
+  # Sort by prefix/serial/suffix
+  # scope :sort_by_tag, -> { order(:prefix, :serial, :suffix) }
+  # 
+  # Provide SQL for ordering tags in the navigator
+  # Tag model is a special case, tags are ordered differently if the discipline uses ISA51 prefix schema
+  def self.navigator_order_sql
+    <<~SQL.squish
+      disciplines.sort_order ASC,
+      CASE
+        WHEN COALESCE(
+          disciplines.prefix_schema->>'type',
+          disciplines.prefix_schema->>'name'
+        ) = 'isa51'
+        THEN tags.loop_id
+        ELSE tags.full_tag
+      END ASC,
+      tags.full_tag ASC
+    SQL
+  end
+
+  # === Validations ===
   validates :prefix, presence: true
   validates :prefix, format: { with: /\A[a-zA-Z]+\z/, message: :only_letters }
   validates :prefix, length: { in: 1..6 }
@@ -57,12 +75,23 @@ class Tag < ApplicationRecord
   validate :prevent_circular_reference
   validate :prevent_cross_project_reference
 
-  # Class Methods
+  # === Callbacks ===
+  before_validation :clear_tagable_id_if_invalid, on: :update
+  nilifies_blank :tagable_type
+
+  # === Class methods ===
   def self.safe_tagable_types
     Tag.tagable_types.select{ |type| type.safe_constantize.present? }.map { |type| [type.safe_constantize.model_name.human, type] }
   end
 
-  # Instance Methods
+  # LEGACY CODE?
+  # Returns tags grouped by their loop identifier
+  # @return [Hash] Tags grouped by loop_id
+  def self.grouped_by_loop
+    all.group_by(&:loop_id)
+  end
+
+  # === Public methods ===
   def label
     full_tag
   end
@@ -71,27 +100,14 @@ class Tag < ApplicationRecord
     "#{discipline.code}#{Constants.tags.separator}#{full_tag}"
   end
 
+  # Only use for tests
   def next_serial
     Tag.where(discipline: discipline, prefix: prefix, suffix: suffix)
       .maximum(:serial)
       .to_i + 1
   end
 
-  # Get the next tag in the discipline, ordered by loop_id, prefix, and suffix
-  def next(attribute = :loop_id)
-    return super(attribute) unless attribute == :loop_id
-    
-    adjacent_tag('next_id') || self
-  end
-
-  # Get the previous tag in the discipline, ordered by loop_id, prefix, and suffix
-  def prev(attribute = :loop_id)
-    return super(attribute) unless attribute == :loop_id
-    
-    adjacent_tag('prev_id') || self
-  end
-
-  # Instance method to parse prefix components for form display
+  # Public method to parse prefix components for form display
   def prefix_parts
     return nil unless prefix.present? && prefix.length >= 2 && discipline&.prefix_schema.present?
     parts = {}
@@ -212,38 +228,17 @@ class Tag < ApplicationRecord
 
   def prospective_parents(scope)
     # Return all tags from the provided scope that are not descendants of this tag, or this tag itself
+    # Use for selector
     return scope if new_record?
     scope.where.not(id: descendant_ids + [id])
   end
-  
+
+  # === Private methods ===
+
   private
 
     def normalize_tagable_type
       self.tagable_type = self.tagable_type&.to_s&.classify
-    end
-  
-    # Find adjacent tag (next or previous) based on the given join condition
-    def adjacent_tag(join_column)
-      return nil unless discipline_id
-      
-      sql = <<-SQL
-        WITH ordered_tags AS (
-          SELECT id,
-                loop_id,
-                prefix,
-                COALESCE(suffix, '') as suffix_sort,
-                LAG(id) OVER (ORDER BY loop_id, prefix, COALESCE(suffix, '')) as prev_id,
-                LEAD(id) OVER (ORDER BY loop_id, prefix, COALESCE(suffix, '')) as next_id
-          FROM tags
-          WHERE discipline_id = :discipline_id
-        )
-        SELECT t.*
-        FROM tags t
-        JOIN ordered_tags ot ON t.id = ot.#{join_column}
-        WHERE ot.id = :current_id
-      SQL
-      
-      self.class.find_by_sql([sql, { discipline_id: discipline_id, current_id: id }]).first
     end
 
     def clear_tagable_id_if_invalid
@@ -322,12 +317,6 @@ class Tag < ApplicationRecord
       if parent.project.id != project.id
         errors.add(:parent, I18n.t("activerecord.errors.models.tag.attributes.parent.project"))
       end
-    end
-
-    # Returns tags grouped by their loop identifier
-    # @return [Hash] Tags grouped by loop_id
-    def self.grouped_by_loop
-      all.group_by(&:loop_id)
     end
 
     def self.ransackable_attributes(auth_object = nil)

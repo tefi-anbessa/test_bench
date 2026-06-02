@@ -5,24 +5,27 @@ class TagsController < ApplicationController
   before_action :set_tag, only: %i[ show edit update destroy ]
   before_action :set_swatch, only: %i[ index show ]
 
-  # GET /tags or /tags.json
-  def index
+  # GET /tags
+def index
+  authorize Tag
+  @orphans = Tag.where(discipline_id: nil)
+
+  base_scope =
     if @discipline.present?
-      authorize @discipline.tags.build()
-      @orphans = Tag.where(discipline_id: nil)
-      @q = @discipline.tags.merge(policy_scope(Tag)).ransack(params[:q])
-      @pagy, @tags = pagy(@q.result.includes(discipline: :project), limit: 20)
+      @discipline.tags.merge(@scope)
     else
-      authorize Tag
-      @orphans = Tag.where(discipline_id: nil)
-      @q = policy_scope(Tag).ransack(params[:q])
-      @pagy, @tags = pagy(@q.result, limit: 20)
+      @scope
     end
-  end
+
+  @q = base_scope.ransack(params[:q])
+  result = @q.result.includes(discipline: :project)
+  @pagy, @tags = pagy(result, limit: 20)
+end
 
   # GET /tags/1 or /tags/1.json
   def show
     authorize @tag
+    @neighbours = Navigator.new(scope: @scope, record: @tag).neighbours
   end
 
   # GET /tags/new
@@ -85,10 +88,12 @@ class TagsController < ApplicationController
         @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
         raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
         @project = @discipline.project
+        @scope = policy_scope(Tag).where(discipline_id: @discipline.id)
       elsif params[:project_id].present?
         @discipline = nil
         @project = policy_scope(Project).find_by(id: params[:project_id])
         raise ApplicationController::ConflictError, :out_of_scope if @project.nil?
+        @scope = policy_scope(Tag)
       end
     end
 
@@ -96,6 +101,7 @@ class TagsController < ApplicationController
       @tag = policy_scope(Tag).find_by(id: params[:id])
       raise ApplicationController::ConflictError, :out_of_scope if @tag.nil?
       @discipline = @tag.discipline
+      @scope = policy_scope(Tag)
     end
 
     def isa51_schema?

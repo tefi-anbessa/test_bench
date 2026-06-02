@@ -22,19 +22,18 @@
             <% end %>
 
             <!-- Previous Button -->
-            <% prev_tag = @tag.prev %>
-            <% if prev_tag.present? %>
-              <% disabled = prev_tag == @tag %>
-              <%= link_to tag_path(prev_tag),
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary
-                      #{'disabled' if disabled}",
-                    title: "#{t('actions.previous')}: #{prev_tag.full_tag}" do %>
-                <%== bs_icon('box-arrow-in-left') %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.previous') %>
-                </span>
-              <% end %>
+            <% disabled = @neighbours[0].nil? %>
+            <% text = disabled ? t("actions.previous") : [t("actions.previous"), @neighbours[0].full_tag].join(": ") %>
+            <%= link_to disabled ? '#' : tag_path(@neighbours[0]),
+                  disabled: disabled,
+                  class: "btn btn-sm btn-outline-secondary
+                    #{'disabled' if disabled}",
+                  title: text,
+                  aria: { label: text, disabled: disabled } do %>
+              <%== bs_icon('box-arrow-in-left') %>
+              <span class="d-none d-md-inline">
+                <%= t('actions.previous') %>
+              </span>
             <% end %>
           </div>
         </div>
@@ -54,19 +53,18 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <% next_tag = @tag.next %>
-            <% if next_tag.present? %>
-              <% disabled = next_tag == @tag %>
-              <%= link_to tag_path(next_tag),
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary
-                      me-2 #{'disabled' if disabled}",
-                    title: "#{t('actions.next')}: #{next_tag.full_tag}" do %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.next') %>
-                </span>
-                <%== bs_icon('box-arrow-in-right') %>
-              <% end %>
+            <% disabled = @neighbours[1].nil? %>
+            <% text = disabled ? 't("actions.next")' : [t("actions.next"), @neighbours[1].full_tag].join(": ") %>
+            <%= link_to disabled ? '#' : tag_path(@neighbours[1]),
+                  disabled: disabled,
+                  class: "btn btn-sm btn-outline-secondary
+                    me-2 #{'disabled' if disabled}",
+                  aria: { label: text, disabled: disabled },
+                  title: text do %>
+              <span class="d-none d-md-inline">
+                <%= t('actions.next') %>
+              </span>
+              <%== bs_icon('box-arrow-in-right') %>
             <% end %>
 
             <!-- Action Buttons -->

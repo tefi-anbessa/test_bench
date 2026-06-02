@@ -6,74 +6,14 @@ class TagTest < ActiveSupport::TestCase
     @project = create(:project)
     @discipline = @project.disciplines.find_by(name: "Electrical")
     
-    # Create test tags 
-    @tag_a1 = create(:tag, discipline: @discipline, 
-                     prefix: 'A', serial: 1, suffix: 'A', service: 'Service A1A')
-    @tag_a2 = create(:tag, discipline: @discipline, 
-                     prefix: 'A', serial: 1, suffix: 'B', service: 'Service A1B')
-    @tag_a3 = create(:tag, discipline: @discipline, 
-                     prefix: 'A', serial: 2, suffix: nil, service: 'Service A2')
-    @tag_b1 = create(:tag, discipline: @discipline, 
-                     prefix: 'B', serial: 1, suffix: nil, service: 'Service B1')
-    @tag_ba2 = create(:tag, discipline: @discipline, 
-                     prefix: 'BA', serial: 2, suffix: nil, service: 'Service BA2')
-    @tag_bb1 = create(:tag, discipline: @discipline, 
-                     prefix: 'BB', serial: 1, suffix: nil, service: 'Service BB1')
-    @tag_c1 = create(:tag, discipline: @discipline, 
-                     prefix: 'C', serial: 1, suffix: nil, service: 'Service C1')
-    
     # Initialize a new tag for testing validations
     @tag = build(:tag, discipline: @discipline)
-    
-    # Reload all tags to ensure we have the latest state
-    [@tag_a1, @tag_a2, @tag_a3, @tag_b1, @tag_bb1, @tag_ba2, @tag_c1].each(&:reload)
   end
 
   # Factory Tests
-  test 'tag factory should be valid' do
-    assert @tag.valid?
-  end
-
-  test 'next returns next tag in loop-based order' do
-    # Test next method for each tag
-    assert_equal @tag_a2, @tag_a1.next, 'A1A.next should be A1B'
-    assert_equal @tag_a3, @tag_a2.next, 'A1B.next should be A2'
-    assert_equal @tag_b1, @tag_a3.next, 'A2.next should be B1'
-    assert_equal @tag_bb1, @tag_b1.next, 'B1.next should be BB1'
-    assert_equal @tag_ba2, @tag_bb1.next, 'BB1.next should be BA2'
-    assert_equal @tag_c1, @tag_ba2.next, 'BA2.next should be C1'
-    assert_equal @tag_c1, @tag_c1.next, 'C1.next should return itself (last tag)'
-  end
-
-  test 'prev returns previous tag in loop-based order' do
-    # Test prev method for each tag
-    assert_equal @tag_ba2, @tag_c1.prev, 'C1.prev should be BA2'
-    assert_equal @tag_bb1, @tag_ba2.prev, 'BA2.prev should be BB1'
-    assert_equal @tag_b1, @tag_bb1.prev, 'BB1.prev should be B1'
-    assert_equal @tag_a3, @tag_b1.prev, 'B1.prev should be A2'
-    assert_equal @tag_a2, @tag_a3.prev, 'A2.prev should be A1B'
-    assert_equal @tag_a1, @tag_a2.prev, 'A1B.prev should be A1A'
-    assert_equal @tag_a1, @tag_a1.prev, 'A1A.prev should return itself (first tag)'
-  end
-
-  test 'next with loop_id attribute returns next tag in loop-based order' do
-    assert_equal @tag_a2, @tag_a1.next(:loop_id), 
-                 'A1A.next(:loop_id) should be A1B'
-  end
-
-  test 'prev with loop_id attribute returns previous tag in loop-based order' do
-    assert_equal @tag_a1, @tag_a2.prev(:loop_id),
-                 'A1B.prev(:loop_id) should be A1A'
-  end
-
-  test 'next with non-loop_id attribute falls back to parent implementation' do
-    assert_equal @tag_a2, @tag_a1.next(:id),
-                 'A1A.next(:id) should fall back to ID-based ordering'
-  end
-
-  test 'prev with non-loop_id attribute falls back to parent implementation' do
-    assert_equal @tag_a1, @tag_a2.prev(:id),
-                 'A1B.prev(:id) should fall back to ID-based ordering'
+  test 'tag factory should create valid tag with no attributes provided' do
+    tag = create(:tag)
+    assert tag.valid?
   end
   
   test "should require unique combination of discipline, prefix, serial, and suffix" do
@@ -196,11 +136,17 @@ class TagTest < ActiveSupport::TestCase
   end
 
   test "label method should return full tag" do
-    assert_equal @tag_a1.full_tag, @tag_a1.label
+    # @tag is not persisted, so full_tag should be nil 
+    assert_nil @tag.full_tag
+    @tag.save
+    @tag.reload
+    assert_equal @tag.full_tag, @tag.label
   end
 
   test "long_label method should return discipline and full tag" do
-    assert_equal "#{@tag_a1.discipline.code}-#{@tag_a1.full_tag}", @tag_a1.long_label
+    @tag.save
+    @tag.reload
+    assert_equal "#{@tag.discipline.code}-#{@tag.full_tag}", @tag.long_label
   end
 
   test "destroy tag should remove from discipline" do
@@ -345,30 +291,6 @@ class TagTest < ActiveSupport::TestCase
     assert_difference('Tag.count', -1) do
       test_discipline.destroy
     end
-  end
-  
-  test 'tags should be ordered by loop_id, prefix, and suffix' do
-    skip "Ordering to be refactored"
-    # Get just our test tags in the default scope order
-    test_tag_ids = [@tag_a1, @tag_a2, @tag_a3, @tag_b1, @tag_bb1, @tag_ba2, @tag_c1].map(&:id)
-    ordered_tags = Tag.where(id: test_tag_ids).to_a
-    
-    # Expected order based on the test data
-    expected_order = [@tag_a1, @tag_a2, @tag_a3, @tag_b1, @tag_bb1, @tag_ba2, @tag_c1]
-    
-    # Verify the order matches exactly
-    assert_equal expected_order, ordered_tags, 
-      'Tags should be ordered by loop_id, prefix, and suffix'
-      
-    # Verify the loop_ids are generated as expected
-    assert_equal @tag_a1.loop_id, @tag_a2.loop_id, 
-      'Tags with same prefix and serial should have same loop_id'
-    assert_equal @tag_b1.loop_id, @tag_bb1.loop_id, 
-      'Tags with different prefix but same measured variable and serial should have same loop_id'
-    refute_equal @tag_a1.loop_id, @tag_a3.loop_id,
-      'Tags with different serials should have different loop_ids'
-    refute_equal @tag_a1.loop_id, @tag_b1.loop_id,
-      'Tags with different measured variable should have different loop_ids'
   end
 
   # Tag prefix parser tests
