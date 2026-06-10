@@ -2,7 +2,6 @@ module Electrical
   class Motor < Base
     include Tagable
     include Electrical::Demandable
-    include TagableNavigation
     
     enum :motor_type, Constants.electrical.motor.motor_type.to_h
     enum :frame_size, Constants.electrical.motor.frame_size.to_h

@@ -8,39 +8,15 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Index Button -->
-            <% if @discipline.present? %>
-              <% if policy(@discipline.project).show? %>
-                <%= link_to project_path(@discipline.project),
-                      class: "btn btn-sm btn-outline-info me-2",
-                      title: t('actions.show') do %>
-                  <%== bs_icon('layers') %>
-                  <span class="d-none d-md-inline"><%= @discipline.project.code %></span>
-                <% end %>
-              <% end %>
-              <% if policy(@discipline).index? %>
-                <%= link_to project_disciplines_path(@project),
-                      class: "btn btn-sm btn-outline-info me-2",
-                      title: t('actions.index') do %>
-                  <%== bs_icon('list-columns-reverse') %>
-                  <span class="d-none d-md-inline"><%= t('actions.index') %></span>
-                <% end %>
-              <% end %>
+            <% if policy(@discipline.project).show? %>
+              <%= nav_button(action: :show_project, record: @discipline.project) %>
             <% end %>
+            <% if policy(Discipline).index? %>
+              <%= nav_button(action: :index, path: project_disciplines_path(@discipline.project), record: @discipline) %>
+            <% end %>
+
             <!-- Previous Button -->
-            <% prev_discipline = @discipline.prev %>
-            <% if prev_discipline.present? %>
-              <% disabled = prev_discipline == @discipline %>
-              <%= link_to discipline_path(prev_discipline),
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary
-                      #{'disabled' if disabled}",
-                    title: "#{t('actions.previous')}: #{prev_discipline.code}" do %>
-                <%== bs_icon('box-arrow-in-left') %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.previous') %>
-                </span>
-              <% end %>
-            <% end %>
+            <%= nav_button(action: :previous, record: @neighbours[0]) %>
           </div>
         </div>
 
@@ -60,61 +36,25 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <% next_discipline = @discipline.next %>
-            <% if next_discipline.present? %>
-              <% disabled = next_discipline == @discipline %>
-              <%= link_to discipline_path(next_discipline),
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary
-                      me-2 #{'disabled' if disabled}",
-                    title: "#{t('actions.next')}: #{next_discipline.code}" do %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.next') %>
-                </span>
-                <%== bs_icon('box-arrow-in-right') %>
-              <% end %>
-            <% end %>
+            <%= nav_button(action: :next, record: @neighbours[1]) %>
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
               <% if policy(@discipline).edit? %>
-                <%= link_to edit_discipline_path(@discipline),
-                      class: "btn btn-outline-warning",
-                      title: t('actions.edit') do %>
-                  <%== bs_icon('pencil-square') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.edit') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :edit, record: @discipline, path: edit_discipline_path(@discipline)) %>
               <% end %>
 
               <% if policy(@discipline).destroy? %>
-                <%= link_to @discipline,
-                      method: :delete,
-                      data: { confirm: t('actions.delete_sure') },
-                      class: "btn btn-outline-danger",
-                      title: t('actions.delete') do %>
-                  <%== bs_icon('trash') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.delete') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :delete, record: @discipline) %>
               <% end %>
 
               <% if policy(@project.disciplines.build()).new? %>
-                <%= link_to new_project_discipline_path(@discipline.project),
-                      class: "btn btn-outline-primary",
-                      title: t('actions.new') do %>
-                  <%== bs_icon('plus-square-fill') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.new') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :new, record: @project.disciplines.build(), path: new_project_discipline_path(@discipline.project)) %>
               <% end %>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            </div> <!-- button group -->
+          </div> <!-- d-flex align-items-center -->
+        </div> <!-- right navigation and actions -->
+      </div> <!-- row align-items-center -->
+    </div> <!-- card header -->
 
     <div class="d-flex flex-column justify-content-center">
       <div class="card-body">
@@ -125,20 +65,10 @@
               <div class="card mb-4" style="<%= card_styles(@swatch) %>">
                 <div class="card-body p-3">
 
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.discipline.notes') %></div>
-                    <div class="col-8"><%= @discipline.notes || '-' %></div>
-                  </div> <!-- end row -->
-                  
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.discipline.code') %></div>
-                    <div class="col-8"><%= @discipline.code || '-' %></div>
-                  </div> <!-- end row -->
-
-                  <div class="row mb-1">
-                    <div class="col-4 text-muted"><%= t('activerecord.attributes.discipline.required_role') %></div>
-                    <div class="col-8"><%= @discipline.required_role || '-' %></div>
-                  </div>
+                  <%= show_attribute(@discipline, :notes, type: :text) %>
+                  <%= show_attribute(@discipline, :code) %>
+                  <%= show_attribute(@discipline, :required_role) %>
+                  <%= show_attribute(@discipline, :catalog_required_role) %>
 
                   <!-- Project Card -->
                   <% if @project.present? %>

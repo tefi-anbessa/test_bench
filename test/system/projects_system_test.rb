@@ -1,11 +1,11 @@
 # frozen_string_literal: true
-require "helpers/test_setup_helpers"
+require "helpers/system_test_helpers"
 require "application_system_test_case"
 
 class ProjectsSystemTest < ApplicationSystemTestCase
   include Devise::Test::IntegrationHelpers
   include Warden::Test::Helpers
-  include TestSetupHelpers
+  include SystemTestHelpers
   
   setup do
     setup_projects_and_users
@@ -29,7 +29,6 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     sign_in @project_manager
     visit root_url
     find("#project-menu-btn").click
-    
     within ".dropdown-menu" do
       assert_selector "a", text: I18n.t('actions.select')
       click_on I18n.t('actions.select')  # Click on the project select link
@@ -64,14 +63,16 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     assert_text I18n.t("projects.index.header")
     assert page.title.include?(I18n.t("projects.index.title"))
 
+    refute_selector "a[href='#{new_project_path}']" # team member cannot create new project
+
     assert_selector "input.search_field"
     assert_selector "a[href*='q%5Bs%5D=code']"
     assert_selector "a[href*='q%5Bs%5D=title']"
     assert_selector "a[href*='q%5Bs%5D=description']"
-    assert_selector "a[href='#{project_path(@project)}']"
-    refute_selector "a[href='#{edit_project_path(@project)}']"
-    refute_selector "a[href='#{project_path(@project)}'][data-turbo-method='delete']"
-    refute_selector "a[href='#{new_project_path}']" # only admin can create new project
+    
+    assert_nav_button(:show, @project, icon_only: true)
+    refute_selector "a[href='#{edit_project_path(@project)}']"  # team member cannot edit project
+    refute_delete(project_path(@project)) # team member cannot delete project
 
     assert_text @project.code
     assert_text @project.title
@@ -96,17 +97,17 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     assert_current_path projects_path # project manager has 2 projects
 
     # only admin can create new project
-    refute_selector "a[href='#{new_project_path}']" 
+    refute_selector "a[href='#{new_project_path}']" # project manager cannot create new project
 
     # search and header fields
     assert_selector "input.search_field"
     assert_selector "a.sort_link", text: I18n.t('activerecord.attributes.project.code') # alternative pattern
     assert_selector "a.sort_link", text: I18n.t('activerecord.attributes.project.title')
     assert_selector "a.sort_link", text: I18n.t('activerecord.attributes.project.description')
-    assert_selector "a[href='#{project_path(@project)}']"
+    assert_nav_button(:show, @project)
     refute_selector "a[href='#{project_path(@other_project)}']" # Only shows projects where user has a role
-    assert_selector "a[href='#{edit_project_path(@project)}']" # edit icon
-    refute_selector "a[href='#{project_path(@project)}'][data-turbo-method='delete']" # delete icon
+    assert_nav_button(:edit, @project, path: edit_project_path(@project))
+    refute_delete(project_path(@project))  # project manager cannot delete project
   end
 
   test "admin view the projects index" do
@@ -116,9 +117,11 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     visit projects_path
     assert_current_path projects_path
 
-    refute_selector "a[href='#{project_path(@project)}'][data-turbo-method='delete']" # only app owner can delete projects
-    assert_selector "a[href='#{new_project_path}']" # only admin can create new project
-    assert_selector "a[href='#{project_path(@other_project)}']" # Admin can see all projects
+    assert_nav_button(:new, path: new_project_path) # admin can create new project
+
+    assert_nav_button(:show, @project, icon_only: true)# Admin can see all projects
+    assert_nav_button(:edit, @project, path: edit_project_path(@project), icon_only: true)# Admin can edit all projects
+    refute_delete(project_path(@project)) # only app owner can delete projects
   end
 
   test "app_owner viewing the projects index" do
@@ -128,8 +131,11 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     visit projects_path
     assert_current_path projects_path
 
-    assert_selector "a[href='#{new_project_path}']" # only admin and app owner can create new project
-    assert_selector "a[href='#{project_path(@project)}'][data-method='delete']" # only app_owner can destroy project
+    assert_nav_button(:new, path: new_project_path) # app_owner can create new project
+
+    assert_nav_button(:show, @project, icon_only: true)# app_owner can see all projects
+    assert_nav_button(:edit, @project, path: edit_project_path(@project), icon_only: true)# app_owner can edit all projects
+    assert_nav_button(:delete, @project, icon_only: true) # app_owner can delete projects
   end
 
   test "team member show project" do
@@ -154,10 +160,11 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     assert page.title.include?(I18n.t("projects.show.title"))
 
     # Header bar navigation links
-    assert_selector "a[href='#{projects_path}']"# Link back to projects index
+    assert_nav_button(:index, path: projects_path) # Link back to projects index
+    assert_nav_button_disabled(:previous)
+    assert_nav_button_disabled(:next)
     refute_selector "a[href='#{edit_project_path(@project)}']" # Link to edit project
     refute_selector "a[href='#{project_path(@project)}'][data-turbo-method='delete']" # delete icon
-    # [TODO] test prev and next buttons
 
     assert_text I18n.t('activerecord.attributes.project.description')
     assert_text @project.description
@@ -201,9 +208,12 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     visit project_path(@project)
     assert_current_path project_path(@project)
 
-    assert_selector "a[href='#{projects_path}']"# Link back to projects index
+    assert_nav_button(:index, path: projects_path) # Link back to projects index
+
     refute_selector "a[href='#{edit_project_path(@project)}']" # Link to edit project
-    refute_selector "a[href='#{project_path(@project)}'][data-method='delete']" # delete icon
+    refute_delete(project_path(@project))
+
+    # Swatch drop down
 
     # Project scoped tag and document links 
     assert_selector "a[href='#{project_tags_path(@project)}']"
@@ -218,9 +228,9 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     visit project_path(@project)
     assert_current_path project_path(@project)
 
-    assert_selector "a[href='#{projects_path}']"# Link back to projects index
-    assert_selector "a[href='#{edit_project_path(@project)}']" # Link to edit project
-    refute_selector "a[href='#{project_path(@project)}'][data-method='delete']" # delete icon
+    assert_nav_button(:index, path: projects_path) # Link back to projects index
+    assert_nav_button(:edit, @project, path: edit_project_path(@project)) # Project manager can edit project
+    refute_delete(project_path(@project)) # Project manager cannot delete project
   end
 
   test "app owner show project" do
@@ -228,9 +238,9 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     visit project_path(@project)
     assert_current_path project_path(@project)
 
-    assert_selector "a[href='#{projects_path}']"# Link back to projects index
-    assert_selector "a[href='#{edit_project_path(@project)}']" # Link to edit project
-    assert_selector "a[href='#{project_path(@project)}'][data-method='delete']" # delete icon
+    assert_nav_button(:index, path: projects_path) # Link back to projects index
+    assert_nav_button(:edit, @project, path: edit_project_path(@project)) # App owner can edit project
+    assert_nav_button(:delete, @project, path: project_path(@project)) # App owner can delete project
   end
 
   test "app_owner create new project" do
@@ -301,9 +311,7 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     sign_in @app_owner
     visit projects_path
      # Find the actual delete link and inspect its href
-    accept_confirm do
-      find("a[href='#{project_path(@project)}'][data-method='delete']").click
-    end
+    click_delete(project_path(@project))
     assert_current_path projects_path
     refute_selector "a[href='#{project_path(@project)}']"
     assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.project", count: 1))
@@ -313,9 +321,7 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     sign_in @app_owner
     visit project_path(@project)
      # Find the actual delete link and inspect its href
-    accept_confirm do
-      find("a[href='#{project_path(@project)}'][data-method='delete']").click
-    end
+    click_delete(project_path(@project))
     assert_current_path projects_path
     refute_selector "a[href='#{project_path(@project)}']"
     assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.project", count: 1))

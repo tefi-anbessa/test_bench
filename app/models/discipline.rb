@@ -1,9 +1,13 @@
 class Discipline < ApplicationRecord
+  # === Mixins ===
+
   # === Constants ===
 
   # === Gem macros ===
   # Rolify can set roles scoped to discipline
   resourcify
+  # Record all changes to this model's data
+  has_paper_trail
 
   # === Attributes ===
 
@@ -16,7 +20,7 @@ class Discipline < ApplicationRecord
   has_many :doc_types, dependent: :destroy
 
   # === Scopes ===
-  default_scope { order(project_id: :asc, sort_order: :asc) }
+  # default_scope { order(project_id: :asc, sort_order: :asc) }
 
   # === Validations ===
   before_validation :normalize_prefix_schema
@@ -31,6 +35,15 @@ class Discipline < ApplicationRecord
   # === Class methods ===
   def self.required_role
     :project_admin
+  end
+
+  # === Class methods - Queries ===
+  # Provide SQL for ordering disciplines in the navigator
+  def self.navigator_order_sql
+    <<~SQL.squish
+      projects.code ASC,
+      disciplines.sort_order ASC
+    SQL
   end
 
   # === Public methods ===

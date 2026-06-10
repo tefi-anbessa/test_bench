@@ -5,11 +5,9 @@
     <div class="card-header p-1" style="<%= card_header_styles(@swatch) %>">
       <div class="row align-items-center p-2">
 
+        <!-- Discipline link -->
         <div class="col-2">
-            <%= link_to discipline_path(@discipline), class: "btn btn-sm btn-outline-info" do %>
-              <%= @discipline.name %>
-              <%= bs_icon('collection', class: "me-1") %>
-            <% end %>
+            <%= nav_button(action: :show_discipline, record: @discipline) %>
         </div>
 
         <!-- Header Text (Left) -->
@@ -24,13 +22,8 @@
         <!-- New Button (Right) -->
         <div class="col-2 text-end">
           <% if policy(Electrical::Heater).new? %>
-              <%= link_to new_discipline_electrical_heater_path(@discipline), 
-                class: "btn btn-sm btn-outline-primary actions",
-                aria: { label: t('actions.new') },
-                title: t('actions.new') do %>
-                <%== bs_icon('plus-square-fill') %>
-                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.electrical/heater.one')].join(' ') %></span>
-              <% end %>
+            <%= nav_button(action: :new, path: new_discipline_electrical_heater_path(@discipline),
+                record: Electrical::Heater.new) %>
           <% end %>
         </div>
       </div> <!-- end of row -->
@@ -75,7 +68,7 @@
           </thead>
           <tbody>
             <% @link_broken.each do |tag| %>
-              <%= render 'tags/row', t: tag %>
+              <%= render 'tags/row', row: tag %>
             <% end %>
           </tbody>
         </table>
@@ -94,13 +87,17 @@
           </thead>
           <tbody>
             <% @link_incomplete.each do |tag| %>
-              <%= render 'tags/row', t: tag %>
+              <%= render 'tags/row', row: tag %>
             <% end %>
           </tbody>
         </table>
       <% end %>
 
-<!--  -->
+      <!-- Heaters -->
+      <!-- Policies for tagables are invariable over the scope , so no need to look up policy for each record. -->
+      <% can_show = policy(@discipline.tags.build()).show? %>
+      <% can_edit = policy(@discipline.tags.build()).edit? %>
+      <% can_delete = policy(@discipline.tags.build()).destroy? %>
       <table id='electrical_heaters' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
         <%= render 'header' %>
         <tbody>
@@ -112,7 +109,7 @@
               </td>
             </tr>
             <% @orphans.each do |row| %>
-              <%= render 'row', row: row %>
+              <%= render 'row', row: row, can_show: can_show, can_edit: can_edit, can_delete: can_delete %>
             <% end %>
             <tr class="table-success">
               <td colspan="<%= columns + (current_project ? 0 : 1) %>">
@@ -121,7 +118,7 @@
             </tr>
           <% end %>
           <% @heaters.each do |row| %>
-            <%= render 'row', row: row %>
+            <%= render 'row', row: row, can_show: can_show, can_edit: can_edit, can_delete: can_delete %>
           <% end %>
         </tbody>
       </table>

@@ -1,15 +1,9 @@
 # frozen_string_literal: true
 module Electrical
   class CableType < Base
-    # Scopes
-    default_scope { order(:id) }
+    # === Mixins ===
 
-    # Associations
-    belongs_to :discipline, required: true
-    delegate :project, to: :discipline
-    has_many :electrical_cables, class_name: 'Electrical::Cable', 
-         foreign_key: 'electrical_cable_type_id', dependent: :destroy
-
+    # === Constants ===
     # Define enums
     enum :construction, Constants.cable.constructions.to_h
     enum :conductor_material, Constants.electrical.conductor_materials.to_h
@@ -20,9 +14,34 @@ module Electrical
     enum :sheath, insulation_materials, prefix: true
     enum :voltage_rating, Constants.electrical.voltage_ratings.to_h
     enum :temperature_rating, Constants.electrical.temperature_rating.each_with_index.to_h
+
+    # === Gem macros ===
+
+    # === Attributes ===
+
+    # === Associations ===
+    belongs_to :discipline, required: true
+    has_one :project, through: :discipline
+    has_many :electrical_cables, class_name: 'Electrical::Cable', 
+          foreign_key: 'electrical_cable_type_id', dependent: :destroy
+
+    # === Scopes ===
+
+    # === Validations ===
     validates :conductor_material, :groups, :construction, :csa, presence: true
+
+    # === Callbacks ===
     before_save :generate_code
-    
+
+    # === Class methods ===
+
+    # === Class methods - Queries ===
+    # Provide SQL for ordering swatches in the navigator
+    def self.navigator_order_sql
+      "electrical_cable_types.code ASC"
+    end
+
+    # === Public methods ===
     def code
       self[:code].presence || generate_code
     end
@@ -33,8 +52,8 @@ module Electrical
 
     def long_label
       "#{discipline.code}-ID##{id}"
-    end
-
+    end    
+    
     def generate_code
       # Generate base code using the existing logic
       parts = []
@@ -60,6 +79,7 @@ module Electrical
     end
 
     private
+    # === Private methods ===
       
       def find_next_sequence_number(base_code)
         # Find all existing codes that start with our base code
@@ -100,10 +120,8 @@ module Electrical
           "created_at", "updated_at"]
       end
 
-
       def self.ransackable_associations(auth_object = nil)
         ["electrical_cables"]
       end
-
   end
 end

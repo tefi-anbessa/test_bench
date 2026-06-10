@@ -10,27 +10,10 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@discipline).index? %>
-              <%= link_to discipline_electrical_cable_types_path(@discipline), 
-                class: "btn btn-sm btn-outline-info me-2",
-                title: t('actions.index') do %>
-                <%== bs_icon('list-columns-reverse') %>
-                <span class="d-none d-md-inline"><%= t('actions.index') %></span>
-              <% end %>
+              <%= nav_button(action: :index, path: discipline_electrical_cable_types_path(@discipline), record: @cable_type) %>
             <% end %>
             <!-- Previous Button -->
-            <% prev_cable_type = @cable_type.prev %>
-            <% if prev_cable_type.present? %>
-              <% disabled = prev_cable_type == @cable_type %>
-              <%= link_to electrical_cable_type_path(prev_cable_type),
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
-                    title: "#{t('actions.previous')}: #{prev_cable_type.label}" do %>
-                <%== bs_icon('arrow-left') %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.previous') %>
-                </span>
-              <% end %>
-            <% end %>
+            <%= nav_button(action: :previous, record: @neighbours[0]) %>
           </div> <!-- # d-flex align-items-center -->
         </div> <!-- # col auto -->
 
@@ -49,55 +32,20 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <% next_cable_type = @cable_type.next %>
-            <% if next_cable_type.present? %>
-              <% disabled = next_cable_type == @cable_type %>
-              <%= link_to electrical_cable_type_path(next_cable_type),
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary me-2 #{'disabled' if disabled}",
-                    title: "#{t('actions.next')}: #{next_cable_type.label}" do %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.next') %>
-                </span>
-                <%== bs_icon('arrow-right') %>
-              <% end %>
-            <% end %>
+            <%= nav_button(action: :next, record: @neighbours[1]) %>
 
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
               <% if policy(@cable_type).edit? %>
-                <%= link_to edit_electrical_cable_type_path(@cable_type),
-                      class: "btn btn-outline-warning",
-                      title: t('actions.edit') do %>
-                  <%== bs_icon('pencil-square') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.edit') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :edit, path: edit_electrical_cable_type_path(@cable_type), record: @cable_type) %>
               <% end %>
 
               <% if policy(@cable_type).destroy? %>
-                <%= link_to @cable_type,
-                      method: :delete,
-                      data: { confirm: t('actions.delete_sure') },
-                      class: "btn btn-outline-danger",
-                      title: t('actions.delete') do %>
-                  <%== bs_icon('trash') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.delete') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :delete, path: electrical_cable_type_path(@cable_type), record: @cable_type) %>
               <% end %>
 
               <% if policy(@cable_type).new? %>
-                <%= link_to new_discipline_electrical_cable_type_path(@discipline),
-                      class: "btn btn-outline-primary",
-                      title: t('actions.new') do %>
-                  <%== bs_icon('plus-square-fill') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.new') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :new, path: new_discipline_electrical_cable_type_path(@discipline), record: @cable_type) %>
               <% end %>
             </div> <!-- end button group -->
           </div> <!-- end d-flex -->

@@ -16,6 +16,7 @@ module Electrical
     # GET /electrical/cable_types/1 or /electrical/cable_types/1.json
     def show
       authorize @cable_type
+      @neighbours = Navigator.new(scope: @scope, record: @cable_type).neighbours
     end
 
     # GET /electrical/cable_types/new
@@ -88,10 +89,12 @@ module Electrical
         if params[:discipline_id].present?
           @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
           raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
+          @scope = policy_scope(Electrical::CableType).where(discipline_id: @discipline.id)
         elsif params[:project_id].present?
           @discipline = nil
           @project = policy_scope(Project).find_by(id: params[:project_id])
           raise ApplicationController::ConflictError, :out_of_scope if @project.nil?
+          @scope = policy_scope(Electrical::CableType).where(discipline_id: @project.disciplines.pluck(:id))
         end
       end
 
@@ -99,6 +102,7 @@ module Electrical
         @cable_type = policy_scope(Electrical::CableType).find_by(id: params[:id])
         raise ApplicationController::ConflictError, :out_of_scope if @cable_type.nil?
         @discipline = @cable_type.discipline
+        @scope = policy_scope(Electrical::CableType).where(discipline_id: @discipline.id).joins(discipline: :project)
       end
 
       def set_swatch

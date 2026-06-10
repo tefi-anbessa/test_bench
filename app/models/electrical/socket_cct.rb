@@ -2,7 +2,6 @@ module Electrical
   class SocketCct < Base
     include Tagable
     include Electrical::Demandable
-    include TagableNavigation
     
     enum :socket_type, Constants.electrical.socket_cct.socket_type.to_h
 

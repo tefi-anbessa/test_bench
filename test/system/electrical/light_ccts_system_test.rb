@@ -16,6 +16,8 @@ module Electrical
     def setup_model_specific_data
       @tag.update(prefix: "EL")
       @tag.reload
+      @tag2.update(prefix: "EL")
+      @tag2.reload
       @unassigned_tag.update(prefix: "EL")
       @unassigned_tag.reload
       # List fields that should appear in index. 

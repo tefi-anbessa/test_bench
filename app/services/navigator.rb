@@ -37,7 +37,6 @@ class Navigator
 
     def ranked_cte
       @scope
-        .left_joins(:discipline)
         .select(<<~SQL)
           #{@scope.table_name}.*,
           ROW_NUMBER() OVER (ORDER BY #{order_sql}) AS row_number

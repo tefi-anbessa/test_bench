@@ -11,15 +11,7 @@
 
         <!-- New Button (Right) -->
         <% if policy(Swatch.new()).new? %>
-            <%= link_to new_swatch_path, 
-              class: "btn btn-outline-primary actions",
-              aria: { label: t('actions.new') },
-              title: t('actions.new') do %>
-              <%== bs_icon('plus-square-fill') %>
-              <span class="ms-1">
-                <%= [t('actions.new'), t('activerecord.models.swatch.one')].join(' ') %>
-              </span>
-            <% end %>
+            <%= nav_button(action: :new, record: Swatch.new(), path: new_swatch_path) %>
         <% end %>
       </div> <!-- end of d-flex -->
     </div> <!-- end of card header -->

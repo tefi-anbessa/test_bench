@@ -18,6 +18,7 @@ module <%= module_name %>
     # GET /<%= controller_file_path %>/1
     def show
       authorize @<%= singular_name %>
+      @neighbours = Navigator.new(scope: @scope, record: @<%= singular_name %>).neighbours
     end
 
     # GET /<%= controller_file_path %>/new
@@ -86,6 +87,7 @@ module <%= module_name %>
       def set_<%= singular_name %>
         @<%= singular_name %> = policy_scope(<%= class_name %>).find_by!(id: params[:id])
         raise ApplicationController::ConflictError, :out_of_scope if @<%= singular_name %>.nil?
+        @scope = policy_scope(<%= class_name %>)
       end
 
       def set_swatch

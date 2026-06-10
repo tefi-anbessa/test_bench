@@ -6,22 +6,20 @@ class DocTypesController < ApplicationController
   before_action :set_doc_type, only: [:show, :edit, :update, :destroy]
   before_action :set_swatch, only: [:index, :show ]
 
-  # GET /disciplines/:discipline_id/doc_types
+  # GET /discipline/:discipline_id/doc_types or GET /project/:project_id/doc_types
   def index
-    if @discipline.present?
-      authorize @discipline.doc_types.build()
-      @q = @discipline.doc_types.merge(policy_scope(DocType)).ransack(params[:q])
-      @pagy, @doc_types = pagy(@q.result, limit: 20)
-    else
-      authorize DocType
-      @q = policy_scope(DocType).ransack(params[:q])
-      @pagy, @doc_types = pagy(@q.result, limit: 20)
-    end
+    authorize DocType
+    @orphans = DocType.where(discipline_id: nil)
+
+    @q = @scope.ransack(params[:q])
+    result = @q.result.includes(discipline: :project)
+    @pagy, @doc_types = pagy(result, limit: 20)
   end
 
   # GET /doc_types/1
   def show
     authorize @doc_type
+    @neighbours = Navigator.new(scope: @scope, record: @doc_type).neighbours
   end
 
   # GET /disciplines/:discipline_id/doc_types/new
@@ -93,10 +91,16 @@ class DocTypesController < ApplicationController
       if params[:discipline_id].present?
         @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
         raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
+        @scope = policy_scope(DocType).where(discipline_id: @discipline.id)
       elsif params[:project_id].present?
         @discipline = nil
         @project = policy_scope(Project).find_by(id: params[:project_id])
         raise ApplicationController::ConflictError, :out_of_scope if @project.nil?
+        @scope = policy_scope(DocType).where(discipline_id: @project.disciplines.pluck(:id))
+      else
+        @discipline = nil
+        @project = nil
+        @scope = policy_scope(DocType)
       end
     end
 
@@ -104,6 +108,7 @@ class DocTypesController < ApplicationController
       @doc_type = policy_scope(DocType).find_by(id: params[:id])
       raise ApplicationController::ConflictError, :out_of_scope if @doc_type.nil?
       @discipline = @doc_type.discipline
+      @scope = policy_scope(DocType).joins(discipline: :project)
     end
 
     def set_attributes

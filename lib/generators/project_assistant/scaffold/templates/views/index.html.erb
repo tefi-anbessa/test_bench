@@ -3,9 +3,20 @@
   <!-- Header Card -->
   <div class="card mb-4" style="<%%= card_styles(@swatch) %>">
     <div class="card-header p-2" style="<%%= card_header_styles(@swatch) %>">
-      <div class="d-flex justify-content-between align-items-center">
-        <!-- Header Text (Left) -->
-        <div class="ms-2">
+      <div class="row align-items-center p-2">
+
+        <!-- Discipline and project links -->
+        <div class="col-2">
+          <% if @discipline.present? %>
+            <%= nav_button(action: :show_project, record: @discipline.project) %>
+            <%= nav_button(action: :show_discipline, record: @discipline) %>
+          <% elsif @project.present? %>
+            <%= nav_button(action: :show_project, record: @project) %>
+          <% end %>
+        </div>
+
+        <!-- Header Text (Left - 8 columns) -->
+        <div class="col-8">
           <%% project_text = current_project.present? ? 
           [t('activerecord.models.project.one'), current_project.label].join(': ') : 
           t('index.all', models: t('activerecord.models.project.other')) %>
@@ -13,18 +24,12 @@
         </div>
 
         <!-- New Button (Right) -->
-        <%% if policy(<%= class_name %>).new? %>
-            <%%= link_to new_<%= singular_table_name %>_path, 
-              class: "btn btn-outline-primary actions",
-              aria: { label: t('actions.new') },
-              title: t('actions.new') do %>
-              <%%== bs_icon('plus-square-fill') %>
-              <span class="ms-1">
-                <%%= [t('actions.new'), t('activerecord.models.<%= controller_i18n_scope.singularize %>')].join(' ') %>
-              </span>
-            <%% end %>
-        <%% end %>
-      </div> <!-- end of d-flex -->
+        <div class="col-2 align-content-end">
+          <% if policy(<%= class_name %>.new).new? %>
+            <%= nav_button(action: :new, path: new_<%= singular_table_name %>_path, record: <%= class_name %>.new) %>
+          <% end %>
+        </div>
+      </div> <!-- end of row -->
     </div> <!-- end of card header -->
 
     <div class="card-body">

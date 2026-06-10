@@ -6,7 +6,7 @@ class SwatchesController < ApplicationController
 
   # GET /swatches
   def index
-    authorize Swatch, :index?
+    authorize Swatch
     @q = policy_scope(Swatch).ransack(params[:q])
     @pagy, @swatches = pagy(@q.result, limit: 20)
   end
@@ -14,6 +14,7 @@ class SwatchesController < ApplicationController
   # GET /swatches/1
   def show
     authorize @swatch
+    @neighbours = Navigator.new(scope: @scope, record: @swatch).neighbours
   end
 
   # GET /swatches/new
@@ -71,6 +72,7 @@ class SwatchesController < ApplicationController
     def set_swatch
       @swatch = Swatch.find_by(id: params[:id])
       raise ApplicationController::ConflictError, :out_of_scope if @swatch.nil?
+      @scope = policy_scope(Swatch)
     end
 
     def setup_form
@@ -80,6 +82,6 @@ class SwatchesController < ApplicationController
     def swatch_params
       params.require(:swatch)
       .permit(:name, :bg, :text, :form_bg, :form_field, :card_bg, :card_header_bg, :card_border, 
-      :badge_bg, :badge_text, :link_text, :link_hover, :submit)
+      :badge_bg, :badge_text, :link_text, :link_hover)
     end
 end

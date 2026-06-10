@@ -1,6 +1,5 @@
 class Tag < ApplicationRecord
   # === Mixins ===
-  include Navigation
   
   # === Constants ===
 
@@ -24,22 +23,6 @@ class Tag < ApplicationRecord
   # Sort by prefix/serial/suffix
   # scope :sort_by_tag, -> { order(:prefix, :serial, :suffix) }
   # 
-  # Provide SQL for ordering tags in the navigator
-  # Tag model is a special case, tags are ordered differently if the discipline uses ISA51 prefix schema
-  def self.navigator_order_sql
-    <<~SQL.squish
-      disciplines.sort_order ASC,
-      CASE
-        WHEN COALESCE(
-          disciplines.prefix_schema->>'type',
-          disciplines.prefix_schema->>'name'
-        ) = 'isa51'
-        THEN tags.loop_id
-        ELSE tags.full_tag
-      END ASC,
-      tags.full_tag ASC
-    SQL
-  end
 
   # === Validations ===
   validates :prefix, presence: true
@@ -82,6 +65,25 @@ class Tag < ApplicationRecord
   # === Class methods ===
   def self.safe_tagable_types
     Tag.tagable_types.select{ |type| type.safe_constantize.present? }.map { |type| [type.safe_constantize.model_name.human, type] }
+  end
+
+  # === Class methods - Queries ===
+  # Provide SQL for ordering tags in the navigator
+  # Tag model is a special case, tags are ordered differently if the discipline uses ISA51 prefix schema
+  def self.navigator_order_sql
+    <<~SQL.squish
+      projects.code ASC,
+      disciplines.sort_order ASC,
+      CASE
+        WHEN COALESCE(
+          disciplines.prefix_schema->>'type',
+          disciplines.prefix_schema->>'name'
+        ) = 'isa51'
+        THEN tags.loop_id
+        ELSE tags.full_tag
+      END ASC,
+      tags.full_tag ASC
+    SQL
   end
 
   # LEGACY CODE?

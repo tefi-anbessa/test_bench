@@ -10,6 +10,6 @@ module BootstrapIconHelper
     icon_name = name.to_s.gsub(/^bi-/, '')
     
     # Use the original bootstrap_icon method
-    bootstrap_icon(icon_name, options)
+    bootstrap_icon(icon_name, options).html_safe
   end
 end

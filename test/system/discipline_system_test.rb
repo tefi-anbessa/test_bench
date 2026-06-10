@@ -1,11 +1,11 @@
 # frozen_string_literal: true
-require "helpers/test_setup_helpers"
 require "application_system_test_case"
+require "helpers/system_test_helpers"
 
 class DisciplineSystemTest < ApplicationSystemTestCase
   include Devise::Test::IntegrationHelpers
   include Warden::Test::Helpers
-  include TestSetupHelpers
+  include SystemTestHelpers
   
   setup do
     setup_projects_and_users
@@ -16,11 +16,42 @@ class DisciplineSystemTest < ApplicationSystemTestCase
   end
 
   def model_specific_setup
+    @discipline.update(sort_order: 1)
+    @resource = @discipline
+    @resource2 = @project.disciplines.find_by(name: "Mechanical")
+    @resource2.update(sort_order: 2)
+
     @dt = create(:doc_type, discipline: @discipline)
     @document = create(:document, discipline: @discipline, doc_type: @dt)
   end
 
-  test "team member show discipline" do
+  def test_setup_is_valid
+    assert @project.valid?
+    assert @project.persisted?
+    assert @discipline.valid?
+    assert @discipline.persisted?
+    assert @admin.valid?
+    assert @admin.persisted?
+    assert @project_manager.valid?
+    assert @project_manager.persisted?
+    assert @team_member.valid?
+    assert @team_member.persisted?
+    assert @regular_user.valid?
+    assert @regular_user.persisted?
+    assert @accredited_user.valid?
+    assert @accredited_user.persisted?
+    assert @tag.valid?
+    assert @tag.persisted?
+    assert @tag2.valid?
+    assert @tag2.persisted?
+    assert @resource.valid?
+    assert @resource.persisted?
+    assert @resource2.valid?
+    assert @resource2.persisted?
+    assert (@resource2.sort_order > @resource.sort_order)
+  end
+
+  test "team member navigate from project show to discipline show" do
     sign_in @team_member
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
@@ -44,31 +75,35 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     assert_selector "h5", text: I18n.t('disciplines.index.header', scope_text: @project.label)
     @project.disciplines.each do |disc|
       next unless disc.persisted?
-      assert_selector "a[href='#{discipline_path(disc)}']", text: "#{disc.label}: #{disc.name}" # Link to show discipline
-      assert_selector "a[href='#{discipline_path(disc)}']", text: I18n.t('actions.show')
+      name = I18n.exists?("discipline.name.#{disc.name}") ? I18n.t("discipline.name.#{disc.name}") : disc.name
+      text = [disc.code, name].join(": ")
+      assert_selector "a[href='#{discipline_path(disc)}']", text: text # Link to show discipline
+      assert_nav_button(:show, disc, icon_only: true)
       assert_selector "a[href='#{discipline_tags_path(disc)}']"
       assert_selector "a[href='#{discipline_documents_path(disc)}']"
 
-      find("a[href='#{discipline_path(disc)}']", text: I18n.t('actions.show')).click
+      find("#discipline-#{disc.id}").click
       assert_current_path discipline_path(disc)
       # Header
       assert_selector "#discipline-header", text: I18n.t('disciplines.show.header', label: I18n.t("discipline.name.#{disc.name}"))
       assert page.title.include?(I18n.t("disciplines.show.title"))
       # Header links 
-      assert_selector "a[href='#{project_path(@project)}']", text: @project.code # Link back to project
-      assert_selector "a[href='#{project_disciplines_path(@project)}']", text: I18n.t('actions.index') # Link to disciplines index
+      assert_nav_button(:show_project, disc.project)
+      assert_nav_button(:index, path: project_disciplines_path(disc.project))
       refute_selector "a[href='#{edit_discipline_path(disc)}']", text: I18n.t('actions.edit') # Edit discipline link
-      refute_selector "a[href='#{discipline_path(disc)}'][data-method='delete']" # Delete discipline link
+      refute_delete(discipline_path(disc)) # Delete discipline link
       refute_selector "a[href='#{new_project_discipline_path(@project)}']", text: I18n.t('actions.new') # New discipline link
       # Discipline attribute labels
       assert_text I18n.t('activerecord.attributes.discipline.notes')
       assert_text I18n.t('activerecord.attributes.discipline.required_role')
+      assert_text I18n.t('activerecord.attributes.discipline.catalog_required_role')
       assert_text I18n.t('activerecord.attributes.discipline.prefix_schema')
       refute_text I18n.t('activerecord.models.swatch', count: 1)
       # Discipline attributes
       assert_text disc.notes if disc.notes.present?
       assert_text disc.required_role if disc.required_role.present?
-      assert_text disc.prefix_schema['name']
+      assert_text disc.catalog_required_role if disc.catalog_required_role.present?
+      assert_text disc.prefix_schema['name'] # [TODO: Write a test for collapsible on attribute rather than association.]
       refute_text disc.swatch&.name if disc.swatch.present?
       # Discipline links for tags and documents
       assert_selector "a[href='#{discipline_tags_path(disc)}']", 
@@ -102,7 +137,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
       if disc.roles.any?
         disc.roles.each do |role|
           role.users.each do |user|
-            assert_selector "a[href='#{user_path(user)}']", text: I18n.t('actions.show')
+            assert_nav_button(:show, user, icon_only: true)
             assert_text user.name
             assert_text user.email
             assert_text role.name
@@ -116,6 +151,29 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     end
   end
 
+  def test_team_member_test_next_and_previous_buttons
+    sign_in @team_member
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit resource_path(@resource)
+    assert_current_path resource_path(@resource)
+    
+    # Header bar should include disabled previous button and enabled next button
+    assert_nav_button_disabled(:previous)
+    assert_nav_button(:next, @resource2)
+    
+    click_link I18n.t('actions.next')
+    assert_current_path resource_path(@resource2)
+
+    # Header bar should include enabled previous button and disabled next button
+    assert_nav_button(:previous, @resource)
+    # There are more disciplines, so next button should be enabled
+    # assert_nav_button_disabled(:next)
+
+    click_link I18n.t('actions.previous')
+    assert_current_path resource_path(@resource)
+  end
+
   test "project manager show discipline" do
     sign_in @project_manager
     # Mock current_project for this test
@@ -124,10 +182,10 @@ class DisciplineSystemTest < ApplicationSystemTestCase
       next unless disc.persisted?
       visit discipline_path(disc)
       # Header links 
-      assert_selector "a[href='#{project_path(@project)}']", text: @project.code # Link back to project
-      assert_selector "a[href='#{project_disciplines_path(@project)}']", text: I18n.t('actions.index') # Link to disciplines index
-      assert_selector "a[href='#{edit_discipline_path(disc)}']", text: I18n.t('actions.edit') # Edit discipline link
-      refute_selector "a[href='#{discipline_path(disc)}'][data-method='delete']" # Delete discipline link
+      assert_nav_button(:show_project, disc.project)
+      assert_nav_button(:index, path: project_disciplines_path(disc.project))
+      assert_nav_button(:edit, disc, path: edit_discipline_path(disc)) # Edit discipline link
+      refute_delete(discipline_path(disc)) # Delete discipline link
       refute_selector "a[href='#{new_project_discipline_path(@project)}']", text: I18n.t('actions.new') # New discipline link
 
       # Field labels
@@ -165,12 +223,12 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     @project.disciplines.each do |disc|
       next unless disc.persisted?
       visit discipline_path(disc)
-      # Header links 
-      assert_selector "a[href='#{project_path(@project)}']", text: @project.code # Link back to project
-      assert_selector "a[href='#{project_disciplines_path(@project)}']", text: I18n.t('actions.index') # Link to disciplines index
-      assert_selector "a[href='#{edit_discipline_path(disc)}']", text: I18n.t('actions.edit') # Edit discipline link
-      assert_selector "a[href='#{discipline_path(disc)}'][data-method='delete']" # Delete discipline link
-      assert_selector "a[href='#{new_project_discipline_path(@project)}']", text: I18n.t('actions.new') # New discipline link
+      # Header links
+      assert_nav_button(:show_project, disc.project)
+      assert_nav_button(:index, path: project_disciplines_path(disc.project))
+      assert_nav_button(:edit, disc, path: edit_discipline_path(disc)) # Edit discipline link
+      assert_nav_button(:delete, disc) # Delete discipline link
+      assert_nav_button(:new, @project.disciplines.build, path: new_project_discipline_path(@project)) # New discipline link
     end
   end
 
@@ -242,10 +300,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit project_disciplines_path(@project)
-    # Find the actual delete link and inspect its href
-    accept_confirm do
-      find("a[href='#{discipline_path(@discipline)}'][data-method='delete']").click
-    end
+    click_delete(discipline_path(@discipline))
     assert_current_path project_disciplines_path(@project)
     refute_selector "a[href='#{discipline_path(@discipline)}']"
     assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.discipline", count: 1))
@@ -256,10 +311,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit discipline_path(@discipline)
-    # Find the actual delete link and inspect its href
-    accept_confirm do
-      find("a[href='#{discipline_path(@discipline)}'][data-method='delete']").click
-    end
+    click_delete(discipline_path(@discipline))
     assert_current_path project_disciplines_path(@project)
     refute_selector "a[href='#{discipline_path(@discipline)}']"
     assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.discipline", count: 1))
@@ -270,10 +322,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit project_path(@project)
-    # Find the actual delete link and inspect its href
-    accept_confirm do
-      find("a[href='#{discipline_path(@discipline)}'][data-method='delete']").click
-    end
+    click_delete(discipline_path(@discipline))
     assert_current_path project_disciplines_path(@project)
     refute_selector "a[href='#{discipline_path(@discipline)}']"
     assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.discipline", count: 1))

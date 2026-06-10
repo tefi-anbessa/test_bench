@@ -9,28 +9,11 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@circuit.switchboard).index? %>
-              <%= link_to electrical_switchboard_circuits_path(@switchboard),
-                    class: "btn btn-sm btn-outline-info me-2",
-                    title: t('actions.index') do %>
-                <%== bs_icon('list-columns-reverse') %>
-                <span class="d-none d-md-inline"><%= [t('actions.index'), @switchboard.tag&.full_tag].join(' ') %></span>
-              <% end %>
+              <%= nav_button(action: :index, path: electrical_switchboard_circuits_path(@switchboard), record: @circuit) %>
             <% end %>
 
             <!-- Previous Button -->
-            <% prev_circuit = @circuit.prev %>
-            <% if prev_circuit.present? %>
-              <% disabled = prev_circuit == @circuit %>
-              <%= link_to prev_circuit,
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
-                    title: "#{t('actions.previous')}: #{prev_circuit.label}" do %>
-                <%== bs_icon('box-arrow-in-left') %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.previous') %>
-                </span>
-              <% end %>
-            <% end %>
+            <%= nav_button(action: :previous, record: @neighbours[0]) %>
           </div>
         </div>
 
@@ -49,44 +32,20 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <% next_circuit = @circuit.next %>
-            <% if next_circuit.present? %>
-              <% disabled = next_circuit == @circuit %>
-              <%= link_to next_circuit,
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary me-2 #{'disabled' if disabled}",
-                    title: "#{t('actions.next')}: #{next_circuit.label}" do %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.next') %>
-                </span>
-                <%== bs_icon('box-arrow-in-right') %>
-              <% end %>
-            <% end %>
+            <%= nav_button(action: :next, record: @neighbours[1]) %>
 
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
-              <% if policy(@circuit.switchboard).edit? %>
-                <%= link_to edit_electrical_circuit_path(@circuit),
-                      class: "btn btn-outline-warning",
-                      title: t('actions.edit') do %>
-                  <%== bs_icon('pencil-square') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.edit') %>
-                  </span>
-                <% end %>
+              <% if policy(@switchboard).edit? %>
+                <%= nav_button(action: :edit, path: edit_electrical_circuit_path(@circuit), record: @circuit) %>
               <% end %>
 
-              <% if policy(@circuit.switchboard).destroy? %>
-                <%= link_to @circuit,
-                      method: :delete,
-                      data: { confirm: t('actions.delete_sure') },
-                      class: "btn btn-outline-danger",
-                      title: t('actions.delete') do %>
-                  <%== bs_icon('trash') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.delete') %>
-                  </span>
-                <% end %>
+              <% if policy(@switchboard).destroy? %>
+                <%= nav_button(action: :delete, path: electrical_circuit_path(@circuit), record: @circuit) %>
+              <% end %>
+
+              <% if policy(@switchboard).new? %>
+                <%= nav_button(action: :new, path: new_electrical_switchboard_circuit_path(@switchboard), record: @circuit) %>
               <% end %>
             </div> <!-- end button group -->
           </div> <!-- end d-flex -->

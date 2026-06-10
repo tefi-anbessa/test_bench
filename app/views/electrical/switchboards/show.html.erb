@@ -9,30 +9,13 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@switchboard).index? %>
-              <%= link_to discipline_electrical_switchboards_path(@discipline),
-                    class: "btn btn-sm btn-outline-info me-2",
-                    title: t('actions.index') do %>
-                <%== bs_icon('list-columns-reverse') %>
-                <span class="d-none d-md-inline"><%= t('actions.index') %></span>
-              <% end %>
+              <%= nav_button(action: :index, path: discipline_electrical_switchboards_path(@discipline), record: @switchboard) %>
             <% end %>
 
             <!-- Previous Button -->
-            <% prev_switchboard = @switchboard.prev %>
-            <% if prev_switchboard.present? %>
-              <% disabled = prev_switchboard == @switchboard %>
-              <%= link_to prev_switchboard,
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
-                    title: "#{t('actions.previous')}: #{prev_switchboard.label}" do %>
-                <%== bs_icon('box-arrow-in-left') %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.previous') %>
-                </span>
-              <% end %>
-            <% end %>
-          </div>
-        </div>
+            <%= nav_button(action: :previous, record: @neighbours[0]) %>
+          </div> <!-- end d-flex align-items-center -->
+        </div> <!-- end left column -->
 
         <!-- Center Tag Info -->
         <div class="col text-center">
@@ -50,56 +33,20 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <% next_switchboard = @switchboard.next %>
-            <% if next_switchboard.present? %>
-              <% disabled = next_switchboard == @switchboard %>
-              <%= link_to next_switchboard,
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary me-2 #{'disabled' if disabled}",
-                    title: "#{t('actions.next')}: #{next_switchboard.label}" do %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.next') %>
-                </span>
-                <%== bs_icon('arrow-right') %>
-              <% end %>
-            <% end %>
+            <%= nav_button(action: :next, record: @neighbours[1]) %>
 
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
               <% if policy(@switchboard).edit? %>
-                <%= link_to edit_electrical_switchboard_path(@switchboard),
-                      class: "btn btn-outline-warning",
-                      title: t('actions.edit') do %>
-                  <%== bs_icon('pencil-square') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.edit') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :edit, path: edit_electrical_switchboard_path(@switchboard), record: @switchboard) %>
               <% end %>
 
               <% if policy(@switchboard).destroy? %>
-                <%= link_to @switchboard,
-                      method: :delete,
-                      data: { confirm: t('actions.delete_sure') },
-                      class: "btn btn-outline-danger",
-                      title: t('actions.delete') do %>
-                  <%== bs_icon('trash') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.delete') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :delete, path: electrical_switchboard_path(@switchboard), record: @switchboard) %>
               <% end %>
 
               <% if policy(@switchboard).new? %>
-                <%= link_to new_discipline_electrical_switchboard_path(@discipline),
-                  class: "btn btn-outline-primary actions",
-                  aria: { label: t('actions.new') },
-                  title: t('actions.new') do %>
-                  <%== bs_icon('plus-square-fill') %>
-                  <span class="ms-1">
-                    <%= [t('actions.new'), t('activerecord.models.electrical/switchboard.one')].join(' ') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :new, path: new_discipline_electrical_switchboard_path(@discipline), record: @switchboard) %>
               <% end %>
             </div> <!-- end button group -->
           </div> <!-- end d-flex -->

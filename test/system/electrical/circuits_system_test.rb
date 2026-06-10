@@ -28,7 +28,7 @@ module Electrical
                         notes: "Lorem ipsum")
 
       # Circuit
-      @circuit = @switchboard1.circuits.first
+      @circuit = @switchboard1.circuits.find_by(serial: 1)
       @circuit.update(
             phase: "L1",
             device: "MCCB",
@@ -41,6 +41,8 @@ module Electrical
             )
       @circuit.reload
       @resource = @circuit
+      @circuit2 = @switchboard1.circuits.find_by(serial: 2)
+      @resource2 = @circuit2
 
       # Cable
       @cable_type = create(:electrical_cable_type, discipline: @discipline)
@@ -93,7 +95,76 @@ module Electrical
       find("select[name='electrical_circuit[rating]'] option[value='32']").select_option
     end
 
+    # Customize show assertions for different index button
+    def circuit_show_assertions
+      assert_text I18n.t("#{view_key}.show.header", label: @resource.long_label)
+      assert page.title.include?(I18n.t("#{view_key}.show.title"))
+
+      # Navigation
+      # Link back to switchboard circuits index
+      assert_nav_button(:index, path: electrical_switchboard_circuits_path(@switchboard1))
+
+      # Field labels
+      @show_fields.each do |field|
+        assert_text I18n.t("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field}")
+      end
+
+      # Field data 
+      field_display_assertions(@show_fields)
+
+      # Associations
+      @show_associations.each do |association|
+        if @resource.send(association).present?
+          collapsible_assertions(@resource, association)
+        else
+          # Text for unassigned association varies depending on association type.
+          # If it is important, test it in the calling class.
+        end
+      end
+    end
+
     # Circuit tests
+
+    def test_setup_is_valid
+      assert @project.valid?
+      assert @project.persisted?
+      assert @discipline.valid?
+      assert @discipline.persisted?
+      assert @admin.valid?
+      assert @admin.persisted?
+      assert @project_manager.valid?
+      assert @project_manager.persisted?
+      assert @team_member.valid?
+      assert @team_member.persisted?
+      assert @regular_user.valid?
+      assert @regular_user.persisted?
+      assert @accredited_user.valid?
+      assert @accredited_user.persisted?
+      assert @swbd1_tag.valid?
+      assert @swbd1_tag.persisted?
+      assert @swbd2_tag.valid?
+      assert @swbd2_tag.persisted?
+      assert @switchboard1.valid?
+      assert @switchboard1.persisted?
+      assert @switchboard2.valid?
+      assert @switchboard2.persisted?
+      assert @circuit.valid?
+      assert @circuit.persisted?
+      assert @circuit2.valid?
+      assert @circuit2.persisted?
+      assert @cable_type.valid?
+      assert @cable_type.persisted?
+      assert @cable_tag.valid?
+      assert @cable_tag.persisted?
+      assert @cable.valid?
+      assert @cable.persisted?
+      assert @demand.valid?
+      assert @demand.persisted?
+      assert @resource.valid?
+      assert @resource.persisted?
+      assert_equal @circuit.feeder, @cable
+      assert_equal @circuit.demand, @demand
+    end
 
     test "team member show circuits schedule on existing switchboard" do
       sign_in @team_member
@@ -106,20 +177,20 @@ module Electrical
       find("a[href='#{electrical_switchboard_circuits_path(@switchboard1)}']").click
       assert_current_path electrical_switchboard_circuits_path(@switchboard1)
 
+      assert_nav_button(:show, @circuit, icon_only: true)
       # Variable assertions
       refute_selector "a[href='#{new_electrical_switchboard_circuit_path(@switchboard1)}']"
-      assert_selector "a[href='#{electrical_circuit_path(@circuit)}']"
       refute_selector "a[href='#{edit_electrical_circuit_path(@circuit)}']"
-      refute_selector "a[href='#{electrical_circuit_path(@circuit)}'][data-method='delete']"
+      refute_delete(electrical_circuit_path(@circuit))
 
       index_assertions
 
       # Model specific assertions
       assert_text @circuit.long_label
-      assert_selector "a[href*='q%5Bs%5D=serial']"
+      assert_sort_link("serial", I18n.t("activerecord.attributes.electrical/circuit.serial"))
       # assert_selector "svg.bi.bi-check" if @circuit.contactor?
-      assert_selector "a[href='#{electrical_cable_path(@circuit.feeder)}']" if @circuit.feeder.present?
-      assert_selector "a[href='#{electrical_demand_path(@circuit.demand)}']" if @circuit.demand.present?
+      assert_selector "a[href='#{electrical_cable_path(@circuit.feeder)}']" # if @circuit.feeder.present?
+      assert_selector "a[href='#{electrical_demand_path(@circuit.demand)}']" # if @circuit.demand.present?
     end
 
     test "accredited user show circuits on existing switchboard" do
@@ -128,10 +199,14 @@ module Electrical
       ApplicationController.any_instance.stubs(:current_project).returns(@project)
       visit electrical_switchboard_circuits_path(@switchboard1)
       assert_current_path electrical_switchboard_circuits_path(@switchboard1)
-      assert_selector "a[href='#{new_electrical_switchboard_circuit_path(@switchboard1)}']"
-      assert_selector "a[href='#{electrical_circuit_path(@circuit)}']"
-      assert_selector "a[href='#{edit_electrical_circuit_path(@circuit)}']"
-      refute_selector "a[href='#{electrical_circuit_path(@circuit)}'][data-method='delete']"
+
+      assert_nav_button(:show, @circuit, icon_only: true)
+      # Variable assertions
+      assert_nav_button(:new, @switchboard1, path: new_electrical_switchboard_circuit_path(@switchboard1))
+      assert_nav_button(:edit, @circuit, path: edit_electrical_circuit_path(@circuit), icon_only: true)
+      refute_delete(electrical_circuit_path(@circuit))
+
+      index_assertions
     end
 
     test "admin show circuits on existing switchboard" do
@@ -140,10 +215,14 @@ module Electrical
       ApplicationController.any_instance.stubs(:current_project).returns(@project)
       visit electrical_switchboard_circuits_path(@switchboard1)
       assert_current_path electrical_switchboard_circuits_path(@switchboard1)
-      assert_selector "a[href='#{new_electrical_switchboard_circuit_path(@switchboard1)}']"
-      assert_selector "a[href='#{electrical_circuit_path(@circuit)}']"
-      assert_selector "a[href='#{edit_electrical_circuit_path(@circuit)}']"
-      assert_selector "a[href='#{electrical_circuit_path(@circuit)}'][data-method='delete']"
+
+      assert_nav_button(:show, @circuit, icon_only: true)
+      # Variable assertions
+      assert_nav_button(:new, @switchboard1, path: new_electrical_switchboard_circuit_path(@switchboard1))
+      assert_nav_button(:edit, @circuit, path: edit_electrical_circuit_path(@circuit), icon_only: true)
+      assert_nav_button(:delete, @circuit, icon_only: true)
+
+      index_assertions
     end
 
     test "team member show circuit" do
@@ -159,16 +238,38 @@ module Electrical
       find("a[href='#{electrical_circuit_path(@circuit)}']").click
       assert_current_path electrical_circuit_path(@circuit)
       
-      show_assertions
+      circuit_show_assertions
 
       # Variable assertions
-      assert_link href: electrical_switchboard_circuits_path(@switchboard1)
-      assert_selector "a[href='#{electrical_switchboard_circuits_path(@switchboard1)}']"
-      assert_selector "a[href='#{electrical_circuit_path(@circuit)}']"
+      refute_selector "a[href='#{new_electrical_switchboard_circuit_path(@switchboard1)}']"
       refute_selector "a[href='#{edit_electrical_circuit_path(@circuit)}']"
-      refute_selector "a[href='#{electrical_circuit_path(@circuit)}'][data-method='delete']"
-      # TODO CHECK PRE AND NEXT LINKS
+      refute_delete(electrical_circuit_path(@circuit))
+      
+      # Previous and next links
+      assert_nav_button_disabled(:previous)
+      assert_nav_button(:next, @circuit2)
+    end
 
+    test "team member test previous and next links" do
+      sign_in @team_member
+      # Mock current_project for this test
+      ApplicationController.any_instance.stubs(:current_project).returns(@project)
+      visit electrical_circuit_path(@circuit)
+      assert_current_path electrical_circuit_path(@circuit)
+
+      # Previous and next links
+      assert_nav_button_disabled(:previous)
+      assert_nav_button(:next, @circuit2)
+
+      click_link I18n.t('actions.next')
+      assert_current_path electrical_circuit_path(@circuit2)
+
+      # Previous and next links
+      assert_nav_button(:previous, @circuit)
+      # assert_nav_button_disabled(:next)
+   
+      click_link I18n.t('actions.previous')
+      assert_current_path electrical_circuit_path(@circuit)
     end
 
     test "accredited user viewing the circuit show view" do
@@ -177,10 +278,13 @@ module Electrical
       ApplicationController.any_instance.stubs(:current_project).returns(@project)
       visit electrical_circuit_path(@circuit)
       assert_current_path electrical_circuit_path(@circuit)
+      
+      circuit_show_assertions
 
       # Variable assertions
-      assert_selector "a[href='#{edit_electrical_circuit_path(@circuit)}']"
-      refute_selector "a[href='#{electrical_circuit_path(@circuit)}'][data-method='delete']"
+      assert_nav_button(:new, @switchboard1, path: new_electrical_switchboard_circuit_path(@switchboard1))
+      assert_nav_button(:edit, @circuit, path: edit_electrical_circuit_path(@circuit))
+      refute_delete(electrical_circuit_path(@circuit))
     end
 
     test "admin viewing the circuit show view" do
@@ -189,11 +293,13 @@ module Electrical
       ApplicationController.any_instance.stubs(:current_project).returns(@project)
       visit electrical_circuit_path(@circuit)
       assert_current_path electrical_circuit_path(@circuit)
+      
+      circuit_show_assertions
 
-      # Header links and text
-      assert_link href: electrical_switchboard_circuits_path(@switchboard1)
-      assert_selector "a[href='#{edit_electrical_circuit_path(@circuit)}']"
-      assert_selector "a[href='#{electrical_circuit_path(@circuit)}'][data-method='delete']"
+      # Variable assertions
+      assert_nav_button(:new, @switchboard1, path: new_electrical_switchboard_circuit_path(@switchboard1))
+      assert_nav_button(:edit, @circuit, path: edit_electrical_circuit_path(@circuit))
+      assert_nav_button(:delete, @circuit)
     end
 
     test "accredited user viewing new circuit form" do
@@ -291,9 +397,7 @@ module Electrical
       ApplicationController.any_instance.stubs(:current_project).returns(@project)
       visit electrical_switchboard_circuits_path(@switchboard1)
       # Find the delete link and click it
-      accept_confirm do
-        find("a[href='#{electrical_circuit_path(@circuit)}'][data-method='delete']").click
-      end
+      click_delete(electrical_circuit_path(@circuit))
       assert_current_path electrical_switchboard_circuits_path(@switchboard1)
       refute_selector "a[href='#{electrical_circuit_path(@circuit)}']"
       assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.electrical/circuit.one"))
@@ -304,9 +408,7 @@ module Electrical
       # Mock current_project for this test
       ApplicationController.any_instance.stubs(:current_project).returns(@project)
       visit electrical_circuit_path(@circuit)
-      accept_confirm do
-        find("a[href='#{electrical_circuit_path(@circuit)}'][data-method='delete']").click
-      end
+      click_delete(electrical_circuit_path(@circuit))
       assert_current_path electrical_switchboard_circuits_path(@switchboard1)
       refute_selector "a[href='#{electrical_circuit_path(@circuit)}']"
       assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.electrical/circuit.one"))

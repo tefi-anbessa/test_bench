@@ -1,7 +1,6 @@
 module Electrical
   class Heater < Base
     include Tagable
-    include TagableNavigation
     include Electrical::Demandable
     
 # enum declarations

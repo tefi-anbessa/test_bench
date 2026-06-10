@@ -116,6 +116,9 @@ module SystemTestHelpers
       assert_text @project_resource_index_header
       assert page.title.include?(@project_resource_index_title)
 
+      assert_nav_button(:show_project, @project) # Link back to project resource view
+      assert_nav_button(:show, @resource, icon_only: true) # Link to resource show view
+
       index_field_assertions
     end
 
@@ -143,6 +146,10 @@ module SystemTestHelpers
       assert_text I18n.t("#{view_key}.show.header", label: @resource.long_label)
       assert page.title.include?(I18n.t("#{view_key}.show.title"))
 
+      # Navigation
+      assert_nav_button(:index_project, path: project_resource_index_path(@project), label: @project.code) # Link back to project resource index
+      assert_nav_button(:index_discipline, path: discipline_resource_index_path(@discipline), label: @discipline.name) # Link back to discipline resource index
+
       # Field labels
       @show_fields.each do |field|
         assert_text I18n.t("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field}")
@@ -162,11 +169,44 @@ module SystemTestHelpers
       end
     end
 
+    def assert_nav_button(action, record = nil, path: nil, label: nil, icon_only: false)
+      label ||= I18n.t("actions.#{action}")
+
+      case action
+      when :delete
+        path ||= polymorphic_path(record)
+        assert_selector "form[action='#{path}']"
+        assert_selector "form[action='#{path}'] button", text: icon_only ? "" : label
+
+        # Rails method override
+        assert_selector "form[action='#{path}'] input[name='_method'][value='delete']",
+                        visible: false
+      else
+        path ||= polymorphic_path(record)
+        if icon_only
+          assert_link "", href: path
+        else
+          assert_link label, href: path
+        end
+      end
+    end
+
+    def assert_nav_button_disabled(action, label: nil)
+      label ||= I18n.t("actions.#{action}")
+
+      assert_selector "button.disabled", text: label
+      assert_no_selector "a", text: label
+    end
+
+    def refute_delete(path)
+      assert_no_selector "form[action='#{path}'] input[name='_method'][value='delete']"
+    end
+
     def collapsible_assertions(object, association)
       assert object.respond_to?(association), "Object #{object.class} does not respond to #{association}"
       record = object.public_send(association)
       id = record.id
-      component_id = "#{record.class.model_name.element}_#{id}_details"
+      component_id = "#{record.model_name.element}_#{id}_details"
       header_id = "#{component_id}_header"
       # Should start collapsed
       refute_selector "##{component_id}", visible: true
@@ -415,6 +455,14 @@ module SystemTestHelpers
           assert_field name, type: 'textarea'
         else # string, text, integer, etc.
           assert_field name, type: 'text'
+        end
+      end
+    end
+
+    def click_delete(path)
+      within "form[action='#{path}']" do
+        accept_confirm do
+          find("button[type='submit']").click
         end
       end
     end

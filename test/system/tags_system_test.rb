@@ -71,10 +71,13 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert page.title.include?(I18n.t("tags.index.title"))
 
     # Links
+    assert_nav_button(:show_project, @project) # Link back to show project
+    # Cannot create tag from project view - need discipline
     refute_link I18n.t('actions.new'), href: new_discipline_tag_path(@discipline) 
-    assert_link I18n.t('actions.show'), href: tag_path(@tag)
+    assert_nav_button(:show, @tag, icon_only: true)
+    # Variable link assertions
     refute_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # team member cannot edit tag
-    refute_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # team member cannot delete tag
+    refute_delete(tag_path(@tag)) # team member cannot delete tag
 
     # index search fields, headers, fields
     index_field_assertions
@@ -93,23 +96,25 @@ class TagsSystemTest < ApplicationSystemTestCase
       click_on [I18n.t('actions.show'), @project.code].join(" ")
     end
     assert_current_path project_path(@project)
-    # Click the project tags link
+    # Click the discipline tags link
     click_link(href: discipline_tags_path(@discipline))
     assert_current_path discipline_tags_path(@discipline)
     assert_text I18n.t("tags.index.header", 
       scope_text: [@project.code, I18n.t("activerecord.models.discipline.one"), @discipline.long_label].join(' '))
     assert page.title.include?(I18n.t("tags.index.title"))
 
-    # Cannot create new tag without discipline
+    # Links
+    assert_nav_button(:show_project, @project) # Link back to show project
+    assert_nav_button(:show_discipline, @discipline) # Link back to show discipline
+    # Team member cannot create new tags
     refute_link I18n.t('actions.new'), href: new_discipline_tag_path(@discipline) 
+    assert_nav_button(:show, @tag, icon_only: true)
+    # Variable link assertions
+    refute_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # team member cannot edit tag
+    refute_delete(tag_path(@tag)) # team member cannot delete tag
 
     # index search fields
-    tag_index_field_assertions
-
-    # Links
-    assert_link I18n.t('actions.show'), href: tag_path(@tag)
-    refute_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # team member cannot edit tag
-    refute_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # team member cannot delete tag
+    index_field_assertions
   end
 
   test "accredited user viewing the project tags index" do
@@ -118,10 +123,13 @@ class TagsSystemTest < ApplicationSystemTestCase
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit project_tags_path(@project)
 
+    # Cannot create new tag without discipline
+    refute_link I18n.t('actions.new'), href: new_discipline_tag_path(@discipline) 
+
     # Links
-    assert_link I18n.t('actions.show'), href: tag_path(@tag)
-    assert_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # accredited user can edit tag
-    refute_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # accredited user cannot delete tag
+    assert_nav_button(:show, @tag, icon_only: true)
+    assert_nav_button(:edit, @tag, path: edit_tag_path(@tag), icon_only: true) # accredited user can edit tag
+    refute_delete(tag_path(@tag)) # accredited user cannot delete tag
   end
 
   test "accredited user viewing the discipline tags index" do
@@ -131,12 +139,13 @@ class TagsSystemTest < ApplicationSystemTestCase
     visit discipline_tags_path(@discipline)
     assert_current_path discipline_tags_path(@discipline)
 
-    # Links
     # Accredited user can link to new tag
-    assert_link I18n.t('actions.new'), href: new_discipline_tag_path(@discipline) 
-    assert_link I18n.t('actions.show'), href: tag_path(@tag)
-    assert_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # accredited user can edit tag
-    refute_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # accredited user cannot delete tag
+    assert_nav_button(:new, path: new_discipline_tag_path(@discipline))
+
+    # Links
+    assert_nav_button(:show, @tag, icon_only: true)
+    assert_nav_button(:edit, @tag, path: edit_tag_path(@tag), icon_only: true)
+    refute_delete(tag_path(@tag)) # accredited user cannot delete tag
   end
 
   test "admin viewing the project tags index" do
@@ -146,9 +155,9 @@ class TagsSystemTest < ApplicationSystemTestCase
     visit project_tags_path(@project)
 
     # Links
-    assert_link I18n.t('actions.show'), href: tag_path(@tag)
-    assert_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # admin can edit tag
-    assert_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # admin can delete 
+    assert_nav_button(:show, @tag, icon_only: true)
+    assert_nav_button(:edit, @tag, path: edit_tag_path(@tag), icon_only: true) # admin can edit tag
+    assert_nav_button(:delete, @tag, icon_only: true) # admin can delete 
   end
 
   test "admin user viewing the discipline tags index" do
@@ -158,11 +167,13 @@ class TagsSystemTest < ApplicationSystemTestCase
     visit discipline_tags_path(@discipline)
     assert_current_path discipline_tags_path(@discipline)
 
+    # Admin can link to new tag
+    assert_nav_button(:new, path: new_discipline_tag_path(@discipline))
+
     # Links
-    assert_link I18n.t('actions.new'), href: new_discipline_tag_path(@discipline) 
-    assert_link I18n.t('actions.show'), href: tag_path(@tag)
-    assert_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # accredited user can edit tag
-    assert_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # accredited user cannot delete tag
+    assert_nav_button(:show, @tag, icon_only: true)
+    assert_nav_button(:edit, @tag, path: edit_tag_path(@tag), icon_only: true) # admin can edit tag
+    assert_nav_button(:delete, @tag, icon_only: true) # admin can delete 
   end
 
   test "team member viewing the tag show view" do
@@ -176,21 +187,20 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert page.title.include?(I18n.t("tags.show.title"))
 
     # Header bar navigation links
-    assert_link I18n.t('actions.index'), href: project_tags_path(@project)# Link back to project tags index
-    assert_link I18n.t('actions.index'), href: discipline_tags_path(@discipline)# Link back to discipline tags index
+    assert_nav_button(:index_project, path: project_tags_path(@project), label: @project.code) # Link back to project tags index
+    assert_nav_button(:index_discipline, path: discipline_tags_path(@discipline), label: @discipline.name) # Link back to discipline tags index
     refute_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # team member cannot edit tag
-    refute_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # team member cannot delete tag
+    refute_delete(tag_path(@tag))  # team member cannot delete tag
     refute_link I18n.t('actions.new'), href: new_discipline_tag_path(@discipline) # team member cannot create new tag in discipline
-    # [TODO] test prev and next buttons
 
     show_assertions
     # Field labels
     assert_text I18n.t('activerecord.attributes.tag.tagable_type')
-    assert_text I18n.t('activerecord.attributes.tag.parent')
+    assert_text I18n.t('activerecord.attributes.tag.parent_id')
 
     # Field data
     assert_text I18n.t('show.unassigned', model: I18n.t("activerecord.attributes.tag.tagable_type"))
-    assert_text I18n.t('show.unassigned', model: I18n.t("activerecord.attributes.tag.parent"))
+    assert_text I18n.t('show.unassigned', model: I18n.t("activerecord.attributes.tag.parent_id"))
 
     # Go to project tags index and get the same show view from there.
     click_link(href: project_tags_path(@project))
@@ -203,6 +213,29 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert_current_path discipline_tags_path(@discipline)
   end
 
+  test "team member testing prev and next in show view" do
+    sign_in @team_member
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit tag_path(@tag)
+    assert_current_path tag_path(@tag)
+
+    # Header bar navigation links should include disabled prev button 
+    # and working next button (only 2 tags created)
+    assert_nav_button_disabled(:previous)
+    assert_nav_button(:next, @unassigned_tag)
+
+    click_link I18n.t('actions.next')
+    assert_current_path tag_path(@unassigned_tag)
+
+    # Header bar navigation links should include working prev button 
+    # and disabled next button (only 2 tags created)
+    assert_nav_button(:previous, @tag)
+    assert_nav_button_disabled(:next)
+
+    click_link I18n.t('actions.previous')
+    assert_current_path tag_path(@tag)
+  end
+
   test "accredited user viewing the tag show view" do
     sign_in @accredited_user
     # Mock current_project for this test
@@ -211,11 +244,11 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert_current_path tag_path(@tag)
 
     # Header bar navigation links
-    assert_link I18n.t('actions.index'), href: project_tags_path(@project)# Link back to project tags index
-    assert_link I18n.t('actions.index'), href: discipline_tags_path(@discipline)# Link back to discipline tags index
-    assert_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # accredited user can edit tag
-    refute_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # accredited user cannot delete tag
-    assert_link I18n.t('actions.new'), href: new_discipline_tag_path(@discipline) # accredited user can create new tag in discipline
+    assert_nav_button(:index_project, path: project_tags_path(@project), label: @project.code) # Link back to project tags index
+    assert_nav_button(:index_discipline, path: discipline_tags_path(@discipline), label: @discipline.name) # Link back to discipline tags index
+    assert_nav_button(:edit, path: edit_tag_path(@tag)) # accredited user can edit tag
+    refute_delete(tag_path(@tag)) # accredited user cannot delete tag
+    assert_nav_button(:new, path: new_discipline_tag_path(@discipline)) # accredited user can create new tag in discipline
   end
 
   test "admin viewing the tag show view" do
@@ -226,11 +259,11 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert_current_path tag_path(@tag)
 
     # Header bar navigation links
-    assert_link I18n.t('actions.index'), href: project_tags_path(@project)# Link back to project tags index
-    assert_link I18n.t('actions.index'), href: discipline_tags_path(@discipline)# Link back to discipline tags index
-    assert_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # admin can edit tag
-    assert_selector "a[href='#{tag_path(@tag)}'][data-method='delete']" # admin can delete tag
-    assert_link I18n.t('actions.new'), href: new_discipline_tag_path(@discipline) # admin can create new tag in discipline
+    assert_nav_button(:index_project, path: project_tags_path(@project), label: @project.code) # Link back to project tags index
+    assert_nav_button(:index_discipline, path: discipline_tags_path(@discipline), label: @discipline.name) # Link back to discipline tags index
+    assert_nav_button(:edit, path: edit_tag_path(@tag)) # admin can edit tag
+    assert_nav_button(:delete, path: tag_path(@tag)) # admin can delete tag
+    assert_nav_button(:new, path: new_discipline_tag_path(@discipline)) # admin can create new tag in discipline
   end
 
   test "accredited user viewing the tag new view" do
@@ -411,10 +444,8 @@ class TagsSystemTest < ApplicationSystemTestCase
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit project_tags_path(@project)
-     # Find the actual delete link and inspect its href
-    accept_confirm do
-      find("a[href='#{tag_path(@tag)}'][data-method='delete']").click
-    end
+    # Click the delete button - helper method has built in confirm.
+    click_delete(tag_path(@tag))
     assert_current_path discipline_tags_path(@discipline)
     refute_selector "a[href='#{tag_path(@tag)}']"
     assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.tag.one"))
@@ -422,13 +453,12 @@ class TagsSystemTest < ApplicationSystemTestCase
 
   test "admin destroy tag from the show view" do
     sign_in @admin
+
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit tag_path(@tag)
-     # Find the actual delete link and inspect its href
-    accept_confirm do
-      find("a[href='#{tag_path(@tag)}'][data-method='delete']").click
-    end
+    # Click the delete button - helper method has built in confirm.
+    click_delete(tag_path(@tag))
     assert_current_path discipline_tags_path(@discipline)
     refute_selector "a[href='#{tag_path(@tag)}']"
     assert_text I18n.t("flash.destroy.notice", resource_name: I18n.t("activerecord.models.tag.one"))
@@ -475,29 +505,6 @@ class TagsSystemTest < ApplicationSystemTestCase
   end
 
   private
-
-    def tag_index_field_assertions
-      # index search fields and sort link headers
-      assert_field "q[prefix_cont]"
-      assert_field "q[serial_eq]"
-      assert_field "q[service_cont]"
-      assert_field "q[location_cont]"
-      assert_field "q[notes_cont]"
-      assert_sort_link :stage, I18n.t("activerecord.attributes.tag.stage")
-      assert_sort_link :full_tag, I18n.t("activerecord.attributes.tag.full_tag")
-      assert_sort_link :service, I18n.t("activerecord.attributes.tag.service")
-      assert_sort_link :location, I18n.t("activerecord.attributes.tag.location")
-      assert_sort_link :tagable_type, I18n.t("activerecord.attributes.tag.tagable_type")
-
-      # index fields
-      assert_text @tag.stage
-      assert_text @tag.label
-      assert_text @tag.prefix
-      assert_text @tag.serial
-      assert_text @tag.service
-      assert_text @tag.location
-      assert_text @tag.tagable.model_name.human if @tag.tagable.present?
-    end
 
     def tag_form_field_assertions
       # Data fields

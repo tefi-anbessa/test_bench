@@ -15,6 +15,7 @@ class DocumentsSystemTest < ApplicationSystemTestCase
   def setup_model_specific_data
     @dt = create(:doc_type, discipline: @discipline)
     @resource = create(:document, doc_type: @dt, discipline: @discipline)
+    @resource2 = create(:document, doc_type: @dt, discipline: @discipline)
     @discipline_resource_index_header = I18n.t('documents.index.header', 
       scope_text: [@discipline.project.code, I18n.t("activerecord.models.discipline.one"), @discipline.long_label].join(' '))
     @project_resource_index_header = I18n.t('documents.index.header', 
@@ -38,7 +39,7 @@ class DocumentsSystemTest < ApplicationSystemTestCase
     # New and edit required separately because some models have read only fields that can't be edited.
     # Set a valid value for each field if required to be unique, set nil for factory default.
     # Document model has its own way to ensure uniqueness by setting serial internally.
-    @new_fields = {doc_type_id: nil, title: nil, notes: nil}
+    @new_fields = {doc_type: nil, title: nil, notes: nil}
     @edit_fields = {title: nil, notes: nil}
 
     # Set an attribute/s to be modified in edit test
@@ -48,5 +49,11 @@ class DocumentsSystemTest < ApplicationSystemTestCase
 
   def fill_in_model_specific_fields
     # No special fields in documents
+  end
+
+  test "model specific test setup is valid" do
+    assert @dt.valid?
+    assert @dt.persisted?
+    assert @resource2.serial > @resource.serial
   end
 end

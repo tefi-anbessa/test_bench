@@ -1,4 +1,9 @@
 class User < ApplicationRecord
+  # === Mixins ===
+
+  # === Constants ===
+
+  # === Gem macros ===
   rolify
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
@@ -7,6 +12,14 @@ class User < ApplicationRecord
          :confirmable, :lockable, #:trackable,
          authentication_keys: [:login]
 
+  # === Attributes ===
+  attr_writer :login
+
+  # === Associations ===
+
+  # === Scopes ===
+
+  # === Validations ===
   # only allow letter, number, underscore and punctuation.
   validates :name,
              presence: true,
@@ -19,17 +32,10 @@ class User < ApplicationRecord
                    format: { with: VALID_EMAIL_REGEX },
                    uniqueness: true
 
-  attr_writer :login
+  # === Callbacks ===
 
-#  def assign_default_role
-#    self.add_role(:default) if self.roles.blank?
-#  end
-
+  # === Class methods ===
   # from devise wiki for allowing alternate login keys (name or email)
-  def login
-    @login || self.name || self.email
-  end
-
   def self.find_for_database_authentication(warden_conditions)
     conditions = warden_conditions.dup
     if (login = conditions.delete(:login))
@@ -40,12 +46,25 @@ class User < ApplicationRecord
     end
   end
 
-  def self.ransackable_attributes(auth_object = nil)
-    ["name", "email", "created_at", "updated_at"]
+  # === Public methods ===
+  # from devise wiki for allowing alternate login keys (name or email)
+  def login
+    @login || self.name || self.email
   end
 
-  def self.ransackable_associations(auth_object = nil)
-    []
+  def label
+    name
   end
+
+  private
+  
+    # === Private methods ===
+    def self.ransackable_attributes(auth_object = nil)
+      ["name", "email", "created_at", "updated_at"]
+    end
+
+    def self.ransackable_associations(auth_object = nil)
+      []
+    end
 
 end

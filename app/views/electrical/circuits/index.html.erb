@@ -9,15 +9,9 @@
         <!-- Switchboard or Discipline link -->
         <div class="col-2">
           <% if @switchboard.present?%>
-            <%= link_to electrical_switchboard_path(@switchboard), class: "btn btn-sm btn-outline-info" do %>
-              <%= @switchboard.label %>
-              <%= bs_icon('box-arrow-in-up-left', class: "me-1") %>
-            <% end %>
+            <%= nav_button(action: :show, record: @switchboard) %>
           <% else %>
-            <%= link_to discipline_path(@discipline), class: "btn btn-sm btn-outline-info" do %>
-              <%= @discipline.name %>
-              <%= bs_icon('collection', class: "me-1") %>
-            <% end %>
+            <%= nav_button(action: :show_discipline, record: @discipline) %>
           <% end %>
         </div>
 
@@ -32,15 +26,8 @@
         <!-- New Button (Right) -->
         <div class="col-2 align-content-end">
           <% if @switchboard.present? && policy(@switchboard).new? %>
-              <%= link_to new_electrical_switchboard_circuit_path(@switchboard), 
-                class: "btn btn-sm btn-outline-primary actions",
-                aria: { label: t('actions.new') },
-                title: t('actions.new') do %>
-                <%== bs_icon('plus-square-fill') %>
-                <span class="ms-1">
-                  <%= [t('actions.new'), t('activerecord.models.electrical/circuit.one')].join(' ') %>
-                </span>
-              <% end %>
+            <%= nav_button(action: :new, path: new_electrical_switchboard_circuit_path(@switchboard),
+                record: Electrical::Circuit.new) %>
           <% end %>
         </div> 
       </div> <!-- row -->
@@ -60,13 +47,20 @@
           <% end %>
         <% end %>
       </div> <!-- end of search-form -->
+
+      <!-- Circuits -->
+      <!-- Policies for circuits are inherited from switchboard, and are invariable over the scope,
+      so no need to look up policy for each record. Use a dummy tag in the discipline. -->
+      <% can_show = policy(@discipline.tags.build()).show? %>
+      <% can_edit = policy(@discipline.tags.build()).edit? %>
+      <% can_delete = policy(@discipline.tags.build()).destroy? %>
       
       <table id='circuits' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
         <%= render 'header' %>
         <tbody>
           <!-- [TODO - orphans go here] -->
           <% @circuits.each do |row| %>
-            <%= render 'row', row: row %>
+            <%= render 'row', row: row, can_show: can_show, can_edit: can_edit, can_delete: can_delete %>
           <% end %>
         </tbody>
       </table>

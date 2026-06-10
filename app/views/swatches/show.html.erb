@@ -9,29 +9,11 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@swatch).index? %>
-              <%= link_to swatches_path,
-                    class: "btn btn-sm btn-outline-info me-2",
-                    title: t('actions.index') do %>
-                <%== bs_icon('list-columns-reverse') %>
-                <span class="d-none d-md-inline"><%= t('actions.index') %></span>
-              <% end %>
+              <%= nav_button(action: :index, path: swatches_path) %>
             <% end %>
 
             <!-- Previous Button -->
-            <% prev_swatch = @swatch.prev %>
-            <% if prev_swatch.present? %>
-              <% disabled = prev_swatch == @swatch %>
-              <% title_text = t('actions.previous') + ": " + prev_swatch.label %>
-              <%= link_to prev_swatch,
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
-                    title: title_text do %>
-                <%== bs_icon('box-arrow-in-left') %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.previous') %>
-                </span>
-              <% end %>
-            <% end %>
+            <%= nav_button(action: :previous, record: @neighbours[0]) %>
           </div>
         </div>
 
@@ -50,57 +32,20 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <% next_swatch = @swatch.next %>
-            <% if next_swatch.present? %>
-              <% title_text = t('actions.next') + ": " + next_swatch.label %>
-              <% disabled = next_swatch == @swatch %>
-              <%= link_to next_swatch,
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary me-2 #{'disabled' if disabled}",
-                    title: title_text do %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.next') %>
-                </span>
-                <%== bs_icon('box-arrow-in-right') %>
-              <% end %>
-            <% end %>
+            <%= nav_button(action: :next, record: @neighbours[1]) %>
 
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
               <% if policy(@swatch).edit? %>
-                <%= link_to edit_swatch_path(@swatch),
-                      class: "btn btn-outline-warning",
-                      title: t('actions.edit') do %>
-                  <%== bs_icon('pencil-square') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.edit') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :edit, record: @swatch, path: edit_swatch_path(@swatch)) %>
               <% end %>
 
               <% if policy(@swatch).destroy? %>
-                <%= link_to @swatch,
-                      method: :delete,
-                      data: { confirm: t('actions.delete_sure') },
-                      class: "btn btn-outline-danger",
-                      title: t('actions.delete') do %>
-                  <%== bs_icon('trash') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.delete') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :delete, record: @swatch) %>
               <% end %>
 
               <% if policy(@swatch).new? %>
-                <%= link_to new_swatch_path, 
-                  class: "btn btn-outline-primary actions",
-                  aria: { label: t('actions.new') },
-                  title: t('actions.new') do %>
-                  <%== bs_icon('plus-square-fill') %>
-                  <span class="ms-1">
-                    <%= [t('actions.new'), t('activerecord.models.swatch', count: 1)].join(' ') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :new, record: @swatch, path: new_swatch_path) %>
               <% end %>
             </div>
           </div>

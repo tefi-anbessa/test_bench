@@ -1,30 +1,33 @@
 # frozen_string_literal: true
 class Document < ApplicationRecord
+  # === Mixins ===
 
-  # Gem invocation
+  # === Constants ===
+
+  # === Gem macros ===
+  # Record all changes to this model's data
   has_paper_trail
 
-  # Scopes
-  # Default scope to sort by document number
-  default_scope { order(:doc_number) }
-
-  # Callbacks
-  around_create :set_document_number
-
-  # Associatons
-  belongs_to :discipline
-  delegate :project, to: :discipline
-  belongs_to :doc_type
-  has_many :issues, dependent: :destroy
-
-  # Validations
-  # Presence validation for required fields.
-  validates :title, presence: true, length: { maximum: 50 }
-  
+  # === Attributes ===
   # Lock discipline_id, doc_type_id, serial (therefore document number) after creation
   attr_readonly :discipline_id, :doc_type_id, :serial
 
-  # Class Methods
+  # === Associations ===
+  belongs_to :doc_type
+  belongs_to :discipline
+  has_one :project, through: :discipline
+  has_many :issues, dependent: :destroy
+
+  # === Scopes ===
+  # default_scope { order(:doc_number) }
+
+  # === Validations ===
+  validates :title, presence: true, length: { maximum: 50 }
+
+  # === Callbacks ===
+  around_create :set_document_number
+
+  # === Class methods ===
   def self.required_role
     :document_controller
   end
@@ -33,12 +36,18 @@ class Document < ApplicationRecord
     Swatch.find_by(name: "app_theme")
   end
 
-  # Default discipline to reference back to this module, used in testing. 
-  # Not used in the application, as projects can set their own disciplines.
-  def self.discipline
-    "Document Control"
+  # === Class methods - Queries ===
+  # Provide SQL for ordering documents in the navigator
+  def self.navigator_order_sql
+    <<~SQL.squish
+      projects.code ASC,
+      disciplines.sort_order ASC,
+      doc_types.code ASC,
+      documents.serial ASC
+    SQL
   end
 
+  # === Public methods ===
   def label
     doc_number
   end
@@ -49,6 +58,8 @@ class Document < ApplicationRecord
   end
 
   private
+
+    # === Private methods ===
     def set_document_number
       Document.transaction do
         # Lock existing records for this discipline/doc_type combination

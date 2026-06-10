@@ -36,6 +36,12 @@ module TestSetupHelpers
     @regular_user = create(:user)
   end
 
+  # Simple version for model and service tests that don't need users
+  def setup_projects
+    @project = create(:project)
+    @other_project = create(:project)
+  end
+
   def setup_disciplines(name: nil, required_role: :designer)
     # Priority 1: Use explicitly provided name
     # Priority 2: Try to find from resource_class
@@ -81,13 +87,16 @@ module TestSetupHelpers
 
   def setup_tags
     @tag = create(:tag, :unique_tag, discipline: @discipline, service: "Tag in current project")
+    @tag2 = create(:tag, :unique_tag, discipline: @discipline, service: "2nd tag in current project")
     @other_tag = create(:tag, :unique_tag, discipline: @other_discipline, service: "Tag in other project")
     @unassigned_tag = create(:tag, :unique_tag, discipline: @discipline, service: "Unassigned tag")
   end
 
   # Including class must implement resource_class method
+  # Must run setup_tags first
   def setup_tagable_resources
     @resource = create(resource_class.model_name.param_key, tag: @tag)
+    @resource2 = create(resource_class.model_name.param_key, tag: @tag2)
     @other_resource = create(resource_class.model_name.param_key, tag: @other_tag)
   end
 

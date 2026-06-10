@@ -22,6 +22,7 @@ module Electrical
     
     def show
       authorize @circuit.switchboard
+      @neighbours = Navigator.new(scope: @scope, record: @circuit).neighbours
       set_swatch
     end
     
@@ -206,6 +207,8 @@ module Electrical
               .find_by(id: params[:id])
         raise ApplicationController::ConflictError, :out_of_scope if @circuit.nil?
         @switchboard = @circuit.switchboard
+        @scope = @switchboard.circuits
+          .joins(switchboard: { tag: { discipline: :project } })
       end
 
       def set_swatch

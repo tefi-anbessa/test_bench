@@ -10,14 +10,17 @@ class ProjectsController < ApplicationController
   before_action :ensure_html_format, except: [ :show ]
   # GET /projects or /projects.json
   def index
-    authorize Project.new()
+    authorize Project
     @q = policy_scope(Project).ransack(params[:q])
     @pagy, @projects = pagy(@q.result.ordered, limit: 20)
+    # Permissions do not change for delete
+    @can_delete = policy(Project).destroy?
   end
 
   # GET /projects/1 or /projects/1.json
   def show
     authorize @project
+    @neighbours = Navigator.new(scope: @scope, record: @project).neighbours
     setup_user_roles
   end
 
@@ -117,10 +120,11 @@ class ProjectsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
+  
     def get_project
       @project = policy_scope(Project).find_by(id: params[:id])
       raise ApplicationController::ConflictError, :out_of_scope if @project.nil?
+      @scope = policy_scope(Project)
     end
 
     # Same as get_project but doesn't raise an error, just passes nil project.

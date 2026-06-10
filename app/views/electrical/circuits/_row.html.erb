@@ -28,35 +28,14 @@
   </td>
   <!-- Links -->
   <td>
-    <% if policy(row.switchboard).show? %>
-      <%= link_to row, class: "btn btn-outline-info btn-sm icon-link",
-            aria: { label: t('actions.show') },
-            title: t('actions.show'),
-            display: "inline" do %>
-              <%== bs_icon('eye') %>
-            <% end %>
+    <% if can_show %>
+      <%= nav_button(action: :show, record: row, icon_only: true) %>
     <% end %>
-        
-    <% if policy(row.switchboard).edit? %>
-      <%= link_to edit_electrical_circuit_path(row), class: "btn btn-outline-warning btn-sm icon-link",
-            aria: { label: t('actions.edit') },
-            title: t('actions.edit'),
-            display: "inline"  do %>
-              <%== bs_icon('pencil') %>
-            <% end %>
+    <% if can_edit %>
+      <%= nav_button(action: :edit, record: row, path: edit_electrical_circuit_path(row), icon_only: true) %>
     <% end %>
-        
-    <% if policy(row.switchboard).destroy? %>
-      <%= link_to row, 
-            method: :delete,
-            data: { 
-              turbo_method: :delete,
-              turbo_confirm: t('actions.sure')
-            },
-            class: "btn btn-outline-danger btn-sm icon-link",
-            title: t('actions.delete') do %>
-        <%== bs_icon('trash') %>
-      <% end %>
+    <% if can_delete %>
+      <%= nav_button(action: :delete, record: row, icon_only: true) %>
     <% end %>
   </td>
 </tr>

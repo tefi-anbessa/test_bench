@@ -9,28 +9,11 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@socket_cct).index? %>
-              <%= link_to discipline_electrical_socket_ccts_path(@discipline),
-                    class: "btn btn-sm btn-outline-info me-2",
-                    title: t('actions.index') do %>
-                <%== bs_icon('list-columns-reverse') %>
-                <span class="d-none d-md-inline"><%= t('actions.index') %></span>
-              <% end %>
+              <%= nav_button(action: :index, path: discipline_electrical_socket_ccts_path(@discipline), record: @socket_cct) %>
             <% end %>
 
             <!-- Previous Button -->
-            <% prev_socket_cct = @socket_cct.prev %>
-            <% if prev_socket_cct.present? %>
-              <% disabled = prev_socket_cct == @socket_cct %>
-              <%= link_to prev_socket_cct,
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
-                    title: "#{t('actions.previous')}: #{prev_socket_cct.label}" do %>
-                <%== bs_icon('box-arrow-in-left') %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.previous') %>
-                </span>
-              <% end %>
-            <% end %>
+            <%= nav_button(action: :previous, record: @neighbours[0]) %>
           </div> <!-- end d-flex align-items-center -->
         </div> <!-- end left column -->
 
@@ -46,60 +29,24 @@
           </div>
         </div>
 
-        <!-- Right Actions -->
+        <!-- Right Navigation and Actions -->
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <% next_socket_cct = @socket_cct.next %>
-            <% if next_socket_cct.present? %>
-              <% disabled = next_socket_cct == @socket_cct %>
-              <%= link_to next_socket_cct,
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary me-2 #{'disabled' if disabled}",
-                    title: "#{t('actions.next')}: #{next_socket_cct.label}" do %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.next') %>
-                </span>
-                <%== bs_icon('box-arrow-in-right') %>
-              <% end %>
-            <% end %>
+            <%= nav_button(action: :next, record: @neighbours[1]) %>
 
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
               <% if policy(@socket_cct).edit? %>
-                <%= link_to edit_electrical_socket_cct_path(@socket_cct),
-                      class: "btn btn-outline-warning",
-                      title: t('actions.edit') do %>
-                  <%== bs_icon('pencil-square') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.edit') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :edit, path: edit_electrical_socket_cct_path(@socket_cct), record: @socket_cct) %>
               <% end %>
 
               <% if policy(@socket_cct).destroy? %>
-                <%= link_to @socket_cct,
-                      method: :delete,
-                      data: { confirm: t('actions.delete_sure') },
-                      class: "btn btn-outline-danger",
-                      title: t('actions.delete') do %>
-                  <%== bs_icon('trash') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.delete') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :delete, path: electrical_socket_cct_path(@socket_cct), record: @socket_cct) %>
               <% end %>
 
               <% if policy(@socket_cct).new? %>
-                <%= link_to new_discipline_electrical_socket_cct_path(@discipline),
-                  class: "btn btn-outline-primary actions",
-                  aria: { label: t('actions.new') },
-                  title: t('actions.new') do %>
-                  <%== bs_icon('plus-square-fill') %>
-                  <span class="ms-1">
-                    <%= [t('actions.new'), t('activerecord.models.electrical/socket_cct.one')].join(' ') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :new, path: new_discipline_electrical_socket_cct_path(@discipline), record: @socket_cct) %>
               <% end %>
             </div> <!-- end button group -->
           </div> <!-- end d-flex -->

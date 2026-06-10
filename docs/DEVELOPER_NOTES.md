@@ -416,6 +416,9 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Fix error in doc_types system test (edit).
 - [ ] Refactor cable and cable type system tests after restructure to core.
 - [ ] Fix error in discipline system test where the test seems to be building new disciplines.
+- [ ] Write a test for collapsible on attribute rather than association (specifically discipline prefix schema).
+- [ ] Decide what to do about deletion of data. It is affecting many aspects of the architecture.
+- [ ] Complete demand system test after refactor.
 
 ## Refactoring Opportunities
 
@@ -480,7 +483,10 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Prettification.
 - [ ] Refactor collapsible component to use only stimulus js.
 - [ ] Consider expanding scope for models to include all projects for which user has a role.
-- [ ] Migrate i18n translations to a database system rather than .YAML.
+- [ ] Migrate i18n translations to a database system rather than YAML.
+- [ ] Refactor documents to normalize discipline: remove fk and associate discipline through doc_type.
+- [ ] Ditto cables: remove fk and associate discipline through cable_type. At the same time, sort out a decent label and add unique constraint on code.
+- [ ] Refactor show views using standardised attributes helper.
 
 ## Potential Features
 
@@ -502,6 +508,8 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Allow projects to add role names.
 - [ ] Add a generator for scaffolding nested models.
 - [ ] Add a "locator" so accessing index view from show view centres the index on the present record.
+- [ ] Add a clear search button for index views. Add hover title for search button.
+- [ ] Add highlight to search results for all index views (refer projects).
 
 ## Architecture Considerations
 
@@ -519,5 +527,5 @@ It is possible to create multiple tags referencing the same tagable element, des
 
 ## Glossary
 
-Resource: In rails, resource often refers to an abstracted model. In this application, resource more often refers to an abstracted tagable model. Context should clarify which meaning is intended.
-Record: Resource instance. Used internally in Pundit.
+Resource: In rails, resource usually refers to an abstracted model. In this application, resource more often refers to an abstracted tagable model. Context should clarify which meaning is intended.
+Record: Resource instance. Used very specifically internally in Pundit.

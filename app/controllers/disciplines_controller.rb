@@ -10,15 +10,18 @@ class DisciplinesController < ApplicationController
 
   # GET /disciplines or /disciplines.json
   def index
-    @q = policy_scope(Discipline).ransack(params[:q])
+    authorize Discipline
+    @scope = policy_scope(Discipline).joins(:project)
+    @q = @scope.ransack(params[:q])
     @pagy, @disciplines = pagy(@q.result, limit: 20)
     @discipline = @project.disciplines.build()
-    authorize @discipline
   end
 
   # GET /disciplines/1 or /disciplines/1.json
   def show
     authorize @discipline
+    @scope = policy_scope(Discipline).joins(:project)
+    @neighbours = Navigator.new(scope: @scope, record: @discipline).neighbours
     setup_dashboard
   end
 
@@ -106,6 +109,7 @@ class DisciplinesController < ApplicationController
       @discipline = policy_scope(Discipline).find_by(id: params[:id])
       raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
       @project = @discipline.project
+      @scope = policy_scope(Discipline).joins(:project)
     end
 
     def set_swatch

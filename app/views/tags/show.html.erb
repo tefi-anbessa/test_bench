@@ -8,33 +8,13 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Index Buttons -->
-            <%= link_to project_tags_path(@discipline.project),
-                  class: "btn btn-sm btn-outline-secondary me-2",
-                  title: t('actions.index') do %>
-              <%== bs_icon('layers') %>
-              <span class="d-none d-md-inline"><%= [@discipline.project.label, t('actions.index')].join(' ') %></span>
-            <% end %>
-            <%= link_to discipline_tags_path(@discipline),
-                  class: "btn btn-sm btn-outline-secondary me-2",
-                  title: t('actions.index') do %>
-              <%== bs_icon('collection') %>
-              <span class="d-none d-md-inline"><%= [@discipline.code, t('actions.index')].join(' ') %></span>
+            <% if policy(Tag).index? %>
+              <%= nav_button(action: :index_project, path: project_tags_path(@discipline.project), record: @tag) %>
+              <%= nav_button(action: :index_discipline, path: discipline_tags_path(@discipline), record: @tag) %>
             <% end %>
 
             <!-- Previous Button -->
-            <% disabled = @neighbours[0].nil? %>
-            <% text = disabled ? t("actions.previous") : [t("actions.previous"), @neighbours[0].full_tag].join(": ") %>
-            <%= link_to disabled ? '#' : tag_path(@neighbours[0]),
-                  disabled: disabled,
-                  class: "btn btn-sm btn-outline-secondary
-                    #{'disabled' if disabled}",
-                  title: text,
-                  aria: { label: text, disabled: disabled } do %>
-              <%== bs_icon('box-arrow-in-left') %>
-              <span class="d-none d-md-inline">
-                <%= t('actions.previous') %>
-              </span>
-            <% end %>
+            <%= nav_button(action: :previous, record: @neighbours[0]) %>
           </div>
         </div>
 
@@ -53,55 +33,20 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <% disabled = @neighbours[1].nil? %>
-            <% text = disabled ? 't("actions.next")' : [t("actions.next"), @neighbours[1].full_tag].join(": ") %>
-            <%= link_to disabled ? '#' : tag_path(@neighbours[1]),
-                  disabled: disabled,
-                  class: "btn btn-sm btn-outline-secondary
-                    me-2 #{'disabled' if disabled}",
-                  aria: { label: text, disabled: disabled },
-                  title: text do %>
-              <span class="d-none d-md-inline">
-                <%= t('actions.next') %>
-              </span>
-              <%== bs_icon('box-arrow-in-right') %>
-            <% end %>
+            <%= nav_button(action: :next, record: @neighbours[1]) %>
 
             <!-- Action Buttons -->
-            <div class="btn-group btn-group-sm gap-1">
+            <div class="btn-group btn-group-sm">
               <% if policy(@tag).edit? %>
-                <%= link_to edit_tag_path(@tag),
-                      class: "btn btn-outline-warning",
-                      title: t('actions.edit') do %>
-                  <%== bs_icon('pencil-square') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.edit') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :edit, path: edit_tag_path(@tag), record: @tag) %>
               <% end %>
+              
               <% if policy(@tag).destroy? %>
-                <%= link_to @tag,
-                      method: :delete,
-                      data: { confirm: t('actions.delete_sure') },
-                      class: "btn btn-outline-danger",
-                      title: t('actions.delete') do %>
-                  <%== bs_icon('trash') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.delete') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :delete, path: tag_path(@tag), record: @tag) %>
               <% end %>
 
               <% if policy(@tag).new? %>
-                <%= link_to new_discipline_tag_path(@discipline), 
-                  class: "btn btn-outline-primary actions",
-                  aria: { label: t('actions.new') },
-                  title: t('actions.new') do %>
-                  <%== bs_icon('plus-square-fill') %>
-                  <span class="ms-1">
-                    <%= [t('actions.new'), t('activerecord.models.tag', count: 1)].join(' ') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :new, path: new_discipline_tag_path(@discipline), record: @tag) %>
               <% end %>
             </div> <!-- button group -->
           </div> <!-- d-flex align-items-center -->
@@ -174,7 +119,7 @@
                       <%= link_to @tag.tagable,
                             class: "btn btn-sm btn-outline-secondary mb-2",
                             title: t('show.linked', model: text) do %>
-                              <%== bs_icon('box-arrow-down-right') %>
+                              <%= bs_icon('box-arrow-down-right') %>
                               <span class="d-none d-md-inline"><%= t('show.linked', model: text) %></span>
                           <% end %>
                     </div>
@@ -193,7 +138,7 @@
                           <%= link_to eval("new_tag_#{resource}_path(#{@tag.id})"),
                                 class: "btn btn-sm btn-outline-primary mb-2",
                                 title: t('actions.link', resource: text) do %>
-                                  <%== bs_icon('link') %>
+                                  <%= bs_icon('link') %>
                                   <span class="d-none d-md-inline">
                                     <%= t('actions.link', resource: text) %>
                                   </span>

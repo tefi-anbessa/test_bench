@@ -1,47 +1,30 @@
 <tr scope="row">
   <% unless @project.present? %>
-    <td><%= t.project.label %></td>
+    <td><%= row.project.label %></td>
   <% end %>
-  <td><%= t.stage %></td>
-  <td><%= t.long_label %></td>
+  <td><%= row.stage %></td>
+  <td><%= row.long_label %></td>
   <td>
-    <span title="<%= t.notes %>">
-      <%= truncate(strip_tags(t.notes.to_s), length: 20) %>
+    <span title="<%= row.notes %>">
+      <%= truncate(strip_tags(row.notes.to_s), length: 20) %>
     </span>
   </td>
-  <td><%= t.service %></td>
-  <td><%= t.location %></td>
-  <td><%= t.parent.present? ? link_to(t.parent.long_label, t.parent) : "-" %></td>
-  <td><%= t.children.count %></td>
+  <td><%= row.service %></td>
+  <td><%= row.location %></td>
+  <td><%= row.parent.present? ? link_to(row.parent.long_label, row.parent) : "-" %></td>
+  <td><%= row.children.count %></td>
   <td>
-    <%= render "tags/tagable_link", t: t, view: "index" %>
+    <%= render "tags/tagable_link", row: row, view: "index" %>
   </td>
   <td>
-    <% if policy(t).show? %>
-      <%= link_to t, class: "btn btn-outline-info btn-sm icon-link",
-            aria: { label: t('actions.show') },
-            title: t('actions.show'),
-            display: "inline" do %>
-        <%== bs_icon('eye') %>
-      <% end %>
+    <% if policy(row).show? %>
+      <%= nav_button(action: :show, record: row, icon_only: true) %>
     <% end %>
-    <% if policy(t).edit? %>
-      <%= link_to edit_tag_path(t), class: "btn btn-outline-warning btn-sm icon-link",
-            aria: { label: t('actions.edit') },
-            title: t('actions.edit'),
-            display: "inline"  do %>
-        <%== bs_icon('pencil') %>
-      <% end %>
+    <% if policy(row).edit? %>
+      <%= nav_button(action: :edit, record: row, path: edit_tag_path(row), icon_only: true) %>
     <% end %>
-    <% if policy(t).destroy? %>
-    <%= link_to t, 
-          data: { method: :delete, confirm: t('actions.delete_sure') },
-          class: "btn btn-outline-danger btn-sm icon-link",
-          aria: { label: t('actions.delete') },
-          title: t('actions.delete'),
-          display: "inline"  do %>
-        <%== bs_icon('trash') %>
-      <% end %>
+    <% if policy(row).destroy? %>
+      <%= nav_button(action: :delete, record: row, icon_only: true) %>
     <% end %>
   </td>
 </tr>

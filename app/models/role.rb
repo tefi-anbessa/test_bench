@@ -1,28 +1,32 @@
 class Role < ApplicationRecord
+  # === Mixins ===
+
+  # === Constants ===
+
+  # === Gem macros ===
   resourcify
-  
-    # Default scope to sort by resource_type (with nil first), then by resource_id, and finally by name
-    # This helps maintain consistent pagination while the exact label-based sort is handled in the controller
-    default_scope { 
-      order(
-        Arel.sql('CASE WHEN resource_type IS NULL THEN 0 ELSE 1 END'), 
-        :resource_type,
-        :resource_id,
-        :name
-      ) 
-    }
-  
+
+  # === Attributes ===
+
+  # === Associations ===
   # This sets up the many-to-many relationship with users through the users_roles join table
   has_and_belongs_to_many :users, join_table: :users_roles, class_name: 'User'
+  belongs_to :resource, polymorphic: true, optional: true
 
-  belongs_to :resource,
-             polymorphic: true,
-             optional: true
+  # === Scopes ===
+  # Default scope to sort by resource_type (with nil first), then by resource_id, and finally by name
+  # This helps maintain consistent pagination while the exact label-based sort is handled in the controller
+  default_scope { 
+    order(
+      Arel.sql('CASE WHEN resource_type IS NULL THEN 0 ELSE 1 END'), 
+      :resource_type,
+      :resource_id,
+      :name
+    ) 
+  }
 
-  validates :resource_type,
-            inclusion: { in: Rolify.resource_types },
-            allow_nil: true
-            
+  # === Validations ===
+  validates :resource_type, inclusion: { in: Rolify.resource_types }, allow_nil: true
   # Role validation
   validates :name, 
             presence: { message: :blank },
@@ -34,7 +38,10 @@ class Role < ApplicationRecord
               in: ->(role) { valid_roles_for(role.resource_type) },
               message: :invalid
             }
-            
+
+  # === Callbacks ===
+
+  # === Class methods ===         
   # Class methods for role queries
   class << self
     # Get valid roles for a resource type
@@ -99,28 +106,32 @@ class Role < ApplicationRecord
     end
   end
 
-  def self.ransackable_attributes(auth_object = nil)
-    ["name", "id"]
-  end
+  # === Public methods ===
 
-  def self.ransackable_associations(auth_object = nil)
-    ["users", "resource"]
-  end
+  private
 
-  # Get all roles for a specific resource class
-  # @param resource_class [Class, String, Symbol] The resource class or type name
-  # @return [Array<String>] Array of role names for the resource
-  def self.for_resource(resource_class)
-    resource_type = resource_class.is_a?(Class) ? resource_class.name : resource_class
-    valid_roles_for(resource_type)
-  end
+  # === Private methods ===
+    def self.ransackable_attributes(auth_object = nil)
+      ["name", "id"]
+    end
 
-  # Get all roles for the current resource type
-  # @param klass [Class] The resource class
-  # @return [Array<String>] Array of role names for the resource
-  def self.for_resource_class(klass)
-    valid_roles_for(klass.name)
-  end
+    def self.ransackable_associations(auth_object = nil)
+      ["users", "resource"]
+    end
+    
+    # === Private Class methods ===  
+    # Get all roles for a specific resource class
+    # @param resource_class [Class, String, Symbol] The resource class or type name
+    # @return [Array<String>] Array of role names for the resource
+    def self.for_resource(resource_class)
+      resource_type = resource_class.is_a?(Class) ? resource_class.name : resource_class
+      valid_roles_for(resource_type)
+    end
 
-#  scopify
+    # Get all roles for the current resource type
+    # @param klass [Class] The resource class
+    # @return [Array<String>] Array of role names for the resource
+    def self.for_resource_class(klass)
+      valid_roles_for(klass.name)
+    end
 end

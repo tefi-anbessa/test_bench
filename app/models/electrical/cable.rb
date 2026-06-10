@@ -3,7 +3,6 @@
 module Electrical
   class Cable < Base
     include ::Tagable
-    include TagableNavigation
 
     # Default scope to sort by tag's loop_id, prefix, and suffix
     # default_scope { includes(:tag).order('tags.loop_id', 'tags.prefix', 'tags.suffix') }

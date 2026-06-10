@@ -5,22 +5,13 @@
     <div class="card-header p-1" style="<%= card_header_styles(@swatch) %>">
       <div class="row align-items-center p-2">
 
-        <!-- Discipline or project link -->
+        <!-- Discipline and project links -->
         <div class="col-2">
           <% if @discipline.present? %>
-            <%= link_to project_path(@discipline.project), class: "btn btn-sm btn-outline-info" do %>
-              <%= @discipline.project.label %>
-              <%= bs_icon('layers', class: "me-1") %>
-            <% end %>
-            <%= link_to discipline_path(@discipline), class: "btn btn-sm btn-outline-info" do %>
-              <%= @discipline.name %>
-              <%= bs_icon('collection', class: "me-1") %>
-            <% end %>
+            <%= nav_button(action: :show_project, record: @discipline.project) %>
+            <%= nav_button(action: :show_discipline, record: @discipline) %>
           <% elsif @project.present? %>
-            <%= link_to project_path(@project), class: "btn btn-sm btn-outline-info" do %>
-              <%= @project.label %>
-              <%= bs_icon('layers', class: "me-1") %>
-            <% end %>
+            <%= nav_button(action: :show_project, record: @project) %>
           <% end %>
         </div>
 
@@ -37,13 +28,7 @@
         <!-- New Button (Right) -->
         <div class="col-2 align-content-end">
           <% if @discipline.present? && policy(@discipline.tags.build()).new? %>
-              <%= link_to new_discipline_tag_path(@discipline),
-                class: "btn btn-sm btn-outline-primary actions",
-                aria: { label: t('actions.new') },
-                title: t('actions.new') do %>
-                <%== bs_icon('plus-square-fill') %>
-                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.tag.one')].join(' ') %></span>
-              <% end %>
+            <%= nav_button(action: :new, path: new_discipline_tag_path(@discipline), record: Tag.new) %>
           <% end %>
         </div>
       </div> <!-- end of row -->
@@ -97,8 +82,8 @@
               </td>
             </tr>
           <% end %>
-          <% @tags.each do |t| %>
-            <%= render 'row', t: t %>
+          <% @tags.each do |row| %>
+            <%= render 'row', row: row %>
           <% end %>
         </tbody>
       </table>

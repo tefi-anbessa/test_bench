@@ -21,27 +21,14 @@
   <%- end -%>
   <td>
     <%% if policy(row).show? %>
-      <%%= link_to row, class: "btn btn-outline-info btn-sm icon-link",
-            aria: { label: t('actions.show') },
-            title: t('actions.show') do %>
-        <%%== bs_icon('eye') %>
-      <%% end %>
+      <%%= nav_button(action: :show, record: row, icon_only: true) %>
     <%% end %>
     <%% if policy(row).edit? %>
-      <%%= link_to edit_<%= singular_table_name %>_path(row), class: "btn btn-outline-warning btn-sm icon-link",
-            aria: { label: t('actions.edit') },
-            title: t('actions.edit') do %>
-        <%%== bs_icon('pencil') %>
-      <%% end %>
+      <%%= nav_button(action: :edit, record: row, path: edit_<%= singular_table_name %>_path(row), icon_only: true) %>
     <%% end %>
     <%% if policy(row).destroy? %>
-    <%%= link_to row,
-            data: { method: :delete, confirm: t('actions.delete_sure') },
-            class: "btn btn-outline-danger btn-sm icon-link",
-            aria: { label: t('actions.delete') },
-            title: t('actions.delete') do %>
-        <%%== bs_icon('trash') %>
-      <%% end %>
+      <%%= nav_button(action: :destroy, record: row, icon_only: true) %>
     <%% end %>
   </td>
 </tr>
+       

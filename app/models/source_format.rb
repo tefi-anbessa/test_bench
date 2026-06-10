@@ -6,36 +6,51 @@
 # Avoid using the reverse relationship, unless project context is carefully managed.
 class SourceFormat < ApplicationRecord
 
-# Associatons
-has_many :issues
+  # === Mixins ===
 
-# Presence validation for required fields.
-validates :title, presence: true, length: { maximum: 50 }
+  # === Constants ===
 
-# Uniqueness validation for unique fields.
-validates :revision, uniqueness: { scope: :title }, length: { maximum: 20 }
+  # === Gem macros ===
 
-validates :file_extension, length: { maximum: 10 }, format: { with: /\A\./ }
-  
-def label
-  "#{title} #{revision}"
-end
+  # === Attributes ===
 
-def self.required_role
-  :document_controller
-end
+  # === Associations ===
+  has_many :issues
 
-def self.swatch
-  Swatch.find_by(name: "app_theme")
-end
+  # === Scopes ===
 
-private
+  # === Validations ===
+  validates :title, presence: true, length: { maximum: 50 }
 
-  def self.ransackable_attributes(auth_object = nil)
-    [:vendor, :title, :file_extension, :revision, :notes, :created_at, :updated_at]
+  # Uniqueness validation for unique fields.
+  validates :revision, uniqueness: { scope: :title }, length: { maximum: 20 }
+  validates :file_extension, length: { maximum: 10 }, format: { with: /\A\./ }
+
+  # === Callbacks ===
+
+  # === Class methods ===
+  def self.swatch
+    Swatch.find_by(name: "app_theme")
   end
 
-  def self.ransackable_associations(auth_object = nil)
-    [ :issues ]
+  def self.required_role
+    :document_controller
   end
+
+  # === Public methods ===
+  def label
+    "#{title} #{revision}"
+  end
+
+  # === Private methods ===
+
+  private
+
+    def self.ransackable_attributes(auth_object = nil)
+      [:vendor, :title, :file_extension, :revision, :notes, :created_at, :updated_at]
+    end
+
+    def self.ransackable_associations(auth_object = nil)
+      [ :issues ]
+    end
 end

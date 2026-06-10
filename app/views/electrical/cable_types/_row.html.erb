@@ -11,28 +11,13 @@
   <td><%= row.code %></td>
   <td>
     <% if policy(row).show? %>
-      <%= link_to electrical_cable_type_path(row), class: "btn btn-outline-info btn-sm icon-link",
-            aria: { label: t('actions.show') },
-            title: t('actions.show'),
-            display: "inline" do %>
-        <%== bs_icon('eye') %>
-      <% end %>
+      <%= nav_button(action: :show, record: row, icon_only: true) %>
     <% end %>
     <% if policy(row).edit? %>
-      <%= link_to edit_electrical_cable_type_path(row), class: "btn btn-outline-warning btn-sm icon-link",
-            aria: { label: t('actions.edit') },
-            title: t('actions.edit'),
-            display: "inline"  do %>
-        <%== bs_icon('pencil') %>
-      <% end %>
+      <%= nav_button(action: :edit, record: row, path: edit_electrical_cable_type_path(row), icon_only: true) %>
     <% end %>
     <% if policy(row).destroy? %>
-      <%= link_to electrical_cable_type_path(row), method: :delete, class: "btn btn-outline-danger btn-sm icon-link",
-            aria: { label: t('actions.delete') },
-            title: t('actions.delete'),
-            display: "inline"  do %>
-        <%== bs_icon('trash') %>
-      <% end %>
+      <%= nav_button(action: :delete, record: row, icon_only: true) %>
     <% end %>
   </td>
 </tr>

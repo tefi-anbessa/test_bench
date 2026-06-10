@@ -16,6 +16,8 @@ module Electrical
     def setup_model_specific_data
       @tag.update(prefix: "EL")
       @tag.reload
+      @tag2.update(prefix: "EL")
+      @tag2.reload
       @unassigned_tag.update(prefix: "EL")
       @unassigned_tag.reload
       # List fields that should appear in index. 
@@ -28,7 +30,7 @@ module Electrical
       @show_fields = [:socket_type, :quantity, :notes]
 
       # List all associations that should have a collapsible card on the show view
-      @show_associations = [:tag]
+      @show_associations = [:tag, :electrical_demand]
 
       # List all fields that should appear in forms (should be all)
       @new_fields = {socket_type: nil, quantity: nil, notes: nil}

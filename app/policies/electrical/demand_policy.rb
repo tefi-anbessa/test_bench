@@ -26,7 +26,8 @@ module Electrical
           scope.joins('INNER JOIN tags ON electrical_demands.demandable_type = tags.tagable_type AND 
               electrical_demands.demandable_id = tags.tagable_id')
               .joins('INNER JOIN disciplines ON tags.discipline_id = disciplines.id')
-              .where(disciplines: { project_id: current_project.id })
+              .joins('INNER JOIN projects ON disciplines.project_id = projects.id')
+              .where(projects: { id: current_project.id })
         elsif user&.is_admin? || user&.is_app_owner?
           scope.all
         else

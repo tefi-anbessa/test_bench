@@ -13,8 +13,10 @@ class DocTypesSystemTest < ApplicationSystemTestCase
   end
 
   def setup_model_specific_data
-    @accredited_user.grant(:document_controller, @discipline)
+    @accredited_user.grant(:document_controller, @project)
     @resource = create(:doc_type, discipline: @discipline)
+    # Factory should sequence code
+    @resource2 = create(:doc_type, discipline: @discipline)
     @discipline_resource_index_header = I18n.t('doc_types.index.header', 
       scope_text: [@discipline.project.code, I18n.t("activerecord.models.discipline.one"), @discipline.long_label].join(' '))
     @project_resource_index_header = I18n.t('doc_types.index.header', 
@@ -33,12 +35,15 @@ class DocTypesSystemTest < ApplicationSystemTestCase
     # List all fields that should appear in show (should be all)
     @show_fields = [:code, :name, :description]
 
+    # List all associations that should have a collapsible card on the show view
+    @show_associations = []
+
     # List all fields that should appear in forms (usually all).
     # New and edit required separately because some models have read only fields that can't be edited.
     # Set a valid value for each field if required to be unique, set nil for factory default.
     # Document model has its own way to ensure uniqueness by setting serial internally.
-    @new_fields = {code: @resource.code.succ, name: nil, description: nil}
-    @edit_fields = {code: @resource.code.succ, name: nil, description: nil}
+    @new_fields = {code: @resource2.code.succ, name: nil, description: nil}
+    @edit_fields = {code: @resource2.code.succ, name: nil, description: nil}
 
     # Set an attribute/s to be modified in edit test
     # Only working with text fields at present
@@ -47,6 +52,10 @@ class DocTypesSystemTest < ApplicationSystemTestCase
   
   def fill_in_model_specific_fields
     # No special fields in doc types
+  end
+
+  test "model specific test setup is valid" do
+    assert @resource2.code > @resource.code
   end
 
   # team_member cannot see doc_types except in selectors.

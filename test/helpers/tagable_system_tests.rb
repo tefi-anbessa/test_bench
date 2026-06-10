@@ -15,6 +15,32 @@ module TagableSystemTests
 
   # Tests
 
+  def test_setup_is_valid
+    assert @project.valid?
+    assert @project.persisted?
+    assert @discipline.valid?
+    assert @discipline.persisted?
+    assert @admin.valid?
+    assert @admin.persisted?
+    assert @project_manager.valid?
+    assert @project_manager.persisted?
+    assert @team_member.valid?
+    assert @team_member.persisted?
+    assert @regular_user.valid?
+    assert @regular_user.persisted?
+    assert @accredited_user.valid?
+    assert @accredited_user.persisted?
+    assert @tag.valid?
+    assert @tag.persisted?
+    assert @tag2.valid?
+    assert @tag2.persisted?
+    assert @resource.valid?
+    assert @resource.persisted?
+    assert @resource2.valid?
+    assert @resource2.persisted?
+    assert (@resource2.full_tag > @resource.full_tag)
+  end
+
   def test_unauthenticated_users
     visit root_url
     refute_selector "a[href='projects_url']"
@@ -34,18 +60,17 @@ module TagableSystemTests
     end
     assert_current_path project_path(@project)
 
-    find("a[href='#{discipline_path(@discipline)}']", text: I18n.t("actions.show")).click
+    find("#discipline-#{@discipline.id}").click
     assert_current_path discipline_path(@discipline)
 
     find("a[href='#{discipline_resource_index_path(@discipline)}']").click
     assert_current_path discipline_resource_index_path(@discipline)
 
+    assert_nav_button(:show, @resource)
     # Variable assertions
-    assert_selector "a[href='#{discipline_path(@discipline)}']" # Link back to discipline show view
     refute_selector "a[href='#{new_discipline_resource_path(@discipline)}']" # Link to new resource
-    assert_selector "a[href='#{resource_path(@resource)}']" # Link to resource show view
     refute_selector "a[href='#{edit_resource_path(@resource)}']" # team member cannot edit resource
-    refute_selector "a[href='#{resource_path(@resource)}'][data-method='delete']" # team member cannot delete resource
+    refute_delete(resource_path(@resource)) # team member cannot delete resource
 
     discipline_resource_index_assertions
   end
@@ -58,11 +83,11 @@ module TagableSystemTests
     assert_current_path discipline_resource_index_path(@discipline)
 
     # Variable assertions
-    assert_selector "a[href='#{discipline_path(@discipline)}']" # Link back to discipline show view
-    assert_selector "a[href='#{new_discipline_resource_path(@discipline)}']" # Link to new resource
-    assert_selector "a[href='#{resource_path(@resource)}']" # Link to resource show view
-    assert_selector "a[href='#{edit_resource_path(@resource)}']" # accredited user can edit resource
-    refute_selector "a[href='#{resource_path(@resource)}'][data-method='delete']" # accredited user cannot delete resource
+    assert_nav_button(:new, path: new_discipline_resource_path(@discipline)) # Link to new resource
+    assert_nav_button(:edit, @resource, path: edit_resource_path(@resource), icon_only: true) # accredited user can edit resource
+    refute_delete(resource_path(@resource)) # accredited user cannot delete resource
+
+    discipline_resource_index_assertions
   end
 
   def test_admin_view_index
@@ -73,11 +98,11 @@ module TagableSystemTests
     assert_current_path discipline_resource_index_path(@discipline)
 
     # Variable assertions
-    assert_selector "a[href='#{discipline_path(@discipline)}']" # Link back to discipline show view
-    assert_selector "a[href='#{new_discipline_resource_path(@discipline)}']" # Link to new resource
-    assert_selector "a[href='#{resource_path(@resource)}']" # Link to resource show view
-    assert_selector "a[href='#{edit_resource_path(@resource)}']" # admin can edit resource
-    assert_selector "a[href='#{resource_path(@resource)}'][data-method='delete']" # admin can delete resource
+    assert_nav_button(:new, path: new_discipline_resource_path(@discipline)) # Link to new resource
+    assert_nav_button(:edit, @resource, path: edit_resource_path(@resource), icon_only: true) # admin can edit resource
+    assert_nav_button(:delete, @resource, icon_only: true) # admin can delete resource
+
+    discipline_resource_index_assertions
   end
 
   def test_team_member_navigating_to_the_resource_show_view
@@ -89,13 +114,37 @@ module TagableSystemTests
     assert_current_path resource_path(@resource)
 
     # Variable assertions
-    assert_selector "a[href='#{discipline_resource_index_path(@discipline)}']"# Link back to discipline resource index
     refute_selector "a[href='#{edit_resource_path(@resource)}']" # edit resource
-    refute_selector "a[href='#{resource_path(@resource)}'][data-method='delete']" # delete resource
+    refute_delete(resource_path(@resource)) # delete resource
     refute_selector "a[href='#{new_discipline_resource_path(@discipline)}']" # Link to new resource
-    # [TODO] test prev and next buttons
+    
+    # Test prev and next buttons
+    assert_nav_button_disabled(:previous)
+    assert_nav_button(:next, @resource2)
 
-    show_assertions
+    tagable_show_assertions
+  end
+
+  def test_team_member_test_next_and_previous_buttons
+    sign_in @team_member
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit resource_path(@resource)
+    assert_current_path resource_path(@resource)
+    
+    # Header bar should include disabled previous button and enabled next button
+    assert_nav_button_disabled(:previous)
+    assert_nav_button(:next, @resource2)
+    
+    click_link I18n.t('actions.next')
+    assert_current_path resource_path(@resource2)
+
+    # Header bar should include enabled previous button and disabled next button
+    assert_nav_button(:previous, @resource)
+    assert_nav_button_disabled(:next)
+
+    click_link I18n.t('actions.previous')
+    assert_current_path resource_path(@resource)
   end
 
   def test_accredited_user_resource_show_view
@@ -106,10 +155,11 @@ module TagableSystemTests
     assert_current_path resource_path(@resource)
 
     # Variable assertions
-    assert_selector "a[href='#{discipline_resource_index_path(@discipline)}']" # Discipline resource index
-    assert_selector "a[href='#{edit_resource_path(@resource)}']"
-    refute_selector "a[href='#{resource_path(@resource)}'][data-method='delete']"
-    assert_selector "a[href='#{new_discipline_resource_path(@discipline)}']"
+    assert_nav_button(:edit, @resource, path: edit_resource_path(@resource))
+    refute_delete(resource_path(@resource))
+    assert_nav_button(:new, @resource, path: new_discipline_resource_path(@discipline))
+
+    tagable_show_assertions
   end
 
   def test_admin_resource_show_view
@@ -120,10 +170,11 @@ module TagableSystemTests
     assert_current_path resource_path(@resource)
 
     # Variable assertions
-    assert_selector "a[href='#{discipline_resource_index_path(@discipline)}']" # Discipline resource index
-    assert_selector "a[href='#{edit_resource_path(@resource)}']"
-    assert_selector "a[href='#{resource_path(@resource)}'][data-method='delete']"
-    assert_selector "a[href='#{new_discipline_resource_path(@discipline)}']"
+    assert_nav_button(:edit, @resource, path: edit_resource_path(@resource))
+    assert_nav_button(:delete, @resource)
+    assert_nav_button(:new, @resource, path: new_discipline_resource_path(@discipline))
+
+    tagable_show_assertions
   end
 
   def test_accredited_user_navigating_to_new_resource_view_from_show
@@ -254,10 +305,8 @@ module TagableSystemTests
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit discipline_resource_index_path(@discipline)
     assert_current_path discipline_resource_index_path(@discipline)
-    # Find the actual delete link and inspect its href
-    accept_confirm do
-      find("a[href='#{resource_path(@resource)}'][data-method='delete']").click
-    end
+
+    click_delete(resource_path(@resource))
     assert_current_path discipline_resource_index_path(@discipline)
     refute_selector "a[href='#{resource_path(@resource)}']"
     assert_text I18n.t("flash.destroy.notice", resource_name: @resource.model_name.human)
@@ -271,10 +320,8 @@ module TagableSystemTests
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit resource_path(@resource)
     assert_current_path resource_path(@resource)
-    # Find the delete link and click it
-    accept_confirm do
-      find("a[href='#{resource_path(@resource)}'][data-method='delete']").click
-    end
+    
+    click_delete(resource_path(@resource))
     assert_current_path discipline_resource_index_path(@discipline)
     refute_selector "a[href='#{resource_path(@resource)}']"
     assert_text I18n.t("flash.destroy.notice", resource_name: @resource.model_name.human)
@@ -292,6 +339,9 @@ module TagableSystemTests
           I18n.t("activerecord.models.discipline.one"), 
           @discipline.code].join(' '))
       assert page.title.include?(I18n.t("#{view_key}.index.title"))
+
+      assert_nav_button(:show_discipline, @discipline) # Link back to discipline show view
+      assert_nav_button(:show, @resource, icon_only: true) # Link to resource show view
       
       index_field_assertions
     end
@@ -300,5 +350,33 @@ module TagableSystemTests
       # Additional model specific requirements for filling the form that cannot be handled 
       # from the field type alone. These should be excluded from the new_fields list and tested
       # in the model system test.
+    end
+
+    # Same as system test helpers show assertions, with different index back link. Opportunity to DRY this.
+    def tagable_show_assertions
+      assert_text I18n.t("#{view_key}.show.header", label: @resource.long_label)
+      assert page.title.include?(I18n.t("#{view_key}.show.title"))
+
+      # Navigation
+      # Link back to discipline resource index
+      assert_nav_button(:index, path: discipline_resource_index_path(@discipline))
+
+      # Field labels
+      @show_fields.each do |field|
+        assert_text I18n.t("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field}")
+      end
+
+      # Field data 
+      field_display_assertions(@show_fields)
+
+      # Associations
+      @show_associations.each do |association|
+        if @resource.send(association).present?
+          collapsible_assertions(@resource, association)
+        else
+          # Text for unassigned association varies depending on association type.
+          # If it is important, test it in the calling class.
+        end
+      end
     end
 end

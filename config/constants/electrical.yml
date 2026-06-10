@@ -109,13 +109,19 @@ electrical:
     two_180:        4
     three_3c:       5
     three_4c:       6
+  voltage_reference:
+    line_to_line: 1
+    line_to_neutral: 2
   supply:
-    "220V":             220.0
-    "240V":             240.0
-    "400V":             400.0
-    "415V":             415.0
-    "690V":             690.0
-    "1kV":              1000.0
+    line_to_neutral:
+      "120V": 120.0
+      "230V": 230.0
+      "240V": 240.0
+    line_to_line:
+      "208V": 208.0
+      "400V": 400.0
+      "415V": 415.0
+      "480V": 480.0
   ingress_protection:
     first_digit:
       no_protection: 0

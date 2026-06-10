@@ -62,8 +62,10 @@ km:
         title:            "Title"
         description:      "Description"
       discipline:
+        project_id:       "Project"
+        swatch_id:        "Swatch"
         name:             "Name"
-        code:            "Label"
+        code:             "Code"
         sort_order:       "Sort Order"
         prefix_schema:    "Prefix Schema"
         default_prefix_schema_name: "user_defined"
@@ -74,6 +76,7 @@ km:
         module_name:      "Module Name"
         notes:            "Notes"
         required_role:    "Required Role"
+        catalog_required_role:    "Catalog Required Role"
         copy_from_standard: "Copy from Standard" # Form label
       doc_type:
         code: "Code"

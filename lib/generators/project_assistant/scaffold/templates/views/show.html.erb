@@ -9,29 +9,11 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <%% if policy(@<%= singular_name %>).index? %>
-              <%%= link_to <%= plural_route_name %>_path,
-                    class: "btn btn-sm btn-outline-info me-2",
-                    title: t('actions.index') do %>
-                <%%== bs_icon('list-columns-reverse') %>
-                <span class="d-none d-md-inline"><%%= t('actions.index') %></span>
-              <%% end %>
+              <%%= nav_button(action: :index, path: <%= plural_route_name %>_path, record: @<%= singular_name %>) %>
             <%% end %>
 
             <!-- Previous Button -->
-            <%% prev_<%= singular_name %> = @<%= singular_name %>.prev %>
-            <%% if prev_<%= singular_name %>.present? %>
-              <%% disabled = prev_<%= singular_name %> == @<%= singular_name %> %>
-              <%% title_text = t('actions.previous') + ": " + prev_<%= singular_name %>.label %>
-              <%%= link_to prev_<%= singular_name %>,
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
-                    title: title_text do %>
-                <%%== bs_icon('box-arrow-in-left') %>
-                <span class="d-none d-md-inline">
-                  <%%= t('actions.previous') %>
-                </span>
-              <%% end %>
-            <%% end %>
+            <%%%= nav_button(action: :previous, record: @neighbours[0]) %>
           </div>
         </div>
 
@@ -51,57 +33,20 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <%% next_<%= singular_name %> = @<%= singular_name %>.next %>
-            <%% if next_<%= singular_name %>.present? %>
-              <%% title_text = t('actions.next') + ": " + next_<%= singular_name %>.label %>
-              <%% disabled = next_<%= singular_name %> == @<%= singular_name %> %>
-              <%%= link_to next_<%= singular_name %>,
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary me-2 #{'disabled' if disabled}",
-                    title: title_text do %>
-                <span class="d-none d-md-inline">
-                  <%%= t('actions.next') %>
-                </span>
-                <%%== bs_icon('box-arrow-in-right') %>
-              <%% end %>
-            <%% end %>
+            <%%= nav_button(action: :next, record: @neighbours[1]) %>
 
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
               <%% if policy(@<%= singular_name %>).edit? %>
-                <%%= link_to edit_<%= singular_route_name %>_path(@<%= singular_name %>),
-                      class: "btn btn-outline-warning",
-                      title: t('actions.edit') do %>
-                  <%%== bs_icon('pencil-square') %>
-                  <span class="d-none d-md-inline">
-                    <%%= t('actions.edit') %>
-                  </span>
-                <%% end %>
+                <%%= nav_button(action: :edit, record: @<%= singular_name %>, path: edit_<%= singular_route_name %>_path(@<%= singular_name %>)) %>
               <%% end %>
 
               <%% if policy(@<%= singular_name %>).destroy? %>
-                <%%= link_to @<%= singular_name %>,
-                      method: :delete,
-                      data: { confirm: t('actions.delete_sure') },
-                      class: "btn btn-outline-danger",
-                      title: t('actions.delete') do %>
-                  <%%== bs_icon('trash') %>
-                  <span class="d-none d-md-inline">
-                    <%%= t('actions.delete') %>
-                  </span>
-                <%% end %>
+                <%%= nav_button(action: :destroy, record: @<%= singular_name %>) %>
               <%% end %>
 
               <%% if policy(@<%= singular_name %>).new? %>
-                <%%= link_to new_<%= singular_table_name %>_path, 
-                  class: "btn btn-outline-primary actions",
-                  aria: { label: t('actions.new') },
-                  title: t('actions.new') do %>
-                  <%%== bs_icon('plus-square-fill') %>
-                  <span class="ms-1">
-                    <%%= [t('actions.new'), t('activerecord.models.<%= controller_i18n_scope.singularize %>')].join(' ') %>
-                  </span>
-                <%% end %>
+                <%%= nav_button(action: :new, path: new_<%= singular_route_name %>_path, record: <%= class_name %>.new) %>
               <%% end %>
             </div> <!-- button group -->
           </div> <!-- d-flex align-items-center -->

@@ -13,6 +13,27 @@ module DisciplineResourceSystemTests
     setup_accredited_users(role = :designer)
   end
 
+  def test_setup_is_valid
+    assert @project.valid?
+    assert @project.persisted?
+    assert @discipline.valid?
+    assert @discipline.persisted?
+    assert @admin.valid?
+    assert @admin.persisted?
+    assert @project_manager.valid?
+    assert @project_manager.persisted?
+    assert @team_member.valid?
+    assert @team_member.persisted?
+    assert @regular_user.valid?
+    assert @regular_user.persisted?
+    assert @accredited_user.valid?
+    assert @accredited_user.persisted?
+    assert @resource.valid?
+    assert @resource.persisted?
+    assert @resource2.valid?
+    assert @resource2.persisted?
+  end
+
   def test_team_member_navigating_to_project_resource_index
     sign_in @team_member
     # Mock current_project for this test
@@ -24,9 +45,6 @@ module DisciplineResourceSystemTests
     
     project_resource_index_assertions
     # Variable assertions
-    assert_selector "a[href='#{project_path(@project)}']" # Link back to project show view
-    refute_selector "a[href='#{new_discipline_resource_path(@discipline)}']" # Link to new resource
-    assert_selector "a[href='#{resource_path(@resource)}']" # Link to resource show view
     refute_selector "a[href='#{edit_resource_path(@resource)}']" # team member cannot edit resource
     refute_selector "a[href='#{resource_path(@resource)}'][data-method='delete']" # team member cannot delete resource
   end
@@ -42,11 +60,9 @@ module DisciplineResourceSystemTests
     
     discipline_resource_index_assertions
     # Variable assertions
-    assert_selector "a[href='#{discipline_path(@discipline)}']" # Link back to discipline show view
     refute_selector "a[href='#{new_discipline_resource_path(@discipline)}']" # Link to new resource
-    assert_selector "a[href='#{resource_path(@resource)}']" # Link to resource show view
     refute_selector "a[href='#{edit_resource_path(@resource)}']" # team member cannot edit resource
-    refute_selector "a[href='#{resource_path(@resource)}'][data-method='delete']" # team member cannot delete resource
+    refute_delete(resource_path(@resource)) # team member cannot delete resource
   end
 
   def test_accredited_user_view_index
@@ -56,11 +72,11 @@ module DisciplineResourceSystemTests
     visit discipline_resource_index_path(@discipline)
     assert_current_path discipline_resource_index_path(@discipline)
 
+    discipline_resource_index_assertions
     # Variable assertions
-    assert_selector "a[href='#{new_discipline_resource_path(@discipline)}']" # Link to new resource
-    assert_selector "a[href='#{resource_path(@resource)}']" # Link to resource show view
-    assert_selector "a[href='#{edit_resource_path(@resource)}']" # accredited team member can edit resource
-    refute_selector "a[href='#{resource_path(@resource)}'][data-method='delete']" # accredited team member cannot delete rsource
+    assert_nav_button(:new, path: new_discipline_resource_path(@discipline)) # Link to new resource
+    assert_nav_button(:edit, @resource, path: edit_resource_path(@resource)) # accredited team member can edit resource
+    refute_delete(resource_path(@resource)) # accredited team member cannot delete resource
   end
 
   def test_admin_view_index
@@ -70,11 +86,11 @@ module DisciplineResourceSystemTests
     visit discipline_resource_index_path(@discipline)
     assert_current_path discipline_resource_index_path(@discipline)
 
+    discipline_resource_index_assertions
     # Variable assertions
-    assert_selector "a[href='#{new_discipline_resource_path(@discipline)}']" # Link to new resource
-    assert_selector "a[href='#{resource_path(@resource)}']" # Link to resource show view
-    assert_selector "a[href='#{edit_resource_path(@resource)}']" # accredited team member can edit resource
-    assert_selector "a[href='#{resource_path(@resource)}'][data-method='delete']" # accredited team member cannot delete rsource
+    assert_nav_button(:new, path: new_discipline_resource_path(@discipline)) # Link to new resource
+    assert_nav_button(:edit, @resource, path: edit_resource_path(@resource)) # admin can edit resource
+    assert_nav_button(:delete, @resource, icon_only: true) # admin can delete resource
   end
 
   def test_team_member_navigating_to_resource_show_view
@@ -88,14 +104,36 @@ module DisciplineResourceSystemTests
     
     click_link href: resource_path(@resource)
     assert_current_path resource_path(@resource)
+
     show_assertions
     # Include discipline in @show_associations
 
     # Variable assertions
-    assert_selector "a[href='#{discipline_resource_index_path(@discipline)}']"
     refute_selector "a[href='#{edit_resource_path(@resource)}']"
-    refute_selector "a[href='#{resource_path(@resource)}'][data-method='delete']"
+    refute_delete(resource_path(@resource)) # team member cannot delete resource
     refute_selector "a[href='#{new_discipline_resource_path(@discipline)}']"
+  end
+
+  def test_team_member_test_next_and_previous_buttons
+    sign_in @team_member
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit resource_path(@resource)
+    assert_current_path resource_path(@resource)
+    
+    # Header bar should include disabled previous button and enabled next button
+    assert_nav_button_disabled(:previous)
+    assert_nav_button(:next, @resource2)
+    
+    click_link I18n.t('actions.next')
+    assert_current_path resource_path(@resource2)
+
+    # Header bar should include enabled previous button and disabled next button
+    assert_nav_button(:previous, @resource)
+    assert_nav_button_disabled(:next)
+
+    click_link I18n.t('actions.previous')
+    assert_current_path resource_path(@resource)
   end
 
   def test_accredited_user_resource_show_view
@@ -105,11 +143,11 @@ module DisciplineResourceSystemTests
     visit resource_path(@resource)
     assert_current_path resource_path(@resource)
 
+    show_assertions
     # Variable assertions
-    assert_selector "a[href='#{discipline_resource_index_path(@discipline)}']" # Discipline resource index
-    assert_selector "a[href='#{edit_resource_path(@resource)}']"
-    refute_selector "a[href='#{resource_path(@resource)}'][data-method='delete']"
-    assert_selector "a[href='#{new_discipline_resource_path(@discipline)}']"
+    assert_nav_button(:edit, @resource, path: edit_resource_path(@resource))
+    refute_delete(resource_path(@resource))
+    assert_nav_button(:new, path: new_discipline_resource_path(@discipline))
   end
 
   def test_admin_resource_show_view
@@ -119,11 +157,11 @@ module DisciplineResourceSystemTests
     visit resource_path(@resource)
     assert_current_path resource_path(@resource)
 
+    show_assertions
     # Variable assertions
-    assert_selector "a[href='#{discipline_resource_index_path(@discipline)}']" # Discipline resource index
-    assert_selector "a[href='#{edit_resource_path(@resource)}']"
-    assert_selector "a[href='#{resource_path(@resource)}'][data-method='delete']"
-    assert_selector "a[href='#{new_discipline_resource_path(@discipline)}']"
+    assert_nav_button(:edit, @resource, path: edit_resource_path(@resource))
+    assert_nav_button(:delete, @resource)
+    assert_nav_button(:new, path: new_discipline_resource_path(@discipline))
   end
 
   def test_accredited_user_navigating_to_resource_new_view_from_show
@@ -230,10 +268,7 @@ module DisciplineResourceSystemTests
     visit discipline_resource_index_path(@discipline)
     assert_current_path discipline_resource_index_path(@discipline)
     
-    # Find the actual delete link and inspect its href
-    accept_confirm do
-      find("a[href='#{resource_path(@resource)}'][data-method='delete']").click
-    end
+    click_delete(resource_path(@resource))
     assert_current_path discipline_resource_index_path(@discipline)
     refute_selector "a[href='#{resource_path(@resource)}']"
     assert_text I18n.t("flash.destroy.notice", 
@@ -247,10 +282,7 @@ module DisciplineResourceSystemTests
     visit resource_path(@resource)
     assert_current_path resource_path(@resource)
     
-    # Find the actual delete link and inspect its href
-    accept_confirm do
-      find("a[href='#{resource_path(@resource)}'][data-method='delete']").click
-    end
+    click_delete(resource_path(@resource))
     assert_current_path discipline_resource_index_path(@discipline)
     refute_selector "a[href='#{resource_path(@resource)}']"
     assert_text I18n.t("flash.destroy.notice", resource_name: @resource.model_name.human)
@@ -264,6 +296,10 @@ module DisciplineResourceSystemTests
       assert_text @discipline_resource_index_header
       assert page.title.include?(@discipline_resource_index_title)
 
+      assert_nav_button(:show_project, @project) # Link back to project resource view
+      assert_nav_button(:show_discipline, @discipline) # Link back to discipline resource view
+
+      assert_nav_button(:show, @resource, icon_only: true) # Link to resource show view
       index_field_assertions
     end
 end

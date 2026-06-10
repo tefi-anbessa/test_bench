@@ -12,10 +12,9 @@ class DisciplineResourcePolicy < ApplicationPolicy
         (user_has_project_role?(current_project) || user&.is_admin? || user&.is_app_owner?)
         scope
           .where(discipline_id: Discipline.where(project_id: current_project.id))
-          .includes(:discipline)
 
       elsif user&.is_admin? || user&.is_app_owner?
-        scope.includes(:discipline)
+        scope.all
 
       else
         scope.none

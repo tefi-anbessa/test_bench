@@ -1,68 +1,53 @@
 <tr scope="row">
-  <% if d.tag.nil? %>
-    <td class="table-danger"><%= t('table.missing', model: t("activerecord.models.tag")) %>: ID <%= d.id %></td>
+  <% if row.tag.nil? %>
+    <td class="table-danger"><%= t('table.missing', model: t("activerecord.models.tag")) %>: ID <%= row.id %></td>
   <% else %>
-    <td><%= link_to d.tag.label, tag_path(d.tag) %></td>
+    <td><%= link_to row.tag.label, tag_path(row.tag) %></td>
   <% end %>
   <td>
-    <span title="<%= d.notes %>">
-      <%= truncate(strip_tags(d.notes.to_s), length: 20) %>
+    <span title="<%= row.notes %>">
+      <%= truncate(strip_tags(row.notes.to_s), length: 20) %>
     </span>
   </td>
   <!-- circuit -->
   <td>
-    <% if d.incomer&.from&.present? %>
-      <%= link_to d.incomer.from.long_label, d.incomer.from %>
+    <% if row.incomer&.from&.present? %>
+      <%= link_to row.incomer.from.long_label, row.incomer.from %>
     <% else %>
       <%= t('show.unassigned', model: t("activerecord.models.electrical/circuit.one")) %>
     <% end %>
   </td>
   <!-- incomer -->
   <td>
-    <% if d.incomer&.present? %>
-      <%= link_to d.incomer.label, d.incomer %>
+    <% if row.incomer&.present? %>
+      <%= link_to row.incomer.label, row.incomer %>
     <% else %>
       <%= t('show.unassigned', model: t("activerecord.models.electrical/cable.one")) %>
     <% end %>
   </td>
-  <td><%= d.class.human_enum_name(:basis, d.basis) %></td>
-  <td><%= d.class.human_enum_name(:config, d.config) %></td>
+  <td><%= row.class.human_enum_name(:basis, row.basis) %></td>
+  <td><%= row.class.human_enum_name(:config, row.config) %></td>
   <!-- Safe number formatting with nil handling -->
-  <td><%= number_to_human(d.supply, precision: 4, units: { unit: "V", thousand: "kV" }) || '-' %></td>
-  <td><%= number_to_human(d.power, precision: 4, units: { unit: "W", thousand: "kW", million: "MW" }) || '-' %></td>
-  <td><%= number_to_human(d.vector, precision: 4, units: { unit: "VA", thousand: "kVA", million: "MVA" }) || '-' %></td>
-  <td><%= number_to_human(d.current, precision: 4, units: { unit: "A", thousand: "kA" }) || '-' %></td>
-  <td><%= d.power_factor.presence || '-' %></td>
-  <td><%= d.duty.presence || '-' %></td>
-  <% if d.demandable.present? %>
-    <td><%= link_to d.demandable.model_name.human, url_for(d.demandable) %></td>
+  <td><%= number_to_human(row.supply, precision: 4, units: { unit: "V", thousand: "kV" }) || '-' %></td>
+  <td><%= number_to_human(row.power, precision: 4, units: { unit: "W", thousand: "kW", million: "MW" }) || '-' %></td>
+  <td><%= number_to_human(row.vector, precision: 4, units: { unit: "VA", thousand: "kVA", million: "MVA" }) || '-' %></td>
+  <td><%= number_to_human(row.current, precision: 4, units: { unit: "A", thousand: "kA" }) || '-' %></td>
+  <td><%= row.power_factor.presence || '-' %></td>
+  <td><%= row.duty.presence || '-' %></td>
+  <% if row.demandable.present? %>
+    <td><%= link_to row.demandable.model_name.human, url_for(row.demandable) %></td>
   <% else %>
-    <td><%= d.demandable_type || '-' %></td>
+    <td><%= row.demandable_type || '-' %></td>
   <% end %>
   <td>
-    <% if policy(d).show? %>
-      <%= link_to d, class: "btn btn-outline-info btn-sm icon-link",
-            aria: { label: t('actions.show') },
-            title: t('actions.show'),
-            display: "inline" do %>
-        <%== bs_icon('eye') %>
-      <% end %>
+    <% if can_show %>
+      <%= nav_button(action: :show, record: row, icon_only: true) %>
     <% end %>
-    <% if policy(d).edit? %>
-      <%= link_to edit_electrical_demand_path(d), class: "btn btn-outline-warning btn-sm icon-link",
-            aria: { label: t('actions.edit') },
-            title: t('actions.edit'),
-            display: "inline"  do %>
-        <%== bs_icon('pencil') %>
-      <% end %>
+    <% if can_edit %>
+      <%= nav_button(action: :edit, record: row, path: edit_electrical_demand_path(row), icon_only: true) %>
     <% end %>
-    <% if policy(d).destroy? %>
-      <%= link_to d, method: :delete, class: "btn btn-outline-danger btn-sm icon-link",
-            aria: { label: t('actions.delete') },
-            title: t('actions.delete'),
-            display: "inline"  do %>
-        <%== bs_icon('trash') %>
-      <% end %>
+    <% if can_delete %>
+      <%= nav_button(action: :delete, record: row, icon_only: true) %>
     <% end %>
   </td>
 </tr>

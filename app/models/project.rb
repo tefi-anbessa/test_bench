@@ -1,18 +1,17 @@
 class Project < ApplicationRecord
-  # Gem invocation
-  # Record all changes to this model's data
-  has_paper_trail
+  # === Mixins ===
+
+  # === Constants ===
+
+  # === Gem macros ===
   # Rolify can set roles scoped to project
   resourcify
+  # Record all changes to this model's data
+  has_paper_trail
 
-  # Scopes
-  scope :ordered, -> { order(:code) }
+  # === Attributes ===
 
-  # Callbacks
-  before_validation { self.code = code.upcase }
-  after_create :create_disciplines
-
-  # Associations
+  # === Associations ===
   belongs_to :swatch, optional: true
   has_many :disciplines, dependent: :destroy
   has_many :tags, through: :disciplines
@@ -20,14 +19,32 @@ class Project < ApplicationRecord
   has_many :doc_types, through: :disciplines
   has_many :change_requests, class_name: 'ProjectChange::Request', dependent: :destroy
 
-  # Validations
+  # === Scopes ===
+  scope :ordered, -> { order(:code) }
+
+  # === Validations ===
   VALID_CODE_REGEX = /[A-Z][A-Z]/
   validates :code,        presence: true, length: { is: 2},
                           format: { with: VALID_CODE_REGEX },
                           uniqueness: true
   validates :title, presence: true, length: { maximum: 50 }
 
-  # Methods
+  # === Callbacks ===
+  before_validation { self.code = code.upcase }
+  after_create :create_disciplines
+
+  # === Class methods ===
+  def self.swatch
+    Swatch.find_by(name: "app_theme")
+  end
+  
+  # === Class methods - Queries ===
+  # Provide SQL for ordering projects in the navigator
+  def self.navigator_order_sql
+    "projects.code ASC"
+  end
+
+  # === Public methods ===
   def label
       "#{code}"
   end
@@ -36,9 +53,7 @@ class Project < ApplicationRecord
     "#{code}: #{title}"
   end
 
-  def self.swatch
-    Swatch.find_by(name: "app_theme")
-  end
+  # === Private methods ===
 
   private
 

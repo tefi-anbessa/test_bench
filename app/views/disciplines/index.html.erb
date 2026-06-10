@@ -8,11 +8,8 @@
 
         <!-- Project link -->
         <div class="col-2">
-          <% if current_project.present? %>
-            <%= link_to project_path(current_project), class: "btn btn-sm btn-outline-info" do %>
-              <%= current_project.label %>
-              <%= bs_icon('layers', class: "me-1") %>
-            <% end %>
+          <% if policy(@discipline.project).show? %>
+            <%= nav_button(action: :show_project, record: @discipline.project) %>
           <% end %>
         </div>
 
@@ -27,13 +24,7 @@
         <!-- New Button (Right) -->
         <div class="col-2 align-content-end">
           <% if current_project.present? && policy(@project.disciplines.build()).new? %>
-              <%= link_to new_project_discipline_path(current_project),
-                class: "btn btn-sm btn-outline-primary actions",
-                aria: { label: t('actions.new') },
-                title: t('actions.new') do %>
-                <%== bs_icon('plus-square-fill') %>
-                <span class="ms-1"><%= [t('actions.new'), t('activerecord.models.discipline.one')].join(' ') %></span>
-              <% end %>
+            <%= nav_button(action: :new, path: new_project_discipline_path(@discipline.project), record: @discipline.project.disciplines.build()) %>
           <% end %>
         </div>
       </div> <!-- end of row -->

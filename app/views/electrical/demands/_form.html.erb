@@ -42,15 +42,15 @@
                     demand.class.configs.keys.collect { |config| [demand.class.human_enum_name(:config, config), config] },
                     help: t('activerecord.help.electrical/demand.config') %>
             </div>
-
-            <div class="row">
-              <%= f.select :supply, Constants.electrical.supply.to_h.invert,
-                  include_blank: t("form.other"),
-                  help: t('activerecord.help.electrical/demand.supply') %>
-              <%= f.number_field :other_supply,
-                append: "V",
-                  help: t('activerecord.help.electrical/demand.other_supply') %>
-            </div>
+            
+            <%= f.text_field :supply,
+              data: {
+                controller: "typed-select",
+                typed_select_options_value: [120, 230, 240, 400, 415, 480].to_json,
+                typed_select_type_value: "number",
+                action: "input->demand#recalculate"
+              },
+              class: "form-control" %>
 
             <% disabled = [:current, :power, :vector, :power_factor] %>
             <% case demand.basis %>
@@ -95,6 +95,11 @@
             <div class="row">
               <%= f.number_field :duty, in: 0.0 .. 1.0, step: 0.01,
                     help: t('activerecord.help.electrical/demand.duty') %>
+            </div>
+            
+            <div class="row">
+              <%= f.text_area :notes,
+                  help: t('activerecord.help.electrical/demand.notes') %>
             </div>
           </div> <!-- end responsive columns --> 
         </div>

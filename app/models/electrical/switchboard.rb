@@ -2,7 +2,6 @@ module Electrical
   class Switchboard < Base
     include Tagable
     include Electrical::Demandable
-    include TagableNavigation
     
     has_many :circuits, class_name: 'Electrical::Circuit', 
               foreign_key: 'electrical_switchboard_id', dependent: :destroy

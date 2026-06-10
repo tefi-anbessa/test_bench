@@ -6,21 +6,14 @@ class TagsController < ApplicationController
   before_action :set_swatch, only: %i[ index show ]
 
   # GET /tags
-def index
-  authorize Tag
-  @orphans = Tag.where(discipline_id: nil)
+  def index
+    authorize Tag
+    @orphans = Tag.where(discipline_id: nil)
 
-  base_scope =
-    if @discipline.present?
-      @discipline.tags.merge(@scope)
-    else
-      @scope
-    end
-
-  @q = base_scope.ransack(params[:q])
-  result = @q.result.includes(discipline: :project)
-  @pagy, @tags = pagy(result, limit: 20)
-end
+    @q = @scope.ransack(params[:q])
+    result = @q.result.includes(discipline: :project)
+    @pagy, @tags = pagy(result, limit: 20)
+  end
 
   # GET /tags/1 or /tags/1.json
   def show
@@ -88,11 +81,15 @@ end
         @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
         raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
         @project = @discipline.project
-        @scope = policy_scope(Tag).where(discipline_id: @discipline.id)
+        @scope = policy_scope(Tag).joins(:discipline).where(discipline_id: @discipline.id)
       elsif params[:project_id].present?
         @discipline = nil
         @project = policy_scope(Project).find_by(id: params[:project_id])
         raise ApplicationController::ConflictError, :out_of_scope if @project.nil?
+        @scope = policy_scope(Tag).joins(discipline: :project).where(projects: { id: @project.id })
+      else
+        @discipline = nil
+        @project = nil
         @scope = policy_scope(Tag)
       end
     end
@@ -101,7 +98,7 @@ end
       @tag = policy_scope(Tag).find_by(id: params[:id])
       raise ApplicationController::ConflictError, :out_of_scope if @tag.nil?
       @discipline = @tag.discipline
-      @scope = policy_scope(Tag)
+      @scope = policy_scope(Tag).joins(discipline: :project)
     end
 
     def isa51_schema?

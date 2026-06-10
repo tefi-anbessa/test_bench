@@ -29,33 +29,84 @@ class SwatchesSystemTest < ApplicationSystemTestCase
     # List all fields that should appear in show (usually all)
     @show_fields = [:name, :bg, :text, :form_bg, :form_field, :card_bg, :card_header_bg, :card_border, 
       :badge_bg, :badge_text, :link_text, :link_hover]
+    @show_associations = []
 
     # List all fields that should appear in forms (usually all)
     @form_fields = [:name, :bg, :text, :form_bg, :form_field, :card_bg, :card_header_bg, :card_border, 
       :badge_bg, :badge_text, :link_text, :link_hover]
   end
 
+  test "admin navigating to index" do
+    sign_in @admin
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit root_path
+    click_link(href: swatches_path)
+    assert_current_path swatches_path
+    index_assertions
+    assert_nav_button(:new, path: new_swatch_path) # Link to new resource
+    
+    assert_nav_button(:show, @swatch, icon_only: true)
+    assert_nav_button(:edit, @swatch, path: edit_swatch_path(@swatch), icon_only: true) # admin can edit resource
+    refute_delete(swatch_path(@swatch)) # admin cannot delete swatch
+  end
+
+  test "app owner viewing index" do
+    sign_in @app_owner
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit swatches_path
+    assert_current_path swatches_path
+    assert_nav_button(:new, path: new_swatch_path) # Link to new resource
+    
+    assert_nav_button(:show, @swatch, icon_only: true)
+    assert_nav_button(:edit, @swatch, path: edit_swatch_path(@swatch), icon_only: true) # app owner can edit resource
+    assert_nav_button(:delete, @swatch, path: swatch_path(@swatch), icon_only: true) # app owner can delete resource
+  end
+
   test "team member view show" do
+    # There is no path for team members to view swatches, only for admins.
+    # Permissions allow it though...
     sign_in @team_member
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit project_path(@project)
-    click_link(href: swatch_path(@swatch))
+    visit swatch_path(@swatch)
     assert_current_path swatch_path(@swatch)
     assert_text I18n.t("swatches.show.header", label: @swatch.label)
     assert page.title.include?(I18n.t("swatches.show.title"))
 
-    assert_selector "a[href='#{swatches_path}']" # link to index
-    refute_selector "a[href='#{new_swatch_path}']" # Link to new resource
+    refute_selector "a[href='#{new_swatch_path}']" # team member has no link to new resource
+
+    assert_nav_button(:index, path: swatches_path) # link to index
     refute_selector "a[href='#{edit_swatch_path(@swatch)}']" # team member cannot edit resource
-    refute_selector "a[href='#{swatch_path(@swatch)}'][data-method='delete']" # team member cannot delete resource
+    refute_delete(swatch_path(@swatch)) # admin cannot delete swatch
 
-    @show_fields.each do |field|
-      assert_text I18n.t("activerecord.attributes.swatch.#{field}")
-    end
+    show_assertions
+  end
 
-    # Field data 
-    field_display_assertions(@show_fields)
+  test "team member testing prev and next in show view" do
+    # Create a second swatch to enable prev/next navigation
+    @swatch2 = create(:swatch, name: 'swatch2')
+    sign_in @team_member
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit swatch_path(@swatch)
+    assert_current_path swatch_path(@swatch)
+
+    # Header bar navigation links should include disabled prev button 
+    # and working next button (only 2 tags created)
+    assert_nav_button_disabled(:previous)
+    assert_nav_button(:next, @swatch2)
+
+    click_link I18n.t('actions.next')
+    assert_current_path swatch_path(@swatch2)
+
+    # Header bar navigation links should include working prev button 
+    # and disabled next button (only 2 tags created)
+    assert_nav_button(:previous, @swatch)
+    assert_nav_button_disabled(:next)
+
+    click_link I18n.t('actions.previous')
+    assert_current_path swatch_path(@swatch)
   end
 
   test "admin view show" do
@@ -65,10 +116,11 @@ class SwatchesSystemTest < ApplicationSystemTestCase
     visit swatch_path(@swatch)
     assert_current_path swatch_path(@swatch)
 
-    assert_selector "a[href='#{swatches_path}']" # link to index
-    assert_selector "a[href='#{edit_swatch_path(@swatch)}']" # admin can edit resource
-    refute_selector "a[href='#{swatch_path(@swatch)}'][data-method='delete']" # admin cannot delete resource
-    assert_selector "a[href='#{new_swatch_path}']" # Link to new resource
+    assert_nav_button(:new, path: new_swatch_path) # Link to new resource
+
+    assert_nav_button(:index, path: swatches_path) # link to index
+    assert_nav_button(:edit, @swatch, path: edit_swatch_path(@swatch)) # admin can edit resource
+    refute_delete(swatch_path(@swatch)) # admin cannot delete resource
   end
 
   test "app_owner view show" do
@@ -77,56 +129,11 @@ class SwatchesSystemTest < ApplicationSystemTestCase
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit swatch_path(@swatch)
     assert_current_path swatch_path(@swatch)
+    assert_nav_button(:new, path: new_swatch_path) # Link to new resource
 
-    assert_selector "a[href='#{swatches_path}']" # link to index
-    assert_selector "a[href='#{edit_swatch_path(@swatch)}']" # admin can edit resource
-    assert_selector "a[href='#{swatch_path(@swatch)}'][data-method='delete']" # admin cannot delete resource
-    assert_selector "a[href='#{new_swatch_path}']" # Link to new resource
-  end
-
-  test "team member navigating to index" do
-    sign_in @team_member
-    # Mock current_project for this test
-    ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit project_path(@project)
-    click_link(href: swatch_path(@swatch))
-    assert_current_path swatch_path(@swatch)
-    click_link(href: swatches_path)
-    assert_current_path swatches_path
-    index_assertions
-    refute_selector "a[href='#{new_swatch_path}']" # Link to new resource
-    
-    assert_selector "a[href='#{swatch_path(@swatch)}']" # link to show
-    refute_selector "a[href='#{edit_swatch_path(@swatch)}']" # team member cannot edit resource
-    refute_selector "a[href='#{swatch_path(@swatch)}'][data-method='delete']" # team member cannot delete resource
-  end
-
-  test "admin navigating to index" do
-    sign_in @admin
-    # Mock current_project for this test
-    ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit root_path
-    assert_selector "a[href='#{swatches_path}']"
-    click_link(href: swatches_path)
-    assert_current_path swatches_path
-    assert_selector "a[href='#{new_swatch_path}']" # Link to new resource
-    
-    assert_selector "a[href='#{swatch_path(@swatch)}']" # link to show
-    assert_selector "a[href='#{edit_swatch_path(@swatch)}']" # admin can edit resource
-    refute_selector "a[href='#{swatch_path(@swatch)}'][data-method='delete']" # admin cannot delete resource
-  end
-
-  test "app owner navigating to index" do
-    sign_in @app_owner
-    # Mock current_project for this test
-    ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit swatches_path
-    assert_current_path swatches_path
-    assert_selector "a[href='#{new_swatch_path}']" # Link to new resource
-    
-    assert_selector "a[href='#{swatch_path(@swatch)}']" # link to show
-    assert_selector "a[href='#{edit_swatch_path(@swatch)}']" # app owner can edit resource
-    assert_selector "a[href='#{swatch_path(@swatch)}'][data-method='delete']" # app owner can delete resource
+    assert_nav_button(:index, path: swatches_path) # link to index
+    assert_nav_button(:edit, @swatch, path: edit_swatch_path(@swatch)) # admin can edit resource
+    assert_nav_button(:delete, @swatch, path: swatch_path(@swatch))
   end
 
   test "admin view the new form" do
@@ -217,10 +224,8 @@ class SwatchesSystemTest < ApplicationSystemTestCase
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit swatch_path(@unattached_swatch)
     assert_current_path swatch_path(@unattached_swatch)
-    # Find the actual delete link and inspect its href
-    accept_confirm do
-      find("a[href='#{swatch_path(@unattached_swatch)}'][data-method='delete']").click
-    end
+    # Click the delete button - helper method has built in confirm.
+    click_delete(swatch_path(@unattached_swatch))
     assert_current_path swatches_path
     refute_selector "a[href='#{swatch_path(@unattached_swatch)}']"
   end

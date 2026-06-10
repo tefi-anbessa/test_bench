@@ -7,31 +7,14 @@
         <!-- Left Navigation -->
         <div class="col-auto">
           <div class="d-flex align-items-center">
-            <!-- Index Button -->
-            <% if policy(@document).index? %>
-              <%= link_to discipline_documents_path(@discipline),
-                    class: "btn btn-sm btn-outline-secondary me-2",
-                    title: t('actions.index') do %>
-                <%== bs_icon('list-columns-reverse') %>
-                <span class="d-none d-md-inline"><%= t('actions.index') %></span>
-              <% end %>
+            <!-- Index Buttons -->
+            <% if policy(Document).index? %>
+              <%= nav_button(action: :index_project, path: project_documents_path(@discipline.project), record: @document) %>
+              <%= nav_button(action: :index_discipline, path: discipline_documents_path(@discipline), record: @document) %>
             <% end %>
 
             <!-- Previous Button -->
-            <% prev_document = @document.prev %>
-            <% if prev_document.present? %>
-              <% disabled = prev_document == @document %>
-              <% title_text = "#{t('actions.previous')}: #{prev_document.label}" %>
-              <%= link_to prev_document,
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
-                    title: title_text do %>
-                <%== bs_icon('box-arrow-in-left') %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.previous') %>
-                </span>
-              <% end %>
-            <% end %>
+            <%= nav_button(action: :previous, record: @neighbours[0]) %>
           </div>
         </div>
 
@@ -50,57 +33,20 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <% next_document = @document.next %>
-            <% if next_document.present? %>
-              <% title_text = "#{t('actions.next')}: #{next_document.label}" %>
-              <% disabled = next_document == @document %>
-              <%= link_to next_document,
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary me-2 #{'disabled' if disabled}",
-                    title: title_text do %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.next') %>
-                </span>
-                <%== bs_icon('box-arrow-in-right') %>
-              <% end %>
-            <% end %>
+            <%= nav_button(action: :next, record: @neighbours[1]) %>
 
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
               <% if policy(@document).edit? %>
-                <%= link_to edit_document_path(@document),
-                      class: "btn btn-outline-warning",
-                      title: t('actions.edit') do %>
-                  <%== bs_icon('pencil-square') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.edit') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :edit, record: @document, path: edit_document_path(@document)) %>
               <% end %>
 
               <% if policy(@document).destroy? %>
-                <%= link_to @document,
-                      method: :delete,
-                      data: { confirm: t('actions.delete_sure') },
-                      class: "btn btn-outline-danger",
-                      title: t('actions.delete') do %>
-                  <%== bs_icon('trash') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.delete') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :delete, record: @document, path: document_path(@document)) %>
               <% end %>
 
               <% if @discipline && policy(@discipline.documents.build()).new? %>
-                <%= link_to new_discipline_document_path(@discipline), 
-                  class: "btn btn-outline-primary actions",
-                  aria: { label: t('actions.new') },
-                  title: t('actions.new') do %>
-                  <%== bs_icon('plus-square-fill') %>
-                  <span class="ms-1">
-                    <%= [t('actions.new'), t('activerecord.models.document', count: 1)].join(' ') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :new, record: @document, path: new_discipline_document_path(@discipline)) %>
               <% end %>
             </div> <!-- button group -->
           </div> <!-- d-flex align-items-center -->

@@ -6,30 +6,13 @@
   <td><%= link_to discipline.swatch&.name, discipline.swatch %></td>
   <td>
     <% if policy(discipline).show? %>
-      <%= link_to discipline_path(discipline), class: "btn btn-outline-info  btn-sm icon-link",
-            aria: { label: t('actions.show') },
-            title: t('actions.show'),
-            display: "inline" do %>
-        <%== bs_icon('eye') %>
-      <% end %>
+      <%= nav_button(action: :show, record: discipline, icon_only: true) %>
     <% end %>
     <% if policy(discipline).edit? %>
-      <%= link_to edit_discipline_path(discipline), class: "btn btn-outline-warning btn-sm icon-link",
-            aria: { label: t('actions.edit') },
-            title: t('actions.edit'),
-            display: "inline"  do %>
-        <%== bs_icon('pencil') %>
-      <% end %>
+      <%= nav_button(action: :edit, record: discipline, path: edit_discipline_path(discipline), icon_only: true) %>
     <% end %>
     <% if policy(discipline).destroy? %>
-      <%= link_to discipline_path(discipline),
-              data: { method: :delete, confirm: t('actions.delete_sure') },
-              class: "btn btn-outline-danger btn-sm icon-link",
-              aria: { label: t('actions.delete') },
-              title: t('actions.delete'),
-              display: "inline"  do %>
-        <%== bs_icon('trash') %>
-      <% end %>
+      <%= nav_button(action: :delete, record: discipline, icon_only: true) %>
     <% end %>
   </td>
 </tr>

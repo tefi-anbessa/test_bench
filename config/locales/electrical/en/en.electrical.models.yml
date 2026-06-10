@@ -269,8 +269,8 @@ en:
       electrical/demand:
         basis: "Defines which load parameters are given and which are calculated"
         basis_notes: "Record references for derivation of the load parameters"
-        config: "Select the power system for the load"
-        supply: "Select the supply voltage for the load. Leave blank for other supply."
+        config: "Power configuration for the load. Use the correct supply voltage appropriate to the configuration."
+        supply: "L-N supply voltage for loads with neutral, L-L for 3-phase 3C. Leave blank for other supply."
         other_supply: "Enter the supply voltage for the load if not in the list"
         duty: "Proportional ON time for the load, for total load estimates"
         demandable: "Equipment datasheet"

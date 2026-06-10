@@ -23,7 +23,7 @@ Rails.application.routes.draw do
       end
 
       # Project nested index routes
-      resources :tags, :documents, :doc_types, only: [:index]
+      resources :tags, :documents, :doc_types, :electrical_cable_types, only: [:index]
 
       # Project nested resources
       resources :disciplines, shallow: true do

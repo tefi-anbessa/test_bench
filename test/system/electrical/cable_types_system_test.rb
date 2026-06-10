@@ -35,6 +35,9 @@ module Electrical
             :insulation, :bedding, :armour, :sheath, :bedding_od, :overall_od,
             :temperature_rating, :voltage_rating, :notes, :code]
 
+      # List all associations that should have a collapsible card on the show view
+      @show_associations = [:project, :discipline]
+
       # List all fields that should appear in forms (usually all).
       # New and edit required separately because some models have read only fields that can't be edited.
       # Set a valid value for each field if required to be unique, set nil for factory default.

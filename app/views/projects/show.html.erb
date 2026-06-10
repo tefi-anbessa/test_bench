@@ -9,29 +9,11 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@project).index? %>
-              <%= link_to projects_path,
-                    class: "btn btn-sm btn-outline-info me-2",
-                    title: t('actions.index') do %>
-                <%== bs_icon('list-columns-reverse') %>
-                <span class="d-none d-md-inline"><%= t('actions.index') %></span>
-              <% end %>
+              <%= nav_button(action: :index, path: projects_path) %>
             <% end %>
 
             <!-- Previous Button -->
-            <% prev_project = @project.prev("code") %>
-            <% if prev_project.present? %>
-              <% disabled = prev_project == @project %>
-              <%= link_to project_path(prev_project),
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary
-                      #{'disabled' if disabled}",
-                    title: "#{t('actions.previous')}: #{prev_project.code}" do %>
-                <%== bs_icon('box-arrow-in-left') %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.previous') %>
-                </span>
-              <% end %>
-            <% end %>
+            <%= nav_button(action: :previous, record: @neighbours[0]) %>
           </div>
         </div>
 
@@ -53,45 +35,20 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <% next_project = @project.next("code") %>
-            <% if next_project.present? %>
-              <% disabled = next_project == @project %>
-              <%= link_to project_path(next_project),
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary
-                      me-2 #{'disabled' if disabled}",
-                    title: "#{t('actions.next')}: #{next_project.code}" do %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.next') %>
-                </span>
-                <%== bs_icon('box-arrow-in-right') %>
-              <% end %>
-            <% end %>
+            <%= nav_button(action: :next, record: @neighbours[1]) %>
 
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
               <% if policy(@project).edit? %>
-                <%= link_to edit_project_path(@project),
-                      class: "btn btn-outline-warning",
-                      title: t('actions.edit') do %>
-                  <%== bs_icon('pencil-square') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.edit') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :edit, record: @project, path: edit_project_path(@project)) %>
               <% end %>
 
               <% if policy(@project).destroy? %>
-                <%= link_to @project,
-                      method: :delete,
-                      data: { confirm: t('actions.delete_sure') },
-                      class: "btn btn-outline-danger",
-                      title: t('actions.delete') do %>
-                  <%== bs_icon('trash') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.delete') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :delete, record: @project, path: project_path(@project)) %>
+              <% end %>
+
+              <% if policy(@project).new? %>
+                <%= nav_button(action: :new, record: @project, path: new_project_path) %>
               <% end %>
             </div> <!-- button group -->
           </div> <!-- d-flex align-items-center -->

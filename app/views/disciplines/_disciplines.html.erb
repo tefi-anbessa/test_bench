@@ -6,13 +6,7 @@
   <div class="card-header d-flex justify-content-between align-items-center py-2" style="<%= card_header_styles(@swatch) %>">
     <h5 class="mb-0"><%= t('disciplines.index.header', scope_text: @project.label) %></h5>
     <% if policy(project.disciplines.build()).new? %>
-      <%= link_to new_project_discipline_path(@project),
-            class: "btn btn-outline-primary btn-sm",
-            data: { turbo: false },
-            aria: { label: t('actions.new') } do %>
-        <%== bs_icon('plus-square-fill') %>
-        <%= t('actions.new') %>
-      <% end %>
+      <%= nav_button(action: :new, path: new_project_discipline_path(@project), record: project.disciplines.build) %>
     <% end %>
   </div>
   
@@ -21,11 +15,15 @@
       <div class="row align-items-center py-2 border-bottom">
         <!-- Discipline Name Column -->
         <div class="col-md-4">
-          <%= link_to discipline, 
+          <% name = I18n.exists?("discipline.name.#{discipline.name}") ? t("discipline.name.#{discipline.name}") : discipline.name %>
+          <% text = [discipline.code, name].join(": ") %>
+          <%= link_to discipline,
+              id: "discipline-#{discipline.id}",
               class: "fw-bold text-decoration-none",
+              title: text,
+              aria: { label: text },
               style: "color: #{@swatch&.text || '#000'}" do %>
-            <%= discipline.code %>:
-            <%= discipline.name %>
+            <%= text %>
           <% end %>
         </div>
         
@@ -71,31 +69,15 @@
         <div class="col-md-4 text-end">
           <div class="d-flex gap-1 justify-content-end">
             <% if policy(discipline).show? %>
-              <%= link_to discipline_path(discipline),
-                    class: "btn btn-outline-info btn-sm",
-                    aria: { label: t('actions.show') } do %>
-                <%== bs_icon('eye') %>
-                <%= t('actions.show') %>
-              <% end %>
+              <%= nav_button(action: :show, record: discipline, icon_only: true) %>
             <% end %>
             
             <% if policy(discipline).edit? %>
-              <%= link_to edit_discipline_path(discipline),
-                    class: "btn btn-outline-warning btn-sm",
-                    aria: { label: t('actions.edit') } do %>
-                <%== bs_icon('pencil') %>
-                <%= t('actions.edit') %>
-              <% end %>
+              <%= nav_button(action: :edit, path: edit_discipline_path(discipline), record: discipline, icon_only: true) %>
             <% end %>
             
             <% if policy(discipline).destroy? %>
-              <%= link_to discipline_path(discipline),
-                      data: { method: :delete, confirm: t('actions.delete_sure') },
-                      class: "btn btn-outline-danger btn-sm",
-                      aria: { label: t('actions.delete') } do %>
-                <%== bs_icon('trash') %>
-                <%= t('actions.delete') %>
-              <% end %>
+              <%= nav_button(action: :delete, record: discipline, icon_only: true) %>
             <% end %>
           </div>
         </div>
@@ -104,7 +86,7 @@
     
     <% if disciplines.empty? %>
       <div class="text-center text-muted py-3">
-        <%= t('disciplines.index.empty') %>
+        <%= t('index.empty', models: t('activerecord.models.discipline', count: 0)) %>
       </div>
     <% end %>
   </div>

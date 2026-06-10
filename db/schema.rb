@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_28_040827) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_10_070550) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -121,7 +121,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_28_040827) do
   create_table "electrical_demands", force: :cascade do |t|
     t.integer "demandable_id", null: false
     t.integer "basis"
-    t.string "basis_notes"
+    t.text "basis_notes"
     t.float "supply"
     t.integer "config"
     t.float "power"
@@ -133,6 +133,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_28_040827) do
     t.datetime "updated_at", null: false
     t.text "notes"
     t.string "demandable_type"
+    t.integer "voltage_reference"
     t.index ["demandable_type", "demandable_id"], name: "index_electrical_demands_on_demandable"
   end
 

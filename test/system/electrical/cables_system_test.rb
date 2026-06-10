@@ -22,10 +22,13 @@ module Electrical
     def setup_model_specific_data
       @tag.update(prefix: "EC")
       @tag.reload
+      @tag2.update(prefix: "EC")
+      @tag2.reload
       @unassigned_tag.update(prefix: "EC")
       @unassigned_tag.reload
       @cable_type = create(:electrical_cable_type, discipline: @discipline)
       @resource = create(:electrical_cable, cable_type: @cable_type, tag: @tag)
+      @resource2 = create(:electrical_cable, cable_type: @cable_type, tag: @tag2)
       # List fields that should appear in index. 
       @index_fields = %w[ electrical_cable_type_id route_length ]
 

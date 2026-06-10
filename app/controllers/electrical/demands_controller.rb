@@ -17,6 +17,7 @@ module Electrical
     # GET /demands/1 or /demands/1.json
     def show
       authorize @demand
+      @neighbours = Navigator.new(scope: @scope, record: @demand).neighbours
     end
 
     # GET /tag/1/demands/new
@@ -89,6 +90,7 @@ module Electrical
             :record_is_orphan
         end
         @discipline = @demand.demandable.tag.discipline
+        @scope = policy_scope(Electrical::Demand)
       end
 
       def set_tag

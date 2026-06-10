@@ -15,10 +15,50 @@ module Electrical
 
     def setup_model_specific_data
       # Set prefix to one of the options available on the selector for the discipline prefix schema.
+      # Next/previous tests assume sort order is @tag before @tag2, factory should generate consecutive serials.
       @tag.update(prefix: "EX")
       @tag.reload
+      @tag2.update(prefix: "EX")
+      @tag2.reload
       @unassigned_tag.update(prefix: "EX")
       @unassigned_tag.reload
+      
+      # List fields that should appear in index. 
+      # The generator will include test for sort link header for each column, 
+      # and try to find an appropriate value field for the type.
+      @index_fields = [:ingress_protection, :voltage_rating,
+          :busbar_rating, :busbar_fault_rating, :busbar_fault_duration]
+
+      # List index fields that should have ransack search capability.
+      # The generator will only test for "contains" fields (_cont).
+      # Don't include numeric or date fields, add model specific tests for these later in this file.
+      @search_fields = [:voltage_rating, :busbar_rating, :incomer_protection, :metering, :notes]
+
+      # List all fields that should appear in show (usually all)
+      @show_fields = [:ingress_protection, :voltage_rating,
+          :busbar_rating, :busbar_fault_rating, :busbar_fault_duration, 
+          :cable_entry, :incomer_protection, :metering, 
+          :neutral_bar_connections, :earth_bar_connections, :notes]
+
+      # List all associations that should have a collapsible card on the show view
+      @show_associations = [:tag, :electrical_demand]
+
+      # List all fields that should appear in forms (usually all).
+      # New and edit required separately because some models have read only fields that can't be edited.
+      # Set a valid value for each field if required to be unique, set nil for factory default.
+      # Document model has its own way to ensure uniqueness by setting serial internally.
+      @new_fields = {busbar_rating: nil, 
+        busbar_fault_rating: nil, busbar_fault_duration: nil, cable_entry: nil, incomer_protection: nil, 
+        metering: nil, neutral_bar_connections: nil, earth_bar_connections: nil, notes: nil}
+      @edit_fields = @new_fields
+
+      # Set an attribute/s to be modified in edit test
+      # Only working with string/text fields at present
+      @edit_attributes = { incomer_protection: "None" }
+      @model_special_cases = { ingress_protection: nil, voltage_rating: nil }
+    end
+
+    def setup_for_integration_test
       @switchboard1_tag = create(:tag, project: @project, stage: '1', discipline: @discipline, 
         prefix: 'EX', serial: '1', suffix: "i", service: 'TEST SWITCHBOARD E:EX-0001.i', notes: "Lorem ipsum",
         tagable_type: "Electrical::Switchboard")
@@ -42,39 +82,6 @@ module Electrical
       @cable = create(:electrical_cable, tag: @cable_tag, route_length: 55.5, vertical_allowance: 5.5,
                         termination_allowance: 1.5, start_mark: "154", end_mark: "42", 
                         notes: "test cable for switchboard system test")
-      # List fields that should appear in index. 
-      # The generator will include test for sort link header for each column, 
-      # and try to find an appropriate value field for the type.
-      @index_fields = [:ingress_protection, :voltage_rating,
-          :busbar_rating, :busbar_fault_rating, :busbar_fault_duration]
-
-      # List index fields that should have ransack search capability.
-      # The generator will only test for "contains" fields (_cont).
-      # Don't include numeric or date fields, add model specific tests for these later in this file.
-      @search_fields = [:voltage_rating, :busbar_rating, :incomer_protection, :metering, :notes]
-
-      # List all fields that should appear in show (usually all)
-      @show_fields = [:ingress_protection, :voltage_rating,
-          :busbar_rating, :busbar_fault_rating, :busbar_fault_duration, 
-          :cable_entry, :incomer_protection, :metering, 
-          :neutral_bar_connections, :earth_bar_connections, :notes]
-
-      # List all associations that should have a collapsible card on the show view
-      @show_associations = [:tag]
-
-      # List all fields that should appear in forms (usually all).
-      # New and edit required separately because some models have read only fields that can't be edited.
-      # Set a valid value for each field if required to be unique, set nil for factory default.
-      # Document model has its own way to ensure uniqueness by setting serial internally.
-      @new_fields = {busbar_rating: nil, 
-        busbar_fault_rating: nil, busbar_fault_duration: nil, cable_entry: nil, incomer_protection: nil, 
-        metering: nil, neutral_bar_connections: nil, earth_bar_connections: nil, notes: nil}
-      @edit_fields = @new_fields
-
-      # Set an attribute/s to be modified in edit test
-      # Only working with string/text fields at present
-      @edit_attributes = { incomer_protection: "None" }
-      @model_special_cases = { ingress_protection: nil, voltage_rating: nil }
     end
 
     def fill_in_model_specific_fields

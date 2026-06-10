@@ -78,6 +78,7 @@ en:
         module_name:      "Module Name"
         notes:            "Notes"
         required_role:    "Required Role"
+        catalog_required_role:    "Catalog Required Role"
         copy_from_standard: "Copy from Standard" # Form label
       doc_type:
         code: "Code"

@@ -15,8 +15,11 @@ module Electrical
 
     def setup_model_specific_data
       # Set prefix to one of the options available on the selector for the discipline prefix schema.
+      # Next/previous tests assume sort order is @tag before @tag2, factory should generate consecutive serials.
       @tag.update(prefix: "PM")
       @tag.reload
+      @tag2.update(prefix: "PM")
+      @tag2.reload
       @unassigned_tag.update(prefix: "PM")
       @unassigned_tag.reload
 
@@ -31,7 +34,7 @@ module Electrical
       @show_fields = %w[motor_type frame_size ingress_protection poles speed_rated notes]
 
       # List all associations that should have a collapsible card on the show view
-      @show_associations = [:tag, :demand]
+      @show_associations = [:tag, :electrical_demand]
 
       # List all fields that should appear in forms
       @new_fields = {motor_type: nil, frame_size: nil, poles: nil, speed_rated: nil, notes: nil}

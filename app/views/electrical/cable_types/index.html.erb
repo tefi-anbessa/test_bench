@@ -5,23 +5,9 @@
     <div class="card-header p-1" style="<%= card_header_styles(@swatch) %>">
       <div class="row align-items-center p-2">
 
-        <!-- Discipline and project link -->
+        <!-- Discipline link -->
         <div class="col-2">
-          <% if @discipline.present? %>
-            <%= link_to project_path(@discipline.project), class: "btn btn-sm btn-outline-info" do %>
-              <%= @discipline.project.label %>
-              <%= bs_icon('layers', class: "me-1") %>
-            <% end %>
-            <%= link_to discipline_path(@discipline), class: "btn btn-sm btn-outline-info" do %>
-              <%= @discipline.name %>
-              <%= bs_icon('collection', class: "me-1") %>
-            <% end %>
-          <% elsif @project.present? %>
-            <%= link_to project_path(@project), class: "btn btn-sm btn-outline-info" do %>
-              <%= @project.label %>
-              <%= bs_icon('layers', class: "me-1") %>
-            <% end %>
-          <% end %>
+            <%= nav_button(action: :show_discipline, record: @discipline) %>
         </div>
 
         <!-- Header Text (Left - 8 columns) -->
@@ -37,14 +23,8 @@
         <!-- New Button (Right) -->
         <div class="col-2 text-end">
           <% if @discipline.present? && policy(@discipline.electrical_cable_types.build()).new? %>
-          <% text = [t('actions.new'), t('activerecord.models.electrical/cable_type.one')].join(' ') %>
-            <%= link_to new_discipline_electrical_cable_type_path(@discipline), 
-                class: "btn btn-sm btn-outline-primary actions",
-                aria: { label: text },
-                title: text do %>
-                <%== bs_icon('plus-square-fill') %>
-                <span class="ms-1"><%= text %></span>
-              <% end %>
+            <%= nav_button(action: :new, path: new_discipline_electrical_cable_type_path(@discipline),
+                record: Electrical::CableType.new) %>
           <% end %>
         </div>
       </div> <!-- row -->
@@ -73,6 +53,8 @@
           <% end %>
         <% end %>
       </div>
+      
+      <!-- Cable Types -->
       <table id='cable_types' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
         <%= render "header" %>
         <tbody>

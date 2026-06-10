@@ -17,7 +17,8 @@ module TagablesController
     def index_tagable
       authorize resource_class, :index?
       @q = policy_scope(resource_class).ransack(params[:q])
-      @pagy, @resources = pagy(@q.result.includes(:tag), limit: 20)
+      result = @q.result.includes(tag: { discipline: :project })
+      @pagy, @resources = pagy(result, limit: 20)
       # Set the resources instance variable (e.g., @motors, @switchboards)
       # At present, orphans will only be visible to admins, as other users 
       # have their scope set by current_project, and orphans do not have a project.
@@ -37,6 +38,7 @@ module TagablesController
     def show_tagable
       authorize @resource, :show?
       instance_variable_set(resource_var_name, @resource)
+      @neighbours = Navigator.new(scope: @scope, record: @resource).neighbours
     end
 
     # GET /new - abstracted new action
@@ -46,8 +48,8 @@ module TagablesController
       # If no tag_id in params, discipline_id is expected, and set_tag builds a new tag on the discipline.
       # The action builds a new resource
       set_tag
+      authorize @tag, :new?
       @resource = resource_class.new()
-      authorize @resource, :new?
       setup_form
     end
 
@@ -166,10 +168,11 @@ module TagablesController
       raise ApplicationController::ConflictError, :out_of_scope if @resource.nil?
       @tag = @resource.tag
       @discipline = @tag.discipline
+      @scope = policy_scope(resource_class).joins(tag: { discipline: :project })
     end
 
     def set_tag
-      # Handle case when linking to existing tag through tagable_id association first
+      # Handle case when linking to existing tag through tagable association
       # Uses shallow nested route
       if params[:tag_id].present?
         @tag = policy_scope(Tag).find_by(id: params[:tag_id])

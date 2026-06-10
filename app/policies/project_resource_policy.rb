@@ -12,7 +12,7 @@ class ProjectResourcePolicy < ApplicationPolicy
     def resolve
       if current_project.present? && 
         (user_has_project_role?(current_project) || user&.is_admin? || user&.is_app_owner?)
-        scope.joins(:project).where(projects: { id: current_project.id })
+        scope.where(project_id: current_project.id)
       elsif user&.is_admin? || user&.is_app_owner?
         scope.all
       else
