@@ -16,6 +16,9 @@
 
     <%= bootstrap_form_with(model: demand,
         url: demand.persisted? ? demand : tag_electrical_demands_path(tag),
+        data: {
+          recalculate_url: recalculate_electrical_demand_path(demand)
+        },
         layout: :horizontal, 
         label_col: "col-sm-4", 
         control_col: "col-sm-8") do |f| %>
@@ -26,81 +29,77 @@
         <div class="row justify-content-center">
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
-            <div class="row">
-              <%= f.select :basis, 
+            <div data-controller="typed-select demand-form"
+                data-demand-form-supply-options-value="<%= Constants.electrical.supply.to_h.to_json %>">
+
+              <input type="text"
+                    data-typed-select-target="input"
+                    data-action="input->typed-select#search blur->typed-select#commit">
+
+              <input type="hidden"
+                    name="electrical_demand[supply]"
+                    data-typed-select-target="hidden"
+                    data-demand-form-target="supply">
+
+              <div data-typed-select-target="menu"></div>
+
+              <%= f.select :basis,
                     demand.class.bases.keys.collect { |basis| [demand.class.human_enum_name(:basis, basis), basis] },
-                    help: t('activerecord.help.electrical/demand.basis') %>
-            </div>
-            
-            <div class="row">
-              <%= f.text_area :basis_notes,
-                  help: t('activerecord.help.electrical/demand.basis_notes') %>
-            </div>
+                    {},
+                    data: {
+                      demand_form_target: "basis",
+                      action: "change->demand-form#basisChanged"
+                    } %>
+              
+              <div class="row">
+                <%= f.text_area :basis_notes,
+                    help: t('activerecord.help.electrical/demand.basis_notes') %>
+              </div>
 
-            <div class="row">
-              <%= f.select :config, 
-                    demand.class.configs.keys.collect { |config| [demand.class.human_enum_name(:config, config), config] },
-                    help: t('activerecord.help.electrical/demand.config') %>
-            </div>
-            
-            <%= f.text_field :supply,
-              data: {
-                controller: "typed-select",
-                typed_select_options_value: [120, 230, 240, 400, 415, 480].to_json,
-                typed_select_type_value: "number",
-                action: "input->demand#recalculate"
-              },
-              class: "form-control" %>
+              <div class="row">
+                <%= f.select :config, 
+                      demand.class.configs.keys.collect { |config| [demand.class.human_enum_name(:config, config), config] },
+                      help: t('activerecord.help.electrical/demand.config') %>
+              </div>
 
-            <% disabled = [:current, :power, :vector, :power_factor] %>
-            <% case demand.basis %>
-            <% when "summation" %>
-            <% when "power_pf" %>
-              <% disabled.delete(:power) %>
-              <% disabled.delete(:power_factor) %>
-            <% when "vector_pf" %>
-              <% disabled.delete(:vector) %>
-              <% disabled.delete(:power_factor) %>
-            <% when "current_pf" %>
-              <% disabled.delete(:current) %>
-              <% disabled.delete(:power_factor) %>
-            <% when "current_power" %>
-              <% disabled.delete(:current) %>
-              <% disabled.delete(:power) %>
-            <% end %>
-        
-            <div class="row">
-              <%= f.number_field :current,
-                    value: number_to_human(f.object.current, precision: 4),
-                    disabled: disabled.include?(:current), append: "A" %>
-            </div>
+              <%= f.select :supply_reference,
+                      demand.class.supply_references.keys.collect { |key| [demand.class.human_enum_name(:supply_reference, key), key] },
+                {},
+                data: {
+                  action: "change->demand-form#supplyReferenceChanged",
+                  demand_form_target: "supplyReference"
+                } %>
 
-            <div class="row">
               <%= f.number_field :power,
-                    value: number_to_human(f.object.power, precision: 4),
-                    disabled: disabled.include?(:power), append: "W" %>
-            </div>
+                    data: { demand_form_target: "power",
+                            action: "input->demand-form#inputChanged" } %>
 
-            <div class="row">
-              <%= f.number_field :power_factor, in: -1.0 .. 1.0, step: 0.01,
-                    disabled: disabled.include?(:power_factor) %>
-            </div>
-
-            <div class="row">
               <%= f.number_field :vector,
-                    value: number_to_human(f.object.vector, precision: 4),
-                    disabled: disabled.include?(:vector), append: "VA" %>
-            </div>
+                    data: { demand_form_target: "vector",
+                            action: "input->demand-form#inputChanged" } %>
 
-            <div class="row">
-              <%= f.number_field :duty, in: 0.0 .. 1.0, step: 0.01,
-                    help: t('activerecord.help.electrical/demand.duty') %>
-            </div>
-            
-            <div class="row">
-              <%= f.text_area :notes,
-                  help: t('activerecord.help.electrical/demand.notes') %>
-            </div>
+              <%= f.number_field :current,
+                    data: { demand_form_target: "current",
+                            action: "input->demand-form#inputChanged" } %>
+
+              <%= f.number_field :power_factor,
+                    step: 0.01,
+                    data: { demand_form_target: "pf",
+                            action: "input->demand-form#inputChanged" } %>
+
+              <%= f.hidden_field :config, data: { demand_form_target: "config" } %>
+              <%= f.hidden_field :supply, data: { demand_form_target: "supply" } %>
+
+              <div class="row">
+                <%= f.number_field :duty, in: 0.0 .. 1.0, step: 0.01,
+                      help: t('activerecord.help.electrical/demand.duty') %>
+              </div>
+              
+              <div class="row">
+                <%= f.text_area :notes,
+                    help: t('activerecord.help.electrical/demand.notes') %>
+              </div>
+            </div> <!-- end data-controllers -->
           </div> <!-- end responsive columns --> 
         </div>
       </div> <!-- card body -->

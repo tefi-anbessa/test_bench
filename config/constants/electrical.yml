@@ -109,7 +109,7 @@ electrical:
     two_180:        4
     three_3c:       5
     three_4c:       6
-  voltage_reference:
+  supply_reference:
     line_to_line: 1
     line_to_neutral: 2
   supply:

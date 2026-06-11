@@ -133,7 +133,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_10_070550) do
     t.datetime "updated_at", null: false
     t.text "notes"
     t.string "demandable_type"
-    t.integer "voltage_reference"
+    t.integer "supply_reference"
     t.index ["demandable_type", "demandable_id"], name: "index_electrical_demands_on_demandable"
   end
 

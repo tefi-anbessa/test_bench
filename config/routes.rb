@@ -43,7 +43,9 @@ Rails.application.routes.draw do
           end
           # Define discipline level index routes for circuits, demands, to allow complete 
           # discipline load listings.
-          resources :circuits, :demands, only: [:index]
+          resources :circuits, :demands, only: [:index] do
+            post :recalculate, on: :member
+          end
         end # electrical namespace
         # INSERTION POINT 1 FOR MODULE GENERATOR
         resources :tags, shallow: true do

@@ -1,92 +1,92 @@
-// controllers/typed_select_controller.js
+// app/javascript/controllers/typed_select_controller.js
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static values = {
-    options: Array,
-    type: { type: String, default: "string" } // "number" or "string"
-  }
+  static targets = ["input", "hidden", "menu"]
 
   connect() {
-    this.build()
-    this.bindEvents()
-  }
+    this.options = {}
 
-  build() {
-    this.wrapper = document.createElement("div")
-    this.wrapper.classList.add("dropdown")
-
-    this.menu = document.createElement("div")
-    this.menu.classList.add("dropdown-menu")
-
-    this.element.parentNode.insertBefore(this.wrapper, this.element)
-    this.wrapper.appendChild(this.element)
-    this.wrapper.appendChild(this.menu)
-
-    this.renderOptions(this.optionsValue)
-  }
-
-  bindEvents() {
-    this.element.addEventListener("focus", () => this.show())
-    this.element.addEventListener("input", () => this.filter())
-    document.addEventListener("click", (e) => {
-      if (!this.wrapper.contains(e.target)) this.hide()
+    // Listen for external updates (decoupled)
+    this.element.addEventListener("typed-select:set-options", (e) => {
+      this.setOptions(e.detail.options)
     })
   }
 
-  renderOptions(options) {
-    this.menu.innerHTML = ""
+  // ---------------------------
+  // Public API
+  // ---------------------------
+  setOptions(options) {
+    this.options = options || {}
 
-    options.forEach(opt => {
-      const option = this.normalize(opt)
+    // Only clear if current value is invalid
+    const current = parseFloat(this.hiddenTarget.value)
 
-      const item = document.createElement("button")
-      item.type = "button"
-      item.classList.add("dropdown-item")
-      item.textContent = option.label
+    if (!Object.values(this.options).includes(current)) {
+      this.clear()
+    }
+  }
 
-      item.addEventListener("click", () => {
-        this.select(option)
+  // ---------------------------
+  // UI behaviour
+  // ---------------------------
+  search() {
+    const term = this.inputTarget.value.toLowerCase()
+
+    const results = Object.entries(this.options)
+      .filter(([label]) => label.toLowerCase().includes(term))
+
+    this.render(results)
+  }
+
+  render(items) {
+    this.menuTarget.innerHTML = ""
+
+    items.forEach(([label, value]) => {
+      const el = document.createElement("button")
+      el.type = "button"
+      el.classList.add("dropdown-item")
+      el.textContent = label
+
+      el.addEventListener("click", () => {
+        this.select(label, value)
       })
 
-      this.menu.appendChild(item)
+      this.menuTarget.appendChild(el)
+    })
+
+    this.menuTarget.classList.toggle("show", items.length > 0)
+  }
+
+  select(label, value) {
+    this.inputTarget.value = label
+    this.hiddenTarget.value = value
+    this.menuTarget.classList.remove("show")
+
+    // 🔥 Notify others (this is key)
+    this.dispatch("changed", {
+      detail: { value: value }
     })
   }
 
-  filter() {
-    const term = this.element.value.toLowerCase()
+  commit() {
+    // Allow manual numeric entry
+    if (!this.hiddenTarget.value) {
+      const val = parseFloat(this.inputTarget.value)
 
-    const filtered = this.optionsValue.filter(opt => {
-      const o = this.normalize(opt)
-      return o.label.toLowerCase().includes(term)
-    })
+      if (!isNaN(val)) {
+        this.hiddenTarget.value = val
 
-    this.renderOptions(filtered)
-    this.show()
-  }
-  
-  select(option) {
-    let value = option.value
-
-    if (this.typeValue === "number") {
-      value = parseFloat(value)
+        this.dispatch("changed", {
+          detail: { value: val }
+        })
+      }
     }
-
-    this.element.value = value
-    this.element.dispatchEvent(new Event("input"))
-    this.hide()
   }
 
-  normalize(opt) {
-    if (typeof opt === "object") return opt
-    return { value: opt, label: String(opt) }
-  }
-
-  show() {
-    this.menu.classList.add("show")
-  }
-
-  hide() {
-    this.menu.classList.remove("show")
+  clear() {
+    this.inputTarget.value = ""
+    this.hiddenTarget.value = ""
+    this.menuTarget.innerHTML = ""
   }
 }

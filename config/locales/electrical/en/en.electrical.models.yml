@@ -171,6 +171,10 @@ en:
           two_180: "AC L-N 2 phase 180˚"
           three_3c: "AC L-L 3 phase 3 wire"
           three_4c: "AC L-N 3 phase 4 wire"
+        supply_reference: "Supply Reference"
+        supply_references:
+          line_to_line: "Line to Line"
+          line_to_neutral: "Line to Neutral"
         supply: "Supply (V)"
         power: "Power (W)"
         vector: "Vector (VA)"

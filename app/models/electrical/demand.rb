@@ -7,6 +7,7 @@ module Electrical
     # Enums
     enum :basis, Constants.electrical.load_basis.to_h
     enum :config, Constants.electrical.load_configuration.to_h
+    enum :supply_reference, Constants.electrical.supply_reference.to_h
 
     # === Gem macros ===
 
@@ -75,6 +76,10 @@ module Electrical
       )
     end
     delegate :service, :stage, :location, :label, :long_label, :full_tag, to: :tag
+
+    def recalculate!
+      Electrical::Calculator.new(self).calculate!
+    end
 
     def conductor_count
       case self.config

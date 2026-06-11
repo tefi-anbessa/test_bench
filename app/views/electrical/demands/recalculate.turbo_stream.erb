@@ -1,0 +1,5 @@
+<!-- app/views/demands/recalculate.turbo_stream.erb -->
+
+<%= turbo_stream.replace "demand_form" do %>
+  <%= render "form", demand: @demand %>
+<% end %>

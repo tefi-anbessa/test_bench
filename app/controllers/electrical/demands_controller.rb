@@ -72,6 +72,15 @@ module Electrical
       redirect_to discipline_electrical_demands_url(@discipline), status: :see_other
     end
 
+    def recalculate
+      @demand = Demand.find(params[:id])
+      @demand.assign_attributes(demand_params)
+      Electrical::Calculator.call(@demand)
+      respond_to do |format|
+        format.turbo_stream
+      end
+    end
+
     private
 
       def set_discipline
@@ -112,7 +121,7 @@ module Electrical
 
       # Only allow a list of trusted parameters through.
       def demand_params
-        params.require(:electrical_demand).permit(:basis, :basis_notes, :config, :supply, :power, :current, :power_factor, 
+        params.require(:electrical_demand).permit(:basis, :basis_notes, :config, :supply, supply_reference, :power, :current, :power_factor, 
         :duty, :other_supply, :loadable_type, :loadable_id, :notes)
       end
   end

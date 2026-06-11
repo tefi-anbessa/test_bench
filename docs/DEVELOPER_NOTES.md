@@ -386,7 +386,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Complete discipline system tests.
 - [x] Complete swatch system tests.
 - [x] Complete switchboard controller test.
-- [ ] Complete cable system tests for from and to after switchboard, demand, and circuit tests are working.
+- [x] Complete cable system tests for from and to after switchboard, demand, and circuit tests are working.
 - [x] Use of button text for new and edit forms is mixed. Standardise on create for new, update for edit.
 - [ ] Demand form live update of calculated values not working.
 - [ ] Workflow for cable types with no current project.
@@ -432,10 +432,10 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Refactor all views to use pundit policy checks.
 - [x] Change terminology and implementation from project owner to project manager.
 - [ ] Refactor projects controller and application controller setting of current project: `def after_sign_in_path_for(resource)to use app/controllers/concerns/current_project_concern.rb to reduce code duplication.
-- [ ] Tags:
+- [x] Tags:
   - [x] Refactor tag 'description' to 'service'.
   - [x] Add location attribute to tag, remove from all tagables.
-  - [ ] Add parent/child capability.
+  - [x] Add parent/child capability.
 - [x] Cable types:  
   - [x] convert core material to enum.
   - [x] convert insulation material to enum.
@@ -443,7 +443,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Motors:
   - [x] convert motor type to enum.
   - [x] convert frame size to enum.
-  - [ ] build a ruby structure for ingress protection, convert ingress protection to this type.
+  - [ ] build a view helper and a form helper for ingress protection, convert ingress protection to use them.
 - [x] Redesign tag module:
   - [x] builder/parser model for each discipline which creates the string according to the required format, and can parse the string back into the components.
   - [x] provide default format for each discipline, e.g. isa5.1
@@ -462,9 +462,9 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Refactor test helpers to minimise code duplication, and simplify generation of new models.
 - [ ] Improve forbidden error logging messages, include user. Consider automatic sign out.
 - [ ] Abstract controllers for project linked models, similar to tagables controller.
-- [ ] Add catalog required roles in disciplines, to allow different role for cable types and doc types, etc.
+- [x] Add catalog required roles in disciplines, to allow different role for cable types and doc types, etc.
 - [ ] Refactor cable and cable types to be core module available to electrical, instruments, telecoms (any module). Should belong to discipline.
-- [ ] Index views should preload permissions and not check every row.
+- [x] Index views should preload permissions and not check every row.
 - [ ] Scaffold generators should include enum configuration, or build a separate generator.
 - [ ] Include a valid value for fields in generators args.
 - [ ] Consider whether the same improvement applies to demand.
