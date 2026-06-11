@@ -3,21 +3,21 @@
 
 <% if object.respond_to?(association) %>
   <% record = object.send(association) %>
-  <% if object.class.reflect_on_association(association).polymorphic? %>
-    <!-- Try to translate the model name of the associated record. -->
-    <% associated = I18n.exists?("activerecord.models.#{record.class.model_name.i18n_key}.one") ?
-            t("activerecord.models.#{record.class.model_name.i18n_key}.one") :
-            record.class.model_name.human %>
-  <% else %>
-    <!-- Set label text to attribute translation, if it exists, otherwise associated model name translation. -->
-    <% associated = I18n.exists?("activerecord.attributes.#{object.model_name.i18n_key}.#{association}") ?
-                t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}") :
-                t("activerecord.models.#{object.reflect_on_association(association).klass.model_name.i18n_key}.one") %>
-  <% end %>
   <% if record.present? %>
     <% partial = "#{record.model_name.collection}/card" %>
     <% if lookup_context.exists?(partial, [], true) %>
       <!-- Show a collapsible card for the associated object. -->
+      <% if object.class.reflect_on_association(association).polymorphic? %>
+        <!-- Try to translate the model name of the associated record. -->
+        <% associated = I18n.exists?("activerecord.models.#{record.class.model_name.i18n_key}.one") ?
+                t("activerecord.models.#{record.class.model_name.i18n_key}.one") :
+                record.class.model_name.human %>
+      <% else %>
+        <!-- Set label text to attribute translation, if it exists, otherwise associated model name translation. -->
+        <% associated = I18n.exists?("activerecord.attributes.#{object.model_name.i18n_key}.#{association}") ?
+                    t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}") :
+                    t("activerecord.models.#{object.reflect_on_association(association).klass.model_name.i18n_key}.one") %>
+      <% end %>
       <%= render partial, object: record, context: associated %>
     <% else %>
       <!-- No card available for this type, show a link to the object. -->

@@ -4,7 +4,7 @@
 <div id="<%= dom_id cable_type %>" style="<%= card_styles(@swatch)%>">
 
   <%= render 'components/collapsible',
-    id: "electrical_cable_type_#{cable_type.id}_details",
+    id: "cable_type_#{cable_type.id}_details",
     title: [context, cable_type.long_label].join(': '),
     expanded: false,
     header_class: "py-1" do %>

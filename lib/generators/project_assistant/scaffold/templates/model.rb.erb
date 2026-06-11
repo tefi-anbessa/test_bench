@@ -5,18 +5,28 @@ module <%= module_name %>
 <%- else -%>
 class <%= model_class %> < ApplicationRecord
 <%- end -%>
+  # === Mixins ===
 
-    # Belongs to associatons
-    <%- @fields.select { |f| %w[references belongs_to].include?(f[:type]) }.each do |field| -%>
-    belongs_to :<%= field[:name] %><%- unless field[:options].include?('required') %>, optional: true<%- end %>
-    <%- end -%>
-    
+  # === Constants ===
     # enum declarations
     <%- @fields.select { |f| %w[enum enum_translated].include?(f[:type]) }.each do |field| -%>
     enum :<%= field[:name] %>, Constants.<%= module_name.underscore %>.<%= singular_name %>.<%= field[:name] %>.to_h
     #!!! Define enum options in Constants file config/constants/<%= module_name.underscore %>.yml
     <%- end -%>
-    
+
+  # === Gem macros ===
+
+  # === Attributes ===
+
+  # === Associations ===
+    # Belongs to associatons
+    <%- @fields.select { |f| %w[references belongs_to].include?(f[:type]) }.each do |field| -%>
+    belongs_to :<%= field[:name] %><%- unless field[:options].include?('required') %>, optional: true<%- end %>
+    <%- end -%>
+
+  # === Scopes ===
+
+  # === Validations ===
     # Presence validation for required fields.
     <%- @fields.select { |f| f[:options].include?('required') && !%w[references].include?(f[:type]) }.each do |field| -%>
     validates :<%= field[:name] %>, presence: true
@@ -26,7 +36,20 @@ class <%= model_class %> < ApplicationRecord
     <%- @fields.select { |f| f[:options].include?('uniq') }.each do |field| -%>
     validates :<%= field[:name] %>, uniqueness: true
     <%- end -%>
-    
+
+  # === Callbacks ===
+
+  # === Class methods ===
+
+  # === Class methods - Queries ===
+  # Provide SQL for ordering records in the navigator
+  def self.navigator_order_sql
+    "<%= table_name %>.created_at ASC"
+  end
+
+  # === Public methods ===
+
+  # === Private methods ===
     private
 
     def self.ransackable_attributes(auth_object = nil)

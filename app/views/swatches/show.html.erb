@@ -9,7 +9,7 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@swatch).index? %>
-              <%= nav_button(action: :index, path: swatches_path) %>
+              <%= nav_button(action: :index, path: swatches_path, record: Swatch.new) %>
             <% end %>
 
             <!-- Previous Button -->

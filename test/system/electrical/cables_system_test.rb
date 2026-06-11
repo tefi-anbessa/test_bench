@@ -47,10 +47,44 @@ module Electrical
         termination_allowance: nil, start_mark: nil, end_mark: nil, from: nil, to: nil, notes: nil }
       @edit_fields = @new_fields
 
-      # Set an attribute/s to be modified in edit test
+      # Set attribute/s to be modified in edit test
       # Only working with string/text fields at present
       @edit_attributes = { notes: "Updated notes" }
+    end
 
+    test "accredited user assign from and to" do
+      # Build switchboard with circuits
+      swbd_tag = create(:tag, :unique_tag, prefix: 'XB', discipline: @discipline)
+      switchboard = create(:electrical_switchboard, :with_circuits, circuits_count: 2, tag: swbd_tag)
+      circuit = switchboard.circuits.find_by(serial: 1)
+      # Build load
+      motor_tag = create(:tag, :unique_tag, prefix: 'PM', discipline: @discipline)
+      motor = create(:electrical_motor, tag: motor_tag)
+      motor_load = create(:electrical_demand, demandable: motor)
+
+      sign_in @accredited_user
+      # Mock current_project for this test
+      ApplicationController.any_instance.stubs(:current_project).returns(@project)
+      
+      # Navigate to the cable edit page
+      visit edit_electrical_cable_path(@resource)
+      
+      edit_resource_form_assertions
+
+      find('#electrical_cable_from_type').select(I18n.t('activerecord.models.electrical/circuit.one'))
+      find('#electrical_cable_from_id').select(circuit.id.to_s)
+      find('#electrical_cable_to_type').select(I18n.t('activerecord.models.electrical/demand.one'))
+      find('#electrical_cable_to_id').select(motor_load.id.to_s)
+
+      # Submit the form data
+      click_button I18n.t('actions.update')
+      sleep 0.5  # Give database time to commit
+      @resource.reload
+      assert_equal circuit, @resource.from
+      assert_equal motor_load, @resource.to
+      assert_current_path electrical_cable_path(@resource)
+      collapsible_assertions(@resource, :from)
+      collapsible_assertions(@resource, :to)
     end
   end
 end

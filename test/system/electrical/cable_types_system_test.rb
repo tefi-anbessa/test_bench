@@ -9,12 +9,16 @@ module Electrical
     include DisciplineResourceSystemTests
 
     setup do
-      setup_common_data
+      setup_projects_and_users
+      setup_disciplines(name: "Electrical", required_role: :designer)
+      setup_accredited_users(:custodian)
       setup_model_specific_data
     end
 
     def setup_model_specific_data
       @resource = create(:electrical_cable_type, discipline: @discipline)
+      # Model should generate sequential codes.
+      @resource2 = create(:electrical_cable_type, discipline: @discipline)
       @discipline_resource_index_header = I18n.t('electrical.cable_types.index.header', 
         scope_text: [@discipline.project.code, I18n.t("activerecord.models.discipline.one"), @discipline.long_label].join(' '))
       @project_resource_index_header = I18n.t('electrical.cable_types.index.header', 

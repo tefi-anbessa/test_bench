@@ -10,7 +10,7 @@ module DisciplineResourceSystemTests
   def setup_common_data
     setup_projects_and_users
     setup_disciplines(name: "Electrical", required_role: :designer)
-    setup_accredited_users(role = :designer)
+    setup_accredited_users(:designer)
   end
 
   def test_setup_is_valid

@@ -379,12 +379,12 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] System tests for all resources.
 - [x] Model tests should include test of enums.
 - [ ] Complete workflows with admin and no project selected.
-- [ ] Complete proper ordering by switchboard tag and serial for circuits.
+- [x] Complete proper ordering by switchboard tag and serial for circuits.
 - [x] Update index view header lines.
 - [ ] Custom 404 not found error page. E.g. Case where admin deletes a record than uses browser back button.
 - [ ] Translation of html5 messages on required fields. Alternatively, suppress html 5 and use client side js.
 - [x] Complete discipline system tests.
-- [ ] Complete swatch system tests.
+- [x] Complete swatch system tests.
 - [x] Complete switchboard controller test.
 - [ ] Complete cable system tests for from and to after switchboard, demand, and circuit tests are working.
 - [x] Use of button text for new and edit forms is mixed. Standardise on create for new, update for edit.
@@ -408,7 +408,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Add model tests for read only attributes - documents, tags.
 - [x] Review security of all controllers wrt injection attacks.
 - [ ] Check that usage of accepts_nested_attributes_for is correct for tagable concern.
-- [ ] Fix previous and next functionality in tagable navigation, and generalise it for non tagables. All models next and prev should only look inside policy scope. At present can raise forbidden.
+- [x] Fix previous and next functionality in tagable navigation, and generalise it for non tagables. All models next and prev should only look inside policy scope. At present can raise forbidden.
 - [ ] RBAC still has anomalous behaviour when resource wide roles are applied. Scope will include all projects, and allow selection of any project as current, but accessing the project without a specific role will result in forbidden. Either block resource wide roles or implement them in policies.
 - [ ] Clean up responsive views - test all on simulator.
 - [x] Issue policy has been removed. Assess whether it is required or just use document policy, like circuits.

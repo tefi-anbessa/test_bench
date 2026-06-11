@@ -81,7 +81,7 @@ class SwatchesSystemTest < ApplicationSystemTestCase
     refute_selector "a[href='#{edit_swatch_path(@swatch)}']" # team member cannot edit resource
     refute_delete(swatch_path(@swatch)) # admin cannot delete swatch
 
-    show_assertions
+    swatch_show_assertions
   end
 
   test "team member testing prev and next in show view" do
@@ -121,6 +121,8 @@ class SwatchesSystemTest < ApplicationSystemTestCase
     assert_nav_button(:index, path: swatches_path) # link to index
     assert_nav_button(:edit, @swatch, path: edit_swatch_path(@swatch)) # admin can edit resource
     refute_delete(swatch_path(@swatch)) # admin cannot delete resource
+
+    swatch_show_assertions
   end
 
   test "app_owner view show" do
@@ -229,4 +231,32 @@ class SwatchesSystemTest < ApplicationSystemTestCase
     assert_current_path swatches_path
     refute_selector "a[href='#{swatch_path(@unattached_swatch)}']"
   end
+
+  private
+
+    def swatch_show_assertions
+      assert_text I18n.t("#{view_key}.show.header", label: @resource.long_label)
+      assert page.title.include?(I18n.t("#{view_key}.show.title"))
+
+      # Navigation
+      assert_nav_button(:index, Swatch.new, path: swatches_path) # Link back to swatches index
+
+      # Field labels
+      @show_fields.each do |field|
+        assert_text I18n.t("activerecord.attributes.#{resource_class.model_name.i18n_key}.#{field}")
+      end
+
+      # Field data 
+      field_display_assertions(@show_fields)
+
+      # Associations
+      @show_associations.each do |association|
+        if @resource.send(association).present?
+          collapsible_assertions(@resource, association)
+        else
+          # Text for unassigned association varies depending on association type.
+          # If it is important, test it in the calling class.
+        end
+      end
+    end
 end
