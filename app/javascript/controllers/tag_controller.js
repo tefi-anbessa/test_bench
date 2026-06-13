@@ -185,22 +185,22 @@ export default class extends Controller {
         '<div class="col-sm-8">' +
         '<select name="measured_variable" class="form-select" id="_measured_variable" data-action="change->tag#updatePreview">' +
         '<option value="">' + translations.select_option + '</option>';
-      for (var key in schemaData.measured_variables) {
+      for (var key in schemaData.measured_variable) {
         var selected = key === (prefixParts.measured_variable || '') ? 'selected' : '';
-        fieldsHtml += '<option value="' + key + '" ' + selected + '>' + key + ': ' + schemaData.measured_variables[key] + '</option>';
+        fieldsHtml += '<option value="' + key + '" ' + selected + '>' + key + ': ' + schemaData.measured_variable[key] + '</option>';
       }
       fieldsHtml += '</select></div></div>';
       
-      if (schemaData.modifiers) {
+      if (schemaData.modifier) {
         fieldsHtml += '<div class="form-group row mb-3">' +
           '<label class="col-form-label col-sm-4" for="_modifier">' + 
           translations.modifier + '</label>';
         fieldsHtml += '<div class="col-sm-8">' +
           '<select name="modifier" class="form-select" id="_modifier" data-action="change->tag#updatePreview">' +
           '<option value="">' + translations.select_option + '</option>';
-        for (var key in schemaData.modifiers) {
+        for (var key in schemaData.modifier) {
           var selected = key === (prefixParts.modifier || '') ? 'selected' : '';
-          fieldsHtml += '<option value="' + key + '" ' + selected + '>' + key + ': ' + schemaData.modifiers[key] + '</option>';
+          fieldsHtml += '<option value="' + key + '" ' + selected + '>' + key + ': ' + schemaData.modifier[key] + '</option>';
         }
         fieldsHtml += '</select></div></div>';
       }
@@ -212,36 +212,36 @@ export default class extends Controller {
         '<select name="function" class="form-select" id="_function" data-action="change->tag#updatePreview">' +
         '<option value="">' + translations.select_option + '</option>';
       
-      if (schemaData.readout_functions) {
+      if (schemaData.readout_function) {
         fieldsHtml += '<optgroup label="Readout Functions">';
-        for (var key in schemaData.readout_functions) {
+        for (var key in schemaData.readout_function) {
           var selected = key === (prefixParts.readout_function || '') ? 'selected' : '';
-          fieldsHtml += '<option value="' + key + '" ' + selected + '>' + key + ': ' + schemaData.readout_functions[key] + '</option>';
+          fieldsHtml += '<option value="' + key + '" ' + selected + '>' + key + ': ' + schemaData.readout_function[key] + '</option>';
         }
         fieldsHtml += '</optgroup>';
       }
       
-      if (schemaData.output_functions) {
+      if (schemaData.output_function) {
         fieldsHtml += '<optgroup label="Output Functions">';
-        for (var key in schemaData.output_functions) {
+        for (var key in schemaData.output_function) {
           var selected = key === (prefixParts.output_function || '') ? 'selected' : '';
-          fieldsHtml += '<option value="' + key + '" ' + selected + '>' + key + ': ' + schemaData.output_functions[key] + '</option>';
+          fieldsHtml += '<option value="' + key + '" ' + selected + '>' + key + ': ' + schemaData.output_function[key] + '</option>';
         }
         fieldsHtml += '</optgroup>';
       }
       
       fieldsHtml += '</select></div></div>';
 
-      if (schemaData.modifier_functions) {
+      if (schemaData.modifier_function) {
         fieldsHtml += '<div class="form-group row mb-3">' +
           '<label class="col-form-label col-sm-4" for="_modifier_function">' + 
           translations.modifier_function + '</label>';
         fieldsHtml += '<div class="col-sm-8">' + 
           '<select name="modifier_function" class="form-select" id="_modifier_function" data-action="change->tag#updatePreview">' +
           '<option value="">' + translations.select_option + '</option>';
-        for (var key in schemaData.modifier_functions) {
+        for (var key in schemaData.modifier_function) {
           var selected = key === (prefixParts.modifier_function || '') ? 'selected' : '';
-          fieldsHtml += '<option value="' + key + '" ' + selected + '>' + key + ': ' + schemaData.modifier_functions[key] + '</option>';
+          fieldsHtml += '<option value="' + key + '" ' + selected + '>' + key + ': ' + schemaData.modifier_function[key] + '</option>';
         }
         fieldsHtml += '</select></div></div>';
       }

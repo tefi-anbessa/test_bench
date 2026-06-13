@@ -113,7 +113,7 @@ class DisciplinesController < ApplicationController
     end
 
     def set_swatch
-      @swatch = @discipline&.swatch || @discipline&.project&.swatch || Project.swatch || Swatch.find_by(name: 'app_theme')
+      @swatch = @discipline&.swatch || @discipline&.project&.swatch || Swatch.find_by(name: @discipline&.name) || Project.swatch || Swatch.find_by(name: 'app_theme')
     end
 
     def setup_form

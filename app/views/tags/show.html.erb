@@ -65,24 +65,21 @@
               <h4 class="mb-0"><%= t('show.details', model: t("activerecord.models.tag.one")) %></h4>
             </div>
             <div class="card-body">
-          
-              <!-- Notes -->
-              <div class="row mb-1">
-                <div class="col-4 "><%= t('activerecord.attributes.tag.notes') %></div>
-                <div class="col-8"><%= simple_format(@tag.notes || '-') %></div>
-              </div>
-
-              <!-- Project stage -->
-              <div class="row mb-1">
-                <div class="col-4"><%= t('activerecord.attributes.tag.stage') %></div>
-                <div class="col-8"><%= @tag.stage %></div>
-              </div>
-              
-              <!-- Location -->
-              <div class="row mb-1">
-                <div class="col-4 "><%= t('activerecord.attributes.tag.location') %></div>
-                <div class="col-8"><%= @tag.location %></div>
-              </div>
+              <% parts = @tag.prefix_parts %>
+              <% if parts = @tag.prefix_parts %>
+                <%= render partial: "prefix", locals: { tag: @tag, parts: parts } %>
+              <% else %>
+                <%= show_attribute(@tag, :prefix) %>
+              <% end %>
+              <% if @tag.discipline.isa51_type_schema? %>
+                <%= show_attribute(@tag, :loop_id) %>
+              <% else %>
+                <%= show_attribute(@tag, :serial) %>
+              <% end %>
+              <%= show_attribute(@tag, :suffix) %>
+              <%= show_attribute(@tag, :notes, type: :text) %>
+              <%= show_attribute(@tag, :stage) %>
+              <%= show_attribute(@tag, :location) %>
             </div>  <!-- temporary end inner card body -->
 
             <!-- Associations -->
@@ -177,6 +174,11 @@
               <!-- Children card -->
               <div class="row mb-1">
                 <%= render 'shared/children', parent: @tag, association: :children %>
+              </div>
+
+              <!-- Loop elements card -->
+              <div class="row mb-1">
+                <%= render 'shared/children', parent: @tag, association: :loop_elements %>
               </div>
             </div> <!-- inner card body -->
           </div> <!-- inner card -->

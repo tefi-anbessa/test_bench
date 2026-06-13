@@ -222,15 +222,15 @@ class TagsSystemTest < ApplicationSystemTestCase
     # Header bar navigation links should include disabled prev button 
     # and working next button (only 2 tags created)
     assert_nav_button_disabled(:previous)
-    assert_nav_button(:next, @unassigned_tag)
+    assert_nav_button(:next, @tag2)
 
     click_link I18n.t('actions.next')
-    assert_current_path tag_path(@unassigned_tag)
+    assert_current_path tag_path(@tag2)
 
     # Header bar navigation links should include working prev button 
     # and disabled next button (only 2 tags created)
     assert_nav_button(:previous, @tag)
-    assert_nav_button_disabled(:next)
+    assert_nav_button(:next, @unassigned_tag)
 
     click_link I18n.t('actions.previous')
     assert_current_path tag_path(@tag)

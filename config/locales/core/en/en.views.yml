@@ -55,6 +55,7 @@ en:
       out_of_scope: "The item requested is not in the current project scope"
       record_is_orphan: "The item requested does not have a valid parent"
       already_assigned: "This item is already assigned to another object"
+      missing_param: "The request is missing a required parameter"
   projects:
     index:
       title:            "Projects"

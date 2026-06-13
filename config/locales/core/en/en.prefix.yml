@@ -22,6 +22,7 @@ en:
     schema_help: "TODO: help for schema editor"
   prefix:
     isa51:
+      measured_variable: "Measured Variable"
       measured_variables:
         'A': 'Analysis'
         'B': 'Burner, combustion'
@@ -49,6 +50,7 @@ en:
         'X': 'Unclassified'
         'Y': 'Event, state or presence'
         'Z': 'Position, dimension'
+      modifier: "Modifier"
       modifiers:
         'D': 'Differential'
         'F': 'Ration (fraction)'
@@ -60,6 +62,7 @@ en:
         'X': 'X-axis'
         'Y': 'Y-axis'
         'Z': 'Z-axis'
+      readout_function: "Readout Function"
       readout_functions:
         'A': 'Alarm'
         'B': 'User''s choice'
@@ -74,6 +77,7 @@ en:
         'U': 'Multifunction'
         'W': 'Well'
         'X': 'Unclassified'
+      output_function: "Output Function"
       output_functions:
         'B': 'User''s choice'
         'C': 'Control'
@@ -86,6 +90,7 @@ en:
         'X': 'Unclassified'
         'Y': 'Relay, compute, convert'
         'Z': 'Driver, actuator'
+      modifier_function: "Modifier Function"
       modifier_functions:
         'B': 'User''s choice'
         'H': 'High'
@@ -96,7 +101,10 @@ en:
         'N': 'User''s choice'
         'U': 'Multifunction'
         'X': 'Unclassified'
+
     dim1:
+      prefix: "Prefix Selection"
     dim2:
-      1:
-      2:
+      part1: "First Part"
+      part2: "Second Part"
+      

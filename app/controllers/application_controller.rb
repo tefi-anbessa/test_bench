@@ -129,7 +129,7 @@ class ApplicationController < ActionController::Base
       # Handle symbol translation
       error_message = exception.message
       if error_message.is_a?(Symbol)
-        error_message = I18n.t("errors.#{error_message}", default: error_message.to_s)
+        error_message = I18n.t("errors.conflict.#{error_message}", default: error_message.to_s)
       end
 
       respond_to do |format|

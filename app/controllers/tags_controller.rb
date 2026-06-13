@@ -23,12 +23,14 @@ class TagsController < ApplicationController
 
   # GET /tags/new
   def new
+    raise ApplicationController::ConflictError, :missing_param if @discipline.nil?
     authorize @tag = @discipline.tags.build()
     setup_form
   end
 
   # POST /tags or /tags.json
   def create
+    raise ApplicationController::ConflictError, :missing_param if @discipline.nil?
     @tag = authorize @discipline.tags.build(tag_params)
     if @tag.save
       flash[:success] = I18n.t('flash.create.notice', resource_name: I18n.t('activerecord.models.tag.one'))
@@ -117,10 +119,11 @@ class TagsController < ApplicationController
       set_swatch
       @safe_tagable_types = Tag.safe_tagable_types
       @parents = @tag.prospective_parents(policy_scope(Tag)).order(:discipline_id, :full_tag)
+      @schema = @discipline.schema_for_form.with_indifferent_access
     end
 
     def set_swatch
-      @swatch = @discipline&.swatch || @project&.swatch || Swatch.find_by(name: 'app_theme')
+      @swatch = @discipline&.swatch || @project&.swatch || Swatch.find_by(name: @discipline&.name) || Swatch.find_by(name: 'app_theme')
     end
 
     def tag_params

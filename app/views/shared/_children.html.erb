@@ -9,6 +9,8 @@ Relation must reflect a has_many association. -->
 <% end %>
 
 <% children = parent.public_send(association) %>
+<!-- Ensure list does not contain parent - mainly for loop elements -->
+<% children = children.reject { |child| child == parent } %>
 <%= render 'components/collapsible',
   id: "#{parent.model_name.element}_#{association}_links",
     title: [t("activerecord.attributes.#{parent.model_name.i18n_key}.#{association.to_s}", 
