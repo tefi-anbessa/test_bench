@@ -116,7 +116,7 @@ class Tag < ApplicationRecord
 
   # Public method to parse prefix components for form display
   def prefix_parts
-    return nil unless prefix.present? && prefix.length >= 2 && discipline&.prefix_schema.present?
+    return nil unless prefix.present? && discipline&.prefix_schema.present?
     parts = {}
     chars = prefix.chars
     if discipline.custom_schema?
@@ -187,6 +187,15 @@ class Tag < ApplicationRecord
       end
       return parts
 
+    when :dim2
+      parts[:part1] = schema[:part1].keys.map(&:to_s).find { |p| prefix.start_with?(p) }
+      return nil unless parts[:part1] # not a valid dim2 prefix
+      parts[:part2] = prefix[parts[:part1].length..-1]
+      unless parts[:part2].present? && schema[:part2]&.key?(parts[:part2].to_sym)
+        parts[:part2] = nil # return valid part 1 and nil part 2
+      end
+      return parts
+
     when :dim1
       if schema[:prefix]&.keys&.map(&:to_s)&.include?(chars.join)
         parts[:prefix] = chars.join
@@ -196,13 +205,8 @@ class Tag < ApplicationRecord
       end 
       return parts
 
-    when :dim2
-      parts[:part1] = schema[:part1].keys.map(&:to_s).find { |p| prefix.start_with?(p) }
-      return nil unless parts[:part1] # not a valid dim2 prefix
-      parts[:part2] = prefix[parts[:part1].length..-1]
-      unless parts[:part2].present? && schema[:part2]&.key?(parts[:part2].to_sym)
-        parts[:part2] = nil # return valid part 1 and nil part 2
-      end
+    when :default
+      parts[:prefix] = prefix
       return parts
     end
   end

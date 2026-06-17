@@ -419,6 +419,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Write a test for collapsible on attribute rather than association (specifically discipline prefix schema).
 - [ ] Decide what to do about deletion of data. It is affecting many aspects of the architecture.
 - [ ] Complete demand system test after refactor.
+- [ ] Fix tag prefix warning message for non-conforming prefix.
 
 ## Refactoring Opportunities
 

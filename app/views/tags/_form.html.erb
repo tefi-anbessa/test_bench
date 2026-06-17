@@ -1,3 +1,4 @@
+<!-- Expects tag, discipline, schema and parts variables. -->
 <div class="container mt-3" style="<%= container_styles(@swatch) %>">
   <div class="card" style="<%= card_styles(@swatch) %>">
     <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
@@ -20,9 +21,8 @@
       url: tag.persisted? ? tag : discipline_tags_path(tag.discipline),
       layout: :horizontal,
       label_col: "col-sm-4",
-      control_col: "col-sm-8",
-      wrapper: { class: 'mb-1' },
-      data: { controller: 'tag', 'tag-model-name-value': t('activerecord.models.tag.one') }) do |f| %>
+      control_col: "col-sm-8"
+      ) do |f| %>
 
       <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
       <%= render 'shared/error_messages', object: f.object %>
@@ -40,11 +40,8 @@
                     title: t('activerecord.help.tag.stage') %>
             </div>
 
-            <!-- Discipline -->
-            <%= f.hidden_field :discipline_id, value: @discipline.id %>
-
             <!-- Prefix Fields - Dynamic based on discipline schema -->
-            <%= render 'tags/prefix_fields', tag: tag, f: f %>
+            <%= render 'tags/prefix_fields', tag: tag, form: f, schema: schema, parts: parts %>
 
             <!-- Serial and Suffix -->
             <div class="row">
@@ -55,58 +52,53 @@
                 pattern: '\d*',
                 inputmode: 'numeric',
                 value: tag.serial.present? ? tag.serial.to_s.rjust(4, '0') : '0000',
-                data: { 
-                  action: 'change->tag#updatePreview input->tag#updatePreview'
-                },
+                data: { action: 'tag#updatePreview' },
                 id: 'tag_serial' %>
             </div>
 
             <div class="row">
-              <%= f.text_field :suffix,
-              label_col: "col-sm-3",
-              control_col: "col-sm-3",
-                    title: t('activerecord.help.tag.suffix'),
-                    data: { action: 'change->tag#updatePreview input->tag#updatePreview' },
-                    id: 'tag_suffix' %>
+                <%= f.text_field :suffix,
+                label_col: "col-sm-3",
+                control_col: "col-sm-3",
+                title: t('activerecord.help.tag.suffix'),
+                data: { action: 'tag#updatePreview' },
+                id: 'tag_suffix' %>
             </div>
 
             <div class="row">
               <%= f.text_field :service,
                 label_col: "col-sm-3",
                 control_col: "col-sm-9",
-                      title: t('activerecord.help.tag.service'),
-                      required: true %>
+                title: t('activerecord.help.tag.service'),
+                required: true %>
             </div>
 
             <div class="row">
               <%= f.text_field :location,
-                      label_col: "col-sm-3",
-                      control_col: "col-sm-9",
-                      title: t('activerecord.help.tag.location') %>
-            </div>
+                label_col: "col-sm-3",
+                control_col: "col-sm-9",
+                title: t('activerecord.help.tag.location') %>
+      </div>
 
             <!-- Notes -->
             <div class="row">
               <%= f.text_area :notes,
-                      label_col: "col-sm-3",
-                      control_col: "col-sm-9",
-                      rows: 3,
-                      placeholder: t('activerecord.help.tag.notes') %>
-            </div>
-
-            <!-- Hidden field for full tag preview -->
-            <%= hidden_field_tag :full_tag, id: 'tag_full_tag_preview' %>
-
-            <!-- Tagable Type -->
-            <div class="row">
-              <%= f.select :tagable_type, Tag.safe_tagable_types,
-                    { include_blank: t("form.none") },
-                    { class: 'form-select' } %>
+                label_col: "col-sm-3",
+                control_col: "col-sm-9",
+                rows: 3,
+                placeholder: t('activerecord.help.tag.notes') %>
             </div>
 
             <!-- Parent Tag -->
             <div class="row">
-              <%= f.collection_select :parent_id, @parents, :id, :full_tag,
+              <%= f.collection_select :parent_id, parents, :id, :full_tag,
+                    { include_blank: t("form.none") },
+                    { class: 'form-select' } %>
+            </div>
+
+            <!-- Tagable Type -->
+            <div class="row">
+              <%= f.select :tagable_type, Tag.safe_tagable_types,
                     { include_blank: t("form.none") },
                     { class: 'form-select' } %>
             </div>
@@ -116,7 +108,7 @@
 
       <!-- Card Footer with Actions -->
       <div class="card-footer bg-transparent text-end p-2">
-        <%= link_to(tag.persisted? ? tag_path(tag) : discipline_tags_path(@discipline),
+        <%= link_to(tag.persisted? ? tag_path(tag) : discipline_tags_path(discipline),
               class: 'btn btn-warning',
               data: { confirm: t('actions.sure'), turbo: false }) do %>
           <%= t('actions.discard') %>
@@ -127,8 +119,6 @@
           <%== bs_icon('save') %>
         <% end %>
       </div>
-
-      <!-- Tag preview is now handled by the Stimulus controller -->
     <% end %>
   </div>
 </div>

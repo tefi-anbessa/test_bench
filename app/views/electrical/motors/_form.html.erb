@@ -43,7 +43,7 @@
 
               <div class="card-body p-2" style="<%= form_styles(swatch) %>">
                 <%= render 'shared/error_messages', object: f.object %>
-
+                <%= form_field(f, :motor_type, type: enum_translated) %>
                 <%= f.select :motor_type,
                     options_for_select(
                       Electrical::Motor.motor_types.keys.collect { |k| [Electrical::Motor.human_enum_name(:motor_type, k), k] },

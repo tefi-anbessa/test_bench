@@ -104,15 +104,8 @@ class TagsController < ApplicationController
     end
 
     def isa51_schema?
-      discipline_id = params[:tag][:discipline_id]
-      return false unless discipline_id.present?
-      
-      discipline_data = Constants.tag.discipline.send(
-        Tag.normalize_discipline_code(discipline_id)
-      ) rescue nil
-      
-      return false unless discipline_data
-      discipline_data[:prefix_schema] == :isa51
+      return false unless @discipline.present?
+      @discipline.prefix_schema['name'] == 'isa51' || @discipline.prefix_schema['type'] == 'isa51'
     end
 
     def setup_form
@@ -120,6 +113,7 @@ class TagsController < ApplicationController
       @safe_tagable_types = Tag.safe_tagable_types
       @parents = @tag.prospective_parents(policy_scope(Tag)).order(:discipline_id, :full_tag)
       @schema = @discipline.schema_for_form.with_indifferent_access
+      @parts = @tag.prefix_parts
     end
 
     def set_swatch

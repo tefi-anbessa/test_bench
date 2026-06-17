@@ -8,14 +8,14 @@
   <% schema = tag.discipline.schema_for_form.with_indifferent_access %>
   <% parts.each do |key, value| %>
     <% if value.present? %>
-    <div class="row">
-      <div class="col-4">
-        <%= t("prefix.#{schema[:type]}.#{key}") %>
+      <div class="row">
+        <div class="col-4">
+          <%= t("prefix.#{schema[:type]}.#{key}") %>
+        </div>
+        <div class="col-8">
+          <%= [value, t("prefix.#{schema[:type]}.#{key.to_s.pluralize}.#{value}", default: value)].join(": ") unless value.nil? %>
+        </div>
       </div>
-      <div class="col-8">
-        <%= [value, t("prefix.#{schema[:type]}.#{key.to_s.pluralize}.#{value}", default: value)].join(": ") unless value.nil? %>
-      </div>
-    </div>
     <% end %>
   <% end %>
 <% end %>

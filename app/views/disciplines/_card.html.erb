@@ -2,7 +2,7 @@
 <%= render 'components/collapsible',
       id: "discipline_#{discipline.id}_details",
       title: t("disciplines.show.header", 
-        label: [discipline.code, t("discipline.name.#{discipline.name}")].join(': ')),
+        label: [discipline.code, t("discipline.name.#{discipline.name}", default: discipline.name)].join(': ')),
       expanded: false,
       header_class: 'py-1' do %>
   

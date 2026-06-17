@@ -296,6 +296,11 @@ module TagablesController
       instance_variable_set(resource_var_name, @resource)
       @tag.tagable_type ||= controller_path.classify
       set_swatch
+      @parents = @tag.prospective_parents(policy_scope(Tag)).order(:discipline_id, :full_tag)
+      @schema = @discipline.schema_for_form.with_indifferent_access
+      # prefix parts is a hash from parsing the tag prefix against the schema type for the tag's discipline.
+      # Used in the prefix build sub form. Nil means prefix is not conforming (may be new tag...)
+      @parts = @tag.prefix_parts
       # Hook for model-specific form setup
       setup_additional_form_data
     end

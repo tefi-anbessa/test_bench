@@ -1,5 +1,6 @@
 en:
   prefix_schema:
+    non_conforming: "Prefix does not conform to %{schema} schema"
     key:
       custom: "Custom"
       default: "Default"
@@ -7,7 +8,8 @@ en:
       dim1: "1 Dimension"
       dim2: "2 Dimensions"
       alternate_inst: "Alternate ISA-5.1"
-    type:
+    type: "Schema Type"
+    types:
       default: "Default"
       isa51: "ISA-5.1"
       dim1: "1 Dimension"
@@ -62,6 +64,7 @@ en:
         'X': 'X-axis'
         'Y': 'Y-axis'
         'Z': 'Z-axis'
+      function: "Function"
       readout_function: "Readout Function"
       readout_functions:
         'A': 'Alarm'
@@ -104,7 +107,28 @@ en:
 
     dim1:
       prefix: "Prefix Selection"
+      prefixes:
+        'A': 'Package'
+        'B': 'Building'
+        'EC': Electrical Cable
+        "EL": "Light Circuit"
+        "EM": "Motor"
+        "ES": "Socket Circuit"
+        "EX": "Switchboard"
     dim2:
       part1: "First Part"
+      part1s:
+        'X': Switch
+        'J': Junction
+        'P': Power
+        'C': Control
+
       part2: "Second Part"
+      part2s:
+        'B': Box
+        'C': Cable
+        'M': Motor
+        'G': Generator
+    default:
+      prefix: "Free form prefix"
       

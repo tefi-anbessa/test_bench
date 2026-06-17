@@ -24,9 +24,6 @@
   <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
     <%= render 'shared/error_messages', object: tag %>
 
-      <!-- Discipline -->
-      <%= tag_f.hidden_field :discipline_id, value: @discipline.id %>
-
       <!-- Stage -->
       <div class="row">
         <%= tag_f.number_field :stage,
@@ -38,10 +35,7 @@
       </div>
 
       <!-- Prefix Fields - Dynamic based on discipline schema -->
-      <%= render 'tags/prefix_fields', tag: tag, f: tag_f %>
-
-      <!-- Full tag preview -->
-      <%= hidden_field_tag :full_tag, id: 'tag_full_tag_preview' %>
+      <%= render 'tags/prefix_fields', tag: tag, form: tag_f, schema: @schema, parts: @parts %>
 
       <!-- Serial and Suffix -->
       <div class="row">
@@ -88,6 +82,13 @@
                 placeholder: t('activerecord.help.tag.notes') %>
       </div>
 
+      <!-- Parent Tag -->
+      <div class="row">
+        <%= tag_f.collection_select :parent_id, @parents, :id, :full_tag,
+              { include_blank: t("form.none") },
+              { class: 'form-select' } %>
+      </div>
+
       <!-- Tagable Type -->
       <div class="row">
         <%= tag_f.text_field :tagable_type,
@@ -96,6 +97,4 @@
                 disabled: true %>
       </div>
   </div>
-
-  <!-- Tag preview is now handled by the Stimulus controller -->
 </div>
