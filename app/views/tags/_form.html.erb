@@ -31,63 +31,20 @@
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
             <!-- Stage -->
-            <div class="row">
-              <%= f.number_field :stage,
-              label_col: "col-sm-3",
-              control_col: "col-sm-3",
-                    min: 0,
-                    max: 10,
-                    title: t('activerecord.help.tag.stage') %>
-            </div>
+            <%= form_field(f, :stage, type: :number, label_cols: 3, control_cols: 3, min: 0, max: 10) %>
 
             <!-- Prefix Fields - Dynamic based on discipline schema -->
             <%= render 'tags/prefix_fields', tag: tag, form: f, schema: schema, parts: parts %>
 
             <!-- Serial and Suffix -->
-            <div class="row">
-              <%= f.text_field :serial,
-                label_col: "col-sm-3",
-                control_col: "col-sm-3",
-                title: t('activerecord.help.tag.serial'),
-                pattern: '\d*',
-                inputmode: 'numeric',
-                value: tag.serial.present? ? tag.serial.to_s.rjust(4, '0') : '0000',
-                data: { action: 'tag#updatePreview' },
-                id: 'tag_serial' %>
-            </div>
-
-            <div class="row">
-                <%= f.text_field :suffix,
-                label_col: "col-sm-3",
-                control_col: "col-sm-3",
-                title: t('activerecord.help.tag.suffix'),
-                data: { action: 'tag#updatePreview' },
-                id: 'tag_suffix' %>
-            </div>
-
-            <div class="row">
-              <%= f.text_field :service,
-                label_col: "col-sm-3",
-                control_col: "col-sm-9",
-                title: t('activerecord.help.tag.service'),
-                required: true %>
-            </div>
-
-            <div class="row">
-              <%= f.text_field :location,
-                label_col: "col-sm-3",
-                control_col: "col-sm-9",
-                title: t('activerecord.help.tag.location') %>
-      </div>
-
-            <!-- Notes -->
-            <div class="row">
-              <%= f.text_area :notes,
-                label_col: "col-sm-3",
-                control_col: "col-sm-9",
-                rows: 3,
-                placeholder: t('activerecord.help.tag.notes') %>
-            </div>
+            <%= form_field(f, :serial, type: :string, label_cols: 3, control_cols: 3, 
+                  min: 0, pattern: '\d*', inputmode: 'numeric', data: { action: 'tag#updatePreview' },
+                  value: tag.serial.present? ? tag.serial.to_s.rjust(4, '0') : '0000', id: 'tag_serial') %>
+            <%= form_field(f, :suffix, label_cols: 3, control_cols: 3, data: { action: 'tag#updatePreview' },
+                  id: 'tag_suffix' ) %>
+            <%= form_field(f, :service, label_cols: 3, control_cols: 9) %>
+            <%= form_field(f, :location, label_cols: 3, control_cols: 9) %>
+            <%= form_field(f, :notes, type: :text, label_cols: 3, control_cols: 9) %>
 
             <!-- Parent Tag -->
             <div class="row">
@@ -98,7 +55,9 @@
 
             <!-- Tagable Type -->
             <div class="row">
-              <%= f.select :tagable_type, Tag.safe_tagable_types,
+              <%= f.select :tagable_type, 
+                options_for_select(Tag.safe_tagable_types.map { |type| [type.safe_constantize.model_name.human, type] }, 
+                  tag.tagable_type),
                     { include_blank: t("form.none") },
                     { class: 'form-select' } %>
             </div>

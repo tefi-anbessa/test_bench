@@ -69,7 +69,7 @@ class Tag < ApplicationRecord
 
   # === Class methods ===
   def self.safe_tagable_types
-    Tag.tagable_types.select{ |type| type.safe_constantize.present? }.map { |type| [type.safe_constantize.model_name.human, type] }
+    Tag.tagable_types.select{ |type| type.safe_constantize.present? }
   end
 
   # === Class methods - Queries ===

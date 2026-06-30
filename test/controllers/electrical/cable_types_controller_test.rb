@@ -8,13 +8,24 @@ module Electrical
   include ControllerTestHelper
 
     setup do
-      setup_controller_test
+      # Cannot use standard setup because CableType is a catalog model, uses catalog_required_role.
+      setup_projects_and_users
+      setup_disciplines(name: "Electrical", required_role: :designer)
+      setup_accredited_users(:designer)
       setup_discipline_resources
       setup_model_specific_data
     end
 
     def setup_model_specific_data
-      # No model specific requirements
+      @discipline.update(catalog_required_role: :custodian)
+      @other_discipline.update(catalog_required_role: :custodian)
+      @accredited_user.grant(:custodian, @discipline)
+      @accredited_user_other_project.grant(:custodian, @other_discipline)
+    end
+
+    test "model specific setup is valid" do
+      assert @accredited_user.has_role?(:custodian, @discipline)
+      assert @accredited_user_other_project.has_role?(:custodian, @other_discipline)
     end
 
     private

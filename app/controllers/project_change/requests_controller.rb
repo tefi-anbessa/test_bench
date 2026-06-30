@@ -17,6 +17,7 @@ module ProjectChange
     # GET /change/requests/1
     def show
       authorize @request
+      @neighbours = Navigator.new(scope: @scope, record: @request).neighbours
     end
 
     # GET /change/requests/new
@@ -88,6 +89,7 @@ module ProjectChange
         @request = policy_scope(ProjectChange::Request).find_by(id: params[:id])
         raise ApplicationController::ConflictError, :out_of_scope if @request.nil?
         @project = @request.project
+        @scope = policy_scope(Request).joins(:project)
       end
 
       def set_swatch

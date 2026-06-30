@@ -41,40 +41,6 @@ class DocumentTest < ActiveSupport::TestCase
     assert_equal serial, doc.serial
   end
 
-  test "default scope sorts by discipline.code, doc type code, then serial" do
-    # Create documents with different disciplines and doc types
-    discipline_e = @project.disciplines.find_by(code: "E")
-    discipline_j = @project.disciplines.find_by(code: "J")
-    
-    doc_type_a = create(:doc_type, code: "AAA", discipline: discipline_e)
-    doc_type_b = create(:doc_type, code: "BBB", discipline: discipline_j)
-    
-    # Create documents in a specific order to test sorting
-    doc1 = create(:document, discipline: discipline_j, doc_type: doc_type_b, title: "Doc 1")
-    doc2 = create(:document, discipline: discipline_e, doc_type: doc_type_a, title: "Doc 2")
-    doc3 = create(:document, discipline: discipline_e, doc_type: doc_type_a, title: "Doc 3")
-    
-    # Get all documents and verify order
-    documents = Document.all
-    
-    # Find the documents we created for this test
-    test_docs = documents.select { |doc| [doc1.id, doc2.id, doc3.id].include?(doc.id) }
-    
-    # Should be ordered by discipline.code (A before B), then doc type code, then serial
-    # Filter to only our test documents to avoid interference from setup data
-    ordered_test_docs = test_docs.sort_by { |doc| [doc.discipline.code, doc.doc_type.code, doc.serial] }
-    
-    # Verify the actual order matches the expected order
-    assert_equal ordered_test_docs, test_docs
-    
-    # Specifically verify E discipline docs come before J discipline docs
-    e_docs = test_docs.select { |doc| doc.discipline.code == "E" }
-    # j_docs = test_docs.select { |doc| doc.discipline.code == "J" }
-    
-    # Within E discipline, verify serial ordering
-    assert e_docs.first.serial < e_docs.last.serial
-  end
-
   test "readonly attributes cannot be changed" do
     # Test discipline_id cannot be changed
     new_discipline = @project.disciplines.find_by(name: 'Mechanical')

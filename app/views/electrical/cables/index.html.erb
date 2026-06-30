@@ -33,7 +33,7 @@
         <%= search_form_for @q, url: discipline_electrical_cables_path(@discipline) do |f| %>
           <%= f.search_field :electrical_cable_type_code_cont,
                 class: "search_field",
-                placeholder: t('activerecord.models.electrical/cable_type') %>
+                placeholder: t('activerecord.attributes.electrical/cable.electrical_cable_type') %>
           <%= f.search_field :notes_cont,
                 class: "search_field",
                 placeholder: t('activerecord.attributes.electrical/cable.notes') %>

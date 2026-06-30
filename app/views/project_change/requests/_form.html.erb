@@ -32,30 +32,13 @@
 
               <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
                 <%= render 'shared/error_messages', object: f.object %>
-                <%= f.text_field :title,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8" %>
-                <%= f.select :duration,
-                    options_for_select(
-                      ProjectChange::Request.durations.keys.collect { |k| 
-                        [ProjectChange::Request.human_enum_name(:duration, k), k] 
-                      },
-                      selected: request.duration
-                    ),
-                    { include_blank: t('form.required') },
-                    class: 'form-control form-control-sm' %>
-                <%= f.text_area :reason,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8",
-                        rows: 3 %>
-                <%= f.text_area :summary,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8",
-                        rows: 3 %>
-                
+
+                <%= form_field(f, :title, label_cols: 4, control_cols: 8) %>
+                <% collection = options_for_select(ProjectChange::Request.durations.keys.collect { |k| 
+                          [ProjectChange::Request.human_enum_name(:duration, k), k] }, selected: request.duration) %>
+                <%= form_field(f, :duration, type: :enum_translated, label_cols: 4, control_cols: 8, collection: collection, required: true) %>
+                <%= form_field(f, :reason, type: :text) %>
+                <%= form_field(f, :summary, type: :text) %>
               </div> <!-- end request card body -->
             </div> <!-- end request card -->
 

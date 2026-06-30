@@ -144,6 +144,7 @@ en:
         from_id: "From selection"
         to_type: "To type"
         to_id: "To selection"
+        electrical_cable_type: "Cable Type"
         electrical_cable_type_id: "Cable Type"
         route_length: "Route Length"
         vertical_allowance: "Vertical Allowance"
@@ -208,7 +209,9 @@ en:
         elcb: "ELCB"
         contactor: "Contactor"
         feeder: "Feeder"
+        feeder_id: "Feeder"
         demand: "Load"
+        demand_id: "Load"
         notes: "Notes"
 
       electrical/motor:

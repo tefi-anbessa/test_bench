@@ -85,7 +85,7 @@
       <% can_show = policy(@discipline.tags.build()).show? %>
       <% can_edit = policy(@discipline.tags.build()).edit? %>
       <% can_delete = policy(@discipline.tags.build()).destroy? %>
-      <table id='socket_ccts' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
+      <table id='socket_ccts' class='table table-responsive table-condensed table-striped table-hoverable table-bordered'>
         <%= render 'header' %>
         <tbody>
           <% unless @orphans.empty? %>

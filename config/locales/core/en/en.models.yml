@@ -88,6 +88,7 @@ en:
         source_format_id: "Source Format"
         code: "Code"
         reason: "Reason for Issue"
+        created_at: "Created at"
       source_format:
         vendor: "Vendor"
         title: "Software Title"
@@ -113,9 +114,10 @@ en:
         stage:            "Stage"
         notes:            "Notes"
         full_tag:         "Tag"
+        loop_id:         "Loop ID"
         tagable_id:       "Tag Type"
         tagable_type:     "Tag Type"
-        parent_id:        "Parent"
+        parent:           "Parent"
         children:         "Children"
       role:
         name:             "Name"

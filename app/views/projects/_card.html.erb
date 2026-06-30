@@ -1,41 +1,23 @@
 <!-- Project collapsible card -->
+<!-- Expecting 'object', 'context' and 'id' variables, passed from the shared/_association partial. -->
+<!-- The card uses the context name in the header and the id for the block (for testing). -->
 <% project = object %>
 <%= render 'components/collapsible',
-			id: "project_#{project.id}_details",
-			title: [t("activerecord.models.project", count: 1), project.label].join(": "),
+			id: "#{id}_#{project.id}_details",
+      title: [context, project.label].join(": "),
 			expanded: false,
 			show_icon: true,
 			header_class: 'py-1' do %>
 
 	<div class="container-fluid">
-		<div class="row mb-1">
-			<% text = t("actions.jump_to", model: project.model_name.human) %>
-			<%= link_to project_path(project),
-				class: "btn btn-sm btn-outline-secondary me-2",
-				title: text do %>
-				<%== bs_icon('folder') %>
-				<span class="d-none d-md-inline"><%= text %></span>
-			<% end %>
-		</div>
+    <%= nav_link(action: :show_project, record: project) %>
 
-		<div class="row mb-1">
-			<div class="col-4 text-muted"><%= t("activerecord.attributes.project.title") %></div>
-			<div class="col-8"><%= project.title || '-' %></div>
-		</div>
-
-		<div class="row mb-1">
-			<div class="col-4 text-muted"><%= t("activerecord.attributes.project.description") %></div>
-		</div>
-		<div class="row mb-1">
-			<div class="col-12"><%= simple_format(project.description.present? ? project.description : '-') %></div>
-		</div>
+    <%= show_attribute(project, :code) %>
+    <%= show_attribute(project, :title) %>
+    <%= show_attribute(project, :description, type: :text) %>
 
 		<% if policy(project).edit? %>
-			<!-- Only show the swatch to users that can change it. -->
-			<div class="row mb-1">
-				<div class="col-4 text-muted"><%= t("activerecord.models.swatch", count: 1) %></div>
-				<div class="col-8"><%= project.swatch&.name || '-' %></div>
-			</div>
-		<% end %>
+      <%= nav_link(action: :show, record: project.swatch) %>
+    <% end %>
 	</div>
 <% end %>

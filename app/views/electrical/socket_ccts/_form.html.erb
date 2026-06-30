@@ -43,32 +43,9 @@
               <div class="card-body p-2">
                 <%= render 'shared/error_messages', object: f.object %>
 
-                <%= f.select :socket_type,
-                  options_for_select(
-                    socket_cct.class.socket_types.map { |k, _v| 
-                      [socket_cct.class.human_enum_name(:socket_type, k), k] 
-                    },
-                    selected: socket_cct.socket_type
-                    ),
-                    { include_blank: t('form.required') },
-                    class: 'form-control form-control-sm',
-                    label_col: "col-sm-4",
-                    control_col: "col-sm-8" %>
-
-                <%= f.number_field :quantity,
-                        class: 'form-control form-control-sm',
-                        min: 1,
-                        max: 1000,
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8",
-                        wrapper: { class: 'mb-1' } %>
-
-                <%= f.text_area :notes,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8",
-                        wrapper: { class: 'mb-1' },
-                        rows: 3 %>
+                <%= form_field(f, :socket_type, type: :enum_translated, required: true) %>
+                <%= form_field(f, :quantity, type: :number, control_cols: 4, min: 1, max: 100, required: true) %>
+                <%= form_field(f, :notes, type: :text) %>
               </div> <!-- end socket circuit card body -->
             </div> <!-- end socket circuit card -->
 

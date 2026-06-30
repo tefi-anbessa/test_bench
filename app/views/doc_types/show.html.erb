@@ -66,18 +66,9 @@
             </div>
 
             <div class="card-body p-3">
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.doc_type.code") %></div>
-                <div class="col-8"><%= @doc_type.code || '-' %></div>
-              </div> <!-- end row -->
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.doc_type.name") %></div>
-                <div class="col-8"><%= @doc_type.name || '-' %></div>
-              </div> <!-- end row -->
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.doc_type.description") %></div>
-                <div class="col-8"><%= simple_format(@doc_type.description || '-') %></div>
-              </div>
+              <%= show_attribute(@doc_type, :code) %>
+              <%= show_attribute(@doc_type, :name) %>
+              <%= show_attribute(@doc_type, :description, type: :text) %>
             </div>  <!-- temporary end inner card body -->
 
             <!-- Document Associations -->
@@ -86,11 +77,13 @@
             </div>
 
             <div class="card-body p-3">
-              
+              <!-- Discipline card -->
+              <%= show_association(@doc_type, :discipline) %>
+
+              <!-- Children card -->
               <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.models.discipline.one") %></div>
-                <div class="col-8"><%= render 'disciplines/card', object: @doc_type.discipline %></div>
-              </div> <!-- end row -->
+                <%= render 'shared/children', parent: @doc_type, association: :documents, text_method: :title %>
+              </div>
             </div>  <!-- end inner card body -->
           </div> <!-- end inner card -->
         </div> <!-- end responsive columns -->

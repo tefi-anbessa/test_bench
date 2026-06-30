@@ -27,92 +27,26 @@
         <%= render 'shared/error_messages', object: f.object %>
 
         <div class="row justify-content-center">
+          <div class="row">
+            <div class="col-12">
+              <%= render "circuits_list", object: switchboard %>
+            </div>
+          </div>
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-            <!-- Basic Information -->
-            <div class="row">
-              <%= f.number_field :serial,
-                    required: true,
-                    min: 1,
-                    max: 36 %>
-            </div>
+            <%= form_field(f, :serial, type: :number, min: 1, max: 36, control_cols: 4, required: true) %>
+            <%= form_field(f, :phase, type: :enum, control_cols: 4, required: true) %>
+            <%= form_field(f, :device, type: :enum, control_cols: 4, required: false) %>
+            <%= form_field(f, :poles, type: :number, min: 0, max: 12, control_cols: 4, required: false) %>
+            <%= form_field(f, :curve, type: :enum, control_cols: 4, required: false) %>
+            <% collection = options_for_select(Constants.electrical.mcb_rating, selected: circuit.rating.to_i) %>
+            <%= form_field(f, :rating, type: :select, collection: collection, control_cols: 4, required: false) %>
+            <%= form_field(f, :elcb, type: :enum, control_cols: 4, required: false) %>
+            <%= form_field(f, :contactor, type: :boolean) %>
 
-            <div class="row">
-              <%= f.select :phase, 
-              options_for_select(Electrical::Circuit.phases.map { |k, v| [k, k] },
-                    selected: circuit.phase),
-                    { include_blank: t("form.none") } %>
-            </div>
-
-            <!-- Protection -->
-            <div class="row">
-              <%= f.select :device, 
-              options_for_select(Electrical::Circuit.devices.map { |k, v| [k, k] },
-                    selected: circuit.device),
-                    { include_blank: t("form.none") } %>
-            </div>
-
-            <div class="row">
-              <%= f.number_field :poles,
-                    min: 0,
-                    max: 6 %>
-            </div>
-
-            <div class="row">
-              <%= f.select :curve, 
-                    options_for_select(Electrical::Circuit.curves.map { |k, v| [k, k] },
-                    selected: circuit.curve),
-                    { include_blank: t("form.none") } %>
-            </div>
-
-            <div class="row">
-              <%= f.select :rating, 
-                    options_for_select(Constants.electrical.mcb_rating,
-                    selected: circuit.rating),
-                    { include_blank: t("form.none") } %>
-            </div>
-
-            <div class="row">
-              <%= f.select :elcb, 
-                    options_for_select(Electrical::Circuit.elcbs.map { |k, v| [k, k] },
-                    selected: circuit.elcb) %>
-            </div>
-
-            <div class="row">
-              <%= f.check_box :contactor, 
-                    label: t('activerecord.attributes.electrical/circuit.contactor') %>
-            </div>
-
-            <div class="row">
-              <%= f.text_area :notes,
-                    label: t('activerecord.attributes.electrical/circuit.notes'),
-                    rows: 2 %>
-            </div>
-
-            <div class="row">
-              <%= bootstrap_fields @cable  do |c| %>
-                <%= c.select :from_id,
-                      options_for_select(@cables || [], 
-                      selected: circuit.feeder&.id),
-                      { include_blank: t("form.none"),
-                        layout: :horizontal,
-                        label_col: "col-sm-4", 
-                        control_col: "col-sm-8",
-                        label: t('activerecord.attributes.electrical/circuit.feeder') } %>
-              <% end %>
-            </div>
-
-            <div class="row">
-              <%= bootstrap_fields @cable  do |c| %>
-                <%= c.select :to_id,
-                      options_for_select(@demands || [], 
-                      selected: circuit.feeder&.to&.id),
-                      { include_blank: t("form.none"),
-                        layout: :horizontal,
-                        label_col: "col-sm-4", 
-                        control_col: "col-sm-8",
-                        label: t('activerecord.attributes.electrical/circuit.demand') } %>
-              <% end %>
-            </div>
+            <% collection = options_for_select(cables || [], selected: circuit.feeder&.id) %>
+            <%= form_field(f, :feeder_id, type: :select, collection: collection, required: false) %>
+            <% collection = options_for_select(demands || [], selected: circuit.demand&.id) %>
+            <%= form_field(f, :demand_id, type: :select, collection: collection, required: false) %>
           </div>
         </div>
 

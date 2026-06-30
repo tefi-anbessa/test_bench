@@ -64,74 +64,21 @@
             </div> <!-- end inner card header -->
 
             <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
-      
-
-              <!-- Cable Type Details Inner Card -->
-              <div class="table-responsive">
-                <table class="table table-sm mb-0" style="width: auto;">
-                  <tbody>
-                    <tr>
-                      <th><%= @cable_type.class.human_attribute_name(:conductor_material) %></th>
-                      <td><%= @cable_type&.conductor_material %></td>
-                    <tr>
-                      <th><%= @cable_type.class.human_attribute_name(:groups) %></th>
-                      <td><%= @cable_type&.groups %></td>
-                    </tr>
-                    <tr>
-                      <th><%= @cable_type.class.human_attribute_name(:construction) %></th>
-                      <td><%= @cable_type.class.human_enum_name(:construction, @cable_type.construction) %></td>
-                    </tr>
-                    <tr>
-                      <th><%= @cable_type.class.human_attribute_name(:csa) %></th>
-                      <td><%= @cable_type&.csa %></td>
-                    </tr>
-                    <tr>
-                      <th><%= @cable_type.class.human_attribute_name(:neutral_csa) %></th>
-                      <td><%= @cable_type&.neutral_csa %></td>
-                    </tr>
-                    <tr>
-                      <th><%= @cable_type.class.human_attribute_name(:earth_csa) %></th>
-                      <td><%= @cable_type&.earth_csa %></td>
-                    </tr>
-                    <tr>
-                      <th><%= @cable_type.class.human_attribute_name(:insulation) %></th>
-                      <td><%= @cable_type&.insulation %></td>
-                    </tr>
-                    <tr>
-                      <th><%= @cable_type.class.human_attribute_name(:bedding) %></th>
-                      <td><%= @cable_type&.bedding %></td>
-                    </tr>
-                    <tr>
-                      <th><%= @cable_type.class.human_attribute_name(:armour) %></th>
-                      <td><%= @cable_type&.armour %></td>
-                    </tr>
-                    <tr>
-                      <th><%= @cable_type.class.human_attribute_name(:sheath) %></th>
-                      <td><%= @cable_type&.sheath %></td>
-                    </tr>
-                    <tr>
-                      <th><%= @cable_type.class.human_attribute_name(:bedding_od) %></th>
-                      <td><%= @cable_type&.bedding_od %></td>
-                    </tr>
-                    <tr>
-                      <th><%= @cable_type.class.human_attribute_name(:overall_od) %></th>
-                      <td><%= @cable_type&.overall_od %></td>
-                    </tr>
-                    <tr>
-                      <th><%= @cable_type.class.human_attribute_name(:temperature_rating) %></th>
-                      <td><%= @cable_type&.temperature_rating %></td>
-                    </tr>
-                    <tr>
-                      <th><%= @cable_type.class.human_attribute_name(:voltage_rating) %></th>
-                      <td><%= @cable_type&.voltage_rating %></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <%= @cable_type.class.human_attribute_name(:notes) %>
-              <div class="scrollable-box">
-                <%= @cable_type&.notes %>
-              </div>
+              <%= show_attribute(@cable_type, :conductor_material, type: :enum) %>
+              <%= show_attribute(@cable_type, :groups, type: :integer) %>
+              <%= show_attribute(@cable_type, :construction, type: :enum) %>
+              <%= show_attribute(@cable_type, :csa, type: :float, units: "mm²") %>
+              <%= show_attribute(@cable_type, :neutral_csa, type: :float, units: "mm²") %>
+              <%= show_attribute(@cable_type, :earth_csa, type: :float, units: "mm²") %>
+              <%= show_attribute(@cable_type, :insulation, type: :enum) %>
+              <%= show_attribute(@cable_type, :bedding, type: :enum) %>
+              <%= show_attribute(@cable_type, :armour, type: :enum) %>
+              <%= show_attribute(@cable_type, :sheath, type: :enum) %>
+              <%= show_attribute(@cable_type, :bedding_od, type: :decimal) %>
+              <%= show_attribute(@cable_type, :overall_od, type: :decimal) %>
+              <%= show_attribute(@cable_type, :temperature_rating, type: :enum) %>
+              <%= show_attribute(@cable_type, :voltage_rating, type: :enum) %>
+              <%= show_attribute(@cable_type, :notes, type: :text) %>
             </div>  <!-- temporary end inner card body -->
 
             <!-- Associations -->
@@ -140,16 +87,7 @@
             </div>
 
             <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
-
-              <!-- Project collapsible card -->
-              <div class="row mb-1">
-                <%= render 'projects/card', object: @cable_type.project %>
-              </div>
-
-              <!-- Discipline card -->
-              <div class="row mb-1">
-                <%= render 'disciplines/card', object: @cable_type.discipline %>
-              </div>
+                <%= show_association(@cable_type, :discipline) %>
 
               <!-- Children card -->
               <div class="row mb-1">

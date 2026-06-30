@@ -61,46 +61,16 @@
             </div> <!-- end inner card header -->
 
             <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
-              
               <%= show_attribute(@demand, :notes, type: :text) %>
               <%= show_attribute(@demand, :basis, type: :enum_translated) %>
               <%= show_attribute(@demand, :basis_notes, type: :text) %>
-
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.supply") %></div>
-                <div class="col-8"><%= number_to_human(@demand.supply, precision: 4,
-                                        units: { unit: "V", thousand: "kV"}) %></div>
-              </div>
-
+              <%= show_attribute(@demand, :supply, type: :float, units: "V") %>
               <%= show_attribute(@demand, :config, type: :enum_translated) %>
-
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.power") %></div>
-                <div class="col-8"><%= number_to_human(@demand.power, precision: 4,
-                                        units: { unit: "W", thousand: "kW", million: "MW"}) %></div>
-              </div>
-
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.vector") %></div>
-                <div class="col-8"><%= number_to_human(@demand.vector, precision: 4,
-                                        units: { unit: "VA", thousand: "kVA", million: "MVA"}) %></div>
-              </div>
-
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.power_factor") %></div>
-                <div class="col-8"><%= @demand.power_factor || '-'%></div>
-              </div>
-
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.current") %></div>
-                <div class="col-8"><%= number_to_human(@demand.current, precision: 4,
-                                        units: { unit: "A", thousand: "kA", million: "MA"}) %></div>
-              </div>
-
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/demand.duty") %></div>
-                <div class="col-8"><%= @demand.duty %></div>
-              </div>  <!-- temporary end inner card body -->
+              <%= show_attribute(@demand, :power, type: :float, units: "VA") %>
+              <%= show_attribute(@demand, :power_factor, type: :float) %>
+              <%= show_attribute(@demand, :current, type: :float, units: "A") %>
+              <%= show_attribute(@demand, :duty, type: :float) %>
+            </div>  <!-- temporary end inner card body -->
 
             <!-- Associations -->
             <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
@@ -108,21 +78,14 @@
             </div>
 
             <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
-
               <!-- Demandable Card -->
-              <div class="row mb-1">
-                <%= render 'shared/association', object: @demand, association: :demandable %>
-              </div>
+              <%= show_association(@demand, :demandable) %>
 
               <!-- Circuit Section -->
-              <div class="row mb-1">
-                <%= render 'shared/association', object: @demand, association: :circuit %>
-              </div>
+              <%= show_association(@demand, :circuit) %>
 
               <!-- Incomer Section -->
-              <div class="row mb-1">
-                <%= render 'shared/association', object: @demand, association: :incomer %>
-              </div>
+              <%= show_association(@demand, :incomer) %>
             </div>  <!-- end inner card body -->
           </div> <!-- end inner card -->
         </div> <!-- end responsive columns -->

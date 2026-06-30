@@ -65,42 +65,12 @@
             </div> <!-- end inner card header -->
 
             <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/motor.motor_type') %></div>
-                <div class="col-8"><%= @motor.class.human_enum_name(:motor_type, @motor.motor_type) %></div>
-              </div>
-
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/motor.frame_size') %></div>
-                <div class="col-8"><%= "frame_#{@motor.frame_size}" %></div>
-              </div>
-
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/motor.poles') %></div>
-                <div class="col-8"><%= @motor.poles || '-' %></div>
-              </div>
-
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/motor.ingress_protection') %></div>
-                <div class="col-8"><%= @motor.ingress_protection.present? ?
-                ["IP", @motor.ingress_protection].join(' ') : '-' %></div>
-              </div>
-
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/motor.speed_rated') %></div>
-                <div class="col-8"><%= @motor.speed_rated.present? ? 
-                                        number_to_human(@motor.speed_rated, precision: 4, units: { unit: "rpm"}) : 
-                                        '-' %></div>
-              </div>
-
-              <span class="border">
-                <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/heater.notes') %></div>
-                </div>
-                <div class="row mb-1">
-                  <div class="col-8"><%= simple_format(@motor.notes) %></div>
-                </div>
-              </span>
+              <%= show_attribute(@motor, :motor_type, type: :enum_translated) %>
+              <%= show_attribute(@motor, :frame_size, type: :enum) %>
+              <%= show_attribute(@motor, :poles, type: :integer) %>
+              <%= show_attribute(@motor, :ingress_protection) %>
+              <%= show_attribute(@motor, :speed_rated, type: :float, units: "rpm") %>
+              <%= show_attribute(@motor, :notes, type: :text) %>
             </div>  <!-- temporary end inner card body -->
 
             <!-- Associations -->
@@ -110,13 +80,11 @@
 
             <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
               <!-- Demand -->
-              <%= render 'electrical/demands/show_insert', tag: @motor.tag, demand: @motor.electrical_demand %>
+              <%= render 'electrical/demands/show_insert', object: @motor %>
               
               <!-- Tag Card -->
               <% if @motor.tag.present? %>
-                <div class="row g-3 mb-3">
-                    <%= render 'tags/card', object: @motor, association: :tag %>
-                </div>
+                <%= show_association(@motor, :tag) %>
               <% else %>
                 <div class="row g-3 mb-3">
                   <div class="alert alert-danger">

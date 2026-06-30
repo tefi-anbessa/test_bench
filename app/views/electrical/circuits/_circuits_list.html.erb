@@ -1,0 +1,64 @@
+<!-- Expects switchboard object -->
+<!-- Alternative index with no links, for display on circuits form, so user can see existing circuits. -->
+<% switchboard = object %>
+<% circuits = switchboard.circuits %>
+<!-- Switchboard Circuits Panel -->
+<%= render 'components/collapsible',
+  id: "circuits_list",
+  title: [switchboard.model_name.human, switchboard.label, switchboard.class.human_attribute_name(:circuits)].join(' '),
+  expanded: false,
+  header_class: 'py-1' do %>
+  
+  <div class="container">
+    <div class="card mb-1" style="<%= card_styles(@swatch) %>">
+      <div class="card-body p-3">
+        <div class="row align-items-center py-2 border-bottom">
+          <table id='circuits' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
+            <thead>
+              <tr>
+                <th scope="col"><%= t("activerecord.attributes.electrical/circuit.serial") %></th>
+                <th scope="col"><%= t('activerecord.attributes.electrical/circuit.notes') %></th>
+                <th scope="col"><%= t("activerecord.attributes.electrical/circuit.phase") %></th>
+                <th scope="col"><%= t("activerecord.attributes.electrical/circuit.device") %></th>
+                <th scope="col"><%= t("activerecord.attributes.electrical/circuit.poles") %></th>
+                <th scope="col"><%= t("activerecord.attributes.electrical/circuit.rating") %></th>
+                <th scope="col"><%= t("activerecord.attributes.electrical/circuit.curve") %></th>
+                <th scope="col"><%= t("activerecord.attributes.electrical/circuit.elcb") %></th>
+                <th scope="col"><%= t("activerecord.attributes.electrical/circuit.contactor") %></th>
+                <th scope="col"><%= t("activerecord.attributes.electrical/circuit.feeder") %></th>
+                <th scope="col"><%= t("activerecord.attributes.electrical/circuit.demand") %></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% circuits.each do |row| %>
+                <tr>
+                  <td><%= row.long_label %></td>
+                  <td>
+                    <span title="<%= row.notes %>">
+                      <%= truncate(strip_tags(row.notes.to_s), length: 10) %>
+                    </span>
+                  </td>
+                  <td><%= row.phase %></td>
+                  <td><%= row.device %></td>
+                  <td><%= row.poles %></td>
+                  <td><%= row.rating %></td>
+                  <td><%= row.curve %></td>
+                  <td><%= row.elcb %></td>
+                  <td><%= boolean_icon(row.contactor) %></td>
+                  <td><%= row.feeder.present? ? row.feeder.tag.label : "-" %></td>
+                  <td><%= row.demand.present? ? row.demand.tag.label : "-" %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+        
+        <% if circuits.empty? %>
+          <div class="text-center text-muted py-3">
+            <%= t('electrical.circuits.index.empty') %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>

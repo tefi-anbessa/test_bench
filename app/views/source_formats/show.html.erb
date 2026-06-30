@@ -9,29 +9,11 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@source_format).index? %>
-              <%= link_to source_formats_path,
-                    class: "btn btn-sm btn-outline-secondary me-2",
-                    title: t('actions.index') do %>
-                <%== bs_icon('list-columns-reverse') %>
-                <span class="d-none d-md-inline"><%= t('actions.index') %></span>
-              <% end %>
+              <%= nav_button(action: :index, path: source_formats_path, record: @source_format) %>
             <% end %>
 
             <!-- Previous Button -->
-            <% prev_source_format = @source_format.prev %>
-            <% if prev_source_format.present? %>
-              <% disabled = prev_source_format == @source_format %>
-              <% title_text = t('actions.previous') + ": " + prev_source_format.label %>
-              <%= link_to prev_source_format,
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
-                    title: title_text do %>
-                <%== bs_icon('box-arrow-in-left') %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.previous') %>
-                </span>
-              <% end %>
-            <% end %>
+            <%= nav_button(action: :previous, record: @neighbours[0]) %>
           </div>
         </div>
 
@@ -50,63 +32,26 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <% next_source_format = @source_format.next %>
-            <% if next_source_format.present? %>
-              <% title_text = t('actions.next') + ": " + next_source_format.label %>
-              <% disabled = next_source_format == @source_format %>
-              <%= link_to next_source_format,
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary me-2 #{'disabled' if disabled}",
-                    title: title_text do %>
-                <span class="d-none d-md-inline">
-                  <%= t('actions.next') %>
-                </span>
-                <%== bs_icon('box-arrow-in-right') %>
-              <% end %>
-            <% end %>
+            <%= nav_button(action: :next, record: @neighbours[1]) %>
 
             <!-- Action Buttons -->
-            <div class="btn-group btn-group-sm gap-1">
+            <div class="btn-group btn-group-sm">
               <% if policy(@source_format).edit? %>
-                <%= link_to edit_source_format_path(@source_format),
-                      class: "btn btn-outline-warning",
-                      title: t('actions.edit') do %>
-                  <%== bs_icon('pencil-square') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.edit') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :edit, path: edit_source_format_path(@source_format), record: @source_format) %>
               <% end %>
-
+              
               <% if policy(@source_format).destroy? %>
-                <%= link_to @source_format,
-                      method: :delete,
-                      data: { confirm: t('actions.delete_sure') },
-                      class: "btn btn-outline-danger",
-                      title: t('actions.delete') do %>
-                  <%== bs_icon('trash') %>
-                  <span class="d-none d-md-inline">
-                    <%= t('actions.delete') %>
-                  </span>
-                <% end %>
+                <%= nav_button(action: :delete, path: source_format_path(@source_format), record: @source_format) %>
               <% end %>
 
-              <% if policy(SourceFormat.new()).new? %>
-                <%= link_to new_source_format_path, 
-                  class: "btn btn-outline-primary actions",
-                  aria: { label: t('actions.new') },
-                  title: t('actions.new') do %>
-                  <%== bs_icon('plus-square-fill') %>
-                  <span class="ms-1">
-                    <%= [t('actions.new'), t("activerecord.models.source_format")].join(' ') %>
-                  </span>
-                <% end %>
+              <% if policy(@source_format).new? %>
+                <%= nav_button(action: :new, path: new_source_format_path, record: @source_format) %>
               <% end %>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            </div> <!-- button group -->
+          </div> <!-- d-flex align-items-center -->
+        </div> <!-- right navigation and actions -->
+      </div> <!-- row align-items-center -->
+    </div> <!-- card header -->
 
     <div class="card-body">
 
@@ -119,28 +64,12 @@
               <h4 class="mb-0"><%= t('show.details', model: @source_format.model_name.human) %></h4>
             </div>
 
-            <div class="card-body p-3">
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.source_format.vendor") %></div>
-                <div class="col-8"><%= @source_format.vendor || '-' %></div>
-              </div> <!-- end row -->
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.source_format.title") %></div>
-                <div class="col-8"><%= @source_format.title || '-' %></div>
-              </div> <!-- end row -->
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.source_format.file_extension") %></div>
-                <div class="col-8"><%= @source_format.file_extension || '-' %></div>
-              </div> <!-- end row -->
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.source_format.revision") %></div>
-                <div class="col-8"><%= @source_format.revision || '-' %></div>
-              </div> <!-- end row -->
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.source_format.notes") %></div>
- 
-                <div class="col-8"><%= simple_format(@source_format.notes || '-') %></div>
-              </div> <!-- end row -->
+            <div class="card-body">
+              <%= show_attribute(@source_format, :vendor) %>
+              <%= show_attribute(@source_format, :title) %>
+              <%= show_attribute(@source_format, :file_extension) %>
+              <%= show_attribute(@source_format, :revision) %>
+              <%= show_attribute(@source_format, :notes, type: :text) %>
             </div>  <!-- end inner card body -->
           </div> <!-- end inner card -->
         </div> <!-- end responsive columns -->

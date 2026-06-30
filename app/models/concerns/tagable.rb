@@ -8,9 +8,14 @@ module Tagable
     accepts_nested_attributes_for :tag
     delegate :full_tag, :stage, :label, :long_label, :service, :location, to: :tag, allow_nil: true  
     
+ 
+    # === Gem macros ===
+    has_paper_trail
+    
+
     # === Class methods - Queries ===
     # Provide SQL for ordering tags in the navigator
-    # Tag model is a special case, tags are ordered differently if the discipline uses ISA51 prefix schema
+    # Tag model is a special case, tags are ordered differently if the discipline uses ISA51 type prefix schema
     def self.navigator_order_sql
       <<~SQL.squish
         projects.code ASC,

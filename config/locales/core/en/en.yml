@@ -25,6 +25,8 @@ en:
     show:         "Show"
     show_project: "Show"
     show_discipline: "Show"
+    show_tag: "Show"
+    show_document: "Show"
     new:          "New"
     edit:         "Edit"
     index:        "Index"
@@ -32,6 +34,9 @@ en:
     index_discipline: "Index"
     next:         "Next"
     previous:     "Prev"
+    up:           "Show %{model}"
+    down:         "Show %{model}"
+    children:     "Children"
     grant:        "Grant"
     revoke:       "Revoke"
 
@@ -62,6 +67,9 @@ en:
     label:        "Label"
     details:      "%{model} Details"
     associations: "Associations"
+    resource:     "Resource"
+    true:         "Yes"
+    false:        "No"
   field:
     type:
       integer:      "integer"
@@ -82,8 +90,6 @@ en:
     undefined:    "Undefined"
     none:         "None"
     unknown:      "Unknown"
-    true:         "☑"
-    false:        "☒"
     error_message: 
       one:        "The form contains %{count} error"
       other:      "The form contains %{count} errors"

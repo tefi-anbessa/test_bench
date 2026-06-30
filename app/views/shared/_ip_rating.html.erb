@@ -1,0 +1,45 @@
+<!-- Expects form, object -->
+<!-- Retrieves options from constants, no need for controller setup -->
+<% ip_1 = Constants.electrical.ingress_protection.first_digit.to_h %>
+<% ip_2 = Constants.electrical.ingress_protection.second_digit.to_h %>
+<div class="card p-2 mb-2" data-controller="ip-rating">
+  <div class="row">
+    <div class="col-4">
+      <%= form.text_field :ingress_protection,
+              class: 'form-control form-control-sm',
+              layout: :vertical,
+              prepend: 'IP',
+              data: { 'ip-rating-target': 'output' } %>
+    </div>
+    <div class="col-6">
+      <div class="row">
+      <%= select_tag :ip_1,
+        options_for_select(ip_1.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] },
+          object.ingress_protection&.first),
+        {
+          class: 'form-select mb-0',
+          label_col: "col-sm-4",
+          control_col: "col-sm-3",
+          data: {
+            action: 'change->ip-rating#update',
+            'ip-rating-target': 'firstDigit'
+          }
+        } %>
+      </div>
+      <div class="row">
+        <%= select_tag :ip_2,
+          options_for_select(ip_2.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] },
+            object.ingress_protection&.last),
+            {
+              class: 'form-select mb-0',
+              label_col: "col-sm-2",
+              control_col: "col-sm-10",
+              data: {
+                action: 'change->ip-rating#update',
+                'ip-rating-target': 'secondDigit'
+              }
+            } %>
+      </div>
+    </div>
+  </div>
+</div> <!-- end ip Card -->

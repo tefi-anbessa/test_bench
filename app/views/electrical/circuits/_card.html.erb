@@ -1,67 +1,28 @@
-<!-- Expects object and context (optional) to be passed in -->
+<!-- Circuit collapsible card -->
+<!-- Expecting 'object', 'context' and 'id' variables, passed from the shared/_association partial. -->
+<!-- The card uses the context name in the header and the id for the block (for testing). -->
 <% circuit = object %>
 <% context ||= t("activerecord.models.electrical/circuit.one") %>
 <%= render 'components/collapsible',
-  id: "circuit_#{circuit.id}_details",
+  id: "#{id}_#{circuit.id}_details",
   title: [context, circuit.long_label].join(': '),
   expanded: false,
   header_class: 'py-1' do %>
   
   <div class="container-fluid">
+    <%= nav_link(action: :show, record: circuit) %>
+    
+    <%= show_attribute(circuit, :serial, type: :integer) %>
+    <%= show_attribute(circuit, :phase, type: :enum) %>
+    <%= show_attribute(circuit, :device, type: :enum) %>
+    <%= show_attribute(circuit, :poles, type: :integer) %>
+    <%= show_attribute(circuit, :curve, type: :enum) %>
+    <%= show_attribute(circuit, :rating, type: :float, units: "A") %>
+    <%= show_attribute(circuit, :elcb, type: :enum) %>
+    <%= show_attribute(circuit, :contactor, type: :boolean) %>
+    <%= show_attribute(circuit, :notes, type: :text) %>
 
-    <div class="row mb-1">
-      <% text = t("actions.jump_to", model: circuit.model_name.human) %>
-      <%= link_to circuit, 
-        class: "btn btn-sm btn-outline-secondary me-2",
-        title: text do %>
-        <%== bs_icon('box-arrow-in-up-left') %>
-        <span class="d-none d-md-inline"><%= text %></span>
-      <% end %>
-    </div>
-
-    <div class="row mb-1">
-      <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/circuit.serial') %></div>
-      <div class="col-8"><%= circuit.label.presence || '-' %></div>
-    </div>
-    
-    <div class="row mb-1">
-      <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/circuit.notes") %></div>
-      <div class="col-8" title="<%= circuit.notes %>">
-        <%= truncate(strip_tags(circuit.notes.to_s), length: 20) %>
-      </div>
-    </div>
-    
-    <div class="row mb-1">
-      <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/circuit.phase") %></div>
-      <div class="col-8"><%= circuit.phase %></div>
-    </div>
-    
-    <div class="row mb-1">
-      <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/circuit.device") %></div>
-      <div class="col-8"><%= circuit.device %></div>
-    </div>
-    
-    <div class="row mb-1">
-      <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/circuit.feeder") %></div>
-      <div class="col-8">
-        <% if circuit.feeder.present? && policy(circuit.feeder).show? %>
-          <%= link_to circuit.feeder.label, circuit.feeder %>
-        <% else %>
-          <%= t("index.unassigned") %>
-        <% end %>
-      </div>
-    </div>
-    
-    <div class="row mb-1">
-      <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/circuit.demand") %></div>
-      <div class="col-8">
-        <% if circuit.demand.present? && policy(circuit.demand).show? %>
-          <%= link_to circuit.demand.label, circuit.demand %>
-        <% else %>
-          <%= t("index.unassigned") %>
-        <% end %>
-      </div>
-    </div>
-
+    <%= show_attribute(circuit, :feeder, type: :association) %>
+    <%= show_attribute(circuit, :demand, type: :association) %>
   </div>
 <% end %>

@@ -36,13 +36,16 @@ module Electrical
       authorize @switchboard
       # Catch enum validation errors
       begin
+        attributes = circuit_params
+        feeder_id = attributes.delete(:feeder_id)
+        demand_id = attributes.delete(:demand_id)
         @circuit = @switchboard.circuits.build
-        @circuit.assign_attributes(circuit_params.except(:cable))
+        @circuit.assign_attributes(attributes)
       rescue ArgumentError => _
         # Handle invalid enum values as a conflict
         raise ApplicationController::ConflictError, :invalid_enum
       end
-      unless process_cable_params
+      unless process_cable_params(feeder_id.to_i, demand_id.to_i)
         setup_form
         render :new, status: :unprocessable_content
         return
@@ -65,9 +68,9 @@ module Electrical
         end
         flash[:success] = [t("flash.create.notice",
                           resource_name: t("activerecord.models.electrical/circuit.one"))]
-        flash[:success] << t("flash.assigned",
+        flash[:success] << t("flash.assigned", count: 1,
           resource_name: t("activerecord.attributes.electrical/circuit.feeder")) if @feeder.present?
-        flash[:success] << t("flash.assigned",
+        flash[:success] << t("flash.assigned", count: 1,
           resource_name: t("activerecord.attributes.electrical/circuit.demand")) if @demand.present?
         redirect_to @circuit
       rescue ActiveRecord::RecordInvalid => _e
@@ -88,12 +91,15 @@ module Electrical
       authorize @switchboard
       # Catch enum validation errors
       begin
-        @circuit.assign_attributes(circuit_params.except(:cable))
+        attributes = circuit_params
+        feeder_id = attributes.delete(:feeder_id)
+        demand_id = attributes.delete(:demand_id)
+        @circuit.assign_attributes(attributes)
       rescue ArgumentError => _
         # Handle invalid enum values as a conflict
         raise ApplicationController::ConflictError, :invalid_enum
       end
-      unless process_cable_params
+      unless process_cable_params(feeder_id.to_i, demand_id.to_i)
         setup_form
         render :edit, status: :unprocessable_content
         return
@@ -134,9 +140,9 @@ module Electrical
         end
         flash[:success] = [t("flash.update.notice",
                           resource_name: t("activerecord.models.electrical/circuit.one"))]
-        flash[:success] << t("flash.assigned",
+        flash[:success] << t("flash.assigned", count: 1,
           resource_name: t("activerecord.attributes.electrical/circuit.feeder")) if @feeder.present?
-        flash[:success] << t("flash.assigned",
+        flash[:success] << t("flash.assigned", count: 1,
           resource_name: t("activerecord.attributes.electrical/circuit.demand")) if @demand.present?
         redirect_to @circuit
       rescue ActiveRecord::RecordInvalid
@@ -159,33 +165,6 @@ module Electrical
     end
     
     private
-      def setup_form
-        # Filter cables that are not already assigned as feeders (from association is nil)
-        # but include the current assignment to show selected on form.
-        @cables = policy_scope(Electrical::Cable).where(from: nil)
-                                .or(policy_scope(Electrical::Cable).where(from: @circuit))
-                                .map { |cable| [cable.label, cable.id] }
-        @cable = Electrical::Cable.new() # dummy instance for bootstrap fields
-        
-        # Filter demands that don't already have an incomer cable
-        # Build the base scope for demands
-        demands_scope = policy_scope(Electrical::Demand)
-        
-        # Find demands without an incomer
-        demands_without_incomer = demands_scope
-          .where.not(id: Electrical::Cable.where(to_type: 'Electrical::Demand').select(:to_id))
-        
-        # If there's a current feeder, include its target demand
-        if @circuit.feeder&.to_id.present?
-          demands = demands_without_incomer.or(demands_scope.where(id: @circuit.feeder.to_id))
-        else
-          demands = demands_without_incomer
-        end
-
-        @demands = demands.map { |demand| [demand.label, demand.id] }
-        @demand = Electrical::Demand.new() # dummy instance for bootstrap fields
-        set_swatch
-      end
       
       def set_switchboard
         if params[:switchboard_id].present?
@@ -215,20 +194,17 @@ module Electrical
         @swatch = @switchboard&.discipline&.swatch || Electrical::Circuit.swatch
       end
 
-      def process_cable_params
+      def process_cable_params(feeder_id, demand_id)
         @feeder = @demand = nil
         # Only assign feeder if the param is set and it is not pointing to the present @circuit
-        feeder_id = params.dig(:electrical_cable, :from_id).presence
-        if feeder_id && feeder_id != @circuit.feeder&.id
+        if feeder_id.present? && feeder_id != @circuit.feeder&.id
           # Don't look for a feeder if it is already set (only relevant on update)
           # Check that feeder is valid and trap false params.
           @feeder = set_feeder(feeder_id)
-          # Tried to set a feeder but error occurred
           return false if @feeder.nil?
         end
         # Only assign demand if the param is set and it is not pointing to the present @circuit
-        demand_id = params.dig(:electrical_cable, :to_id).presence
-        if demand_id && demand_id != @circuit.feeder&.to_id
+        if demand_id.present? && demand_id != @circuit.feeder&.to_id
           # Check that demand is valid and trap false params.
           @demand = set_demand(demand_id)
           # Tried to set demand but error occurred
@@ -243,7 +219,7 @@ module Electrical
       def set_feeder(feeder_id)
         # Check that the cable requested exists and is in scope
         unless feeder = policy_scope(Electrical::Cable).find_by(id: feeder_id)
-          raise ApplicationController::ConflictError, :out_of_scope
+          raise ApplicationController::ConflictError, :invalid_assignment
         end
 
         # Check that user has permission to edit cable
@@ -269,7 +245,7 @@ module Electrical
 
         # Check that the demand requested exists and is in scope
         unless demand = policy_scope(Electrical::Demand).find_by(id: demand_id)
-          raise ApplicationController::ConflictError, :out_of_scope
+          raise ApplicationController::ConflictError, :invalid_assignment
         end
 
         # Check that user has permission to edit the feeder
@@ -283,10 +259,38 @@ module Electrical
         # Return the demand object
         return demand
       end
+
+      def setup_form
+        # Filter cables that are not already assigned as feeders (from association is nil)
+        # but include the current assignment to show selected on form.
+        @cables = policy_scope(Electrical::Cable).where(from: nil)
+                                .or(policy_scope(Electrical::Cable).where(from: @circuit))
+                                .map { |cable| [cable.label, cable.id] }
+        @cable = Electrical::Cable.new() # dummy instance for bootstrap fields
+        
+        # Filter demands that don't already have an incomer cable
+        # Build the base scope for demands
+        demands_scope = policy_scope(Electrical::Demand)
+        
+        # Find demands without an incomer
+        demands_without_incomer = demands_scope
+          .where.not(id: Electrical::Cable.where(to_type: 'Electrical::Demand').where.not(to_id: nil).select(:to_id))
+        
+        # If there's a current feeder, include its target demand
+        if @circuit.feeder&.to_id.present?
+          demands = demands_without_incomer.or(demands_scope.where(id: @circuit.feeder.to_id))
+        else
+          demands = demands_without_incomer
+        end
+
+        @demands = demands.map { |demand| [demand.label, demand.id] }
+        @demand = Electrical::Demand.new() # dummy instance for bootstrap fields
+        set_swatch
+      end
       
       def circuit_params
         params.require(:electrical_circuit).permit(
-          :serial, :phase, :device, :poles, :curve, :rating, :elcb, :contactor, :notes
+          :serial, :phase, :device, :poles, :curve, :rating, :elcb, :contactor, :notes, :feeder_id, :demand_id
         )
       end
   end

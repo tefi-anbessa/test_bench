@@ -157,8 +157,9 @@ Ruby on Rails implements the Model View Controller (MVC) pattern for data driven
 CRUD operations refer to the four basic functions of persistent storage in computer programming: Create, Read, Update, and Delete. These operations are essential for managing data in databases and applications, allowing users to add, retrieve, modify, and remove data as needed.
 
 - Controller classes include logic for performing CRUD operations on the object.
+  - Controllers are responsible for controlling access, by implementing the RBAC system.
   - Controllers are responsible for setting variables for the view, including select options that are derived from data.
-  - Controllers are responsible for providing the user with feedback via an appropriate flash message after every operation.
+  - Controllers are responsible for providing the user with feedback via an appropriate flash message after every operation that modifies content.
 
 #### Views
 
@@ -178,49 +179,35 @@ The new and edit views should only set title and variables, then defer to the fo
 
 - `_form`
 
-In addition, a card partial should be provided for drop down view on other pages:
+In addition, a card partial should be provided for collapsible view on pages where the model is associated:
 
 - `_card`
 
 - All views shall provide a page title which appears on the browser tab, which includes the view and the model name.
 - Index and show views shall have a header line which includes the header and a standard set of navigation buttons.
-- The index header shall specify whether the index is for project, discipline, or all projects (only available to global admins).
+- The index header shall specify whether the index is for project, discipline, or all projects.
 - The show view header shall include the resource model name, the record's long_label, and optionally a title or service description.
 - The new view header shall include the scope where the resource is to be created e.g. discipline label.
 - The edit view header shall include the resource's long_label.
-- Navigation buttons for index and show views shall include "return" index buttons to the higher level views, locate to the left of the header.
+- Navigation buttons for index and show views shall include "return" index or show links to the higher level views, located to the left of the header.
 - Navigation buttons for show views shall also include previous and next buttons, located left and right of the header.
 - Index views shall also include new "action" button to the right of the header, conditional on user permissions.
 - Show views shall also include edit, delete, and new "action" buttons to the right of the header, conditional on user permissions.
 - Title and header shall be translated using a `views.yml` file in the locales structure, see [INTERNATIONALIZATION](../config/locales/INTERNATIONALIZATION.md).
 - Views should not include complex logical processing.
+- Views should use the helpers in [view_helper.rb](../app/helpers/view_helper.rb). These helpers standardise the presentation of attributes in show and form views. Read the code to know what arguments are expected.
+  - Show views can display most attribute types using `show_attribute`.
+  - Forms can present most field types using `form_field`.
+  - The helpers ensure that attributes labels are translated consistently.
+  - The :enum_translated type ensures translation of enum options when translations are available.
+- Show views should use the shared partials [_association](../app/views/shared/_association.html.erb) and [_children](../app/views/shared/_children.html.erb) to include collapsible cards with associated data.
 - Conditionals should be controlled by pundit policy calls where applicable.
 - Conditionals may also use presence or otherwise of variables set in the controller.
-- Views should use model constants such as enums to generate select options directly. Use human_enum_name from [application_record](../app/models/application_record.rb) to provide the translations.
-- Views should include i18n translations for all user facing text, including:
-  - Model names.
-    - Model name translations are pluralized for English: two options are provided, :one and :other. Either provide a count, or include the explicit key required in the translation call.
-    - Future refactor may be required for other language pluralization.
-    - Use of I18n::t('activerecord.models.tag.one') is preferred, as it is a strict translation and raises "translation missing" in dev environment, if required.
-    - Use of @tag.model_name.human is acceptable, but if the translation is missing it will fall back to humanize the coded model name, which won't look good in other locales.
-  - Attribute labels.
-    - In forms, use bootstrap_form fields, which automatically wrap with a translated label.
-    - Use of I18n::t('activerecord.attributes.tag.prefix') is preferred in other cases.
-    - Use @tag.class.human_attribute_name(:prefix) may be used but uses fallbacks to the coded attribute name.
-  - Attribute help text.
-    - In bootstrap_form fields, use help: I18n::t('activerecord.help.tag.prefix') option.
-    - Use I18n::t('activerecord.help.tag.prefix') if required in other cases.
-  - Select options.
-    - If select options are derived from data, they should be built as an instance variable (hash or array) in the controller, and passed to the view. Options derived from data won't generally have translations available.
-    - If select options are built from enums (which mostly will be built in turn from Constants), and don't require translation, use the model enum methods directly in the view.
-    - If select options are built from enums, and require translation, use something like:
-      ```demand.class.configs.keys.collect { |config| [demand.class.human_enum_name(:config, config), config] },```
-      directly in the view.
-  - Flash messages
-      - Flash messages should be generated and translated in the controller, and the standard layout will display them. Normally nothing is required in views.
-      - Complex forms may require further flash processing.
-  - Messages
-          - Occasionally, bespoke explanatory messages are required. Translations should be provided in the appropriate views.yml file.
+- Flash messages
+  - Flash messages should be generated and translated in the controller, and the standard layout will display them. Normally nothing is required in views.
+  - Complex forms may require further flash processing.
+- Messages
+  - Occasionally, bespoke explanatory messages are required. Translations should be provided in the appropriate views.yml file.
 
 ### Error Handling
 
@@ -420,6 +407,8 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Decide what to do about deletion of data. It is affecting many aspects of the architecture.
 - [ ] Complete demand system test after refactor.
 - [ ] Fix tag prefix warning message for non-conforming prefix.
+- [ ] Fix assertion in projects system test for show link with no text.
+- [ ] Improve cable index and search options.
 
 ## Refactoring Opportunities
 
@@ -488,6 +477,9 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Refactor documents to normalize discipline: remove fk and associate discipline through doc_type.
 - [ ] Ditto cables: remove fk and associate discipline through cable_type. At the same time, sort out a decent label and add unique constraint on code.
 - [ ] Refactor show views using standardised attributes helper.
+- [ ] Refactor form views using standardised form fields helper.
+- [ ] Extend views helper for attributes to include decimal numbers with units.
+- [ ] Carefully consider use of nested collapsible cards, as in cables from and to. Prefer a more robust nav_link?
 
 ## Potential Features
 

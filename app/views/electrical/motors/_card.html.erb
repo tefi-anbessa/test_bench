@@ -1,54 +1,22 @@
-<!-- Expects object and context (optional) to be passed in -->
+<!-- Socket Circuit collapsible card -->
+<!-- Expecting 'object', 'context' and 'id' variables, passed from the shared/_association partial. -->
+<!-- The card uses the context name in the header and the id for the block (for testing). -->
 <% motor = object %>
 <% context ||= t("activerecord.models.electrical/motor.one") %>
 <%= render 'components/collapsible',
-  id: "motor_#{motor.id}_details",
+  id: "#{id}_#{motor.id}_details",
   title: [context, motor.long_label].join(': '),
   expanded: false,
   header_class: 'py-1' do %>
   
   <div class="container-fluid">
-    <div class="row mb-1">
-      <% text = t("actions.jump_to", model: t("activerecord.models.electrical/motor.one")) %>
-      <%= link_to motor, 
-          class: "btn btn-sm btn-outline-secondary me-2",
-          title: text do %>
-        <%== bs_icon('box-arrow-in-up-left') %>
-        <span class="d-none d-md-inline"><%= text %></span>
-      <% end %>
-    </div>
+    <%= nav_link(action: :show, record: motor) %>
 
-    <div class="row mb-1">
-      <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/motor.motor_type') %></div>
-      <div class="col-8"><%= motor.class.human_enum_name(:motor_type, motor.motor_type) %></div>
-    </div>
-
-    <div class="row mb-1">
-      <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/motor.frame_size') %></div>
-      <div class="col-8"><%= motor.frame_size.present? ? "frame_#{motor.frame_size}" : '-' %></div>
-    </div>
-    
-    <div class="row mb-1">
-      <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/motor.poles') %></div>
-      <div class="col-8"><%= motor.poles.presence || '-' %></div>
-    </div>
-    
-    <div class="row mb-1">
-      <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/motor.ingress_protection') %></div>
-      <div class="col-8"><%= motor.ingress_protection.present? ?
-                      ["IP", motor.ingress_protection].join(' ') : '-' %></div>
-    </div>
-    
-    <div class="row mb-1">
-      <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/motor.speed_rated') %></div>
-      <div class="col-8"><%= motor.speed_rated.present? ? 
-                              number_to_human(motor.speed_rated, precision: 4, units: { unit: "rpm"}) : 
-                              '-' %></div>
-    </div>
-    
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/motor.notes') %></div>
-        <div class="col-8"><%= motor.notes.present? ? simple_format(motor.notes) : '-' %></div>
-      </div>
+    <%= show_attribute(motor, :motor_type, type: :enum_translated) %>
+    <%= show_attribute(motor, :frame_size, type: :enum) %>
+    <%= show_attribute(motor, :poles, type: :integer) %>
+    <%= show_attribute(motor, :ingress_protection) %>
+    <%= show_attribute(motor, :speed_rated, type: :float, units: "rpm") %>
+    <%= show_attribute(motor, :notes, type: :text) %>
   </div>
 <% end %>

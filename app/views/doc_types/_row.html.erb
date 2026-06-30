@@ -8,6 +8,7 @@
   <td><%= row.code || '-' %></td>
   <td><%= row.name || '-' %></td>
   <td><%= row.description || '-' %></td>
+  <td><%= row.documents.count || '-' %></td>
   <td>
     <% if policy(row).show? %>
       <%= nav_button(action: :show, record: row, icon_only: true) %>

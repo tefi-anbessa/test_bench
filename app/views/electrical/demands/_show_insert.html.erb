@@ -1,9 +1,12 @@
-
+<!-- 
+Alternative caller for the loads card, which displays a link to new if not already set.
+Expecting object variable. 
+-->
 <div class="row mb-1">
   <!-- Demand section -->
   <% text = t("activerecord.models.electrical/demand", count: 1) %>
-  <% if demand.present? %>
-    <%= render "electrical/demands/card", object: demand %>
+  <% if object.electrical_demand.present? %>
+    <%= show_association(object, :electrical_demand, header: :model) %>
   <% else %> 
     <div class="col-4 text-muted">
       <% text %>
@@ -11,15 +14,15 @@
     <div class="col-8">
       <!-- Cannot create a new demand without a tag. -->
       <% link_text = t("actions.link", resource: text) %>
-      <% if tag&.present? %>
+      <% if object.tag&.present? %>
         <% if policy(Electrical::Demand).new? %> 
-          <%= link_to new_tag_electrical_demand_path(tag.id),
+          <%= link_to new_tag_electrical_demand_path(object.tag),
               class: "btn btn-sm btn-outline-primary mb-2",
               title: link_text do %>
+                <%== bs_icon('link') %>
                 <span class="d-none d-md-inline">
                   <%= link_text %>
                 </span>
-                <%== bs_icon('link') %>
               <% end %>
         <% else %>
           <span class="d-none d-md-inline">

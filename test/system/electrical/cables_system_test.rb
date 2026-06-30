@@ -83,8 +83,8 @@ module Electrical
       assert_equal circuit, @resource.from
       assert_equal motor_load, @resource.to
       assert_current_path electrical_cable_path(@resource)
-      collapsible_assertions(@resource, :from)
-      collapsible_assertions(@resource, :to)
+      collapsible_assertions(@resource, :from, header: :association)
+      collapsible_assertions(@resource, :to, header: :association)
     end
   end
 end

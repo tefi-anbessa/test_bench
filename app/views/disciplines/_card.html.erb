@@ -1,40 +1,21 @@
+<!-- Discipline collapsible card -->
+<!-- Expecting 'object', 'context' and 'id' variables, passed from the shared/_association partial. -->
+<!-- The card uses the context name in the header and the id for the block (for testing). -->
 <% discipline = object %>
 <%= render 'components/collapsible',
-      id: "discipline_#{discipline.id}_details",
-      title: t("disciplines.show.header", 
-        label: [discipline.code, t("discipline.name.#{discipline.name}", default: discipline.name)].join(': ')),
+      id: "#{id}_#{discipline.id}_details",
+      title: [context, discipline.name].join(': '),
       expanded: false,
       header_class: 'py-1' do %>
   
   <div class="container-fluid">
-    <div class="row mb-1">
-      <% text = [t("actions.jump_to", model: t("activerecord.models.discipline", count: 1)),
-        discipline.code, discipline.name].join(' ') %>
-      <%= link_to discipline, 
-          class: "btn btn-sm btn-outline-secondary me-2",
-          title: text do %>
-        <%== bs_icon('layers') %>
-        <span class="d-none d-md-inline"><%= text %></span>
-      <% end %>
-    </div>
+    <%= nav_link(action: :show_discipline, record: discipline) %>
+    <%= nav_link(action: :show_project, record: discipline.project) %>
 
-    <div class="row mb-1">
-      <div class="col-4 text-muted"><%= t("activerecord.attributes.discipline.notes") %></div>
-    </div>
-    <div class="row mb-1">
-      <div class="col-12"><%= simple_format(discipline.notes) %></div>
-    </div>
-
-    <div class="row mb-1">
-      <div class="col-4 text-muted"><%= t("activerecord.models.project.one") %></div>
-      <% if discipline.project.present? %>
-        <div class="col-8"><%= discipline.project.code %></div>
-      <% else %>
-        <div class="col-8 alert alert-danger">
-          <%= t('show.orphan', model: Project.model_name.human.downcase) %>
-        </div>
-      <% end %>
-    </div>
+    <%= show_attribute(discipline, :notes, type: :text) %>
+    <%= show_attribute(discipline, :required_role) %>
+    <%= show_attribute(discipline, :catalog_required_role) %>
+    <%= show_attribute(discipline, :sort_order) %>
 
     <div class="row mb-1">
       <div class="col-4 text-muted"><%= t("activerecord.attributes.discipline.prefix_schema") %></div>
@@ -42,10 +23,7 @@
     </div>
 
     <% if policy(discipline).edit? %>
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t("activerecord.models.swatch.one") %></div>
-        <div class="col-8"><%= discipline&.swatch&.name || '-' %></div>
-      </div>
+      <%= nav_link(action: :show, record: discipline.swatch) %>
     <% end %>
 
   </div> <!-- end container-fluid -->

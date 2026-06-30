@@ -1,20 +1,10 @@
 <% text = t('activerecord.models.electrical/demand.one') %>
 <% if row.electrical_demand.present? %>
-  <%= link_to row.electrical_demand,
-    class: "btn btn-sm btn-outline-info",
-    title: t('show.linked', model: text) do %>
-      <%== bs_icon('box-arrow-in-down-right') %>
-      <%= text %>
-    <% end %>
+  <%= index_link(action: :down, record: row.electrical_demand) %>
 <% else %>
   <% if row.tag&.present? %>
     <% if policy(Electrical::Demand).new? %>
-      <%= link_to new_tag_electrical_demand_path(row.tag.id),
-        class: "btn btn-sm btn-outline-primary",
-        title: t('actions.link', resource: text) do %>
-          <%== bs_icon('link') %>
-          <%= text %>
-        <% end %>
+      <%= index_link(action: :link, path: new_tag_electrical_demand_path(row.tag.id), record: Electrical::Demand.new) %>
     <% else %>
       <span class="d-none d-md-inline">
         <%= t('index.unassigned') %>

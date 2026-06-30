@@ -1,29 +1,19 @@
-<% if row.tagable_type.present? && Tag.tagable_types.include?(row.tagable_type)%>
-  <% text = row.tagable_type.constantize.model_name.human %>
+
+<% if Tag.safe_tagable_types.include?(row.tagable_type) %>
   <% if row.tagable.present? %>
-    <%= link_to row.tagable,
-        class: "btn btn-sm btn-outline-info mb-2 icon-link",
-        title: t('show.linked', model: row.tagable_type.constantize.model_name.human) do %>
-          <%== bs_icon('box-arrow-down-right') %>
-          <%= text %>
-        <% end %>
+    <%= index_link(action: :down, record: row.tagable) %>
   <% else %>
     <% if policy(row.build_tagable()).new? %>
       <% resource = row.tagable_type.constantize.model_name.singular %>
-      <%= link_to eval("new_tag_#{resource}_path(#{row.id})"),
-          class: "btn btn-sm btn-outline-primary mb-2 icon-link",
-          title: t('actions.link', resource: resource) do %>
-            <%== bs_icon('link') %>
-          <%= text %>
-          <% end %>
+      <%= index_link(action: :link, path: eval("new_tag_#{resource}_path(#{row.id})"), record: row.build_tagable()) %>
     <% else %>
       <%= row.tagable_type.constantize.model_name.human %>
     <% end %>
   <% end %>
 <% else %>
   <span class="text-muted">
-    <%= row.tagable_type.nil? ? 
-      t('index.unassigned') :
-      t('index.invalid') %>
+      <%= row.tagable_type.present? ?
+      t('index.invalid') :
+      t('index.unassigned') %>
   </span>
 <% end %>

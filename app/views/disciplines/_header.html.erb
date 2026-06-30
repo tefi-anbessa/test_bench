@@ -1,6 +1,7 @@
 <thead>
   <tr>
-    <th><%= sort_link(@q, :code, request.query_parameters.merge(disciplines_expanded: '1')) %></th>
+    <th><%= sort_link(@q, :sort_order, request.query_parameters.merge(disciplines_expanded: '1')) %></th>
+    <th><%= sort_link(@q, :name, request.query_parameters.merge(disciplines_expanded: '1')) %></th>
     <th><%= sort_link(@q, :name, request.query_parameters.merge(disciplines_expanded: '1')) %></th>
     <th><%= sort_link(@q, :prefix_schema, request.query_parameters.merge(disciplines_expanded: '1')) %></th>
     <th><%= sort_link(@q, :required_role, request.query_parameters.merge(disciplines_expanded: '1')) %></th>

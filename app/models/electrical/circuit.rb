@@ -48,11 +48,11 @@ module Electrical
 
     # === Public methods ===
     def label
-      "##{serial.to_s.rjust(2, '0')}"
+      [switchboard.label, serial].join(" ")
     end
 
     def long_label
-      switchboard.label + " " + label
+      [discipline.code, label].join(": ")
     end
 
     def next_serial

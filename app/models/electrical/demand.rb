@@ -9,6 +9,7 @@ module Electrical
     enum :config, Constants.electrical.load_configuration.to_h
 
     # === Gem macros ===
+    has_paper_trail
 
     # === Attributes ===
     attr_accessor :other_supply

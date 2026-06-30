@@ -6,7 +6,7 @@
   <div class="card-header d-flex justify-content-between align-items-center py-2" style="<%= card_header_styles(@swatch) %>">
     <!-- Link to index view -->
     <% if policy(switchboard).index? %>
-    <% text = [t("activerecord.attributes.electrical/switchboard.circuits"), t('actions.index'), switchboard.tag&.full_tag].join(' ')%>
+      <% text = [t("activerecord.attributes.electrical/switchboard.circuits"), t('actions.index'), switchboard.tag&.full_tag].join(' ')%>
       <%= link_to electrical_switchboard_circuits_path(switchboard),
             class: "btn btn-sm btn-outline-info me-2",
             title: text,

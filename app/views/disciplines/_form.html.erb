@@ -65,12 +65,21 @@
                       required: true %>
             </div>
 
-            <!-- Label -->
+            <!-- Code -->
             <div class="row">
               <%= f.text_field :code,
                 label_col: "col-sm-3",
                 control_col: "col-sm-9",
                       title: t('activerecord.help.discipline.code'),
+                      required: true %>
+            </div>
+
+            <!-- Sort order -->
+            <div class="row">
+              <%= f.text_field :sort_order,
+                label_col: "col-sm-3",
+                control_col: "col-sm-9",
+                      title: t('activerecord.help.discipline.sort_order'),
                       required: true %>
             </div>
 

@@ -16,6 +16,7 @@ module Electrical
     enum :temperature_rating, Constants.electrical.temperature_rating.each_with_index.to_h
 
     # === Gem macros ===
+    has_paper_trail
 
     # === Attributes ===
 

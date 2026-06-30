@@ -1,10 +1,18 @@
 <% provide(:title, t('.title')) %>
-<div class="container mt-3 mx-auto"style="<%= container_styles(@swatch)%>"
+<div class="container mt-3 mx-auto"style="<%= container_styles(@swatch)%>">
   <!-- Header Card -->
   <div class="card mb-4" style="<%= card_styles(@swatch) %>">
     <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
       <div class="d-flex justify-content-between align-items-center">
         <!-- Header Text (Left) -->
+
+        <!-- Project link -->
+        <div class="col-2">
+          <% if policy(@project).show? %>
+            <%= nav_button(action: :show_project, record: @project) %>
+          <% end %>
+        </div>
+
         <div class="ms-2">
           <% project_text = current_project.present? ? 
           [t("activerecord.models.project.one"), current_project.label].join(': ') : 
@@ -14,15 +22,8 @@
 
         <!-- New Button (Right) -->
         <% if policy(@project.change_requests.build()).new? %>
-            <%= link_to new_project_project_change_request_path(@project), 
-              class: "btn btn-outline-primary actions",
-              aria: { label: t('actions.new') },
-              title: t('actions.new') do %>
-              <%== bs_icon('plus-square-fill') %>
-              <span class="ms-1">
-                <%= [t('actions.new'), t('activerecord.models.project_change/request.one')].join(' ') %>
-              </span>
-            <% end %>
+            <%= nav_button(action: :new, path: new_project_project_change_request_path(@project), 
+              record: @project.change_requests.build()) %>
         <% end %>
       </div> <!-- end of d-flex -->
     </div> <!-- end of card header -->

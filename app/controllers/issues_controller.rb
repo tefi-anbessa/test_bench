@@ -16,6 +16,7 @@ class IssuesController < ApplicationController
   # GET /issues/1
   def show
     authorize @document
+    @neighbours = Navigator.new(scope: @scope, record: @issue).neighbours
   end
 
   # GET /documents/:document_id/issues/new
@@ -88,11 +89,12 @@ class IssuesController < ApplicationController
     end
 
     def set_issue
-      @issue = Issue.find_by(id: params[:id])
+      @issue = policy_scope(Issue).find_by(id: params[:id])
       raise ApplicationController::ConflictError, :not_found if @issue.nil?
       @document = @issue.document
       raise ApplicationController::ConflictError, :out_of_scope unless policy_scope(Document).include?(@document)
       @discipline = @document.discipline
+      @scope = policy_scope(Issue).joins(document: { discipline: :project } ).where(documents: { id: @document.id })
     end
 
     def set_swatch
@@ -103,7 +105,7 @@ class IssuesController < ApplicationController
     end
 
     def setup_form
-      @source_formats = SourceFormat.all
+      @source_formats = policy_scope(SourceFormat).order(:vendor, :title, :revision)
       set_swatch
     end
 

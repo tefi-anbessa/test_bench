@@ -202,12 +202,32 @@ module SystemTestHelpers
       assert_no_selector "form[action='#{path}'] input[name='_method'][value='delete']"
     end
 
-    def collapsible_assertions(object, association)
+    def collapsible_assertions(object, association, header: :none)
       assert object.respond_to?(association), "Object #{object.class} does not respond to #{association}"
       record = object.public_send(association)
-      id = record.id
-      component_id = "#{record.model_name.element}_#{id}_details"
+      case header
+      when :model
+        id_text = record.model_name.element
+        header_text = t("activerecord.models.#{record.model_name.i18n_key}.one",
+                        default: record.class.model_name.human)
+      when :association
+        id_text = association.to_s
+        header_text = I18n.t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}", 
+            default: association.to_s.humanize)
+      else
+        if object.class.reflect_on_association(association).polymorphic?
+          id_text = record.model_name.element
+          header_text = I18n.t("activerecord.models.#{record.model_name.i18n_key}.one",
+                          default: record.model_name.human)
+        else
+          id_text = association.to_s
+          header_text = I18n.t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}", 
+              default: association.to_s.humanize)
+        end
+      end
+      component_id = "#{id_text}_#{record.id}_details"
       header_id = "#{component_id}_header"
+      assert_text header_text
       # Should start collapsed
       refute_selector "##{component_id}", visible: true
       assert_selector "##{component_id}", visible: :all
@@ -290,7 +310,6 @@ module SystemTestHelpers
       assert_text I18n.t('activerecord.attributes.tag.tagable_type')
 
       # Data fields
-      # [TODO: Add a conditional test for prefix fields depending on schema]
       assert_field "#{resource_class.model_name.param_key}[tag][stage]", with: tag.present? ? tag.stage : ""
       assert_field "#{resource_class.model_name.param_key}[tag][serial]", with: tag.present? ? tag.serial.to_s.rjust(4, '0') : "0000"
       assert_field "#{resource_class.model_name.param_key}[tag][suffix]", with: tag.present? ? tag.suffix : ""
@@ -299,6 +318,24 @@ module SystemTestHelpers
       assert_field "#{resource_class.model_name.param_key}[tag][notes]", with: tag.present? ? tag.notes : ""
       assert_field "#{resource_class.model_name.param_key}[tag][tagable_type]", with: tag.present? ? tag.tagable_type : "#{resource_class.name}",
              disabled: true
+      
+      # Prefix elements depend on discipline prefix schema.
+      case @discipline.schema_for_form[:type]
+      when 'default'
+        assert_field "#{resource_class.model_name.param_key}[tag][prefix]"
+      when 'dim1'
+        assert_selector "select[name='#{resource_class.model_name.param_key}[tag][prefix]']"
+      when 'dim2'
+        assert_selector "select[name='part1']"
+        assert_selector "select[name='part2']"
+        assert_selector "[data-tag-prefix-target='prefix'][readonly]"
+      when 'isa51'
+        assert_selector "select[name='measured_variable']"
+        assert_selector "select[name='modifier']"
+        assert_selector "select[name='function']"
+        assert_selector "select[name='modifier_function']"
+        assert_selector "[data-tag-prefix-target='prefix'][readonly]"
+      end
     end
 
     # Form operations
@@ -322,8 +359,8 @@ module SystemTestHelpers
         fill_in "#{resource_class.model_name.param_key}[tag][prefix]", with: @tag.prefix
         @saved_prefix = @tag.prefix
       when 'dim1'
-        @saved_prefix = @discipline.schema_for_form.with_indifferent_access[:prefixes].keys.last
-        find("select[name='prefix_select'] option[value='#{@saved_prefix}']").select_option
+        @saved_prefix = @discipline.schema_for_form.with_indifferent_access[:prefix].keys.last
+        find("select[name='#{resource_class.model_name.param_key}[tag][prefix]'] option[value='#{@saved_prefix}']").select_option
       when 'dim2'
         value1 = @discipline.schema_for_form.with_indifferent_access[:part1].keys.last
         value2 = @discipline.schema_for_form.with_indifferent_access[:part2].keys.last

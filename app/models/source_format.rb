@@ -11,6 +11,7 @@ class SourceFormat < ApplicationRecord
   # === Constants ===
 
   # === Gem macros ===
+  has_paper_trail
 
   # === Attributes ===
 
@@ -35,6 +36,15 @@ class SourceFormat < ApplicationRecord
 
   def self.required_role
     :document_controller
+  end
+
+  # === Class methods - Queries ===
+  # Provide SQL for ordering disciplines in the navigator
+  def self.navigator_order_sql
+    <<~SQL.squish
+      title ASC,
+      revision ASC
+    SQL
   end
 
   # === Public methods ===

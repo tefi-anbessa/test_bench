@@ -1,9 +1,10 @@
-<!-- Expecting parent, association to be passed in. -->
+<!-- Expecting parent, association to be passed in. Accepts optional label_method and text_method variables. -->
 <!-- This partial presents a collapsible card with a link to each associated child object of the parent. 
 Child objects should be tagable or at least have a label and service method.
 Relation must reflect a has_many association. -->
 <% reflection = parent.class.reflect_on_association(association) %>
-
+<% label_method ||= :label %>
+<% text_method ||= nil %>
 <% unless reflection&.macro == :has_many %>
   <% raise ArgumentError, "#{association} is not a has_many association on #{parent.class}" %>
 <% end %>
@@ -12,7 +13,7 @@ Relation must reflect a has_many association. -->
 <!-- Ensure list does not contain parent - mainly for loop elements -->
 <% children = children.reject { |child| child == parent } %>
 <%= render 'components/collapsible',
-  id: "#{parent.model_name.element}_#{association}_links",
+    id: "#{parent.model_name.element}_#{association}_links",
     title: [t("activerecord.attributes.#{parent.model_name.i18n_key}.#{association.to_s}", 
       default: association.to_s.humanize), children.count].join(': '),
     expanded: false,
@@ -21,8 +22,9 @@ Relation must reflect a has_many association. -->
   <div class="container-fluid">
     <% if children.any? %>
         <% children.each do |child| %>
+          <% text = text_method.present? ? child.send(text_method) : "" %>
           <div class="row">
-            <%= link_to [child.label || "No label", child.service].join(' '), polymorphic_path(child) %>
+            <%= link_to [child.label || "No label", text].join(' '), polymorphic_path(child) %>
           </div>
         <% end %>
     <% end %>

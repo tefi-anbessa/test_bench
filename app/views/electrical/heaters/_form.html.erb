@@ -44,103 +44,15 @@
               <div class="card-body p-2" style="<%= form_styles(swatch) %>">
                 <%= render 'shared/error_messages', object: f.object %>
 
-                <%= f.select :heater_type,
-                    options_for_select(
-                      Electrical::Heater.heater_types.keys.collect { |k| [Electrical::Heater.human_enum_name(:heater_type, k), k] },
-                      selected: heater.heater_type
-                    ),
-                    { include_blank: t('form.required') },
-                    class: 'form-control form-control-sm' %>
-
-                <%= f.select :application,
-                    options_for_select(
-                      Electrical::Heater.applications.keys.collect { |k| [Electrical::Heater.human_enum_name(:application, k), k] },
-                      selected: heater.application
-                    ),
-                    { include_blank: t('form.required') },
-                    class: 'form-control form-control-sm' %>
-
-                <div class="card p-2 mb-2" data-controller="ip-rating">
-                  <div class="row">
-                    <div class="col-4">
-                      <%= f.text_field :ingress_protection,
-                              class: 'form-control form-control-sm',
-                              layout: :vertical,
-                              prepend: 'IP',
-                              data: { 'ip-rating-target': 'output' } %>
-                    </div>
-                    <div class="col-6">
-                      <div class="row">
-                      <%= select_tag :ip_1,
-                        options_for_select(ip_1.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] }, 
-                          heater.ingress_protection&.first),
-                        {
-                          class: 'form-select mb-0',
-                          label_col: "col-sm-4",
-                          control_col: "col-sm-3",
-                          data: { 
-                            action: 'change->ip-rating#update',
-                            'ip-rating-target': 'firstDigit' 
-                          } 
-                        } %>
-                      </div>
-                      <div class="row">
-                        <%= select_tag :ip_2,
-                          options_for_select(ip_2.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] }, 
-                            heater.ingress_protection&.last),
-                            {
-                              class: 'form-select mb-0',
-                              label_col: "col-sm-2",
-                              control_col: "col-sm-10",
-                              data: { 
-                                action: 'change->ip-rating#update',
-                                'ip-rating-target': 'secondDigit' 
-                              } 
-                            } %>
-                      </div>
-                    </div>
-                  </div>
-                </div> <!-- end ip Card -->
-
-                <%= f.number_field :sheath_temperature_max,
-                        class: 'form-control form-control-sm',
-                        step: 10.0,                             # Customize as required
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8"%>
-
-                <%= f.number_field :power_density_min,
-                        class: 'form-control form-control-sm',
-                        step: 0.01,                             # Customize as required
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8"%>
-
-                <%= f.number_field :power_density_max,
-                        class: 'form-control form-control-sm',
-                        step: 0.01,                             # Customize as required
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8"%>
-
-                <%= f.select :sheath_material,
-                    options_for_select(
-                      Electrical::Heater.sheath_materials.keys.collect { |k| [Electrical::Heater.human_enum_name(:sheath_material, k), k] },
-                        selected: heater.sheath_material
-                    ),
-                    { include_blank: t('form.optional') },
-                    class: 'form-control form-control-sm' %>
-
-                <%= f.select :insulation_material,
-                    options_for_select(
-                      Electrical::Heater.insulation_materials.keys.collect { |k| [Electrical::Heater.human_enum_name(:insulation_material, k), k] },
-                      selected: heater.insulation_material
-                    ),
-                    { include_blank: t('form.optional') },
-                    class: 'form-control form-control-sm' %>
-
-                <%= f.text_area :notes,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8"%>
-                
+                <%= form_field(f, :heater_type, type: :enum_translated, required: true) %>
+                <%= form_field(f, :application, type: :enum_translated, required: true) %>
+                <%= render "shared/ip_rating", form: f, object: heater %>
+                <%= form_field(f, :sheath_temperature_max, type: :number, required: false, control_cols: 4, units: "°C", step: 10) %>
+                <%= form_field(f, :power_density_min, type: :number, required: false, control_cols: 4, units: "°C", step: 0.01, units: "W/m²") %>
+                <%= form_field(f, :power_density_max, type: :number, required: false, control_cols: 4, units: "°C", step: 0.01, units: "W/m²") %>
+                <%= form_field(f, :sheath_material, type: :enum_translated, required: false) %>
+                <%= form_field(f, :insulation_material, type: :enum_translated, required: false) %>
+                <%= form_field(f, :notes, type: :text) %>                
               </div> <!-- end heater card body -->
             </div> <!-- end heater card -->
 

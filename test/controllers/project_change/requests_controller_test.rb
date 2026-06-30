@@ -7,18 +7,37 @@ module ProjectChange
   include ControllerTestHelper
 
     setup do
-    setup_projects_and_users # In test/helpers/test_setup_helpers.rb
-    setup_disciplines(name: "Electrical") # Not used but required to pass setup test.
-    # Set up users with edit permissions on the project.
-    # (Abstracted test setup uses discipline roles.)
-    @accredited_user = create(:user)
-    @accredited_user.grant(:team_member, @project)
-    @accredited_user_other_project = create(:user)
-    @accredited_user_other_project.grant(:team_member, @other_project)
+      setup_projects_and_users # In test/helpers/test_setup_helpers.rb
+      setup_disciplines(name: "Electrical") # Not used but required to pass setup test.
+      # Set up users with edit permissions on the project.
+      # (Abstracted test setup uses discipline roles.)
+      @accredited_user = create(:user)
+      @accredited_user.grant(:team_member, @project)
+      @accredited_user_other_project = create(:user)
+      @accredited_user_other_project.grant(:team_member, @other_project)
 
-    # Set up in and out of scope instances of request
-    @resource = create(:project_change_request, project: @project)
-    @other_resource = create(:project_change_request, project: @other_project)
+      # Set up in and out of scope instances of request
+      @resource = create(:project_change_request, project: @project)
+      @other_resource = create(:project_change_request, project: @other_project)
+    end
+
+    # Tweak required to setup test roles
+    undef test_setup_is_valid
+    def test_setup_is_valid
+      assert @project.valid?
+      assert @project.persisted?
+      assert @discipline.valid?
+      assert @discipline.persisted?
+      assert @admin.valid?
+      assert @admin.persisted?
+      assert @project_manager.valid?
+      assert @project_manager.persisted?
+      assert @team_member.valid?
+      assert @team_member.persisted?
+      assert @regular_user.valid?
+      assert @regular_user.persisted?
+      assert @accredited_user.valid?
+      assert @accredited_user.persisted?
     end
 
     # For requests, team members can access new form.

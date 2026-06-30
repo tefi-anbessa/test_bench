@@ -65,66 +65,17 @@
             </div> <!-- end inner card header -->
 
             <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
-
-              <span class="border">
-                <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/switchboard.notes') %></div>
-                </div>
-                <div class="row mb-1">
-                  <div class="col-8"><%= simple_format(@switchboard.notes) %></div>
-                </div>
-              </span>
-
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/switchboard.ingress_protection") %></div>
-                <div class="col-8"><%= @switchboard.ingress_protection.present? ? 
-                  [t("ingress_protection.ip"), @switchboard.ingress_protection].join('') : '-' %></div>
-              </div>
-              
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/switchboard.voltage_rating") %></div>
-                <div class="col-8"><%= @switchboard.voltage_rating %></div>
-              </div>
-              
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/switchboard.busbar_rating") %></div>
-                <div class="col-8"><%= @switchboard.busbar_rating %></div>
-              </div>
-              
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/switchboard.busbar_fault_rating") %></div>
-                <div class="col-8"><%= @switchboard.busbar_fault_rating || '-' %></div>
-              </div>
-              
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/switchboard.busbar_fault_duration") %></div>
-                <div class="col-8"><%= @switchboard.busbar_fault_duration || '-' %></div>
-              </div>
-              
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/switchboard.cable_entry") %></div>
-                <div class="col-8"><%= @switchboard.cable_entry || '-' %></div>
-              </div>
-              
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/switchboard.incomer_protection") %></div>
-                <div class="col-8"><%= @switchboard.incomer_protection || '-' %></div>
-              </div>
-              
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/switchboard.metering") %></div>
-                <div class="col-8"><%= @switchboard.metering || '-' %></div>
-              </div>
-              
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/switchboard.neutral_bar_connections") %></div>
-                <div class="col-8"><%= @switchboard.neutral_bar_connections || '-' %></div>
-              </div>
-              
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/switchboard.earth_bar_connections") %></div>
-                <div class="col-8"><%= @switchboard.earth_bar_connections || '-' %></div>
-              </div>
+              <%= show_attribute(@switchboard, :notes, type: :text) %>
+              <%= show_attribute(@switchboard, :ingress_protection) %>
+              <%= show_attribute(@switchboard, :voltage_rating, type: :enum) %>
+              <%= show_attribute(@switchboard, :busbar_rating, type: :float, units: "A") %>
+              <%= show_attribute(@switchboard, :busbar_fault_rating, type: :float, units: "A") %>
+              <%= show_attribute(@switchboard, :busbar_fault_duration, type: :float, units: "s") %>
+              <%= show_attribute(@switchboard, :cable_entry) %>
+              <%= show_attribute(@switchboard, :incomer_protection, type: :text) %>
+              <%= show_attribute(@switchboard, :metering, type: :text) %>
+              <%= show_attribute(@switchboard, :neutral_bar_connections, type: :text) %>
+              <%= show_attribute(@switchboard, :earth_bar_connections, type: :text) %>
             </div>  <!-- temporary end inner card body -->
 
             <!-- Associations -->
@@ -134,13 +85,11 @@
 
             <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
               <!-- Demand -->
-              <%= render 'electrical/demands/show_insert', tag: @switchboard.tag, demand: @switchboard.electrical_demand %>
+              <%= render 'electrical/demands/show_insert', object: @switchboard %>
               
               <!-- Tag Card -->
               <% if @switchboard.tag.present? %>
-                <div class="row g-3 mb-3">
-                    <%= render 'tags/card', object: @switchboard, association: :tag %>
-                </div>
+                <%= show_association(@switchboard, :tag) %>
               <% else %>
                 <div class="row g-3 mb-3">
                   <div class="alert alert-danger">

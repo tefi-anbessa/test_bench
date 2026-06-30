@@ -1,28 +1,52 @@
 # frozen_string_literal: true
 module ProjectChange
   class Request < Base
-    # Callbacks
-    around_create :set_request_number
+    # === Mixins ===
 
-    # Belongs to associatons
-    belongs_to :project, inverse_of: :change_requests
-    
+    # === Constants ===
     # enum declarations
     enum :duration, Constants.project_change.request.duration.to_h
-    
+
+    # === Gem macros ===
+    has_paper_trail
+
+    # === Attributes ===
+    # Lock CR number after creation
+    attr_readonly :project_id, :serial
+
+    # === Associations ===
+    belongs_to :project, inverse_of: :change_requests
+
+    # === Scopes ===
+
+    # === Validations ===
     # Presence validation for required fields.
     validates :title, presence: true, 
       length: { maximum: 255 }, uniqueness: { scope: :project_id }
     validates :reason, presence: true
     validates :summary, presence: true
     validates :duration, presence: true
-    
     # Uniqueness validation for unique fields.
     validates :serial, uniqueness: { scope: :project_id }
-    
-    # Lock CR number after creation
-    attr_readonly :project_id, :serial
 
+    # === Callbacks ===
+    around_create :set_request_number
+
+    # === Class methods ===
+    def self.swatch
+      Swatch.find_by(name: "app_theme")
+    end
+
+    # === Class methods - Queries ===
+    # Provide SQL for ordering swatches in the navigator
+    def self.navigator_order_sql
+    <<~SQL.squish
+      projects.code ASC,
+      project_change_requests.serial ASC
+    SQL
+    end
+
+    # === Public methods ===
     def label
       "CR #{serial}"
     end
@@ -31,10 +55,7 @@ module ProjectChange
       "CR #{project.label}-#{serial}"
     end
 
-    def self.swatch
-      Swatch.find_by(name: "app_theme")
-    end
-    
+    # === Private methods ===
     private
       def set_request_number
         ProjectChange::Request.transaction do

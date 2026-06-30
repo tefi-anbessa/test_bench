@@ -39,8 +39,8 @@ class TagsSystemTest < ApplicationSystemTestCase
     # New and edit required separately because some models have read only fields that can't be edited.
     # Set a valid value for each field if required to be unique, set nil for factory default.
     # Document model has its own way to ensure uniqueness by setting serial internally.
-    @new_fields = { }
-    @edit_fields = { }
+    @new_fields = { stage: nil, location: nil, notes: nil, parent: nil }
+    @edit_fields = @new_fields
 
     @model_special_cases = { parent: nil, tagable: nil }
     # Set an attribute/s to be modified in edit test
@@ -196,11 +196,11 @@ class TagsSystemTest < ApplicationSystemTestCase
     show_assertions
     # Field labels
     assert_text I18n.t('activerecord.attributes.tag.tagable_type')
-    assert_text I18n.t('activerecord.attributes.tag.parent_id')
+    assert_text I18n.t('activerecord.attributes.tag.parent')
 
     # Field data
     assert_text I18n.t('show.unassigned', model: I18n.t("activerecord.attributes.tag.tagable_type"))
-    assert_text I18n.t('show.unassigned', model: I18n.t("activerecord.attributes.tag.parent_id"))
+    assert_text I18n.t('show.unassigned', model: I18n.t("activerecord.attributes.tag.parent"))
 
     # Go to project tags index and get the same show view from there.
     click_link(href: project_tags_path(@project))
@@ -277,16 +277,15 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert page.title.include?(I18n.t("tags.new.title"))
 
     tag_form_field_assertions
-    assert_selector "select[name='prefix_select']" # prefix schema for Electrical discipline
   end
 
   test "discipline sets the prefix schema" do
     # Additional discipline setup
-    test_sample_disciplines_setup
+    sample_disciplines_setup
     sign_in @c_user # Accredited for discipline C
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    # Discipline C defaults to default schema
+    # Test Discipline C uses default schema
     visit new_discipline_tag_path(@discipline_c)
     assert_current_path new_discipline_tag_path(@discipline_c)
 
@@ -294,24 +293,24 @@ class TagsSystemTest < ApplicationSystemTestCase
     sign_out @c_user
 
     sign_in @m_user # Accredited for discipline M
-    # Discipline M defaults to dim1 schema
+    # Test Discipline M uses dim1 schema
     visit new_discipline_tag_path(@discipline_m)
     assert_current_path new_discipline_tag_path(@discipline_m)
 
-    assert_selector "select[name='prefix_select']"
+    assert_selector "select[name='tag[prefix]']"
     sign_out @m_user
     
-    sign_in @accredited_user # Accredited for discipline E default
+    sign_in @p_user # Accredited for discipline P
+    # Test Discipline P uses dim2 schema
 
-    visit discipline_tags_path(@discipline)
-    click_link(href: new_discipline_tag_path(@discipline))
-    assert_current_path new_discipline_tag_path(@discipline)
+    visit discipline_tags_path(@discipline_p)
+    click_link(href: new_discipline_tag_path(@discipline_p))
+    assert_current_path new_discipline_tag_path(@discipline_p)
 
-    # Default discipline is E and default schema for E is dim2.
-    assert_selector "select[name='prefix_select']"
-    sign_out @accredited_user
+    sign_out @p_user
     
     sign_in @j_user # Accredited for discipline J
+    # Test Discipline J uses isa51 schema
   
     visit new_discipline_tag_path(@discipline_j)
     assert_current_path new_discipline_tag_path(@discipline_j)
@@ -320,13 +319,13 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert_selector "select[name='modifier']"
     assert_selector "select[name='function']"
     assert_selector "select[name='modifier_function']"
-    assert_selector "[data-tag-target='prefixField'][readonly]"
+    assert_selector "[data-tag-prefix-target='prefix'][readonly]"
     sign_out @j_user
   end
 
   test "accredited users create new tags" do
     # Additional discipline setup
-    test_sample_disciplines_setup
+    sample_disciplines_setup
     @count = 0
     sign_in @c_user
     # Mock current_project for this test
@@ -348,33 +347,32 @@ class TagsSystemTest < ApplicationSystemTestCase
     sign_in @m_user # Accredited for discipline M
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    # Discipline M defaults to dim1 schema
+    # Discipline M uses dim1 schema
     visit new_discipline_tag_path(@discipline_m)
     assert_current_path new_discipline_tag_path(@discipline_m)
 
-    # Build mechanical tag M:A-0002.A
     fill_in_tag_fields
-    select("A", from: "prefix_select", match: :first)
+    select("PM", from: "tag[prefix]", match: :first)
 
     click_button I18n.t('actions.create')
     sleep 0.1  # Give database time to commit
-    new_tag = Tag.find_by(prefix: "A", serial: @count)
+    new_tag = Tag.find_by(prefix: "PM", serial: @count)
     assert_current_path tag_path(new_tag)
     assert_text I18n.t("flash.create.notice", resource_name: I18n.t("activerecord.models.tag", count: 1))
     sign_out @m_user
 
-    sign_in @accredited_user # Accredited for discipline E default
+    sign_in @p_user # Accredited for discipline P
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit new_discipline_tag_path(@discipline)
+    visit new_discipline_tag_path(@discipline_p)
 
-    # Build electrical tag E-PM-0003.A 
     fill_in_tag_fields
-    select("B", from: "prefix_select", match: :first)
+    select("P", from: "part1", match: :first)
+    select("M", from: "part2", match: :first)
 
     click_button I18n.t('actions.create')
     sleep 0.1  # Give database time to commit
-    new_tag = Tag.find_by(prefix: "B", serial: @count)
+    new_tag = Tag.find_by(prefix: "PM", serial: @count)
     assert_current_path tag_path(new_tag)
     assert_text I18n.t("flash.create.notice", resource_name: I18n.t("activerecord.models.tag", count: 1))
     sign_out @accredited_user
@@ -399,43 +397,41 @@ class TagsSystemTest < ApplicationSystemTestCase
   end
 
   test "accredited user edit tag with default schema" do
+    sample_disciplines_setup
+    c_tag = create(:tag, discipline: @discipline_c)
     @count = 10
-    sign_in @accredited_user
+    sign_in @c_user
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit tag_path(@tag)
-    click_link(href: edit_tag_path(@tag))
-    assert_current_path edit_tag_path(@tag)
-    assert_text I18n.t("tags.edit.header", label: @tag.reload.label)
+    visit tag_path(c_tag)
+    click_link(href: edit_tag_path(c_tag))
+    assert_current_path edit_tag_path(c_tag)
+    assert_text I18n.t("tags.edit.header", label: c_tag.reload.label)
     assert page.title.include?(I18n.t("tags.edit.title"))
 
-    # This test is rather brittle. Depends on schema for discpline chosen to be tested.
     tag_form_field_assertions
-    assert_selector "select[name='prefix_select']" # prefix schema for Electrical discipline
-
-    # assert_selector "[data-tag-target='prefixField'][readonly]"
+    assert_field "tag[prefix]"
 
     # Update the form
     fill_in "tag_location", with: "NEW LOCATION"
     click_button I18n.t('actions.update')
     sleep 1.0  # Give server time to respond
     @tag.reload
-    assert_current_path tag_path(@tag)
+    assert_current_path tag_path(c_tag)
     assert_text "NEW LOCATION"
     assert_text I18n.t("flash.update.notice", resource_name: I18n.t("activerecord.models.tag.one"))
 
     # Make another edit to test the show view link, and then discard
-    visit tag_path(@tag)
-    click_link(href: edit_tag_path(@tag))
-    assert_current_path edit_tag_path(@tag)
+    click_link(href: edit_tag_path(c_tag))
+    assert_current_path edit_tag_path(c_tag)
     fill_in "tag_serial", with: "0201"
     
     fill_in "tag_service", with: "RESTORED SERVICE"
     accept_confirm do
       click_link(text: I18n.t('actions.discard'))
     end
-    @tag.reload
-    assert_current_path tag_path(@tag)
+    c_tag.reload
+    assert_current_path tag_path(c_tag)
     refute_text "RESTORED SERVICE"
   end
 
@@ -471,16 +467,15 @@ class TagsSystemTest < ApplicationSystemTestCase
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit new_discipline_tag_path(@discipline)
 
-    # Build electrical tag E-PM-0003.A 
     @count = 11
     fill_in_tag_fields
-    select("B", from: "prefix_select", match: :first)
+    select("PM", from: "tag[prefix]", match: :first)
     assert_selector "select[name='tag[parent_id]']"
     select(@tag.full_tag, from: "tag[parent_id]", match: :first)
 
     click_button I18n.t('actions.create')
     sleep 0.1  # Give database time to commit
-    new_tag = Tag.find_by(prefix: "B", serial: @count)
+    new_tag = Tag.find_by(prefix: "PM", serial: @count)
     assert_current_path tag_path(new_tag)
     assert_text I18n.t("flash.create.notice", resource_name: I18n.t("activerecord.models.tag", count: 1))
 
@@ -521,21 +516,33 @@ class TagsSystemTest < ApplicationSystemTestCase
       assert_selector "a.btn.btn-warning", text: I18n.t('actions.discard')
     end
 
-    def test_sample_disciplines_setup
-      # Discipline J defaults to isa51 schema
+    def sample_disciplines_setup
+
+      # Set up test schemata so test does not depend on constants, which will develop over time.
+      default_schema = { name: "default" }
+      dim1_schema = { name: "d1", type: 'dim1', prefix: { "PM": "PUMP MOTOR", "JB": "JUNCTION BOX" } }
+      dim2_schema = { name: "d2", type: 'dim2', part1: { "P": "PUMP", "J": "JUNCTION" }, part2: { "M": "MOTOR", "B": "BOX" }  }
+      isa51_schema = { name: "isa51" }
+      
       @discipline_j = @project.disciplines.find_by(code: 'J')
       @j_user = create(:user)
       @j_user.grant(:designer, @discipline_j)
+      @discipline_j.update(prefix_schema: isa51_schema)
     
-      # Discipline M defaults to dim1 schema
+      @discipline_p = @project.disciplines.find_by(code: 'P')
+      @p_user = create(:user)
+      @p_user.grant(:designer, @discipline_p)
+      @discipline_p.update(prefix_schema: dim2_schema)
+    
       @discipline_m = @project.disciplines.find_by(code: 'M')
       @m_user = create(:user)
       @m_user.grant(:designer, @discipline_m)
+      @discipline_m.update(prefix_schema: dim1_schema)
     
-      # Discipline C defaults to default schema
       @discipline_c = @project.disciplines.find_by(code: 'C')
       @c_user = create(:user)
       @c_user.grant(:designer, @discipline_c)
+      @discipline_c.update(prefix_schema: default_schema)
     end
 
     def fill_in_tag_fields

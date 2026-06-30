@@ -1,72 +1,21 @@
 <!-- Tag collapsible card -->
-<!-- Expecting 'object' and 'association' variables -->
-<!-- The card uses the association name in the id, so more than one tag card can be present on the page -->
-<% return false unless object.respond_to?(association) %>
-<% tag = object.send(association) %>
+<!-- Expecting 'object', 'context' and 'id' variables, passed from the shared/_association partial. -->
+<!-- The card uses the context name in the header and the id for the block (for testing). -->
+<% tag = object %>
 <% return false unless tag.present? && tag.is_a?(Tag) %>
-<% if I18n.exists?("activerecord.attributes.#{object.model_name.i18n_key}_id.#{association}_id") %>
-  <!-- The card looks for a tag attribute in the parent object translations. -->
-  <!-- If not found it uses the tag model translation. -->
-  <% model = t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}_id") %>
-<% else %>
-  <% model = t("activerecord.models.tag.one") %>
-<% end %>
 <%= render 'components/collapsible',
-      id: "#{association}_#{tag.id}_details",
-      title: [model, tag.long_label].join(": "),
+      id: "#{id}_#{tag.id}_details",
+      title: [context, tag.long_label].join(": "),
       expanded: false,
       header_class: 'py-1' do %>
   
   <div class="container-fluid">
-    <div class="row mb-1">
-      <% text = t("actions.jump_to", model: tag.model_name.human) %>
-      <%= link_to tag_path(tag),
-        class: "btn btn-sm btn-outline-secondary me-2",
-        title: text do %>
-        <%== bs_icon('tag') %>
-        <span class="d-none d-md-inline"><%= text %></span>
-      <% end %>
-    </div>
+    <%= nav_link(action: :show_tag, record: tag) %>
+    <%= nav_link(action: :show_discipline, record: tag.discipline) %>
 
-    <div class="row mb-1">
-      <% text = [t("actions.jump_to", model: tag.discipline.model_name.human), 
-        tag.discipline.code, tag.discipline.name].join(' ') %>
-      <%= link_to discipline_path(tag.discipline),
-        class: "btn btn-sm btn-outline-secondary me-2",
-        title: text do %>
-        <%== bs_icon('layers') %>
-        <span class="d-none d-md-inline"><%= text %></span>
-      <% end %>
-    </div>
-
-    <div class="row mb-1">
-      <div class="col-12">
-        <%= [t('activerecord.attributes.tag.stage'), tag.stage].join(': ') %>
-      </div>
-    </div>
-
-    <div class="row mb-1">
-      <div class="col-12">
-        <%= t("activerecord.attributes.tag.service") %>: <%= tag.service || '-' %>
-      </div>
-    </div>
-
-    <div class="row mb-1">
-      <div class="col-12">
-        <%= t("activerecord.attributes.tag.location") %>: <%= tag.location || '-' %>
-      </div>
-    </div>
-
-    <% if tag.notes.present? %>
-      <div class="row mb-1">
-        <div class="col-12">
-          <div class="d-flex">
-            <span class="text-muted me-2"><%= t('activerecord.attributes.tag.notes') %>:</span>
-            <span><%= tag.notes %></span>
-          </div>
-        </div>
-      </div>
-    <% end %>
+    <%= show_attribute(tag, :stage) %>
+    <%= show_attribute(tag, :service) %>
+    <%= show_attribute(tag, :location) %>
+    <%= show_attribute(tag, :notes, type: :text) %>
   </div>
 <% end %>
-

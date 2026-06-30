@@ -67,14 +67,13 @@
 
                   <%= show_attribute(@discipline, :notes, type: :text) %>
                   <%= show_attribute(@discipline, :code) %>
+                  <%= show_attribute(@discipline, :sort_order, type: :integer) %>
                   <%= show_attribute(@discipline, :required_role) %>
                   <%= show_attribute(@discipline, :catalog_required_role) %>
 
                   <!-- Project Card -->
                   <% if @project.present? %>
-                    <div class="row mb-3">
-                        <%= render 'projects/card', object: @project %>
-                    </div>
+                    <%= show_association(@discipline, :project) %>
                   <% else %>
                     <div class="row mb-3">
                       <div class="alert alert-danger">
@@ -88,14 +87,13 @@
                       object: @discipline.prefix_schema %>
                   <% else %>
                     <div class="row mb-1">
-                      <div class="col-4 text-muted"><%= t('activerecord.attributes.discipline.prefix_schema') %></div>
-                      <div class="col-8"><%= '-' %></div>
+                      <div class="col-4 text-muted bg-warning"><%= t('activerecord.attributes.discipline.prefix_schema') %></div>
+                      <div class="col-8 bg-warning"><%= t("show.unassigned", model: t("activerecord.attributes.discipline.prefix_schema")) %></div>
                     </div>
                   <% end %>
 
                   <% if policy(@discipline).edit? && @discipline.swatch.present? %>
-                    <%= render 'swatches/card', 
-                      object: @discipline.swatch %>
+                    <%= show_association(@discipline, :swatch) %>
                   <% end %>
                 </div> <!-- end discipline details card-body -->
               </div> <!-- end discipline card -->

@@ -13,44 +13,32 @@
     </div>
 
     <%= bootstrap_form_with(model: issue,
-          url: document_issues_path(@document),
-          layout: :horizontal,
-          label_col: "col-sm-4",
-          control_col: "col-sm-8",
-          wrapper_class: 'mb-1',
-          ) do |f| %>
+      url: issue.persisted? ? issue : document_issues_path(document),
+      layout: :horizontal,
+      label_col: "col-sm-4",
+      control_col: "col-sm-8",
+      wrapper_class: 'mb-1',
+      ) do |f| %>
 
       <div class="card-body p-2" style="<%= card_styles(@swatch) %>">
+        <%= render 'shared/error_messages', object: f.object %>
+
         <div class="row justify-content-center">
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">        <!-- Adjust to fit field width requirements -->
 
             <!-- Issue Details -->
             <div class="card mb-1" style="<%= card_styles(@swatch) %>">
-              <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
-                <h5><%= t('activerecord.models.issue') %></h5>
-              </div>
 
               <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
-                <%= render 'shared/error_messages', object: f.object %>
 
                 <!-- Document dropdown -->
-                <%= render 'documents/card', object: @document %>
+                <%= show_association(issue, :document) %>
 
-                <%= f.text_field :code,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8" %>
-                <%= f.text_field :reason,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8" %>
-                <%= f.select :source_format_id,
-                    options_for_select(
-                      @source_formats,
-                      selected: issue.source_format_id
-                    ),
-                    { include_blank: t('form.optional') },
-                    class: 'form-control form-control-sm' %>
+                <%= form_field(f, :code) %>
+                <%= form_field(f, :reason) %>
+                <% collection = options_for_select(
+                      @source_formats.map  { |s| [[s.title, s.revision].join(" "), s.id] }) %>
+                <%= form_field(f, :source_format_id, type: :select, collection: collection, required: false) %>
                 
               </div> <!-- end issue card body -->
             </div> <!-- end issue card -->

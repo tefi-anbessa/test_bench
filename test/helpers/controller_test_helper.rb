@@ -35,6 +35,7 @@ module ControllerTestHelper
     assert @regular_user.persisted?
     assert @accredited_user.valid?
     assert @accredited_user.persisted?
+    assert @accredited_user.has_role?(@discipline.required_role, @discipline)
   end
 
   # Ensure that the including controller test creates valid in and out of scope resources

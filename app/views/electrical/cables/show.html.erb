@@ -65,43 +65,12 @@
             </div> <!-- end inner card header -->
 
             <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
-
-              <span class="border">
-                <div class="row mb-1">
-                  <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/cable.notes') %></div>
-                </div>
-                <div class="row mb-1">
-                  <div class="col-12"><%= simple_format(@cable.notes) %></div>
-                </div>
-              </span>
-
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @cable.class.human_attribute_name(:route_length) %></div>
-                <div class="col-8"><%= number_to_human(@cable.route_length, 
-                  units: { unit: "m" }, precision: 2) || '-' %></div>
-              </div>
-              
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @cable.class.human_attribute_name(:vertical_allowance) %></div>
-                <div class="col-8"><%= number_to_human(@cable.vertical_allowance, 
-                  units: { unit: "m" }, precision: 2) || '-' %></div>
-              </div>
-              
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @cable.class.human_attribute_name(:termination_allowance) %></div>
-                <div class="col-8"><%= number_to_human(@cable.termination_allowance, 
-                  units: { unit: "m" }, precision: 2) || '-' %></div>
-              </div>
-              
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @cable.class.human_attribute_name(:start_mark) %></div>
-                <div class="col-8"><%= @cable.start_mark.presence || '-' %></div>
-              </div>
-              
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= @cable.class.human_attribute_name(:end_mark) %></div>
-                <div class="col-8"><%= @cable.end_mark.presence || '-' %></div>
-              </div>
+              <%= show_attribute(@cable, :route_length, type: :float, units: "m") %>
+              <%= show_attribute(@cable, :vertical_allowance, type: :float, units: "m") %>
+              <%= show_attribute(@cable, :termination_allowance, type: :float, units: "m") %>
+              <%= show_attribute(@cable, :start_mark, type: :integer, units: "m") %>
+              <%= show_attribute(@cable, :end_mark, type: :integer, units: "m") %>
+              <%= show_attribute(@cable, :notes, type: :text) %>
             </div> <!-- temporary end inner card body -->
 
             <!-- Associations -->
@@ -111,55 +80,17 @@
 
             <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
               <!-- Cable Type Card -->
-              <div class="row mb-1">
-                  <%= render 'electrical/cable_types/card', 
-                    object: @cable.electrical_cable_type, 
-                    context: t("activerecord.models.electrical/cable_type.one") %>
-              </div>
+                <%= show_association(@cable, :electrical_cable_type) %>
               
               <!-- From Section -->
-              <div class="row mb-1">
-                <!-- Trap invalid from_type -->
-                <% if Constants.electrical.connect_options.include?(@cable.from_type) &&
-                    @cable.from_type.safe_constantize %>
-                  <%= render 'shared/association', 
-                    object: @cable, 
-                    association: :from %>
-                <% else %>
-                  <!-- Invalid from_type -->
-                  <div class="col-4 text-muted">
-                    <%= @cable.class.human_attribute_name(:from) %>
-                  </div>
-                  <div class="col-8">
-                    <%= t('show.invalid', model: @cable.from_type) %>
-                  </div>
-                <% end %>
-              </div>
+                <%= show_association(@cable, :from, header: :association) %>
               
               <!-- To Section -->
-              <div class="row mb-1">
-                <!-- Trap invalid to_type -->
-                <% if Constants.electrical.connect_options.include?(@cable.to_type) &&
-                    @cable.to_type.safe_constantize %>
-                  <%= render 'shared/association', 
-                    object: @cable, 
-                    association: :to %>
-                <% else %>
-                  <!-- Invalid to_type -->
-                  <div class="col-4 text-muted">
-                    <%= @cable.class.human_attribute_name(:to) %>
-                  </div>
-                  <div class="col-8">
-                    <%= t('show.invalid', model: @cable.to_type) %>
-                  </div>
-                <% end %>
-              </div>
+                <%= show_association(@cable, :to, header: :association) %>
 
               <!-- Tag Card -->
               <% if @cable.tag.present? %>
-                <div class="row g-3 mb-3">
-                    <%= render 'tags/card', object: @cable, association: :tag %>
-                </div>
+                <%= show_association(@cable, :tag) %>
               <% else %>
                 <div class="row g-3 mb-3">
                   <div class="alert alert-danger">
@@ -167,7 +98,6 @@
                   </div>
                 </div>
               <% end %>
-          
             </div>  <!-- end inner card body -->
           </div> <!-- end inner card -->
         </div> <!-- end responsive columns -->

@@ -1,45 +1,20 @@
-<% resource = object %>
+<!-- Source Format collapsible card -->
+<!-- Expecting 'object', 'context' and 'id' variables, passed from the shared/_association partial. -->
+<!-- The card uses the context name in the header and the id for the block (for testing). -->
+<% source_format = object %>
 <%= render 'components/collapsible',
-  id: "source_formats_#{resource.id}_details",
-  title: t("source_formats.show.header", label: resource.label),
-  expanded: false,
-  header_class: 'py-1' do %>
+      id: "#{id}_#{source_format.id}_details",
+      title: [context, source_format.label].join(": "),
+      expanded: false,
+      header_class: 'py-1' do %>
   
-    <div class="container-fluid">
-      <div class="row mb-1">
-        <% text = t("actions.jump_to", model: t("activerecord.models.source_format")) %>
-        <%= link_to resource, 
-            class: "btn btn-sm btn-outline-secondary me-2",
-            title: text do %>
-          <%== bs_icon('box-arrow-in-up-left') %>
-          <span class="d-none d-md-inline"><%= text %></span>
-        <% end %>
-      </div>
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t("activerecord.attributes.source_format.vendor") %></div>
-        <div class="col-8"><%= resource.vendor || '-' %></div>
-      </div>
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t("activerecord.attributes.source_format.title") %></div>
-        <div class="col-8"><%= resource.title || '-' %></div>
-
-      </div>
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t("activerecord.attributes.source_format.file_extension") %></div>
-        <div class="col-8"><%= resource.file_extension || '-' %></div>
-
-      </div>
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t("activerecord.attributes.source_format.revision") %></div>
-        <div class="col-8"><%= resource.revision || '-' %></div>
-
-      </div>
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%= t("activerecord.attributes.source_format.notes") %></div>
- 
-        <!-- TODO: Add json formatting -->
-        <div class="col-8"><%= simple_format(resource.notes || '-') %></div>
-
-      </div>
-    </div> <!-- end container-fluid -->
+  <div class="container-fluid">
+    <%= nav_link(action: :show, record: source_format) %>
+      <%= show_attribute(source_format, :vendor) %>
+      <%= show_attribute(source_format, :title) %>
+      <%= show_attribute(source_format, :file_extension) %>
+      <%= show_attribute(source_format, :revision) %>
+      <%= show_attribute(source_format, :notes, type: :text) %>
+    </div>
+  </div> <!-- end container-fluid -->
 <% end %>

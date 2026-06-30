@@ -15,6 +15,7 @@ class SourceFormatsController < ApplicationController
   # GET /source_formats/1
   def show
     authorize @source_format
+    @neighbours = Navigator.new(scope: @scope, record: @source_format).neighbours
   end
 
   # GET /source_formats/new
@@ -83,7 +84,9 @@ class SourceFormatsController < ApplicationController
   private
 
     def set_source_format
-      @source_format = SourceFormat.find(params[:id])
+      @scope = policy_scope(SourceFormat)
+      @source_format = @scope.find_by(id: params[:id])
+      raise ApplicationController::ConflictError, :out_of_scope if @source_format.nil?
     end
 
     def set_swatch
