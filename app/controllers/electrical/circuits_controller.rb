@@ -45,7 +45,7 @@ module Electrical
         # Handle invalid enum values as a conflict
         raise ApplicationController::ConflictError, :invalid_enum
       end
-      unless process_cable_params(feeder_id.to_i, demand_id.to_i)
+      unless process_cable_params(feeder_id, demand_id)
         setup_form
         render :new, status: :unprocessable_content
         return
@@ -99,7 +99,7 @@ module Electrical
         # Handle invalid enum values as a conflict
         raise ApplicationController::ConflictError, :invalid_enum
       end
-      unless process_cable_params(feeder_id.to_i, demand_id.to_i)
+      unless process_cable_params(feeder_id, demand_id)
         setup_form
         render :edit, status: :unprocessable_content
         return
@@ -194,20 +194,24 @@ module Electrical
         @swatch = @switchboard&.discipline&.swatch || Electrical::Circuit.swatch
       end
 
-      def process_cable_params(feeder_id, demand_id)
+      def process_cable_params(feeder_id, demand_id) 
         @feeder = @demand = nil
-        # Only assign feeder if the param is set and it is not pointing to the present @circuit
-        if feeder_id.present? && feeder_id != @circuit.feeder&.id
-          # Don't look for a feeder if it is already set (only relevant on update)
-          # Check that feeder is valid and trap false params.
+        # Only assign feeder if the param is not pointing to the present @circuit
+        feeder_id = feeder_id.present? ? feeder_id.to_i : nil
+
+        if feeder_id.present? && (feeder_id != @circuit.feeder&.id)
+          # Only assign feeder if the param is not pointing to the present @circuit.
+          # This code at present cannot reset the feeder to nil.
           @feeder = set_feeder(feeder_id)
+          # set_feeder checks request is in scope and raises conflict error if not...
           return false if @feeder.nil?
         end
-        # Only assign demand if the param is set and it is not pointing to the present @circuit
+        demand_id = demand_id.present? ? demand_id.to_i : nil
         if demand_id.present? && demand_id != @circuit.feeder&.to_id
-          # Check that demand is valid and trap false params.
+          # Only assign demand if the param is set and it is not pointing to the present @circuit.
+          # This code at present cannot reset the demand to nil.
           @demand = set_demand(demand_id)
-          # Tried to set demand but error occurred
+          # set_demand checks that demand is in scope and raises conflict error if not...
           return false if @demand.nil?
         end
         # No errors or no cable params changed
@@ -266,7 +270,7 @@ module Electrical
         @cables = policy_scope(Electrical::Cable).where(from: nil)
                                 .or(policy_scope(Electrical::Cable).where(from: @circuit))
                                 .map { |cable| [cable.label, cable.id] }
-        @cable = Electrical::Cable.new() # dummy instance for bootstrap fields
+        @cable = policy_scope(Electrical::Cable).first # dummy cable for policy testing
         
         # Filter demands that don't already have an incomer cable
         # Build the base scope for demands

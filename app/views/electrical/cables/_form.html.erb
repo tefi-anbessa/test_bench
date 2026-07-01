@@ -45,19 +45,13 @@
                 <%= render 'shared/error_messages', object: f.object %>
 
                 <!-- Cable Type -->
-                <%= f.select :electrical_cable_type_id,
-                      options_for_select(@cable_type_options, selected: cable.electrical_cable_type_id),
-                      {include_blank: t("form.required")},
-                      { 
-                        class: 'form-select form-select-sm',
-                        required: true 
-                      } %>
+                <% collection = options_for_select(cable_type_options, selected: cable.electrical_cable_type_id) %>
+                <%= form_field(f, :electrical_cable_type_id, type: :select, collection: collection, required: true) %>
                     
                 <div data-controller="cable-form" 
                   data-cable-form-id-options-value="<%= @id_options.to_json %>">
 
-
-                  <!-- From Section --> 
+                  <!-- From Section -->
                   <div class="row">
                     <%= f.select :from_type,
                       options_for_select(@connect_options, selected: cable.from_type),
@@ -96,67 +90,12 @@
                   </div>
 
                   <!-- Design lengths -->
-                  <div class="row">
-                    <%= f.number_field :route_length,
-                            class: 'form-control form-control-sm',
-                            step: '0.1',
-                    min: 0,
-                    append: "m",
-                    label_col: "col-sm-6",
-                    control_col: "col-sm-3",
-                    wrapper: { class: 'mb-1' } %>
-                  </div>
-
-                  <div class="row">
-                    <%= f.number_field :vertical_allowance,
-                      class: 'form-control form-control-sm',
-                      step: '0.1',
-                      min: 0,
-                      append: "m",
-                      label_col: "col-sm-6",
-                      control_col: "col-sm-3",
-                      wrapper: { class: 'mb-1' } %>
-                  </div>
-
-                  <div class="row">
-                    <%= f.number_field :termination_allowance,
-                      class: 'form-control form-control-sm',
-                      step: '0.1',
-                      min: 0,
-                      append: "m",
-                      label_col: "col-sm-6",
-                      control_col: "col-sm-3",
-                      wrapper: { class: 'mb-1' } %>
-                  </div> 
-
-                  <!-- Installed length -->
-                  <div class="row">
-                    <%= f.number_field :start_mark,
-                            class: 'form-control form-control-sm',
-                            step: '1',
-                            min: 0,
-                            label_col: "col-sm-6",
-                            control_col: "col-sm-3",
-                            wrapper: { class: 'mb-1' } %>
-                  </div>
-
-                  <div class="row">
-                    <%= f.number_field :end_mark,
-                            class: 'form-control form-control-sm',
-                            step: '1',
-                            min: 0,
-                          label_col: "col-sm-6",
-                          control_col: "col-sm-3",
-                          wrapper: { class: 'mb-1' } %>
-                          </div>
-
-                  <!-- Notes -->
-                  <div class="row">
-                    <%= f.text_area :notes,
-                            label_col: "col-sm-3",
-                            control_col: "col-sm-9",
-                            rows: 3 %>
-                  </div>
+                  <%= form_field(f, :route_length, type: :number, min: 0, step: 0.1, units: "m", control_cols: 4) %>
+                  <%= form_field(f, :vertical_allowance, type: :number, min: 0, step: 0.1, units: "m", control_cols: 4) %>
+                  <%= form_field(f, :termination_allowance, type: :number, min: 0, step: 0.1, units: "m", control_cols: 4) %>
+                  <%= form_field(f, :start_mark, type: :number, min: 0, step: 0.1, units: "m", control_cols: 4) %>
+                  <%= form_field(f, :end_mark, type: :number, min: 0, step: 0.1, units: "m", control_cols: 4) %>
+                  <%= form_field(f, :notes, type: :text) %>
                 </div> <!-- end div data controller -->
               </div> <!-- end cable card body -->
             </div> <!-- end cable card -->

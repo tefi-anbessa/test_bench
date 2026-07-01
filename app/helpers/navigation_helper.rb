@@ -204,7 +204,9 @@ module NavigationHelper
   # Use nav_link for show links only, no content actions. Returns nothing for nil record.
   def nav_link(action:, record: nil, icon_only: false, **opts)
     config = ACTION_CONFIG[action] || {}
-    text = [t("actions.jump_to", model: record&.model_name.human), record.label].join(": ")
+    text = record.present? ?
+      [t("actions.jump_to", model: record&.model_name.human), record.label].join(": ") :
+      t("index.unassigned")
     classes = [
       "btn",
       "btn-sm",

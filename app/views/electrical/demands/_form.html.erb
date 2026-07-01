@@ -26,23 +26,10 @@
         <div class="row justify-content-center">
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
-            <div class="row">
-              <%= f.select :basis, 
-                    demand.class.bases.keys.collect { |basis| [demand.class.human_enum_name(:basis, basis), basis] },
-                    help: t('activerecord.help.electrical/demand.basis') %>
-            </div>
-            
-            <div class="row">
-              <%= f.text_area :basis_notes,
-                  help: t('activerecord.help.electrical/demand.basis_notes') %>
-            </div>
-
-            <div class="row">
-              <%= f.select :config, 
-                    demand.class.configs.keys.collect { |config| [demand.class.human_enum_name(:config, config), config] },
-                    help: t('activerecord.help.electrical/demand.config') %>
-            </div>
-            
+            <%= form_field(f, :basis, type: :enum_translated, required: true) %>
+            <%= form_field(f, :basis_notes, type: :text) %>
+            <%= form_field(f, :config, type: :enum_translated, required: true) %>
+        
             <%= f.text_field :supply,
               data: {
                 controller: "typed-select",

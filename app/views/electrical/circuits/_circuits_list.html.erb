@@ -30,7 +30,7 @@
               </tr>
             </thead>
             <tbody>
-              <% circuits.each do |row| %>
+              <% circuits.order(:serial).each do |row| %>
                 <tr>
                   <td><%= row.long_label %></td>
                   <td>

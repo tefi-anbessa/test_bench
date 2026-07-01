@@ -72,9 +72,9 @@ module Electrical
       edit_resource_form_assertions
 
       find('#electrical_cable_from_type').select(I18n.t('activerecord.models.electrical/circuit.one'))
-      find('#electrical_cable_from_id').select(circuit.id.to_s)
+      find('#electrical_cable_from_id').select(circuit.label)
       find('#electrical_cable_to_type').select(I18n.t('activerecord.models.electrical/demand.one'))
-      find('#electrical_cable_to_id').select(motor_load.id.to_s)
+      find('#electrical_cable_to_id').select(motor_load.label)
 
       # Submit the form data
       click_button I18n.t('actions.update')

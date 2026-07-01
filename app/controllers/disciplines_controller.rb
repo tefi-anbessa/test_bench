@@ -99,8 +99,7 @@ class DisciplinesController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_project
       unless params[:project_id].to_i == current_project.id
-        raise ApplicationController::ConflictError, 
-          :out_of_scope
+        raise ApplicationController::ConflictError, :out_of_scope
       end
       @project = current_project
     end
@@ -177,7 +176,7 @@ class DisciplinesController < ApplicationController
     def discipline_params
       params.require(:discipline).permit(
         :code, :name, :required_role, :catalog_required_role, 
-        :sort_order, :notes, :project_id, :swatch_id,
+        :sort_order, :notes, :swatch_id,
         :prefix_schema
       )
     end

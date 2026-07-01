@@ -239,7 +239,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     visit project_disciplines_path(@project)
     click_link(href: new_project_discipline_path(@project))
     assert_current_path new_project_discipline_path(@project)
-    assert_text I18n.t("disciplines.new.header")
+    assert_text I18n.t("disciplines.new.header", scope_text: I18n.t("projects.show.header", label: @project.label))
     assert page.title.include?(I18n.t("disciplines.new.title"))
 
     discipline_form_field_assertions
@@ -268,7 +268,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     visit discipline_path(@discipline)
     click_link(href: edit_discipline_path(@discipline))
     assert_current_path edit_discipline_path(@discipline)
-    assert_text I18n.t("disciplines.edit.header", label: @discipline.code)
+    assert_text I18n.t("disciplines.edit.header", label: @discipline.code, scope_text: I18n.t("projects.show.header", label: @project.label))
     assert page.title.include?(I18n.t("disciplines.edit.title"))
 
     discipline_form_field_assertions

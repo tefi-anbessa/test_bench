@@ -29,7 +29,7 @@ module Electrical
       # List fields that should appear in index. 
       # The generator will include test for sort link header for each column, 
       # and try to find an appropriate value field for the type.
-      @index_fields = %i[notes basis config]
+      @index_fields = %i[supply power vector power_factor current duty]
 
       # List index fields that should have ransack search capability.
       # The generator will only test for "contains" fields (_cont).
@@ -38,7 +38,7 @@ module Electrical
 
       # List all fields that should appear in show (usually all)
       @show_fields = %i[notes basis basis_notes config supply power vector power_factor current duty]
-      @show_associations = %i[demandable]
+      @show_associations = %i[demandable circuit incomer]
 
       # List all fields that should appear in forms (usually all).
       # New and edit required separately because some models have read only fields that can't be edited.

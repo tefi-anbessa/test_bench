@@ -6,9 +6,6 @@
         <div class="d-flex flex-column align-items-center">
           <div class="mt-1">
             <%= yield(:header) %>
-            <% if discipline.present? && discipline.persisted? %>
-              <small class="text-muted ms-2"><%= discipline.name %></small>
-            <% end %>
           </div>
         </div>
       </div>
@@ -26,22 +23,6 @@
         <div class="row justify-content-center">
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
-            <!-- Project -->
-            <div class="col-md-12">
-              <% if project.present? %>
-                <%= f.hidden_field :project_id, value: project.id %>
-                <%= render 'projects/card',
-                      object: project %>
-              <% else %>
-                <%= f.select :project_id,
-                      options_for_select(
-                        @projects.map { |p| ["#{p.code}: #{p.title}", p.id] },
-                        discipline.project_id
-                      ),
-                      { class: 'form-select', required: true  } %>
-              <% end %>
-            </div>
-
             <!-- Copy from standard -->
             <% unless discipline.persisted? %>
               <div class="mb-1">
@@ -54,60 +35,21 @@
                       { include_blank: t('form.new_select') },
                       { class: "form-select" } %>
               </div>
-           <% end %>
-
-            <!-- Name -->
-            <div class="row">
-              <%= f.text_field :name,
-                label_col: "col-sm-3",
-                control_col: "col-sm-9",
-                      title: t('activerecord.help.discipline.name'),
-                      required: true %>
-            </div>
-
-            <!-- Code -->
-            <div class="row">
-              <%= f.text_field :code,
-                label_col: "col-sm-3",
-                control_col: "col-sm-9",
-                      title: t('activerecord.help.discipline.code'),
-                      required: true %>
-            </div>
-
-            <!-- Sort order -->
-            <div class="row">
-              <%= f.text_field :sort_order,
-                label_col: "col-sm-3",
-                control_col: "col-sm-9",
-                      title: t('activerecord.help.discipline.sort_order'),
-                      required: true %>
-            </div>
+            <% end %>
+           
+            <%= form_field(f, :name) %>
+            <%= form_field(f, :code) %>
+            <%= form_field(f, :sort_order, type: :number, step: 1) %>
 
             <!-- prefix schema -->
             <%= render 'prefix_schema_fields', form: f %>
 
-            <!-- colour swatch -->
-            <div class="row">
-              <%= f.select :swatch_id,
-                options_for_select(
-                  @swatches.map { |s| [s.name, s.id] },
-                  discipline.swatch_id
-                ),
-                { class: 'form-select' } %>
-            </div>
-
-            <!-- Required Role -->
-            <div class="row">
-              <%= f.select :required_role,
-                options_for_select(
-                  Role.all_resource_roles[:discipline].map { |r| [r.humanize, r] },
-                  discipline.required_role
-                ),
-                { include_blank: true, label: t('activerecord.attributes.discipline.required_role') },
-                { label_col: "col-sm-3",
-                  control_col: "col-sm-9",
-                  title: t('activerecord.help.discipline.required_role') } %>
-            </div>
+            <% collection = options_for_select(@swatches.map { |s| [s.name, s.id] }, discipline.swatch_id) %>
+            <%= form_field(f, :swatch_id, type: :select, collection: collection, required: false) %>
+            <% collection = options_for_select(Role.all_resource_roles[:discipline].map { |r| [r.humanize, r] },
+                  discipline.required_role) %>
+            <%= form_field(f, :required_role, type: :select, collection: collection, required: false) %>
+            <%= form_field(f, :catalog_required_role, type: :select, collection: collection, required: false) %>
 
           </div> <!-- end responsive columns --> 
         </div>
@@ -123,7 +65,7 @@
                 <%== bs_icon('x-square') %>
               <% end %>
         <% else %>
-            <%= link_to project_disciplines_path(project),
+            <%= link_to project_disciplines_path(discipline.project),
               class: "btn btn-warning actions",
                 data: { confirm: t('actions.sure'), turbo: false } do %>
                 <%= t('actions.discard') %>

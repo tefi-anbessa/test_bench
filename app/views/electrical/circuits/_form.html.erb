@@ -1,3 +1,4 @@
+<!-- Expects switchboard, circuit, cables, demands, cable -->
 <div class="container mt-3" style="<%= container_styles(@swatch) %>">
   <div class="card" style="<%= card_styles(@swatch) %>">
     <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
@@ -43,10 +44,13 @@
             <%= form_field(f, :elcb, type: :enum, control_cols: 4, required: false) %>
             <%= form_field(f, :contactor, type: :boolean) %>
 
+            <% enabled = cables.any? && cable.present? && policy(cable).edit? %>
             <% collection = options_for_select(cables || [], selected: circuit.feeder&.id) %>
-            <%= form_field(f, :feeder_id, type: :select, collection: collection, required: false) %>
+            <%= form_field(f, :feeder_id, type: :select, collection: collection, required: false, disabled: !enabled) %>
+            <% enabled &= demands.any? %>
             <% collection = options_for_select(demands || [], selected: circuit.demand&.id) %>
-            <%= form_field(f, :demand_id, type: :select, collection: collection, required: false) %>
+            <%= form_field(f, :demand_id, type: :select, collection: collection, required: false, disabled: !enabled) %>
+            <%= form_field(f, :notes, type: :text) %>
           </div>
         </div>
 

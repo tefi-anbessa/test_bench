@@ -66,8 +66,9 @@
               <%= show_attribute(@demand, :basis_notes, type: :text) %>
               <%= show_attribute(@demand, :supply, type: :float, units: "V") %>
               <%= show_attribute(@demand, :config, type: :enum_translated) %>
-              <%= show_attribute(@demand, :power, type: :float, units: "VA") %>
+              <%= show_attribute(@demand, :power, type: :float, units: "W") %>
               <%= show_attribute(@demand, :power_factor, type: :float) %>
+              <%= show_attribute(@demand, :vector, type: :float, units: "VA") %>
               <%= show_attribute(@demand, :current, type: :float, units: "A") %>
               <%= show_attribute(@demand, :duty, type: :float) %>
             </div>  <!-- temporary end inner card body -->

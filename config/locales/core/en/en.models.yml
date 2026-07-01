@@ -33,6 +33,7 @@ en:
     attributes:
       document:
         doc_type_id: "Document Type"
+        doc_type: "Document Type"
         serial: "Serial"
         doc_number: "Document Number"
         title: "Title"
@@ -140,7 +141,6 @@ en:
       discipline:
         name:             "Descriptive name, maximum 50 characters"
         code:             "Unique code, maximum 5 characters"
-        sort_order:       "Sort order - deprecated"
         prefix_schema:    "Select a standard schema or define a custom schema. Custom schema must have a unique name, defaults to project code + discipline code"
         module_name:      "Links the discipline to a module in the application"
         notes:            "Additional information"

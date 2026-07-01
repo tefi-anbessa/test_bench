@@ -177,7 +177,8 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     # Discipline links 
     assert_selector "h5", text: I18n.t('disciplines.index.header', scope_text: @project.label)
     @project.disciplines.each do |discipline|
-      assert_selector "a[href='#{discipline_path(discipline)}']", text: "#{discipline.code}: #{discipline.name}"
+      text = "#{discipline.code}: #{I18n.t("discipline.name.#{discipline.name}", default: discipline.name)}"
+      assert_selector "a[href='#{discipline_path(discipline)}']", text: text
       # assert_selector "a[href='#{discipline_path(discipline)}'], [aria-label=I18n.t('actions.show')]"
       assert_selector "a[href='#{discipline_documents_path(discipline)}']"
     end
@@ -189,7 +190,7 @@ class ProjectsSystemTest < ApplicationSystemTestCase
       assert_text user.name
       assert_text user.email
       assert_text I18n.t("rolify.names.#{user_role}")
-      assert_selector "a[href='#{user_path(user)}']", text: I18n.t('actions.show')
+      assert_nav_button(:show, user)
     end
     
     refute_text @app_owner.name

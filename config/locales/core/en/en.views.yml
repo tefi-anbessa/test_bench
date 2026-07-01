@@ -84,13 +84,13 @@ en:
       header:           "Disciplines for %{scope_text}"
     new:
       title:            "New Discipline"
-      header:           "New Discipline"
+      header:           "New Discipline in %{scope_text}"
     show:
       title:            "Discipline"
       header:           "Discipline %{label}"
     edit:
       title:            "Edit Discipline"
-      header:           "Edit Discipline %{label}"
+      header:           "Edit Discipline %{label} in %{scope_text}"
   tags:
     index:
       title:            "Tags"

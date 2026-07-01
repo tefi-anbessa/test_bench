@@ -51,8 +51,10 @@ module Electrical
       def setup_additional_form_data
         # Only set cable attributes if cable exists (prevents errors during validation failures)
         if @cable.present?
-          @cable.from_type ||= Constants.electrical.connect_options.first
-          @cable.to_type ||= Constants.electrical.connect_options.last
+          # Default from type to circuit.
+          @cable.from_type ||= "Electrical::Circuit"
+          # Default to type to demand.
+          @cable.to_type ||= "Electrical::Demand"
         end
 
         @cable_types = policy_scope(Electrical::CableType)

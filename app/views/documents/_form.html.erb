@@ -27,28 +27,11 @@
               <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
                 <%= render 'shared/error_messages', object: f.object %>
                 <% disable = document.persisted? %>
-                <% if document.new_record? %>
-                  <%= f.select :doc_type_id,
-                      options_for_select(
-                        @doc_types.map { |doc_type|
-                          ["#{doc_type.code}: #{doc_type.label}", doc_type.id]
-                        },
-                        selected: document.doc_type_id
-                      ),
-                      { include_blank: t('form.required') },
-                      disabled: disable,
-                      class: 'form-control form-control-sm' %>
-                <% end %>
-                <%= f.text_field :title,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8" %>
-                <%= f.text_area :notes,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8",
-                        rows: 3 %>
-                
+                <% collection = options_for_select(@doc_types.map { |doc_type|
+                    ["#{doc_type.code}: #{doc_type.name}", doc_type.id]}, selected: document&.doc_type_id) %>
+                <%= form_field(f, :doc_type_id, type: :select, collection: collection, required: true, disabled: disable) %>
+                <%= form_field(f, :title) %>
+                <%= form_field(f, :notes, type: :text) %>
               </div> <!-- end document card body -->
             </div> <!-- end document card -->
 
