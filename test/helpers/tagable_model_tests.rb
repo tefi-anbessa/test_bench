@@ -1,5 +1,6 @@
 # This module provides common test patterns for tagable models
-# Include this in your controller test and all the test methods will run.
+# Include this in the model test and all the explicit test methods will run.
+# Optional test methods for required, unique, and enum fields are provided. 
 module TagableModelTests
   extend ActiveSupport::Concern
 # Setup common to all tagable models
@@ -13,6 +14,10 @@ module TagableModelTests
     @tag = create(:tag, :unique_tag, discipline: @resource_discipline)
     setup_resource_prerequisites if defined?(setup_resource_prerequisites)
     @resource = create(resource_class.model_name.singular, tag: @tag)
+
+    # Create a second tag and resource pair for testing uniqueness
+    @tag2 = create(:tag, :unique_tag, discipline: @resource_discipline)
+    @resource2 = create(resource_class.model_name.singular, tag: @tag2)
   end
 
   # Common test patterns used for all tagable controller tests
@@ -68,6 +73,64 @@ module TagableModelTests
       @tag.destroy
     end
     assert_raises(ActiveRecord::RecordNotFound) { resource_class.find(resource_id) }
+  end
+
+  class_methods do
+    def test_required_fields(*fields)
+      define_method("test_required_fields_presence") do
+        fields.each do |field|
+          resource = @resource.dup
+          resource.public_send("#{field}=", nil)
+
+          refute resource.valid?,
+            "Expected #{field} to be invalid when nil"
+
+          assert_includes resource.errors[field],
+            I18n.t("errors.messages.blank"),
+            "Expected #{field} to have a blank error, got #{@resource.errors[field].inspect}"
+        end
+      end
+    end
+
+    def test_unique_fields(*fields)
+      define_method("test_unique_fields_uniqueness") do
+        fields.each do |field|
+          resource = @resource.dup
+          @resource2.public_send("#{field}=", @resource.public_send(field))
+
+          refute @resource2.valid?,
+            "Expected #{field} to be invalid when duplicated"
+
+          assert_includes resource.errors[field],
+            I18n.t("errors.messages.taken"),
+              "Expected #{field} to have a taken error, got #{@resource.errors[field].inspect}"
+        end
+      end
+    end
+
+    def test_enum_field(field, prefix: false, keys:)
+      define_method("test_#{field}_enum_predicates") do
+        actual_keys = @resource.class.public_send(field.to_s.pluralize).keys
+        keys.each do |key|
+          assert_includes actual_keys, key.to_s
+          method = prefix ? "#{field}_#{key.to_s}?" : "#{key.to_s}?"
+          assert_respond_to @resource, method,
+            "Expected enum #{field} to respond to #{method}"
+        end
+      end
+    end
+
+    def test_demandable_association
+      define_method("test_should_have_demand_through_demandable_concern") do
+        assert_respond_to @resource, :electrical_demand
+        demand = @resource.electrical_demand
+        assert_kind_of Electrical::Demand, demand
+        assert_difference 'Electrical::Demand.count', -1 do
+          @resource.destroy
+        end
+        assert_raises(ActiveRecord::RecordNotFound) { demand.reload }
+      end
+    end
   end
 
   private

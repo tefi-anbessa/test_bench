@@ -1,15 +1,34 @@
 module Electrical
   class Switchboard < Base
+
+    # === Mixins ===
     include Tagable
     include Electrical::Demandable
-    
-    has_many :circuits, class_name: 'Electrical::Circuit', 
-              foreign_key: 'electrical_switchboard_id', dependent: :destroy
+
+    # === Constants ===
     enum :voltage_rating, Constants.electrical.voltage_ratings.to_h
 
+    # === Gem macros ===
+
+    # === Attributes ===
+
+    # === Associations ===    
+    has_many :circuits, class_name: 'Electrical::Circuit', 
+              foreign_key: 'electrical_switchboard_id', dependent: :destroy
+
+    # === Scopes ===
+
+    # === Validations ===
     validates :voltage_rating, presence: true
     validates :busbar_rating, presence: true
-    
+
+    # === Callbacks ===
+
+    # === Class methods ===
+
+    # === Public methods ===
+
+    # === Private methods ===
     private
 
       def self.ransackable_attributes(auth_object = nil)

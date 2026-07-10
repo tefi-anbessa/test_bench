@@ -7,48 +7,32 @@
     <td class="table-danger"><%%= t("index.no_tag", id: row.id) %></td>
   <%% else %>
     <td><%%= row.tag.stage %></td>
-    <td><%%= link_to row.tag.label, tag_path(row.tag) %></td>
+    <td><%%= index_link(action: :show_tag, record: row.tag) %></td>
   <%% end %>
-  <%- @fields.select { |field| INDEX_TYPES.include?(field[:type]) }.each do |field| -%>
+  <%- @index_fields.each do |field| -%>
+    <%- attr = "#{field[:name]}" -%>
     <%- case field[:type] -%>
-    <%- when "string", "enum", "integer", "bigint", "decimal" -%>
-  <td><%%= row.<%= field[:name] %> || '-' %></td>
-    <%- when "float" -%>
-  <td><%%= number_to_human(row.<%= field[:name] %>, 
-    precision: 4, units: { unit: "x", thousand: "kx", million: "Mx" }) || '-' %></td>
-    <%- when "enum_translated" -%>
-  <td><%%= row.class.human_enum_name(:<%= field[:name] %>, row.<%= field[:name] %>) %></td>
-    <%- when "references" -%>
-  <td><%%= row.<%= field[:name] %>.present? ?
-    link_to(row.<%= field[:name] %>.label, row.<%= field[:name] %>) : 
-    '-' %></td>
-    <%- else -%>
-  <td><%%= row.<%= field[:name] %> || '-' %></td>
+    <%- when :string, :enum, :integer, :bigint -%>
+  <td><%%= index_attribute(row, :<%= attr %>) %></td>
+    <%- when :decimal, :float -%>
+  <td><%%= index_attribute(row, :<%= attr %>, type: <%= field[:type] %>, **<%= field[:options].slice(:units, :si, :scale, :precision).inspect %>) %></td>
+    <%- when :enum_translated -%>
+  <td><%%= index_attribute(row, :<%= attr %>, type: :enum_translated) %></td>
+    <%- when :references, :belongs_to -%>
+  <td><%%= index_attribute(row, :<%= attr %>, type: :association) %></td>
+    <%- when :boolean -%>
+  <td><%%= index_attribute(row, :<%= attr %>, type: :boolean) %></td>
     <%- end -%>
   <%- end -%>
   <td>
-    <%% if policy(row).show? %>
-      <%%= link_to row, class: "btn btn-outline-info btn-sm icon-link",
-            aria: { label: t('actions.show') },
-            title: t('actions.show') do %>
-        <%%== bs_icon('eye') %>
-      <%% end %>
+    <%% if can_show %>
+      <%%= nav_button(action: :show, record: row, icon_only: true) %>
     <%% end %>
-    <%% if policy(row).edit? %>
-      <%%= link_to edit_<%= singular_table_name %>_path(row), class: "btn btn-outline-warning btn-sm icon-link",
-            aria: { label: t('actions.edit') },
-            title: t('actions.edit') do %>
-        <%%== bs_icon('pencil') %>
-      <%% end %>
+    <%% if can_edit %>
+      <%%= nav_button(action: :edit, record: row, path: edit_<%= singular_table_name %>_path(row), icon_only: true) %>
     <%% end %>
-    <%% if policy(row).destroy? %>
-      <%%= link_to row,
-              data: { method: :delete, confirm: t('actions.delete_sure') },
-              class: "btn btn-outline-danger btn-sm icon-link",
-              aria: { label: t('actions.delete') },
-              title: t('actions.delete') do %>
-        <%%== bs_icon('trash') %>
-      <%% end %>
+    <%% if can_delete %>
+      <%%= nav_button(action: :delete, record: row, icon_only: true) %>
     <%% end %>
   </td>
 </tr>

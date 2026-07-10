@@ -480,6 +480,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Refactor form views using standardised form fields helper.
 - [ ] Extend views helper for attributes to include decimal numbers with units.
 - [ ] Carefully consider use of nested collapsible cards, as in cables from and to. Prefer a more robust nav_link?
+- [ ] Include a scope for unique fields in generators.
 
 ## Potential Features
 

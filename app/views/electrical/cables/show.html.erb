@@ -42,7 +42,7 @@
               <% end %>
 
               <% if policy(@cable).destroy? %>
-                <%= nav_button(action: :delete, path: electrical_cable_path(@cable), record: @cable) %>
+                <%= nav_button(action: :delete, record: @cable) %>
               <% end %>
 
               <% if policy(@cable).new? %>

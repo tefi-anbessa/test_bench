@@ -9,41 +9,21 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <%% if policy(@<%= singular_name %>).index? %>
-              <%%= link_to <%= plural_route_name %>_path,
-                    class: "btn btn-sm btn-outline-info me-2",
-                    title: t('actions.index') do %>
-                <%%== bs_icon('list-columns-reverse') %>
-                <span class="d-none d-md-inline"><%%= t('actions.index') %></span>
-              <%% end %>
+              <%%= nav_button(action: :index, path: discipline_<%= plural_route_name %>_path(@discipline), record: @<%= singular_name %>) %>
             <%% end %>
 
             <!-- Previous Button -->
-            <%% prev_<%= singular_name %> = @<%= singular_name %>.prev %>
-            <%% if prev_<%= singular_name %>.present? %>
-              <%% disabled = prev_<%= singular_name %> == @<%= singular_name %> %>
-              <%% title_text = t('actions.previous') + ": " + prev_<%= singular_name %>.label %>
-              <%%= link_to prev_<%= singular_name %>,
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary #{'disabled' if disabled}",
-                    title: title_text do %>
-                <%%== bs_icon('box-arrow-in-left') %>
-                <span class="d-none d-md-inline">
-                  <%%= t('actions.previous') %>
-                </span>
-              <%% end %>
-            <%% end %>
-          </div>
-        </div>
+            <%%= nav_button(action: :previous, record: @neighbours[0]) %>
+          </div> <!-- end d-flex align-items-center -->
+        </div> <!-- end left column -->
 
         <!-- Center Tag Info -->
         <div class="col text-center">
           <div class="d-flex flex-column align-items-center">
             <div class="mt-1">
-              <span class="badge fs-6" style="<%%= badge_styles(@swatch) %>">
-                <%%= t('.header', label: @<%= singular_name %>.label)%>
+              <span class="badge fs-6">
+                <%%= t('.header', label: [@tag.long_label, @tag.service].compact.join(' - ')) %>
               </span>
-              <%% if @<%= singular_name %>.tag&.service.present? %>
-                <small class="text-muted ms-2"><%%= @<%= singular_name %>.tag.service %></small>
               <%% end %>
             </div>
           </div>
@@ -53,56 +33,20 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <%% next_<%= singular_name %> = @<%= singular_name %>.next %>
-            <%% if next_<%= singular_name %>.present? %>
-              <%% title_text = t('actions.next') + ": " + next_<%= singular_name %>.label %>
-              <%% disabled = next_<%= singular_name %> == @<%= singular_name %> %>
-              <%%= link_to next_<%= singular_name %>,
-                    disabled: disabled,
-                    class: "btn btn-sm btn-outline-secondary me-2 #{'disabled' if disabled}",
-                    title: title_text do %>
-                <span class="d-none d-md-inline">
-                  <%%= t('actions.next') %>
-                </span>
-                <%%== bs_icon('box-arrow-in-right') %>
-              <%% end %>
-            <%% end %>
+            <%%= nav_button(action: :next, record: @neighbours[1]) %>
 
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
               <%% if policy(@<%= singular_name %>).edit? %>
-                <%%= link_to edit_<%= singular_route_name %>_path(@<%= singular_name %>),
-                      class: "btn btn-outline-warning",
-                      title: t('actions.edit') do %>
-                  <%%== bs_icon('pencil-square') %>
-                  <span class="d-none d-md-inline">
-                    <%%= t('actions.edit') %>
-                  </span>
-                <%% end %>
+                <%%= nav_button(action: :edit, path: edit_<%= singular_route_name %>_path(@<%= singular_name %>), record: @<%= singular_name %>) %>
               <%% end %>
 
               <%% if policy(@<%= singular_name %>).destroy? %>
-                <%%= link_to @<%= singular_name %>,
-                      method: :delete,
-                      data: { confirm: t('actions.delete_sure') },
-                      class: "btn btn-outline-danger",
-                      title: t('actions.delete') do %>
-                  <%%== bs_icon('trash') %>
-                  <span class="d-none d-md-inline">
-                    <%%= t('actions.delete') %>
-                  </span>
-                <%% end %>
+                <%%= nav_button(action: :delete, record: @<%= singular_name %>) %>
               <%% end %>
 
               <%% if policy(@<%= singular_name %>).new? %>
-                <%%= link_to new_<%= singular_route_name %>_path,
-                      class: "btn btn-outline-primary",
-                      title: t('actions.new') do %>
-                  <%%== bs_icon('plus-square-fill') %>
-                  <span class="d-none d-md-inline">
-                    <%%= t('actions.new') %>
-                  </span>
-                <%% end %>
+                <%%= nav_button(action: :new, path: new_discipline_<%= singular_route_name %>_path(@discipline), record: @<%= singular_name %>) %>
               <%% end %>
             </div> <!-- end button group -->
           </div> <!-- end d-flex -->
@@ -115,60 +59,60 @@
         <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
           <!-- <%= human_name %> Details Card -->
-          <div class="card mb-4" style="<%= card_styles(@swatch) %>">
-            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
-              <h4 class="mb-0"><%= t('show.details', model: @<%= singular_name %>.model_name.human) %></h4>
+          <div class="card mb-4" style="<%%= card_styles(@swatch) %>">
+            <div class="card-header py-1" style="<%%= card_header_styles(@swatch) %>">
+              <h4 class="mb-0"><%%= t('show.details', model: @<%= singular_name %>.model_name.human) %></h4>
             </div> <!-- end inner card header -->
 
-            <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
-<%- @fields.each do |field| -%>
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%%= @<%= singular_name %>.class.human_attribute_name(:<%= field[:name] %>) %></div>
+            <div class="card-body p-3" style="<%%= card_styles(@swatch) %>">
+<%- @attribute_fields.each do |field| -%>
   <%- case field[:type] -%>
-  <%- when "string", "enum", "integer", "bigint", "decimal" -%>
-                <div class="col-8"><%%= @<%= singular_name %>.<%= field[:name] %> || '-' %></div>
-  <%- when "float" -%>
-                <div class="col-8"><%%= number_to_human(@<%= singular_name %>.<%= field[:name] %>, 
-                  precision: 4, 
-                  units: { unit: "x", thousand: "kx", million: "Mx" }) || '-' %></div>
-  <%- when "enum_translated" -%>
-                <div class="col-8"><%%= @<%= singular_name %>.class.human_enum_name(:<%= field[:name] %>, @<%= singular_name %>.<%= field[:name] %>) %></div>
-  <%- when "text", "jsonb" -%> <!-- TODO: Add json formatting -->
-              </div>
-              <div class="row mb-1">
-                <div class="col-12"><%%= simple_format(@<%= singular_name %>.<%= field[:name] %> || '-') %></div>
-  <%- when "datetime", "timestamp", "time", "date" -%> <!-- Default to time_tag -->
-                <div class="col-8"><%%= time_tag(@<%= singular_name %>.<%= field[:name] %> || '-') %></div>
-  <%- when "binary" -%> <!-- TODO: Add binary field support -->
+  <%- when :string, :integer, :bigint -%>
+              <%%= show_attribute(@<%= singular_name %>, :<%= field[:name] %>) %>
+  <%- when :enum -%>
+              <%%= show_attribute(@<%= singular_name %>, :<%= field[:name] %>, type: :enum) %>
+  <%- when :enum_translated -%>
+              <%%= show_attribute(@<%= singular_name %>, :<%= field[:name] %>, type: :enum_translated) %>
+  <%- when :float, :decimal -%>
+              <%%= show_attribute(@<%= singular_name %>, :<%= field[:name] %>, type: :<%= field[:type] %>, **<%= field[:options].slice(:units, :si, :scale, :precision).inspect %>) %>
+  <%- when :text, :jsonb -%>
+              <%%= show_attribute(@<%= singular_name %>, :<%= field[:name] %>, type: :<%= field[:type] %>) %>
+  <%- when :datetime, :timestamp, :time -%> 
+              <%%= show_attribute(@<%= singular_name %>, :<%= field[:name] %>, type: :<%= field[:type] %>) %>
+  <%- when :date -%> 
+              <%%= show_attribute(@<%= singular_name %>, :<%= field[:name] %>, type: :date) %>
+  <%- when :boolean -%>
+              <%%= show_attribute(@<%= singular_name %>, :<%= field[:name] %>, type: :boolean) %>
+  <%- when :binary -%> 
                 <div class="col-8"><%%= 'PLACEHOLDER FOR BINARY FIELD' %></div>
-  <%- when "references" -%>
-                <div class="col-8"><%%= render "<%= File.join(*class_path, field[:name].pluralize, "card") %>", object: @<%= singular_name %>.<%= field[:name] %> %></div>
-  <%- else -%> # Fallback to show whatever content is in the field.
-                <div class="col-8"><%%= @<%= singular_name %>.<%= field[:name] %> || '-' %></div>
+  <%- else -%> 
+              <%%= show_attribute(@<%= singular_name %>, :<%= field[:name] %>) %>
   <%- end -%>
               </div> <!-- end row -->
 <%- end -%>
             </div>  <!-- temporary end inner card body -->
 
             <!-- Associations -->
-            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
-              <h4 class="mb-0"><%= t('show.associations', model: @<%= singular_name %>.class.model_name.human) %></h4>
+            <div class="card-header py-1" style="<%%= card_header_styles(@swatch) %>">
+              <h4 class="mb-0"><%%= t('show.associations', model: @<%= singular_name %>.class.model_name.human) %></h4>
             </div>
 
-            <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
+            <div class="card-body p-3" style="<%%= card_styles(@swatch) %>">
               
               <!-- Tag Card -->
-              <% if @<%= singular_name %>.tag.present? %>
-                <div class="row g-3 mb-3">
-                    <%= render 'tags/card', object: @<%= singular_name %>, association: :tag %>
-                </div>
-              <% else %>
+              <%% if @<%= singular_name %>.tag.present? %>
+                <%%= show_association(@<%= singular_name %>, :tag) %>
+              <%% else %>
                 <div class="row g-3 mb-3">
                   <div class="alert alert-danger">
-                    <%= t('show.orphan', model: Tag.model_name.human.downcase) %>
+                    <%%= t('show.orphan', model: Tag.model_name.human.downcase) %>
                   </div>
                 </div>
-              <% end %>
+              <%% end %>
+
+<%- @association_fields.each do |field| -%>
+              <%%= show_association(@<%= singular_name %>, :<%= field[:name] %>) %>
+<%- end -%>
             </div>  <!-- end inner card body -->
           </div> <!-- end inner card -->
         </div> <!-- end responsive columns -->

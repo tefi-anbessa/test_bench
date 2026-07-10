@@ -8,10 +8,8 @@ module Tagable
     accepts_nested_attributes_for :tag
     delegate :full_tag, :stage, :label, :long_label, :service, :location, to: :tag, allow_nil: true  
     
- 
     # === Gem macros ===
     has_paper_trail
-    
 
     # === Class methods - Queries ===
     # Provide SQL for ordering tags in the navigator

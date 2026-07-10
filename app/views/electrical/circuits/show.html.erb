@@ -41,7 +41,7 @@
               <% end %>
 
               <% if policy(@switchboard).destroy? %>
-                <%= nav_button(action: :delete, path: electrical_circuit_path(@circuit), record: @circuit) %>
+                <%= nav_button(action: :delete, record: @circuit) %>
               <% end %>
 
               <% if policy(@switchboard).new? %>

@@ -10,7 +10,7 @@ The tag model has the following database attributes:
 
 * tag_number: it is a compound structure of prefix, serial number, and optional suffix. This structure is not universal but very common in engineering practice.
 * service_description: a brief description of the function of the element.
-* discipline: the discipline to which the tag belongs.
+* discipline: the engineering discipline to which the tag belongs.
 * stage: the stage is a mechanism to allow grouping tags within a project. It can be used at the project's discretion. E.g. a project may use stages for different phases of construction.
 * location: the physical location field also allows grouping of tags.
 
@@ -29,7 +29,8 @@ The tag model provides the following functionality:
   * Specify the schema of the tag prefixes in the discipline.
   * Specify the schema for document type codes.
   * Specify the colour swatch for forms and tables.
-* Ideally, only standard disciplines would be required. These are defined in the constants system, which can be copied when setting up a project.
+  * Specifiy required roles for the RBAC system.
+* Ideally, only standard disciplines would be required. These are defined in the constants system, which are copied when setting up a project.
 * However, it is possible to create custom disciplines, as required, and these can be copied from standard disciplines.
 * Discipline names are one of the very few parts of the application where translation of the application generated user facing text is not presently provided. This is because translation would be required for the database content, not the configuration. Until a content translation solution is implemented, custom disciplines are one option for projects to provide translated discipline names which can link back to core discipline functionality by their module connection.
 
@@ -65,7 +66,7 @@ The tag model provides the following functionality:
   * Correct initial file content.
   * Reduced development time.
 * Rails provides a number of generators for common tasks, such as creating a model, controller, or migration. These are typically very primitive, providing only bare bones of an application.
-* The Rails scaffold generator is more comprehensive, providing a full suite of model, migration, controller, routes,views and associated tests.
+* The Rails scaffold generator is more comprehensive, providing a full suite of model, migration, controller, routes, views and associated tests.
 * This application's bespoke generators are namespaced in the /lib folder under the application name ProjectAssistant. This prevents generator name clashes with other gems and rails standard generators.
 * Generators comprise a sequence of instructions to create folders, create files from templates, or edit files. They can also run migrations and all sorts of marvellous things.
 * Rails provides the facility to reverse a generator's action using the rails destroy command. Some points to consider about destroy:
@@ -164,27 +165,48 @@ General requirements.
 
 #### Command Line
 
-The generator shall be invoked using the rails generate command, the generator name project_assistant:tagable, the module and tagable model name as Ruby class specifier in CamelCase, and a list of arguments for the fields to be created. Here is an example generate command for an electrical heater:
+The generator shall be invoked using the rails generate command. The command line must inlcude the generator name project_assistant:tagable, and the module and tagable model name as Ruby class specifier in CamelCase. A list of arguments for the fields to be created can either be provided on the command line, or read from a definition file. By using a definition file, more complex information can be provided to the generator, which can greatly speed up completion of the new model. Here is an example generate command for an electrical heater:
 
 ```bash
 rails generate project_assistant:tagable Electrical::Heater heater_type:enum_translated:required application:enum_translated:required ingress_protection:string sheath_temperature_max:float power_density_min:float power_density_max:float sheath_material:enum_translated insulation_material:enum_translated notes:text
 ```
 
+Here is the alternate version using a definition file:
+
+```bash
+rails generate project_assistant:tagable Electrical::Heater --definition=electrical_heater
+```
+
 The name of the tagable type must be prefixed with its namespace module, as shown in the example. (The generator cannot be used to create a tagable type in the core application, and nested modules are not allowed.)
 
-Following the tagable model name, all fields to be included in the model shall be specified with their type and options, separated by colons with no spaces.
+#### Command Line Input of Fields
+
+When using command line input for fields, following the tagable model name, all fields to be included in the model shall be specified with their type and options, separated by colons with no spaces.
 
 * Names must be valid ruby symbols.
 * Types implemented shall be the standard rails types as used by the scaffold generator, with custom additions for this generator as listed below.
-* The generator is not required to handle `:references` for relationships between models.
 * Standard rails column types are: `:string, :text, :integer, :bigint, :float, :decimal, :datetime, :timestamp, :time, :date, :binary, :boolean, jsonb`.
+* The generator shall implement `:references` or `:belongs_to` types as relationships between models. These should only be used on the belongs_to model. They shall add the foreign key field to the migration, and provide appropriate view links.
 * The generator shall implement the custom `:enum` type to create an enumerated field. The generator shall set integer type in the migration, and shall create a framework for the enum in the model, views, and constants files for the module. The allowable values for the enum will need to be set manually after generation.
 * The generator shall implement the custom `:enum_translated` type to specify an enumerated field (with translations). The generator shall set integer type in the migration, and shall create a framework for the enum in the model, views, and constants as for `:enum` type. In addition, the locales files for the module shall be edited with placeholders for the field name and option translations. The allowable values and translations for the enum will need to be set manually after generation.
 * The generator shall respond to the `:index` option after the type. This is standard rails generator format. This option shall result in an index being added in the migration.
-* The generator shall respond to the `:uniq` option after the type instead of `:index`. This option shall result in a unique index being added in the migration.
-* The generator shall respond to the `:required` option after the type. This is not standard rails generator format but is less ambiguous than the `:null` option.
+* The generator shall respond to the `:uniq` or `unique` option after the type instead of `:index`. This option shall result in a unique index being added in the migration.
+* The generator shall respond to the `:required` option after the type. This is not standard rails generator format but is less ambiguous than the `:null` option. It shall result in a presence validation in the model, and associated model test.
+* The generator shall respond to 
+The generator shall first parse all arguments. If invalid names, types, or options are provided, a warning shall be issued listing the invalid arguments. The generator will abort unless all names and fields are valid.
 
-The generator shall first parse all arguments. If invalid names, types, or options are provided, a warning shall be issued listing the invalid arguments. The user shall be provided with the option to proceed with the remaining valid fields, or to abort the generation and correct the errors.
+#### File Definition of Fields
+
+The rules for fields defined in a file are the same as for the command line, but there are additional options available. Fields shall be defined in a YAML file as in this [example](../lib/generators/project_assistant/tagable/definitions/electrical_test.yml).
+
+Differences from command line options are as follows:
+
+* The "flag" options index, uniq/unique, and required shall be specified with a value true, rather than just be present.
+* The enum types shall accept a :keys option, in the form of a comma separated list of values which shall be used to set the enum structure in constants, and the framework for translations in the case of :enum_translated fields types.
+* Float and decimal types shall accept precision and scale options.
+* Float and decimal types shall accept a :units option and a :si flag, indicating SI units are in use, so can be presented with SI prefixes.
+* All numeric types shall accept a :step option for use in form fields.
+* All types shall accept a :valid option, which allows provision of a known valid value for the field, to be used in the test factory.
 
 #### Folders
 

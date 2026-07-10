@@ -42,7 +42,7 @@
               <% end %>
 
               <% if policy(@socket_cct).destroy? %>
-                <%= nav_button(action: :delete, path: electrical_socket_cct_path(@socket_cct), record: @socket_cct) %>
+                <%= nav_button(action: :delete, record: @socket_cct) %>
               <% end %>
 
               <% if policy(@socket_cct).new? %>

@@ -42,7 +42,7 @@
               <% end %>
 
               <% if policy(@motor).destroy? %>
-                <%= nav_button(action: :delete, path: electrical_motor_path(@motor), record: @motor) %>
+                <%= nav_button(action: :delete, record: @motor) %>
               <% end %>
 
               <% if policy(@motor).new? %>

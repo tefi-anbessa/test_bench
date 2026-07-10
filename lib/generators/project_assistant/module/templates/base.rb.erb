@@ -2,11 +2,13 @@ module <%= name.camelize %>
   class Base < ApplicationRecord
     self.abstract_class = true
     # Add shared module behavior here
+    
+    def self.required_role
+      :designer
+    end
 
-    # Default discipline for tagable models to reference back to this module, used in testing. 
-    # Not used in the application, as projects can set their own disciplines.
-    def self.discipline
-      <%= name.split("::").last.to_s %>
+    def self.catalog_required_role
+      :custodian
     end
 
     def label

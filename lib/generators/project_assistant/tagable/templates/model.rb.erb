@@ -2,25 +2,44 @@
 
 module <%= module_name %>
   class <%= tagable_name %> < Base
-    include Tagable
-    include TagableNavigation
 
-# Belongs to associatons
-    <%- @fields.select { |f| %w[references belongs_to].include?(f[:type]) }.each do |field| -%>
-    belongs_to :<%= field[:name] %><%- unless field[:options].include?('required') %>, optional: true<%- end %>
-    <%- end -%>
-    
-# enum declarations
-    <%- @fields.select { |f| %w[enum enum_translated].include?(f[:type]) }.each do |field| -%>
+    # === Mixins ===
+    include Tagable
+
+    # === Constants ===
+    # enum declarations
+    <%- @enum_fields.each do |field| -%>
     enum :<%= field[:name] %>, Constants.<%= module_name.underscore %>.<%= singular_name %>.<%= field[:name] %>.to_h
-    #!!! Define enum options in Constants file config/constants/<%= module_name.underscore %>.yml
     <%- end -%>
-    
-# Presence validation for required fields.
-    <%- @fields.select { |f| f[:options].include?('required') }.each do |field| -%>
+
+    # === Gem macros ===
+
+    # === Attributes ===
+
+    # === Associations ===
+    # Belongs to associatons
+    <%- @association_fields.each do |field| -%>
+    belongs_to :<%= field[:name] %><%- unless field[:options][:required] == true %>, optional: true<%- end %>
+    <%- end -%>
+
+    # === Scopes ===
+
+    # === Validations ===
+    # Presence validation for required fields.
+    <%- @required_fields.each do |field| -%>
     validates :<%= field[:name] %>, presence: true
     <%- end -%>
-    
+    <%- @unique_fields.each do |field| -%>
+    validates :<%= field[:name] %>, uniqueness: true
+    <%- end -%>
+
+    # === Callbacks ===
+
+    # === Class methods ===
+
+    # === Public methods ===
+
+    # === Private methods ===
     private
 
     def self.ransackable_attributes(auth_object = nil)
@@ -30,8 +49,8 @@ module <%= module_name %>
 
     def self.ransackable_associations(auth_object = nil)
       <%- associations = [ :tag, :tag_discipline, :tag_discipline_project ] -%>
-      <%- @fields.select { |f| %w[references].include?(f[:type]) }.each do |field| -%>
-        <%- associations += [field[:name]] -%>
+      <%- @association_fields.each do |field| -%>
+        <%- associations << field[:name].to_sym -%>
       <%- end -%>
       <%= associations %>
     end

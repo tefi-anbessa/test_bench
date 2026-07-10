@@ -42,7 +42,7 @@
               <% end %>
 
               <% if policy(@demand).destroy? %>
-                <%= nav_button(action: :delete, path: electrical_demand_path(@demand), record: @demand) %>
+                <%= nav_button(action: :delete, record: @demand) %>
               <% end %>
             </div> <!-- end button group -->
           </div> <!-- end d-flex -->

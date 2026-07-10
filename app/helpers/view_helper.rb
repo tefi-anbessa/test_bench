@@ -100,6 +100,46 @@ module ViewHelper
     end
   end
 
+  def index_attribute(record, attr, type: :string, **options)
+    value = record.send(attr)
+    case type
+    when :association
+      index_link(action: :show, record: value)
+    when :string, :enum, :integer, :decimal
+      value
+    when :text
+      content_tag(:span, title: value) do
+        truncate(strip_tags(value.to_s), length: 20)
+      end
+    when :enum_translated
+      record.class.human_enum_name(attr, value)
+    when :float
+      # Accepts the following options:
+      # :precision, defaults to 4
+      # :units, expects base SI unit string
+      precision = options.delete(:precision) || 4
+      units = options.delete(:units)
+      if units.present?
+        units_hash = {  mili: "m#{units}",
+                        micro: "μ#{units}",
+                        nano: "n#{units}",
+                        pico: "p#{units}",
+                        femto: "f#{units}",
+                        unit: "#{units}",
+                        thousand: "k#{units}",
+                        million: "M#{units}",
+                        trillion: "G#{units}",
+                        quadrillion: "P#{units}"
+                      }
+          number_to_human(value, precision: precision, units: units_hash)
+      else
+        number_to_human(value, precision: precision)
+      end
+    when :boolean
+      boolean_icon(value)
+    end
+  end
+
   # Stand alone version of boolean attribute
   def boolean_icon(value, true_label: "Yes", false_label: "No")
     if value

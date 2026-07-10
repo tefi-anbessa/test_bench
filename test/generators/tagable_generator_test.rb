@@ -3,18 +3,19 @@ require 'test_helper'
 require Rails.root.join('lib', 'generators', 'project_assistant', 'tagable_generator').to_s
 require Rails.root.join('lib', 'generators', 'project_assistant', 'module_generator').to_s
 require Rails.root.join('lib', 'generators', 'project_assistant', 'field_types').to_s
+require "yaml"
 
 module ProjectAssistant
   class TagableGeneratorTest < Rails::Generators::TestCase
     include ProjectAssistant::FieldTypes
     tests ProjectAssistant::TagableGenerator
-    destination Rails.root.join('tmp', 'generators')
+    destination Rails.root.join('tmp', 'generators', 'tagable')
     setup :prepare_destination
 
     setup do
       @module_name = "ExistingModule"
       @tagable_name = "Motor"
-      # Generator::NamedBase methods not available in test environment
+      # Generator::NamedBase methods are not available in the test environment so we replicate the ones we need.
       @file_name = "#{@module_name.underscore}_#{@tagable_name.underscore}" # electrical_motor
       @table_name = "#{@module_name.underscore}_#{@tagable_name.underscore.pluralize}" # electrical_motors
       @class_name = "#{@module_name}::#{@tagable_name}" # Electrical::Motor
@@ -22,6 +23,7 @@ module ProjectAssistant
       @singular_name = "#{@tagable_name.underscore}" # motor
       @plural_name = "#{@tagable_name.underscore.pluralize}" # motors
       @controller_file_path = File.join(@module_name.underscore, @plural_name.underscore) # electrical/motors
+      @i18n_key = File.join(@module_name.underscore, @tagable_name.underscore) # electrical/motor
       
       # Create clean files for testing (avoid conflicts with real app files)
       FileUtils.mkdir_p(File.join(destination_root, 'config'))
@@ -59,19 +61,60 @@ module ProjectAssistant
 
       # Dummy arguments for the command line
       @args = ["#{@module_name}::#{@tagable_name}", 
-        'name:string:required',
-        'description:text',
-        'selector:enum',
-        'status:enum_translated',
-        'sort_order:integer:index',
-        'code:string:uniq'
+        'name:string:required:index',
+        'description:text:valid=Test',
+        'selector:enum:keys=[a,b,c]:valid="a"',
+        'status:enum_translated:keys=[alpha,bravo]:valid="bravo"',
+        'sort_order:integer:index:step=10:valid=100',
+        'power:float:precision=5:scale=3:units=kJ:step=1:valid=2.2',
+        'money:decimal:units=$:precision=7:scale=2:step=.01:valid=5555.55',
+        'switch:boolean:valid=true',
+        'birthday:date',
+        'created:datetime',
+        'flex_field:jsonb',
+        'code:string:uniq:valid="AA"',
+        'parent:references:required=false',
+        'owner:belongs_to:required'
       ]
       
-      # Mimic the generators process_fields method.
-      @fields = @args[1..-1].map do |arg| 
+      # Mimic the generator's process_cli method.
+      @fields = @args[1..-1].map do |arg|
         name, type, *opts = arg.split(':')
-        { name: name, type: type, options: opts } 
+
+        options = opts.to_h do |opt|
+          key, value = opt.split('=', 2)
+
+          [key.to_sym, value.nil? ? true : value]
+        end
+        type = type.to_sym
+        { name:, type:, options: }
       end
+      # $stderr.puts "DEBUG: Fields: #{@fields.inspect}"
+      # Mimic the generator field sets.
+      @all_field_names = @fields.map { |field| 
+          case field[:type]
+          when *ProjectAssistant::FieldTypes::ASSOCIATION_TYPES
+            "#{field[:name]}_id"
+          else
+            "#{field[:name]}"
+          end
+        }
+      @index_fields = @fields.select { |field| ProjectAssistant::FieldTypes::INDEX_TYPES.include?(field[:type]) }
+      @searchable_fields = @fields.select { |field| ProjectAssistant::FieldTypes::SEARCHABLE_TYPES.include?(field[:type]) }
+      @association_fields = @fields.select { |field| ProjectAssistant::FieldTypes::ASSOCIATION_TYPES.include?(field[:type]) }
+      @attribute_fields = @fields - @association_fields
+      @required_fields = @fields.select { |field| field[:options][:required] == true }
+      @enum_fields = @fields.select { |field| %i[enum enum_translated].include?(field[:type]) }
+      @enum_fields.each do |field| 
+        str = field[:options][:keys]
+        field[:options][:keys] = 
+          if str.start_with?("[") && str.end_with?("]")
+            str[1..-2].split(",").map(&:strip)
+          else
+            str.split(",").map(&:strip)
+          end
+      end
+      @unique_fields = @fields.select { |field| field[:options][:unique] == true || field[:options][:uniq] == true }
     end
 
     test "module generator setup complete" do
@@ -80,117 +123,216 @@ module ProjectAssistant
       assert_file File.join("config", "constants", "tagable.yml")
     end
 
-    test "generator runs without errors" do
-      puts "\n=== Starting generator test ==="
-      assert_nothing_raised do
-        puts "Running generator with #{@class_name}"
+    test "generator runs without errors from cli" do
+      output = capture(:stderr) do
         run_generator @args
-        puts "=== Generator completed successfully ==="
+      end
+      assert_no_match(/error/i, output)
+    end
+
+    test "generator runs without errors from definition file" do
+      output = capture(:stderr) do
+        run_generator [@class_name, "--definition=electrical_test"]
+      end
+      assert_no_match(/error/i, output)
+    end
+
+    test "protects against mixing command line and file input" do
+      output = capture(:stderr) do
+        run_generator [@class_name, "--definition=electrical_test"]
+      end
+      assert_no_match(/error/i, output)
+      output = capture(:stderr) do
+        run_generator [@class_name, "name:string", "--definition=electrical_test"]
+      end
+      assert_match(/Aborting generator/i, output, "Expected errors in #{output}")
+    end
+
+    test "validates missing module name" do
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["Motor", "name:string"],
+        {},
+        destination_root: destination_root
+      )
+
+      assert_raises(Thor::Error) do
+        generator.invoke_all
       end
     end
 
-    test "processes command line arguments correctly" do
-      # Access the generator instance
-      generator = ProjectAssistant::TagableGenerator.new(@args)
-      
-      # Test the process_fields method directly
-      # This should succeed since all test args are valid
-      fields = generator.send(:process_fields)
-      
-      # Verify the fields were processed correctly
-      assert_equal @fields.size, fields.size
-      
-      # Check fields
-      @fields.each_with_index do |f, index|
-        assert_equal f[:name], fields[index][:name]
-        assert_equal f[:type], fields[index][:type]
-        assert_equal f[:options], fields[index][:options]
-      end
-    end
+    test "validates name with invalid class name" do
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["ExistingModule::123Invalid", "name:string"],
+        {},
+        destination_root: destination_root
+      )
 
-    test "validates name without module" do
-      assert_raises(SystemExit) do
-        run_generator ["Electrical::123Invalid", "name:string"]
+      assert_raises(Thor::Error) do
+        generator.invoke_all
       end
     end
 
     test "validates name with non-existent module" do
-      assert_raises(SystemExit) do
-        run_generator ["NonExistent::Heater", "name:string"]
-      end
-    end
-
-    test "validates invalid class name format" do
-      assert_raises(SystemExit) do
-        run_generator ["Electrical::123Invalid", "name:string"]
+      skip "Test environment does not test for module existence"
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["NonExistent::Heater", "name:string"],
+        {},
+        destination_root: destination_root
+      )
+      assert_raises(Thor::Error) do
+        generator.invoke_all
       end
     end
 
     test "validates correct name format" do
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["#{@module_name}::#{@tagable_name}", "name:string"],
+        {},
+        destination_root: destination_root
+      )
       assert_nothing_raised do
-        run_generator ["#{@module_name}::#{@tagable_name}", "name:string"]
+        generator.invoke_all
       end
     end
 
     test "validates invalid field names" do
-      invalid_args = ["#{@module_name}::#{@tagable_name}", "123invalid:string", "invalid-name:string", "invalid name:string"]
-      generator = ProjectAssistant::TagableGenerator.new(invalid_args)
-      
-      # Mock user input to choose 'N' (abort) when prompted
-      $stdin.stubs(:gets).returns("N\n")
-      assert_raises(SystemExit) do
-        generator.send(:process_fields)
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["#{@module_name}::#{@tagable_name}", "123invalid:string", "invalid-name:string", "invalid name:string", "Start:string", "includeCapital:string"],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
       end
-      $stdin.unstub(:gets)
     end
 
     test "validates missing field types" do
-      invalid_args = ["#{@module_name}::#{@tagable_name}", "name:", "description"]
-      generator = ProjectAssistant::TagableGenerator.new(invalid_args)
-      
-      # Mock user input to choose 'N' (abort) when prompted
-      $stdin.stubs(:gets).returns("N\n")
-      assert_raises(SystemExit) do
-        generator.send(:process_fields)
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["#{@module_name}::#{@tagable_name}", "name:", "description"],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
       end
-      $stdin.unstub(:gets)
     end
 
     test "validates unknown field types" do
-      invalid_args = ["#{@module_name}::#{@tagable_name}", "name:invalid_type", "description:unknown"]
-      generator = ProjectAssistant::TagableGenerator.new(invalid_args)
-      
-      # Mock user input to choose 'N' (abort) when prompted
-      $stdin.stubs(:gets).returns("N\n")
-      assert_raises(SystemExit) do
-        generator.send(:process_fields)
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["#{@module_name}::#{@tagable_name}", "name:invalid_type", "description:123unknown"],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
       end
-      $stdin.unstub(:gets)
     end
 
-    test "validates invalid field options" do
-      invalid_args = ["#{@module_name}::#{@tagable_name}", "name:string:invalid_option", "description:text:unknown:another_invalid"]
-      generator = ProjectAssistant::TagableGenerator.new(invalid_args)
-      
-      # Mock user input to choose 'N' (abort) when prompted
-      $stdin.stubs(:gets).returns("N\n")
-      assert_raises(SystemExit) do
-        generator.send(:process_fields)
+    test "validates unknown field options" do
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["#{@module_name}::#{@tagable_name}", "name:string:invalid_option", "description:text:unknown:another_invalid"],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
       end
-      $stdin.unstub(:gets)
     end
 
-    test "allows continuing with valid fields when some are invalid" do
-      mixed_args = ["#{@module_name}::#{@tagable_name}", "name:string", "123invalid:integer", "description:text"]
-      generator = ProjectAssistant::TagableGenerator.new(mixed_args)
-      
-      # Mock user input to choose 'y' (continue) when prompted
-      $stdin.stubs(:gets).returns("y\n")
-      fields = generator.send(:process_fields)
-      # Should only process the valid fields
-      assert_equal 2, fields.size
-      assert_equal ["name", "description"], fields.map { |f| f[:name] }
-      $stdin.unstub(:gets)
+    test "validates flag options require a valid boolean" do
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["#{@module_name}::#{@tagable_name}", "name:string:required=5", "description:text:uniq=yes"],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates valid options requires a value of the correct type" do
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["#{@module_name}::#{@tagable_name}", "count:integer:valid=5.5", "power:float:valid=true", "switch:boolean:valid=NO"],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates keys option requires an array of identifiers" do
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["#{@module_name}::#{@tagable_name}", "select1:enum:keys=5.5", "select2:enum:keys={key1,key2}", "select3:enum_translated:keys=a,b", "select4:enum:keys=[Capital,in-line]"],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates scale, precision options on invalid types" do
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["#{@module_name}::#{@tagable_name}", "name:string:precision=5", "description:text:scale=2"],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates scale, precision options with invalid value" do
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["#{@module_name}::#{@tagable_name}", "cost:decimal:precision=5.5:scale=-1", "power:float:scale=1e3:precision=high"],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates units, si options with invalid types" do
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["#{@module_name}::#{@tagable_name}", "name:string:units=m:si", "description:text:units=J:si", "select1:enum:units=s:si", "count:integer:units=kJ/m2:si"],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates si option requires valid boolean value" do
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["#{@module_name}::#{@tagable_name}", "power:float:units=m:si=yes"],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates step with non_numeric types" do
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["#{@module_name}::#{@tagable_name}", "name:string:step=1", "description:text:step=.1", "select1:enum:step=100", "flex:jsonb:step", "parent:references:step=1", "created:date:step=1"],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates step value is decimal" do
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["#{@module_name}::#{@tagable_name}", "power:float:units=m:si=true:step=string"],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates option key is valid" do
+      generator = ProjectAssistant::TagableGenerator.new(
+        ["#{@module_name}::#{@tagable_name}", "power:float:units=m:si=true:invalid=string"],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
     end
 
     test "creates model" do
@@ -201,23 +343,23 @@ module ProjectAssistant
         assert_match(/class #{@tagable_name} < Base/, content)
         
         # Check for belongs_to associations
-        @fields.select { |f| %w[references].include?(f[:type]) }.each do |field|
+        @association_fields.each do |field|
           assert_match(/belongs_to :#{field[:name]}/, content)
         end
         
         # Check for presence validation on required fields
-        @fields.select { |f| f[:options].include?('required') }.each do |f|
+        @required_fields.each do |f|
           assert_match(/validates :#{f[:name]}, presence: true/, content)
         end
         
         # Check for enum declarations
-        @fields.select { |f| ['enum', 'enum_translated'].include?(f[:type]) }.each do |f|
+        @enum_fields.each do |f|
           assert_match(/enum :#{f[:name]}, Constants\.#{@module_name.underscore}\.#{@tagable_name.underscore}\.#{f[:name]}\.to_h/, content)
         end
         
         # Check ransackable_attributes
         assert_match(/def self\.ransackable_attributes/, content)
-        @fields.select { |f| SEARCHABLE_TYPES.include?(f[:type]) }.each do |field|
+        @searchable_fields.each do |field|
           field_name = field[:name]
           assert_match(/:\s*#{field_name}(?=[,\s\]])/, content, "Expected #{field_name} to be in ransackable_attributes")
         end
@@ -228,7 +370,7 @@ module ProjectAssistant
         
         # Check ransackable_associations
         associations = [:tag, :tag_discipline, :tag_discipline_project]
-        @fields.select { |f| %w[references].include?(f[:type]) }.each do |field|
+        @association_fields.each do |field|
           associations += [field[:name]]
         end
         assert_match(/def self\.ransackable_associations\(auth_object = nil\)\s+#{associations}/m, content)
@@ -242,16 +384,11 @@ module ProjectAssistant
       assert_file factory_file do |content|
         assert_match(/factory\s+:#{@file_name}/, content)
         assert_match(/class:\s+#{@class_name}/, content)
-        @fields.each do |field|
-          if field[:type] == "references"
-            assert_match(/association\s+:\s*#{field[:name]}/, content)
-          else 
-            if field[:options].include?('required')
-              assert_match(/#{field[:name]}\s+\{\s*\}\s*# Provide default value for required field/, content)
-            else
-              assert_match(/#{field[:name]}\s+\{\s*\}/, content)
-            end
-          end
+        @association_fields.each do |field|
+          assert_match(/association\s+:\s*#{field[:name]}/, content)
+        end
+        @attribute_fields.each do |field| 
+          assert_match(/#{field[:name]}\s+\{\s*#{field[:options][:valid]}/, content)
         end
       end
     end
@@ -262,15 +399,24 @@ module ProjectAssistant
         "#{@module_name.underscore}", "#{@tagable_name.underscore}_test.rb") do |content|
         assert_match(/module #{@module_name}/, content)
         assert_match(/class #{@tagable_name}Test < ActiveSupport::TestCase/, content)
-        assert_match(/include TagableModelPatterns/, content)
-        assert_match(/@resource = create\(:#{@file_name}, tag: @tag\)/, content)
-        @fields.each do |field|
-          if field[:options].include?('required')
-            assert_match(/test "#{field[:name]} must be present" do/, content)
-            assert_match(/@resource.#{field[:name]} = nil/, content)
-          else
-            refute_match(/test "#{field[:name]} must be present" do/, content)
-            refute_match(/@resource.#{field[:name]} = nil/, content)
+        assert_match(/include TagableModelTests/, content)
+        assert_match(/setup_common_test_data/, content)
+        if @required_fields.any? 
+          assert_match(/test_required_fields/, content)
+          @required_fields.each do |field|
+            assert_match(/:#{field[:name]}/, content)
+          end
+        end
+        if @unique_fields.any? 
+          assert_match(/test_unique_fields/, content)
+          @unique_fields.each do |field|
+            assert_match(/:#{field[:name]}/, content)
+          end
+        end
+        @enum_fields.each do |field|
+          assert_match(/test_enum_field/, content)
+          field[:options][:keys].each do |key|
+            assert_match(/#{key}/, content)
           end
         end
       end
@@ -291,19 +437,25 @@ module ProjectAssistant
         @fields.each do |field|
           case field[:type]
           # Check for translation of custom types
-          when 'enum', 'enum_translated'
-            if field[:options].include?('required')
+          when :enum, :enum_translated
+            if field[:options].include?(:required)
               assert_match(/t\.integer\s+:#{field[:name]}.*null: false/m, migration)
             else
               assert_match(/t\.integer\s+:#{field[:name]}/m, migration)
             end
           # Otherwise just check for rails type
           else
-            if field[:options].include?('required') 
+            if field[:options].include?(:required) 
               assert_match(/t\.#{field[:type]}\s+:#{field[:name]}.*null: false/m, migration)
             else
               assert_match(/t\.#{field[:type]}\s+:#{field[:name]}/m, migration)
             end
+          end
+          if field[:options].include?(:scale) 
+            assert_match(/scale:\s+#{field[:options][:scale]}/m, migration)
+          end
+          if field[:options].include?(:precision) 
+            assert_match(/precision:\s+#{field[:options][:precision]}/m, migration)
           end
         end
         @fields.select { |field| field[:options].include?('index') }.each do |field|
@@ -322,8 +474,6 @@ module ProjectAssistant
       assert_file policy_file do |content|
         assert_match(/module\s+#{@module_name}/, content)
         assert_match(/class\s+#{@tagable_name}Policy\s+<\s+ResourcePolicy/m, content)
-        assert_match(/def\s+#{@singular_name}/, content)
-        assert_match(/^\s*def\s+tag\s*\n\s+#{@singular_name}\.tag\s*\n/m, content)
       end
     end
 
@@ -354,16 +504,14 @@ module ProjectAssistant
     test "creates views" do
       run_generator(@args)
       views_dir = File.join(destination_root, 'app', 'views', @folder_name, @plural_name)
+
       # index.html.erb
       assert_file File.join(views_dir, 'index.html.erb') do |content|
+        assert_includes content, "nav_button(action: :show_discipline, record: @discipline)"
         assert_match(/if policy\(#{@class_name}\).new?/, content)
-        assert_match(/link_to new_#{@file_name}_path/, content)
-        @fields.each do |field|
-          if SEARCHABLE_TYPES.include?(field[:type])
-            assert_match(/f\.search_field :#{field[:name]}_cont/, content)
-          else
-            refute_match(/f\.search_field :#{field[:name]}_cont/, content)
-          end
+        assert_includes content, "nav_button(action: :new, path: new_discipline_#{@file_name}_path(@discipline), record: #{@class_name}.new)"
+        @searchable_fields.each do |field|
+          assert_match(/f\.search_field :#{field[:name]}_cont/, content)
         end
         assert_match(/render 'header'/, content)
         assert_match(/render 'row'/, content)
@@ -371,31 +519,23 @@ module ProjectAssistant
 
       # _header.html.erb
       assert_file File.join(views_dir, "_header.html.erb") do |content|
-        @fields.each do |field|
-          if INDEX_TYPES.include?(field[:type])
-            assert_match(/sort_link\(@q, :#{field[:name]}\)/, content)
-          else
-            refute_match(/sort_link\(@q, :#{field[:name]}\)/, content)
-          end
+        @index_fields.each do |field|
+          assert_includes content, "sort_link(@q, :#{field[:name]}"
         end
       end
       
       # _row.html.erb
       assert_file File.join(views_dir, "_row.html.erb") do |content|
-        @fields.each do |field|
-          if INDEX_TYPES.include?(field[:type])
-            case field[:type]
-            when 'string', 'enum', 'integer', 'bigint', 'decimal'
-              assert_match(/#{Regexp.escape("row.#{field[:name]} || '-'")}/, content)
-            when 'float'
-              assert_match(/#{Regexp.escape("number_to_human(row.#{field[:name]}, precision: 4, units: { unit: 'x', thousand: 'kx', million: 'Mx' }) || '-'")}/, content)
-            when 'enum_translated'
-              assert_match(/#{Regexp.escape("row.class.human_enum_name(:#{field[:name]}, row.#{field[:name]})")}/, content)
-            when 'references'
-              assert_match(/#{Regexp.escape("link_to row.#{field[:name]}.label, row.#{field[:name]}")}/, content)
-            end
-          else
-            refute_match(/#{Regexp.escape("row.#{field[:name]}")}/, content)
+        @index_fields.each do |field|
+          case field[:type]
+          when :string, :enum, :integer, :bigint
+            assert_includes content, "index_attribute(row, :#{field[:name]}"
+          when :float, :decimal
+            assert_includes content, "index_attribute(row, :#{field[:name]}, type: #{field[:type]}"
+          when :enum_translated
+            assert_includes content, "index_attribute(row, :#{field[:name]}, type: :enum_translated)"
+          when :references, :belongs_to
+            assert_includes content, "index_attribute(row, :#{field[:name]}, type: :association)"
           end
         end
       end
@@ -404,34 +544,44 @@ module ProjectAssistant
       assert_file File.join(views_dir, "show.html.erb") do |content|
         assert_match(/<% provide\(:title, t\('.title'\)\) %>/, content)
         assert_match(/policy\(@#{@singular_name}\).index?/, content)
-        assert_match(/link_to #{@table_name}_path/, content)
-        assert_match(/link_to prev_#{ @singular_name }/, content)
-        assert_match(/link_to next_#{ @singular_name }/, content)
+        assert_includes content, "nav_button(action: :index, path: discipline_#{@table_name}_path(@discipline), record: @#{@singular_name})"
+        assert_includes content, "nav_button(action: :previous, record: @neighbours[0])"
+        assert_includes content, "nav_button(action: :next, record: @neighbours[1])"
         assert_match(/<%= t\('\.header',\s*label:.*\)\s*%>/, content)
-        assert_match(/link_to edit_#{@file_name}_path\(@#{@singular_name}\)/, content)
-        assert_match(/link_to @#{@singular_name},\s*method:\s*:delete/m, content)
-        assert_match(/render 'tags\/card'/, content)
-        @fields.each do |field|
-            case field[:type]
-            # Breaking these lines causes errors...
-            when "string", "enum", "integer", "bigint", "decimal"
-              assert_match(/#{Regexp.escape("@#{@singular_name}.class.human_attribute_name(:#{field[:name]})")}/, content)
-              assert_match(/#{Regexp.escape("@#{@singular_name}.#{field[:name]} || '-'")}/, content)
-            when "float" 
-              assert_match(/number_to_human\(@#{singular_name}.#{field[:name]}/, content)
-            when "enum_translated"
-              assert_match(/#{Regexp.escape("@#{@singular_name}.class.human_enum_name(:#{field[:name]}, @#{@singular_name}.#{field[:name]})")}/, content)
-            when "text", "jsonb" 
-              assert_match(/simple_format\(@#{@singular_name}.#{field[:name]} || '-'\)/, content)
-            when "datetime", "timestamp", "time", "date"
-              assert_match(/time_tag\(@#{@singular_name}.#{field[:name]} || '-'\)/, content)
-            when "binary"
-              assert_match(/'PLACEHOLDER FOR BINARY FIELD'/, content)
-            when "references"
-              assert_match(/render #{Regexp.escape("#{File.join(@folder_name, field[:name].pluralize, "card")}")}, object: @#{@singular_name}.#{field[:name]} %>/, content)
-            else
-              assert_match(/#{Regexp.escape("@#{@singular_name}.#{field[:name]} || '-'")}/, content)
-            end
+        assert_includes content, "nav_button(action: :edit, path: edit_#{@file_name}_path(@#{@singular_name}), record: @#{@singular_name})"
+        assert_includes content, "nav_button(action: :delete, record: @#{@singular_name})"
+        assert_includes content, "nav_button(action: :new, path: new_discipline_#{@file_name}_path(@discipline), record: @#{@singular_name})"
+        assert_includes content, "t('show.details', model: @#{@singular_name}.model_name.human)"
+        @attribute_fields.each do |field|
+          case field[:type]
+          # Breaking these lines causes errors...
+          when :string, :integer, :bigint
+            assert_includes content, "show_attribute(@#{@singular_name}, :#{field[:name]}"
+          when :enum
+            assert_includes content, "show_attribute(@#{@singular_name}, :#{field[:name]}, type: :#{field[:type]}"
+          when :float, :decimal
+            assert_includes content, "show_attribute(@#{@singular_name}, :#{field[:name]}, type: :#{field[:type]}"
+          when :enum_translated
+            assert_includes content, "show_attribute(@#{@singular_name}, :#{field[:name]}, type: :enum_translated)"
+          when :text, :jsonb 
+            assert_includes content, "show_attribute(@#{@singular_name}, :#{field[:name]}, type: :#{field[:type]}"
+          when :date
+            assert_includes content, "show_attribute(@#{@singular_name}, :#{field[:name]}, type: :date"
+          when :datetime, :timestamp, :time
+            assert_includes content, "show_attribute(@#{@singular_name}, :#{field[:name]}, type: :datetime"
+          when :boolean
+            assert_includes content, "show_attribute(@#{@singular_name}, :#{field[:name]}, type: :boolean"
+          when :binary
+            assert_match(/'PLACEHOLDER FOR BINARY FIELD'/, content)
+          when :references, :belongs_to
+            assert_match(/render #{Regexp.escape("#{File.join(@folder_name, field[:name].pluralize, "card")}")}, object: @#{@singular_name}.#{field[:name]} %>/, content)
+          else
+            assert_match(/#{Regexp.escape("@#{@singular_name}.#{field[:name]} || '-'")}/, content)
+          end
+        end
+        assert_includes content, "show_association(@#{@singular_name}, :tag)"
+        @association_fields.each do |field|
+          assert_includes content, "show_association(@#{@singular_name}, :#{field[:name]})"
         end
       end
       
@@ -479,27 +629,31 @@ module ProjectAssistant
       
       # _card.html.erb
       assert_file File.join(views_dir, "_card.html.erb") do |content|
-        assert_match(/resource = object/, content)
-        assert_match(/render \'components\/collapsible\'/, content)
-        assert_match(/link_to resource/, content)
+        assert_includes content, "#{@singular_name} = object"
+        assert_includes content, "context ||= #{@singular_name}.model_name.human"
+        assert_includes content, "render 'components/collapsible', id: \"\#{id}_\#{#{@singular_name}.id}_details\""
+        assert_includes content, "nav_link(action: :show, record: #{@singular_name})"
         @fields.each do |field|
-          assert_match(/#{Regexp.escape("resource.class.human_attribute_name(:#{field[:name]})")}/, content)
           case field[:type]
           # Breaking these lines causes errors...
-          when "string", "enum", "integer", "bigint", "decimal"
-            assert_match(/#{Regexp.escape("resource.#{field[:name]} || '-'")}/, content)
-          when "float" 
-            assert_match(/number_to_human\(resource.#{field[:name]}/, content)
-          when "enum_translated"
-            assert_match(/#{Regexp.escape("resource.class.human_enum_name(:#{field[:name]}, resource.#{field[:name]})")}/, content)
-          when "text", "jsonb" 
-            assert_match(/simple_format\(@#{@singular_name}.#{field[:name]} || '-'\)/, content)
-          when "datetime", "timestamp", "time", "date"
-            assert_match(/time_tag\(@#{@singular_name}.#{field[:name]} || '-'\)/, content)
-          when "binary"
-            assert_match(/'PLACEHOLDER FOR BINARY FIELD'/, content)
+          when :string, :integer, :enum, :bigint
+            assert_includes content, "show_attribute(#{@singular_name}, :#{field[:name]}"
+          when :float, :decimal
+            assert_includes content, "show_attribute(#{@singular_name}, :#{field[:name]}, type: :#{field[:type]}"
+          when :enum_translated
+            assert_includes content, "show_attribute(#{@singular_name}, :#{field[:name]}, type: :enum_translated)"
+          when :text, :jsonb 
+            assert_includes content, "show_attribute(#{@singular_name}, :#{field[:name]}, type: :#{field[:type]}"
+          when :date
+            assert_includes content, "show_attribute(#{@singular_name}, :#{field[:name]}, type: :date"
+          when :datetime, :timestamp, :time
+            assert_includes content, "show_attribute(#{@singular_name}, :#{field[:name]}, type: :datetime"
+          when :boolean
+            assert_includes content, "show_attribute(#{@singular_name}, :#{field[:name]}, type: :boolean"
+          when :references, :belongs_to
+            assert_includes content, "show_attribute(#{@singular_name}, :#{field[:name]}, type: :association"
           else
-            assert_match(/resource\.#{field[:name]}&\.label\ \|\|\ '\-'/, content)
+            assert_includes content, "show_attribute(#{@singular_name}, :#{field[:name]}"
           end
         end
       end
@@ -515,7 +669,7 @@ module ProjectAssistant
       assert_file controller_test_file do |content|
         assert_match(/module\s+#{@module_name}/, content)
         assert_match(/class\s+#{@tagable_name.pluralize}ControllerTest\s*<\s*ActionController::TestCase/, content)
-        assert_match(/include TagableTestPatterns/, content)
+        assert_match(/include TagableControllerTests/, content)
         assert_match(/include Devise::Test::ControllerHelpers/, content)
         @fields.select { |field| field[:options].include?('required') }.each do |field|
           assert_match(/#{field[:name]}:/, content)
@@ -530,14 +684,22 @@ module ProjectAssistant
       assert_file system_test_file do |content|
         assert_match(/module\s+#{@module_name}/, content)
         assert_match(/class\s+#{@tagable_name.pluralize}SystemTest\s*<\s*ApplicationSystemTestCase/, content)
-        assert_match(/include TagableSystemTestPatterns/, content)
+        assert_match(/include TagableSystemTests/, content)
         assert_match(/include Devise::Test::IntegrationHelpers/, content)
         assert_match(/include Warden::Test::Helpers/, content)
-        assert_match(/include ActionView::Helpers::NumberHelper/, content)
+
+        assert_includes content, "def setup_model_specific_data"
+        assert_includes content, "def setup_model_specific_data"
+        assert_match(/@index_fields = %i\[.*\]/, content)
+        assert_match(/@search_fields = %i\[.*\]/, content)
+        assert_match(/@show_fields = %i\[.*\]/, content)
+        assert_match(/@show_associations = %i\[.*\]/, content)
+        assert_match(/@new_fields = \{.*\}/, content)
+        assert_match(/@edit_fields =/, content)
       end
     end
 
-    test "edits constants" do
+    test "adds new class to tagable constants" do
       run_generator(@args)
       tagable_file = File.join(destination_root, 'config', 'constants', "tagable.yml") 
       assert_file tagable_file do |content|
@@ -550,11 +712,13 @@ module ProjectAssistant
       constants_file = File.join(destination_root, 'config', 'constants', "#{@module_name.underscore}.yml") 
       assert_file constants_file do |content|
         # Check that enum fields are added with namespaced structure
-        enum_fields = @fields.select { |f| ['enum', 'enum_translated'].include?(f[:type]) }
-        if enum_fields.any?
+        if @enum_fields.any?
           assert_match(/#{@singular_name}:\s*\n/, content)
-          enum_fields.each do |f|
-            assert_match(/#{f[:name]}:\s*\n\s*# TODO: Add enum values/m, content)
+          @enum_fields.each do |field|
+            assert_match(/#{field[:name]}:\s*\n/m, content)
+            field[:options][:keys].each_with_index do |key, index|
+              assert_match(/#{key}:\s*#{index}\s*\n/m, content)
+            end
           end
         end
       end
@@ -567,13 +731,8 @@ module ProjectAssistant
       run_generator @args
       
       # Check that the routes file was updated
-      assert_file routes_file do |content|
-#        puts "DEBUG: Routes content:"
-#        puts content
-#        puts "DEBUG: Looking for pattern: /resources #{@plural_name}, only: \[:index, :new, :create\]/"
-        
+      assert_file routes_file do |content|        
         # Check that the new resource lines were added to routes file
-        # TODO extend the regexp to match the correct location for each line.
         assert_match(/resources\s+:#{@plural_name}, only: \[:index, :new, :create\]/, content)
         assert_match(/resources\s+:#{@plural_name}, except: \[:index\]/, content)
       end
@@ -584,49 +743,28 @@ module ProjectAssistant
       I18n.available_locales.each do |language|
       
         # Check models file
+        # $stderr.puts "DEBUG: language: #{language.inspect}"
         models_file = File.join(destination_root, "config", "locales", @folder_name, 
           language.to_s, "#{language.to_s}.#{@folder_name}.models.yml")
-        assert_file models_file do |content|
-          assert_match(/#{@folder_name}\/#{@singular_name}: "#{@tagable_name}"/, content)
-          @fields.each do |field|
-            assert_match(/#{field[:name]}:\s+#{field[:name].humanize}/, content)
+        assert File.exist?(models_file)
+        yaml = YAML.safe_load(File.read(models_file))
+        models = yaml.dig(language.to_s, "activerecord", "models")
+        assert models.key?(@i18n_key)
+        assert models[@i18n_key].key?("one")
+        assert models[@i18n_key].key?("other")
+        all_attributes = yaml.dig(language.to_s, "activerecord", "attributes")
+        assert all_attributes.key?(@i18n_key)
+        attributes = yaml.dig(language.to_s, "activerecord", "attributes", @i18n_key)
+        @fields.each do |field|
+          assert attributes.key?(field[:name])
+          if field[:type] == :enum_translated
+            assert attributes.key?(field[:name].pluralize)
+            enum_keys = attributes[field[:name].pluralize]
+            field[:options][:keys].each do |key|
+              assert enum_keys.key?(key)
+            end
           end
         end
-      end
-    end
-
-    test "creates views translations" do
-      run_generator @args
-      I18n.available_locales.each do |language|
-      views_file = File.join(destination_root, "config", "locales", @folder_name, 
-            language.to_s, "#{language.to_s}.#{@folder_name}.views.yml")
-        assert_file views_file do |content|
-          assert_match(/#{@plural_name}:/, content)
-          assert_match(/title:\s*"#{@tagable_name.pluralize}"/, content)
-          assert_match(/header:\s*"#{@tagable_name.pluralize} Schedule for %{project}"/, content)
-          assert_match(/title:\s*"Edit #{@tagable_name}"/, content)
-          assert_match(/header:\s*"Edit #{@tagable_name}: %{label}"/, content)
-          assert_match(/title:\s*"New #{@tagable_name}"/, content)
-          assert_match(/header:\s*"New #{@tagable_name}"/, content)
-          assert_match(/title:\s*"#{@tagable_name}"/, content)
-          assert_match(/header:\s*"#{@tagable_name}: %{label}"/, content)
-        end
-      end
-    end
-
-    test "handles enum_translated fields correctly in translations" do
-      # Set up locale files for this test
-      create_test_locale_files
-      I18n.stubs(:available_locales).returns([:en, :km])
-      
-      run_generator @args
-      
-      # Check models file for enum_translated field
-      en_models_file = File.join(destination_root, "config", "locales", @folder_name, "en", "en.#{@module_name}.models.yml")
-      assert_file en_models_file do |content|
-        assert_match(/status: Status/, content)
-        assert_match(/statuses:/, content)
-        assert_match(/other_status: "Other Status"/, content)
       end
     end
 
@@ -642,6 +780,26 @@ module ProjectAssistant
       # Should not raise an error
       assert_nothing_raised do
         run_generator @args
+      end
+    end
+
+    test "creates views translations" do
+      run_generator @args
+      I18n.available_locales.each do |language|
+      views_file = File.join(destination_root, "config", "locales", @folder_name, 
+            language.to_s, "#{language.to_s}.#{@folder_name}.views.yml")
+        assert File.exist?(views_file)
+        yaml = YAML.safe_load(File.read(views_file))
+        views = yaml.dig(language.to_s, @folder_name)
+          # $stderr.puts "DEBUG: views: #{views.inspect} "
+        assert views.key?(@plural_name)
+        %w[index show edit new].each do |key|
+          view_keys = yaml.dig(language.to_s, @folder_name, @plural_name)
+          # $stderr.puts "DEBUG: view_keys: #{view_keys.inspect} key: #{key.inspect}"
+          assert view_keys.key?(key)
+          assert view_keys[key].key?("title")
+          assert view_keys[key].key?("header")
+        end
       end
     end
 

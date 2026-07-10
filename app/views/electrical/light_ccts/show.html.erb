@@ -44,7 +44,7 @@
               <% end %>
 
               <% if policy(@light_cct).destroy? %>
-                <%= nav_button(action: :delete, path: electrical_light_cct_path(@light_cct), record: @light_cct) %>
+                <%= nav_button(action: :delete, record: @light_cct) %>
               <% end %>
 
               <% if policy(@light_cct).new? %>

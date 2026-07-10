@@ -42,7 +42,7 @@
               <% end %>
               
               <% if policy(@tag).destroy? %>
-                <%= nav_button(action: :delete, path: tag_path(@tag), record: @tag) %>
+                <%= nav_button(action: :delete, record: @tag) %>
               <% end %>
 
               <% if policy(@tag).new? %>

@@ -11,7 +11,7 @@
   <% end %>
   <td>
     <span title="<%= row.notes %>">
-      <%= truncate(strip_tags(row.notes.to_s), length: 20) %>
+      <%= truncate(strip_tags(row.notes.to_s), length: 10) %>
     </span>
   </td>
   <td><%= row.class.human_enum_name(:motor_type, row.motor_type) %></td>

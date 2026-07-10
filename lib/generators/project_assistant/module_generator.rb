@@ -103,15 +103,11 @@ module ProjectAssistant
         # Create activerecord translation file
         models = File.join(dir_path, "#{language}.#{singular_name}.models.yml")
         create_file(models, <<~YAML) unless File.exist?(models)
-# #{singular_name} model translations for #{language}
 #{language}:
   activerecord:
     models:
-      <%= singular_name %>:        # Insert model name translations here
     attributes:
-      <%= singular_name %>:        # Insert attributes translations here
     errors:
-      <%= singular_name %>:        # Insert custom validation error translations here
         YAML
 
         # Create views translation file

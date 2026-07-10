@@ -42,7 +42,7 @@
               <% end %>
 
               <% if policy(@switchboard).destroy? %>
-                <%= nav_button(action: :delete, path: electrical_switchboard_path(@switchboard), record: @switchboard) %>
+                <%= nav_button(action: :delete, record: @switchboard) %>
               <% end %>
 
               <% if policy(@switchboard).new? %>

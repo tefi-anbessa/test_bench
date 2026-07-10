@@ -50,6 +50,7 @@ Rails.application.routes.draw do
           # tagables differ from shallow routes because they require index to be treated
           # like a member route. No point in nesting index under tag.
           namespace :electrical do
+          # INSERTION POINT 2 FOR TAGABLE GENERATOR
             resources :heaters, :cables, :motors, :light_ccts, 
               :socket_ccts, :switchboards, except: [:index]
             # Demands are special case, not tagable but require tagable for create and update, 
@@ -62,10 +63,10 @@ Rails.application.routes.draw do
         resources :documents, shallow: true do
           resources :issues
         end
+        resources :doc_types
         namespace :electrical do
           resources :cable_types, shallow: true
         end
-        resources :doc_types
       end # discipline nested resources
 
       # Change namespace for change management

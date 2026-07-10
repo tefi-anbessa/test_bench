@@ -9,16 +9,12 @@
     <td><%= row.tag.stage %></td>
     <td><%= index_link(action: :show_tag, record: row.tag) %></td>
   <% end %>
-  <td>
-    <span title="<%= row.notes %>">
-      <%= truncate(strip_tags(row.notes.to_s), length: 20) %>
-    </span>
-  </td>
-  <td><%= row.ingress_protection %></td>
-  <td><%= row.voltage_rating %></td>
-  <td><%= row.busbar_rating %></td>
-  <td><%= row.busbar_fault_rating %></td>
-  <td><%= row.busbar_fault_duration %></td>
+  <td><%= index_attribute(row, :notes, type: :text) %></td>
+  <td><%= index_attribute(row, :ingress_protection) %></td>
+  <td><%= index_attribute(row, :voltage_rating, type: :enum) %></td>
+  <td><%= index_attribute(row, :busbar_rating, type: :float, units: "A") %></td>
+  <td><%= index_attribute(row, :busbar_fault_rating, type: :float, units: "A") %></td>
+  <td><%= index_attribute(row, :busbar_fault_duration, type: :float, units: "s") %></td>
   <td>
     <%= render 'electrical/demands/index_link', row: row %>
   </td>

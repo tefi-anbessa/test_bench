@@ -16,16 +16,19 @@ module <%= module_name %>
       # E.g. electrical_demand for electrical models.
     end
 
-<%- @fields.select { |f| f[:options].include?('required') }.each do |field| -%>
-    test "<%= field[:name] %> must be present" do
-      @resource.<%= field[:name] %> = nil
-      refute @resource.valid?
-      assert_includes @resource.errors[:<%= field[:name] %>], I18n.t("errors.messages.blank")
-    end
+<%- if @required_fields.any? -%>
+    test_required_fields <%= @required_fields.map { |f| ":#{f[:name]}" }.join(", ") %>
+<%- end -%>
+<%- if @unique_fields.any? -%>
+    test_unique_fields <%= @unique_fields.map { |f| ":#{f[:name]}" }.join(", ") %>
+<%- end -%>
+      # Refactor uniqueness test to account for scope of uniqueness as required.
+<%- @enum_fields.each do |field| -%>
+    test_enum_field(<%= field[:name] %>, keys: <%= field[:options][:keys] %>)
 <%- end -%>
 
     # Insert model specific tests here.
-    # E.g. test electrical_demand for electrical models.
+    # E.g. test_demandable_association for electrical models.
 
   end
 end

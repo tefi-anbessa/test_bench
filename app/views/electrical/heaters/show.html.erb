@@ -42,7 +42,7 @@
               <% end %>
 
               <% if policy(@heater).destroy? %>
-                <%= nav_button(action: :delete, path: electrical_heater_path(@heater), record: @heater) %>
+                <%= nav_button(action: :delete, record: @heater) %>
               <% end %>
 
               <% if policy(@heater).new? %>

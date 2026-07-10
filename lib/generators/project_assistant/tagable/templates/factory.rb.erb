@@ -1,24 +1,39 @@
 FactoryBot.define do
   factory :<%=singular_table_name%>, class: <%=class_name%> do
-    # Tag can be passed explicitly or will be auto-created
+    # Tag can be passed explicitly, if not tag will be created.
+    # If discipline is passed, tag will be created on that discipline.
+    # Otherwise, tag will be created on a new project with default "Electrical" discipline.
     transient do
       tag { nil }
+      discipline { nil }
     end
-    # Attributes
-    <%- @fields.each do |field|-%>
-      <%- if field[:type] == "references" || field[:type] == "belongs_to" -%>
+    # Associations
+<%- @association_fields.each do |field|-%>
     association :<%= field[:name] %>
-      <%- else -%>
-    <%= field[:name] %> {  } <%= "# Provide default value for required field" if field[:options].include?("required") %>
-      <%- end -%>    <%- end -%>
-    
-    after(:build) do |model, evaluator|
-      if evaluator.tag
-        raise "Tag is already associated with another record" if evaluator.tag.tagable.present?
-        model.tag = evaluator.tag
-      else
-        discipline = Discipline.find_or_create_by(code: model.class.discipline_code)
-        model.tag = create(:tag, :unique_tag, discipline: discipline)
+<%- end -%> 
+    # Attributes
+<%- @attribute_fields.each do |field|-%>
+    <%= field[:name] %> { <%= field[:options][:valid].to_s || nil %> }
+<%- end -%>
+
+    # Create tag association in a single transaction
+    after(:build) do |<%= singular_name %>, evaluator|
+      unless <%= singular_name %>.tag
+        if evaluator.tag
+          # Use provided tag, but ensure it's not already associated
+          if evaluator.tag.tagable.present?
+            raise "Tag is already associated with another record: #{evaluator.tag.tagable_type}##{evaluator.tag.tagable_id}"
+          end
+          <%= singular_name %>.tag = evaluator.tag
+        elsif evaluator.discipline
+          <%= singular_name %>.tag = create(:tag, :unique_tag, discipline: evaluator.discipline)
+        else
+          # Create project with auto-created disciplines
+          project = create(:project)
+          discipline = project.disciplines.find_by(name: <%= singular_name %>.class.module_parent_name) ||
+               create(:discipline, name: <%= singular_name %>.class.module_parent_name, project: project)
+          <%= singular_name %>.tag = create(:tag, :unique_tag, discipline: discipline)
+        end
       end
     end
   end

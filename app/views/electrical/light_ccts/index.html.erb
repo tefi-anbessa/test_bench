@@ -22,8 +22,7 @@
         <!-- New Button (Right) -->
         <div class="col-2 text-end">
           <% if policy(Electrical::LightCct).new? %>
-            <%= nav_button(action: :new, path: new_discipline_electrical_light_cct_path(@discipline),
-                record: Electrical::LightCct.new) %>
+            <%= nav_button(action: :new, path: new_discipline_electrical_light_cct_path(@discipline), record: Electrical::LightCct.new) %>
           <% end %>
         </div>
       </div> <!-- end of row -->

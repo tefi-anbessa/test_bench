@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
 require "application_system_test_case"
-require File.join(Rails.root, 'test', 'helpers', 'tagable_system_test_patterns')
+require File.join(Rails.root, 'test', 'helpers', 'tagable_system_tests')
 module <%= module_name %>
   class <%= tagable_name.pluralize %>SystemTest < ApplicationSystemTestCase
-    include TagableSystemTestPatterns
     include Devise::Test::IntegrationHelpers
     include Warden::Test::Helpers
-    include ActionView::Helpers::NumberHelper
+    include TagableSystemTests
 
     setup do
       setup_common_tagable_data
@@ -24,30 +23,36 @@ module <%= module_name %>
             "#{field[:name]}"
           end
         } %>
-<%- index_fields = @fields.select { |field| ProjectAssistant::FieldTypes::INDEX_TYPES.include?(field[:type]) }.map { |field| "#{field[:name]}" } %>
-<%- searchable_field_names = @fields.select { |field| ProjectAssistant::FieldTypes::SEARCHABLE_TYPES.include?(field[:type]) }.map { |field| "#{field[:name]}" } %>
+<%- index_field_names = @index_fields.map { |field| "#{field[:name]}" } %>
+<%- searchable_field_names = @searchable_fields.map { |field| "#{field[:name]}" } %>
 <%- fields_partitioned = @fields.partition { |f| association_types.include?(f[:type]) } %>
 <%- association_names, field_names = fields_partitioned.map { |group| group.map { |f| f[:name] } } %>
 
       # List fields that should appear in index. 
       # The generator will include test for sort link header for each included field, 
       # and test for an appropriate value field for the type.
-      @index_fields = %i[<%= index_fields.join(" ") %>]
+      @index_fields = %i[<%= index_field_names.join(" ") %>]
 
       # List index fields that should have ransack search capability.
       # The generator will only test for "contains" fields (_cont).
       # Don't include numeric or date fields, add model specific tests for these later in this file.
       @search_fields = %i[<%= searchable_field_names.join(" ") %>]
-    end
 
-      # List all fields that should appear in show (usually all)
-      @show_fields = %w[<%= field_names.join(" ") %>]
+      # List all fields that should appear in show attributes
+      @show_fields = %i[<%= all_field_names.join(" ") %>]
 
       # List all associations that should have a collapsible card on the show view
-      @show_associations = %w[<%= association_names.join(" ") %>]
+      @show_associations = %i[<%= association_names.join(" ") %>]
 
-      # List all fields that should appear in forms (usually all)
-      @form_fields = %w[<%= all_field_names.join(' ') %>]
+      # List all fields that should appear in forms (usually all).
+      # New and edit required separately because some models have read only fields that can't be edited.
+      # Set a valid value for each field if required to be unique, set nil for factory default.
+      @new_fields = <%= all_field_names.index_with { nil } %>
+      @edit_fields = @new_fields
+
+      # Set an attribute/s to be modified in edit test
+      # Only working with string/text fields at present
+      @edit_attributes = {  }
     end
 
     def fill_in_model_specific_fields

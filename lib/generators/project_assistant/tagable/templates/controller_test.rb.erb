@@ -19,8 +19,7 @@ module <%= module_name %>
     # Set the expected params for a valid resource create
     def valid_resource_params
       {
-<%= @fields.map { |field| "#{field[:name]}: '' # Add valid data" }
-          .join(",\n        ") %>
+        <%= @fields.map { |field| "#{field[:name]}: #{field[:options][:valid] || "nil"}" }.join(",\n        ") %>
       }
     end
 

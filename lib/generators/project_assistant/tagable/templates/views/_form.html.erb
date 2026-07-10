@@ -7,7 +7,7 @@
         <div class="d-flex flex-column align-items-center">
           <div class ="mt-1">
             <span class="badge fs-6" style="<%%= badge_styles(swatch) %>">
-              <%= yield(:header) %>
+              <%%= yield(:header) %>
             </span>
           </div>
         </div>
@@ -31,21 +31,14 @@
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">        <!-- Adjust to fit field width requirements -->
 
             <!-- Tag -->
-            <div class="card mb-1">
-              <%% if tag.persisted? %>
-                <%%= render 'tags/card', tag: tag %>
-                <%%= hidden_field_tag :tag_id, tag.id %>
-              <%% else %>
-                <%%= f.fields_for tag do |tag_f| %>
-                  <%%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
-                <%% end %>
-              <%% end %>
-            </div>
+            <%%= f.fields_for tag do |tag_f| %>
+              <%%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
+            <%% end %>
 
             <!-- <%= human_name %> Details -->
             <div class="card mb-1" style="<%%= card_styles(swatch) %>">
-              <div class="card-header p-2" style="<%= card_header_styles(swatch) %>">
-                <h5><%= t('activerecord.models.<%= singular_name %>.one') %></h5>
+              <div class="card-header p-2" style="<%%= card_header_styles(swatch) %>">
+                <h6><%%= yield(:header) %></h6>
               </div>
               <div class="card-body p-2" style="<%%= form_styles(swatch) %>">
                 <%%= render 'shared/error_messages', object: f.object %>
@@ -53,69 +46,27 @@
 <%- @fields.each do |field| -%>
   <%- required = field[:options].include? ('required') %>
   <%- case field[:type] -%>
-    <%- when "string" -%>
-                <%%= f.text_field :<%= field[:name] %>,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8" %>
-    <%- when "text" -%>
-                <%%= f.text_area :<%= field[:name] %>,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8",
-                        rows: 3 %>
-    <%- when "integer", "bigint" -%>
-                <%%= f.number_field :<%= field[:name] %>,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8"%>
-    <%- when "float", "decimal" -%>
-                <%%= f.number_field :<%= field[:name] %>,
-                        class: 'form-control form-control-sm',
-                        append: 'x'                             <!-- Customize engineering units -->
-                        step: 0.01,                             <!-- Customize as required -->
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8"%>
-    <%- when "datetime", "timestamp", "time", "date" -%>
-                <%%= f.datetime_select :<%= field[:name] %>,     <!-- Customize as required -->
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8"%>
-    <%- when "boolean" -%>
-                <%%= f.check_box :<%= field[:name] %>,     <!-- Customize as required -->
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8"%>
-    <%- when "jsonb" -%>                                    <!-- [TODO: Add JSONB editor] -->
-                <%%= f.text_area :<%= field[:name] %>,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8" %>
-    <%- when "enum" -%>
-                <%%= f.select :<%= field[:name] %>,
-                    options_for_select(
-                      <%= class_name%>.<%= field[:name].pluralize %>.keys,
-                      selected: <%= singular_name %>.<%= field[:name] %>
-                    ),
-                    { include_blank: <%= required ? "t('form.required')" : "t('form.optional')" %> },
-                    class: 'form-control form-control-sm' %>
-    <%- when "enum_translated" -%>
-                <%%= f.select :<%= field[:name] %>,
-                    options_for_select(
-                      <%= class_name%>.<%= field[:name].pluralize %>.keys.collect 
-                        { |k| [<%= class_name %>.human_enum_name(:<%= field[:name] %>, k), k] },
-                      selected: <%= singular_name %>.<%= field[:name] %>
-                    ),
-                    { include_blank: <%= required ? "t('form.required')" : "t('form.optional')" %> },
-                    class: 'form-control form-control-sm' %>
-    <%- when "references" -%>
-                <%%= f.select :<%= field[:name] %>_id,
-                    options_for_select(
-                      @<%= field[:name].pluralize %>,
-                      selected: <%= singular_name %>.<%= field[:name] %>_id
-                    ),
-                    { include_blank: <%= required ? "t('form.required')" : "t('form.optional')" %> },
-                    class: 'form-control form-control-sm' %>
+    <%- when :string -%>
+                <%%= form_field(f, :<%= field[:name] %>) %>
+    <%- when :text, :jsonb -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :text) %>
+    <%- when :integer, :bigint -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :number) %>
+    <%- when :float, :decimal -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :number<%= field[:options][:units].present? ? ", units: #{field[:options][:units]}" : "" %>) %>
+    <%- when :datetime, :timestamp, :time -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :datetime) %>
+    <%- when :date -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :date) %>
+    <%- when :boolean -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :boolean) %>
+    <%- when :enum -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :enum, required: required) %>
+    <%- when :enum_translated -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :enum_translated, required: required) %>
+    <%- when :references, :belongs_to -%>
+                <%% collection = options_for_select(@<%= field[:name].pluralize %>, selected: <%= singular_name %>.<%= field[:name] %>_id) %>
+                <%%= form_field(f, :<%= field[:name] %>, type: :select, collection: collection, required: required) %>
   <%- end -%>
 <%- end -%>
                 
