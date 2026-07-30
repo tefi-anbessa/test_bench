@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "helpers/controller_test_helper"
-module ProjectChange
+module ChangeManagement
   class RequestsControllerTest < ActionController::TestCase
     include Devise::Test::ControllerHelpers
   include ControllerTestHelper

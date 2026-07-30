@@ -3,29 +3,21 @@
 require 'test_helper'
 require Rails.root.join('lib', 'generators', 'project_assistant', 'scaffold_generator').to_s
 require Rails.root.join('lib', 'generators', 'project_assistant', 'module_generator').to_s
-require Rails.root.join('lib', 'generators', 'project_assistant', 'field_types').to_s
+require Rails.root.join('lib', 'generators', 'project_assistant', 'shared', 'scaffold_helper').to_s
 
 module ProjectAssistant
   class ScaffoldGeneratorTest < Rails::Generators::TestCase
-    include ProjectAssistant::FieldTypes
+    include ProjectAssistant::Shared::ScaffoldHelper
     tests ProjectAssistant::ScaffoldGenerator
-    destination Rails.root.join('tmp', 'generators')
+    destination Rails.root.join('tmp', 'generators', 'scaffold')
     setup :prepare_destination
 
     setup do
-      @module_name = "ExistingModule"
-      @model_name = "NewModel"
-      # Generator::NamedBase methods not available in test environment
-      @human_name = @model_name.underscore.humanize
-      @class_path = @module_name.split('::').to_a # ["ExistingModule"]
-      @file_name = "#{@model_name.underscore}" # "new_model"
-      @table_name = "#{@module_name.split('::').join('_').underscore}_#{@model_name.underscore.pluralize}" # "existing_module_new_models"
-      @singular_table_name = @table_name.singularize # "existing_module_new_model"
-      @class_name = "#{@module_name}::#{@model_name}" # "ExistingModule::NewModel"
-      @folder_name = "#{@module_name.underscore}" # "existing_module/new_model"
-      @singular_name = "#{@model_name.underscore}" # "new_model"
-      @plural_name = "#{@model_name.underscore.pluralize}" # "new_models"
-      
+      @class_name = "ExistingModule::NewModel" # Default namespaced class
+      # Set the namedbase substitutes
+      name_setup_for_test
+      @nesting_options = %i[project discipline tag tagable none]
+
       # Create clean files for testing (avoid conflicts with real app files)
       FileUtils.mkdir_p(File.join(destination_root, 'config'))
       FileUtils.mkdir_p(File.join(destination_root, 'config', 'constants'))
@@ -58,437 +50,569 @@ module ProjectAssistant
 
       # Generate the module (silently)
       capture(:stdout) do
+        # $stderr.puts "DEBUG (TEST): Calling module generator with module_name #{@module_name}"
         ProjectAssistant::ModuleGenerator.start([@module_name], destination_root: destination_root)
       end
 
       # Test arguments for the command line
-      @args = ["#{@module_name}::#{@model_name}", 
-        'name:string:required',
-        'description:text',
-        'selector:enum',
-        'status:enum_translated',
-        'sort_order:integer:index',
-        'code:string:uniq',
-        'parent:references'
+      @args = [
+        'name:string:required:index:valid=Test_name',
+        'description:text:valid=Test',
+        'selector:enum:keys=[a,b,c]:valid=a',
+        'status:enum_translated:keys=[alpha,bravo]:valid=bravo',
+        'sort_order:integer:index:step=10:valid=100:unique',
+        'power:float:precision=5:units=kW:step=1:valid=2.2',
+        'money:decimal:units=$:precision=7:scale=2:step=.01:valid=5555.55',
+        'switch:boolean:valid=true',
+        'birthday:date',
+        'created:datetime',
+        'flex_field:jsonb',
+        'code:string:uniq:valid=AA',
+        'blob:binary',
+        'parent:references:required=false',
+        'owner:belongs_to:required'
       ]
       
-      # Mimic the generators process_fields method.
-      @fields = @args[1..-1].map do |arg| 
-        name, type, *opts = arg.split(':')
-        { name: name, type: type, options: opts } 
+      # Borrow the generator's prepare_cli and process_fields methods.
+      input_fields = prepare_cli(@args)
+      @fields, errors = process_fields(input_fields)
+      if errors.any?
+        # $stderr.puts "DEBUG (TEST): Test setup field errors: #{errors.inspect}"
       end
+      # Mimic the generator field sets.
+      field_sets
     end
     
     test "module generator setup complete" do
-      assert_file "app/models/#{@folder_name}/base.rb"
-      assert_file "app/models/#{@folder_name}.rb"
-      assert_file "config/constants/tagable.yml"
+      paths_to_check(@folder).each do |path|
+        assert_directory path
+      end
     end
 
-    test "generator runs without errors" do
-      puts "\n=== Starting generator test ==="
+    test "generator runs without errors from cli" do
+      output = capture(:stderr) do
+        run_generator [@class_name, *@args]
+      end
+      assert_no_match(/error/i, output)
+    end
+
+    test "generator runs without errors from definition file v0" do
+      output = capture(:stderr) do
+        run_generator [@class_name, "--definition=electrical_test"]
+      end
+      assert_no_match(/error/i, output)
+    end
+
+    test "generator runs without errors from definition file" do
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name],
+        { definition: "electrical_test" },
+        destination_root: destination_root
+      )
       assert_nothing_raised do
-        puts "Running generator with #{@class_name}"
-        run_generator @args
-        puts "=== Generator completed successfully ==="
+        generator.invoke_all
       end
     end
 
-    test "processes command line arguments correctly" do
-      # Access the generator instance
-      generator = ProjectAssistant::ScaffoldGenerator.new(@args)
-      
-      # Test the process_fields method directly
-      # This should succeed since all test args are valid
-      fields = generator.send(:process_fields)
-      
-      # Verify the fields were processed correctly
-      assert_equal @fields.size, fields.size
-      
-      # Check fields
-      @fields.each_with_index do |f, index|
-        assert_equal f[:name], fields[index][:name]
-        assert_equal f[:type], fields[index][:type]
-        assert_equal f[:options], fields[index][:options]
-      end
-    end
-
-    test "validates namespaced name with invalid class name" do
-      assert_raises(SystemExit) do
-        run_generator ["Document::123Invalid", "name:string"]
+    test "validates name with invalid class name" do
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        ["ExistingModule::123Invalid", "name:string"],
+        {},
+        destination_root: destination_root
+      )
+      assert_raises(Thor::Error) do
+        generator.invoke_all
       end
     end
 
     test "validates name with non-existent module" do
-#      skip "Module name validation is crashing generator"
-      assert_raises(SystemExit) do
-        run_generator ["NonExistent::Heater", "name:string"]
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        ["NonExistent::Heater", "name:string"],
+        {},
+        destination_root: destination_root
+      )
+      assert_raises(Thor::Error) do
+        generator.invoke_all
       end
     end
 
     test "validates correct name format" do
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, "name:string"],
+        {},
+        destination_root: destination_root
+      )
       assert_nothing_raised do
-        run_generator ["#{@module_name}::#{@model_name}", "name:string"]
+        generator.invoke_all
+      end
+    end
+
+    test "generator checks definition file exists" do
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name],
+        { definition: "no-file" },
+        destination_root: destination_root
+      )
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "generator checks nesting option is valid" do
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, "name:string"],
+        { nesting: "invalid" },
+        destination_root: destination_root
+      )
+      assert_raises(Thor::Error) do
+        generator.invoke_all
       end
     end
 
     test "validates invalid field names" do
-      invalid_args = ["#{@module_name}::#{@model_name}", "123invalid:string", "invalid-name:string", "invalid name:string"]
-      generator = ProjectAssistant::ScaffoldGenerator.new(invalid_args)
-      
-      # Mock user input to choose 'N' (abort) when prompted
-      $stdin.stubs(:gets).returns("N\n")
-      assert_raises(SystemExit) do
-        generator.send(:process_fields)
+      invalid_args = ["123invalid:string", "invalid-name:string", "invalid name:string"]
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, *invalid_args],
+        {},
+        destination_root: destination_root
+      )
+      assert_raises(Thor::Error) do
+        generator.invoke_all
       end
-      $stdin.unstub(:gets)
     end
 
     test "validates missing field types" do
-      invalid_args = ["#{@module_name}::#{@model_name}", "name:", "description"]
-      generator = ProjectAssistant::ScaffoldGenerator.new(invalid_args)
-      
-      # Mock user input to choose 'N' (abort) when prompted
-      $stdin.stubs(:gets).returns("N\n")
-      assert_raises(SystemExit) do
-        generator.send(:process_fields)
+      invalid_args = ["name:", "description"]
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, *invalid_args],
+        {},
+        destination_root: destination_root
+      )
+      assert_raises(Thor::Error) do
+        generator.invoke_all
       end
-      $stdin.unstub(:gets)
     end
 
     test "validates unknown field types" do
-      invalid_args = ["#{@module_name}::#{@model_name}", "name:invalid_type", "description:unknown"]
-      generator = ProjectAssistant::ScaffoldGenerator.new(invalid_args)
-      
-      # Mock user input to choose 'N' (abort) when prompted
-      $stdin.stubs(:gets).returns("N\n")
-      assert_raises(SystemExit) do
-        generator.send(:process_fields)
+      invalid_args = ["name:invalid_type", "description:unknown"]
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, *invalid_args],
+        {},
+        destination_root: destination_root
+      )
+      assert_raises(Thor::Error) do
+        generator.invoke_all
       end
-      $stdin.unstub(:gets)
     end
 
-    test "validates invalid field options" do
-      invalid_args = ["#{@module_name}::#{@model_name}", "name:string:invalid_option", "description:text:unknown:another_invalid"]
-      generator = ProjectAssistant::ScaffoldGenerator.new(invalid_args)
-      
-      # Mock user input to choose 'N' (abort) when prompted
-      $stdin.stubs(:gets).returns("N\n")
-      assert_raises(SystemExit) do
-        generator.send(:process_fields)
+    test "validates unknown field options" do
+      invalid_args = ["name:string:invalid_option", "description:text:unknown:another_invalid"]
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, *invalid_args],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
       end
-      $stdin.unstub(:gets)
     end
 
-    test "allows continuing with valid fields when some are invalid" do
-      mixed_args = ["#{@module_name}::#{@model_name}", "name:string", "123invalid:integer", "description:text"]
-      generator = ProjectAssistant::ScaffoldGenerator.new(mixed_args)
-      
-      # Mock user input to choose 'y' (continue) when prompted
-      $stdin.stubs(:gets).returns("y\n")
-      fields = generator.send(:process_fields)
-      # Should only process the valid fields
-      assert_equal 2, fields.size
-      assert_equal ["name", "description"], fields.map { |f| f[:name] }
-      $stdin.unstub(:gets)
+    test "validates flag options require a valid boolean" do
+      invalid_args = ["name:string:required=5", "description:text:uniq=yes"]
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, *invalid_args],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates valid options requires a value of the correct type" do
+      invalid_args = ["count:integer:valid=5.5", "power:float:valid=true", "switch:boolean:valid=NO"]
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, *invalid_args],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates keys option requires an array of identifiers" do
+      invalid_args = ["select1:enum:keys=5.5", "select2:enum:keys={key1,key2}", "select3:enum_translated:keys=a,b", "select4:enum:keys=[Capital,in-line]"]
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, *invalid_args],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates scale, precision options on invalid types" do
+      invalid_args = ["name:string:precision=5", "description:text:scale=2"]
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, *invalid_args],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates scale, precision options with invalid value" do
+      invalid_args = ["cost:decimal:precision=5.5:scale=-1", "power:float:scale=1e3:precision=high"]
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, *invalid_args],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates units, si options with invalid types" do
+      invalid_args = ["name:string:units=m:si", "description:text:units=J:si", "select1:enum:units=s:si", "count:integer:units=kJ/m2:si"]
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, *invalid_args],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates si option requires valid boolean value" do
+      invalid_args = ["power:float:units=m:si=yes"]
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, *invalid_args],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates step with non_numeric types" do
+      invalid_args = ["name:string:step=1", "description:text:step=.1", "select1:enum:step=100", "flex:jsonb:step", "parent:references:step=1", "created:date:step=1"]
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, *invalid_args],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates step value is decimal" do
+      invalid_args = ["power:float:units=m:si=true:step=string"]
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, *invalid_args],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
+    test "validates option key is valid" do
+      invalid_args = ["power:float:units=m:si=true:invalid=string"]
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, *invalid_args],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
     end
 
     test "creates model" do
-      run_generator @args
-      assert_file File.join(destination_root, 'app', 'models', 
-          "#{@module_name.underscore}", "#{@model_name.underscore}.rb") do |content|
-        assert_match(/module #{@module_name}/, content)
-        assert_match(/class #{@model_name} < Base/, content)
-        
-        # Check for belongs_to associations
-        @fields.select { |f| %w[references].include?(f[:type]) }.each do |field|
-          assert_match(/belongs_to :#{field[:name]}/, content)
+      original_class_name = @class_name
+      original_model_class_name = @model_class_name
+      # Core model: Set class name without namespace module
+      @nesting_options.each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        assert_file File.join(destination_root, 'app', 'models', "#{@singular_name}.rb") do |content|
+          assert_includes content, "class #{@model_class_name} < ApplicationRecord"
+          test_assertions_model(content, nesting)
         end
+      end
 
-        # Check for presence validations on required fields
-        @fields.select { |f| f[:options].include?('required') }.each do |f|
-          assert_match(/validates :#{f[:name]}, presence: true/, content)
+      # Namespaced model: Set class name with namespace module
+      @nesting_options.each do |nesting|
+        @class_name = original_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        assert_file File.join(destination_root, 'app', 'models', @folder, "#{@singular_name}.rb") do |content|
+          assert_includes content, "module #{@module_name}"
+          assert_includes content, "class #{@model_class_name} < Base"
+          test_assertions_model(content, nesting)
         end
-        
-        # Check for enum declarations
-        @fields.select { |f| ['enum', 'enum_translated'].include?(f[:type]) }.each do |f|
-          assert_match(/enum :#{f[:name]}, Constants\.#{@module_name.underscore}\.#{@model_name.underscore}\.#{f[:name]}\.to_h/, content)
-        end
-      
-        # Check ransackable_attributes
-        assert_match(/def self\.ransackable_attributes/, content)
-        @fields.select { |f| SEARCHABLE_TYPES.include?(f[:type]) }.each do |field|
-          field_name = field[:name]
-          assert_match(/:\s*#{field_name}(?=[,\s\]])/, content, "Expected #{field_name} to be in ransackable_attributes")
-        end
-        %w[created_at updated_at].each do |timestamp|
-          assert_match(/:\s*#{timestamp}(?=[,\s\]])/, content, "Expected #{timestamp} to be in ransackable_attributes")
-        end
-        
-        # Check ransackable_associations
-        associations = [:tag, :tag_discipline, :tag_discipline_project]
-        @fields.select { |f| %w[references].include?(f[:type]) }.each do |field|
-          associations += [field[:name]]
-        end
-        assert_match(/def self\.ransackable_associations\(auth_object = nil\)\s+#{associations}/m, content)
       end
     end
 
     test "creates factory" do
-      run_generator(@args)
-      factory_file = File.join(destination_root, 'test', 'factories', @folder_name, 
-        "#{@plural_name}.rb")
-      assert_file factory_file do |content|
-        assert_match(/factory\s+:#{@singular_table_name}/, content)
-        assert_match(/class:\s+#{@class_name}/, content)
-        @fields.each do |field|
-          if field[:type] == "references"
-            assert_match(/association\s+:\s*#{field[:name]}/, content)
-          else 
-            if field[:options].include?('required')
-              assert_match(/#{field[:name]}\s+\{\s*\}\s*# Provide default value for required field/, content)
-            else
-              assert_match(/#{field[:name]}\s+\{\s*\}/, content)
-            end
-          end
+      # Core factory
+      original_class_name = @class_name
+      original_model_class_name = @model_class_name
+      @nesting_options.each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        factory_file = File.join(destination_root, 'test', 'factories', folder, 
+          "#{@plural_name}.rb")
+        assert_file factory_file do |content|
+          test_assertions_factory(content, nesting)
+        end
+      end
+
+      # Namespaced factory
+      @nesting_options.each do |nesting|
+        @class_name = original_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        factory_file = File.join(destination_root, 'test', 'factories', folder, 
+          "#{@plural_name}.rb")
+        assert_file factory_file do |content|
+          test_assertions_factory(content, nesting)
         end
       end
     end
 
     test "creates model test" do
-      run_generator @args
-      assert_file File.join(destination_root, 'test', 'models', 
-        "#{@module_name.underscore}", "#{@model_name.underscore}_test.rb") do |content|
-        assert_match(/module #{@module_name}/, content)
-        assert_match(/class #{@model_name}Test < ActiveSupport::TestCase/, content)
-        @fields.each do |field|
-          if field[:options].include?('required')
-            assert_match(/test "#{field[:name]} must be present" do/, content)
-            assert_match(/@resource.#{field[:name]} = nil/, content)
-          else
-            refute_match(/test "#{field[:name]} must be present" do/, content)
-            refute_match(/@resource.#{field[:name]} = nil/, content)
-          end
+      run_generator [@class_name, *@args]
+      assert_file File.join(destination_root, 'test', 'models', @folder, "#{@singular_name}_test.rb") do |content|
+        assert_includes content, "module #{@module_name}"
+        test_assertions_model_test(content)
+      # Core model test
+      @class_name = @model_class_name
+      name_setup_for_test
+      run_generator [@class_name, *@args]
+      assert_file File.join(destination_root, 'test', 'models', "#{@singular_name}_test.rb") do |content|
+        test_assertions_model_test(content)
         end
       end
     end
 
     test "creates migration" do
-      run_generator(@args)
-
       migration_dir = File.join(destination_root, "db", "migrate")
-      
-      # Find the migration file
-      migration_file = Dir.glob(File.join(migration_dir, "*_create_#{@singular_table_name}.rb")).first
-      migration_name = "Create#{@module_name}#{@model_name}"
-      assert_file migration_file do |migration|
-        # Check fields are created, with null: false for required fields.
-        assert_match(/class\s+#{migration_name}/, migration)
-        assert_match(/create_table\s+:#{@table_name}/, migration)
-        @fields.each do |field|
-          case field[:type]
-          # Check for translation of custom types
-          when 'enum', 'enum_translated'
-            if field[:options].include?('required')
-              assert_match(/t\.integer\s+:#{field[:name]}.*null: false/m, migration)
-            else
-              assert_match(/t\.integer\s+:#{field[:name]}/m, migration)
-            end
-          # Otherwise just check for rails type
-          else
-            if field[:options].include?('required') 
-              assert_match(/t\.#{field[:type]}\s+:#{field[:name]}.*null: false/m, migration)
-            else
-              assert_match(/t\.#{field[:type]}\s+:#{field[:name]}/m, migration)
-            end
-          end
+      original_class_name = @class_name
+      original_model_class_name = @model_class_name
+      # Core model: Set class name without namespace module
+      @nesting_options.each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        
+        migration_file = Dir.glob(File.join(migration_dir, "*_create_#{@singular_table_name}.rb")).first
+        assert_file migration_file do |content|
+          test_assertions_migration(content, nesting)
         end
-        @fields.select { |field| field[:options].include?('index') }.each do |field|
-          assert_match(/add_index\s+:#{@table_name},\s+:#{field[:name]}/m, migration)
-        end
-        @fields.select { |field| field[:options].include?('uniq') }.each do |field|
-          assert_match(/add_index\s+:#{@table_name},\s+:#{field[:name]},\s+unique: true/m, migration)
+      end
+
+      # Namespaced model: Set class name with namespace module
+      @nesting_options.each do |nesting|
+        @class_name = original_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        migration_file = Dir.glob(File.join(migration_dir, "*_create_#{@singular_table_name}.rb")).first
+        assert_file migration_file do |content|
+          test_assertions_migration(content, nesting)
         end
       end
     end
 
     test "creates policy" do
-      run_generator(@args)
-      policy_file = File.join(destination_root, 'app', 'policies', @folder_name, 
-        "#{@singular_name}_policy.rb")
-      assert_file policy_file do |content|
-        assert_match(/module\s+#{@module_name}/, content)
-        assert_match(/class\s+#{@model_name}Policy\s+<\s+ResourcePolicy/m, content)
-        assert_match(/def\s+#{@singular_name}/, content)
+      original_class_name = @class_name
+      original_model_class_name = @model_class_name
+      # Core policy: Set class name without namespace module
+      @nesting_options.each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        policy_file = File.join(destination_root, 'app', 'policies', @folder, 
+          "#{@singular_name}_policy.rb")
+        assert_file policy_file do |content|
+          test_assertions_policy(content, nesting)
+        end
+      end
+
+      # Namespaced model: Set class name with namespace module
+      @nesting_options.each do |nesting|
+        @class_name = original_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        policy_file = File.join(destination_root, 'app', 'policies', @folder, 
+          "#{@singular_name}_policy.rb")
+        assert_file policy_file do |content|
+          assert_includes content, "module #{@module_name}"
+          test_assertions_policy(content, nesting)
+        end
       end
     end
 
     test "creates policy test" do
-      run_generator(@args)
-      policy_test_file = File.join(destination_root, 'test', 'policies', @folder_name, 
-        "#{@singular_name}_policy_test.rb")
-      assert_file policy_test_file do |content|
-        assert_match(/module\s+#{@module_name}/, content)
-        assert_match(/class\s+#{@model_name}PolicyTest\s+<\s+ActiveSupport::TestCase/m, content)
+      original_class_name = @class_name
+      original_model_class_name = @model_class_name
+      # Core policy: Set class name without namespace module
+      @nesting_options.each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        policy_test_file = File.join(destination_root, 'test', 'policies', @folder, 
+          "#{@singular_name}_policy_test.rb")
+        assert_file policy_test_file do |content|
+          test_assertions_policy_test(content, nesting)
+        end
+        # Namespaced policy: Set class name with namespace module
+        @class_name = original_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        policy_test_file = File.join(destination_root, 'test', 'policies', @folder, 
+          "#{@singular_name}_policy_test.rb")
+        assert_file policy_test_file do |content|
+          assert_includes content, "module #{@module_name}"
+          test_assertions_policy_test(content, nesting)
+        end
       end
     end
 
     test "creates controller" do
-      run_generator(@args)
-      controller_file = File.join(destination_root, 'app', 'controllers', @folder_name, 
-        "#{@plural_name}_controller.rb")
-      assert_file controller_file do |content|
-        assert_match(/module\s+#{@module_name}/, content)
-        assert_match(/class\s+#{@model_name.pluralize}Controller\s+<\s+ApplicationController/m, content)
-        @fields.each do |field|
-          assert_match(/permit\(.*:#{field[:name]}[,\s\)]/m, content)
+      original_class_name = @class_name
+      original_model_class_name = @model_class_name
+      # Core controller: Set class name without namespace module
+      @nesting_options.each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        controller_file = File.join(destination_root, 'app', 'controllers', @folder, 
+          "#{@plural_name}_controller.rb")
+        assert_file controller_file do |content|
+          test_assertions_controller(content, nesting)
+        end
+        # Namespaced policy: Set class name with namespace module
+        @class_name = original_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        controller_file = File.join(destination_root, 'app', 'controllers', @folder, 
+          "#{@plural_name}_controller.rb")
+        assert_file controller_file do |content|
+          assert_includes content, "module #{@module_name}"
+          test_assertions_controller(content, nesting)
         end
       end
     end
 
     test "creates views" do
-      run_generator(@args)
-      views_dir = File.join(destination_root, 'app', 'views', @folder_name, @plural_name)
+      original_class_name = @class_name
+      original_model_class_name = @model_class_name
+      # Core controller: Set class name without namespace module
+      @nesting_options.each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        views_dir = File.join(destination_root, 'app', 'views', @folder, @plural_name)
+
       # index.html.erb
-      assert_file File.join(views_dir, 'index.html.erb') do |content|
-        assert_match(/if policy\(#{@class_name}\).new?/, content)
-        assert_match(/link_to new_#{@singular_table_name}_path/, content)
-        @fields.each do |field|
-          if SEARCHABLE_TYPES.include?(field[:type])
-            assert_match(/f\.search_field :#{field[:name]}_cont/, content)
-          else
-            refute_match(/f\.search_field :#{field[:name]}_cont/, content)
-          end
+        assert_file File.join(views_dir, 'index.html.erb') do |content|
+          test_assertions_index_view(content, nesting)
         end
-        assert_match(/render 'header'/, content)
-        assert_match(/render 'row'/, content)
-      end
 
       # _header.html.erb
-      assert_file File.join(views_dir, "_header.html.erb") do |content|
-        @fields.each do |field|
-          if INDEX_TYPES.include?(field[:type])
-            assert_match(/sort_link\(@q, :#{field[:name]}\)/, content)
-          else
-            refute_match(/sort_link\(@q, :#{field[:name]}\)/, content)
-          end
+        assert_file File.join(views_dir, '_header.html.erb') do |content|
+          test_assertions_header_view(content, nesting)
         end
-      end
-      
+
       # _row.html.erb
-      assert_file File.join(views_dir, "_row.html.erb") do |content|
-        @fields.each do |field|
-          if INDEX_TYPES.include?(field[:type])
-            case field[:type]
-            when 'string', 'enum', 'integer', 'bigint', 'decimal'
-              assert_match(/#{Regexp.escape("row.#{field[:name]} || '-'")}/, content)
-            when 'float'
-              assert_match(/#{Regexp.escape("number_to_human(row.#{field[:name]}, precision: 4, units: { unit: 'x', thousand: 'kx', million: 'Mx' }) || '-'")}/, content)
-            when 'enum_translated'
-              assert_match(/#{Regexp.escape("row.class.human_enum_name(:#{field[:name]}, row.#{field[:name]})")}/, content)
-            end
-          else
-            refute_match(/#{Regexp.escape("row.#{field[:name]}")}/, content)
-          end
+        assert_file File.join(views_dir, "_row.html.erb") do |content|
+          test_assertions_row_view(content, nesting)
         end
-      end
       
       # show.html.erb
-      assert_file File.join(views_dir, "show.html.erb") do |content|
-        assert_match(/<% provide\(:title, t\('.title'\)\) %>/, content)
-        assert_match(/policy\(@#{@singular_name}\).index?/, content)
-        assert_match(/link_to #{@table_name}_path/, content)
-        assert_match(/link_to prev_#{ @singular_name }/, content)
-        assert_match(/link_to next_#{ @singular_name }/, content)
-        assert_match(/<%= t\('\.header',\s*label:.*\)\s*%>/, content)
-        assert_match(/link_to edit_#{@singular_table_name}_path\(@#{@singular_name}\)/, content)
-        assert_match(/link_to @#{@singular_name},\s*method:\s*:delete/m, content)
-        @fields.each do |field|
-            case field[:type]
-            # Breaking these lines causes errors...
-            when "string", "enum", "integer", "bigint", "decimal"
-              # assert_match(/#{Regexp.escape("@#{@singular_name}.class.human_attribute_name(:#{field[:name]})")}/, content)
-              assert_match(/#{Regexp.escape("@#{@singular_name}.#{field[:name]} || '-'")}/, content)
-            when "float" 
-              assert_match(/number_to_human\(@#{singular_name}.#{field[:name]}/, content)
-            when "enum_translated"
-              assert_match(/#{Regexp.escape("@#{@singular_name}.class.human_enum_name(:#{field[:name]}, @#{@singular_name}.#{field[:name]})")}/, content)
-            when "text", "jsonb" 
-              assert_match(/simple_format\(@#{@singular_name}.#{field[:name]} || '-'\)/, content)
-            when "datetime", "timestamp", "time", "date"
-              assert_match(/time_tag\(@#{@singular_name}.#{field[:name]} || '-'\)/, content)
-            when "binary"
-              assert_match(/'PLACEHOLDER FOR BINARY FIELD'/, content)
-            else
-              assert_match(/#{Regexp.escape("@#{@singular_name}.#{field[:name]} || '-'")}/, content)
-            end
+        assert_file File.join(views_dir, "show.html.erb") do |content|
+          test_assertions_show_view(content, nesting)
         end
-      end
-      
-      # edit.html.erb
-      assert_file File.join(views_dir, "edit.html.erb") do |content|
-        assert_match(/<% provide\(:title, t\('.title'\)\) %>/, content)
-        assert_match(/render \"form\",\s*#{@singular_name}: @#{@singular_name}/m, content)
-      end
       
       # new.html.erb
-      assert_file File.join(views_dir, "new.html.erb") do |content|
-        assert_match(/<% provide\(:title, t\('.title'\)\) %>/, content)
-        assert_match(/render \"form\",\s*#{@singular_name}: @#{@singular_name}/m, content)
-      end
+        assert_file File.join(views_dir, "new.html.erb") do |content|
+          test_assertions_new_view(content, nesting)
+        end
+      
+      # edit.html.erb
+        assert_file File.join(views_dir, "edit.html.erb") do |content|
+          test_assertions_edit_view(content, nesting)
+        end
       
       # _form.html.erb
-      assert_file File.join(views_dir, "_form.html.erb") do |content|
-        assert_match(/yield\(:header\)/m, content)
-        assert_match(/bootstrap_form_with\(model:\s+#{@singular_name}/, content)
-        @fields.each do |field|
-          case field[:type]
-          when "string"
-            assert_match(/f\.text_field\s+:#{field[:name]}/, content)
-          when "text"
-            assert_match(/f\.text_area\s+:#{field[:name]}/, content)
-          when "integer", "bigint"
-            assert_match(/f\.number_field\s+:#{field[:name]}/, content)
-          when "float", "decimal"
-            assert_match(/f\.number_field\s+:#{field[:name]}/, content)
-          when "datetime", "timestamp", "time", "date"
-            assert_match(/f\.datetime_select\s+:#{field[:name]}/, content)
-          when "boolean"
-            assert_match(/f\.check_box\s+:#{field[:name]}/, content)
-          when "jsonb"
-            assert_match(/f\.text_area\s+:#{field[:name]}/, content)
-          when "enum"
-            assert_match(/f\.select\s+:#{field[:name]}/, content)
-          when "enum_translated"
-            assert_match(/f\.select\s+:#{field[:name]}/, content)
-          end
+        assert_file File.join(views_dir, "_form.html.erb") do |content|
+          test_assertions_form_view(content, nesting)
         end
-      end
       
       # _card.html.erb
-      assert_file File.join(views_dir, "_card.html.erb") do |content|
-        assert_match(/resource = object/, content)
-        assert_match(/render \'components\/collapsible\'/, content)
-        assert_match(/link_to resource/, content)
-        @fields.each do |field|
-          # assert_match(/#{Regexp.escape("resource.class.human_attribute_name(:#{field[:name]})")}/, content)
-          case field[:type]
-          # Breaking these lines causes errors...
-          when "string", "enum", "integer", "bigint", "decimal"
-            assert_match(/#{Regexp.escape("resource.#{field[:name]} || '-'")}/, content)
-          when "float" 
-            assert_match(/number_to_human\(resource.#{field[:name]}/, content)
-          when "enum_translated"
-            assert_match(/#{Regexp.escape("resource.class.human_enum_name(:#{field[:name]}, resource.#{field[:name]})")}/, content)
-          when "text", "jsonb" 
-            assert_match(/simple_format\(@#{@singular_name}.#{field[:name]} || '-'\)/, content)
-          when "datetime", "timestamp", "time", "date"
-            assert_match(/time_tag\(@#{@singular_name}.#{field[:name]} || '-'\)/, content)
-          when "binary"
-            assert_match(/'PLACEHOLDER FOR BINARY FIELD'/, content)
-          else
-            assert_match(/#{Regexp.escape("@#{@singular_name}.#{field[:name]} || '-'")}/, content)
-          end
+        assert_file File.join(views_dir, "_card.html.erb") do |content|
+          test_assertions_card_view(content, nesting)
+        end
+
+        # Namespaced policy: Set class name with namespace module
+        @class_name = original_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        views_dir = File.join(destination_root, 'app', 'views', @folder, @plural_name)
+
+      # index.html.erb
+        assert_file File.join(views_dir, 'index.html.erb') do |content|
+          test_assertions_index_view(content, nesting)
+        end
+
+      # _header.html.erb
+        assert_file File.join(views_dir, '_header.html.erb') do |content|
+          test_assertions_header_view(content, nesting)
+        end
+
+      # _row.html.erb
+        assert_file File.join(views_dir, "_row.html.erb") do |content|
+          test_assertions_row_view(content, nesting)
+        end
+      
+      # show.html.erb
+        assert_file File.join(views_dir, "show.html.erb") do |content|
+          test_assertions_show_view(content, nesting)
+        end
+      
+      # new.html.erb
+        assert_file File.join(views_dir, "new.html.erb") do |content|
+          test_assertions_new_view(content, nesting)
+        end
+      
+      # edit.html.erb
+        assert_file File.join(views_dir, "edit.html.erb") do |content|
+          test_assertions_edit_view(content, nesting)
+        end
+      
+      # _form.html.erb
+        assert_file File.join(views_dir, "_form.html.erb") do |content|
+          test_assertions_form_view(content, nesting)
+        end
+      
+      # _card.html.erb
+        assert_file File.join(views_dir, "_card.html.erb") do |content|
+          test_assertions_card_view(content, nesting)
         end
       end
       
@@ -498,11 +622,11 @@ module ProjectAssistant
 
     test "creates controller test" do
       run_generator(@args)
-      controller_test_file = File.join(destination_root, 'test', 'controllers', @folder_name, 
+      controller_test_file = File.join(destination_root, 'test', 'controllers', folder, 
         "#{@plural_name}_controller_test.rb")
       assert_file controller_test_file do |content|
-        assert_match(/module\s+#{@module_name}/, content)
-        assert_match(/class\s+#{@model_name.pluralize}ControllerTest\s*<\s*ActionController::TestCase/, content)
+        assert_match(/module\s+#{module_name}/, content)
+        assert_match(/class\s+#{@model_class_name.pluralize}ControllerTest\s*<\s*ActionController::TestCase/, content)
         assert_match(/include Devise::Test::ControllerHelpers/, content)
         @fields.select { |field| field[:options].include?('required') }.each do |field|
           assert_match(/#{field[:name]}:/, content)
@@ -512,11 +636,11 @@ module ProjectAssistant
 
     test "creates system test" do
       run_generator(@args)
-      system_test_file = File.join(destination_root, 'test', 'system', @folder_name, 
+      system_test_file = File.join(destination_root, 'test', 'system', folder, 
         "#{@plural_name}_system_test.rb")
       assert_file system_test_file do |content|
-        assert_match(/module\s+#{@module_name}/, content)
-        assert_match(/class\s+#{@model_name.pluralize}SystemTest\s*<\s*ApplicationSystemTestCase/, content)
+        assert_match(/module\s+#{module_name}/, content)
+        assert_match(/class\s+#{@model_class_name.pluralize}SystemTest\s*<\s*ApplicationSystemTestCase/, content)
         assert_match(/include Devise::Test::IntegrationHelpers/, content)
         assert_match(/include Warden::Test::Helpers/, content)
         assert_match(/include ActionView::Helpers::NumberHelper/, content)
@@ -525,7 +649,7 @@ module ProjectAssistant
 
     test "adds enum constants" do
       run_generator(@args)
-      constants_file = File.join(destination_root, 'config', 'constants', "#{@module_name.underscore}.yml") 
+      constants_file = File.join(destination_root, 'config', 'constants', "#{module_name.underscore}.yml") 
       assert_file constants_file do |content|
         assert_match(/#{@singular_name}:/, content)
         # Check that enum fields are added with namespaced structure
@@ -558,10 +682,10 @@ module ProjectAssistant
       I18n.available_locales.each do |locale|
       
         # Check models file
-        models_file = File.join(destination_root, "config", "locales", @folder_name, 
-          locale.to_s, "#{locale.to_s}.#{@module_name.underscore}.models.yml")
+        models_file = File.join(destination_root, "config", "locales", folder, 
+          locale.to_s, "#{locale.to_s}.#{module_name.underscore}.models.yml")
         assert_file models_file do |content|
-          assert_match(/#{@folder_name}\/#{@singular_name}:\s+"#{@model_name.underscore.humanize}"/, content)
+          assert_match(/#{folder}\/#{@singular_name}:\s+"#{@model_class_name.underscore.humanize}"/, content)
           @fields.each do |field|
             assert_match(/#{field[:name]}:\s+\"#{field[:name].humanize}\"/, content)
           end
@@ -572,8 +696,8 @@ module ProjectAssistant
     test "creates views translations" do
       run_generator @args
       I18n.available_locales.each do |locale|
-      views_file = File.join(destination_root, "config", "locales", @folder_name, 
-            locale.to_s, "#{locale.to_s}.#{@module_name.underscore}.views.yml")
+      views_file = File.join(destination_root, "config", "locales", folder, 
+            locale.to_s, "#{locale.to_s}.#{module_name.underscore}.views.yml")
         assert_file views_file do |content|
           assert_match(/#{@plural_name}:/, content)
           assert_match(/title:\s*"#{@human_name.pluralize}"/, content)
@@ -594,8 +718,8 @@ module ProjectAssistant
       if enum_translated_fields.any?
         I18n.available_locales.each do |locale|
           # Check models file
-          models_file = File.join(destination_root, "config", "locales", @folder_name, 
-            locale.to_s, "#{locale.to_s}.#{@module_name.underscore}.models.yml")
+          models_file = File.join(destination_root, "config", "locales", folder, 
+            locale.to_s, "#{locale.to_s}.#{module_name.underscore}.models.yml")
           assert_file models_file do |content|
             enum_translated_fields.each do |field|
               assert_match(/#{field[:name]}:\s+\"#{field[:name].humanize}\"/, content)
@@ -607,6 +731,23 @@ module ProjectAssistant
     end
 
     private
+
+    # Required to allow sharing of some scaffold_helper methods in tests.
+    def class_name
+      @class_name
+    end
+    
+    def singular_name
+      @model_class_name.underscore # "new_model"
+    end
+
+    def table_name
+      [*@class_path, @singular_name.pluralize].join"_" # "existing_module_sub_module_new_models"; "existing_module_new_models"; "new_models"
+    end
+
+    def singular_table_name
+      [*@class_path, @singular_name].join"_" # "existing_module_sub_module_new_models"; "existing_module_new_models"; "new_models"
+    end
 
     def teardown
       # Skip cleanup if flag is set

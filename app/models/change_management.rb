@@ -1,6 +1,6 @@
 # frozen_string_literal: true
-module ProjectChange
+module ChangeManagement
   def self.table_name_prefix
-    'project_change_'
+    'change_management_'
   end
 end

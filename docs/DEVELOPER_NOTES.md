@@ -409,6 +409,10 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Fix tag prefix warning message for non-conforming prefix.
 - [ ] Fix assertion in projects system test for show link with no text.
 - [ ] Improve cable index and search options.
+- [ ] Generators file input from ruby format.
+- [ ] Clean up abstraction of policies and policy tests. Update generator and tests.
+- [ ] Abstract controllers for project, discipline and tag nested resources.
+- [ ] Generic tag_resource_policy may be required. Generator provides for tag nesting but use case is not certain. Only demands are tag linked but not tagable.
 
 ## Refactoring Opportunities
 
@@ -476,11 +480,14 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Migrate i18n translations to a database system rather than YAML.
 - [ ] Refactor documents to normalize discipline: remove fk and associate discipline through doc_type.
 - [ ] Ditto cables: remove fk and associate discipline through cable_type. At the same time, sort out a decent label and add unique constraint on code.
-- [ ] Refactor show views using standardised attributes helper.
-- [ ] Refactor form views using standardised form fields helper.
+- [x] Refactor show views using standardised attributes helper.
+- [x] Refactor form views using standardised form fields helper.
 - [ ] Extend views helper for attributes to include decimal numbers with units.
 - [ ] Carefully consider use of nested collapsible cards, as in cables from and to. Prefer a more robust nav_link?
 - [ ] Include a scope for unique fields in generators.
+- [ ] Add migration and test implementation to generator testing.
+- [ ] Build in git commit before scaffold generator and tagable generator run.
+- [ ] Add polymorphic option to associations in generators.
 
 ## Potential Features
 
@@ -504,6 +511,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Add a "locator" so accessing index view from show view centres the index on the present record.
 - [ ] Add a clear search button for index views. Add hover title for search button.
 - [ ] Add highlight to search results for all index views (refer projects).
+- [ ] Add bullet gem for performance issues.
 
 ## Architecture Considerations
 

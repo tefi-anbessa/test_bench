@@ -35,7 +35,7 @@ class Tag < ApplicationRecord
   validates :prefix, length: { in: 1..6 }
 
   validates :serial, presence: true
-  validates :serial, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than: 10**Constants.tags.serial_digits.to_i }
+  validates :serial, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than: 10**Constants.tag.serial_digits.to_i }
   validates :suffix, length: { maximum: 5 }
   validates :service, length: { maximum: 40 }
   validates :stage, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 10 }
@@ -104,7 +104,7 @@ class Tag < ApplicationRecord
   end
 
   def long_label
-    "#{discipline.code}#{Constants.tags.separator}#{full_tag}"
+    "#{discipline.code}#{Constants.tag.separator}#{full_tag}"
   end
 
   # Only use for tests

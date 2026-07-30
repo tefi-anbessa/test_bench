@@ -1,51 +1,58 @@
 # frozen_string_literal: true
 <%- if @namespaced -%>
 module <%= module_name %>
-  class <%= model_class %> < Base
+  class <%= model_class_name %> < Base
 <%- else -%>
-class <%= model_class %> < ApplicationRecord
+class <%= model_class_name %> < ApplicationRecord
 <%- end -%>
   # === Mixins ===
+<%- if @nesting == :tagable -%>
+    include Tagable
+<%- end -%>
 
   # === Constants ===
     # enum declarations
-    <%- @fields.select { |f| %w[enum enum_translated].include?(f[:type]) }.each do |field| -%>
-    enum :<%= field[:name] %>, Constants.<%= module_name.underscore %>.<%= singular_name %>.<%= field[:name] %>.to_h
-    #!!! Define enum options in Constants file config/constants/<%= module_name.underscore %>.yml
-    <%- end -%>
+<%- @enum_fields.each do |field| -%>
+    enum :<%= field[:name] %>, Constants.<%= i18n_scope %>.<%= field[:name] %>.to_h
+<%- end -%>
 
   # === Gem macros ===
+<%- unless @nesting == :tagable -%>
+    has_paper_trail
+<%- end -%>
 
   # === Attributes ===
 
   # === Associations ===
-    # Belongs to associatons
-    <%- @fields.select { |f| %w[references belongs_to].include?(f[:type]) }.each do |field| -%>
-    belongs_to :<%= field[:name] %><%- unless field[:options].include?('required') %>, optional: true<%- end %>
-    <%- end -%>
+<%- @association_fields.each do |field| -%>
+    belongs_to :<%= field[:name] %><%- unless field[:options][:required] == true -%>, optional: true<%- end %>
+<%- end -%>
+<%- unless @nesting.in?(%i[none tagable]) -%>
+    belongs_to <%= @nesting.inspect %>
+<%- end -%>
 
   # === Scopes ===
 
   # === Validations ===
     # Presence validation for required fields.
-    <%- @fields.select { |f| f[:options].include?('required') && !%w[references].include?(f[:type]) }.each do |field| -%>
+<%- @required_fields.each do |field| -%>
     validates :<%= field[:name] %>, presence: true
-    <%- end -%>
+<%- end -%>
     
     # Uniqueness validation for unique fields.
-    <%- @fields.select { |f| f[:options].include?('uniq') }.each do |field| -%>
+<%- @unique_fields.each do |field| -%>
     validates :<%= field[:name] %>, uniqueness: true
-    <%- end -%>
+<%- end -%>
 
   # === Callbacks ===
 
   # === Class methods ===
 
   # === Class methods - Queries ===
-  # Provide SQL for ordering records in the navigator
-  def self.navigator_order_sql
-    "<%= table_name %>.created_at ASC"
-  end
+    # Provide SQL for ordering records in the navigator
+    def self.navigator_order_sql
+      "<%= table_name %>.created_at ASC"
+    end
 
   # === Public methods ===
 
@@ -53,18 +60,13 @@ class <%= model_class %> < ApplicationRecord
     private
 
     def self.ransackable_attributes(auth_object = nil)
-      [<%= (@fields.select { |f| SEARCHABLE_TYPES.include?(f[:type]) }.map { |f| ":#{f[:name]}" } + 
-      [':created_at', ':updated_at']).join(', ') %>]
+      <%= @ransack_attributes %>
     end
 
     def self.ransackable_associations(auth_object = nil)
-      <%- associations = [ ] -%>
-      <%- @fields.select { |f| %w[references].include?(f[:type]) }.each do |field| -%>
-        <%- associations += [field[:name]] -%>
-      <%- end -%>
-      <%= associations %>
+      <%= @ransack_associations %>
     end
-  end
 <%- if @namespaced -%>
-end
+  end
 <%- end -%>
+end

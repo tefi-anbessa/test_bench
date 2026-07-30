@@ -1,6 +1,5 @@
 <%% provide(:title, t('.title')) %>
-<%% provide(:header, t('.header')) %>
+<%% provide(:header, t(<%= ["'.header'", @scope].compact.join(', ') %>)) %>
 <%% provide(:button_text, t('actions.create')) %>
 <%%= render "form",
-  <%= singular_name %>: @<%= singular_name %>
-%>
+  <%= [*@form_variables].join(', ') %> %>

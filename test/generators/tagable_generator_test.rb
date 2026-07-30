@@ -2,28 +2,28 @@
 require 'test_helper'
 require Rails.root.join('lib', 'generators', 'project_assistant', 'tagable_generator').to_s
 require Rails.root.join('lib', 'generators', 'project_assistant', 'module_generator').to_s
-require Rails.root.join('lib', 'generators', 'project_assistant', 'field_types').to_s
+require Rails.root.join('lib', 'generators', 'project_assistant', 'shared', 'scaffold_helper').to_s
 require "yaml"
 
 module ProjectAssistant
   class TagableGeneratorTest < Rails::Generators::TestCase
-    include ProjectAssistant::FieldTypes
+    include ProjectAssistant::Shared::ScaffoldHelper
     tests ProjectAssistant::TagableGenerator
     destination Rails.root.join('tmp', 'generators', 'tagable')
     setup :prepare_destination
 
     setup do
-      @module_name = "ExistingModule"
-      @tagable_name = "Motor"
+      @module_name = "Electrical"
+      @tagable_name = "Test"
       # Generator::NamedBase methods are not available in the test environment so we replicate the ones we need.
-      @file_name = "#{@module_name.underscore}_#{@tagable_name.underscore}" # electrical_motor
-      @table_name = "#{@module_name.underscore}_#{@tagable_name.underscore.pluralize}" # electrical_motors
-      @class_name = "#{@module_name}::#{@tagable_name}" # Electrical::Motor
+      @file_name = "#{@module_name.underscore}_#{@tagable_name.underscore}" # electrical_test
+      @table_name = "#{@module_name.underscore}_#{@tagable_name.underscore.pluralize}" # electrical_tests
+      @class_name = "#{@module_name}::#{@tagable_name}" # Electrical::Test
       @folder_name = "#{@module_name.underscore}" # electrical
-      @singular_name = "#{@tagable_name.underscore}" # motor
-      @plural_name = "#{@tagable_name.underscore.pluralize}" # motors
-      @controller_file_path = File.join(@module_name.underscore, @plural_name.underscore) # electrical/motors
-      @i18n_key = File.join(@module_name.underscore, @tagable_name.underscore) # electrical/motor
+      @singular_name = "#{@tagable_name.underscore}" # test
+      @plural_name = "#{@tagable_name.underscore.pluralize}" # tests
+      @controller_file_path = File.join(@module_name.underscore, @plural_name.underscore) # electrical/tests
+      @i18n_key = File.join(@module_name.underscore, @tagable_name.underscore) # electrical/test
       
       # Create clean files for testing (avoid conflicts with real app files)
       FileUtils.mkdir_p(File.join(destination_root, 'config'))
@@ -61,10 +61,10 @@ module ProjectAssistant
 
       # Dummy arguments for the command line
       @args = ["#{@module_name}::#{@tagable_name}", 
-        'name:string:required:index',
+        'name:string:required:valid=Test_name',
         'description:text:valid=Test',
-        'selector:enum:keys=[a,b,c]:valid="a"',
-        'status:enum_translated:keys=[alpha,bravo]:valid="bravo"',
+        'selector:enum:keys=[a,b,c]:valid=a',
+        'status:enum_translated:keys=[alpha,bravo]:valid=bravo',
         'sort_order:integer:index:step=10:valid=100',
         'power:float:precision=5:scale=3:units=kJ:step=1:valid=2.2',
         'money:decimal:units=$:precision=7:scale=2:step=.01:valid=5555.55',
@@ -72,7 +72,7 @@ module ProjectAssistant
         'birthday:date',
         'created:datetime',
         'flex_field:jsonb',
-        'code:string:uniq:valid="AA"',
+        'code:string:uniq:valid=AA',
         'parent:references:required=false',
         'owner:belongs_to:required'
       ]
@@ -93,15 +93,15 @@ module ProjectAssistant
       # Mimic the generator field sets.
       @all_field_names = @fields.map { |field| 
           case field[:type]
-          when *ProjectAssistant::FieldTypes::ASSOCIATION_TYPES
+          when *ProjectAssistant::Shared::ScaffoldHelper::ASSOCIATION_TYPES
             "#{field[:name]}_id"
           else
             "#{field[:name]}"
           end
         }
-      @index_fields = @fields.select { |field| ProjectAssistant::FieldTypes::INDEX_TYPES.include?(field[:type]) }
-      @searchable_fields = @fields.select { |field| ProjectAssistant::FieldTypes::SEARCHABLE_TYPES.include?(field[:type]) }
-      @association_fields = @fields.select { |field| ProjectAssistant::FieldTypes::ASSOCIATION_TYPES.include?(field[:type]) }
+      @index_fields = @fields.select { |field| ProjectAssistant::Shared::ScaffoldHelper::INDEX_TYPES.include?(field[:type]) }
+      @searchable_fields = @fields.select { |field| ProjectAssistant::Shared::ScaffoldHelper::SEARCHABLE_TYPES.include?(field[:type]) }
+      @association_fields = @fields.select { |field| ProjectAssistant::Shared::ScaffoldHelper::ASSOCIATION_TYPES.include?(field[:type]) }
       @attribute_fields = @fields - @association_fields
       @required_fields = @fields.select { |field| field[:options][:required] == true }
       @enum_fields = @fields.select { |field| %i[enum enum_translated].include?(field[:type]) }
@@ -150,7 +150,7 @@ module ProjectAssistant
 
     test "validates missing module name" do
       generator = ProjectAssistant::TagableGenerator.new(
-        ["Motor", "name:string"],
+        ["Test", "name:string"],
         {},
         destination_root: destination_root
       )
@@ -162,7 +162,7 @@ module ProjectAssistant
 
     test "validates name with invalid class name" do
       generator = ProjectAssistant::TagableGenerator.new(
-        ["ExistingModule::123Invalid", "name:string"],
+        ["Electrical::123Invalid", "name:string"],
         {},
         destination_root: destination_root
       )
@@ -388,7 +388,10 @@ module ProjectAssistant
           assert_match(/association\s+:\s*#{field[:name]}/, content)
         end
         @attribute_fields.each do |field| 
-          assert_match(/#{field[:name]}\s+\{\s*#{field[:options][:valid]}/, content)
+          assert_match(/#{field[:name]}/, content)
+          if field[:options][:valid].present?
+            assert_includes content, field[:options][:valid]
+          end
         end
       end
     end

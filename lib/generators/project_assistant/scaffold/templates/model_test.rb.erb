@@ -1,14 +1,13 @@
 require "test_helper"
-require "helpers/model_test_patterns"
+require "helpers/test_setup_helpers"
 <%- if @namespaced -%>
 module <%= module_name %>
-  class <%= model_class %>Test < ActiveSupport::TestCase
-<%- else -%>
-class <%= model_class %> < ApplicationRecord
 <%- end -%>
-    include ModelTestPatterns
+  class <%= model_class_name %>Test < ActiveSupport::TestCase
+    include TestSetupHelpers
 
     def setup
+      setup_common_test_data
       setup_model_specific_data
     end
     
@@ -18,7 +17,7 @@ class <%= model_class %> < ApplicationRecord
       # E.g. setup electrical_demand for electrical models.
     end
 
-<%- @fields.select { |f| f[:options].include?('required') }.each do |field| -%>
+<%- @required_fields.each do |field| -%>
     test "<%= field[:name] %> must be present" do
       @resource.<%= field[:name] %> = nil
       refute @resource.valid?
@@ -29,11 +28,19 @@ class <%= model_class %> < ApplicationRecord
       <%- end -%>
     end
 <%- end -%>
+<%- @unique_fields.each do |field| -%>
+    test "<%= field[:name] %> must be unique" do
+      new_resource = build(:<%= singular_table_name %>)
+      new_resource.<%= field[:name] %> = @resource.<%= field[:name] %>
+      refute new_resource.valid?
+      assert_includes @resource.errors[:<%= field[:name] %>], I18n.t("errors.messages.taken")
+    end
+<%- end -%>
 
     # Insert model specific tests here.
     # E.g. test electrical_demand for electrical models.
 
-  end
 <%- if @namespaced -%>
-end
+  end
 <%- end -%>
+end

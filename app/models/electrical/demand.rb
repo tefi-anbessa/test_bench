@@ -41,7 +41,6 @@ module Electrical
     validate :demandable_must_have_tag, if: :demandable?
     
     validates :supply, numericality: { greater_than: 0.0 }, allow_nil: true
-    before_save :load_calculator
     
     validates :power_factor, 
       numericality: { in: -1.0..1.0 }, 
@@ -52,6 +51,7 @@ module Electrical
 
     # === Callbacks ===
     before_validation :set_supply
+    before_save :load_calculator
 
     # === Class methods ===
     def self.required_role
@@ -59,7 +59,7 @@ module Electrical
     end
 
     # === Class methods - Queries ===
-    # Provide SQL for ordering documents in the navigator
+    # Provide SQL for ordering records in the navigator
     def self.navigator_order_sql
       <<~SQL.squish
         projects.code ASC,

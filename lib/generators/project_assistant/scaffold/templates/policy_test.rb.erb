@@ -1,10 +1,15 @@
 require 'test_helper'
+<%- unless @nesting == :none %>
+require <%= "helpers/#{@nesting.to_s}_resource_policy_test" %>
+<%- end -%>
 require 'helpers/resource_policy_test'
 <%- if @namespaced -%>
 module <%= module_name %>
 <%- end -%>
-  class <%= model_class %>PolicyTest < ActiveSupport::TestCase
-    include ResourcePolicyTest
+  class <%= model_class_name %>PolicyTest < ActiveSupport::TestCase
+<%- unless @nesting == :none %>
+    include <%= "#{@nesting.to_s.camelize}ResourcePolicyTest" %>
+<%- end -%>
 
     def setup
       setup_resource_policy_test

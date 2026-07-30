@@ -10,9 +10,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_10_070550) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_30_001525) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "change_management_requests", force: :cascade do |t|
+    t.bigint "project_id", null: false
+    t.integer "serial"
+    t.text "reason", null: false
+    t.text "summary", null: false
+    t.integer "duration", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "title", null: false
+    t.index ["project_id", "serial"], name: "index_change_management_requests_on_project_id_and_serial", unique: true
+    t.index ["project_id"], name: "index_change_management_requests_on_project_id"
+    t.index ["title", "project_id"], name: "index_change_management_requests_on_title_and_project_id", unique: true
+  end
 
   create_table "disciplines", force: :cascade do |t|
     t.string "name"
@@ -133,7 +147,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_10_070550) do
     t.datetime "updated_at", null: false
     t.text "notes"
     t.string "demandable_type"
-    t.integer "voltage_reference"
+    t.integer "supply_reference"
     t.index ["demandable_type", "demandable_id"], name: "index_electrical_demands_on_demandable"
   end
 
@@ -204,20 +218,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_10_070550) do
     t.index ["document_id", "code"], name: "index_issues_on_document_id_and_code", unique: true
     t.index ["document_id"], name: "index_issues_on_document_id"
     t.index ["source_format_id"], name: "index_issues_on_source_format_id"
-  end
-
-  create_table "project_change_requests", force: :cascade do |t|
-    t.bigint "project_id", null: false
-    t.integer "serial"
-    t.text "reason", null: false
-    t.text "summary", null: false
-    t.integer "duration", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "title", null: false
-    t.index ["project_id", "serial"], name: "index_project_change_requests_on_project_id_and_serial", unique: true
-    t.index ["project_id"], name: "index_project_change_requests_on_project_id"
-    t.index ["title", "project_id"], name: "index_project_change_requests_on_title_and_project_id", unique: true
   end
 
   create_table "projects", force: :cascade do |t|

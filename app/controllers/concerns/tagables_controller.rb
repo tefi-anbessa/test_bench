@@ -14,7 +14,7 @@ module TagablesController
     # GET /index - abstracted index action with proper authorization
     # This method will set the resources instance variable (e.g., @motors, @switchboards)
     # in accordance with the policy scope for the resource, ransack seach params, and pagy.
-    def index_tagable
+    def index_resource
       authorize resource_class, :index?
       @q = policy_scope(resource_class).ransack(params[:q])
       result = @q.result.includes(tag: { discipline: :project })
@@ -35,14 +35,14 @@ module TagablesController
     end
 
     # GET /show - abstracted show action
-    def show_tagable
+    def show_resource
       authorize @resource, :show?
       instance_variable_set(resource_var_name, @resource)
       @neighbours = Navigator.new(scope: @scope, record: @resource).neighbours
     end
 
     # GET /new - abstracted new action
-    def new_tagable
+    def new_resource
       # set_tag looks for a tag_id in the params.
       # If a valid tag id is found, the action builds a new tagable on the existing tag for the form. 
       # If no tag_id in params, discipline_id is expected, and set_tag builds a new tag on the discipline.
@@ -54,7 +54,7 @@ module TagablesController
     end
 
   # POST /switchboards 
-    def create_tagable
+    def create_resource
       # set_tag looks for a tag_id in the params.
       # If a valid tag id is found, the action creates a new tagable on the existing tag. 
       # If no tag_id in params, discipline_id is expected, and the action creates a new resource
@@ -93,7 +93,7 @@ module TagablesController
     end
 
     # GET /edit 
-    def edit_tagable
+    def edit_resource
       authorize @resource, :edit?
       # Allow edit of resource without a tag as a way to rescue orphans
       # [TODO - this won't work at present because without a project association 
@@ -103,7 +103,7 @@ module TagablesController
     end
 
     # PATCH/PUT /switchboards/1 
-    def update_tagable
+    def update_resource
       authorize @resource, :update?
 
       # Tagable allows a new tag to be created via update, as a way to rescue orphans
@@ -144,7 +144,7 @@ module TagablesController
     end
 
     # DELETE /:id - abstracted destroy action
-    def destroy_tagable
+    def destroy_resource
       authorize @resource, :destroy?
       if @resource.destroy
         flash[:success] = t('flash.destroy.notice',

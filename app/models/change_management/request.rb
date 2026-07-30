@@ -1,11 +1,11 @@
 # frozen_string_literal: true
-module ProjectChange
+module ChangeManagement
   class Request < Base
     # === Mixins ===
 
     # === Constants ===
     # enum declarations
-    enum :duration, Constants.project_change.request.duration.to_h
+    enum :duration, Constants.change_management.request.duration.to_h
 
     # === Gem macros ===
     has_paper_trail
@@ -15,7 +15,7 @@ module ProjectChange
     attr_readonly :project_id, :serial
 
     # === Associations ===
-    belongs_to :project, inverse_of: :change_requests
+    belongs_to :project
 
     # === Scopes ===
 

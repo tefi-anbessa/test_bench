@@ -70,6 +70,8 @@ en:
     resource:     "Resource"
     true:         "Yes"
     false:        "No"
+    not_numeric:  "Not a numeric value"
+
   field:
     type:
       integer:      "integer"

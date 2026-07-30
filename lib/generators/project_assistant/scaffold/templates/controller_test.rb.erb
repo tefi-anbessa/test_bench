@@ -3,7 +3,7 @@ require "helpers/resource_controller_test_helper.rb"
 <%- if @namespaced -%>
 module <%= module_name %>
 <%- end -%>
-  class <%= model_class.pluralize %>ControllerTest < ActionController::TestCase
+  class <%= model_class_name.pluralize %>ControllerTest < ActionController::TestCase
     include Devise::Test::ControllerHelpers
     include ResourceControllerTestHelper
 

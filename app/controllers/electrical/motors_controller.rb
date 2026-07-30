@@ -4,37 +4,37 @@ module Electrical
 
     # GET /motors or /motors.json
     def index
-      index_tagable
+      index_resource
     end
 
     # GET /motors/1 or /motors/1.json
     def show
-      show_tagable
+      show_resource
     end
 
     # GET /motors/1/edit
     def edit
-      edit_tagable
+      edit_resource
     end
 
     # GET /motors/new
     def new
-      new_tagable
+      new_resource
     end
 
     # POST /motors or /motors.json
     def create
-      create_tagable
+      create_resource
     end
 
     # PATCH/PUT /motors/1 or /motors/1.json
     def update
-      update_tagable
+      update_resource
     end
 
     # DELETE /motors/1 or /motors/1.json
     def destroy
-      destroy_tagable
+      destroy_resource
     end
 
     private

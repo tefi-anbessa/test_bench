@@ -76,6 +76,14 @@ module TagableModelTests
   end
 
   class_methods do
+    def test_associations(*fields)
+      define_method("test_responds_to_association") do
+        fields.each do |field|
+          assert_respond_to @resource, field
+        end
+      end
+    end
+
     def test_required_fields(*fields)
       define_method("test_required_fields_presence") do
         fields.each do |field|

@@ -1,5 +1,5 @@
 FactoryBot.define do
-  factory :project_change_request, class: ProjectChange::Request do
+  factory :change_management_request, class: ChangeManagement::Request do
     # Attributes
     association :project
     title { Faker::Lorem.unique.sentence }

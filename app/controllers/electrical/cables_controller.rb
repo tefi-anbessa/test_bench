@@ -4,37 +4,37 @@ module Electrical
 
     # GET electrical/cables or /electrical/cables.json
     def index
-      index_tagable
+      index_resource
     end
 
     # GET electrical/cables/1 or /electrical/cables/1.json
     def show
-      show_tagable
+      show_resource
     end
 
     # GET electrical/cables/new
     def new
-      new_tagable
+      new_resource
     end
 
     # POST electrical/cables or /electrical/cables.json
     def create
-      create_tagable
+      create_resource
     end
 
     # GET electrical/cables/1/edit
     def edit
-      edit_tagable
+      edit_resource
     end
 
     # PATCH/PUT electrical/cables/1 or /electrical/cables/1.json
     def update
-      update_tagable
+      update_resource
     end
 
     # DELETE electrical/cables/1 or /electrical/cables/1.json
     def destroy
-      destroy_tagable
+      destroy_resource
     end
 
     private

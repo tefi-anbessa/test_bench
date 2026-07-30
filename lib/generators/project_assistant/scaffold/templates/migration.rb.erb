@@ -1,23 +1,26 @@
 class Create<%= singular_table_name.camelize %> < ActiveRecord::Migration[<%= Rails.version.to_f %>]
   def change
     create_table :<%= table_name %> do |t|
-      <%- @fields.each do |field| -%>
-        <%- field_type = if ['enum', 'enum_translated'].include?(field[:type])
+<%- @attribute_fields.each do |field| -%>
+  <%- field_type = if ['enum', 'enum_translated'].include?(field[:type])
                       'integer'
                     else
-                      field[:type]
+                      field[:type].to_s
                     end -%>
-        <%- options = "" -%>
-        <%- if field[:options].include?('required') -%>
-          <%- options = ", null: false" -%>
-        <%- end -%>
-        <%- if field[:options].include?('unique') -%>
-          <%- options += ", index: { unique: true }" -%>
-        <%- elsif field[:options].include?('index') -%>
-          <%- options += ", index: true" -%>
-        <%- end -%>
+  <%- options = "" -%>
+  <%- if field.dig(:options, :required) -%>
+    <%- options = ", null: false" -%>
+  <%- end -%>
+  <%- if field.dig(:options, :unique) || field.dig(:options, :uniq) -%>
+    <%- options += ", index: { unique: true }" -%>
+  <%- elsif field.dig(:options, :index) -%>
+    <%- options += ", index: true" -%>
+  <%- end -%>
       t.<%= field_type %> :<%= field[:name] + options %>
-    <%- end -%>
+<%- end -%>
+<%- @association_fields.each do |field| -%>
+      t.references :<%= field[:name] %>, foreign_key: true
+<%- end -%>
       t.timestamps
     end
   end

@@ -1,5 +1,5 @@
 require "application_system_test_case"
-module ProjectChange
+module ChangeManagement
   class RequestsSystemTest < ApplicationSystemTestCase
     include Devise::Test::IntegrationHelpers
     include Warden::Test::Helpers

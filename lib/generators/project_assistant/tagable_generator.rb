@@ -1,21 +1,13 @@
 require "rails/generators/named_base"
-require_relative 'field_types'
+require_relative 'shared/scaffold_helper'
 
 module ProjectAssistant
   class TagableGenerator < Rails::Generators::NamedBase
     include Rails::Generators::ResourceHelpers
-    include FieldTypes
+    include ProjectAssistant::Shared::ScaffoldHelper
     desc "Create scaffolding and config entries for a tagable model"
     source_root File.expand_path("tagable/templates", __dir__)
     class_option :definition, type: :string, desc: "Fields definition file name"
-    FLOAT_REGEX = /\A-?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?\z/
-    INTEGER_REGEX = /\A-?\d+\z/
-    IDENTIFIER_REGEX = /\A[a-z][a-z0-9_]*\z/
-    
-    def initialize(args, *options)
-      super
-      # validate_name
-    end
 
     def module_name
       class_name.split("::")[0..-2].join("::")  # "Module::SubModule".
@@ -26,6 +18,7 @@ module ProjectAssistant
     end
 
     def validate_name
+      $stderr.puts "DEBUG (Generator): args #{args}"
       # $stderr.puts "DEBUG: validating name: #{class_name.inspect}"
       errors = []
       
@@ -96,6 +89,18 @@ module ProjectAssistant
         end
       end
 
+      def spit(fields)
+        cl = +""
+        fields.each do |field|
+          options = +""
+          field[:options].each do |key, value|
+            options << ":#{key}=#{value}"
+          end
+          cl << ("#{field[:name]}:#{field[:type]}#{options} ")
+        end
+        puts cl.inspect
+      end
+
       def normalize_fields(hash)
         hash.map do |name, attrs|
           {
@@ -131,30 +136,29 @@ module ProjectAssistant
         # $stderr.puts "DEBUG: input_fields: #{@input_fields.inspect}"
       
       @input_fields.each do |field|
+        @valid = true
         field => { name:, type:, options: }
           # $stderr.puts "DEBUG: field name: #{name.inspect},  type: #{type.inspect}, options: #{options.inspect}"
         begin
           # Validate field name
           unless name&.match?(IDENTIFIER_REGEX)
             errors << "#{name}: invalid field name. Must be a valid Ruby identifier."
-            next
+            @valid = false
           end
           
           # Validate field type (no defaults)
           if type.nil?
             errors << "#{name}: missing field type. Please specify a valid type."
-            next
-          end
-          
-          type = type.to_sym
-          unless VALID_FIELD_TYPES.include?(type)
-            errors << "#{name}: unknown field type #{type}. Valid types are: #{VALID_FIELD_TYPES.join(', ')}."
-            next
+            @valid = false
+          else
+            type = type.to_sym
+            unless VALID_FIELD_TYPES.include?(type)
+              errors << "#{name}: unknown field type #{type}. Valid types are: #{VALID_FIELD_TYPES.join(', ')}."
+              @valid = false
+            end
           end
 
           # Validate options
-          # set flag
-          all_options_valid = true
           options.each do |key, value|
             # $stderr.puts "DEBUG: checking option: key: #{key.inspect}, value: #{value.inspect}"
             case key
@@ -163,17 +167,20 @@ module ProjectAssistant
               if error
                 errors << "#{name} option #{key}: #{error}"
                 # clear flag
-                all_options_valid = false
+                @valid = false
                 next
               end
               options[key] = value
 
             when :valid
+              # $stderr.puts "DEBUG: valid option key: name: #{name.inspect},  type: #{type.inspect}, options: #{options.inspect}"
+              # $stderr.puts "DEBUG: value before coerce: #{value.inspect}"
               value, error = coerce(value, type)
+              # $stderr.puts "DEBUG: value after coerce: #{value.inspect} error: #{error.inspect}"
               if error
                 errors << "#{name} option #{key}: #{error}"
                 # clear flag
-                all_options_valid = false
+                @valid = false
                 next
               end
               options[key] = value
@@ -183,14 +190,14 @@ module ProjectAssistant
               unless key_list.is_a?(Array)
                 errors << "Key list for #{name} #{type} could not be formed into a valid array." 
                 # clear flag
-                all_options_valid = false
+                @valid = false
                 next
               end
               key_list.each do |enum_key|
                 unless enum_key.to_s.match?(IDENTIFIER_REGEX)
                   errors << "#{name}: Invalid enum key #{enum_key}, must be valid ruby identifier."
                   # clear flag
-                  all_options_valid = false
+                  @valid = false
                 end
               end
               options[key] = key_list
@@ -199,13 +206,13 @@ module ProjectAssistant
               unless %i[decimal float].include?(type)
                 errors << "#{name}: #{key} is not a valid option for #{type}." 
                 # clear flag
-                all_options_valid = false
+                @valid = false
               end
               value, error = coerce(value, :integer)
               if error
                 errors << "#{name} option #{key}: #{key} value must be :integer."
                 # clear flag
-                all_options_valid = false
+                @valid = false
                 next
               end
               options[key] = value
@@ -214,7 +221,7 @@ module ProjectAssistant
               unless %i[decimal float].include?(type)
                 errors << "#{name}: #{key} is not a valid option for #{type}" 
                 # clear flag
-                all_options_valid = false
+                @valid = false
               end
               value, error = coerce(value, :string)
               options[key] = value
@@ -223,13 +230,13 @@ module ProjectAssistant
               unless %i[decimal float].include?(type)
                 errors << "#{name}: #{key} is not a valid option for #{type}" 
                 # clear flag
-                all_options_valid = false
+                @valid = false
               end
               value, error = coerce(value, :boolean)
               if error
                 errors << "#{name} option #{key}: #{error}"
                 # clear flag
-                all_options_valid = false
+                @valid = false
                 next
               end
               options[key] = value
@@ -238,26 +245,26 @@ module ProjectAssistant
               unless %i[decimal float integer bigint].include?(type)
                 errors << "#{name}: #{key} is not a valid option for #{type}" 
                 # clear flag
-                all_options_valid = false
+                @valid = false
                 next
               end
               value, error = coerce(value, :decimal)
               if error
                 errors << "#{name} option #{key}: #{error}"
                 # clear flag
-                all_options_valid = false
+                @valid = false
                 next
               end
               options[key] = value
             else
               errors << "#{name} option #{key}: not a valid option"
               # clear flag
-              all_options_valid = false
+                @valid = false
               next
             end
           end
 
-          if all_options_valid
+          if @valid
             valid_fields << { name:, type:, options: }
               # $stderr.puts "DEBUG: valid field: name: #{name.inspect},  type: #{type.inspect}, options: #{options.inspect}"
           end
@@ -276,6 +283,7 @@ module ProjectAssistant
       else
         @fields = valid_fields
         say_status :info, "All #{valid_fields.length} fields are valid.", :green
+        # spit(@fields)
       end
       
       @fields
@@ -338,15 +346,15 @@ module ProjectAssistant
     def setup_field_sets
       @all_field_names = @fields.map { |field| 
           case field[:type]
-          when *ProjectAssistant::FieldTypes::ASSOCIATION_TYPES
+          when *ProjectAssistant::Shared::ScaffoldHelper::ASSOCIATION_TYPES
             "#{field[:name]}_id"
           else
             "#{field[:name]}"
           end
         }
-      @index_fields = @fields.select { |field| ProjectAssistant::FieldTypes::INDEX_TYPES.include?(field[:type]) }
-      @searchable_fields = @fields.select { |field| ProjectAssistant::FieldTypes::SEARCHABLE_TYPES.include?(field[:type]) }
-      @association_fields = @fields.select { |field| ProjectAssistant::FieldTypes::ASSOCIATION_TYPES.include?(field[:type]) }
+      @index_fields = @fields.select { |field| ProjectAssistant::Shared::ScaffoldHelper::INDEX_TYPES.include?(field[:type]) }
+      @searchable_fields = @fields.select { |field| ProjectAssistant::Shared::ScaffoldHelper::SEARCHABLE_TYPES.include?(field[:type]) }
+      @association_fields = @fields.select { |field| ProjectAssistant::Shared::ScaffoldHelper::ASSOCIATION_TYPES.include?(field[:type]) }
       @attribute_fields = @fields - @association_fields
       @enum_fields = @fields.select { |field| %i[enum enum_translated].include?(field[:type]) }
       @required_fields = @fields.select { |field| field[:options][:required] == true }
@@ -478,8 +486,10 @@ module ProjectAssistant
 
           @enum_fields.each do |field|
             text << "#{indent}#{tab*2}#{field[:name]}:\n"
-            field[:options][:keys].each_with_index do |k, i|
-              text << "#{indent}#{tab*3}#{k}:#{tab}#{i}\n"
+            if field[:options].include?(:keys)
+              field[:options][:keys].each_with_index do |k, i|
+                text << "#{indent}#{tab*3}#{k}:#{tab}#{i}\n"
+              end
             end
           end
           text

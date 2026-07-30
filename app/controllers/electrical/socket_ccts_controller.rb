@@ -3,31 +3,31 @@ module Electrical
     include TagablesController
     
     def index
-      index_tagable
+      index_resource
     end
 
     def show
-      show_tagable
+      show_resource
     end
 
     def new
-      new_tagable
+      new_resource
     end
 
     def edit
-      edit_tagable
+      edit_resource
     end
 
     def create
-      create_tagable
+      create_resource
     end
 
     def update
-      update_tagable
+      update_resource
     end
 
     def destroy
-      destroy_tagable
+      destroy_resource
     end
 
     private

@@ -13,7 +13,11 @@ FactoryBot.define do
 <%- end -%> 
     # Attributes
 <%- @attribute_fields.each do |field|-%>
-    <%= field[:name] %> { <%= field[:options][:valid].to_s || nil %> }
+<%-   valid = field.dig(:options, :valid) || 
+        (if [:enum, :enum_translated].include?(field[:type])
+          field.dig(:options, :keys)&.first
+        end) -%>
+    <%= field[:name] %> { <%= (valid || nil) %> }
 <%- end -%>
 
     # Create tag association in a single transaction

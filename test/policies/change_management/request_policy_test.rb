@@ -2,7 +2,7 @@
 require 'test_helper'
 require 'helpers/test_setup_helpers'
 require 'helpers/project_resource_policy_test'
-module ProjectChange
+module ChangeManagement
   class RequestPolicyTest < ActiveSupport::TestCase
     include TestSetupHelpers
     include ProjectResourcePolicyTest

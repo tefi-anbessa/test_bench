@@ -2,7 +2,7 @@ require "application_system_test_case"
 <%- if @namespaced -%>
 module <%= module_name %>
 <%- end -%>
-  class <%= model_class.pluralize %>SystemTest < ApplicationSystemTestCase
+  class <%= model_class_name.pluralize %>SystemTest < ApplicationSystemTestCase
     include Devise::Test::IntegrationHelpers
     include Warden::Test::Helpers
     include ActionView::Helpers::NumberHelper
@@ -19,39 +19,30 @@ module <%= module_name %>
     end
 
     def setup_model_specific_data
-<%- association_types = %w[references belongs_to] %>
-<%- all_field_names = @fields.map { |field| 
-          case field[:type]
-          when *association_types
-            "#{field[:name]}_id"
-          else
-            "#{field[:name]}"
-          end
-        } %>
-<%- index_fields = @fields.select { |field| ProjectAssistant::FieldTypes::INDEX_TYPES.include?(field[:type]) }.map { |field| "#{field[:name]}" } %>
-<%- searchable_field_names = @fields.select { |field| ProjectAssistant::FieldTypes::SEARCHABLE_TYPES.include?(field[:type]) }.map { |field| "#{field[:name]}" } %>
-<%- fields_partitioned = @fields.partition { |f| association_types.include?(f[:type]) } %>
-<%- association_names, field_names = fields_partitioned.map { |group| group.map { |f| f[:name] } } %>
+<%- all_field_names = @fields.map { |field| "#{field[:name]}" } %>
+<%- index_field_names = @index_fields.map { |field| "#{field[:name]}" } %>
+<%- searchable_field_names = @searchable_fields.map { |field| "#{field[:name]}" } %>
+<%- attribute_names = @attribute_fields.map { |field| "#{field[:name]}" } %>
+<%- association_names = @association_fields.map { |field| "#{field[:name]}" } %>
 
       # List fields that should appear in index. 
       # The generator will include test for sort link header for each included field, 
       # and test for an appropriate value field for the type.
-      @index_fields = %i[<%= index_fields.join(" ") %>]
+      @index_fields = <%= index_field_names.inspect %>
 
       # List index fields that should have ransack search capability.
       # The generator will only test for "contains" fields (_cont).
       # Don't include numeric or date fields, add model specific tests for these later in this file.
-      @search_fields = %i[<%= searchable_field_names.join(" ") %>]
-    end
+      @search_fields = <%= searchable_field_names.inspect %>
 
       # List all fields that should appear in show (usually all)
-      @show_fields = %w[<%= field_names.join(" ") %>]
+      @show_fields = <%= all_field_names.inspect %>
 
       # List all associations that should have a collapsible card on the show view
-      @show_associations = %w[<%= association_names.join(" ") %>]
+      @show_associations = <%= association_names.inspect %>
 
       # List all fields that should appear in forms (usually all)
-      @form_fields = %w[<%= all_field_names.join(' ') %>]
+      @form_fields = <%= all_field_names.inspect %>
     end
 
     def fill_in_model_specific_fields

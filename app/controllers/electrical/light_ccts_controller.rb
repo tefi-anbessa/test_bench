@@ -4,37 +4,37 @@ module Electrical
 
     # GET /light_ccts or /light_ccts.json
     def index
-      index_tagable
+      index_resource
     end
 
     # GET /light_ccts/1 or /light_ccts/1.json
     def show
-      show_tagable
+      show_resource
     end
 
     # GET /light_ccts/1/edit
     def edit
-      edit_tagable
+      edit_resource
     end
 
     # GET /light_ccts/new
     def new
-      new_tagable
+      new_resource
     end
 
     # POST /light_ccts or /light_ccts.json
     def create
-      create_tagable
+      create_resource
     end
 
     # PATCH/PUT /light_ccts/1 or /light_ccts/1.json
     def update
-      update_tagable
+      update_resource
     end
 
     # DELETE /light_ccts/1 or /light_ccts/1.json
     def destroy
-      destroy_tagable
+      destroy_resource
     end
 
     private

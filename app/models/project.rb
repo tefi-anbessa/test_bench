@@ -1,4 +1,5 @@
 class Project < ApplicationRecord
+  
   # === Mixins ===
 
   # === Constants ===
@@ -17,7 +18,7 @@ class Project < ApplicationRecord
   has_many :tags, through: :disciplines
   has_many :documents, through: :disciplines
   has_many :doc_types, through: :disciplines
-  has_many :change_requests, class_name: 'ProjectChange::Request', dependent: :destroy
+  has_many :change_management_requests, dependent: :destroy
 
   # === Scopes ===
   scope :ordered, -> { order(:code) }

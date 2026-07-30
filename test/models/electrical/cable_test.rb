@@ -25,6 +25,8 @@ module Electrical
       assert_includes @cable.errors[:electrical_cable_type], I18n.t('errors.messages.required')
     end
 
+    test_associations(:electrical_cable_type)
+
     test "should associate with circuit feeder" do
       swbd = create(:electrical_switchboard, discipline: @resource_discipline)
       circuit = swbd.circuits.create(serial: 1)

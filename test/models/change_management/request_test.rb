@@ -1,6 +1,6 @@
 require "test_helper"
 # require "helpers/model_test_patterns"
-module ProjectChange
+module ChangeManagement
   class RequestTest < ActiveSupport::TestCase
     # include ModelTestPatterns
 

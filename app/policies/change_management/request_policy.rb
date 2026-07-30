@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-module ProjectChange
+module ChangeManagement
   class RequestPolicy < ProjectResourcePolicy
 
     # Define accreditation for project change requests

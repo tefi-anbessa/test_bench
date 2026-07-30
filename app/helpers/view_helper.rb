@@ -13,7 +13,7 @@ module ViewHelper
         content_tag(:span, label + ": ", class: "col-#{label_cols} text-muted") +
         content_tag(:span, value_section, class: "col-#{value_cols}")
       end
-    when :string, :enum, :integer, :decimal
+    when :string, :enum, :integer
       value ||= options.delete(:default)
       content_tag(:div, class: "row mb-1") do
         content_tag(:div, label + ": ", class: "col-#{label_cols} text-muted") +
@@ -33,33 +33,48 @@ module ViewHelper
         content_tag(:div, label + ": ", class: "col-#{label_cols} text-muted") +
         content_tag(:div, value, class: "col-#{value_cols}")
       end
-    when :float
+    when :decimal
       # Accepts the following options:
-      # :precision, defaults to 4
-      # :units, expects base SI unit string
-      precision = options.delete(:precision) || 4
+      # :scale - if present it sets the decimal places to match the db, defaults to 2 if not provided.
+      # :precision is ignored for display purposes
+      # :units - string
+      # :si - if true will display units with SI prefix and scale the number
+      scale = options.delete(:scale) || 2
       units = options.delete(:units)
-      if units.present?
-        units_hash = {  mili: "m#{units}",
-                        micro: "μ#{units}",
-                        nano: "n#{units}",
-                        pico: "p#{units}",
-                        femto: "f#{units}",
-                        unit: "#{units}",
-                        thousand: "k#{units}",
-                        million: "M#{units}",
-                        trillion: "G#{units}",
-                        quadrillion: "P#{units}"
-                      }
-        content_tag(:div, class: "row mb-1") do
-          content_tag(:div, label + ": ", class: "col-#{label_cols} text-muted") +
-          content_tag(:div, number_to_human(value, precision: precision, units: units_hash), class: "col-#{value_cols}")
+      si = options.delete(:si)
+      if units.present? 
+        if si
+          value_part = format_number(value.to_d, precision: scale, significant: false, units: units)
+        else
+          value_part = [value.to_d, units].join(' ')
         end
       else
+        value_part = number_to_human(value.to_d, precision: scale, significant: false)
+      end
         content_tag(:div, class: "row mb-1") do
           content_tag(:div, label + ": ", class: "col-#{label_cols} text-muted") +
-          content_tag(:div, number_to_human(value, precision: precision), class: "col-#{value_cols}")
+          content_tag(:div, value_part, class: "col-#{value_cols}")
+      end
+    when :float
+      # Accepts the following options:
+      # :precision is significant digits, defaults to 4
+      # :units, string
+      # :si - if true will display units with SI prefix and scale the number
+      precision = options.delete(:precision) || 4
+      units = options.delete(:units)
+      si = options.delete(:si)
+      if units.present? 
+        if si
+          value_part = format_number(value.to_f, precision: precision, significant: true, units: units)
+        else
+          value_part = [value.to_f, units].join(' ')
         end
+      else
+        value_part = number_to_human(value.to_f, precision: precision, significant: true)
+      end
+        content_tag(:div, class: "row mb-1") do
+          content_tag(:div, label + ": ", class: "col-#{label_cols} text-muted") +
+          content_tag(:div, value_part, class: "col-#{value_cols}")
       end
     when :boolean
       # Accepts options for true_label and false_label
@@ -90,7 +105,7 @@ module ViewHelper
     when :datetime
       content_tag(:div, class: "row mb-1") do
         content_tag(:div, label + ": ", class: "col-#{label_cols} text-muted") +
-        content_tag(:div, value, class: "col-#{value_cols}")
+        content_tag(:div, I18n.l(value, format: :default), class: "col-#{value_cols}")
       end
     when :date
       content_tag(:div, class: "row mb-1") do
@@ -100,12 +115,116 @@ module ViewHelper
     end
   end
 
+  def show_association(object, association, header: nil)
+    # Abstracted display of dropdown collapsible card for associated records on show view.
+    # Expecting object and association variables, accepts header selection, see below. 
+    #
+    # This method resolves the provided association. 
+    # If the association results in a record, it looks for a partial named _card in the record's class' views. 
+    # If a partial is found it is rendered.
+      # To cater for different types of associations, the card header text is derived as follows:
+      # If the caller provides variable header as either :model or :association, the symbol determines the header label.
+      #   :model looks for a translation of the record's class name, defaults to class.model_name.human.
+      #   :association looks for a translation of the passed association as an attribute of the passed object, defaults to no translation.
+      # If header is not present:
+      #   For polymorphic associations, the call to render the card passes the translated model name rather than the provided association,
+      #   as most polymorphic association names are internal constructs (e.g. tagable, demandable) not meant for UI. 
+      #   For other associations, the call to render the card looks for a translation of the association name as an attribute of the passed object.
+      # Note that the header text is forwarded as the context variable to the card partial. 
+      # The method also forwards id text, following the same path as the header text but sending the associtation or element name,
+      # without translation. The id text is used by cards to place an id on the block for the collapsible controller.
+      # Tests need to be aware of which mode is being used.
+    # If no partial is found, a link to the associated record is displayed.
+    # If the assocation is valid but no associated record is found, unassigned message is displayed, 
+    # with label as translation of the association name.
+    # If the association is not valid, an invalid message is displayed, with the provided association name.
+    header ||= :none
+    if object.respond_to?(association)
+      record = object.send(association)
+      if record.present?
+        partial = "#{record.model_name.collection}/card"
+        if lookup_context.exists?(partial, [], true)
+          # Show a collapsible card for the associated object. 
+          case header
+          when :model
+            # Try to translate the model name of the associated record, default to rails human method. 
+            associated = t("activerecord.models.#{record.model_name.i18n_key}.one",
+                default: record.class.model_name.human)
+            id_text = record.model_name.element
+          when :association
+            # Set label text to attribute translation, if it exists, otherwise use association without translation. 
+            associated = t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}", 
+                default: association.to_s.humanize)
+            id_text = association
+          else
+            if object.class.reflect_on_association(association).polymorphic?
+              # Default to the model name of the associated record. 
+              associated = t("activerecord.models.#{record.model_name.i18n_key}.one",
+                  default: record.class.model_name.human)
+              id_text = record.model_name.element
+            else
+              # Set label text to attribute translation, if it exists, otherwise use association without translation. 
+              associated = t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}", 
+                  default: association.to_s.humanize)
+              id_text = association
+            end
+          end
+          render partial, object: record, context: associated, id: id_text
+        else
+          config = ACTION_CONFIG[:show] || {}
+          # No card available for this type, show a link to the object. 
+          label = object.class.human_attribute_name(association)
+          path = begin
+            polymorphic_path([record])
+          rescue NoMethodError, ActionController::UrlGenerationError
+            '#'
+          end
+          disabled = path.nil?
+          classes = [
+            "col-8",
+            "btn",
+            "btn-sm",
+            "btn-outline-#{confic[bs_color]}",
+            ("disabled" if disabled)
+          ].compact.join(" ")
+          content_tag(:div, class: "row mb-2") do
+            content_tag(:div, label, class: "col-4 col-form-label text-muted")
+            link_to path,
+              class: classes,
+              aria: { label: text },
+              title: text do
+                button_face(config[:bs_icon], text)
+              end
+          end
+        end
+      else
+        # No record present, show unassigned 
+        label = t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}",
+          default: association.to_s.humanize)
+        text = t('show.unassigned', model: label)
+        content_tag(:div, class: "row mb-2") do
+          content_tag(:div, label, class: "col-4 col-form-label text-muted")
+          content_tag(:div, text, class: "col-8")
+        end
+      end
+    else
+      # Invalid association
+      label = t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}", 
+        default: association.to_s.humanize)
+      text = t('show.invalid', model: association.to_s)
+      content_tag(:div, class: "row mb-2") do
+        content_tag(:div, label, class: "col-4 col-form-label text-muted")
+        content_tag(:div, text, class: "col-8")
+      end
+    end
+  end
+
   def index_attribute(record, attr, type: :string, **options)
     value = record.send(attr)
     case type
     when :association
       index_link(action: :show, record: value)
-    when :string, :enum, :integer, :decimal
+    when :string, :enum, :integer
       value
     when :text
       content_tag(:span, title: value) do
@@ -113,30 +232,47 @@ module ViewHelper
       end
     when :enum_translated
       record.class.human_enum_name(attr, value)
+    when :decimal
+      # Accepts the following options:
+      # :scale - if present it sets the decimal places to match the db, defaults to 2 if not provided.
+      # :precision is ignored for display purposes
+      # :units - string
+      # :si - if true will display units with SI prefix and scale the number
+      scale = options.delete(:scale) || 2
+      units = options.delete(:units)
+      si = options.delete(:si)
+      if units.present? 
+        if si
+          format_number(value.to_d, precision: scale, significant: false, units: units)
+        else
+          [value.to_d, units].join(' ')
+        end
+      else
+        number_to_human(value.to_d, precision: scale, significant: false)
+      end
     when :float
       # Accepts the following options:
-      # :precision, defaults to 4
-      # :units, expects base SI unit string
+      # :precision is significant digits, defaults to 4
+      # :units, string
+      # :si - if true will display units with SI prefix and scale the number
       precision = options.delete(:precision) || 4
       units = options.delete(:units)
-      if units.present?
-        units_hash = {  mili: "m#{units}",
-                        micro: "μ#{units}",
-                        nano: "n#{units}",
-                        pico: "p#{units}",
-                        femto: "f#{units}",
-                        unit: "#{units}",
-                        thousand: "k#{units}",
-                        million: "M#{units}",
-                        trillion: "G#{units}",
-                        quadrillion: "P#{units}"
-                      }
-          number_to_human(value, precision: precision, units: units_hash)
+      si = options.delete(:si)
+      if units.present? 
+        if si
+          format_number(value.to_f, precision: precision, significant: true, units: units)
+        else
+          [value.to_f, units].join(' ')
+        end
       else
-        number_to_human(value, precision: precision)
+        number_to_human(value.to_f, precision: precision, significant: true)
       end
     when :boolean
       boolean_icon(value)
+    when :date
+      I18n.l value.to_date, format: :short
+    when :datetime, :time, :timestamp
+      I18n.l value, format: :short
     end
   end
 

@@ -1,6 +1,6 @@
-project_change:
+change_management:
+  name: Change Management
   request:
-    name: "Change"
     duration:
       trial: 0
       temporary: 1

@@ -4,9 +4,23 @@ cable:
     core: 1
     pair: 2
     triple: 3
-tags:
+tag:
   serial_digits: 4
   separator: "-"
-documents:
+document:
   serial_digits: 5
   separator: "-"
+si_prefix:
+  -18: "a"
+  -15: "f"
+  -12: "p"
+  -9: "n"
+  -6: "μ"
+  -3: "m"
+  0: ""
+  3: "k"
+  6: "M"
+  9: "G"
+  12: "T"
+  15: "P"
+  18: "E"

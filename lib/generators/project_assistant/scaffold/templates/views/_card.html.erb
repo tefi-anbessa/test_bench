@@ -1,48 +1,34 @@
-<%% resource = object %>
-<%%= render 'components/collapsible',
-  id: "#{<%= table_name %>}_#{resource.id}_details",
-  title: t("<%= i18n_scope.pluralize %>.show.header", label: resource.label),
+<!-- <%= human_name %> collapsible card -->
+<!-- Expecting 'object', 'context' and 'id' variables, passed from the shared/_association partial. -->
+<!-- The card uses the context name in the header and the id for the block (for testing). -->
+<%% <%= singular_name %> = object %>
+<%% context ||= <%= singular_name %>.model_name.human %>
+<%%= render 'components/collapsible', id: "#{id}_#{<%= singular_name %>.id}_details", 
+  title: [context, <%= singular_name %>.long_label].join(': '),
   expanded: false,
   header_class: 'py-1' do %>
   
     <div class="container-fluid">
-      <div class="row mb-1">
-        <%% text = t("actions.jump_to", model: t("activerecord.models.<%= i18n_scope %>")) %>
-        <%%= link_to resource, 
-            class: "btn btn-sm btn-outline-secondary me-2",
-            title: text do %>
-          <%%== bs_icon('box-arrow-in-up-left') %>
-          <span class="d-none d-md-inline"><%%= text %></span>
-        <%% end %>
-      </div>
-<%- @fields.each do |field| -%>
-      <div class="row mb-1">
-        <div class="col-4 text-muted"><%%= t("activerecord.attributes.<%= route_url %>.<%= field[:name] %>") %></div>
+      <%% nav_link(action: :show, record: <%= singular_name %>) %>
+<%- @attribute_fields.each do |field| -%>
+  <%- options = field[:options].slice(:precision, :scale, :units, :si) -%>
+  <%- opts = options.map { |k, v| "#{k}: #{v.inspect}" }.join(", ") -%>
   <%- case field[:type] -%>
-  <%- when "string", "enum", "integer", "bigint", "decimal" -%>
-        <div class="col-8"><%%= resource.<%= field[:name] %> || '-' %></div>
-  <%- when "float" -%>
-        <div class="col-8"><%%= number_to_human(resource.<%= field[:name] %>, 
-          precision: 4, 
-          units: { unit: "x", thousand: "kx", million: "Mx" }) || '-' %>
-            <!-- Customize units as required. --> </div>
-  <%- when "enum_translated" -%>
-        <div class="col-8"><%%= resource.class.human_enum_name(:<%= field[:name] %>, resource.<%= field[:name] %>) %></div>
-  <%- when "text", "jsonb" -%> 
-        <!-- TODO: Add json formatting -->
-        <div class="col-8"><%%= simple_format(resource.<%= field[:name] %> || '-') %></div>
-  <%- when "datetime", "timestamp", "time", "date" -%> 
-        <!-- Default to time_tag -->
-        <div class="col-8"><%%= time_tag(resource.<%= field[:name] %> || '-') %></div>
-  <%- when "binary" -%> 
-        <!-- TODO: Add binary field support -->
-        <div class="col-8"><%%= 'PLACEHOLDER FOR BINARY FIELD' %></div>
-  <%- when "references" -%>
-        <div class="col-8"><%%= resource.<%= field[:name] %>&.label || '-' %></div>
-  <%- else -%>
-        <div class="col-8"><%%= resource.<%= field[:name] %> || '-' %></div>
-  <%- end %>
-      </div>
+  <%- when :string -%>
+      <%%= show_attribute(<%= singular_name %>, :<%= field[:name] %>) %>
+  <%- when :integer, :bigint, :boolean, :text, :jsonb, :date, :datetime, :timestamp, :time, :enum, :enum_translated -%> 
+      <%%= show_attribute(<%= singular_name %>, :<%= field[:name] %>, type: :<%= field[:type] %>) %>
+  <%- when :float, :decimal -%>
+      <%%= show_attribute(<%= singular_name %>, :<%= field[:name] %>, type: :<%= field[:type] %><%= ", #{opts}" unless opts.empty? %>) %>
+  <%- when :binary -%> 
+      <div class="col-8"><%%= 'PLACEHOLDER FOR BINARY FIELD' %></div>
+  <%- else -%> 
+      <%%= show_attribute(<%= singular_name %>, :<%= field[:name] %>) %>
+  <%- end -%>
+<%- end -%>
+
+<%- @association_fields.each do |field| -%>
+      <%%= show_attribute(<%= singular_name %>, :<%= field[:name] %>, type: :association) %>
 <%- end -%>
     </div> <!-- end container-fluid -->
 <%% end %>

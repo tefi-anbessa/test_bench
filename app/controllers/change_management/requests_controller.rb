@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-module ProjectChange
+module ChangeManagement
   class RequestsController < ApplicationController
     before_action :authenticate_user!
     before_action :require_project!, only: %i[ new create edit update ]

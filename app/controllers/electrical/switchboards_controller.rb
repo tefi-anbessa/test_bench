@@ -4,37 +4,37 @@ module Electrical
 
     # GET /switchboards or /switchboards.json
     def index
-      index_tagable
+      index_resource
     end
 
     # GET /switchboards/1 or /switchboards/1.json
     def show
-      show_tagable
+      show_resource
     end
 
     # GET /switchboards/new
     def new
-      new_tagable
+      new_resource
     end
 
     # POST /switchboards or /switchboards.json
     def create
-      create_tagable
+      create_resource
     end
 
     # GET /switchboards/1/edit
     def edit
-      edit_tagable
+      edit_resource
     end
 
     # PATCH/PUT /switchboards/1 or /switchboards/1.json
     def update
-      update_tagable
+      update_resource
     end
 
     # DELETE /switchboards/1 or /switchboards/1.json
     def destroy
-      destroy_tagable
+      destroy_resource
     end
 
     private

@@ -70,7 +70,7 @@ Rails.application.routes.draw do
       end # discipline nested resources
 
       # Change namespace for change management
-      namespace :project_change do
+      namespace :change_management do
         resources :requests, shallow: true
       end
     end # project nested routes

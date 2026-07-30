@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 class SourceFormatsController < ApplicationController
   before_action :authenticate_user!
-  before_action :require_project!, only: %i[ new create edit update ]
   before_action :set_source_format, only: [:show, :edit, :update, :destroy]
-  before_action :set_swatch, only: [:index, :show, :new, :edit]
+  before_action :set_swatch, only: [:index, :show]
 
   # GET /source_formats
   def index
@@ -33,13 +32,11 @@ class SourceFormatsController < ApplicationController
     if @source_format.save
       flash[:success] = t('flash.create.notice', 
         resource_name: t('activerecord.models.source_format.one'))
-      set_swatch
       redirect_to @source_format
     else
       flash[:alert] = t('flash.create.alert', 
         resource_name: t('activerecord.models.source_format.one').downcase)
       setup_form
-      set_swatch
       render :new, status: :unprocessable_content
     end
   end
@@ -56,12 +53,10 @@ class SourceFormatsController < ApplicationController
     if @source_format.update(resource_params)
       flash[:success] = t('flash.update.notice', 
         resource_name: t('activerecord.models.source_format.one'))
-      set_swatch
       redirect_to @source_format
     else
       flash[:alert] = t('flash.update.alert', 
         resource_name: t('activerecord.models.source_format.one').downcase)
-      set_swatch
       setup_form
       render :edit, status: :unprocessable_content 
     end
@@ -77,7 +72,6 @@ class SourceFormatsController < ApplicationController
       flash[:alert] = t('flash.destroy.alert', 
         resource_name: t('activerecord.models.source_format.one').downcase)
     end
-    set_swatch
     redirect_to source_formats_path
   end
 
@@ -94,6 +88,7 @@ class SourceFormatsController < ApplicationController
     end
 
     def setup_form
+      set_swatch
       # Add selector setup here.
     end
 

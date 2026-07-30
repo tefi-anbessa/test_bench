@@ -71,8 +71,8 @@ class Document < ApplicationRecord
                             .maximum(:serial) || 0
         self.serial = max_serial.to_i + 1
         
-        separator = Constants.documents.separator
-        self.doc_number = "#{discipline.project.label}#{separator}#{discipline.code}#{separator}#{doc_type.code}#{separator}#{serial.to_s.rjust(Constants.documents.serial_digits, '0')}"
+        separator = Constants.document.separator
+        self.doc_number = "#{discipline.project.label}#{separator}#{discipline.code}#{separator}#{doc_type.code}#{separator}#{serial.to_s.rjust(Constants.document.serial_digits, '0')}"
         
         # Continue with the create (yield runs the actual save)
         yield

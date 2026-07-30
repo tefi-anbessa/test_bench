@@ -1,9 +1,9 @@
 <thead>
   <%% unless current_project %>
-    <th scope="col"><%%= sort_link(@q, 'project_code', t('activerecord.models.project.one')) %></th>
+    <th><%%= sort_link(@q, :project_code, t('activerecord.models.project.one')) %></th>
   <%% end %>
-<%- @fields.select { |field| INDEX_TYPES.include?(field[:type]) }.each do |field| -%>
-  <th scope="col"><%%= sort_link(@q, <%= ":#{field[:name]}" %>) %></th>
+<%- @index_fields.each do |field| -%>
+  <th><%%= sort_link(@q, <%= ":#{field[:name]}" %>) %></th>
 <%- end -%>
-  <th scope="col" width="150px"><%%= t('table.links')%></th>
+  <th width="150px"><%%= t('table.links')%></th>
 </thead>

@@ -20,7 +20,7 @@ module <%= name.camelize %>
     end
 
     def self.swatch
-      Swatch.find_by(name: "app_theme")
+      Swatch.find_by(name: "<%= name %>") || Swatch.find_by(name: "app_theme")
     end
   end
 end

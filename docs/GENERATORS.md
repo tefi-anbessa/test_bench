@@ -158,55 +158,58 @@ Because the application will require many different tagable types (one for each 
 
 ### Specification
 
-General requirements.
-
-* This generator will create the folders, files and edits required to add a new tagable type.
-* The generator itself is reasonably self documented, refer to `lib/generators/project_assistant/tagable_generator.rb`.
+* This generator shall create the folders, files and edits required to add a new tagable type.
+* The generator itself is reasonably self documented, refer to [tagable_generator](../lib/generators/project_assistant/tagable_generator.rb).
 
 #### Command Line
 
-The generator shall be invoked using the rails generate command. The command line must inlcude the generator name project_assistant:tagable, and the module and tagable model name as Ruby class specifier in CamelCase. A list of arguments for the fields to be created can either be provided on the command line, or read from a definition file. By using a definition file, more complex information can be provided to the generator, which can greatly speed up completion of the new model. Here is an example generate command for an electrical heater:
+The generator shall be invoked using the rails generate command. The command line must include the generator name project_assistant:tagable, and the module and tagable model name as Ruby class specifier in CamelCase. A list of arguments for the fields to be created can either be provided on the command line, or read from a definition file. Definition files must be YAML or Ruby format. By using a definition file, more complex information is easier to read, check and edit that with a long unformatted command line. Saving the definition file to revision history may be useful later.
+
+Here is an example generate command for an electrical heater (note only one of the enums has keys expounded, this really is a case where a definition file would be clearer):
 
 ```bash
-rails generate project_assistant:tagable Electrical::Heater heater_type:enum_translated:required application:enum_translated:required ingress_protection:string sheath_temperature_max:float power_density_min:float power_density_max:float sheath_material:enum_translated insulation_material:enum_translated notes:text
+rails generate project_assistant:tagable Electrical::Heater heater_type:enum_translated:required application:enum_translated:required ingress_protection:string sheath_temperature_max:float:units="deg C" power_density_min:float power_density_max:float sheath_material:enum_translated insulation_material:enum_translated:keys="insulation_material_other","no_insulation","ceramic","magnesium_oxide","mica","mineral","fluoropolymer","fiberglass" notes:text
 ```
 
-Here is the alternate version using a definition file:
+Here is the alternate command line using a definition file:
 
 ```bash
 rails generate project_assistant:tagable Electrical::Heater --definition=electrical_heater
 ```
 
-The name of the tagable type must be prefixed with its namespace module, as shown in the example. (The generator cannot be used to create a tagable type in the core application, and nested modules are not allowed.)
+The name of the tagable type must be prefixed with its namespace module, as shown in the example. (The generator cannot be used to create a tagable type in the core application, and nested modules are not allowed.) The generator will look in folder `lib/generators/project_assistant/tagable/definitions` for a file name as specified, with extension `.yml` or `.rb`.
 
 #### Command Line Input of Fields
 
 When using command line input for fields, following the tagable model name, all fields to be included in the model shall be specified with their type and options, separated by colons with no spaces.
 
-* Names must be valid ruby symbols.
+* Names must be valid ruby identifiers.
 * Types implemented shall be the standard rails types as used by the scaffold generator, with custom additions for this generator as listed below.
 * Standard rails column types are: `:string, :text, :integer, :bigint, :float, :decimal, :datetime, :timestamp, :time, :date, :binary, :boolean, jsonb`.
-* The generator shall implement `:references` or `:belongs_to` types as relationships between models. These should only be used on the belongs_to model. They shall add the foreign key field to the migration, and provide appropriate view links.
-* The generator shall implement the custom `:enum` type to create an enumerated field. The generator shall set integer type in the migration, and shall create a framework for the enum in the model, views, and constants files for the module. The allowable values for the enum will need to be set manually after generation.
-* The generator shall implement the custom `:enum_translated` type to specify an enumerated field (with translations). The generator shall set integer type in the migration, and shall create a framework for the enum in the model, views, and constants as for `:enum` type. In addition, the locales files for the module shall be edited with placeholders for the field name and option translations. The allowable values and translations for the enum will need to be set manually after generation.
-* The generator shall respond to the `:index` option after the type. This is standard rails generator format. This option shall result in an index being added in the migration.
-* The generator shall respond to the `:uniq` or `unique` option after the type instead of `:index`. This option shall result in a unique index being added in the migration.
-* The generator shall respond to the `:required` option after the type. This is not standard rails generator format but is less ambiguous than the `:null` option. It shall result in a presence validation in the model, and associated model test.
-* The generator shall respond to 
-The generator shall first parse all arguments. If invalid names, types, or options are provided, a warning shall be issued listing the invalid arguments. The generator will abort unless all names and fields are valid.
+* The generator shall implement `:references` or `:belongs_to` types as associations between models. These should only be used on the belongs_to model. They shall add the foreign key field to the migration, and provide appropriate view links.
+* The generator shall implement the custom `:enum` type to create an enumerated field. The generator shall set integer type in the migration, and shall create a framework for the enum in the model, views, and constants files for the module. The allowable values for the enum should be included as a list of keys as strings in the command line option, or in the definition file.
+* The generator shall implement the custom `:enum_translated` type to specify an enumerated field (with translations). The generator shall set integer type in the migration, and shall create a framework for the enum in the model, views, and constants as for `:enum` type. In addition, the locales files for the module shall be edited with placeholders for the field name and option translations. The translations for the enum will need to be set manually after generation.
+* "Flag options" don't require a value, their presence implies true and absence implies false. However, they do accept a valid boolean (true or "1", false or "0") as a value.
+* The generator shall respond to the `:index` flag option. This is standard rails generator format. This option shall result in an index being added in the migration.
+* The generator shall respond to the `:uniq` or `unique` flag option, instead of `:index`. This option shall result in a unique index being added in the migration.
+* The generator shall respond to the `:required` flag option after the type. This is not standard rails generator format but is less ambiguous than the `:null` option. It shall result in a presence validation in the model, and an associated model test. IMPORTANT: The :required option for association types is significant. With rails, :belongs_to defaults to required, but in the generator it will be set to optional unless the :required is true.
+* Value options require a value. In the command line, the option and value are separated by '='. In a definition file, the syntax must coform to the selected language.
+* The generator shall respond to the :valid option for all types. The value provided must be valid for the field's type. The value will be used to default the test factory, and also in controller tests.
+* The generator shall respond to the :keys option, but only for :enum and :enum_translated field types. The value shall be an array of strings. On the command line, there must not be any spaces between elements (space is the separator between fields). The array elements shall be used as the enum keys by adding them to the Constants structure. For :enum_translated type, they shall also be added to the model translation files.
+* The generator shall respond to the :precision and :scale value options, but only for :decimal and :float types. The values provided must be valid integers. The options shall be passed to the migration for :decimal types. They shall be passed to view helpers for display formatting (not presently implemented).
+* The generator shall respond to the :units option, but only for :float and :decimal types. The value shall be coerced to string class, and passed to display helpers for formatting.
+* The generator shall respond to the :si option, but only for :float and :decimal types. The value shall be a valid boolean. The value shall be passed to display helpers for formatting (not yet implemented).
+* The generator shall respond to the :step option, but only for numeric types :integer, :bigint, :float, and :decimal. The value must be a valid decimal. The value shall be passed to form field helpers for impplementing the step option on number_field tags.
+
+The generator shall first parse all arguments. If invalid names, types, or options are provided, a warning shall be issued listing the invalid arguments. The generator shall abort unless all names, fields and options are valid.
 
 #### File Definition of Fields
 
-The rules for fields defined in a file are the same as for the command line, but there are additional options available. Fields shall be defined in a YAML file as in this [example](../lib/generators/project_assistant/tagable/definitions/electrical_test.yml).
+The rules for fields defined in a file are the same as for the command line. Fields shall be defined in a YAML file as in this [example](../lib/generators/project_assistant/tagable/definitions/electrical_test.yml), or as a valid Ruby hash (to be implemented).
 
 Differences from command line options are as follows:
 
 * The "flag" options index, uniq/unique, and required shall be specified with a value true, rather than just be present.
-* The enum types shall accept a :keys option, in the form of a comma separated list of values which shall be used to set the enum structure in constants, and the framework for translations in the case of :enum_translated fields types.
-* Float and decimal types shall accept precision and scale options.
-* Float and decimal types shall accept a :units option and a :si flag, indicating SI units are in use, so can be presented with SI prefixes.
-* All numeric types shall accept a :step option for use in form fields.
-* All types shall accept a :valid option, which allows provision of a known valid value for the field, to be used in the test factory.
 
 #### Folders
 
@@ -225,9 +228,11 @@ The generator shall create these files:
 ##### Model
 
 * A model definition file including:
-  * include tagable module
+  * include tagable concern
   * enum declarations for any enum fields
+  * belongs to association declaration for any assocition fields
   * presence validations for any required fields
+  * uniqueness validations for any unique fields
   * ransackable attributes for searching and sorting all attributes
   * ransackable associations for :tag, :tag_discipline, :tag_discipline_project, and any  fields of type :references
   * `app/models/#{module_name}/#{tagable_name}.rb`
@@ -266,7 +271,7 @@ The generator shall create these files:
 
 ##### Model Tests
 
-* A model test file with tests for ensuring the tagable link is correct, and for presence of required fields:
+* A model test file with tests for required fields, unique fields and enum declarations:
   * `test/models/#{module_name}/#{tagable_name}_test.rb`
 
 ##### Policy Tests
@@ -332,20 +337,20 @@ The generator shall provide a success message if the file edit is completed.
   #{singular_name}:
 ```
 
-* If any enum fields have been specified (either :enum or :enum_translated), the generator shall insert a key for each required field name:
+* If any enum fields have been specified (either :enum or :enum_translated), the generator shall insert a key for each required field name, followed by the list of key values, each with numeric index:
 
 ```ruby
     #{field[:name]}:
-      # TODO: Add enum values
+      value0: 0
+      value1: 1
+      ...
 ```
-
-The enum keys can be completed using the enum generator, but a reminder comment is inserted in case this is left to be completed manually. (Don't remove the reminder then try to use the enum generator, because the enum generator uses the reminder as a placemarker.)
 
 The generator shall issue a success message if the file edit is completed. If the file is not found, the generator shall log an error message.
 
 ##### Translations
 
-1. For each locale in I18n.available_locales, the generator shall edit the file `config/locales/#{module_name}/#{locale}/#{locale}.#{module_name}.models.yml`. This shall be done by using the `attributes` key as a marker, inserting the model name prior to the key, and the attributes after. For the attributes, the generator shall append a line for each field, with the field name and a dummy translation of "#{field[:name].humanize}". If a field is type :enum_translated, additional lines shall be appended with the plural of the field name as a key, and a placeholder translation for the first option. Example:
+1. For each locale in I18n.available_locales, the generator shall edit the file `config/locales/#{module_name}/#{locale}/#{locale}.#{module_name}.models.yml`. This shall be done by using the `models` key as a marker, inserting the model name following the key, with an entry for one and other (plural). After the `attributes` key, the generator shall append a line for each field, with the field name and a dummy translation of "#{field[:name].humanize}". If a field is type :enum_translated, additional lines shall be appended with the plural of the field name as a key, and a line for each key. Example:
 
 ```yml
 en:
@@ -356,11 +361,15 @@ en:
     attributes:
       electrical/heater:
         heater_type: "Heater type"
-          heater_types:
-            other_heater_type: "Other"
+        heater_types:
+          heater_type_other: Other heater type
+          cast_in: Cast-In Heater
+          ...
         application: "Application"
-          applications:
-            other_application: "Other"
+        applications:
+          application_other: Other application
+          annealing_heat_treating: Annealing _ Heat Treating
+          ...
         sheath_temperature_max: "Sheath temperature max"
         ...
 ```
@@ -375,16 +384,16 @@ The generator shall provide a success message if the file edit is completed. If 
     heaters:
       index:
         title:            "Heaters"
-        header:           "Heaters Schedule for %{project}"
+        header:           "Heaters Schedule for %{scope_text}"
       edit:
         title:            "Edit Heater"
-        header:           "Edit Heater: %{label}"
+        header:           "Edit Heater %{label}"
       new:
         title:            "New Heater"
-        header:           "New Heater"
+        header:           "New Heater in %{scope_text}"
       show:
         title:            "Heater"
-        header:           "Heater: %{label}"
+        header:           "Heater %{label}"
 ```
 
 The generator shall provide a success message if the file edit is completed. If the file is not found, the generator shall log an error message.
@@ -393,191 +402,219 @@ The generator shall provide a success message if the file edit is completed. If 
 
 #### Preparation
 
-Usage is explained using the example mentioned in the command line section of the specification. This will be followed by further details for field types not covered by this example.
+Usage is explained using the example used by the generator test, which covers all types and options. The generator can be run entirely from the command line, or using a definitions file. The choice is largely down to complexity of the target datasheet. Using a definition file provides the added benefit of recording the "starting point" in git history.
 
 1. Before running this complex generator, it is strongly recommended to commit all changes to git, so there is a safe return point if things get messy. Generators can be partly reversed with destroy action, but this does not undo the edits made (in fact destroy repeats the edits), nor does it remove migrations because they are timestamped. The safest way for recovering is to use git.
 
-1. The second and most important step in creating a tagable is to make a list of all the fields that will be on the data sheet, and determine their types. Include all the necessary fields required to specify items of the new tag type. [TODO] If additional fields may be optionally required, they can be added as user defined jsonb extensions.
+1. The second and most important step in creating a tagable is to make a list of all the fields that will be on the data sheet, determine their types, and record the options required. Include all the necessary fields required to specify items of the new tag type. Unless the tagable is a very simple model, it is recommended to use an editor to prepare a definition file.
 
-Field names must be valid ruby identifiers.
+* Field names must be valid ruby identifiers.
 
-Each field requires a valid type, separated by a colon with no space, selected from:
+* Each field requires a valid type, selected from:
 
-* string: use for short definitive text information, but always prefer an enum (see below) if the text should be constrained to accepted values.
-* text: use for descriptive information, not requiring any format or checking.
-* integer and bigint: use integer for most applications, bigint for huge numbers. (Bigint should be used for any foreign keys, but the generator does not provide these.)
-* float: use for floating point numbers, typically attributes that may be involved in calculations. The form has a number field with default 0.00 and step 0.01.
-* decimal: use for fixed point numbers, typically currency. database is set to type decimal, but the generator does not set precision. The form has a number field with default 0.00 and step 0.01.
-* [HOLD] [Date time fields not tested as yet.]
-* datetime:
-* timestamp:
-* time:
-* date:
-* binary: [HOLD] [Binary fields not tested as yet.]
-* boolean: use for switches. The form has a check box.
-* jsonb: use for additional user defined data fields, stored as JSONB in the database. The form provides a text area. [TODO] Form should provide json editor but we couldn't get it working.
-* enum: use for selection options. This is not a standard rails type, it is used by the generator to create an integer field in the datbase, with drop down select in the form.
-* enum_translated: this is as for :enum type, but with translations for the options. the generator will look for translated option keys in forms and display them in views.
-* references: use for foreign keys. This type sets up the framework of an association.
+  * string: use for short definitive text information, but always prefer an enum (see below) if the text should be constrained to accepted values.
+  * text: use for descriptive information. The generator will not provide search or sort on text fields, though these can be added later if required.
+  * integer and bigint: use integer for most applications, bigint for huge numbers. (Bigint is rails default for primary keys, but the generator handles associations separately.)
+  * float: use for floating point numbers, typically engineering attributes that may be involved in calculations and span a wide range of values. Float values exhibit round off error. The generator provides :scale and :precision, :units and :si options for float type.
+  * decimal: use for fixed point numbers, typically currency. Decimal values are precise to the specified precision and scale. The generator provides :scale and :precision, :units and :si options for float type.
+  * [HOLD] [Date time fields not tested as yet.]
+  * datetime:
+  * timestamp:
+  * time:
+  * date:
+  * binary: [HOLD] [Binary fields not tested as yet.]
+  * boolean: use for switches. The form has a check box.
+  * jsonb: use for additional user defined data fields, stored as JSONB in the database. The form provides a text area. [TODO] Form should provide json editor but we couldn't get it working.
+  * enum: use for selection options. This is not a standard rails type, it is used by the generator to create an integer field in the datbase, with drop down select in the form. The generator accepts an array of allowed values.
+  * enum_translated: this is as for :enum type, but also with translations for the options. The controller generated will build translated option key lists for form selectors, and the views will present translations rather than keys or database values.
+  * references: or belongs_to: use for associations. This type sets up the framework of an association.
 
-Fields may also have options, specified after the type, separated by a colons with no spaces. Available options are:
+* Fields may also have options. Options are "flag options" or "value options". Flag options are boolean, and their presence determines the value of the boolean. Value options are of many types, but they are specified as a key/value pair. Available options are:
 
-* index: use this option if the field will be subject to frequent search and sort operations, or used to link to other resources.
-* uniq: use this option instead of :index, if the field must be unique. (Don't use both :index and :uniq.)
-* required: use this option for fields that must have a value set. Use carefully, a record cannot be saved if it has a missing required field. (This is not a standard rails option, but is less ambiguous than null: false.)
+  * Flag options:
+    * :index: use this option to implement a database index. This will greatly improve search and sort operations.
+    * :uniq: or :unique: use one of these options instead of :index, if the field must be unique. It will ensure uniqueness at the database level, as well as in validation. [TODO: allow scope to be provided with unique]
+    * :required: use this option for fields that must have a value set. Use carefully, as a record cannot be saved if it has a missing required field, which may degrade the user experience.
 
-1. For each enum and enum_translated field, list the field options.  
-Note that enum field option keys became class methods for the model, so have to be unique across the whole class, and may not include Ruby method names. "None" is an easy trap to fall into, but is a standard class method so cannot be used as an option. The solution is to use the prefix or suffix options, this is explained in the usage section.  
+  * Value options:
+    * :valid is available to all types but is ignored for enum types. The value provided must match the field type.
+    * :keys is only available for :enum and :enum_translated field types. The value must be an array of strings.
+    * :precision and :scale are available for :float and :decimal types. The value must be a valid integer. They correspond to rails' options of the same name, and for :decimal types are enforced in the database.
+    * :units is only available for :float and :decimal types. The value must be a string. It is used for presentation only.
+    * :si is only available for :float and :decimal types. The value must be a boolean. It is for future use in presentation only.
+    * :step is only available for number types (:integer, :bigint, :float, :decimal). The value must be a decimal. It is used for number fields on forms only.
+
+1. Note that enum field option keys became class methods for the model, so have to be unique across the whole class, and may not include Ruby method names. "None" is an easy trap to fall into, but is a standard class method so cannot be used as an option. The solution is to use the prefix or suffix options, see the "Follow Up" section.  
 
 1. Include a field notes:text at the end of the list. All tagables have this field, and the system test expects it to be there.
 
 1. The generator has dependencies, which should automatically be met if the module generator has been used for setting up the module. Refer to the module generator documentation to see what is expected, and check that all requirements are in place.
 
-1. With all the fields ready, it's time to draft the command line.
+1. The generator uses [field_types.rb](../lib/generators/project_assistant/field_types.rb) to make assumptions on how to present the various field types. Only field types in `SEARCHABLE_TYPES` will have search fields on the index view. Only fields in `INDEX_TYPES` will appear in the index view. If these assumptions don't suit the model being generated, it is acceptable to edit `field_types.rb` temporarily, but ensure it is restored when complete. If this is a regular occurrence, consider adding named versions of this file.
 
-#### Command
+1. With all the fields ready, it's time to prepare the command line.
+
+#### Command with Definition File
+
+If you have prepared a definition file, the command line is of the form:
+
+```bash
+rails generate project_assistant:tagable Electrical::Test --definition=electrical_test
+```
+
+By convention, the file should be named as the snake case of the new model's class name, but this is not presently enforced. The generator will look for the file name provided, with .yml or .rb extension.
+
+#### Command Line Arguments
 
 You can type the command directly into a terminal, but if you are building a large complex model, it may be worth typing into an editor first, and paste it from there into the terminal window. This way, errors are more easily corrected.
 
-Run the generator command line using the --pretend option (or simply -p). This will run through the generator methods and report all the actions, without actually creating or editing files and folders. If there are errors in the name or field specifications, they should get caught here. When everything is clean, run the generator without the --pretend option.
-
-Here again is our example command line:
+Here is the example command line tweaked using the generator test arguments:
 
   ```bash
-  rails generate project_assistant:tagable Electrical::Heater heater_type:enum_translated:required application:enum_translated:required ingress_protection:string sheath_temperature_max:float power_density_min:float power_density_max:float sheath_material:enum_translated insulation_material:enum_translated notes:text
+  rails generate project_assistant:tagable Electrical::Heater name:string:required:valid="Test_name" description:text:valid="Factory_generated_description" selector:enum:keys=["s1","s2","s3"] status:enum_translated:keys=["draft","published","archived"] sort_order:integer:index:valid=100 power:float:precision=4:units=m:si=true:valid=5.555 money:decimal:precision=5:scale=2:valid=1.55 switch:boolean birthday:date created:datetime flex_field:jsonb code:string:uniq parent:references owner:belongs_to:required=true
   ```
+
+Note the limitations of the command line: no spaces allowed. This mainly affects strings: you cannot have multi-word valid values. Also be sure there are no spaces in the enum value arrays.
+
+#### Running the Command
+
+If using guard for testing, it is probably better to exit before running the generator, as generation will trigger lots of failing tests.
+
+Run the generator command using the --pretend option (or simply -p) first. This will run through the generator checks and methods and report all the actions, without actually creating or editing files and folders. If there are errors in the name or field specifications, they should get caught here. Insect the output to ensure it is what you are expecting. When everything is clean, run the generator without the --pretend option.
 
 #### Follow Up
 
 1. If using guard for testing, it is probably better to exit before completing follow up, as some edits will trigger lots of failing tests.
 
-1. Open the model file (in our example app/models/electrical/heater.rb).
-   * For electrical models with load information required (most), after
-     `include Tagable`
-     add the line:
-     `include Electrical::Demandable`.
-   * [TODO future: similar for process module].
-   * Check that associations are correctly defined for :references fields. The generator adds `belongs_to` statements, but no options. These must be added if required. The generator assumes that the referenced class is in the same module/sub-module as the generated model. Add the inverse relation (has_many or has_one) to the referenced model.
-   * Check that any required :enum and :enum_translated type fields are specified as enum with reference to the constants defining the field options.
-   * Check that the fields with :required option have presence validations.
-   * Add any other validations required, such as range limits, numericality, format, etc.
-   * If the `ransackable_attributes` line is too long, split it after a comma for ease of reading.
-   * Check that `ransackable_associations` meet requirements.
+2. Open the model file (in our example app/models/electrical/test.rb).
 
-1. Open the module constants file (in our example config/constants/electrical.yml). [HOLD revise after enum generator working.]
-   * For each enum field, there should be a line with the field name as key.
-   * Give each option key a unique integer value.
-   * Delete the placeholder comments, and add your own comments if required.
-   * Go back to the model file, and delete the reminder comments for each :enum field to complete the enum values, as you have just completed this.
-   * Check all of the enum options for all enum fields in the model. If there are any duplications, they must be made unique. The usual way to to this is to add a prefix in the model definition. In our heater example, sheath material and insulation material both have the option `fluoropolymer`, so we have edited the heater.rb file:
+* For electrical models with load information required (most), after
+  `include Tagable`
+  add the line:
+  `include Electrical::Demandable`.
+* [TODO future: similar for process module].
+* Check that associations are correctly defined for :references fields. The generator adds `belongs_to` statements, but no options. These must be added if required. The generator assumes that the referenced class is in the same module/sub-module as the generated model. Add the inverse relation (has_many or has_one) to the referenced model.
+* Check that any required :enum and :enum_translated type fields are specified as enum with reference to the constants defining the field options.
+* Check that the fields with :required option have presence validations.
+* Add any other validations required, such as range limits, numericality, format, etc.
+* If the `ransackable_attributes` line is too long, split it after a comma for ease of reading.
+* Check that `ransackable_associations` meet requirements.
+
+3. Open the module constants file (in our example config/constants/electrical.yml).
+
+* There should be a new key for the tagable model (test: in our example)
+* For each enum field, there should be a line with the field name as key.
+* Indented under the field name, each option key should have a unique integer value.
+* Check all of the enum options for all enum fields in the model. If there are any duplications, they must be made unique. The usual way to to this is to add a prefix in the model definition. For example, Electrical::Heater has sheath material and insulation material both having the option `fluoropolymer`, so we have edited the heater.rb file:
 
      ```ruby
      enum :sheath_material, Constants.electrical.heater.sheath_material.to_h, prefix: true
      enum :insulation_material, Constants.electrical.heater.insulation_material.to_h, prefix: true
      ```
 
-   * Note this prefix only affects the class method names, it doesn't change the values that are displayed in forms or views.
-   * Save the model file and the module constants file.
+  * Note this prefix only affects the class method names, it doesn't change the values that are displayed in forms or views.
+* Save the model file and the module constants file.
 
-1. Open the default locale file for models (in our example config/locales/en/electrical/models.yml).
-   * Check that the model translation and all field translations are included as expected. The translations have been defaulted using Rails `humanize` method, but they can be edited as required.
-   * For any enum_translated fields, there should be a key for the options as plural of the field name, and a default "other" option. Edit this as required to exactly match the option keys that are in Constants. Add a translation key/value pair for each option.
-   * Copy the attributes section for the new model, and paste it into the models file for all other locales, overwriting the generator defaults.
-   * Edit the translations for all locales (this can be deferred and passed to translators).
-   * Save and close all the model translation files.
+4. Open the default locale file for models (in our example config/locales/en/electrical/models.yml).
 
-1. Open the default locale file for views (in our example config/locales/en/electrical/views.yml).
-   * Check that the view translations are included as expected. The translations have been defaulted using Rails `humanize` method, but they can be edited as required.
-   * In particular, the header for the index page should be checked to match expectations for the model. For example, cables use schedule, instruments typically use index, others may use list, catalog, etc.
-   * Edit the translations for all locales (this can be deferred and passed to translators).
-   * Save and close all the view files.
+* Check that the model translation and all field translations are included as expected. The translations have been defaulted using Rails' `humanize` method, but they can be edited as required.
+* For any enum_translated fields, there should be a key for the options as plural of the field name, and a line for each option. Again, the translations are defaulted using Rails' humanize method.
+* Edit the translations for all locales (this can be deferred and passed to translators).
+* Save and close all the model translation files.
 
-1. Open the migration file (which should be the last migration created), in our example db/migrate/20251226040639_create_electrical_heater.rb.
-   * Check all fields are included as expected.
-   * If there are any decimal fields, add the required precision. For example, a dollar currency field might require
-     `t.decimal :amount, precision: 5, scale: 2`.
-   * Check that any references to existing tables are to the correct table name. For example, an electrical cable belongs_to electrical_cable_type, and the migration includes the line
-     `t.references :electrical_cable_type, foreign_key: true`
-     However, if the referenced table does not exist yet, it will be better to create a new migration to add the reference later.
-   * Other options are available, but not usually required. Refer to [http://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/SchemaStatements.html#method-i-add_column]
-   * Save and close the migration file, then in a terminal, run `rails db:migrate`.
+5. Open the default locale file for views (in our example config/locales/en/electrical/views.yml).
 
-1. Open the factory file (in our example test/factories/electrical/heaters.rb).
-   * Check all fields are included as expected.
-   * Enter a valid value for each field, which will be used in testing (and console, if factory_bot is enabled for console). Enter string values for enum keys, copied from the constants file but with string quotes added. Be sure to include a decimal point for float types.
-   * Save the factory file.
-   * In the terminal, run `rails test test/factories_test.rb` and ensure there are no errors related to the present model.
-   * Close the factory file.
+* Check that the view translations are included as expected. The translations have been defaulted using Rails `humanize` method, but they can be edited as required.
+* In particular, the header for the index page should be checked to match group noun expectations for the model. For example, cables use schedule, instruments typically use index, others may use list, catalog, etc.
+* Edit the translations for all locales (this can be deferred and passed to translators).
+* Save and close all the view files.
 
-1. Open the model test file (in our example `test/models/electrical/heater_test.rb`).
-   * Check that validations are tested for required fields.
-   * Add tests for any other validations added.
-   * For electrical models, add tests for linkage with the demand model by copying from another model test.
-   * Add tests for any other model functionality required.
-   * Save the model test file.
-   * In the terminal, run the test (in our example `rails test test/models/electrical/heater_test.rb`).
-   * Clear any errors before proceeding, then close the model test file.
+6. Open the migration file (which should be the last migration created), in our example db/migrate/20251226040639_create_electrical_test.rb.
 
-1. Unless the new model has special permissions requirements, the policy and policy_test files should not need editing.
+* Check all fields are included as expected.
+* Check index and uniq/unique options have been correctly implemented.
+* If there are any decimal fields, check the required precision and scale options are present.
+* Check that any references to existing tables are to the correct table name. For example, an electrical cable belongs_to electrical_cable_type, and the migration includes the line
+  `t.references :electrical_cable_type, foreign_key: true`
+  However, if the referenced table does not exist yet, it will be better to create a new migration to add the reference later.
+* Other options are available, but not usually required. Refer to [http://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/SchemaStatements.html#method-i-add_column]
+* Save and close the migration file, then in a terminal, run `rails db:migrate`.
 
-   * Run the policy test (in our example `test/policies/electrical/heater_policy_test.rb`).
+7. Open the factory file (in our example test/factories/electrical/tests.rb).
 
-1. Open the controller file (in our example `app/controllers/electrical/heaters_controller.rb`).
+* Check all fields are included as expected.
+* Ensure a valid value has been provided for any required fields, as the factory setup is used in testing and tests will fail if no value is entered.
+ * Enter string values for enum keys, copied from the constants file but with string quotes added. Be sure to include a decimal point for float types. Note the factory template is a bit clever and if no valid option is provided for an enum type field, it defaults to the first key.
+* Save the factory file.
+* In the terminal, run `rails test test/factories_test.rb` and ensure there are no errors related to the present model.
+* Close the factory file.
 
-   * If the safe params line is too long, insert new lines after commas as required so it is readable.
-   * Usually, that will be the only controller edit required at this stage. If the model has related entities, as for example electrical switchboards has circuits, this will usually need to be built before the controller requirements are known.
-   * Add any required additional functionality for form setup, such as specialised option select lists, in the `setup_additional_form_data` section.
-   * Add any required additional functionality for the create action in the `after_create_hook` section.
-   * Add any required additional functionality for the update action in the `after_update_hook` section.
-   * Save and close the controller file.
+8. Open the model test file (in our example `test/models/electrical/test_test.rb`).
 
-1. Open the routes file config/routes.rb.
-   * The generator should have added two lines for tagable routes for the new model: one under the module namespace alone, and another nested under the tags resources, then the module namespace. These routes can be included more simply by including the new model along with the other models in the comma separated lists for the same module. (The generator finds it hard to locate the correct place, so it is easier to create new lines for each route. It will work perfectly as is, but the file grows faster.) If this edit is made, remove the lines added by the generator, then save and close the routes file.
+* Check that validations are tested for required fields.
+* Add tests for any other validations that have been added.
+* For electrical models, if it is a demandable type (has load information), add `test_demandable_association`.
+* Add tests for any other model functionality required.
+* Save the model test file.
+* In the terminal, run the test (in our example `rails test test/models/electrical/test_test.rb`).
+* Clear any errors before proceeding, then close the model test file.
 
-1. Open the controller test file (in our example `test/controllers/electrical/heaters_controller_test.rb`).
+9. Unless the new model has special permissions requirements, the policy and policy_test files should not need editing.
 
-   * The controller test has a method called `valid_resource_params` which sets the minimum required params for testing. There should already be an entry for each field that had the :required option. Set valid values for each field, and remove the reminder comments.
-   * The controller test has a method called `invalid_resource_params` which sets up a failing test, to test controller validations failure paths. Set one parameter to an invalid state here. It could be setting a required field to nil, or out of range, or an enum to a value not included in the enum options.
-   * The controller test has two methods called `update_attribute_name` and `updated_attribute_value` which are used for testing the controller update action. Set update attribute name to any suitable attribute, and set updated attribute value to anything valid other than the value set in the factory.
-   * The controller test has a method called `setup_model_specific_data`. This is where setup code is placed for any additional testing outside the tagable functions. For example, the electrical switchboards controller test has a setup for a switchboard with child circuits, part of the additional functionality of this controller. Leave the method empty if no additional setup is required.
-   * After the updated_attribute_value method, insert any additional tests for additional controller functionality.
-   * Save the controller test file, then run the controller tests (in our example `rails test test/controllers/electrical/heaters_controller_test.rb`).
-   * Clear any errors before proceeding, then save and close the controller test file.
+* Run the policy test (in our example `test/policies/electrical/test_policy_test.rb`).
 
-1. Open the layout header file `app/views/layouts/_header.html.erb` and locate the navbar section for the module where the new model is to be added. Locate the insertion point required, and insert the following code (substituting the module and model names):
+10. Open the controller file (in our example `app/controllers/electrical/test_controller.rb`).
 
-    ```ruby
+* If the safe params line is too long, insert new lines after commas as required so it is readable.
+* Usually, that will be the only controller edit required at this stage. If the model has related entities, as for example electrical switchboards has circuits, this will usually need to be built before the controller requirements are known.
+* Add any required additional functionality for form setup, such as specialised option select lists, in the `setup_additional_form_data` section.
+* Add any required additional functionality for the create action in the `after_create_hook` section.
+* Add any required additional functionality for the update action in the `after_update_hook` section.
+* Save and close the controller file.
 
-                <% if policy(Module::Model).index? %>
-                  <li>
-                    <%= link_to t('model', scope: 'activerecord.models').pluralize,
-                      module_models_path,
-                      class: "dropdown-item" %>
-                  </li>
-                <% end %>
-    ```
+11. Open the routes file config/routes.rb.
 
-1. Go to the views folder, and open the show, card, form and row files (in our example `app/views/electrical/heaters/show.html.erb`, `app/views/electrical/heaters/_card.html.erb`, `app/views/electrical/heaters/_form.html.erb` and `app/views/electrical/heaters/_row.html.erb`). These should work out of the box, but any numeric fields may need engineering units added. In our example, the show view has default code:
+* The generator should have added two lines for tagable routes for the new model: one under the module namespace alone, and another nested under the tags resources, then the module namespace. These routes can be included more simply by including the new model along with the other models in the comma separated lists for the same module. (The generator finds it hard to locate the correct place, so it is easier to create new lines for each route. It will work perfectly as is, but the file grows faster.) If this edit is made, remove the lines added by the generator, then save and close the routes file.
 
-    ```ruby
-                <%= number_to_human(@heater.power_density_min, 
-                  precision: 4, 
-                  units: { unit: "x" , thousand: "kx", million: "Mx" }) || '-' %>
-    ```
+12. Open the controller test file (in our example `test/controllers/electrical/tests_controller_test.rb`).
 
-   Edit this to be:
+* The controller test has a method called `valid_resource_params` which sets the expected params from a form submission for testing. There should be an entry for each field. Ensure that any field with the :required option has a valid value set. 
+* The controller test has a method called `invalid_resource_params` which sets up a failing test, to test controller validation failure paths. Set one parameter to an invalid state here. It could be setting a required field to nil, or out of range, or an enum to a value not included in the enum options.
+* The controller test has two methods called `update_attribute_name` and `updated_attribute_value` which are used for testing the controller update action. Set update attribute name to any suitable attribute, and set updated attribute value to anything valid other than the value set in the factory.
+* The controller test has a method called `setup_model_specific_data`. This is where setup code is placed for any additional testing outside the tagable functions. For example, the electrical switchboards controller test has a setup for a switchboard with child circuits, part of the additional functionality of this controller. Leave the method empty if no additional setup is required.
+* After the updated_attribute_value method, insert any additional tests for additional controller functionality.
+* Save the controller test file, then run the controller tests (in our example `rails test test/controllers/electrical/tests_controller_test.rb`).
+* Clear any errors before proceeding, then save and close the controller test file.
 
-    ```ruby
-                <%= number_to_human(@heater.power_density_min, 
-                  precision: 4, 
-                  units: { unit: "W/m²" , thousand: "kW/m²", million: "MW/m²" }) || '-' %>
-    ```
+13. If the model is electrical and has load information, edit the [electrical constants file](../config/constants/electrical.yml).
 
-   Repeat for all numeric fields, in all four views (forms don't have provision for thousands, millions etc.). If units are not required, delete the option. After editing, delete the comment to show others that the units have already been set, it is not in default state.
+* Under the key `loadable:` add a new line with the new model class.
+* Save and close the electrical constants file.
 
-1. Open the system test file (in our example `test/system/electrical/heaters_test.rb`).
-   * In console, run `Module::ModelName.column_names` to list the fields for the model. Copy this list (without id, and without the timestamp fields unless there is a particular requirement for them), then paste it into each of the field lists in `setup_model_specific_data`. For each list, consider if any of the fields should be removed.
-   * Save and close the system test file.
+14. With the controller tests working, it is time to test the model in dev.
+
+* Start the dev server.
+* Open a browser and navigate to local_host:3000.
+* Sign in as admin.
+* Navigate to an existing project.
+* Navigate to the discipline representing the module of the new model. The new model should appear on the discipline dashboard.
+* Navigate to the index view and check it is in order.
+* Navigate to the new form and build a new tag and associated model.
+* Save the item, and you should be redirected to the show view.
+* The show view should include a dropdown card for the item's tag. Open it, and navigate to the tag.
+* The tag view should include a dropdown card for the tagable model. Open it, and check the contents.
+* Throughout this process, there may have been errors raised. Log them, and build a correction process.
+* Also through the process, there may have been parts of the model that didn't meet expectations. Log them, and build a correction process.
+
+15. When any necessary corrections are complete, open the system test file (in our example `test/system/electrical/tests_test.rb`).
+
+* Tagable system tests are abstracted, so all models follow the same basic tests.
+* The field sets in the system test are set up by the generator according to the [field_types.rb](../lib/generators/project_assistant/field_types.rb) file. Any special field types will need to be coded in the provided hooks. For example, electrical circuits model has a rating field that is a float value but the form uses a select field. The generator doesn't know how this works, so the system test has to set that field specially.
+* If the model has features not tested by the standard tests, add tests for them in the system test file. For example, electrical switchboards are integrated with circuits, so have a number of related tests.
+* Save and close the system test file.
+* Run the system test. Clear any errors.
+
+Congratulations! The new model is on line.
 
 ## SCAFFOLD GENERATOR
 

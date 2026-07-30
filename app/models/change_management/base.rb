@@ -1,4 +1,4 @@
-module ProjectChange
+module ChangeManagement
   class Base < ApplicationRecord
     self.abstract_class = true
     
