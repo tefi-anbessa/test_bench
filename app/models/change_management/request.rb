@@ -42,7 +42,7 @@ module ChangeManagement
     def self.navigator_order_sql
     <<~SQL.squish
       projects.code ASC,
-      project_change_requests.serial ASC
+      change_management_requests.serial ASC
     SQL
     end
 
@@ -58,13 +58,13 @@ module ChangeManagement
     # === Private methods ===
     private
       def set_request_number
-        ProjectChange::Request.transaction do
+        ChangeManagement::Request.transaction do
           # Lock existing records for this discipline/doc_type combination
-          ProjectChange::Request.where(project_id: project_id)
+          ChangeManagement::Request.where(project_id: project_id)
                   .lock
           
           # Now safely set serial number
-          max_serial = ProjectChange::Request.where(project_id: project_id)
+          max_serial = ChangeManagement::Request.where(project_id: project_id)
                               .maximum(:serial) || 0
           self.serial = max_serial.to_i + 1
           # Continue with the create (yield runs the actual save)

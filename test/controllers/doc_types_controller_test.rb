@@ -7,6 +7,7 @@ class DocTypesControllerTest < ActionController::TestCase
   include ControllerTestHelper
 
   setup do
+    @nesting = :discipline
     # Cannot use standard setup because DocType class module has no matching discipline
     setup_projects_and_users
     setup_disciplines(name: "Electrical", required_role: :designer)
@@ -22,16 +23,6 @@ class DocTypesControllerTest < ActionController::TestCase
   end
 
   private
-
-    # Required for nested routes
-    def new_nesting_params
-      { discipline_id: @discipline.id }
-    end
-
-    # Required for nested routes
-    def index_nesting_params
-      new_nesting_params
-    end
 
     # Set the expected params for a valid create
     def create_params
@@ -70,7 +61,7 @@ class DocTypesControllerTest < ActionController::TestCase
       # Index Tests - Success cases
     def test_team_member_can_access_index
       sign_in_and_set_project @accredited_user, @project
-      get :index, params: index_nesting_params
+      get :index, params: index_params
       assert_response :success
     end
 end

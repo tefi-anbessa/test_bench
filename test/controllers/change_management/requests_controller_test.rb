@@ -4,9 +4,10 @@ require "helpers/controller_test_helper"
 module ChangeManagement
   class RequestsControllerTest < ActionController::TestCase
     include Devise::Test::ControllerHelpers
-  include ControllerTestHelper
+    include ControllerTestHelper
 
     setup do
+      @nesting = :project
       setup_projects_and_users # In test/helpers/test_setup_helpers.rb
       setup_disciplines(name: "Electrical") # Not used but required to pass setup test.
       # Set up users with edit permissions on the project.
@@ -17,8 +18,8 @@ module ChangeManagement
       @accredited_user_other_project.grant(:team_member, @other_project)
 
       # Set up in and out of scope instances of request
-      @resource = create(:project_change_request, project: @project)
-      @other_resource = create(:project_change_request, project: @other_project)
+      @resource = create(:change_management_request, project: @project)
+      @other_resource = create(:change_management_request, project: @other_project)
     end
 
     # Tweak required to setup test roles
@@ -54,20 +55,10 @@ module ChangeManagement
 
     private
 
-      # Required for nested routes
-      def new_nesting_params
-        { project_id: @project.id }
-      end
-
-      # Required for nested routes
-      def index_nesting_params
-        new_nesting_params
-      end
-
       # Set the minimum required params for a valid resource
       def create_params
         { project_id: @project.id,
-          project_change_request: {
+          change_management_request: {
             title: 'Test Change Request',
             reason: 'Test reason',
             summary: 'Test summary',
@@ -78,7 +69,7 @@ module ChangeManagement
 
     def update_params
         { project_id: @project.id,
-          project_change_request: {
+          change_management_request: {
             title: 'Updated Change Request',
             reason: 'Test reason',
             summary: 'Test summary',
@@ -89,7 +80,7 @@ module ChangeManagement
 
       # Set invalid resource params for tests
       def invalid_param
-        { project_change_request: {reason: nil } }
+        { change_management_request: {reason: nil } }
       end
 
       # Nominate an attribute to get changed during update tests

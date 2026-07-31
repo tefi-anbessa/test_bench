@@ -19,7 +19,7 @@ module NestedResourcesController
       @pagy, @resources = pagy(result, limit: 20)
       resources_var_name = "@#{controller_name}"
       # Separate resources with tags from orphans (resources without tags)
-      @resources, @orphans = @resources.partition { |r| r.public_send(parent).present? }
+      @resources, @orphans = @resources.partition { |r| r.public_send(nesting).present? }
       instance_variable_set(resources_var_name, @resources)
       set_swatch
     end
@@ -35,7 +35,7 @@ module NestedResourcesController
     # GET /projects/1/examples/new
     def new_resource
       # Build a new resource to authorize
-      @resource = @parent.public_send(resource_class.model_name.collection).build()
+      @resource = @parent.public_send(resource_class.model_name.plural).build()
       authorize @resource, :new?
       setup_form
     end
@@ -55,10 +55,10 @@ module NestedResourcesController
       authorize @resource, :create?
       if @resource.save
         flash[:success] = t('flash.create.notice', 
-          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
-        redirect_to @resource 
+          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one"))
+        redirect_to @resource, status: :see_other
       else
-        flash[:alert] = t('flash.create.alert', 
+        flash.now[:alert] = t('flash.create.alert', 
           resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
         failed_to_save
         return
@@ -86,10 +86,10 @@ module NestedResourcesController
 
       if @resource.save
         flash[:success] = t('flash.update.notice', 
-          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
-        redirect_to @resource 
+          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one"))
+        redirect_to @resource, status: :see_other
       else
-        flash[:alert] = t('flash.update.alert', 
+        flash.now[:alert] = t('flash.update.alert', 
           resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
         failed_to_save
         return
@@ -102,12 +102,11 @@ module NestedResourcesController
       if @resource.destroy
         flash[:success] = t('flash.destroy.notice',
                           resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one"))
-        redirect_to send("discipline_#{resource_path.to_s}_path", @discipline), 
-                    status: :see_other
+        redirect_to helpers.public_send(index_path, @parent), status: :see_other
       else
-        flash.now[:alert] = t("flash.destroy.alert",
+        flash[:alert] = t("flash.destroy.alert",
                             resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
-        failed_to_save
+        redirect_back fallback_location: helpers.public_send(index_path, @parent), status: :see_other
       end
     end
     
@@ -172,9 +171,9 @@ module NestedResourcesController
     end
 
     # The resource_class provides the model_name methods, e.g. electrical_cables
-    # Use resource_path for redirecting to the index action of the calling controller
-    def resource_path
-      resource_class.model_name.route_key.to_sym
+    # Use index_path for redirecting to the index action of the calling controller
+    def index_path
+      "#{nesting}_#{resource_class.model_name.route_key}_path"
     end
 
     # Provide the instance variable name expected by resource forms, e.g. @cable
@@ -197,8 +196,8 @@ module NestedResourcesController
       # Override in subclass for model-specific logic
     end
 
-    # Including class must set parent to one of :tag, :discipline, :project.
+    # Including class must set nesting to one of :tag, :discipline, :project.
     def nesting
-      raise NotImplementedError, "Including class must implement nesting"
+      raise NotImplementedError, "Including class must implement nesting method"
     end
 end

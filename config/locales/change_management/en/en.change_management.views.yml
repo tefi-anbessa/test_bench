@@ -1,6 +1,6 @@
 # change views translations for en
 en:
-  project_change:
+  change_management:
     requests:
       index:
         title:            "Change Requests"

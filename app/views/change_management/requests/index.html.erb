@@ -21,25 +21,28 @@
         </div>
 
         <!-- New Button (Right) -->
-        <% if policy(@project.change_requests.build()).new? %>
-            <%= nav_button(action: :new, path: new_project_project_change_request_path(@project), 
-              record: @project.change_requests.build()) %>
+        <% if policy(@project.change_management_requests.build()).new? %>
+            <%= nav_button(action: :new, path: new_project_change_management_request_path(@project), 
+              record: @project.change_management_requests.build()) %>
         <% end %>
       </div> <!-- end of d-flex -->
     </div> <!-- end of card header -->
 
     <div class="card-body">
       <div class="row search-form">
-        <%= search_form_for @q, url: project_project_change_requests_path(@project) do |f| %>
+        <%= search_form_for @q, url: project_change_management_requests_path(@project) do |f| %>
+          <%= f.search_field :title_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.change_management/request.title") %>
           <%= f.search_field :reason_cont,
                 class: "search_field",
-                placeholder: t("activerecord.attributes.project_change/request.reason") %>
+                placeholder: t("activerecord.attributes.change_management/request.reason") %>
           <%= f.search_field :summary_cont,
                 class: "search_field",
-                placeholder: t("activerecord.attributes.project_change/request.summary") %>
+                placeholder: t("activerecord.attributes.change_management/request.summary") %>
           <%= f.search_field :duration_cont,
                 class: "search_field",
-                placeholder: t("activerecord.attributes.project_change/request.duration") %>
+                placeholder: t("activerecord.attributes.change_management/request.duration") %>
           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
             <%== bs_icon('search') %>
           <% end %>

@@ -6,7 +6,7 @@ module ChangeManagement
 
     def setup
       @project = create(:project)
-      @resource = create(:project_change_request)
+      @resource = create(:change_management_request)
       # Insert model specific test setup here, including relationships with other models.
       # E.g. setup electrical_demand for electrical models.
     end
@@ -24,7 +24,7 @@ module ChangeManagement
   end
 
     test "project must be present" do
-      new_request = build(:project_change_request, project: nil)
+      new_request = build(:change_management_request, project: nil)
       refute new_request.valid?
       assert_includes new_request.errors[:project], I18n.t("errors.messages.required")
     end

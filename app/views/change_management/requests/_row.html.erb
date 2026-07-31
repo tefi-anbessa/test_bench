@@ -10,7 +10,7 @@
       <%= nav_button(action: :show, record: row, icon_only: true) %>
     <% end %>
     <% if policy(row).edit? %>
-      <%= nav_button(action: :edit, record: row, path: edit_project_change_request_path(row), icon_only: true) %>
+      <%= nav_button(action: :edit, record: row, path: edit_change_management_request_path(row), icon_only: true) %>
     <% end %>
     <% if policy(row).destroy? %>
       <%= nav_button(action: :delete, record: row, icon_only: true) %>

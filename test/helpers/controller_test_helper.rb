@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # This module provides common setup and test patterns for resource controllers.
-# Include this in your controller test and all the test methods will run.
+# Include this in the controller test and all the test methods will run.
 require "test_helper"
 require_relative "test_setup_helpers"
 module ControllerTestHelper
@@ -47,22 +47,22 @@ module ControllerTestHelper
   end
 
   def test_unauthenticated_users_are_redirected_to_sign_in
-    get :index, params: index_nesting_params
+    get :index, params: index_params
     assert_unauthenticated
   end
 
   # Index Tests - Success cases
   def test_team_member_can_access_index
     sign_in_and_set_project @team_member, @project
-    get :index, params: index_nesting_params
+    get :index, params: index_params
     assert_response :success
   end
 
   # Index Tests - Failure cases
   def test_regular_user_cannot_access_index
     sign_in_and_set_project @regular_user, @project
-    get :index, params: index_nesting_params
-    if index_nesting_params.present?
+    get :index, params: index_params
+    if :index_params.present?
       assert_conflict
     else
       assert_forbidden
@@ -92,14 +92,14 @@ module ControllerTestHelper
   # New Action Tests - Success cases
   def test_accredited_user_can_access_new_form
     sign_in_and_set_project @accredited_user, @project
-    get :new, params: new_nesting_params
+    get :new, params: new_params
     assert_response :success
   end
 
   # New Action Tests - failure cases
   def test_team_member_cannot_access_new_form
     sign_in_and_set_project @team_member, @project
-    get :new, params: new_nesting_params
+    get :new, params: new_params
     assert_response :forbidden
   end
 
@@ -107,11 +107,11 @@ module ControllerTestHelper
   def test_accredited_user_can_create
     sign_in_and_set_project @accredited_user, @project
     assert_difference("#{resource_class}.count", 1) do
-      post :create, params: new_nesting_params.merge(create_params)
+      post :create, params: new_params.merge(create_params)
     end
 
     # No reliable way to get the created resource...
-    # created_resource = resource_class.find_by(new_nesting_params.merge(create_params)[resource_name])
+    # created_resource = resource_class.find_by(new_params.merge(create_params)[resource_name])
     # assert_redirected_to created_resource
     assert_successful_create_flash_message
   end
@@ -120,7 +120,7 @@ module ControllerTestHelper
   def test_team_member_cannot_create
     sign_in_and_set_project @team_member, @project
     assert_no_difference("#{resource_class}.count") do
-      post :create, params: new_nesting_params.merge(create_params)
+      post :create, params: new_params.merge(create_params)
     end
     assert_forbidden
   end
@@ -130,7 +130,7 @@ module ControllerTestHelper
     sign_in_and_set_project @accredited_user, @project
 
     assert_no_difference("#{resource_class}.count") do
-      post :create, params: new_nesting_params.merge(create_params).deep_merge(invalid_param)
+      post :create, params: new_params.merge(create_params).deep_merge(invalid_param)
     end
     if invalid_param[resource_name].keys.any? { |key| 
           resource_class.defined_enums.key?(key.to_s) && 
@@ -168,7 +168,7 @@ module ControllerTestHelper
     sign_in_and_set_project @accredited_user, @project
     patch :update, params: update_params.deep_merge({ resource_name => { update_attribute_name => updated_attribute_value } }).merge({ id: @resource.id })
     assert_equal updated_attribute_value, @resource.reload.send(update_attribute_name)
-    assert_redirected_to resource_path(@resource)
+    assert_redirected_to @resource
     assert_successful_update_flash_message
   end
 
@@ -236,35 +236,53 @@ module ControllerTestHelper
     resource_class.model_name.param_key.to_sym
   end
 
-  def resource_path(resource)
-    # Use the underscored resource name for path helpers
-    # e.g., :electrical_cable -> :electrical_cable_path
-    path_helper = "#{resource.model_name.singular_route_key}_path"
-    send(path_helper, resource)
+  def resource_index_path
+    args = @nesting ? [instance_variable_get(:"@#{@nesting}")] : []
+    path_helper =
+      if @nesting
+        "#{@nesting}_#{resource_class.model_name.route_key}_path"
+      else
+        "#{resource_class.model_name.route_key}_path"
+      end
+      public_send(path_helper, *args)
   end
 
-  def resource_index_path
+  # Including controller test can override
+  def index_params
     # Handle both namespaced and non-namespaced resources
-    if index_nesting_params.any?
-      # For nested routes: project_disciplines_path(project_id: 1)
-      parent_key = index_nesting_params.keys.first.to_s.sub('_id', '')
-      path_helper = "#{parent_key}_#{resource_name.to_s.pluralize}_path".to_sym
-      send(path_helper, **index_nesting_params)
+    if @nesting.in?(%i[tag document discipline project])
+      # For nested routes: project_disciplines_path(@project)
+      { "#{@nesting}_id": instance_variable_get(:"@#{@nesting}").id }
     else
-      # For non-nested routes: disciplines_path
-      path_helper = "#{resource_name.to_s.pluralize}_path".to_sym
-      send(path_helper)
+      # For non-nested routes: no params
+      {}
+    end
+  end
+
+  # Including controller test can override
+  def new_params
+    # Handle both namespaced and non-namespaced resources
+    if @nesting.in?(%i[tag document discipline project])
+      # For nested routes: project_disciplines_path(@project)
+      { "#{@nesting}_id": instance_variable_get(:"@#{@nesting}").id }
+    else
+      # For non-nested routes: no params
+      {}
     end
   end
 
   # Allows new and create routes to be namespaced.
-  def new_nesting_params
-    { }
-  end
-
-  # Allows index routes to be namespaced (not always the same as new and create, e.g. tagables)
-  def index_nesting_params
-    { }
+  def new_path
+    # Handle both namespaced and non-namespaced resources
+    if @nesting.in?(%i[tag document discipline project])
+      # For nested routes: project_disciplines_path(@project)
+      path_helper = "new_#{@nesting}_#{resource_class.model_name.param_key}_path(@#{nesting})"
+      send(path_helper)
+    else
+      # For non-nested routes: disciplines_path
+      path_helper = "#{resource_class.model_name.route_key}_path".to_sym
+      send(path_helper)
+    end
   end
 
   # Set the minimum required params for a valid resource

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 # This module provides an abstracted controller with no nesting. Use only for system resources.
-module DisciplineResourcesController
+module ResourcesController
   extend ActiveSupport::Concern
   included do
     before_action :authenticate_user!

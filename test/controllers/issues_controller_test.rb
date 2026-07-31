@@ -6,6 +6,7 @@ class IssuesControllerTest < ActionController::TestCase
   include ControllerTestHelper
 
   setup do
+    @nesting = :document
     setup_projects_and_users # In test/helpers/test_setup_helpers.rb
     setup_disciplines(name: "Electrical", required_role: :designer)
     setup_accredited_users(:designer)   
@@ -22,16 +23,6 @@ class IssuesControllerTest < ActionController::TestCase
   end
 
   private
-
-    # Required for nested routes
-    def new_nesting_params
-      { document_id: @document.id }
-    end
-
-    # Required for nested routes
-    def index_nesting_params
-      new_nesting_params
-    end
 
     # Set the minimum required params for a valid resource
     def create_params

@@ -13,7 +13,7 @@
     </div>
 
     <%= bootstrap_form_with(model: request,
-          url: project_project_change_requests_path(@project),
+          url: request.persisted? ? request : project_change_management_requests_path(@project),
           layout: :horizontal,
           label_col: "col-sm-4",
           control_col: "col-sm-8",
@@ -27,15 +27,15 @@
             <!-- Request Details -->
             <div class="card mb-1" style="<%= card_styles(@swatch) %>">
               <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
-                <h5><%= t('activerecord.models.project_change/request.one') %></h5>
+                <h5><%= t('activerecord.models.change_management/request.one') %></h5>
               </div>
 
               <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
                 <%= render 'shared/error_messages', object: f.object %>
 
                 <%= form_field(f, :title, label_cols: 4, control_cols: 8) %>
-                <% collection = options_for_select(ProjectChange::Request.durations.keys.collect { |k| 
-                          [ProjectChange::Request.human_enum_name(:duration, k), k] }, selected: request.duration) %>
+                <% collection = options_for_select(ChangeManagement::Request.durations.keys.collect { |k| 
+                          [ChangeManagement::Request.human_enum_name(:duration, k), k] }, selected: request.duration) %>
                 <%= form_field(f, :duration, type: :enum_translated, label_cols: 4, control_cols: 8, collection: collection, required: true) %>
                 <%= form_field(f, :reason, type: :text) %>
                 <%= form_field(f, :summary, type: :text) %>
@@ -46,7 +46,7 @@
             <div class="card-footer bg-transparent text-end p-2">
               <%= link_to(request.persisted? ? 
               request : 
-              project_project_change_requests_path(@project),
+              project_change_management_requests_path(@project),
                     class: 'btn btn-warning',
                     data: { confirm: t('actions.sure'), turbo: false }) do %>
                 <%= t('actions.discard') %>

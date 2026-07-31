@@ -2,11 +2,11 @@
 en:
   activerecord:
     models:
-      project_change/request: 
+      change_management/request: 
         one: Change Request
         other: Change Requests
     attributes:
-      project_change/request:
+      change_management/request:
         project_id: "Project"
         serial: "Number"
         title: "Title"
@@ -18,5 +18,5 @@ en:
           trial: "Trial"
           temporary: "Temporary"
     errors:
-      project_change/request:
+      change_management/request:
         none: None

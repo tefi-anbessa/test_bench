@@ -7,6 +7,7 @@ class DisciplinesControllerTest < ActionController::TestCase
   include ControllerTestHelper
 
   setup do
+    @nesting = :project
     # Don't use the standard helper setup, discipline model will get confused.
     setup_projects_and_users
     setup_disciplines(name: "Electrical", required_role: :designer)

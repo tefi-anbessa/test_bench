@@ -315,7 +315,7 @@ The SourceFormats model provides a list of available software source formats. Th
 
 [TODO: Add permissions for swatches]
 
-## PERMISSIONS FOR CHANGE CONTROL MODELS
+## PERMISSIONS FOR CHANGE MANAGEMENT MODELS
 
 The ChangeManagement module tracks and manages changes on a project. The Request model records the instigation of change management processes. If a change request (CR) is considered beneficial, it is assigned to a lead discipline to develop a change proposal (CP). The CP fully evaluates the options, assess cost vs benefit, risk, and completes detailed engineering design of the proposed change. After submission, the CP is reviewed and either approved, sent for revision, or rejected. If approved, a Change Order (CO) is raised and assigned to an implementation team.
 
@@ -327,7 +327,7 @@ The ChangeManagement module tracks and manages changes on a project. The Request
 - Admins have full access to all change control resources.
 - Scope for all change_management models is the current project.
 
-### Permission Matrix for ProjectChange Models
+### Permission Matrix for ChangeManagement Models
 
 | Action                         | Admins | Project Manager | Accredited User | Team Member |
 |--------------------------------|--------|-----------------|-----------------|-------------|

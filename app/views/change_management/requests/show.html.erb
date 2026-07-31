@@ -9,7 +9,7 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@request).index? %>
-              <%= nav_button(action: :index_project, path: project_project_change_requests_path(@project), record: @request) %>
+              <%= nav_button(action: :index_project, path: project_change_management_requests_path(@project), record: @request) %>
             <% end %>
 
             <!-- Previous Button -->
@@ -38,15 +38,15 @@
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm">
               <% if policy(@request).edit? %>
-                <%= nav_button(action: :edit, path: edit_project_change_request_path(@request), record: @request) %>
+                <%= nav_button(action: :edit, path: edit_change_management_request_path(@request), record: @request) %>
               <% end %>
               
               <% if policy(@request).destroy? %>
-                <%= nav_button(action: :delete, path: @request, record: @tag) %>
+                <%= nav_button(action: :delete, record: @request) %>
               <% end %>
 
               <% if policy(@request).new? %>
-                <%= nav_button(action: :new, path: new_project_project_change_request_path(@project), record: @request) %>
+                <%= nav_button(action: :new, path: new_project_change_management_request_path(@project), record: @request) %>
               <% end %>
             </div> <!-- button group -->
           </div> <!-- d-flex align-items-center -->
