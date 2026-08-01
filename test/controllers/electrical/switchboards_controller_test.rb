@@ -7,7 +7,7 @@ module Electrical
     include Devise::Test::ControllerHelpers
 
     setup do
-      setup_common_test_data
+      setup_controller_test
       setup_model_specific_data
     end
 
@@ -33,7 +33,7 @@ module Electrical
       }
     end
 
-    # Set invalid resource params for tests
+    # Set invalid resource param for tests
     def invalid_param
       { voltage_rating: 999 }  # Invalid voltage rating (enum only allows 0-9)
     end

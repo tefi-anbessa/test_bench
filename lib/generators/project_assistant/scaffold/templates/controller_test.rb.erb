@@ -1,42 +1,63 @@
 # frozen_string_literal: true
-require "helpers/resource_controller_test_helper.rb"
+require "helpers/controller_test_helper"
+require "helpers/tagable_controller_tests"
 <%- if @namespaced -%>
 module <%= module_name %>
 <%- end -%>
   class <%= model_class_name.pluralize %>ControllerTest < ActionController::TestCase
     include Devise::Test::ControllerHelpers
-    include ResourceControllerTestHelper
-
+<%- case @nesting -%>
+<%- when :tag, :document, :discipline, :project %>
+    include ControllerTestHelper
+<%- when :tagable %>
+    include TagableControllerTests
+<%- end -%>
     setup do
-      setup_controller_test # In test/helpers/resource_controller_test_helper.rb      
-
+      @nesting = <%= @nesting.inspect %>
+      setup_controller_test # In test/helpers/controller_test_helper.rb or test/helpers/tagable_controller_tests
+<%- case @nesting -%>
+<%- when :tag, :document, :discipline, :project %>
       # Set up in and out of scope instances of <%= singular_name %>
-      @resource = create(:<%= singular_table_name %>, discipline: @discipline)
-      @other_resource = create(:<%= singular_table_name %>, discipline: @other_discipline)
+      @resource = create(:<%= singular_table_name %>, <%= @nesting.to_s %>: @<%= @nesting.to_s %>)
+      @other_resource = create(:<%= singular_table_name %>, <%= @nesting.to_s %>: @other_<%= @nesting.to_s %>)
+<%- when :none %>
+      # Set up in and out of scope instances of <%= singular_name %>
+      @resource = create(:<%= singular_table_name %>)
+      @other_resource = create(:<%= singular_table_name %>)
+<%- end -%>
     end
 
     private
 
-      # Set the minimum required params for a valid resource
-      def valid_resource_params
-      {
-  <%- @fields.select { |f| f[:options].include?('required') }.each do |field| -%>
-          <%= "#{field[:name]}: '' # Add valid data" %>
-  <% end %>
+      # Set the expected params for a valid resource
+      def create_params
+<%- params = [] %>
+<%- @attribute_fields.each do |field| -%>
+  <%- valid = field.dig(:options, :valid) || 
+        (if [:enum, :enum_translated].include?(field[:type])
+          field.dig(:options, :keys)&.first
+        end) -%>
+  <%- params << "#{field[:name].to_sym}: #{valid.inspect}" -%>
+<%- end -%>
+<%- @association_fields.each do |field| -%>
+  <%- params << "#{field[:name].to_sym}: #{field.dig(:options, :valid).inspect}" -%>
+<%- end -%>
+        {
+          <%= params.join(",\n\t\t\t\t\t") %>
         }
       end
 
-      # Set invalid resource params for tests
-      def invalid_resource_params
-        { }  # Set invalid value for an attribute
+      # Set invalid resource param for tests.
+      def invalid_param
+        { }  # Set an invalid value for an attribute.
       end
 
-      # Nominate an attribute to get changed during update tests
+      # Nominate an attribute to get changed during update tests.
       def update_attribute_name
-        # Set one attribute name
+        # Set one attribute name as a symbol
       end
 
-      # Nominate a valid value to update the attribute to
+      # Nominate a valid value to update the attribute to, observe the correct type.
       def updated_attribute_value
         "new_value"
       end

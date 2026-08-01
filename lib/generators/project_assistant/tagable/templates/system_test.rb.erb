@@ -14,19 +14,11 @@ module <%= module_name %>
     end
 
     def setup_model_specific_data
-<%- association_types = %w[references belongs_to] %>
-<%- all_field_names = @fields.map { |field| 
-          case field[:type]
-          when *association_types
-            "#{field[:name]}_id"
-          else
-            "#{field[:name]}"
-          end
-        } %>
-<%- index_field_names = @index_fields.map { |field| "#{field[:name]}" } %>
-<%- searchable_field_names = @searchable_fields.map { |field| "#{field[:name]}" } %>
-<%- fields_partitioned = @fields.partition { |f| association_types.include?(f[:type]) } %>
-<%- association_names, field_names = fields_partitioned.map { |group| group.map { |f| f[:name] } } %>
+<%- all_field_names = @fields.map { |field| "#{field[:name]}" } -%>
+<%- index_field_names = @index_fields.map { |field| "#{field[:name]}" } -%>
+<%- searchable_field_names = @searchable_fields.map { |field| "#{field[:name]}" } -%>
+<%- attribute_names = @attribute_fields.map { |field| "#{field[:name]}" } -%>
+<%- association_names = @association_fields.map { |field| "#{field[:name]}" } -%>
 
       # List fields that should appear in index. 
       # The generator will include test for sort link header for each included field, 
@@ -39,7 +31,7 @@ module <%= module_name %>
       @search_fields = %i[<%= searchable_field_names.join(" ") %>]
 
       # List all fields that should appear in show attributes
-      @show_fields = %i[<%= all_field_names.join(" ") %>]
+      @show_fields = %i[<%= attribute_names.join(" ") %>]
 
       # List all associations that should have a collapsible card on the show view
       @show_associations = %i[<%= association_names.join(" ") %>]

@@ -7,7 +7,7 @@ module Electrical
     include Devise::Test::ControllerHelpers
 
     setup do
-      setup_common_test_data
+      setup_controller_test
       setup_model_specific_data
     end
 

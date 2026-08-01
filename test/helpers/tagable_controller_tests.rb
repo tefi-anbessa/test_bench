@@ -8,7 +8,7 @@ module TagableControllerTests
   include TestSetupHelpers
 
   # Setup common to all tagable controllers
-  def setup_common_test_data
+  def setup_controller_test
     setup_projects_and_users
     setup_disciplines
     setup_accredited_users

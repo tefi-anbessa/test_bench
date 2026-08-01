@@ -426,7 +426,12 @@ module ProjectAssistant
           @attribute_fields = @fields - @association_fields
           @required_fields = @fields.select { |field| field[:options][:required] == true }
           @enum_fields = @fields.select { |field| field[:type].in?(%i[enum enum_translated]) }
-          @unique_fields = @fields.select { |field| field[:options][:unique] == true || field[:options][:uniq] == true }
+          @unique_fields = @fields.select { |field| field[:options][:unique] == true || field[:options][:uniq] == true }      
+          @all_field_names = @fields.map { |field| field[:name].to_sym } 
+          @index_field_names = @index_fields.map { |field| "#{field[:name]}" } 
+          @searchable_field_names = @searchable_fields.map { |field| "#{field[:name]}" } 
+          @attribute_names = @attribute_fields.map { |field| "#{field[:name]}" } 
+          @association_names = @association_fields.map { |field| "#{field[:name]}" } 
         end
 
         def set_form_variables(nesting)
@@ -743,6 +748,45 @@ module ProjectAssistant
           @association_fields.each do |field|
             assert_includes content, "show_attribute(#{singular_name}, :#{field[:name]}, type: :association)"
           end
+        end
+
+        def test_assertions_controller_test(content, nesting)
+          assert_includes content, "class #{@model_class_name.pluralize}ControllerTest"
+          assert_includes content, "@nesting = #{nesting.inspect}"
+          assert_includes content, "setup_controller_test"
+          case nesting
+          when :tag, :document, :discipline, :project
+            assert_includes content, "include ControllerTestHelper"
+            assert_includes content, "@resource = create(:#{@singular_table_name}, #{nesting.to_s}: @#{nesting.to_s})"
+          when :tagable
+            assert_includes content, "include TagableControllerTests"
+          when :none
+            assert_includes content, "@resource = create(:#{@singular_table_name})"
+          end
+          assert_includes content, "def create_params"
+          @fields.each do |field|
+            assert_includes content, "#{field[:name]}"
+          end
+        end
+
+        def test_assertions_system_test(content, nesting)
+          assert_includes content, "class #{@model_class_name.pluralize}SystemTest < ApplicationSystemTestCase"
+          assert_includes content, "include Devise::Test::IntegrationHelpers"
+          assert_includes content, "include Warden::Test::Helpers"
+          text = @index_field_names.join(" ")
+          assert_includes content, "@index_fields = %i[#{text}]"
+
+          text = @searchable_field_names.join(" ")
+          assert_includes content, "@search_fields = %i[#{text}]"
+
+          text = @attribute_names.join(" ")
+          assert_includes content, "@show_fields = %i[#{text}]"
+
+          text = @association_names.join(" ")
+          assert_includes content, "@show_associations = %i[#{text}]"
+
+          text = @all_field_names.map { |f| "#{f}: nil" }.join(", ")
+          assert_includes content, "@new_fields = { #{text} }"
         end
     end
   end

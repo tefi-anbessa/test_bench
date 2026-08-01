@@ -79,7 +79,7 @@ module ProjectAssistant
       if errors.any?
         # $stderr.puts "DEBUG (TEST): Test setup field errors: #{errors.inspect}"
       end
-      # Mimic the generator field sets.
+      # Build the generator field sets.
       field_sets
     end
     
@@ -621,29 +621,58 @@ module ProjectAssistant
     end
 
     test "creates controller test" do
-      run_generator(@args)
-      controller_test_file = File.join(destination_root, 'test', 'controllers', folder, 
-        "#{@plural_name}_controller_test.rb")
-      assert_file controller_test_file do |content|
-        assert_match(/module\s+#{module_name}/, content)
-        assert_match(/class\s+#{@model_class_name.pluralize}ControllerTest\s*<\s*ActionController::TestCase/, content)
-        assert_match(/include Devise::Test::ControllerHelpers/, content)
-        @fields.select { |field| field[:options].include?('required') }.each do |field|
-          assert_match(/#{field[:name]}:/, content)
+      original_class_name = @class_name
+      original_model_class_name = @model_class_name
+      # Core controller: Set class name without namespace module
+      @nesting_options.each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        controller_test_file = File.join(destination_root, 'test', 'controllers', folder, 
+          "#{@plural_name}_controller_test.rb")
+        assert_file controller_test_file do |content|
+          test_assertions_controller_test(content, nesting)
+        end
+        # Namespaced policy: Set class name with namespace module
+        @class_name = original_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        controller_test_file = File.join(destination_root, 'test', 'controllers', folder, 
+          "#{@plural_name}_controller_test.rb")
+        assert_file controller_test_file do |content|
+          assert_includes content, "module #{@module_name}"
+          test_assertions_controller_test(content, nesting)
         end
       end
     end
 
     test "creates system test" do
-      run_generator(@args)
-      system_test_file = File.join(destination_root, 'test', 'system', folder, 
+      original_class_name = @class_name
+      original_model_class_name = @model_class_name
+      # Core controller: Set class name without namespace module
+      @nesting_options.each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        system_test_file = File.join(destination_root, 'test', 'system', folder, 
         "#{@plural_name}_system_test.rb")
-      assert_file system_test_file do |content|
-        assert_match(/module\s+#{module_name}/, content)
-        assert_match(/class\s+#{@model_class_name.pluralize}SystemTest\s*<\s*ApplicationSystemTestCase/, content)
-        assert_match(/include Devise::Test::IntegrationHelpers/, content)
-        assert_match(/include Warden::Test::Helpers/, content)
-        assert_match(/include ActionView::Helpers::NumberHelper/, content)
+        assert_file system_test_file do |content|
+          test_assertions_system_test(content, nesting)
+        end
+        # Namespaced policy: Set class name with namespace module
+        @class_name = original_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        system_test_file = File.join(destination_root, 'test', 'system', folder, 
+        "#{@plural_name}_system_test.rb")
+        assert_file system_test_file do |content|
+          assert_includes content, "module #{@module_name}"
+          test_assertions_system_test(content, nesting)
+        end
       end
     end
 
@@ -736,7 +765,7 @@ module ProjectAssistant
     def class_name
       @class_name
     end
-    
+
     def singular_name
       @model_class_name.underscore # "new_model"
     end

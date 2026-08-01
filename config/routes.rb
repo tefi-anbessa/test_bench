@@ -28,52 +28,61 @@ Rails.application.routes.draw do
       # Project nested resources
       resources :disciplines, shallow: true do
         get :schema, on: :member, constraints: { format: 'json' }
-        # Discipline nested resources
-        # Tagable models have discipline level new and create routes to allow creation 
-        # of tagable and tag in a single operation
-        # Tagables override index from the shallow nesting under tags, 
-        # there is no sense in nesting a 1:1 relationship.
-        namespace :electrical do
-          # INSERTION POINT 1 FOR SUBMODULES
-          # INSERTION POINT 1 FOR TAGABLE GENERATOR
-          resources :heaters, :cables, :motors, :light_ccts, 
-                    :socket_ccts, only: [:index, :new, :create]
-          resources :switchboards, only: [:index, :new, :create] do
-            resources :circuits, shallow: true
-          end
-          # Define discipline level index routes for circuits, demands, to allow complete 
-          # discipline load listings.
-          resources :circuits, :demands, only: [:index]
-        end # electrical namespace
-        # INSERTION POINT 1 FOR MODULE GENERATOR
-        resources :tags, shallow: true do
-          # tagables differ from shallow routes because they require index to be treated
-          # like a member route. No point in nesting index under tag.
-          namespace :electrical do
-          # INSERTION POINT 2 FOR TAGABLE GENERATOR
-            resources :heaters, :cables, :motors, :light_ccts, 
-              :socket_ccts, :switchboards, except: [:index]
-            # Demands are special case, not tagable but require tagable for create and update, 
-            # nested under tag for this requirement.
-            resources :demands, except: [:index]
-          end
-          # INSERTION POINT 2 FOR MODULE GENERATOR
-        end # tag nested resources (tagables)
-        # Continue discipline nested resources
-        resources :documents, shallow: true do
-          resources :issues
-        end
-        resources :doc_types
-        namespace :electrical do
-          resources :cable_types, shallow: true
-        end
-      end # discipline nested resources
-
+      end
       # Change namespace for change management
       namespace :change_management do
         resources :requests, shallow: true
       end
     end # project nested routes
+
+    resources :disciplines, shallow: true, only: [] do
+      # Discipline nested resources
+      # Tagable models have discipline level new and create routes to allow creation 
+      # of tagable and tag in a single operation
+      # Tagables override index from the shallow nesting under tags, 
+      # there is no sense in nesting a 1:1 relationship.
+      namespace :electrical do
+        # INSERTION POINT 1 FOR SUBMODULES
+        # INSERTION POINT 1 FOR TAGABLE GENERATOR
+        resources :heaters, :cables, :motors, :light_ccts, 
+                  :socket_ccts, only: [:index, :new, :create]
+        resources :switchboards, only: [:index, :new, :create] do
+          resources :circuits, shallow: true
+        end
+        # Define discipline level index routes for circuits, demands, to allow complete 
+        # discipline load listings.
+        resources :circuits, :demands, only: [:index]
+      end # electrical namespace
+      # INSERTION POINT 1 FOR MODULE GENERATOR
+      resources :tags, shallow: true do
+        # tagables differ from shallow routes because they require index to be treated
+        # like a member route. No point in nesting index under tag.
+        namespace :electrical do
+        # INSERTION POINT 2 FOR TAGABLE GENERATOR
+          resources :heaters, :cables, :motors, :light_ccts, 
+            :socket_ccts, :switchboards, except: [:index]
+          # Demands are special case, not tagable but require tagable for create and update, 
+          # nested under tag for this requirement.
+          resources :demands, except: [:index]
+        end
+        # INSERTION POINT 2 FOR MODULE GENERATOR
+      end # tag nested resources (tagables)
+      # Continue discipline nested resources
+      resources :documents, shallow: true do
+        # Document nested resources
+        resources :issues
+          # Issue nested resources
+      end
+      resources :doc_types
+      namespace :electrical do
+        resources :cable_types, shallow: true
+      end
+    end # discipline nested resources
+
+    resources :tags, shallow: true, only: [] do
+      # Tag nested resources
+    end
+
 
     resources :source_formats
 
@@ -86,6 +95,7 @@ Rails.application.routes.draw do
     resources :roles, only: [:index, :new, :create]
 
     resources :swatches
+    # Insertion point for non-nested routes
   end
 
 # Defines the root path route ("/")

@@ -413,6 +413,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Clean up abstraction of policies and policy tests. Update generator and tests.
 - [ ] Abstract controllers for project, discipline and tag nested resources.
 - [ ] Generic tag_resource_policy may be required. Generator provides for tag nesting but use case is not certain. Only demands are tag linked but not tagable.
+- [ ] Complete nested system test for scaffold generator.
 
 ## Refactoring Opportunities
 
