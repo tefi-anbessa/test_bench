@@ -1,6 +1,6 @@
 module Electrical
   class SocketCctsController < ApplicationController
-    include TagablesController
+    include TagablesConcern
     
     def index
       index_resource

@@ -55,8 +55,7 @@ Rails.application.routes.draw do
       end # electrical namespace
       # INSERTION POINT 1 FOR MODULE GENERATOR
       resources :tags, shallow: true do
-        # tagables differ from shallow routes because they require index to be treated
-        # like a member route. No point in nesting index under tag.
+        resource :tagables
         namespace :electrical do
         # INSERTION POINT 2 FOR TAGABLE GENERATOR
           resources :heaters, :cables, :motors, :light_ccts, 

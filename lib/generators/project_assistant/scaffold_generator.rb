@@ -11,7 +11,7 @@ module ProjectAssistant
 
     def validate_name
       # $stderr.puts "DEBUG (Generator): args #{args}"
-      @namespaced = class_path.count > 0
+      @namespaced = class_path.any?
       errors = []
       # $stderr.puts "DEBUG (GENERATOR): validating name: #{class_name.inspect}"
       
@@ -52,7 +52,7 @@ module ProjectAssistant
       # $stderr.puts "DEBUG (GENERATOR): options[:nesting]: #{options[:nesting].inspect} (#{options[:nesting].class})"
       errors = []
       if options[:nesting].present?
-        unless options[:nesting].in? %w[project discipline tag tagable none]
+        unless options[:nesting].in? %w[project discipline tag document issue tagable none]
           errors << "Invalid nesting option #{options[:nesting]}"
         end
         @nesting = options[:nesting].to_sym
@@ -166,17 +166,18 @@ module ProjectAssistant
     
     def edit_routes_file
       # Update config/routes.rb
+      tab = "  "
       routes_file = Pathname.new(File.join(destination_root, "config", "routes.rb"))
       if File.exist?(routes_file)
         content = File.read(routes_file)
         
-        if class_path.any?
+        if @namespaced
           # Find the insertion point
           insertion_pattern = /^(\s*)(namespace\s+:#{class_path.last}\s+do)$/
           if content.match?(insertion_pattern)
             content.sub!(insertion_pattern) do
               # $1 is the captured indentation, $2 is the namespace line
-              "#{$1}#{$2}\n#{$1}  resources :#{plural_name}\n"
+              "#{$1}#{$2}\n#{$1}#{tab}resources :#{plural_name}\n"
             end
           else
             say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Could not find namespace for #{class_path.last}", :red
@@ -184,13 +185,13 @@ module ProjectAssistant
           end
         else
           # Non-namespaced case - insert before root path route
-          root_pattern = /(# Defines the root path route)/
-          if content.match?(root_pattern)
+        insertion_pattern = /# Insertion point for non-nested routes/
+          if content.match?(insertion_pattern)
             content.sub!(root_pattern) do
               "\n  resources :#{plural_name}\n\n#{$1}"
             end
           else
-            say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Could not find root path route", :red
+            say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Could not find insertion point for non-nested routes", :red
             return
           end
         end

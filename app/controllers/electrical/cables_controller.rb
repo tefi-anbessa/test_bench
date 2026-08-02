@@ -1,6 +1,6 @@
 module Electrical
   class CablesController < ApplicationController
-    include TagablesController
+    include TagablesConcern
 
     # GET electrical/cables or /electrical/cables.json
     def index

@@ -22,6 +22,10 @@ module NavigationHelper
       bs_color: "info",
       bs_icon: "eye"
     },
+    show_tagable: {
+      bs_color: "info",
+      bs_icon: "eye"
+    },
     show_project: {
       bs_color: "info",
       bs_icon: "layers"
@@ -116,6 +120,8 @@ module NavigationHelper
         record.name
       when :show_project
         record.code
+      when :show_tagable
+        I18n.t("actions.show")
       end
 
     help_text =

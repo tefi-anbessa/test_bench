@@ -1,6 +1,6 @@
 module Electrical
   class MotorsController < ApplicationController
-    include TagablesController
+    include TagablesConcern
 
     # GET /motors or /motors.json
     def index

@@ -1,6 +1,6 @@
 module Electrical
   class SwitchboardsController < ApplicationController
-    include TagablesController
+    include TagablesConcern
 
     # GET /switchboards or /switchboards.json
     def index

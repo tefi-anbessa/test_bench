@@ -1,6 +1,6 @@
 module Electrical
   class HeatersController < ApplicationController
-    include TagablesController
+    include TagablesConcern
 
     # GET /resource or /resource.json
     def index

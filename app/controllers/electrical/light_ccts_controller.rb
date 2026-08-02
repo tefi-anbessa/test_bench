@@ -1,6 +1,6 @@
 module Electrical
   class LightCctsController < ApplicationController
-    include TagablesController
+    include TagablesConcern
 
     # GET /light_ccts or /light_ccts.json
     def index

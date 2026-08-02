@@ -1,4 +1,4 @@
-module TagablesController
+module TagablesConcern
   extend ActiveSupport::Concern
   included do
     before_action :authenticate_user!
