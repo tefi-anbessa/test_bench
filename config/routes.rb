@@ -55,7 +55,6 @@ Rails.application.routes.draw do
       end # electrical namespace
       # INSERTION POINT 1 FOR MODULE GENERATOR
       resources :tags, shallow: true do
-        resource :tagables
         namespace :electrical do
         # INSERTION POINT 2 FOR TAGABLE GENERATOR
           resources :heaters, :cables, :motors, :light_ccts, 
@@ -80,7 +79,9 @@ Rails.application.routes.draw do
 
     resources :tags, shallow: true, only: [] do
       # Tag nested resources
+      resource :tagable, only: [:show, :edit, :update, :destroy]
     end
+    resources :tagables, only: [:new, :create]
 
 
     resources :source_formats

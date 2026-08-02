@@ -57,6 +57,7 @@ en:
       record_is_orphan: "The item requested does not have a valid parent"
       already_assigned: "This item is already assigned to another object"
       missing_param: "The request is missing a required parameter"
+      invalid_type: "Invalid type"
   projects:
     index:
       title:            "Projects"

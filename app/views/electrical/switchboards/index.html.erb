@@ -20,7 +20,7 @@
         <!-- New Button (Right) -->
         <div class="col-2 align-content-end">
           <% if policy(@discipline.tags.build()).new? %>
-            <%= nav_button(action: :new, path: new_discipline_electrical_switchboard_path(@discipline),
+            <%= nav_button(action: :new, path: new_tagable_path(discipline_id: @discipline.id, tagable_type: "Electrical::Switchboard"),
                 record: Electrical::Switchboard.new) %>
           <% end %>
         </div>

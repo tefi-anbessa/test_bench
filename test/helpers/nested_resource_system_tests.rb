@@ -2,7 +2,7 @@
 require "test_helper"
 require "helpers/test_setup_helpers"
 require "helpers/system_test_helpers"
-module DisciplineResourceSystemTests
+module NestedResourceSystemTests
   extend ActiveSupport::Concern
   include TestSetupHelpers
   include SystemTestHelpers
