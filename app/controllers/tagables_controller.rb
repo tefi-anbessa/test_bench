@@ -34,7 +34,8 @@ class TagablesController < ApplicationController
       render template: "#{@resource_class.model_name.collection}/show"
     end
 
-    # GET /new_tag_tagables
+    # GET    (/:locale)/tags/:tag_id/tagable/new or
+    # GET    (/:locale)/disciplines/:discipline_id/tagable/new
     def new
       # set_new_parent looks for a tag_id in the params.
       # If a valid tag id is found with a valid tagable_type, the action builds a new tagable on the existing tag for the form, using the tag's tagable_type. 
@@ -45,7 +46,8 @@ class TagablesController < ApplicationController
       render template: "#{@resource_class.model_name.collection}/new"
     end
 
-  # POST /tagables 
+  # POST   (/:locale)/tags/:tag_id/tagable or
+  # POST   (/:locale)/disciplines/:discipline_id/tagable
     def create
       # set_create_parent looks for a tag_id in the params.
       # If a valid tag id is found, the action creates a new tagable on the existing tag. 
@@ -98,54 +100,38 @@ class TagablesController < ApplicationController
       end
     end
 
-    # GET /edit 
+    # GET    (/:locale)/tags/:tag_id/tagable/edit
     def edit
-      authorize @resource, :edit?
-      # Allow edit of resource without a tag as a way to rescue orphans
-      # [TODO - this won't work at present because without a project association 
-      # the action will not be authorised.]
-      @tag = (@resource.tag&.present? && @resource.tag.valid?)? @resource.tag : Tag.new(tagable_type: controller_path.classify)
+      authorize @tag
       setup_form
+      render template: "#{@resource_class.model_name.collection}/edit"
     end
 
-    # PATCH/PUT /switchboards/1 
+    # PATCH  (/:locale)/tags/:tag_id/tagable
     def update
-      authorize @resource, :update?
-
-      # Tagable allows a new tag to be created via update, as a way to rescue orphans
-      @tag = @resource.tag&.present? ? @resource.tag : Tag.new(tag_params.merge(tagable: @resource))
-
-      unless @tag.valid?
-        flash.now[:alert] = t("flash.create.alert",
-                            resource_name: t("activerecord.models.tag.one").downcase)
-        failed_to_save
-        return
-      end
-
+      authorize @tag
+      # Introduce model specific requirements including safe params
+      extend_tagable
       # Catch enum validation errors
       begin
-        @resource.assign_attributes(resource_params.except(:tag))
+        @tagable.assign_attributes(tagable_params)
       rescue ArgumentError => _
         # Handle invalid enum values as a conflict
         raise ApplicationController::ConflictError, :invalid_enum
       end
-
-      unless @resource.valid?
-        flash.now[:alert] = t("flash.update.alert",
-                            resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
+      
+      if @tag.save
+        # Flash is an array to allow after_update_hook to add its own messages
+        flash[:success] = [t("flash.update.notice", 
+          resource_name: t("activerecord.models.#{@resource_class.model_name.i18n_key}.one"))]
+        after_update_hook(@tagable)
+        redirect_to @tagable
+      else
+        # Fallback protection in case something else is wrong
+        flash.now[:alert] = t('flash.update.alert', 
+          resource_name: @tagable.model_name.human(count: 1).downcase)
         failed_to_save
         return
-      end
-
-      # Separate authorization for tag update to check project against current project context
-      if @tag&.persisted?
-        authorize @tag, :update?
-        # Update existing tag and resource
-        update_resource
-      else
-        authorize @tag, :create?
-        # Create new tag and assign resource
-        create_tag_for_orphan_resource
       end
     end
 
