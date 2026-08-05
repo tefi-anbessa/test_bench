@@ -137,11 +137,11 @@ class TagablesController < ApplicationController
 
     # DELETE /:id - abstracted destroy action
     def destroy
-      authorize @resource, :destroy?
-      if @resource.destroy
+      authorize @tag
+      if @tagable.destroy
         flash[:success] = t('flash.destroy.notice',
                           resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one"))
-        redirect_to send("discipline_#{resource_path.to_s}_path", @discipline), 
+        redirect_to send("discipline_#{resource_path}_path", @discipline), 
                     status: :see_other
       else
         flash.now[:alert] = t("flash.destroy.alert",
