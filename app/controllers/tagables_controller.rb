@@ -2,7 +2,7 @@ class TagablesController < ApplicationController
 
     before_action :authenticate_user!
     before_action :require_project!, only: [:new, :create, :edit, :update]
-    before_action :set_resource, only: [:show, :edit, :update, :destroy]
+    before_action :set_tagable, only: [:show, :edit, :update, :destroy]
 
     # Main abstracted methods
     # GET /index - abstracted index action with proper authorization
@@ -10,7 +10,7 @@ class TagablesController < ApplicationController
     # in accordance with the policy scope for the resource, ransack seach params, and pagy.
     def index
       authorize resource_class
-      set_parent
+      set_index_parent
       @q = @scope.ransack(params[:q])
       result = @q.result.includes(tag: { discipline: :project })
       @pagy, @resources = pagy(result, limit: 20)
@@ -27,41 +27,45 @@ class TagablesController < ApplicationController
 
     # GET /tag_tagables
     def show
-      authorize @resource
-      instance_variable_set(resource_var_name, @resource)
-      @neighbours = Navigator.new(scope: @scope, record: @resource).neighbours
+      authorize @tagable
+      instance_variable_set(resource_var_name, @tagable)
+      @neighbours = Navigator.new(scope: @scope, record: @tagable).neighbours
       set_swatch
       render template: "#{@resource_class.model_name.collection}/show"
     end
 
     # GET /new_tag_tagables
     def new
-      # set_tag looks for a tag_id in the params.
-      # If a valid tag id is found, the action builds a new tagable on the existing tag for the form. 
-      # If no tag_id in params, discipline_id and tagable_type are required, and set_tag builds a new tag on the discipline.
-      set_tag
+      # set_new_parent looks for a tag_id in the params.
+      # If a valid tag id is found with a valid tagable_type, the action builds a new tagable on the existing tag for the form, using the tag's tagable_type. 
+      # If no tag_id in params, discipline_id and tagable_type are required, and set_form_parent builds a new tag on the discipline.
+      set_new_variables
       authorize @tag
-      @resource = @tag.build_tagable()
       setup_form
       render template: "#{@resource_class.model_name.collection}/new"
     end
 
-  # POST /switchboards 
+  # POST /tagables 
     def create
-      # set_tag looks for a tag_id in the params.
+      # set_create_parent looks for a tag_id in the params.
       # If a valid tag id is found, the action creates a new tagable on the existing tag. 
       # If no tag_id in params, discipline_id is expected, and the action creates a new resource
       # and new tag on the discipline.
-      set_tag
-      # Authorize tag to check project (via discipline) against current project context
-      authorize @tag, :create? unless @tag.persisted?
-
+      set_create_variables
+      # Introduce model specific requirements including safe params
+      extend_tagable
       begin
-        @resource = resource_class.new(resource_params.except(:tag))
+        if @parent.is_a?(Discipline)
+          @tag = @discipline.tags.build(tag_params.merge(tagable_type: @type))
+        end
+        @tagable = @tag.build_tagable(tagable_params)
+
       rescue ArgumentError => _
         # Handle invalid enum values as a conflict
         raise ApplicationController::ConflictError, :invalid_enum
       end
+      # Tag permissions apply to tagable
+      authorize @tag
 
       unless @tag.valid?
         flash.now[:alert] = t("flash.create.alert",
@@ -70,18 +74,27 @@ class TagablesController < ApplicationController
         return
       end
 
-      authorize @resource, :create?
-      unless @resource.valid?
-        flash[:alert] = t('flash.create.alert', 
-          resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
+      unless @tagable.valid?
+        flash.now[:alert] = t('flash.create.alert', 
+          resource_name: @tagable.model_name.human(count: 1).downcase)
         failed_to_save
         return
       end
       
-      if @tag.persisted?
-        update_tag_with_tagable_resource
+      if @tag.save
+        # Flash is an array to allow after_create_hook to add its own messages
+        flash[:success] = [t('flash.tagables.created_and_assigned',
+                          resource_name: @tagable.model_name.human(count: 1),
+                          id: @tagable.id,
+                          tag: @tag.label)]
+        after_create_hook(@tagable)
+        redirect_to @tagable
       else
-        create_tag_and_resource
+        # Fallback protection in case something else is wrong
+        flash.now[:alert] = t('flash.create.alert', 
+          resource_name: @tagable.model_name.human(count: 1).downcase)
+        failed_to_save
+        return
       end
     end
 
@@ -153,7 +166,7 @@ class TagablesController < ApplicationController
 
   private
 
-    def set_parent
+    def set_index_parent
       if params[:discipline_id].present?
         @parent = @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
         raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
@@ -169,36 +182,60 @@ class TagablesController < ApplicationController
       end
     end
 
-    def set_resource
+    def set_tagable
       @tag = policy_scope(Tag).find_by(id: params[:tag_id])
       raise ApplicationController::ConflictError, :out_of_scope if @tag.nil?
       raise ApplicationController::ConflictError, :out_of_scope if @tag.tagable.nil?
-      @resource = @tag.tagable
+      raise ApplicationController::ConflictError, :invalid_type unless @tag.tagable_type.in?(Tag.safe_tagable_types)
+      @tagable = @tag.tagable
       @discipline = @tag.discipline
       @resource_class = @tag.tagable_type.classify.safe_constantize
       @scope = policy_scope(@resource_class).joins(tag: { discipline: :project })
     end
 
-    def set_tag
-      # Handle case when linking to existing tag
+    # For new action
+    def set_new_variables
       if params[:tag_id].present?
-        @tag = policy_scope(Tag).find_by(id: params[:tag_id])
-        raise ApplicationController::ConflictError, :out_of_scope if @tag.nil?
-        raise ApplicationController::ConflictError, :tag_already_assigned if @tag.tagable.present?
-        raise ApplicationController::ConflictError, :invalid_type unless @tag.tagable_type.in?(Tag.safe_tagable_types)
+        # Handle case when linking to existing tag
+        set_tag
         @resource_class = @tag.tagable_type.classify.safe_constantize
+        @parent = @tag
         @discipline = @tag.discipline
+        @tagable = @tag.build_tagable
       else
+        # New tag and resource
         set_discipline
+        @parent = @discipline
         set_type
-        if tag_params.present?
-          # Handle case with tag parameters - [HOLD - how can this be initiated?]
-          @tag = @discipline.tags.build(tag_params.merge(tagable_type: @type))
-        else
-          # No tag parameters: new tag and resource
-          @tag = @discipline.tags.build(tagable_type: @type)
-        end
+        @resource_class = @type.classify.safe_constantize
+        @tag = @discipline.tags.build(tagable_type: @type)
+        @tagable = @tag.build_tagable
       end
+    end
+
+    def set_create_variables
+      debugger
+      if params[:tag_id].present?
+        # Handle case when linking to existing tag
+        set_tag
+        @parent = @tag
+        @discipline = @tag.discipline
+        @resource_class = @tag.tagable_type.classify.safe_constantize
+        @tagable = @tag.build_tagable(tagable_params)
+      else
+        # New tag and resource
+        set_discipline
+        @parent = @discipline
+        set_type
+        @resource_class = @type.classify.safe_constantize
+      end
+    end
+
+    def set_tag
+      @tag = policy_scope(Tag).find_by(id: params[:tag_id])
+      raise ApplicationController::ConflictError, :out_of_scope if @tag.nil?
+      raise ApplicationController::ConflictError, :tag_already_assigned if @tag.tagable.present?
+      raise ApplicationController::ConflictError, :invalid_type unless @tag.tagable_type.in?(Tag.safe_tagable_types)
     end
 
     def set_discipline
@@ -208,10 +245,9 @@ class TagablesController < ApplicationController
     end
 
     def set_type
-      raise ApplicationController::ConflictError, :missing_param unless params[:tagable_type].present?
       @type = params[:tagable_type]
+      raise ApplicationController::ConflictError, :missing_param unless @type.present?
       raise ApplicationController::ConflictError, :invalid_type unless @type.in?(Tag.safe_tagable_types)
-      @resource_class = @type.classify.safe_constantize
     end
 
     def set_swatch
@@ -224,13 +260,13 @@ class TagablesController < ApplicationController
     # Existing tag: Create resource from params and update tag with tagable
     def update_tag_with_tagable_resource
       begin
-        @tag.update(tagable: @resource)
+        @tag.save!
         flash[:success] = [t('flash.tagables.assigned_to',
                           resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one"),
-                          id: @resource.id,
+                          id: @tagable.id,
                           tag: @tag.label)]
-        after_create_hook(@resource)
-        redirect_after_save
+        after_create_hook(@tagable)
+        redirect_to @tagable
         return
       rescue ActiveRecord::RecordNotUnique
         # Tag already assigned to another resource
@@ -240,7 +276,7 @@ class TagablesController < ApplicationController
           tagable_type: resource_class.model_name.human.downcase))
         failed_to_save
       rescue ActiveRecord::RecordInvalid => _
-        # Should not reach here - @tag and @resource have been validated
+        # Should not reach here - @tag and @tagable have been validated
         flash.now[:alert] = t("flash.update.alert",
           resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
         failed_to_save
@@ -250,20 +286,16 @@ class TagablesController < ApplicationController
     # New resource and tag from params
     def create_tag_and_resource
       begin
-        @resource.class.transaction do
-          # @tag.save!
-          @tag.update(tagable: @resource)
-        end
-        @tag.reload
+        @tag.save!
         flash[:success] = [t('flash.tagables.created_and_assigned',
                           resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one"),
-                          id: @resource.id,
+                          id: @tagable.id,
                           tag: @tag.label)]
-        after_create_hook(@resource)
-        redirect_after_save
+        after_create_hook(@tagable)
+        redirect_to @tagable
         return
       rescue ActiveRecord::RecordInvalid => _
-        # Should not reach here - @tag and @resource have already been validated
+        # Should not reach here - @tag and @tagable have already been validated
         flash.now[:alert] = t("flash.create.alert",
                           resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one").downcase)
         failed_to_save
@@ -279,7 +311,7 @@ class TagablesController < ApplicationController
         flash[:success] = [t("flash.update.notice", 
           resource_name: t("activerecord.models.#{resource_class.model_name.i18n_key}.one"))]
         after_update_hook(@resource)
-        redirect_after_save
+        redirect_to @tagable
         return
       rescue ActiveRecord::RecordInvalid
         # Should not reach here - @tag and @resource have already been validated
@@ -301,7 +333,7 @@ class TagablesController < ApplicationController
           id: @resource.id,
           tag: @tag.label)]
         after_update_hook(@resource)
-        redirect_after_save
+        redirect_to @tagable
       rescue ActiveRecord::RecordInvalid
         # Should not reach here - @tag and @resource have been validated
         flash.now[:alert] = t("flash.update.alert",
@@ -312,8 +344,7 @@ class TagablesController < ApplicationController
     end
 
     def setup_form
-      instance_variable_set(resource_var_name, @resource)
-      @tag.tagable_type ||= controller_path.classify
+      instance_variable_set(resource_var_name, @tagable)
       set_swatch
       @parents = @tag.prospective_parents(policy_scope(Tag)).order(:discipline_id, :full_tag)
       @schema = @discipline.schema_for_form.with_indifferent_access
@@ -326,20 +357,10 @@ class TagablesController < ApplicationController
 
     def failed_to_save
       # If we get here, there was a validation error preventing save
-      # @resource has been set in the calling action
-      return_action = @resource.persisted? ? :edit : :new
+      # @tag and @tagable have been set in the calling action
+      return_action = @tagable.persisted? ? :edit : :new
       setup_form
-      respond_to do |format|
-        format.html { render return_action, status: :unprocessable_content }
-        format.json { render json: @resource.errors, status: :unprocessable_content }
-      end
-    end
-
-    def redirect_after_save
-      respond_to do |format|
-        format.html { redirect_to @resource }
-        format.json { render :show, status: :created, location: @resource }
-      end
+      render template: "#{@resource_class.model_name.collection}/#{return_action}"
     end
 
     # controller_path returns the namespaced controller class, e.g. Electrical::CablesController
@@ -380,25 +401,22 @@ class TagablesController < ApplicationController
       # Override in subclass for model-specific logic
     end
 
+    def extend_tagable
+      extension = "#{@resource_class.name}Extension".safe_constantize
+      extend extension if extension
+    end
+
     def tag_params
-      # Get the tag parameters from the nested structure
-      return nil if params[:tag_id].present?
-      if params[:tag].present?
-        tag_source = params[:tag]
-      elsif params.dig(@resource_class.model_name.param_key, :tag).present?
-        tag_source = params[resource_class.model_name.param_key][:tag]
-      else
-        tag_source = {}
-      end
-
-      tag_params = tag_source.is_a?(ActionController::Parameters) ?
-                  tag_source :
-                  ActionController::Parameters.new(tag_source)
-
-      # Permitted parameters
-      tag_params.permit(
-        :prefix, :serial, :suffix,
-        :service, :stage, :location, :notes, :tagable_id, :tagable_type
-      )
+      params.require(@resource_class.model_name.param_key)
+            .require(:tag)
+            .permit(
+              :stage,
+              :prefix,
+              :serial,
+              :suffix,
+              :service,
+              :location,
+              :notes
+            )
     end
 end

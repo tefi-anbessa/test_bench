@@ -11,12 +11,8 @@
         </div>
       </div>
     </div>
-    <%= bootstrap_form_with(model: switchboard,
-          url: switchboard.persisted? ?
-            switchboard : 
-            ( tag.persisted? ?
-              tag_electrical_switchboards_path(tag) :
-              discipline_electrical_switchboards_path(discipline) ),
+    <%= bootstrap_form_with(model: tagable,
+          url: polymorphic_path([parent, :tagable]),
           layout: :horizontal, 
           label_col: "col-sm-4", 
           control_col: "col-sm-8",
@@ -28,9 +24,15 @@
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
             <!-- Tag -->
-            <%= f.fields_for tag do |tag_f| %>
-              <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
+            <% if tag.persisted? %>
+              <%= render'tags/tag', tag: tag, swatch: swatch %>
+              <%= hidden_field_tag :tag_id, tag.id %>
+            <% else %>
+              <%= f.fields_for tag do |tag_f| %>
+                <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
+              <% end %>
             <% end %>
+            <%= hidden_field_tag :tagable_type, tag.tagable_type %>
 
             <!-- Switchboard Details -->
             <div class="card mb-1" style="<%= card_styles(swatch) %>">
@@ -69,7 +71,7 @@
 
             <!-- Card Footer with Actions -->
             <div class="card-footer bg-transparent text-end p-2">
-              <%= link_to(switchboard.persisted? ? switchboard : discipline_electrical_switchboards_path(discipline), 
+              <%= link_to(tagable.persisted? ? tagable : discipline_electrical_switchboards_path(discipline), 
                     class: 'btn btn-warning',
                     data: { confirm: t('actions.sure'), turbo: false }) do %>
                 <%= t('actions.discard') %>

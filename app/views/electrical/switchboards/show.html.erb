@@ -46,7 +46,7 @@
               <% end %>
 
               <% if policy(@switchboard).new? %>
-                <%= nav_button(action: :new, path: new_tagable_path(discipline_id: @discipline.id, tagable_type: "Electrical::Switchboard"),
+                <%= nav_button(action: :new, path: new_discipline_tagable_path(@discipline.id, tagable_type: "Electrical::Switchboard"),
                   record: Electrical::Switchboard.new) %>
               <% end %>
             </div> <!-- end button group -->

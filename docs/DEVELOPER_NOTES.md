@@ -334,9 +334,9 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Enhance the existing database models to include revison control of data.
 - [ ] Build a document control module to manage document storage, issue, history including versions and workflow.
 - [ ] Add polymorphic comments.
-- [ ] Management of Change.
+- [ ] Management of Change with workflows.
 - [ ] Build an instrument module.
-- [ ] Build a bookkeeping module to manage financial transactions.
+- [ ] Build a bookkeeping module to record financial transactions.
 - [ ] Build a process piping module similar to the electrical module, using pipes and fittings to model a process piping network.
 - [ ] Build an asset management module to track assets and link from design to maintenance.
 - [ ] Build a maintenance management module.
@@ -489,6 +489,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Add migration and test implementation to generator testing.
 - [ ] Build in git commit before scaffold generator and tagable generator run.
 - [ ] Add polymorphic option to associations in generators.
+- [ ] Consider changing "discard" to "cancel" on all forms.
 
 ## Potential Features
 

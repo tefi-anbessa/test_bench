@@ -77,12 +77,13 @@ Rails.application.routes.draw do
       end
     end # discipline nested resources
 
-    resources :tags, shallow: true, only: [] do
-      # Tag nested resources
-      resource :tagable, only: [:show, :edit, :update, :destroy]
+    # Tagable routes
+    resources :tags, only: [] do
+      resource :tagable
     end
-    resources :tagables, only: [:new, :create]
-
+    resources :disciplines, only: [] do
+      resource :tagable, only: [:new, :create]
+    end
 
     resources :source_formats
 

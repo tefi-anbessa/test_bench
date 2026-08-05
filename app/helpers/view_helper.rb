@@ -112,6 +112,11 @@ module ViewHelper
         content_tag(:div, label + ": ", class: "col-#{label_cols} text-muted") +
         content_tag(:div, I18n.l(value.to_date, format: :default), class: "col-#{value_cols}")
       end
+    when :class
+      content_tag(:div, class: "row mb-1") do
+        content_tag(:div, label + ": ", class: "col-#{label_cols} text-muted") +
+        content_tag(:div, value.safe_constantize.model_name.human, class: "col-#{value_cols}")
+      end
     end
   end
 
@@ -273,6 +278,8 @@ module ViewHelper
       I18n.l value.to_date, format: :short
     when :datetime, :time, :timestamp
       I18n.l value, format: :short
+    when :class
+      value.safe_constantize.model_name.human
     end
   end
 

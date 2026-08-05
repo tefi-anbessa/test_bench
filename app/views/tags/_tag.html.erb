@@ -1,0 +1,12 @@
+<div class="card mb-4" style="<%= card_styles(@swatch) %>">
+  <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
+    <h6 class="mb-0"><%= t('show.details', model: t("activerecord.models.tag.one")) %></h6>
+  </div>
+  <div class="card-body">
+    <%= show_attribute(@tag, :full_tag) %>
+    <%= show_attribute(@tag, :notes, type: :text) %>
+    <%= show_attribute(@tag, :stage) %>
+    <%= show_attribute(@tag, :location) %>
+    <%= show_attribute(@tag, :tagable_type, type: :class) %>
+  </div>
+</div>

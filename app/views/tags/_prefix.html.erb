@@ -2,7 +2,7 @@
 <% parts = local_assigns[:parts] %>
 <%= render 'components/collapsible',
       id: "prefix_#{tag.id}_details",
-      title: tag.prefix,
+      title: [t("activerecord.attributes.tag.prefix"), tag.prefix].join(": "),
       expanded: false,
       header_class: 'py-1' do %>
   <% schema = tag.discipline.schema_for_form.with_indifferent_access %>
