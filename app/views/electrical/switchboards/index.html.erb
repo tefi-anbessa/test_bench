@@ -5,21 +5,21 @@
   <div class="card mb-1" style="<%= card_styles(@swatch) %>">
     <div class="card-header p-1" style="<%= card_header_styles(@swatch) %>">
       <div class="row align-items-center p-2 mb-1">
-
-        <!-- Discipline link -->
+        <!-- Discipline and project links -->
         <div class="col-2">
-            <%= nav_button(action: :show_discipline, record: @discipline) %>
+          <%= nav_button(action: :show_project, record: @discipline.project) %>
+          <%= nav_button(action: :show_discipline, record: @discipline) %>
         </div>
 
         <!-- Header Text (Left - 8 columns) -->
         <div class="col-8">
-          <h5><%= t('.header', 
-            scope_text: [@discipline.project.code, t("activerecord.models.discipline.one"), @discipline.code].join(' ')) %></h5>
+          <% scope_text = [@discipline.project.label, @discipline.model_name.human, @discipline.label].join(' ')  %>
+          <h5><%= t('.header', scope_text: scope_text) %></h5>
         </div>
 
         <!-- New Button (Right) -->
         <div class="col-2 align-content-end">
-          <% if policy(@discipline.tags.build()).new? %>
+          <% if @discipline.present? && policy(@discipline.tags.build()).new? %>
             <%= nav_button(action: :new, path: new_discipline_tagable_path(@discipline, tagable_type: "Electrical::Switchboard"),
                 record: Electrical::Switchboard.new) %>
           <% end %>
@@ -29,7 +29,7 @@
     
     <div class="card-body">
       <div class="row search-form">
-        <%= search_form_for @q, url: discipline_electrical_switchboards_path(@discipline) do |f| %>
+        <%= search_form_for @q, url: discipline_tagable_path(@discipline, tagable_type: @type) do |f| %>
           <%= f.search_field :voltage_rating_cont,
                 class: "search_field",
                 placeholder: t('activerecord.attributes.electrical/switchboard.voltage_rating') %>
@@ -97,7 +97,7 @@
       <% can_edit = policy(@discipline.tags.build()).edit? %>
       <% can_delete = policy(@discipline.tags.build()).destroy? %>
       <table id='switchboards' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
-        <%= render 'header' %>
+        <%= render "#{@resource_class.model_name.collection}/header" %>
         <tbody>
           <% unless @orphans.empty? %>
             <tr class="table-danger">
@@ -115,7 +115,7 @@
             </tr>
           <% end %>
           <% @switchboards.each do |row| %>
-            <%= render 'row', row: row, can_show: can_show, can_edit: can_edit, can_delete: can_delete %>
+            <%= render "#{@resource_class.model_name.collection}/row", row: row, can_show: can_show, can_edit: can_edit, can_delete: can_delete %>
           <% end %>
         </tbody>
       </table>

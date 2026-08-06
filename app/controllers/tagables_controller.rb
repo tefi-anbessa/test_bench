@@ -9,20 +9,24 @@ class TagablesController < ApplicationController
     # This method will set the resources instance variable (e.g., @motors, @switchboards)
     # in accordance with the policy scope for the resource, ransack seach params, and pagy.
     def index
-      authorize resource_class
-      set_index_parent
+      set_discipline
+      set_type
+      authorize @resource_class
+      @scope = policy_scope(@resource_class)
+        .joins(:tag)
+        .where(tags: { discipline_id: @discipline.id })
       @q = @scope.ransack(params[:q])
       result = @q.result.includes(tag: { discipline: :project })
       @pagy, @resources = pagy(result, limit: 20)
       # Separate resources with tags from orphans (resources without tags)
       @resources, @orphans = @resources.partition(&:tag)
       instance_variable_set(resources_var_name, @resources)
-
       # Find any tags that have tagable_type for this resource but do not have valid tagable.
-      @link_errors = policy_scope(Tag).select { |tag| tag.tagable_type == controller_path.classify && tag.tagable.nil? }
+      @link_errors = policy_scope(Tag).select { |tag| tag.tagable_type == @resource_class.name && tag.tagable.nil? }
       # Separate incomplete links (no tagable_id) from broken links (has tagable_id but missing resource)
       @link_incomplete, @link_broken = @link_errors.partition { |tag| tag.tagable_id.nil? }
       set_swatch
+      render template: "#{@resource_class.model_name.collection}/index"
     end
 
     # GET /tag_tagables
@@ -152,22 +156,6 @@ class TagablesController < ApplicationController
 
   private
 
-    def set_index_parent
-      if params[:discipline_id].present?
-        @parent = @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
-        raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
-        @scope = policy_scope(@resource_class).joins(discipline: :project).where(discipline: @discipline)
-      elsif params[:project_id].present?
-        @discipline = nil
-        @parent = @project = policy_scope(Project).find_by(id: params[:project_id])
-        raise ApplicationController::ConflictError, :out_of_scope if @project.nil?
-        @scope = policy_scope(@resource_class).joins(discipline: :project).where(projects: { id: @project.id })
-      else
-        @parent = @discipline = @project = nil
-        @scope = policy_scope(@resource_class)
-      end
-    end
-
     def set_tagable
       @tag = policy_scope(Tag).find_by(id: params[:tag_id])
       raise ApplicationController::ConflictError, :out_of_scope if @tag.nil?
@@ -213,7 +201,7 @@ class TagablesController < ApplicationController
         set_discipline
         @parent = @discipline
         set_type
-        @resource_class = @type.classify.safe_constantize
+        
       end
     end
 
@@ -234,6 +222,7 @@ class TagablesController < ApplicationController
       @type = params[:tagable_type]
       raise ApplicationController::ConflictError, :missing_param unless @type.present?
       raise ApplicationController::ConflictError, :invalid_type unless @type.in?(Tag.safe_tagable_types)
+      @resource_class = @type.classify.safe_constantize
     end
 
     def set_swatch

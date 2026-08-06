@@ -84,6 +84,13 @@ Rails.application.routes.draw do
     resources :disciplines, only: [] do
       resource :tagable, only: [:new, :create], controller: :tagables
     end
+    resources :projects, only: [] do
+      resources :tagables, only: [:index]
+    end
+    resources :disciplines, only: [] do
+      resources :tagables, only: [:index]
+    end
+    resources :tagables, only: [:index]
 
     resources :source_formats
 

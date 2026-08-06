@@ -113,13 +113,13 @@ module NavigationHelper
       when :index_link
         record.try(:label)
       when :index_discipline
-        record.discipline.name
+        [record.discipline.label, I18n.t("actions.index")].join (" ")
       when :index_project
-        record.project.code
+        [record.project.label, I18n.t("actions.index")].join (" ")
       when :show_discipline
         record.name
       when :show_project
-        record.code
+        record.label
       when :show_tagable
         I18n.t("actions.show")
       end

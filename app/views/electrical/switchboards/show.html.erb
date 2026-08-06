@@ -9,7 +9,7 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@switchboard).index? %>
-              <%= nav_button(action: :index, path: discipline_electrical_switchboards_path(@discipline), record: @switchboard) %>
+              <%= nav_button(action: :index_discipline, path: discipline_tagables_path(@discipline, tagable_type: "Electrical::Switchboard"), record: @switchboard) %>
             <% end %>
 
             <!-- Previous Button -->
