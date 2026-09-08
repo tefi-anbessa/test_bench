@@ -6,8 +6,6 @@ module Electrical
       def setup_additional_form_data
         @circuits = @switchboard.persisted? ? @switchboard.circuits.count : 0
         @voltage_ratings = Constants.electrical.voltage_ratings
-        @ip_1 = Constants.electrical.ingress_protection.first_digit.to_h
-        @ip_2 = Constants.electrical.ingress_protection.second_digit.to_h
       end
 
       def after_create_hook(switchboard)

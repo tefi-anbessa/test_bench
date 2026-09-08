@@ -13,6 +13,7 @@
     </div>
     <%= bootstrap_form_with(model: tagable,
           url: polymorphic_path([parent, :tagable]),
+          local: true,
           layout: :horizontal, 
           label_col: "col-sm-4", 
           control_col: "col-sm-8",
@@ -26,8 +27,9 @@
             <!-- Tag -->
             <% if tag.persisted? %>
               <%= render'tags/tag', tag: tag, swatch: swatch %>
-              <%= hidden_field_tag :tag_id, tag.id %>
             <% else %>
+              <p><%= tag.inspect %></p>
+              <p><%= tag.errors.full_messages %></p>
               <%= f.fields_for tag do |tag_f| %>
                 <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
               <% end %>

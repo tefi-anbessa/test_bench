@@ -4,8 +4,7 @@
     <%= index_link(action: :down, record: row.tagable) %>
   <% else %>
     <% if policy(row.build_tagable()).new? %>
-      <% resource = row.tagable_type.constantize.model_name.singular %>
-      <%= index_link(action: :link, path: eval("new_tag_#{resource}_path(#{row.id})"), record: row.build_tagable()) %>
+      <%= index_link(action: :link, path: new_tag_tagable_path(row), record: row.build_tagable()) %>
     <% else %>
       <%= row.tagable_type.constantize.model_name.human %>
     <% end %>

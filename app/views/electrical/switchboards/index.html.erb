@@ -97,7 +97,7 @@
       <% can_edit = policy(@discipline.tags.build()).edit? %>
       <% can_delete = policy(@discipline.tags.build()).destroy? %>
       <table id='switchboards' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
-        <%= render "#{@resource_class.model_name.collection}/header" %>
+        <%= render "electrical/switchboards/header" %>
         <tbody>
           <% unless @orphans.empty? %>
             <tr class="table-danger">
@@ -115,7 +115,7 @@
             </tr>
           <% end %>
           <% @switchboards.each do |row| %>
-            <%= render "#{@resource_class.model_name.collection}/row", row: row, can_show: can_show, can_edit: can_edit, can_delete: can_delete %>
+            <%= render "electrical/switchboards/row", row: row, can_show: can_show, can_edit: can_edit, can_delete: can_delete %>
           <% end %>
         </tbody>
       </table>
