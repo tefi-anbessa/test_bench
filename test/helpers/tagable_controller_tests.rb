@@ -8,7 +8,7 @@ module TagableControllerTests
   include TestSetupHelpers
 
   # Setup common to all tagable controllers
-  def setup_controller_test
+  def setup_tagables_controller_test
     setup_projects_and_users
     setup_disciplines
     setup_accredited_users
@@ -62,53 +62,59 @@ module TagableControllerTests
 
   def test_team_member_can_access_index
     sign_in_and_set_project(@team_member, @project)
-    get :index, params: { discipline_id: @discipline.id }
+    get :index, params: { discipline_id: @discipline.id, tagable_type: tagable_type }
     assert_response :success
   end
 
   # Show Tests
   def test_user_cannot_view_resource_details_without_project_role
     sign_in_and_set_project(@regular_user, @project)
-    get :show, params: { id: @resource.id }
+    get :show, params: { tag_id: @tag.id }
     # Raises conflict due to out of scope resource before authorization check
     assert_conflict
   end
 
   def test_team_member_can_view_resource_details
     sign_in_and_set_project(@team_member, @project)
-    get :show, params: { id: @resource.id }
+    get :show, params: { tag_id: @tag.id }
     assert_response :success
   end
 
   # New Action Tests
   def test_team_member_cannot_access_new_form
     sign_in_and_set_project(@team_member, @project)
+    @unassigned_tag.update(tagable_type: tagable_type)
     get :new, params: { tag_id: @unassigned_tag.id }
     assert_response :forbidden
   end
 
   def test_accredited_user_can_access_new_form_for_existing_unassigned_tag
     sign_in_and_set_project(@accredited_user, @project)
+    @unassigned_tag.update(tagable_type: tagable_type)
     get :new, params: { tag_id: @unassigned_tag.id }
     assert_response :success
   end
 
   def test_accredited_user_can_access_new_form_with_no_tag
     sign_in_and_set_project(@accredited_user, @project)
-    get :new, params: { discipline_id: @discipline.id }
+    get :new, params: { discipline_id: @discipline.id, tagable_type: tagable_type }
     assert_response :success
   end
 
   # Create Action Tests - Success Cases
   def test_accredited_user_can_create_with_existing_unassigned_tag
     sign_in_and_set_project(@accredited_user, @project)
+    @unassigned_tag.update(tagable_type: tagable_type)
     assert_difference("#{resource_class}.count", 1) do
       post :create, params: params_with_existing_tag
     end
 
     @unassigned_tag.reload
     created_resource = @unassigned_tag.tagable
-    assert_redirected_to created_resource
+    # Core tagable invariant: the tag's type matches the class it actually holds.
+    assert_equal resource_class.name, created_resource.class.name
+    assert_equal created_resource.class.name, @unassigned_tag.tagable_type
+    assert_redirected_to tag_tagable_path(@unassigned_tag)
     assert_successful_assignment_flash_message(created_resource)
   end
 
@@ -120,14 +126,18 @@ module TagableControllerTests
     end
     assert_equal Tag.count, before_tag_count + 1
     # Find the created resource and tag
-    created_tag = Tag.find_by(params_with_new_tag[resource_name][:tag].merge(tagable_type: resource_class.name).except(:tagable_id))
-    assert_redirected_to created_tag.tagable
+    created_tag = Tag.find_by(params_with_new_tag[resource_name][:tag].merge(tagable_type: tagable_type).except(:tagable_id))
+    # Core tagable invariant: the tag's type matches the class it actually holds.
+    assert_equal tagable_type, created_tag.tagable_type
+    assert_equal created_tag.tagable_type, created_tag.tagable.class.name
+    assert_redirected_to tag_tagable_path(created_tag)
     assert_successful_creation_flash_message(created_tag.tagable, created_tag)
   end
 
   # Create Action Tests - Failure Cases
   def test_team_member_cannot_create
     sign_in_and_set_project(@team_member, @project)
+    @unassigned_tag.update(tagable_type: tagable_type)
     assert_no_difference("#{resource_class}.count") do
       post :create, params: params_with_existing_tag
     end
@@ -150,11 +160,39 @@ module TagableControllerTests
     assert_conflict
   end
 
-  def test_cannot_create_with_wrong_tagable_type
+  # The universal controller derives the resource class from the tag's own
+  # tagable_type, so "wrong controller for this tag" is no longer a scenario.
+  # What still needs guarding is an unrecognised type reaching the controller,
+  # and resource params nested under a key that disagrees with the resolved type.
+
+  # Existing-tag path: a tag carrying a type that is not a tagable (stale data, or
+  # an injected value) must be refused, not used to build a resource.
+  def test_cannot_create_for_tag_with_non_tagable_type
     sign_in_and_set_project(@accredited_user, @project)
-    @unassigned_tag.update(tagable_type: @wrong_tagable_type)
+    @unassigned_tag.update_columns(tagable_type: "Project")
     assert_no_difference("#{resource_class}.count") do
       post :create, params: params_with_existing_tag
+    end
+    assert_conflict
+  end
+
+  # Discipline path: a tagable_type param that is not a tagable must be refused.
+  def test_cannot_create_with_non_tagable_type_param
+    sign_in_and_set_project(@accredited_user, @project)
+    assert_no_difference("#{resource_class}.count") do
+      post :create, params: params_with_new_tag.merge(tagable_type: "Project")
+    end
+    assert_conflict
+  end
+
+  # Resource params nested under a key for a different tagable type than the tag
+  # signals a confused or injected request and is trapped as a conflict.
+  def test_cannot_create_when_resource_params_key_mismatches_tag_type
+    sign_in_and_set_project(@accredited_user, @project)
+    @unassigned_tag.update(tagable_type: tagable_type)
+    wrong_key = @wrong_tagable_type.constantize.model_name.param_key
+    assert_no_difference("#{resource_class}.count") do
+      post :create, params: { tag_id: @unassigned_tag.id, wrong_key => create_params }
     end
     assert_conflict
   end
@@ -215,13 +253,13 @@ module TagableControllerTests
   # Edit Action Tests
   def test_team_member_cannot_access_edit_form
     sign_in_and_set_project(@team_member, @project)
-    get :edit, params: { id: @resource.id }
+    get :edit, params: { tag_id: @tag.id }
     assert_forbidden
   end
 
   def test_accredited_user_can_access_edit_form
     sign_in_and_set_project(@accredited_user, @project)
-    get :edit, params: { id: @resource.id }
+    get :edit, params: { tag_id: @tag.id }
     assert_response :success
   end
 
@@ -229,9 +267,9 @@ module TagableControllerTests
   def test_accredited_user_can_update
     sign_in_and_set_project(@accredited_user, @project)
     patch :update, params: 
-      { id: @resource.id, resource_name => { update_attribute_name => updated_attribute_value } }
+      { tag_id: @tag.id, resource_name => { update_attribute_name => updated_attribute_value } }
     assert_equal updated_attribute_value, @resource.reload.send(update_attribute_name)
-    assert_redirected_to resource_path(@resource)
+    assert_redirected_to tag_tagable_path(@tag)
     assert_successful_update_flash_message
   end
 
@@ -240,7 +278,7 @@ module TagableControllerTests
     sign_in_and_set_project(@team_member, @project)
     original_value = @resource.send(update_attribute_name)
     patch :update, params: 
-      { id: @resource.id, resource_name => { update_attribute_name => updated_attribute_value } }
+      { tag_id: @tag.id, resource_name => { update_attribute_name => updated_attribute_value } }
     assert_forbidden
     assert_equal original_value, @resource.reload.send(update_attribute_name)
   end
@@ -250,7 +288,7 @@ module TagableControllerTests
     sign_in_and_set_project(@accredited_user, @project)
     original_value = @resource.send(update_attribute_name)
     patch :update, params: 
-      { id: @resource.id, resource_name => { update_attribute_name => updated_attribute_value }.merge(invalid_param) }
+      { tag_id: @tag.id, resource_name => { update_attribute_name => updated_attribute_value }.merge(invalid_param) }
 
     if invalid_param.keys.any? { |key|
           resource_class.defined_enums.key?(key.to_s) &&
@@ -272,7 +310,7 @@ module TagableControllerTests
   def test_accredited_user_cannot_destroy
     sign_in_and_set_project(@accredited_user, @project)
     assert_no_difference("#{resource_class}.count") do
-      delete :destroy, params: { id: @resource.id }
+      delete :destroy, params: { tag_id: @tag.id }
     end
     assert_forbidden
   end
@@ -280,9 +318,9 @@ module TagableControllerTests
   def test_admin_can_destroy
     sign_in_and_set_project(@admin, @project)
     assert_difference("#{resource_class}.count", -1) do
-      delete :destroy, params: { id: @resource.id }
+      delete :destroy, params: { tag_id: @tag.id }
     end
-    assert_redirected_to resource_index_path
+    assert_redirected_to discipline_tagables_path(@discipline, tagable_type: tagable_type)
     assert_successful_destroy_flash_message
   end
 
@@ -291,7 +329,7 @@ module TagableControllerTests
     # Helper methods
 
     def resource_class
-    self.class.name.sub('ControllerTest', '').singularize.constantize
+      self.class.name.sub('ControllerTest', '').singularize.constantize
     end
 
     def resource_name
@@ -332,7 +370,7 @@ module TagableControllerTests
 
     # [TODO] - a more reliable way of generating a unique serial number would be a good idea.
     def params_with_new_tag
-      { discipline_id: @discipline.id, resource_name => create_params.merge(new_tag_params) }
+      { discipline_id: @discipline.id, tagable_type: tagable_type, resource_name => create_params.merge(new_tag_params) }
     end
 
     def create_params

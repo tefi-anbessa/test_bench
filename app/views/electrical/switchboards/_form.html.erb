@@ -11,7 +11,7 @@
         </div>
       </div>
     </div>
-    <%= bootstrap_form_with(model: tagable,
+    <%= bootstrap_form_with(model: switchboard,
           url: polymorphic_path([parent, :tagable]),
           local: true,
           layout: :horizontal, 
@@ -73,7 +73,7 @@
 
             <!-- Card Footer with Actions -->
             <div class="card-footer bg-transparent text-end p-2">
-              <%= link_to(tagable.persisted? ? tagable : discipline_electrical_switchboards_path(discipline), 
+              <%= link_to(switchboard.persisted? ? tag_tagable_path(tag) : discipline_tagables_path(discipline, tagable_type: 'Electrical::Switchboard'), 
                     class: 'btn btn-warning',
                     data: { confirm: t('actions.sure'), turbo: false }) do %>
                 <%= t('actions.discard') %>

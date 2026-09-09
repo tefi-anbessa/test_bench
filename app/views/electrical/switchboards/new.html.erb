@@ -2,11 +2,8 @@
 <% provide(:header, t('.header', scope_text: @discipline.long_label)) %>
 <% provide(:button_text, t('actions.create')) %>
 <% partial = File.join(@tagable.model_name.collection, "form") %>
-<p><%= @tag.inspect %><p>
-<p><%= @tag.errors.full_messages %></p>
-<p><%= @tagable.inspect %><p>
-<%= render partial, 
-  tagable: @tagable,
+<%= render partial,
+  switchboard: @switchboard,
   parent: @parent,
   tag: @tag,
   discipline: @discipline,

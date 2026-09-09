@@ -5,9 +5,14 @@ module Electrical
   class SwitchboardsControllerTest < ActionController::TestCase
     include TagableControllerTests
     include Devise::Test::ControllerHelpers
+    tests TagablesController
 
+    def tagable_type
+      "Electrical::Switchboard"
+    end
+    
     setup do
-      setup_controller_test
+      setup_tagables_controller_test
       setup_model_specific_data
     end
 
@@ -56,6 +61,7 @@ module Electrical
         assert_difference('Circuit.count', 2) do
           post :create, params: {
             discipline_id: @discipline.id,
+            tagable_type: 'Electrical::Switchboard',
             electrical_switchboard: {
               voltage_rating: '600/1000V',
               busbar_rating: 200.0,

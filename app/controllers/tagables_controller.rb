@@ -41,10 +41,10 @@ class TagablesController < ApplicationController
     # GET    (/:locale)/tags/:tag_id/tagable/new or
     # GET    (/:locale)/disciplines/:discipline_id/tagable/new
     def new
-      # set_form_variables looks for a tag_id in the params.
+      # set_variables_from_params looks for a tag_id in the params.
       # If a valid tag id is found with a valid tagable_type, the action builds a new tagable on the existing tag for the form, using the tag's tagable_type. 
       # If no tag_id in params, discipline_id and tagable_type are required, and set_form_parent builds a new tag on the discipline.
-      set_form_variables
+      set_variables_from_params
       authorize @tag
       @tagable = @tag.build_tagable
       setup_form
@@ -54,16 +54,20 @@ class TagablesController < ApplicationController
   # POST   (/:locale)/tags/:tag_id/tagable or
   # POST   (/:locale)/disciplines/:discipline_id/tagable
     def create
-      # set_create_variables looks for a tag_id in the params.
+      # set_variables_from_params looks for a tag_id in the params.
       # If a valid tag id is found, it is used as the parent, and the tagable type sets the resource_class. 
-      # If there is no tag_id in params, discipline_id and tagabole_type params are expected.
+      # If there is no tag_id in params, discipline_id and tagable_type params are expected.
       # Parent is set to the discipline, and the type sets the resource class.
-      set_form_variables
+      set_variables_from_params
       # From resource class, extend the controller with model specific requirements including safe params
       extend_tagable
+      # The resource params must be nested under the key for the type resolved from
+      # the tag (or the tagable_type param). A mismatch means a confused or injected
+      # request, so trap it as a conflict rather than a bare 400 from require().
+      require_matching_tagable_params!
       begin
         if @parent.is_a?(Discipline)
-          @tag = @discipline.tags.build(tag_params.merge(tagable_type: @type))
+          @tag.assign_attributes(tag_params.merge(tagable_type: @type))
         end
         @tagable = @resource_class.new(tagable_params)
 
@@ -117,6 +121,7 @@ class TagablesController < ApplicationController
       authorize @tag
       # Introduce model specific requirements including safe params
       extend_tagable
+      require_matching_tagable_params!
       # Catch enum validation errors
       begin
         @tagable.assign_attributes(tagable_params)
@@ -170,7 +175,7 @@ class TagablesController < ApplicationController
     end
 
     # For new action
-    def set_form_variables
+    def set_variables_from_params
       if params[:tag_id].present?
         # Handle case when linking to existing tag
         set_tag
@@ -183,21 +188,6 @@ class TagablesController < ApplicationController
         @parent = @discipline
         set_type
         @tag = @discipline.tags.build(tagable_type: @type)
-      end
-    end
-
-    def set_create_variables
-      if params[:tag_id].present?
-        # Handle case when linking to existing tag
-        set_tag
-        @parent = @tag
-        @discipline = @tag.discipline
-        @resource_class = @tag.tagable_type.classify.safe_constantize
-      else
-        # New tag and resource
-        set_discipline
-        @parent = @discipline
-        set_type
       end
     end
 
@@ -229,7 +219,7 @@ class TagablesController < ApplicationController
     end
 
     def setup_form
-      # instance_variable_set(resource_var_name, @tagable)
+      instance_variable_set(resource_var_name, @tagable)
       set_swatch
       @parents = @tag.prospective_parents(policy_scope(Tag)).order(:discipline_id, :full_tag)
       @schema = @discipline.schema_for_form.with_indifferent_access
@@ -245,7 +235,7 @@ class TagablesController < ApplicationController
       # @tag and @tagable have been set in the calling action
       return_action = @tagable.persisted? ? :edit : :new
       setup_form
-      render template: "#{@resource_class.model_name.collection}/#{return_action}"
+      render template: "#{@resource_class.model_name.collection}/#{return_action}", status: :unprocessable_content
     end
 
 
@@ -277,6 +267,14 @@ class TagablesController < ApplicationController
     def extend_tagable
       extension = "#{@resource_class.name}Extension".safe_constantize
       extend extension if extension
+    end
+
+    # Confirm the request carries resource params under the key that matches the
+    # tagable type. @resource_class is always a safe_tagable_types member by this
+    # point, so a missing key is an anomalous request, not user error.
+    def require_matching_tagable_params!
+      return if params[@resource_class.model_name.param_key].present?
+      raise ApplicationController::ConflictError, :tagable_type_mismatch
     end
 
     def tag_params

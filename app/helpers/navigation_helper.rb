@@ -76,7 +76,7 @@ module NavigationHelper
     },
     children: {
       bs_color: "info",
-      bs_icon: "list-columns-reverse"
+      bs_icon: "diagram-3-fill"
     }
   }.freeze
 
@@ -235,35 +235,40 @@ module NavigationHelper
   # Use index_link for links from index views. The helper shows a minimal label outside the icon button for compactness.
   def index_link(action:, path: nil, record: nil, **opts)
     config = ACTION_CONFIG[action] || {}
-    path ||= record
     
-    label =
-      case action
-      when :new, :link
-        [I18n.t("actions.new"),
+    case action
+    when :new, :link
+      label =
           record.present? ? 
           I18n.t("activerecord.models.#{record.model_name.i18n_key}.one") : 
           I18n.t("show.resource")
-        ].join(" ")
-      when :edit
-        [I18n.t("actions.edit"), record&.try(:label)].join(" ")
-      when :delete
-        [I18n.t("actions.delete"), record&.try(:label)].join(" ")
-      when :show, :previous, :next, :show_tag, :show_document
-        record&.try(:label)
-      when :up, :down
-        I18n.t("activerecord.models.#{record&.model_name.i18n_key}.one", default: action.to_s)
-      when :show_discipline
-        record&.try(name)
-      when :show_project
-        record&.try(code)
-      when :children
-        opts.delete(:count)
-      else
-        record&.try(:label)
-      end
+      help_text = [I18n.t("actions.#{action}", default: action.to_s), label].join(" ")
+    when :edit
+      label = [I18n.t("actions.edit"), record&.try(:label)].join(" ")
+      help_text = label
+    when :delete
+      label = [I18n.t("actions.delete"), record&.try(:label)].join(" ")
+      help_text = label
+    when :show, :previous, :next, :show_tag, :show_document
+      label = record&.try(:label)
+      help_text = label
+    when :up, :down
+      label = I18n.t("activerecord.models.#{record&.model_name.i18n_key}.one", default: action.to_s)
+      help_text = [I18n.t("actions.#{action}", default: action.to_s), label].join(" ")
+    when :show_discipline
+      label = record&.try(name)
+      help_text = [I18n.t("actions.#{action}", default: action.to_s.capitalize), label].join(": ")
+    when :show_project
+      label = record&.try(code)
+      help_text = [I18n.t("actions.#{action}", default: action.to_s.capitalize), label].join(": ")
+    when :children
+      label = opts[:count]
+      help_text = [I18n.t("actions.#{action}", default: action.to_s.capitalize), label].join(": ")
+    else
+      label = record&.try(:label)
+      help_text = label
+    end
 
-    help_text = [I18n.t("actions.#{action}", default: action.to_s), label].join(" ")
     if path.present?
       index_link_html(path: path, label: label, help_text: help_text, bs_icon: config[:bs_icon], bs_color: config[:bs_color])
     else

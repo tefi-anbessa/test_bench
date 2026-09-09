@@ -38,11 +38,11 @@
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
               <% if policy(@switchboard).edit? %>
-                <%= nav_button(action: :edit, path: edit_electrical_switchboard_path(@switchboard), record: @switchboard) %>
+                <%= nav_button(action: :edit, path: edit_tag_tagable_path(@tag), record: @switchboard) %>
               <% end %>
 
               <% if policy(@switchboard).destroy? %>
-                <%= nav_button(action: :delete, record: @switchboard) %>
+                <%= nav_button(action: :delete, path: tag_tagable_path(@tag), record: @switchboard) %>
               <% end %>
 
               <% if policy(@switchboard).new? %>

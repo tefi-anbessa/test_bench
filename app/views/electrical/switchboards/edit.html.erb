@@ -2,8 +2,8 @@
 <% provide(:header, t('.header', label: @switchboard.long_label)) %>
 <% provide(:button_text, t('actions.update')) %>
 <% partial = File.join(@switchboard.model_name.collection, "form") %>
-<%= render partial, 
-  tagable: @switchboard,
+<%= render partial,
+  switchboard: @switchboard,
   tag: @tag,
   parent: @tag,
   discipline: @discipline,
