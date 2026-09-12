@@ -211,6 +211,14 @@ class TagablesController < ApplicationController
       @resource_class = @type.classify.safe_constantize
     end
 
+    # Confirm the request carries resource params under the key that matches the
+    # tagable type. @resource_class is always a safe_tagable_types member by this
+    # point, so a missing key is an anomalous request, not user error.
+    def require_matching_tagable_params!
+      return if params[@resource_class.model_name.param_key].present?
+      raise ApplicationController::ConflictError, :tagable_type_mismatch
+    end
+
     def set_swatch
       @swatch = @discipline.present? && @discipline.swatch ||
                 @resource_class.swatch ||
@@ -267,14 +275,6 @@ class TagablesController < ApplicationController
     def extend_tagable
       extension = "#{@resource_class.name}Extension".safe_constantize
       extend extension if extension
-    end
-
-    # Confirm the request carries resource params under the key that matches the
-    # tagable type. @resource_class is always a safe_tagable_types member by this
-    # point, so a missing key is an anomalous request, not user error.
-    def require_matching_tagable_params!
-      return if params[@resource_class.model_name.param_key].present?
-      raise ApplicationController::ConflictError, :tagable_type_mismatch
     end
 
     def tag_params

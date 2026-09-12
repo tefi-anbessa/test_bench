@@ -12,8 +12,12 @@ module SystemTestHelpers
 
   private # Helper methods
 
+    def resource_name
+      self.class.name.sub('SystemTest', '').singularize
+    end
+
     def resource_class
-      self.class.name.sub('SystemTest', '').singularize.constantize
+      resource_name.safe_constantize
     end
 
     def field_type(field)
@@ -59,6 +63,11 @@ module SystemTestHelpers
     # Electrical::Cable -> discipline_electrical_cables_path(discipline)
     def discipline_resource_index_path(discipline)
       send("discipline_#{resource_class.model_name.route_key}_path", discipline)
+    end
+
+    # Electrical::Cable -> discipline_electrical_cables_path(discipline)
+    def discipline_tagable_resources_path(discipline)
+      discipline_tagables_path(discipline, tagable_type: resource_class.name)
     end
 
     # Document -> document_path
@@ -191,6 +200,39 @@ module SystemTestHelpers
       end
     end
 
+    def assert_tagable_nav_button(action, record = nil, path: nil, tagable_type: nil, label: nil, icon_only: false)
+      label ||= I18n.t("actions.#{action}")
+
+      case action
+      when :delete
+        path ||= tag_tagable_path(record.tag)
+        assert_selector "form[action='#{path}'] button", text: icon_only ? "" : label
+
+        # Rails method override
+        assert_selector "form[action='#{path}'] input[name='_method'][value='delete']",
+                        visible: false
+        return
+      when :new
+        if record.is_a?(Tag)
+          path ||= new_tag_tagable_path(record.tag)
+        elsif record.is_a?(Discipline)
+          path ||= new_discipline_tagable_path(record, tagable_type: tagable_type || resource_name)
+        else
+          raise ArgumentError, "assert_tagable_nav_button(:new, ...) expects a Tag or Discipline, got #{record.class}"
+        end
+        label = [I18n.t("actions.#{action}"), resource_class.model_name.human].join(' ')
+      when :edit
+        path ||= edit_tag_tagable_path(record.tag)
+      else
+        path ||= tag_tagable_path(record.tag)
+      end
+      if icon_only
+        assert_link "", href: path
+      else
+        assert_link label, href: path
+      end
+    end
+
     def assert_nav_button_disabled(action, label: nil)
       label ||= I18n.t("actions.#{action}")
 
@@ -256,6 +298,22 @@ module SystemTestHelpers
       collapsible_assertions(@resource, :tag)
     end
 
+    def tag_detail_assertions(tag)
+      assert_text I18n.t("activerecord.attributes.tag.full_tag")
+      assert_text I18n.t("activerecord.attributes.tag.service")
+      assert_text I18n.t("activerecord.attributes.tag.stage")
+      assert_text I18n.t("activerecord.attributes.tag.location")
+      assert_text I18n.t("activerecord.attributes.tag.notes")
+      assert_text I18n.t("activerecord.attributes.tag.tagable_type")
+
+      assert_text tag.full_tag
+      assert_text tag.service
+      assert_text tag.stage
+      assert_text tag.location
+      assert_text tag.notes
+      assert_text tag.tagable_type.safe_constantize.model_name.human
+    end
+
     def new_resource_form_assertions
       # Field labels
       form_labels_assertions(@new_fields)
@@ -316,8 +374,7 @@ module SystemTestHelpers
       assert_field "#{resource_class.model_name.param_key}[tag][service]", with: tag.present? ? tag.service : ""
       assert_field "#{resource_class.model_name.param_key}[tag][location]", with: tag.present? ? tag.location : ""
       assert_field "#{resource_class.model_name.param_key}[tag][notes]", with: tag.present? ? tag.notes : ""
-      assert_field "#{resource_class.model_name.param_key}[tag][tagable_type]", with: tag.present? ? tag.tagable_type : "#{resource_class.name}",
-             disabled: true
+      assert_text resource_class.model_name.human
       
       # Prefix elements depend on discipline prefix schema.
       case @discipline.schema_for_form[:type]

@@ -21,13 +21,13 @@
   <td><%= index_link(action: :children, path: electrical_switchboard_circuits_path(row), count: row.circuits.count) %></td>
   <td>
     <% if can_show %>
-      <%= nav_button(action: :show_tagable, path: tag_tagable_path(row.tag), icon_only: true) %>
+      <%= nav_button(action: :show_tagable, record: row, icon_only: true) %>
     <% end %>
     <% if can_edit %>
-      <%= nav_button(action: :edit, record: row, path: edit_electrical_switchboard_path(row), icon_only: true) %>
+      <%= nav_button(action: :edit_tagable, record: row, icon_only: true) %>
     <% end %>
     <% if can_delete %>
-      <%= nav_button(action: :delete, record: row, icon_only: true) %>
+      <%= nav_button(action: :delete_tagable, record: row, icon_only: true) %>
     <% end %>
   </td>
 </tr>

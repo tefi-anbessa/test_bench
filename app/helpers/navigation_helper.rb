@@ -6,7 +6,15 @@ module NavigationHelper
       bs_color: "danger",
       bs_icon: "trash"
     },
+    delete_tagable: {
+      bs_color: "danger",
+      bs_icon: "trash"
+    },
     edit: {
+      bs_color: "warning",
+      bs_icon: "pencil-square"
+    },
+    edit_tagable: {
       bs_color: "warning",
       bs_icon: "pencil-square"
     },
@@ -46,7 +54,15 @@ module NavigationHelper
       bs_color: "secondary",
       bs_icon: "box-arrow-in-left"
     },
+    previous_tagable: {
+      bs_color: "secondary",
+      bs_icon: "box-arrow-in-left"
+    },
     next: {
+      bs_color: "secondary",
+      bs_icon: "box-arrow-in-right"
+    },
+    next_tagable: {
       bs_color: "secondary",
       bs_icon: "box-arrow-in-right"
     },
@@ -83,10 +99,14 @@ module NavigationHelper
   def nav_button(action:, path: nil, record: nil, icon_only: false)
     config = ACTION_CONFIG[action] || {}
 
-    path = 
+    path ||= 
       case action
       when :show, :show_project, :show_discipline, :show_tag, :show_document, :down, :up, :previous, :next, :delete, :index_link
         record
+      when :show_tagable, :delete_tagable, :previous_tagable, :next_tagable
+        record.present? ? tag_tagable_path(record.tag) : nil
+      when :edit_tagable
+        record.present? ? edit_tag_tagable_path(record.tag) : nil
       else
         path
       end
@@ -102,10 +122,12 @@ module NavigationHelper
         I18n.t("show.resource"))
       when :edit
         I18n.t("actions.edit")
-      when :delete
+      when :delete, :delete_tagable
         I18n.t("actions.delete")
       when :previous, :next, :show, :index
         I18n.t("actions.#{action}")
+      when :show_tagable, :edit_tagable, :previous_tagable, :next_tagable
+        I18n.t("actions.#{action.to_s.sub('_tagable', '')}")
       when :up, :down
         I18n.t("actions.#{action}", model: record.present? ? 
         I18n.t("activerecord.models.#{record.model_name.i18n_key}.one", default: record.model_name.human) : 
@@ -120,8 +142,6 @@ module NavigationHelper
         record.name
       when :show_project
         record.label
-      when :show_tagable
-        I18n.t("actions.show")
       end
 
     help_text =
@@ -134,9 +154,14 @@ module NavigationHelper
         [I18n.t("actions.show"), record.code].join(" ")
       when :show_discipline
         [I18n.t("actions.show"), record.name].join(" ")
+      when :show_tagable, :edit_tagable, :delete_tagable, :previous_tagable, :next_tagable
+        record.present? ? 
+          [I18n.t("actions.#{action.to_s.sub('_tagable', '')}"), record&.class.model_name.human].join(" ") :
+          I18n.t("actions.#{action.to_s.sub('_tagable', '')}")
+
       else
         if record
-          [label, record.try(:label)].compact.join(": ")
+          [label, record.try(:label)].compact.join(" ")
         else
           label
         end
@@ -176,7 +201,7 @@ module NavigationHelper
         end
     end
     case action
-    when :delete
+    when :delete, :delete_tagable
       button_to path,
         method: :delete,
         class: classes,
@@ -252,15 +277,19 @@ module NavigationHelper
     when :show, :previous, :next, :show_tag, :show_document
       label = record&.try(:label)
       help_text = label
+      path = record
     when :up, :down
       label = I18n.t("activerecord.models.#{record&.model_name.i18n_key}.one", default: action.to_s)
       help_text = [I18n.t("actions.#{action}", default: action.to_s), label].join(" ")
+      path = record
     when :show_discipline
       label = record&.try(name)
       help_text = [I18n.t("actions.#{action}", default: action.to_s.capitalize), label].join(": ")
+      path = record
     when :show_project
       label = record&.try(code)
       help_text = [I18n.t("actions.#{action}", default: action.to_s.capitalize), label].join(": ")
+      path = record
     when :children
       label = opts[:count]
       help_text = [I18n.t("actions.#{action}", default: action.to_s.capitalize), label].join(": ")

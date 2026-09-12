@@ -13,7 +13,7 @@
             <% end %>
 
             <!-- Previous Button -->
-            <%= nav_button(action: :previous, record: @neighbours[0]) %>
+            <%= nav_button(action: :previous_tagable, record: @neighbours[0]) %>
           </div> <!-- end d-flex align-items-center -->
         </div> <!-- end left column -->
 
@@ -33,7 +33,7 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <%= nav_button(action: :next, record: @neighbours[1]) %>
+            <%= nav_button(action: :next_tagable, record: @neighbours[1]) %>
 
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">

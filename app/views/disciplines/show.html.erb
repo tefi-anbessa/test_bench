@@ -136,7 +136,7 @@
               <!-- Models -->
               <div class="d-flex gap-2">
                 <% @model_links.each do |link| %>
-                  <%= link_to polymorphic_path([@discipline, link[1].to_sym]), 
+                  <%= link_to discipline_tagables_path(@discipline, tagable_type: link[1]), 
                       class: "btn btn-outline-info",
                       title: link[0] do %>
                     <%== bs_icon('box-arrow-in-down-right') %>

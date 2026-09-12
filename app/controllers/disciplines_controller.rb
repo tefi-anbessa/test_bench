@@ -126,7 +126,7 @@ class DisciplinesController < ApplicationController
       models = ActiveRecord::Base.descendants
       .select { |model| model.module_parent_name == @discipline.name && model.model_name.human != "Base" }
       .sort_by(&:model_name)
-      @model_links = models.map { |m| [m.model_name.human.pluralize, m.model_name.route_key] }
+      @model_links = models.map { |m| [m.model_name.human.pluralize, m.model_name.name] }
     end
 
     def set_prefix_schema_selection

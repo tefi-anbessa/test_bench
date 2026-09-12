@@ -4,9 +4,10 @@
   </div>
   <div class="card-body">
     <%= show_attribute(@tag, :full_tag) %>
-    <%= show_attribute(@tag, :notes, type: :text) %>
+    <%= show_attribute(@tag, :service) %>
     <%= show_attribute(@tag, :stage) %>
     <%= show_attribute(@tag, :location) %>
+    <%= show_attribute(@tag, :notes, type: :text) %>
     <%= show_attribute(@tag, :tagable_type, type: :class) %>
   </div>
 </div>
