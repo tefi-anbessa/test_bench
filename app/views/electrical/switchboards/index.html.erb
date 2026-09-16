@@ -29,7 +29,8 @@
     
     <div class="card-body">
       <div class="row search-form">
-        <%= search_form_for @q, url: discipline_tagable_path(@discipline, tagable_type: @type) do |f| %>
+        <%= search_form_for @q, url: discipline_tagables_path(@discipline) do |f| %>
+          <%= hidden_field_tag :tagable_type, @type %>
           <%= f.search_field :voltage_rating_cont,
                 class: "search_field",
                 placeholder: t('activerecord.attributes.electrical/switchboard.voltage_rating') %>

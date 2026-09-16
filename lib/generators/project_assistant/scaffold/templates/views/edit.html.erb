@@ -1,5 +1,6 @@
 <%% provide(:title, t('.title')) %>
 <%% provide(:header, t('.header', label: @<%= singular_name %>.label)) %>
 <%% provide(:button_text, t('actions.update')) %>
-<%%= render "form",
-  <%= [*@form_variables].join(', ') %> %>
+<%% partial = File.join(@<%= singular_name %>.model_name.collection, "form") %>
+<%%= render partial,
+  <%= [*@form_variables].join(",\n\t") %> %>

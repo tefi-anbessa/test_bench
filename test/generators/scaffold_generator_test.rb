@@ -329,18 +329,6 @@ module ProjectAssistant
     test "creates model" do
       original_class_name = @class_name
       original_model_class_name = @model_class_name
-      # Core model: Set class name without namespace module
-      @nesting_options.each do |nesting|
-        @class_name = original_model_class_name + nesting.to_s.classify
-        # Reset the namedbase substitutes
-        name_setup_for_test
-        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
-        assert_file File.join(destination_root, 'app', 'models', "#{@singular_name}.rb") do |content|
-          assert_includes content, "class #{@model_class_name} < ApplicationRecord"
-          test_assertions_model(content, nesting)
-        end
-      end
-
       # Namespaced model: Set class name with namespace module
       @nesting_options.each do |nesting|
         @class_name = original_class_name + nesting.to_s.classify
@@ -353,24 +341,23 @@ module ProjectAssistant
           test_assertions_model(content, nesting)
         end
       end
-    end
-
-    test "creates factory" do
-      # Core factory
-      original_class_name = @class_name
-      original_model_class_name = @model_class_name
-      @nesting_options.each do |nesting|
+      # Core model: Set class name without namespace module
+      @nesting_options.excluding(:tagable).each do |nesting|
         @class_name = original_model_class_name + nesting.to_s.classify
         # Reset the namedbase substitutes
         name_setup_for_test
         run_generator [@class_name, *@args, "--nesting=#{nesting}"]
-        factory_file = File.join(destination_root, 'test', 'factories', folder, 
-          "#{@plural_name}.rb")
-        assert_file factory_file do |content|
-          test_assertions_factory(content, nesting)
+        assert_file File.join(destination_root, 'app', 'models', "#{@singular_name}.rb") do |content|
+          assert_includes content, "class #{@model_class_name} < ApplicationRecord"
+          test_assertions_model(content, nesting)
         end
       end
 
+    end
+
+    test "creates factory" do
+      original_class_name = @class_name
+      original_model_class_name = @model_class_name
       # Namespaced factory
       @nesting_options.each do |nesting|
         @class_name = original_class_name + nesting.to_s.classify
@@ -383,6 +370,19 @@ module ProjectAssistant
           test_assertions_factory(content, nesting)
         end
       end
+      # Core factory
+      @nesting_options.excluding(:tagable).each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        factory_file = File.join(destination_root, 'test', 'factories', folder, 
+          "#{@plural_name}.rb")
+        assert_file factory_file do |content|
+          test_assertions_factory(content, nesting)
+        end
+      end
+
     end
 
     test "creates model test" do
@@ -404,8 +404,19 @@ module ProjectAssistant
       migration_dir = File.join(destination_root, "db", "migrate")
       original_class_name = @class_name
       original_model_class_name = @model_class_name
-      # Core model: Set class name without namespace module
+      # Namespaced model: Set class name with namespace module
       @nesting_options.each do |nesting|
+        @class_name = original_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        migration_file = Dir.glob(File.join(migration_dir, "*_create_#{@singular_table_name}.rb")).first
+        assert_file migration_file do |content|
+          test_assertions_migration(content, nesting)
+        end
+      end
+      # Core model: Set class name without namespace module
+      @nesting_options.excluding(:tagable).each do |nesting|
         @class_name = original_model_class_name + nesting.to_s.classify
         # Reset the namedbase substitutes
         name_setup_for_test
@@ -417,35 +428,11 @@ module ProjectAssistant
         end
       end
 
-      # Namespaced model: Set class name with namespace module
-      @nesting_options.each do |nesting|
-        @class_name = original_class_name + nesting.to_s.classify
-        # Reset the namedbase substitutes
-        name_setup_for_test
-        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
-        migration_file = Dir.glob(File.join(migration_dir, "*_create_#{@singular_table_name}.rb")).first
-        assert_file migration_file do |content|
-          test_assertions_migration(content, nesting)
-        end
-      end
     end
 
     test "creates policy" do
       original_class_name = @class_name
       original_model_class_name = @model_class_name
-      # Core policy: Set class name without namespace module
-      @nesting_options.each do |nesting|
-        @class_name = original_model_class_name + nesting.to_s.classify
-        # Reset the namedbase substitutes
-        name_setup_for_test
-        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
-        policy_file = File.join(destination_root, 'app', 'policies', @folder, 
-          "#{@singular_name}_policy.rb")
-        assert_file policy_file do |content|
-          test_assertions_policy(content, nesting)
-        end
-      end
-
       # Namespaced model: Set class name with namespace module
       @nesting_options.each do |nesting|
         @class_name = original_class_name + nesting.to_s.classify
@@ -456,6 +443,18 @@ module ProjectAssistant
           "#{@singular_name}_policy.rb")
         assert_file policy_file do |content|
           assert_includes content, "module #{@module_name}"
+          test_assertions_policy(content, nesting)
+        end
+      end
+      # Core policy: Set class name without namespace module
+      @nesting_options.excluding(:tagable).each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        policy_file = File.join(destination_root, 'app', 'policies', @folder, 
+          "#{@singular_name}_policy.rb")
+        assert_file policy_file do |content|
           test_assertions_policy(content, nesting)
         end
       end
@@ -464,18 +463,8 @@ module ProjectAssistant
     test "creates policy test" do
       original_class_name = @class_name
       original_model_class_name = @model_class_name
-      # Core policy: Set class name without namespace module
+      # Namespaced policy: Set class name with namespace module
       @nesting_options.each do |nesting|
-        @class_name = original_model_class_name + nesting.to_s.classify
-        # Reset the namedbase substitutes
-        name_setup_for_test
-        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
-        policy_test_file = File.join(destination_root, 'test', 'policies', @folder, 
-          "#{@singular_name}_policy_test.rb")
-        assert_file policy_test_file do |content|
-          test_assertions_policy_test(content, nesting)
-        end
-        # Namespaced policy: Set class name with namespace module
         @class_name = original_class_name + nesting.to_s.classify
         # Reset the namedbase substitutes
         name_setup_for_test
@@ -484,6 +473,18 @@ module ProjectAssistant
           "#{@singular_name}_policy_test.rb")
         assert_file policy_test_file do |content|
           assert_includes content, "module #{@module_name}"
+          test_assertions_policy_test(content, nesting)
+        end
+      end
+      # Core policy: Set class name without namespace module
+      @nesting_options.excluding(:tagable).each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        policy_test_file = File.join(destination_root, 'test', 'policies', @folder, 
+          "#{@singular_name}_policy_test.rb")
+        assert_file policy_test_file do |content|
           test_assertions_policy_test(content, nesting)
         end
       end
@@ -492,8 +493,29 @@ module ProjectAssistant
     test "creates controller" do
       original_class_name = @class_name
       original_model_class_name = @model_class_name
-      # Core controller: Set class name without namespace module
+      # Namespaced policy: Set class name with namespace module
       @nesting_options.each do |nesting|
+        @class_name = original_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        case nesting 
+        when :tagable
+          extension_file = File.join(destination_root, 'app', 'controllers', @folder, 
+            "#{@singular_name}_extension.rb")
+          assert_file extension_file do |content|
+            test_assertions_controller_extension(content)
+          end
+        else
+          controller_file = File.join(destination_root, 'app', 'controllers', @folder, 
+            "#{@plural_name}_controller.rb")
+          assert_file controller_file do |content|
+            test_assertions_controller(content, nesting)
+          end
+        end
+      end
+      # Core controller: Set class name without namespace module
+      @nesting_options.excluding(:tagable).each do |nesting|
         @class_name = original_model_class_name + nesting.to_s.classify
         # Reset the namedbase substitutes
         name_setup_for_test
@@ -501,17 +523,6 @@ module ProjectAssistant
         controller_file = File.join(destination_root, 'app', 'controllers', @folder, 
           "#{@plural_name}_controller.rb")
         assert_file controller_file do |content|
-          test_assertions_controller(content, nesting)
-        end
-        # Namespaced policy: Set class name with namespace module
-        @class_name = original_class_name + nesting.to_s.classify
-        # Reset the namedbase substitutes
-        name_setup_for_test
-        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
-        controller_file = File.join(destination_root, 'app', 'controllers', @folder, 
-          "#{@plural_name}_controller.rb")
-        assert_file controller_file do |content|
-          assert_includes content, "module #{@module_name}"
           test_assertions_controller(content, nesting)
         end
       end
@@ -520,97 +531,99 @@ module ProjectAssistant
     test "creates views" do
       original_class_name = @class_name
       original_model_class_name = @model_class_name
-      # Core controller: Set class name without namespace module
+      # Namespaced views: Set class name with namespace module
       @nesting_options.each do |nesting|
-        @class_name = original_model_class_name + nesting.to_s.classify
-        # Reset the namedbase substitutes
-        name_setup_for_test
-        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
-        views_dir = File.join(destination_root, 'app', 'views', @folder, @plural_name)
-
-      # index.html.erb
-        assert_file File.join(views_dir, 'index.html.erb') do |content|
-          test_assertions_index_view(content, nesting)
-        end
-
-      # _header.html.erb
-        assert_file File.join(views_dir, '_header.html.erb') do |content|
-          test_assertions_header_view(content, nesting)
-        end
-
-      # _row.html.erb
-        assert_file File.join(views_dir, "_row.html.erb") do |content|
-          test_assertions_row_view(content, nesting)
-        end
-      
-      # show.html.erb
-        assert_file File.join(views_dir, "show.html.erb") do |content|
-          test_assertions_show_view(content, nesting)
-        end
-      
-      # new.html.erb
-        assert_file File.join(views_dir, "new.html.erb") do |content|
-          test_assertions_new_view(content, nesting)
-        end
-      
-      # edit.html.erb
-        assert_file File.join(views_dir, "edit.html.erb") do |content|
-          test_assertions_edit_view(content, nesting)
-        end
-      
-      # _form.html.erb
-        assert_file File.join(views_dir, "_form.html.erb") do |content|
-          test_assertions_form_view(content, nesting)
-        end
-      
-      # _card.html.erb
-        assert_file File.join(views_dir, "_card.html.erb") do |content|
-          test_assertions_card_view(content, nesting)
-        end
-
-        # Namespaced policy: Set class name with namespace module
         @class_name = original_class_name + nesting.to_s.classify
         # Reset the namedbase substitutes
         name_setup_for_test
         run_generator [@class_name, *@args, "--nesting=#{nesting}"]
         views_dir = File.join(destination_root, 'app', 'views', @folder, @plural_name)
 
-      # index.html.erb
+        # index.html.erb
         assert_file File.join(views_dir, 'index.html.erb') do |content|
           test_assertions_index_view(content, nesting)
         end
 
-      # _header.html.erb
+        # _header.html.erb
         assert_file File.join(views_dir, '_header.html.erb') do |content|
           test_assertions_header_view(content, nesting)
         end
 
-      # _row.html.erb
+        # _row.html.erb
         assert_file File.join(views_dir, "_row.html.erb") do |content|
           test_assertions_row_view(content, nesting)
         end
       
-      # show.html.erb
+        # show.html.erb
         assert_file File.join(views_dir, "show.html.erb") do |content|
           test_assertions_show_view(content, nesting)
         end
       
-      # new.html.erb
+        # new.html.erb
         assert_file File.join(views_dir, "new.html.erb") do |content|
           test_assertions_new_view(content, nesting)
         end
       
-      # edit.html.erb
+        # edit.html.erb
         assert_file File.join(views_dir, "edit.html.erb") do |content|
           test_assertions_edit_view(content, nesting)
         end
       
-      # _form.html.erb
+        # _form.html.erb
         assert_file File.join(views_dir, "_form.html.erb") do |content|
           test_assertions_form_view(content, nesting)
         end
       
-      # _card.html.erb
+        # _card.html.erb
+        assert_file File.join(views_dir, "_card.html.erb") do |content|
+          test_assertions_card_view(content, nesting)
+        end
+      end
+
+      # Core views: Set class name without namespace module
+      @nesting_options.excluding(:tagable).each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        views_dir = File.join(destination_root, 'app', 'views', @folder, @plural_name)
+
+        # index.html.erb
+        assert_file File.join(views_dir, 'index.html.erb') do |content|
+          test_assertions_index_view(content, nesting)
+        end
+
+        # _header.html.erb
+        assert_file File.join(views_dir, '_header.html.erb') do |content|
+          test_assertions_header_view(content, nesting)
+        end
+
+        # _row.html.erb
+        assert_file File.join(views_dir, "_row.html.erb") do |content|
+          test_assertions_row_view(content, nesting)
+        end
+      
+        # show.html.erb
+        assert_file File.join(views_dir, "show.html.erb") do |content|
+          test_assertions_show_view(content, nesting)
+        end
+      
+        # new.html.erb
+        assert_file File.join(views_dir, "new.html.erb") do |content|
+          test_assertions_new_view(content, nesting)
+        end
+      
+        # edit.html.erb
+        assert_file File.join(views_dir, "edit.html.erb") do |content|
+          test_assertions_edit_view(content, nesting)
+        end
+      
+        # _form.html.erb
+        assert_file File.join(views_dir, "_form.html.erb") do |content|
+          test_assertions_form_view(content, nesting)
+        end
+      
+        # _card.html.erb
         assert_file File.join(views_dir, "_card.html.erb") do |content|
           test_assertions_card_view(content, nesting)
         end
@@ -623,18 +636,8 @@ module ProjectAssistant
     test "creates controller test" do
       original_class_name = @class_name
       original_model_class_name = @model_class_name
-      # Core controller: Set class name without namespace module
+      # Namespaced controller: Set class name with namespace module
       @nesting_options.each do |nesting|
-        @class_name = original_model_class_name + nesting.to_s.classify
-        # Reset the namedbase substitutes
-        name_setup_for_test
-        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
-        controller_test_file = File.join(destination_root, 'test', 'controllers', folder, 
-          "#{@plural_name}_controller_test.rb")
-        assert_file controller_test_file do |content|
-          test_assertions_controller_test(content, nesting)
-        end
-        # Namespaced policy: Set class name with namespace module
         @class_name = original_class_name + nesting.to_s.classify
         # Reset the namedbase substitutes
         name_setup_for_test
@@ -646,22 +649,24 @@ module ProjectAssistant
           test_assertions_controller_test(content, nesting)
         end
       end
+      # Core controller: Set class name without namespace module
+      @nesting_options.excluding(:tagable).each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        controller_test_file = File.join(destination_root, 'test', 'controllers', folder, 
+          "#{@plural_name}_controller_test.rb")
+        assert_file controller_test_file do |content|
+          test_assertions_controller_test(content, nesting)
+        end
+      end
     end
 
     test "creates system test" do
       original_class_name = @class_name
       original_model_class_name = @model_class_name
-      # Core controller: Set class name without namespace module
       @nesting_options.each do |nesting|
-        @class_name = original_model_class_name + nesting.to_s.classify
-        # Reset the namedbase substitutes
-        name_setup_for_test
-        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
-        system_test_file = File.join(destination_root, 'test', 'system', folder, 
-        "#{@plural_name}_system_test.rb")
-        assert_file system_test_file do |content|
-          test_assertions_system_test(content, nesting)
-        end
         # Namespaced policy: Set class name with namespace module
         @class_name = original_class_name + nesting.to_s.classify
         # Reset the namedbase substitutes
@@ -671,6 +676,18 @@ module ProjectAssistant
         "#{@plural_name}_system_test.rb")
         assert_file system_test_file do |content|
           assert_includes content, "module #{@module_name}"
+          test_assertions_system_test(content, nesting)
+        end
+      end
+      # Core controller: Set class name without namespace module
+      @nesting_options.excluding(:tagable).each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        system_test_file = File.join(destination_root, 'test', 'system', folder, 
+        "#{@plural_name}_system_test.rb")
+        assert_file system_test_file do |content|
           test_assertions_system_test(content, nesting)
         end
       end

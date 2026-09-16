@@ -7,46 +7,7 @@ module ProjectAssistant
     include ProjectAssistant::Shared::ScaffoldHelper
     source_root File.expand_path("scaffold/templates", __dir__)
     class_option :definition, type: :string, desc: "Fields definition file name"
-    class_option :nesting, type: :string, desc: "Parent class, options: none (default), project, discipline, tag, tagable)"
-
-    def validate_name
-      # $stderr.puts "DEBUG (Generator): args #{args}"
-      @namespaced = class_path.any?
-      errors = []
-      # $stderr.puts "DEBUG (GENERATOR): validating name: #{class_name.inspect}"
-      
-      # Validate that we have a module and class name for tagables
-      if @nesting == :tagable && !class_name.include?("::")
-        errors << "Name for tagable must include both module and class with '::' separator"
-      # Check for existence of module paths required
-      elsif @namespaced
-        # Validate module/sub-module exists
-        paths_to_check(folder).each do |path|
-          unless Dir.exist?(path)
-            errors << "#{path} not found, module #{module_name} has incomplete folder structure"
-          end
-        end
-      end
-        
-      # Validate class name format
-      unless model_class_name&.match?(/^[A-Z][a-zA-Z0-9_]*$/)
-        errors << "'#{model_class_name}' is not a valid Ruby class name"
-      end
-      
-      if errors.any?
-        # $stderr.puts "DEBUG (GENERATOR): validating name: errors: #{errors.inspect}"
-        say_status :error, "Name validation failed:", :red
-        errors.each { |error| say_status :error, "  - #{error}", :red }
-        say_status :info, "Please fix the name and try again.", :yellow
-        raise Thor::Error, "Aborting generator"
-      else
-        if @namespaced
-          say_status :info, "Generating model #{model_class_name} in module #{module_name}", :green
-        else
-          say_status :info, "Generating model #{model_class_name} in core application", :green
-        end
-      end
-    end
+    class_option :nesting, type: :string, desc: "Parent class, options: none (default), project, discipline, tag, tagable"
     
     def validate_nesting
       # $stderr.puts "DEBUG (GENERATOR): options[:nesting]: #{options[:nesting].inspect} (#{options[:nesting].class})"
@@ -72,6 +33,45 @@ module ProjectAssistant
       # $stderr.puts "DEBUG (GENERATOR): errors: #{@errors.inspect}"
     end
 
+    def validate_name
+      # $stderr.puts "DEBUG (Generator): args #{args}"
+      @namespaced = class_path.any?
+      errors = []
+      # $stderr.puts "DEBUG (GENERATOR): validating name: #{class_name.inspect}"
+      
+      if @namespaced
+        # Validate module/sub-module exists
+        paths_to_check(folder).each do |path|
+          unless Dir.exist?(path)
+            errors << "#{path} not found, module #{module_name} has incomplete folder structure"
+          end
+        end
+      else
+        # Tagables must have a module and class name
+        if @nesting == :tagable
+          errors << "Name for tagable must include both module and class with '::' separator"
+        end
+      end
+        
+      # Validate class name format
+      unless model_class_name&.match?(/^[A-Z][a-zA-Z0-9_]*$/)
+        errors << "'#{model_class_name}' is not a valid Ruby class name"
+      end
+      
+      if errors.any?
+        # $stderr.puts "DEBUG (GENERATOR): validating name: errors: #{errors.inspect}"
+        say_status :error, "Name validation failed:", :red
+        errors.each { |error| say_status :error, "  - #{error}", :red }
+        say_status :info, "Please fix the name and try again.", :yellow
+        raise Thor::Error, "Aborting generator"
+      else
+        if @namespaced
+          say_status :info, "Generating model #{model_class_name} in module #{module_name}", :green
+        else
+          say_status :info, "Generating model #{model_class_name} in core application", :green
+        end
+      end
+    end
 
     def resolve_fields
       # Check for option to load arguments from file
@@ -100,7 +100,7 @@ module ProjectAssistant
       end
       # Set up field sets convenience variables
       field_sets
-      $stderr.puts "DEBUG: GENERATOR: fields: #{@fields} \nnesting: #{@nesting}\nenum_fields: #{@enum_fields}"
+      # $stderr.puts "DEBUG: GENERATOR: fields: #{@fields} \nnesting: #{@nesting}\nenum_fields: #{@enum_fields}"
     end
 
     def create_model_file
@@ -139,9 +139,11 @@ module ProjectAssistant
     end
     
     def create_controller_file
-      @params = [@attribute_fields.map { |field| ":#{field[:name]}" }, 
-                @association_fields.map { |field| ":#{field[:name]}_id" } ].join(', ')
-      template "controller.rb.erb", File.join('app', 'controllers', "#{controller_file_path}_controller.rb")
+      if @nesting == :tagable
+        template "controller_extension.rb.erb", File.join('app', 'controllers', "#{file_path}_extension.rb")
+      else
+        template "controller.rb.erb", File.join('app', 'controllers', "#{controller_file_path}_controller.rb")
+      end
     end
     
     def create_view_files

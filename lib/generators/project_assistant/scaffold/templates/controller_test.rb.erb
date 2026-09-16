@@ -7,23 +7,24 @@ module <%= module_name %>
   class <%= model_class_name.pluralize %>ControllerTest < ActionController::TestCase
     include Devise::Test::ControllerHelpers
 <%- case @nesting -%>
-<%- when :tag, :document, :discipline, :project %>
-    include ControllerTestHelper
 <%- when :tagable %>
     include TagableControllerTests
+<%- else %>
+    include ControllerTestHelper
 <%- end -%>
     setup do
       @nesting = <%= @nesting.inspect %>
       setup_controller_test # In test/helpers/controller_test_helper.rb or test/helpers/tagable_controller_tests
 <%- case @nesting -%>
-<%- when :tag, :document, :discipline, :project %>
-      # Set up in and out of scope instances of <%= singular_name %>
-      @resource = create(:<%= singular_table_name %>, <%= @nesting.to_s %>: @<%= @nesting.to_s %>)
-      @other_resource = create(:<%= singular_table_name %>, <%= @nesting.to_s %>: @other_<%= @nesting.to_s %>)
 <%- when :none %>
       # Set up in and out of scope instances of <%= singular_name %>
       @resource = create(:<%= singular_table_name %>)
       @other_resource = create(:<%= singular_table_name %>)
+<%- when :tagable %>
+<%- else %>
+      # Set up in and out of scope instances of <%= singular_name %>
+      @resource = create(:<%= singular_table_name %>, <%= @nesting.to_s %>: @<%= @nesting.to_s %>)
+      @other_resource = create(:<%= singular_table_name %>, <%= @nesting.to_s %>: @other_<%= @nesting.to_s %>)
 <%- end -%>
     end
 
@@ -31,19 +32,8 @@ module <%= module_name %>
 
       # Set the expected params for a valid resource
       def create_params
-<%- params = [] %>
-<%- @attribute_fields.each do |field| -%>
-  <%- valid = field.dig(:options, :valid) || 
-        (if [:enum, :enum_translated].include?(field[:type])
-          field.dig(:options, :keys)&.first
-        end) -%>
-  <%- params << "#{field[:name].to_sym}: #{valid.inspect}" -%>
-<%- end -%>
-<%- @association_fields.each do |field| -%>
-  <%- params << "#{field[:name].to_sym}: #{field.dig(:options, :valid).inspect}" -%>
-<%- end -%>
         {
-          <%= params.join(",\n\t\t\t\t\t") %>
+          <%= controller_test_create_params.join(",\n\t\t\t\t\t") %>
         }
       end
 

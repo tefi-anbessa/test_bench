@@ -13,7 +13,8 @@
             <%% end %>
 
             <!-- Previous Button -->
-            <%%%= nav_button(action: :previous, record: @neighbours[0]) %>
+<%- action = @nesting == :tagable ? "previous_tagable" : "previous" -%>
+            <%%= nav_button(action: :<%= action %>, record: @neighbours[0]) %>
           </div>
         </div>
 
@@ -33,16 +34,17 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <%%= nav_button(action: :next, record: @neighbours[1]) %>
+<%- action = @nesting == :tagable ? "next_tagable" : "next" -%>
+            <%%= nav_button(action: :<%= action %>, record: @neighbours[1]) %>
 
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
               <%% if policy(@<%= singular_name %>).edit? %>
-                <%%= nav_button(action: :edit, record: @<%= singular_name %>, path: edit_<%= singular_route_name %>_path(@<%= singular_name %>)) %>
+                <%%= nav_button(action: :<%= edit_button_action(@nesting) %>, record: @<%= singular_name %>) %>
               <%% end %>
 
               <%% if policy(@<%= singular_name %>).destroy? %>
-                <%%= nav_button(action: :delete, record: @<%= singular_name %>) %>
+                <%%= nav_button(action: :<%= delete_button_action(@nesting) %>, record: @<%= singular_name %>) %>
               <%% end %>
 
               <%% if policy(@<%= singular_name %>).new? %>

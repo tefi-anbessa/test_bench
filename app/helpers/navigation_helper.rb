@@ -103,6 +103,8 @@ module NavigationHelper
       case action
       when :show, :show_project, :show_discipline, :show_tag, :show_document, :down, :up, :previous, :next, :delete, :index_link
         record
+      when :edit
+        edit_polymorphic_path(record)
       when :show_tagable, :delete_tagable, :previous_tagable, :next_tagable
         record.present? ? tag_tagable_path(record.tag) : nil
       when :edit_tagable

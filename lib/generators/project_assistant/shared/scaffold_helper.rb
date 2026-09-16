@@ -65,6 +65,21 @@ module ProjectAssistant
         def model_class_name
           class_name.split('::').last # "NewModel"
         end
+
+        def name_setup_for_test
+          # Generator::NamedBase methods not available in test environment
+          # @class_name examples: ModuleName::SubModule::NewModel; ModuleName::NewModel; NewModel
+          @module_name = @class_name.split("::")[0..-2].join("::")  # "ModuleName::SubModule"; "ModuleName"; ""
+          @model_class_name = @class_name.split('::').last # "NewModel"
+          @singular_name = @model_class_name.underscore # "new_model"
+          @plural_name = @singular_name.pluralize # "new_models"
+          @human_name = @singular_name.humanize # "New model"
+          @class_path = @module_name.split('::').to_a.map(&:underscore) # ["existing_module", "sub_module"]; ["existing_module"]; []
+          @table_name = [*@class_path, @singular_name.pluralize].join"_" # "existing_module_sub_module_new_models"; "existing_module_new_models"; "new_models"
+          @singular_table_name = @table_name.singularize # "existing_module_sub_module_new_model"; "existing_module_new_model"; "new_model"
+          @folder = File.join(*@class_path) # "existing_module/sub_module"; "existing_module"; ""
+          @i18n_scope = [*@class_path, @singular_name].join('.') # "existing_module.sub_module.new_model"; "existing_modulenew_model"; "new_model"
+        end
       
         # Helper methods for path generation
         def i18n_views_insertion_point
@@ -77,52 +92,35 @@ module ProjectAssistant
 
         def index_path(nesting)
           case nesting
-          when :tag, :discipline, :project
-            "#{nesting.to_s}_#{table_name}_path(@#{nesting.to_s})"
           when :tagable
-            "discipline_#{table_name}_path(@#{@discipline})"
+            "discipline_tagables_path(@discipline, tagable_type: '#{class_name}')"
           when :none
             "#{table_name}_path"
+          else
+            "#{nesting.to_s}_#{table_name}_path(@#{nesting.to_s})"
           end
         end
 
         def new_path(nesting)
           case nesting
-          when :tag, :discipline, :project
-            "new_#{nesting.to_s}_#{singular_table_name}_path(@#{nesting.to_s})"
           when :tagable
-            "new_discipline_#{singular_table_name}_path(@discipline)"
+            "new_discipline_#{singular_table_name}_path(@discipline, tagable_type: '#{class_name}')"
           when :none
             "new_#{singular_table_name}_path"
+          else
+            "new_#{nesting.to_s}_#{singular_table_name}_path(@#{nesting.to_s})"
           end
         end
 
         def new_build(nesting)
           case nesting
-          when :tag, :discipline, :project
-            "@#{nesting.to_s}.#{table_name}.build"
           when :tagable
             "@discipline.#{table_name}.build"
           when :none
             "#{class_name}.new"
+          else
+            "@#{nesting.to_s}.#{table_name}.build"
           end
-        end
-
-        def name_setup_for_test
-          # Generator::NamedBase methods not available in test environment
-          # @class_name examples: ModuleName::SubModule::NewModel; ModuleName::NewModel; NewModel
-          @module_name = @class_name.split("::")[0..-2].join("::")  # "ModuleName::SubModule"; "ModuleName"; ""
-          @model_class_name = @class_name.split('::').last # "NewModel"
-          @singular_name = @model_class_name.underscore # "new_model"
-          @plural_name = @singular_name.pluralize # "new_models"
-          @human_name = @singular_name.humanize # "New model"
-          @class_path = @module_name.split('::').to_a.map(&:underscore) # ["ExistingModule", "SubModule"]; ["ExistingModule"]; []
-          @table_name = [*@class_path, @singular_name.pluralize].join"_" # "existing_module_sub_module_new_models"; "existing_module_new_models"; "new_models"
-          @singular_table_name = @table_name.singularize # "existing_module_sub_module_new_model"; "existing_module_new_model"; "new_model"
-          @folder = File.join(*@class_path) # "existing_module/sub_module"; "existing_module"; ""
-          @index_path = "#{@nesting.to_s}_#{@table_name}_path(@#{@nesting.to_s})"
-          @new_path = "new_#{@nesting.to_s}_#{@singular_table_name}_path(@#{@nesting.to_s})"
-          @i18n_scope = [*@class_path, @singular_name].join('.') # "existing_module.sub_module.new_model"; "existing_modulenew_model"; "new_model"
         end
 
         def policy_resource_class
@@ -149,12 +147,12 @@ module ProjectAssistant
 
         def controller_mixin
           case @nesting
-          when :project, :discipline, :tag
-            "#{@nesting.to_s.camelize}ResourcesController"
           when :tagable
             "TagablesController"
           when :none
             ""
+          else
+            "#{@nesting.to_s.camelize}ResourcesController"
           end
         end
 
@@ -432,18 +430,23 @@ module ProjectAssistant
           @searchable_field_names = @searchable_fields.map { |field| "#{field[:name]}" } 
           @attribute_names = @attribute_fields.map { |field| "#{field[:name]}" } 
           @association_names = @association_fields.map { |field| "#{field[:name]}" } 
+          @params = [@attribute_fields.map { |field| ":#{field[:name]}" }, 
+                @association_fields.map { |field| ":#{field[:name]}_id" } ].join(', ')
         end
 
+        # Set variables for new and edit templates to pass into form
         def set_form_variables(nesting)
-          form_variables = ["#{singular_name}: @#{singular_name}, ""swatch: @swatch"]
+          form_variables = ["#{singular_name}: @#{singular_name},\n\t" + "swatch: @swatch"]
           scope = nil
           case nesting
-          when :tag, :discipline, :project
-            form_variables << "#{nesting}: @#{nesting}"
-            scope = "scope_text: @#{nesting}.long_label"
           when :tagable
             form_variables << "tag: @tag"
             scope = "scope_text: @tag.long_label"
+          when :none
+            scope = "scope_text: @#{singular_name}.long_label"
+          else
+            form_variables << "#{nesting}: @#{nesting}"
+            scope = "scope_text: @#{nesting}.long_label"
           end
           @association_fields.each do |field|
             form_variables << "#{field[:name].pluralize}: @#{field[:name].pluralize}"
@@ -451,19 +454,103 @@ module ProjectAssistant
           [form_variables, scope]
         end
 
+        def form_model
+          case @nesting
+          when :none, :tagable
+            "#{singular_name}"
+          else
+            "[#{@nesting}, #{singular_name}]"
+          end
+        end
+
         def form_url
           case @nesting
           when :tagable
-            "#{singular_name}.persisted? ?
-            #{singular_name} : 
-            ( tag.persisted? ?
-              tag_#{plural_route_name}_path(tag) :
-              discipline_#{plural_route_name}_path(discipline))"
-          when :tag, :discipline, :project
-            "#{singular_name}.persisted? ? #{singular_name} : #{@nesting}_#{plural_route_name}_path(#{@nesting})"
+            "polymorphic_path([parent, :tagable])"
           else
             nil
           end
+        end
+
+        def form_discard
+          case @nesting
+          when :tagable
+            ["tag_tagable_path(tag)", "discipline_tagables_path(tag.discipline, tagable_type: #{class_name})"]
+          when :none
+            ["#{singular_name}", "#{plural_route_name}_path"]
+          else
+            ["#{singular_name}", "#{@nesting}_#{plural_route_name}_path(#{@nesting})"]
+          end
+        end
+
+        def index_back_link
+          case @nesting
+          when :tagable
+            action = ":show_discipline"
+            record = "@discipline"
+          when :none
+            action = nil
+            record = nil
+          else
+            action = ":show_#{@nesting}"
+            record = "@#{@nesting}"
+          end
+          [action, record]
+        end
+
+        def index_scope_text
+          case @nesting
+          when :tagable
+            "[t('activerecord.models.discipline.one'), @discipline.label].join(': ')"
+          when :none
+            "t('index.all', models: t('activerecord.models.project.other'))"
+          else
+            "[t('activerecord.models.#{@nesting}.one'), @#{@nesting}.label].join(': ')"
+          end
+        end
+
+        def show_back_link
+          case @nesting
+          when :tagable
+            "discipline_tagables_path(@discipline, tagable_type: #{class_name})"
+          when :none
+            "#{index_helper(type: 'path')}"
+          else
+            "#{@nesting}_#{index_helper(type: 'path')}(@#{@nesting})"
+          end
+        end
+
+        def edit_button_action(nesting)
+          case nesting
+          when :tagable
+            :edit_tagable
+          else
+            :edit
+          end
+        end
+
+        def delete_button_action(nesting)
+          case nesting
+          when :tagable
+            :delete_tagable
+          else
+            :delete
+          end
+        end
+
+        def controller_test_create_params
+          params = []
+          @attribute_fields.each do |field|
+            valid = field.dig(:options, :valid) || 
+                    (if [:enum, :enum_translated].include?(field[:type])
+                      field.dig(:options, :keys)&.first
+                    end)
+            params << "#{field[:name].to_sym}: #{valid.inspect}"
+          end
+          @association_fields.each do |field|
+            params << "#{field[:name].to_sym}: #{field.dig(:options, :valid).inspect}"
+          end
+          params
         end
 
         def test_assertions_model(content, nesting)
@@ -619,14 +706,35 @@ module ProjectAssistant
           end
         end
 
+        def test_assertions_controller_extension(content)
+          assert_includes content, "module #{@module_name}"
+          assert_includes content, "module #{@model_class_name}Extension"
+          target = /
+            def\s+tagable_params\s*
+            params\.require\(:#{@singular_table_name}\)\s*
+            \.permit\(
+            (.*?)\)
+          /mx
+          match = content.match(target)
+          assert match, "Expected to find def tagable_params..."
+          @attribute_fields.each do |field|
+            assert_includes match[1], field[:name]
+          end
+          @association_fields.each do |field|
+            assert_includes match[1], "#{field[:name]}_id"
+          end
+        end
+
         def test_assertions_index_view(content, nesting)
           assert_includes content, "if policy(#{new_build(nesting)}).new?"
           assert_includes content, "nav_button(action: :new, path: #{new_path(nesting)}, record: #{new_build(nesting)}"
           @searchable_fields.each do |field|
             assert_includes content, "f.search_field :#{field[:name]}_cont"
           end
-          assert_includes content, "render 'header'"
-          assert_includes content, "render 'row'"
+          header = File.join(*@class_path, @plural_name, "header")
+          assert_includes content, "render '#{header}'"
+          row = File.join(*@class_path, @plural_name, "row")
+          assert_includes content, "render '#{row}', row: row"
         end
 
         def test_assertions_header_view(content, nesting)
@@ -647,14 +755,20 @@ module ProjectAssistant
         end
 
         def test_assertions_show_view(content, nesting)
+          case nesting
+          when :tagable 
+            action_suffix = "_tagable"
+          else
+            action_suffix = ""
+          end
           assert_includes content, "<% provide(:title, t('.title')) %>"
           assert_includes content, "policy(@#{@singular_name}).index?"
           assert_includes content, "nav_button(action: :index, path: #{index_path(nesting)}, record: @#{@singular_name})"
-          assert_includes content, "nav_button(action: :previous, record: @neighbours[0])"
-          assert_includes content, "nav_button(action: :next, record: @neighbours[1])"
+          assert_includes content, "nav_button(action: :previous#{action_suffix}, record: @neighbours[0])"
+          assert_includes content, "nav_button(action: :next#{action_suffix}, record: @neighbours[1])"
           assert_includes content, "<%= t('.header', label: "
-          assert_includes content, "nav_button(action: :edit, record: @#{@singular_name}, path: edit_#{@singular_table_name}_path(@#{@singular_name}))"
-          assert_includes content, "nav_button(action: :delete, record: @#{@singular_name})"
+          assert_includes content, "nav_button(action: :#{edit_button_action(nesting)}, record: @#{@singular_name})"
+          assert_includes content, "nav_button(action: :#{delete_button_action(nesting)}, record: @#{@singular_name})"
           assert_includes content, "nav_button(action: :new, path: #{new_path(nesting)}, record: @#{@singular_name}"
           @attribute_fields.each do |field|
             case field[:type]
@@ -689,21 +803,26 @@ module ProjectAssistant
           if scope.present?
             assert_includes content, scope
           end
-          assert_includes content, "render \"form\""
-          assert_includes content, [*form_variables].join(', ')
+          assert_includes content, "render partial"
+          assert_includes content, [*form_variables].join(",\n\t")
         end
 
         def test_assertions_edit_view(content, nesting)
           form_variables, scope = set_form_variables(nesting)
           assert_includes content, "provide(:title, t('.title'))"
           assert_includes content, "provide(:header, t('.header', label: @#{@singular_name}.label))"
-          assert_includes content, "render \"form\""
-          assert_includes content, [*form_variables].join(', ')
+          assert_includes content, "render partial"
+          assert_includes content, [*form_variables].join(",\n\t")
         end
 
         def test_assertions_form_view(content, nesting)
           assert_includes content, "yield(:header)"
-          assert_includes content, "bootstrap_form_with(model: #{@singular_name}"
+          case nesting
+          when :none, :tagable
+            assert_includes content, "bootstrap_form_with model: #{@singular_name}"
+          else
+            assert_includes content, "bootstrap_form_with model: [#{nesting}, #{@singular_name}]"
+          end
           @fields.each do |field|
             case field[:type]
             when "string"
