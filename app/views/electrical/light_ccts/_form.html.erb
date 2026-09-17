@@ -12,11 +12,8 @@
     </div>
 
     <%= bootstrap_form_with(model: light_cct,
-          url: light_cct.persisted? ?
-            light_cct : 
-            ( tag.persisted? ?
-              tag_electrical_light_ccts_path(tag) :
-              discipline_electrical_light_ccts_path(discipline) ),
+          url: polymorphic_path([parent, :tagable]),
+          local: true,
           layout: :horizontal,
           label_col: "col-sm-4",
           control_col: "col-sm-8",
@@ -28,19 +25,22 @@
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
             <!-- Tag -->
-            <div class="card mb-1">
+            <% if tag.persisted? %>
+              <%= render'tags/tag', tag: tag, swatch: swatch %>
+            <% else %>
               <%= f.fields_for tag do |tag_f| %>
                 <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
               <% end %>
-            </div>
+            <% end %>
+            <%= hidden_field_tag :tagable_type, tag.tagable_type %>
 
             <!-- Light Circuit Details -->
-            <div class="card mb-1">
-              <div class="card-header p-2">
-                <h5><%= light_cct.model_name.human %></h5>
+            <div class="card mb-1" style="<%= card_styles(swatch) %>">
+              <div class="card-header p-2" style="<%= card_header_styles(swatch) %>">
+                <h6><%= yield(:header) %></h6>
               </div>
 
-              <div class="card-body p-2">
+              <div class="card-body p-2" style="<%= form_styles(swatch) %>">
                 <%= render 'shared/error_messages', object: f.object %>
 
                 <%= form_field(f, :light_fitting_type, type: :enum_translated, required: true) %>
@@ -51,7 +51,7 @@
 
             <!-- Card Footer with Actions -->
             <div class="card-footer bg-transparent text-end p-2">
-              <%= link_to(light_cct.persisted? ? light_cct : discipline_electrical_light_ccts_path(discipline),
+              <%= link_to(light_cct.persisted? ? tag_tagable_path(tag) : discipline_tagables_path(discipline, tagable_type: 'Electrical::LightCct'),
                     class: 'btn btn-warning',
                     data: { confirm: t('actions.sure'), turbo: false }) do %>
                 <%= t('actions.discard') %>

@@ -21,13 +21,13 @@
   </td>
   <td>
     <% if can_show %>
-      <%= nav_button(action: :show, record: row, icon_only: true) %>
+      <%= nav_button(action: :show_tagable, record: row, icon_only: true) %>
     <% end %>
     <% if can_edit %>
-      <%= nav_button(action: :edit, record: row, path: edit_electrical_light_cct_path(row), icon_only: true) %>
+      <%= nav_button(action: :edit_tagable, record: row, icon_only: true) %>
     <% end %>
     <% if can_delete %>
-      <%= nav_button(action: :delete, record: row, icon_only: true) %>
+      <%= nav_button(action: :delete_tagable, record: row, icon_only: true) %>
     <% end %>
   </td>
 </tr>

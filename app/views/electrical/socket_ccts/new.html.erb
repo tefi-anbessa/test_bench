@@ -1,8 +1,10 @@
 <% provide(:title, t('.title')) %>
 <% provide(:header, t('.header', scope_text: @discipline.long_label)) %>
 <% provide(:button_text, t('actions.create')) %>
-<%= render "form",
+<% partial = File.join(@socket_cct.model_name.collection, "form") %>
+<%= render partial,
   socket_cct: @socket_cct,
+  parent: @parent,
   tag: @tag,
   discipline: @discipline,
   swatch: @swatch

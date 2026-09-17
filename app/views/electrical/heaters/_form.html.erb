@@ -13,11 +13,8 @@
     </div>
 
     <%= bootstrap_form_with(model: heater,
-          url: heater.persisted? ?
-            heater : 
-            ( tag.persisted? ?
-              tag_electrical_heaters_path(tag) :
-              discipline_electrical_heaters_path(discipline) ),
+          url: polymorphic_path([parent, :tagable]),
+          local: true,
           layout: :horizontal,
           label_col: "col-sm-4",
           control_col: "col-sm-8",
@@ -29,16 +26,19 @@
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">        <!-- Adjust to fit requirements -->
 
             <!-- Tag -->
-            <div class="card mb-1">
+            <% if tag.persisted? %>
+              <%= render'tags/tag', tag: tag, swatch: swatch %>
+            <% else %>
               <%= f.fields_for tag do |tag_f| %>
                 <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
               <% end %>
-            </div>
+            <% end %>
+            <%= hidden_field_tag :tagable_type, tag.tagable_type %>
 
             <!-- Heater Details -->
             <div class="card mb-1" style="<%= card_styles(swatch) %>">
               <div class="card-header p-2" style="<%= card_header_styles(swatch) %>">
-                <h5><%= t('activerecord.models.electrical/heater.one') %></h5>
+                <h6><%= yield(:header) %></h6>
               </div>
 
               <div class="card-body p-2" style="<%= form_styles(swatch) %>">
@@ -58,7 +58,7 @@
 
             <!-- Card Footer with Actions -->
             <div class="card-footer bg-transparent text-end p-2">
-              <%= link_to(heater.persisted? ? heater : discipline_electrical_heaters_path(@discipline),
+              <%= link_to(heater.persisted? ? tag_tagable_path(tag) : discipline_tagables_path(discipline, tagable_type: 'Electrical::Heater'),
                     class: 'btn btn-warning',
                     data: { confirm: t('actions.sure'), turbo: false }) do %>
                 <%= t('actions.discard') %>

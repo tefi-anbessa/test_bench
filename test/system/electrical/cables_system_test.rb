@@ -67,8 +67,8 @@ module Electrical
       ApplicationController.any_instance.stubs(:current_project).returns(@project)
       
       # Navigate to the cable edit page
-      visit edit_electrical_cable_path(@resource)
-      
+      visit edit_tag_tagable_path(@resource.tag)
+
       edit_resource_form_assertions
 
       find('#electrical_cable_from_type').select(I18n.t('activerecord.models.electrical/circuit.one'))
@@ -82,7 +82,7 @@ module Electrical
       @resource.reload
       assert_equal circuit, @resource.from
       assert_equal motor_load, @resource.to
-      assert_current_path electrical_cable_path(@resource)
+      assert_current_path tag_tagable_path(@resource.tag)
       collapsible_assertions(@resource, :from, header: :association)
       collapsible_assertions(@resource, :to, header: :association)
     end

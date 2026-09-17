@@ -5,9 +5,14 @@ module Electrical
   class MotorsControllerTest < ActionController::TestCase
     include TagableControllerTests
     include Devise::Test::ControllerHelpers
+    tests TagablesController
+
+    def tagable_type
+      "Electrical::Motor"
+    end
 
     setup do
-      setup_controller_test
+      setup_tagables_controller_test
       setup_model_specific_data
     end
 

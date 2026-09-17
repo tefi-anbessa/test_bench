@@ -47,6 +47,8 @@ class TagablesController < ApplicationController
       set_variables_from_params
       authorize @tag
       @tagable = @tag.build_tagable
+      # From resource class, extend the controller with model specific requirements
+      extend_tagable
       setup_form
       render template: "#{@resource_class.model_name.collection}/new"
     end
@@ -112,6 +114,8 @@ class TagablesController < ApplicationController
     # GET    (/:locale)/tags/:tag_id/tagable/edit
     def edit
       authorize @tag
+      # From resource class, extend the controller with model specific requirements
+      extend_tagable
       setup_form
       render template: "#{@resource_class.model_name.collection}/edit"
     end

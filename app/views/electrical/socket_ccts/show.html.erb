@@ -9,11 +9,11 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@socket_cct).index? %>
-              <%= nav_button(action: :index, path: discipline_electrical_socket_ccts_path(@discipline), record: @socket_cct) %>
+              <%= nav_button(action: :index_discipline, path: discipline_tagables_path(@discipline, tagable_type: "Electrical::SocketCct"), record: @socket_cct) %>
             <% end %>
 
             <!-- Previous Button -->
-            <%= nav_button(action: :previous, record: @neighbours[0]) %>
+            <%= nav_button(action: :previous_tagable, record: @neighbours[0]) %>
           </div> <!-- end d-flex align-items-center -->
         </div> <!-- end left column -->
 
@@ -33,20 +33,21 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <%= nav_button(action: :next, record: @neighbours[1]) %>
+            <%= nav_button(action: :next_tagable, record: @neighbours[1]) %>
 
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
               <% if policy(@socket_cct).edit? %>
-                <%= nav_button(action: :edit, path: edit_electrical_socket_cct_path(@socket_cct), record: @socket_cct) %>
+                <%= nav_button(action: :edit_tagable, path: edit_tag_tagable_path(@tag), record: @socket_cct) %>
               <% end %>
 
               <% if policy(@socket_cct).destroy? %>
-                <%= nav_button(action: :delete, record: @socket_cct) %>
+                <%= nav_button(action: :delete, path: tag_tagable_path(@tag), record: @socket_cct) %>
               <% end %>
 
               <% if policy(@socket_cct).new? %>
-                <%= nav_button(action: :new, path: new_discipline_electrical_socket_cct_path(@discipline), record: @socket_cct) %>
+                <%= nav_button(action: :new, path: new_discipline_tagable_path(@discipline.id, tagable_type: "Electrical::SocketCct"),
+                  record: Electrical::SocketCct.new) %>
               <% end %>
             </div> <!-- end button group -->
           </div> <!-- end d-flex -->

@@ -1,11 +1,11 @@
 <% provide(:title, t('.title')) %>
 <% provide(:header, t('.header', label: @heater.long_label)) %>
 <% provide(:button_text, t('actions.update')) %>
-<%= render "form",
+<% partial = File.join(@heater.model_name.collection, "form") %>
+<%= render partial,
   heater: @heater,
   discipline: @discipline,
   tag: @tag,
-  ip_1: @ip_1,
-  ip_2: @ip_2,
+  parent: @tag,
   swatch: @swatch
 %>

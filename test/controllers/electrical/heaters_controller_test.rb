@@ -6,9 +6,14 @@ module Electrical
   class HeatersControllerTest < ActionController::TestCase
     include TagableControllerTests
     include Devise::Test::ControllerHelpers
+    tests TagablesController
+
+    def tagable_type
+      "Electrical::Heater"
+    end
 
     setup do
-      setup_controller_test
+      setup_tagables_controller_test
       setup_model_specific_data
     end
 
