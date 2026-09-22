@@ -201,47 +201,48 @@ module ProjectAssistant
          
     def update_constants
       # Update module constants with enum definitions
-      constants_file = @namespaced ? "#{class_path[0]}.yml" : "core.yml"
-      constants_file = Pathname.new(File.join(destination_root, "config", "constants", constants_file))
-      if File.exist?(constants_file)
-        content = File.read(constants_file)
-        
-        # Add the model key
-        if @namespaced
-          module_key = "#{class_path.last}:"
-          # Find the module key and capture its indentation
-          insertion_pattern = /^(\s*)(#{module_key})/
-          model_key = "#{singular_name}:"
-          
-          # Insert after the module key
-          if content.match?(insertion_pattern)
-            content.sub!(insertion_pattern) do
-              # $1 is the captured indentation, $2 is the module key
-              "\n#{$1}#{$2}#{$1}#{model_key}"
+      if @enum_fields.any?
+        constants_file = @namespaced ? "#{class_path[0]}.yml" : "core.yml"
+        constants_file = Pathname.new(File.join(destination_root, "config", "constants", constants_file))
+        if File.exist?(constants_file)
+          content = File.read(constants_file)
+          tab = "  "
+          insertion_text = "#{singular_name}:\n"
+          @enum_fields.each do |field|
+            field_name = field[:name]
+            field_indent = tab * (1 + class_path.count)
+            insertion_text += "#{field_indent}#{field_name}:\n"
+            if field[:options][:keys].any?
+              field[:options][:keys].each_with_index do |key, index|
+                insertion_text += "#{field_indent}#{tab}#{key}: #{index}\n"
+              end
+            end
+          end
+
+          if @namespaced
+            module_key = "#{class_path.last}:"
+            # Find the module key and capture its indentation
+            insertion_pattern = /^(\s*)(#{module_key})/
+            # Insert after the module key
+            if content.match?(insertion_pattern)
+              content.sub!(insertion_pattern) do
+                # $1 is the captured indentation, $2 is the module key
+                "#{$1}#{$2}\n#{$1}#{tab}#{insertion_text}"
+              end
+            else
+              say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Could not find module key #{module_key}", :red
+              return
             end
           else
-            say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Could not find module key #{module_key}", :red
-            return
+            # Non-namespaced case - add at root level
+            content += "\n#{insertion_text}"
           end
+
+          File.write(constants_file, content) unless options[:pretend]
+          say_status :update, "#{constants_file.relative_path_from(Rails.root)}: Added #{singular_name} key", :green
         else
-          # Non-namespaced case - add at root level
-          model_key = "\n#{singular_name}:"
-          content += "#{model_key}\n"
+          say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Not found", :red
         end
-        
-        # Add enum fields if they exist
-        enum_fields = @fields.select { |field| field[:type] == 'enum' || field[:type] == 'enum_translated' }
-        enum_fields.each do |field|
-          field_name = field[:name]
-          field_indent = " " * ((class_path.count) * 2)
-          content += "#{field_indent}#{field_name}:\n"
-          content += "#{field_indent}  #{field_name}_other: 0  # TODO: Add enum values\n"
-        end
-        
-        File.write(constants_file, content) unless options[:pretend]
-        say_status :update, "#{constants_file.relative_path_from(Rails.root)}: Added #{singular_name} key", :green
-      else
-        say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Not found", :red
       end
     end
 

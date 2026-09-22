@@ -41,6 +41,11 @@ module ProjectAssistant
   end
       RUBY
       
+      # Create clean core.yml constants file
+      File.write(File.join(destination_root, 'config', 'constants', 'core.yml'), <<~YAML)
+nr: "Not Required"
+        YAML
+      
       # Create clean tagable.yml
       File.write(File.join(destination_root, 'config', 'constants', 'tagable.yml'), <<~YAML)
         tagable:
@@ -728,36 +733,47 @@ module ProjectAssistant
         # Reset the namedbase substitutes
         name_setup_for_test
         run_generator [@class_name, *@args, "--nesting=#{nesting}"]
-        system_test_file = File.join(destination_root, 'test', 'system', folder, 
-        "#{@plural_name}_system_test.rb")
-        assert_file system_test_file do |content|
-          test_assertions_system_test(content, nesting)
+        routes_file = File.join(destination_root, "config", "routes.rb")
+        assert_file routes_file do |content|
+          assert_match(/resources\s+:#{@plural_name}/, content)
         end
-      end
-      routes_file = File.join(destination_root, "config", "routes.rb")
-      
-      # Run the generator
-      run_generator @args
-      
-      # Check that the routes file was updated
-      assert_file routes_file do |content|        
-        # Check that the new resource lines were added to routes file
-        # TODO extend the regexp to match the correct location for each line.
-        assert_match(/resources\s+:#{@plural_name}/, content)
       end
     end
 
     test "adds enum constants" do
-      run_generator(@args)
-      constants_file = File.join(destination_root, 'config', 'constants', "#{module_name.underscore}.yml") 
-      assert_file constants_file do |content|
-        assert_match(/#{@singular_name}:/, content)
-        # Check that enum fields are added with namespaced structure
-        enum_fields = @fields.select { |f| ['enum', 'enum_translated'].include?(f[:type]) }
-        if enum_fields.any?
-          assert_match(/#{@singular_name}:\s*\n/, content)
-          enum_fields.each do |f|
-            assert_match(/#{f[:name]}:\s*\n\s+#{f[:name]}_other: 0.*?# TODO: Add enum values/m, content)
+      original_class_name = @class_name
+      original_model_class_name = @model_class_name
+      @nesting_options.each do |nesting|
+        # Namespaced policy: Set class name with namespace module
+        @class_name = original_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        constants_file = File.join(destination_root, 'config', 'constants', "#{module_name.underscore}.yml") 
+        assert_file constants_file do |content|
+          assert_includes content, "#{@singular_name}:"
+          @enum_fields.each do |f|
+            assert_includes content, "#{f[:name]}:"
+            f[:options][:keys].each_with_index do |key, index|
+              assert_includes content, "#{key}: #{index}"
+            end
+          end
+        end
+      end
+      # Core controller: Set class name without namespace module
+      @nesting_options.excluding(:tagable).each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        constants_file = File.join(destination_root, 'config', 'constants', "core.yml")
+        assert_file constants_file do |content|
+          assert_includes content, "#{@singular_name}:"
+          @enum_fields.each do |f|
+            assert_includes content, "#{f[:name]}:"
+            f[:options][:keys].each_with_index do |key, index|
+              assert_includes content, "#{key}: #{index}"
+            end
           end
         end
       end
