@@ -73,7 +73,7 @@
         <!-- Feeder -->
         <div class="col-md-2">
           <% if circuit.feeder.present? && policy(circuit.feeder).show? %>
-            <%= link_to circuit.feeder.label, circuit.feeder %>
+            <%= link_to circuit.feeder.label, tagable_or_record_path(circuit.feeder) %>
           <% else %>
             <%= t("index.unassigned") %>
           <% end %>

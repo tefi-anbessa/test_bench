@@ -99,10 +99,10 @@ module NavigationHelper
   def nav_button(action:, path: nil, record: nil, icon_only: false)
     config = ACTION_CONFIG[action] || {}
 
-    path ||= 
+    path ||=
       case action
       when :show, :show_project, :show_discipline, :show_tag, :show_document, :down, :up, :previous, :next, :delete, :index_link
-        record
+        tagable_or_record_path(record)
       when :edit
         edit_polymorphic_path(record)
       when :show_tagable, :delete_tagable, :previous_tagable, :next_tagable
@@ -223,6 +223,18 @@ module NavigationHelper
     end
   end
 
+  # Resolves the link target for a record that may be a tagable. Tagable models
+  # (switchboard, cable, heater, motor, light_cct, socket_cct, ...) have no route
+  # of their own - they are only reachable nested under their tag - so a plain
+  # polymorphic_path(record) would resolve to a route that no longer exists.
+  # Non-tagable records (swatches, disciplines, demands, circuits, ...) are
+  # returned unchanged for normal polymorphic_path resolution.
+  def tagable_or_record_path(record)
+    return record unless record.present? && record.class.respond_to?(:name) &&
+      Tag.safe_tagable_types.include?(record.class.name)
+    tag_tagable_path(record.tag)
+  end
+
   def button_face(icon, label, icon_only = false)
     if icon_only
       bs_icon(icon)
@@ -249,7 +261,7 @@ module NavigationHelper
 
     if record.present?
       content_tag(:div, class: "row mb-1") do
-        link_to polymorphic_path(record),
+        link_to tagable_or_record_path(record),
           class: classes,
           aria: { label: text },
           title: text do
@@ -279,11 +291,11 @@ module NavigationHelper
     when :show, :previous, :next, :show_tag, :show_document
       label = record&.try(:label)
       help_text = label
-      path = record
+      path = tagable_or_record_path(record)
     when :up, :down
       label = I18n.t("activerecord.models.#{record&.model_name.i18n_key}.one", default: action.to_s)
       help_text = [I18n.t("actions.#{action}", default: action.to_s), label].join(" ")
-      path = record
+      path = tagable_or_record_path(record)
     when :show_discipline
       label = record&.try(name)
       help_text = [I18n.t("actions.#{action}", default: action.to_s.capitalize), label].join(": ")

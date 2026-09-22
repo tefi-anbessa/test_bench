@@ -167,35 +167,29 @@ module ProjectAssistant
     end
     
     def edit_routes_file
+      # Tagable models all share the single unified tagable route set
+      if @nesting == :tagable
+        say_status :info, "Skipping routes.rb - tagable models use the shared tagable routes.", :green
+        return
+      end
       # Update config/routes.rb
       tab = "  "
       routes_file = Pathname.new(File.join(destination_root, "config", "routes.rb"))
       if File.exist?(routes_file)
         content = File.read(routes_file)
-        
-        if @namespaced
-          # Find the insertion point
-          insertion_pattern = /^(\s*)(namespace\s+:#{class_path.last}\s+do)$/
-          if content.match?(insertion_pattern)
-            content.sub!(insertion_pattern) do
-              # $1 is the captured indentation, $2 is the namespace line
-              "#{$1}#{$2}\n#{$1}#{tab}resources :#{plural_name}\n"
-            end
-          else
-            say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Could not find namespace for #{class_path.last}", :red
-            return
+        if @nesting == :none
+          insertion_pattern = /^(\s*)(# Insertion point for non-nested routes)$/
+        else
+          insertion_pattern = /^(\s*)(end # #{@nesting.to_s} nested routes)$/
+        end
+        if content.match?(insertion_pattern)
+          content.sub!(insertion_pattern) do
+            # $1 is the captured indentation, $2 is the end comment line
+            "#{$1}#{tab}resources :#{plural_name}\n#{$1}#{$2}"
           end
         else
-          # Non-namespaced case - insert before root path route
-        insertion_pattern = /# Insertion point for non-nested routes/
-          if content.match?(insertion_pattern)
-            content.sub!(root_pattern) do
-              "\n  resources :#{plural_name}\n\n#{$1}"
-            end
-          else
-            say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Could not find insertion point for non-nested routes", :red
-            return
-          end
+          say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Could not find routes section for #{@nesting.to_s}", :red
+          return
         end
         
         File.write(routes_file, content) unless options[:pretend]

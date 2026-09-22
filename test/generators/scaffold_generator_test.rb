@@ -24,13 +24,21 @@ module ProjectAssistant
       
       # Create clean routes.rb with insertion points
       File.write(File.join(destination_root, 'config', 'routes.rb'), <<~RUBY)
-        Rails.application.routes.draw do
-          # INSERTION POINT 1 FOR MODULE GENERATOR
-          
-          resources :tags, shallow: true do
-            # INSERTION POINT 2 FOR MODULE GENERATOR
-          end
-        end
+  Rails.application.routes.draw do
+    resources :projects do
+      resources :disciplines
+    end # project nested routes
+    resources :disciplines, shallow: true, only: [] do
+      resources :tags
+    end # discipline nested routes
+    resources :tags, shallow: true, only: [] do
+    end # tag nested routes
+    resources :documents, shallow: true, only: [] do
+    end # document nested routes
+    resources :issues, shallow: true, only: [] do
+    end # issue nested routes
+    # Insertion point for non-nested routes
+  end
       RUBY
       
       # Create clean tagable.yml
@@ -693,6 +701,52 @@ module ProjectAssistant
       end
     end
 
+    test "updates routes file" do
+      original_class_name = @class_name
+      original_model_class_name = @model_class_name
+      @nesting_options.each do |nesting|
+        # Namespaced policy: Set class name with namespace module
+        @class_name = original_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        routes_file = File.join(destination_root, "config", "routes.rb")
+        assert_file routes_file do |content|
+          case nesting
+          when :tagable
+            refute_match(/resources\s+:#{@plural_name}/, content)
+          when :none
+            assert_match(/resources\s+:#{@plural_name}/, content)
+          else
+            assert_match(/resources\s+:#{@plural_name}/, content)
+          end
+        end
+      end
+      # Core controller: Set class name without namespace module
+      @nesting_options.excluding(:tagable).each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        system_test_file = File.join(destination_root, 'test', 'system', folder, 
+        "#{@plural_name}_system_test.rb")
+        assert_file system_test_file do |content|
+          test_assertions_system_test(content, nesting)
+        end
+      end
+      routes_file = File.join(destination_root, "config", "routes.rb")
+      
+      # Run the generator
+      run_generator @args
+      
+      # Check that the routes file was updated
+      assert_file routes_file do |content|        
+        # Check that the new resource lines were added to routes file
+        # TODO extend the regexp to match the correct location for each line.
+        assert_match(/resources\s+:#{@plural_name}/, content)
+      end
+    end
+
     test "adds enum constants" do
       run_generator(@args)
       constants_file = File.join(destination_root, 'config', 'constants', "#{module_name.underscore}.yml") 
@@ -706,20 +760,6 @@ module ProjectAssistant
             assert_match(/#{f[:name]}:\s*\n\s+#{f[:name]}_other: 0.*?# TODO: Add enum values/m, content)
           end
         end
-      end
-    end
-
-    test "updates routes file" do
-      routes_file = File.join(destination_root, "config", "routes.rb")
-      
-      # Run the generator
-      run_generator @args
-      
-      # Check that the routes file was updated
-      assert_file routes_file do |content|        
-        # Check that the new resource lines were added to routes file
-        # TODO extend the regexp to match the correct location for each line.
-        assert_match(/resources\s+:#{@plural_name}/, content)
       end
     end
 

@@ -338,18 +338,6 @@ module TagableControllerTests
       resource_class.model_name.param_key.to_sym
     end
 
-    def resource_path(resource)
-      # Use the underscored resource name for path helpers
-      # e.g., :electrical_cable -> :electrical_cable_path
-      path_helper = "#{resource.model_name.singular_route_key}_path"
-      send(path_helper, resource)
-    end
-
-    def resource_index_path
-      # Handle both namespaced and non-namespaced resources
-      send("discipline_#{resource_name.to_s.pluralize}_path", @discipline)
-    end
-
     def new_tag_params
       { tag: { discipline_id: @discipline.id, 
         prefix: 'TEST',
