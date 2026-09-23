@@ -9,11 +9,11 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@socket_cct).index? %>
-              <%= nav_button(action: :index, path: discipline_electrical_socket_ccts_path(@discipline), record: @socket_cct) %>
+              <%= nav_button(action: :index_discipline, path: discipline_tagables_path(@discipline, tagable_type: "Electrical::SocketCct"), record: @socket_cct) %>
             <% end %>
 
             <!-- Previous Button -->
-            <%= nav_button(action: :previous, record: @neighbours[0]) %>
+            <%= nav_button(action: :previous_tagable, record: @neighbours[0]) %>
           </div> <!-- end d-flex align-items-center -->
         </div> <!-- end left column -->
 
@@ -33,20 +33,21 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Next Button -->
-            <%= nav_button(action: :next, record: @neighbours[1]) %>
+            <%= nav_button(action: :next_tagable, record: @neighbours[1]) %>
 
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
               <% if policy(@socket_cct).edit? %>
-                <%= nav_button(action: :edit, path: edit_electrical_socket_cct_path(@socket_cct), record: @socket_cct) %>
+                <%= nav_button(action: :edit_tagable, path: edit_tag_tagable_path(@tag), record: @socket_cct) %>
               <% end %>
 
               <% if policy(@socket_cct).destroy? %>
-                <%= nav_button(action: :delete, path: electrical_socket_cct_path(@socket_cct), record: @socket_cct) %>
+                <%= nav_button(action: :delete, path: tag_tagable_path(@tag), record: @socket_cct) %>
               <% end %>
 
               <% if policy(@socket_cct).new? %>
-                <%= nav_button(action: :new, path: new_discipline_electrical_socket_cct_path(@discipline), record: @socket_cct) %>
+                <%= nav_button(action: :new, path: new_discipline_tagable_path(@discipline.id, tagable_type: "Electrical::SocketCct"),
+                  record: Electrical::SocketCct.new) %>
               <% end %>
             </div> <!-- end button group -->
           </div> <!-- end d-flex -->
@@ -63,21 +64,11 @@
             <div class="card-header py-1" style="<%= card_header_styles(@socket_cct.tag.discipline.swatch) %>">
               <h4 class="mb-0"><%= t('show.details', model: @socket_cct.model_name.human) %></h4>
             </div>
+
             <div class="card-body p-3" style="<%= card_styles(@socket_cct.tag.discipline.swatch) %>">
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/socket_cct.socket_type") %></div>
-                <div class="col-8"><%= Electrical::SocketCct.human_enum_name(:socket_type, @socket_cct.socket_type) %></div>
-              </div>
-
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/socket_cct.quantity") %></div>
-                <div class="col-8"><%= @socket_cct.quantity || '-' %></div>
-              </div>
-
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.electrical/socket_cct.notes") %></div>
-                <div class="col-8"><%= @socket_cct.notes || '-' %></div>
-              </div>
+              <%= show_attribute(@socket_cct, :socket_type, type: :enum_translated) %>
+              <%= show_attribute(@socket_cct, :quantity, type: :integer) %>
+              <%= show_attribute(@socket_cct, :notes, type: :text) %>
             </div>  <!-- temporary end inner card body -->
 
             <!-- Associations -->
@@ -87,12 +78,10 @@
 
             <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
               <!-- Demand -->
-              <%= render 'electrical/demands/show_insert', tag: @socket_cct.tag, demand: @socket_cct.electrical_demand %>
+              <%= render 'electrical/demands/show_insert', object: @socket_cct %>
               <!-- Tag Card -->
               <% if @socket_cct.tag.present? %>
-                <div class="row g-3 mb-3">
-                    <%= render 'tags/card', object: @socket_cct, association: :tag %>
-                </div>
+                <%= show_association(@socket_cct, :tag) %>
               <% else %>
                 <div class="row g-3 mb-3">
                   <div class="alert alert-danger">

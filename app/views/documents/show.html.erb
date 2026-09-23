@@ -65,20 +65,11 @@
             <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
               <h4 class="mb-0"><%= t('show.details', model: t("activerecord.models.document.one")) %></h4>
             </div>
+
             <div class="card-body">
-              
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.document.doc_number") %></div>
-                <div class="col-8"><%= @document.doc_number || '-' %></div>
-              </div> <!-- end row -->
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.document.title") %></div>
-                <div class="col-8"><%= @document.title || '-' %></div>
-              </div> <!-- end row -->
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.attributes.document.notes") %></div>
-                <div class="col-8"><%= simple_format(@document.notes || '-') %></div>
-              </div> <!-- end row -->
+              <%= show_attribute(@document, :doc_number) %>
+              <%= show_attribute(@document, :title) %>
+              <%= show_attribute(@document, :notes, type: :text) %>
             </div>  <!-- temporary end inner card body -->
 
             <!-- Document Associations -->
@@ -87,14 +78,8 @@
             </div>
 
             <div class="card-body p-3">
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.models.discipline.one") %></div>
-                <div class="col-8"><%= render "disciplines/card", object: @document.discipline %></div>
-              </div> <!-- end row -->
-              <div class="row mb-1">
-                <div class="col-4 text-muted"><%= t("activerecord.models.doc_type.one") %></div>
-                <div class="col-8"><%= render "doc_types/card", object: @document.doc_type %></div>
-              </div> <!-- end row -->
+              <%= show_association(@document, :discipline) %>
+              <%= show_association(@document, :doc_type) %>
               <div class="row mb-1">
                 <%= render "issues/issues", object: @document %>
               </div> <!-- end row -->

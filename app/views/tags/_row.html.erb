@@ -11,7 +11,7 @@
   </td>
   <td><%= row.service %></td>
   <td><%= row.location %></td>
-  <td><%= row.parent.present? ? link_to(row.parent.long_label, row.parent) : "-" %></td>
+  <td><%= row.parent.present? ? index_link(action: :show_tag, record: row.parent) : "-" %></td>
   <td><%= row.children.count %></td>
   <td>
     <%= render "tags/tagable_link", row: row, view: "index" %>

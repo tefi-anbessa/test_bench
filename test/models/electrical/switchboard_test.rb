@@ -12,27 +12,13 @@ module Electrical
       @circuit = create(:electrical_circuit, switchboard: @resource)
     end
 
+    test_required_fields(:voltage_rating, :busbar_rating)
+    test_enum_field(:voltage_rating, keys: [:other, :"300/500V", :"450/750V", :"600/1000V", :"1.9/3.3kV", :"3.3/6.6kV", :"6.6/11kV", :"11/33kV", :"33/66kV", :"66/132kV", :"132/220kV"])
+
     test "circuit setup must be valid" do
       assert @circuit.valid?
       assert_equal @resource.circuits.count, 1
       assert_equal @resource, @circuit.switchboard
-    end
-
-    test "voltage rating must be present" do
-      @resource.voltage_rating = nil
-      refute @resource.valid?
-      assert_includes @resource.errors[:voltage_rating], I18n.t("errors.messages.blank")
-    end
-
-    test "busbar rating must be present" do
-      @resource.busbar_rating = nil
-      refute @resource.valid?
-      assert_includes @resource.errors[:busbar_rating], I18n.t("errors.messages.blank")
-    end
-
-    test "switchboard label should be tag label" do
-      assert_equal @resource.label, @tag.label
-      assert_equal @resource.long_label, @tag.long_label
     end
 
     test "should create switchboard with custom tag attributes" do
@@ -57,12 +43,12 @@ module Electrical
 
       assert_difference 'Electrical::Switchboard.count', 1 do
         tag.update(tagable: create(:electrical_switchboard, tag: tag,
-          ingress_protection: '22'
+          ingress_protection: '44'
         ))
       end
 
       assert tag.tagable.class == Electrical::Switchboard
-      assert_equal '22', tag.tagable.ingress_protection
+      assert_equal '44', tag.tagable.ingress_protection
     end
 
     test "destroy switchboard should destroy associated circuits" do

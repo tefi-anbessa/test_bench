@@ -5,9 +5,14 @@
     <div class="card-header p-1" style="<%= card_header_styles(@swatch) %>">
       <div class="row align-items-center p-2">
 
-        <!-- Discipline link -->
+        <!-- Discipline and project links -->
         <div class="col-2">
+          <% if @discipline.present? %>
+            <%= nav_button(action: :show_project, record: @discipline.project) %>
             <%= nav_button(action: :show_discipline, record: @discipline) %>
+          <% elsif @project.present? %>
+            <%= nav_button(action: :show_project, record: @project) %>
+          <% end %>
         </div>
 
         <!-- Header Text (Left - 8 columns) -->

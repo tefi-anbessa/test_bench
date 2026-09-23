@@ -95,8 +95,8 @@ module Electrical
       # Mock current_project for this test
       ApplicationController.any_instance.stubs(:current_project).returns(@project)
 
-      visit new_discipline_resource_path(@discipline)
-      assert_current_path new_discipline_resource_path(@discipline)
+      visit new_discipline_tagable_path(@discipline, tagable_type: "Electrical::Switchboard")
+      assert_current_path new_discipline_tagable_path(@discipline, tagable_type: "Electrical::Switchboard")
 
       fill_in_tag_fields
       fill_in_resource_fields
@@ -110,7 +110,7 @@ module Electrical
         prefix: @saved_prefix, 
         serial: @saved_serial,
         suffix: @tag.suffix)
-      assert_current_path resource_path(new_tag.tagable)
+      assert_current_path tag_tagable_path(new_tag)
       assert_equal new_tag.tagable.class, resource_class
       assert_equal new_tag.tagable.circuits.count, 5
       

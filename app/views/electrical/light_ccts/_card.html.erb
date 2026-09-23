@@ -1,36 +1,19 @@
-<!-- Expects object and context (optional) to be passed in -->
+<!-- Light Circuit collapsible card -->
+<!-- Expecting 'object', 'context' and 'id' variables, passed from the shared/_association partial. -->
+<!-- The card uses the context name in the header and the id for the block (for testing). -->
 <% light_cct = object %>
 <% context ||= t("activerecord.models.electrical/light_cct.one") %>
 <%= render 'components/collapsible',
-  id: "light_cct_#{light_cct.id}_details",
+  id: "#{id}_#{light_cct.id}_details",
   title: [context, light_cct.long_label].join(': '),
   expanded: false,
   header_class: 'py-1' do %>
   
   <div class="container-fluid">
-    <div class="row mb-1">
-      <% text = t("actions.jump_to", model: t("activerecord.models.electrical/light_cct.one")) %>
-      <%= link_to light_cct, 
-          class: "btn btn-sm btn-outline-secondary me-2",
-          title: text do %>
-        <%== bs_icon('box-arrow-in-up-left') %>
-        <span class="d-none d-md-inline"><%= text %></span>
-      <% end %>
-    </div>
+    <%= nav_link(action: :show, record: light_cct) %>
 
-    <div class="row mb-1">
-      <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/light_cct.light_fitting_type') %></div>
-      <div class="col-8"><%= light_cct.class.human_enum_name(:light_fitting_type, light_cct.light_fitting_type) %></div>
-    </div>
-
-    <div class="row mb-1">
-      <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/light_cct.quantity') %></div>
-      <div class="col-8"><%= light_cct.quantity.present? ? light_cct.quantity : '-' %></div>
-    </div>
-    
-    <div class="row mb-1">
-      <div class="col-4 text-muted"><%= t('activerecord.attributes.electrical/light_cct.notes') %></div>
-      <div class="col-8"><%= simple_format(light_cct.notes) %></div>
-    </div>
-    </div>
+    <%= show_attribute(light_cct, :light_fitting_type, type: :enum_translated) %>
+    <%= show_attribute(light_cct, :quantity, type: :integer) %>
+    <%= show_attribute(light_cct, :notes, type: :text) %>
+  </div>
 <% end %>

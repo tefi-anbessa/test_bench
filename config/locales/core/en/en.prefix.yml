@@ -1,5 +1,6 @@
 en:
   prefix_schema:
+    non_conforming: "Prefix does not conform to %{schema} schema"
     key:
       custom: "Custom"
       default: "Default"
@@ -7,7 +8,8 @@ en:
       dim1: "1 Dimension"
       dim2: "2 Dimensions"
       alternate_inst: "Alternate ISA-5.1"
-    type:
+    type: "Schema Type"
+    types:
       default: "Default"
       isa51: "ISA-5.1"
       dim1: "1 Dimension"
@@ -22,6 +24,7 @@ en:
     schema_help: "TODO: help for schema editor"
   prefix:
     isa51:
+      measured_variable: "Measured Variable"
       measured_variables:
         'A': 'Analysis'
         'B': 'Burner, combustion'
@@ -49,6 +52,7 @@ en:
         'X': 'Unclassified'
         'Y': 'Event, state or presence'
         'Z': 'Position, dimension'
+      modifier: "Modifier"
       modifiers:
         'D': 'Differential'
         'F': 'Ration (fraction)'
@@ -60,6 +64,8 @@ en:
         'X': 'X-axis'
         'Y': 'Y-axis'
         'Z': 'Z-axis'
+      function: "Function"
+      readout_function: "Readout Function"
       readout_functions:
         'A': 'Alarm'
         'B': 'User''s choice'
@@ -74,6 +80,7 @@ en:
         'U': 'Multifunction'
         'W': 'Well'
         'X': 'Unclassified'
+      output_function: "Output Function"
       output_functions:
         'B': 'User''s choice'
         'C': 'Control'
@@ -86,6 +93,7 @@ en:
         'X': 'Unclassified'
         'Y': 'Relay, compute, convert'
         'Z': 'Driver, actuator'
+      modifier_function: "Modifier Function"
       modifier_functions:
         'B': 'User''s choice'
         'H': 'High'
@@ -96,7 +104,31 @@ en:
         'N': 'User''s choice'
         'U': 'Multifunction'
         'X': 'Unclassified'
+
     dim1:
+      prefix: "Prefix Selection"
+      prefixes:
+        'A': 'Package'
+        'B': 'Building'
+        'EC': Electrical Cable
+        "EL": "Light Circuit"
+        "EM": "Motor"
+        "ES": "Socket Circuit"
+        "EX": "Switchboard"
     dim2:
-      1:
-      2:
+      part1: "First Part"
+      part1s:
+        'X': Switch
+        'J': Junction
+        'P': Power
+        'C': Control
+
+      part2: "Second Part"
+      part2s:
+        'B': Box
+        'C': Cable
+        'M': Motor
+        'G': Generator
+    default:
+      prefix: "Free form prefix"
+      

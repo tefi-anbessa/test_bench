@@ -4,12 +4,12 @@
   <%% end %>
   <th scope="col"><%%= sort_link(@q, :tag_stage) %></th>
   <th scope="col"><%%= sort_link(@q, :tag) %></th>
-<%- @fields.select { |field| INDEX_TYPES.include?(field[:type]) }.each do |field| -%>
-  <%- case field[:type] %>
-    <%- when :belongs_to, :references %>
-  <th scope="col"><%%= sort_link(@q, <%= ":#{field[:name]}", t("activerecord.models.#{field[:name]}") %>) %></th>
+<%- @index_fields.each do |field| -%>
+  <%- case field[:type] -%>
+    <%- when :belongs_to, :references -%>
+  <th scope="col"><%%= sort_link(@q, :<%= field[:name] %>, t("activerecord.models.<%= field[:name] %>.one")) %></th>
     <%- else %>
-  <th scope="col"><%%= sort_link(@q, <%= ":#{field[:name]}", t("activerecord.attributes.#{i18n_scope}.#{field[:name]}") %>) %></th>
+  <th scope="col"><%%= sort_link(@q, :<%= field[:name] %>, t("activerecord.attributes.<%= i18n_scope %>.<%= field[:name] %>")) %></th>
     <%- end %>
   <%- end -%>
   <th scope="col" width="150px"><%%= t('table.links')%></th>

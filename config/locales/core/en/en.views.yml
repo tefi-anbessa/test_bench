@@ -53,8 +53,11 @@ en:
       tagable_not_set: "The tag has no object to assign the load"
       tag_not_demandable: "The tag type is not an electric load"
       out_of_scope: "The item requested is not in the current project scope"
+      invalid_assignment: "The record is not valid for the assignment"
       record_is_orphan: "The item requested does not have a valid parent"
       already_assigned: "This item is already assigned to another object"
+      missing_param: "The request is missing a required parameter"
+      invalid_type: "Invalid type"
   projects:
     index:
       title:            "Projects"
@@ -82,13 +85,13 @@ en:
       header:           "Disciplines for %{scope_text}"
     new:
       title:            "New Discipline"
-      header:           "New Discipline"
+      header:           "New Discipline in %{scope_text}"
     show:
       title:            "Discipline"
       header:           "Discipline %{label}"
     edit:
       title:            "Edit Discipline"
-      header:           "Edit Discipline %{label}"
+      header:           "Edit Discipline %{label} in %{scope_text}"
   tags:
     index:
       title:            "Tags"

@@ -6,11 +6,11 @@
   <td style="<%= form_field_styles(row) %>"><%= row.form_field || '-' %></td>
   <td style="<%= card_styles(row) %>"><%= row.card_bg || '-' %></td>
   <td style="<%= card_header_styles(row) %>"><%= row.card_header_bg || '-' %></td>
-  <td style="background-color: <%= row.card_border %>"><%= row.card_border || '-' %></td>
+  <td style="background-color: <%= row.card_bg %>; color: <%= row.card_border %>"><%= row.card_border || '-' %></td>
   <td style="<%= badge_styles(row) %>"><%= row.badge_bg || '-' %></td>
   <td style="<%= badge_styles(row) %>"><%= row.badge_text || '-' %></td>
-  <td style="<%= link_styles(row) %>"><%= row.link_text || '-' %></td>
-  <td style="<%= link_hover_styles(row) %>"><%= row.link_hover || '-' %></td>
+  <td style="background-color: <%= row.bg %>; color: <%= row.link_text %>"><%= row.link_text || '-' %></td>
+  <td style="background-color: <%= row.bg %>; color: <%= row.link_hover %>"><%= row.link_hover || '-' %></td>
   <td>
     <% if policy(row).show? %>
       <%= nav_button(action: :show, record: row, icon_only: true) %>

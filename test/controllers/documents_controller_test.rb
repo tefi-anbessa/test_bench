@@ -6,6 +6,7 @@ class DocumentsControllerTest < ActionController::TestCase
   include ControllerTestHelper
 
   setup do
+    @nesting = :discipline
     # setup_controller_test
     # Cannot use standard setup because Document class has no module to define discipline
     setup_projects_and_users
@@ -24,16 +25,6 @@ class DocumentsControllerTest < ActionController::TestCase
   end
 
   private
-
-    # Required for nested routes
-    def new_nesting_params
-      { discipline_id: @discipline.id }
-    end
-
-    # Required for nested routes
-    def index_nesting_params
-      new_nesting_params
-    end
   
     # Set the expected params for a valid create
     def create_params

@@ -2,7 +2,8 @@
 <% provide(:header, t('.header', discipline: @discipline.code)) %>
 <% provide(:button_text, t('actions.create')) %>
 <%= render 'form', 
-          tag: @tag,
-          project: @project,
-          projects: @projects,
-          disciplines: @disciplines %>
+      tag: @tag,
+      discipline: @discipline,
+      schema: @schema,
+      parts: @parts,
+      parents: @parents %>

@@ -22,28 +22,11 @@
 
         <div class="row justify-content-center">
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-
-            <%= f.text_field :code,
-                  placeholder: t('activerecord.attributes.project.code'),
-                  help: t('activerecord.help.project.code') %>
-
-            <%= f.text_field :title,
-                  placeholder: t('activerecord.attributes.project.title'),
-                  help: t('activerecord.help.project.title') %>
-
-            <%= f.text_area :description,
-                  placeholder: t('activerecord.attributes.project.description'),
-                  rows: 3 %>
-
-            <!-- colour swatch -->
-            <div class="row">
-              <%= f.select :swatch_id,
-                options_for_select(
-                  @swatches.map { |s| [s.name, s.id] },
-                  @project.swatch_id
-                ),
-                { class: 'form-select' } %>
-            </div>
+            <%= form_field(f, :code) %>
+            <%= form_field(f, :title) %>
+            <%= form_field(f, :description, type: :text) %>
+            <% collection = options_for_select(@swatches.map { |s| [s.name, s.id] }, @project.swatch_id) %>
+            <%= form_field(f, :swatch_id, type: :select, collection: collection) %>
           </div>
         </div>
       </div>

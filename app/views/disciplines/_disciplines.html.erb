@@ -15,7 +15,7 @@
       <div class="row align-items-center py-2 border-bottom">
         <!-- Discipline Name Column -->
         <div class="col-md-4">
-          <% name = I18n.exists?("discipline.name.#{discipline.name}") ? t("discipline.name.#{discipline.name}") : discipline.name %>
+          <% name = t("discipline.name.#{discipline.name}", default: discipline.name) %>
           <% text = [discipline.code, name].join(": ") %>
           <%= link_to discipline,
               id: "discipline-#{discipline.id}",

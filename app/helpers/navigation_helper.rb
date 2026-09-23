@@ -6,7 +6,15 @@ module NavigationHelper
       bs_color: "danger",
       bs_icon: "trash"
     },
+    delete_tagable: {
+      bs_color: "danger",
+      bs_icon: "trash"
+    },
     edit: {
+      bs_color: "warning",
+      bs_icon: "pencil-square"
+    },
+    edit_tagable: {
       bs_color: "warning",
       bs_icon: "pencil-square"
     },
@@ -14,7 +22,15 @@ module NavigationHelper
       bs_color: "primary",
       bs_icon: "plus-square-fill"
     },
+    link: {
+      bs_color: "primary",
+      bs_icon: "link"
+    },
     show: {
+      bs_color: "info",
+      bs_icon: "eye"
+    },
+    show_tagable: {
       bs_color: "info",
       bs_icon: "eye"
     },
@@ -26,13 +42,41 @@ module NavigationHelper
       bs_color: "info",
       bs_icon: "collection"
     },
+    show_tag: {
+      bs_color: "info",
+      bs_icon: "tag"
+    },
+    show_document: {
+      bs_color: "info",
+      bs_icon: "file"
+    },
     previous: {
+      bs_color: "secondary",
+      bs_icon: "box-arrow-in-left"
+    },
+    previous_tagable: {
       bs_color: "secondary",
       bs_icon: "box-arrow-in-left"
     },
     next: {
       bs_color: "secondary",
       bs_icon: "box-arrow-in-right"
+    },
+    next_tagable: {
+      bs_color: "secondary",
+      bs_icon: "box-arrow-in-right"
+    },
+    down: {
+      bs_color: "info",
+      bs_icon: "box-arrow-in-down-right"
+    },
+    up: {
+      bs_color: "info",
+      bs_icon: "box-arrow-in-up-left"
+    },
+    index_link: {
+      bs_color: "info",
+      bs_icon: "eye"
     },
     index: {
       bs_color: "info",
@@ -45,17 +89,26 @@ module NavigationHelper
     index_discipline: {
       bs_color: "info",
       bs_icon: "collection"
+    },
+    children: {
+      bs_color: "info",
+      bs_icon: "diagram-3-fill"
     }
-}.freeze
+  }.freeze
 
   def nav_button(action:, path: nil, record: nil, icon_only: false)
     config = ACTION_CONFIG[action] || {}
 
-    # :show, :previous, :next, :delete use record as path
-    path = 
+    path ||=
       case action
-      when :show, :show_project, :show_discipline, :previous, :next, :delete
-        record
+      when :show, :show_project, :show_discipline, :show_tag, :show_document, :down, :up, :previous, :next, :delete, :index_link
+        tagable_or_record_path(record)
+      when :edit
+        edit_polymorphic_path(record)
+      when :show_tagable, :delete_tagable, :previous_tagable, :next_tagable
+        record.present? ? tag_tagable_path(record.tag) : nil
+      when :edit_tagable
+        record.present? ? edit_tag_tagable_path(record.tag) : nil
       else
         path
       end
@@ -65,33 +118,52 @@ module NavigationHelper
       when :new
         [I18n.t("actions.new"),
         record.present? ? I18n.t("activerecord.models.#{record.model_name.i18n_key}.one") : ''].join(" ")
+      when :link
+        I18n.t("actions.link", resource: record.present? ? 
+        I18n.t("activerecord.models.#{record.model_name.i18n_key}.one", default: record.model_name.human) : 
+        I18n.t("show.resource"))
       when :edit
         I18n.t("actions.edit")
-      when :delete
+      when :delete, :delete_tagable
         I18n.t("actions.delete")
       when :previous, :next, :show, :index
         I18n.t("actions.#{action}")
+      when :show_tagable, :edit_tagable, :previous_tagable, :next_tagable
+        I18n.t("actions.#{action.to_s.sub('_tagable', '')}")
+      when :up, :down
+        I18n.t("actions.#{action}", model: record.present? ? 
+        I18n.t("activerecord.models.#{record.model_name.i18n_key}.one", default: record.model_name.human) : 
+        I18n.t("show.resource"))
+      when :index_link
+        record.try(:label)
       when :index_discipline
-        record.discipline.name
+        [record.discipline.label, I18n.t("actions.index")].join (" ")
+      when :index_project
+        [record.project.label, I18n.t("actions.index")].join (" ")
       when :show_discipline
         record.name
-      when :index_project
-        record.project.code
       when :show_project
-        record.code
+        record.label
       end
 
     help_text =
       case action
       when :index, :index_discipline, :index_project
         [record.present? ? I18n.t("activerecord.models.#{record.model_name.i18n_key}.other") : '', I18n.t("actions.index")].join(" ")
+      when :index_link
+        [I18n.t("actions.show"), label].join(" ")
       when :show_project
         [I18n.t("actions.show"), record.code].join(" ")
       when :show_discipline
         [I18n.t("actions.show"), record.name].join(" ")
+      when :show_tagable, :edit_tagable, :delete_tagable, :previous_tagable, :next_tagable
+        record.present? ? 
+          [I18n.t("actions.#{action.to_s.sub('_tagable', '')}"), record&.class.model_name.human].join(" ") :
+          I18n.t("actions.#{action.to_s.sub('_tagable', '')}")
+
       else
         if record
-          [label, record.try(:label)].compact.join(": ")
+          [label, record.try(:label)].compact.join(" ")
         else
           label
         end
@@ -113,6 +185,7 @@ module NavigationHelper
                       bs_color:, bs_icon:, icon_only:, bs_size:)
     disabled = path.nil?
     classes = [
+      "mb-1",
       "btn",
       "btn-#{bs_size}",
       "btn-outline-#{bs_color}",
@@ -130,7 +203,7 @@ module NavigationHelper
         end
     end
     case action
-    when :delete
+    when :delete, :delete_tagable
       button_to path,
         method: :delete,
         class: classes,
@@ -150,6 +223,18 @@ module NavigationHelper
     end
   end
 
+  # Resolves the link target for a record that may be a tagable. Tagable models
+  # (switchboard, cable, heater, motor, light_cct, socket_cct, ...) have no route
+  # of their own - they are only reachable nested under their tag - so a plain
+  # polymorphic_path(record) would resolve to a route that no longer exists.
+  # Non-tagable records (swatches, disciplines, demands, circuits, ...) are
+  # returned unchanged for normal polymorphic_path resolution.
+  def tagable_or_record_path(record)
+    return record unless record.present? && record.class.respond_to?(:name) &&
+      Tag.safe_tagable_types.include?(record.class.name)
+    tag_tagable_path(record.tag)
+  end
+
   def button_face(icon, label, icon_only = false)
     if icon_only
       bs_icon(icon)
@@ -158,6 +243,115 @@ module NavigationHelper
         bs_icon(icon),
         content_tag(:span, label, class: "d-none d-lg-inline ms-1")
       ])
+    end
+  end
+
+  # Use nav_link for show links only, no content actions. Returns nothing for nil record.
+  def nav_link(action:, record: nil, icon_only: false, **opts)
+    config = ACTION_CONFIG[action] || {}
+    text = record.present? ?
+      [t("actions.jump_to", model: record&.model_name.human), record.label].join(": ") :
+      t("index.unassigned")
+    classes = [
+      "btn",
+      "btn-sm",
+      "btn-outline-#{config[:bs_color]}",
+      ("icon-link" if icon_only)
+    ].compact.join(" ")
+
+    if record.present?
+      content_tag(:div, class: "row mb-1") do
+        link_to tagable_or_record_path(record),
+          class: classes,
+          aria: { label: text },
+          title: text do
+            button_face(config[:bs_icon], text, icon_only)
+          end
+      end
+    end
+  end
+
+  # Use index_link for links from index views. The helper shows a minimal label outside the icon button for compactness.
+  def index_link(action:, path: nil, record: nil, **opts)
+    config = ACTION_CONFIG[action] || {}
+    
+    case action
+    when :new, :link
+      label =
+          record.present? ? 
+          I18n.t("activerecord.models.#{record.model_name.i18n_key}.one") : 
+          I18n.t("show.resource")
+      help_text = [I18n.t("actions.#{action}", default: action.to_s), label].join(" ")
+    when :edit
+      label = [I18n.t("actions.edit"), record&.try(:label)].join(" ")
+      help_text = label
+    when :delete
+      label = [I18n.t("actions.delete"), record&.try(:label)].join(" ")
+      help_text = label
+    when :show, :previous, :next, :show_tag, :show_document
+      label = record&.try(:label)
+      help_text = label
+      path = tagable_or_record_path(record)
+    when :up, :down
+      label = I18n.t("activerecord.models.#{record&.model_name.i18n_key}.one", default: action.to_s)
+      help_text = [I18n.t("actions.#{action}", default: action.to_s), label].join(" ")
+      path = tagable_or_record_path(record)
+    when :show_discipline
+      label = record&.try(name)
+      help_text = [I18n.t("actions.#{action}", default: action.to_s.capitalize), label].join(": ")
+      path = record
+    when :show_project
+      label = record&.try(code)
+      help_text = [I18n.t("actions.#{action}", default: action.to_s.capitalize), label].join(": ")
+      path = record
+    when :children
+      label = opts[:count]
+      help_text = [I18n.t("actions.#{action}", default: action.to_s.capitalize), label].join(": ")
+    else
+      label = record&.try(:label)
+      help_text = label
+    end
+
+    if path.present?
+      index_link_html(path: path, label: label, help_text: help_text, bs_icon: config[:bs_icon], bs_color: config[:bs_color])
+    else
+      content_tag(:span, I18n.t("index.unassigned"))
+    end
+  end
+
+  def index_link_html(path:, label:, help_text:, bs_icon:, bs_color: "secondary")
+    disabled = path.nil?
+
+    classes = [
+      "icon-link",
+      "link-#{bs_color}",
+      "link-offset-0",
+      "link-underline-opacity-0",
+      "link-underline-opacity-0-hover",
+      "text-decoration-none",
+      "px-1",
+      "rounded",
+      ("disabled" if disabled)
+    ].compact.join(" ")
+
+    content = safe_join([
+      bs_icon(bs_icon),
+      content_tag(:span, label, class: "ms-1")
+    ])
+
+    if disabled
+      content_tag :span,
+        content,
+        class: classes,
+        title: help_text,
+        aria: { label: help_text, disabled: true }
+    else
+      link_to path,
+        class: classes,
+        title: help_text,
+        aria: { label: help_text } do
+          content
+        end
     end
   end
 end

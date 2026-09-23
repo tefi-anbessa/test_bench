@@ -10,16 +10,8 @@
         </div>
 
         <!-- New Button (Right) -->
-        <% if policy(SourceFormat.new()).new? %>
-            <%= link_to new_source_format_path, 
-              class: "btn btn-outline-primary actions",
-              aria: { label: t('actions.new') },
-              title: t('actions.new') do %>
-              <%== bs_icon('plus-square-fill') %>
-              <span class="ms-1">
-                <%= [t('actions.new'), t("activerecord.models.source_format")].join(' ') %>
-              </span>
-            <% end %>
+        <% if policy(SourceFormat.new).new? %>
+          <%= nav_button(action: :new, path: new_source_format_path, record: SourceFormat.new) %>
         <% end %>
       </div> <!-- end of d-flex -->
     </div> <!-- end of card header -->
@@ -48,12 +40,16 @@
         <% end %>
       </div>
 
-      <!--  -->
+      <!-- Source formats -->
+      <!-- Policies for source formats are invariable over the scope, so no need to look up policy for each record. -->
+      <% can_show = policy(SourceFormat.new).show? %>
+      <% can_edit = policy(SourceFormat.new).edit? %>
+      <% can_delete = policy(SourceFormat.new).destroy? %>
       <table id='source_formats' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
         <%= render 'header' %>
         <tbody>
           <% @source_formats.each do |row| %>
-            <%= render 'row', row: row %>
+            <%= render 'row', row: row, can_show: can_show, can_edit: can_edit, can_delete: can_delete %>
           <% end %>
         </tbody>
       </table>

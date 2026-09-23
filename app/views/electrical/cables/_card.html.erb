@@ -1,44 +1,26 @@
-<!-- Expects object and context (optional) to be passed in -->
+<!-- Cable collapsible card -->
+<!-- Expecting 'object', 'context' and 'id' variables, passed from the shared/_association partial. -->
+<!-- The card uses the context name in the header and the id for the block (for testing). -->
 <% cable = object %>
 <% context ||= t("activerecord.models.electrical/cable.one") %>
 <%= render 'components/collapsible',
-      id: "cable_#{cable.id}_details",
+      id: "#{id}_#{cable.id}_details",
       title: [context, cable.long_label].join(': '),
       expanded: false,
       header_class: 'py-1' do %>
   
   <div class="container-fluid">
+    <%= nav_link(action: :show, record: cable) %>
+    <%= nav_link(action: :show, record: cable.electrical_cable_type) %>
 
-    <div class="row mb-1">
-      <% text = t("actions.jump_to", model: cable.model_name.human) %>
-      <%= link_to electrical_cable_path(cable), 
-        class: "btn btn-sm btn-outline-secondary me-2",
-        title: text do %>
-          <%== bs_icon('box-arrow-in-up-left') %>
-          <span class="d-none d-md-inline"><%= text %></span>
-        <% end %>
-    </div>
+    <%= show_attribute(cable, :route_length, type: :float, units: "m") %>
+    <%= show_attribute(cable, :vertical_allowance, type: :float, units: "m") %>
+    <%= show_attribute(cable, :termination_allowance, type: :float, units: "m") %>
+    <%= show_attribute(cable, :start_mark, type: :integer, units: "m") %>
+    <%= show_attribute(cable, :end_mark, type: :integer, units: "m") %>
+    <%= show_attribute(cable, :notes, type: :text) %>
 
-    <!-- Cable Type card -->
-    <div class="row mb-1">
-      <%= render 'electrical/cable_types/card', object: cable.electrical_cable_type %>
-    </div>
-
-    <dl class="row mb-0">
-      <dt class="col-6"><%= t('activerecord.attributes.electrical/cable.route_length') %></dt>
-      <dd class="col-6"><%= cable.route_length %> m</dd>
-      
-      <dt class="col-6"><%= t('activerecord.attributes.electrical/cable.vertical_allowance') %></dt>
-      <dd class="col-6"><%= cable.vertical_allowance %> m</dd>
-      
-      <dt class="col-6"><%= t('activerecord.attributes.electrical/cable.termination_allowance') %></dt>
-      <dd class="col-6"><%= cable.termination_allowance %> m</dd>
-      
-      <dt class="col-6"><%= t('activerecord.attributes.electrical/cable.start_mark') %></dt>
-      <dd class="col-6"><%= cable.start_mark %></dd>
-      
-      <dt class="col-6"><%= t('activerecord.attributes.electrical/cable.end_mark') %></dt>
-      <dd class="col-6"><%= cable.end_mark %></dd>
-    </dl>
+    <%= show_attribute(cable, :from, type: :association) %>
+    <%= show_attribute(cable, :to, type: :association) %>
   </div>
 <% end %>

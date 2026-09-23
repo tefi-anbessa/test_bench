@@ -1,172 +1,116 @@
 require "rails/generators/named_base"
-require_relative 'field_types'
+require_relative 'shared/scaffold_helper'
 
 module ProjectAssistant
   class ScaffoldGenerator < Rails::Generators::NamedBase
     include Rails::Generators::ResourceHelpers
-    include FieldTypes
+    include ProjectAssistant::Shared::ScaffoldHelper
     source_root File.expand_path("scaffold/templates", __dir__)
+    class_option :definition, type: :string, desc: "Fields definition file name"
+    class_option :nesting, type: :string, desc: "Parent class, options: none (default), project, discipline, tag, tagable"
     
-    def initialize(args, *options)
-      super
-      @namespaced = class_name&.include?('::')
-      validate_name
-    end
-    
-    # Additional helper methods to supplement NamedBase methods
-    # Comments assume name argument is "ModuleName::SubModule::ClassName"
-    def module_name # Equivalent to class_name without the model class part
-      if @namespaced
-        name.split("::")[0..-2].join("::")  # "ModuleName::SubModule"
+    def validate_nesting
+      # $stderr.puts "DEBUG (GENERATOR): options[:nesting]: #{options[:nesting].inspect} (#{options[:nesting].class})"
+      errors = []
+      if options[:nesting].present?
+        unless options[:nesting].in? %w[project discipline tag document issue tagable none]
+          errors << "Invalid nesting option #{options[:nesting]}"
+        end
+        @nesting = options[:nesting].to_sym
       else
-        nil
+        @nesting = :none
       end
-    end
-
-    def module_path # Used for setting directories.
-      if @namespaced
-        File.join(*class_path)  # "module_name/sub_module"
-      else
-        nil     
+      
+      if errors.any?
+        # $stderr.puts "DEBUG (GENERATOR): nesting errors: #{errors.inspect}"
+        say_status :error, "Nesting option validation failed:", :red
+        errors.each { |error| say_status :error, "  - #{error}", :red }
+        say_status :info, "Please use valid nesting option and try again.", :yellow
+        raise Thor::Error, "Aborting generator"
       end
-    end
-
-    def model_class
-      class_name.split('::').last  # "ClassName"
-    end
-    
-    # Helper methods for path generation
-    def i18n_insertion_point
-      if @namespaced
-        "#{class_path[-1]}:"
-      else
-        class_name.underscore
-      end
-    end
-
-    def views_path
-      if @namespaced
-        File.join(module_name.underscore, class_name.underscore)
-      else
-        class_name.underscore
-      end
-    end
-
-    def factory_path
-      if @namespaced
-        "#{module_name.underscore}"
-      else
-        "."
-      end
+      say_status :info, "Running generator with nesting option #{@nesting}", :green
+      # $stderr.puts "DEBUG (GENERATOR): nesting: #{@nesting.inspect} (#{@nesting.class})"
+      # $stderr.puts "DEBUG (GENERATOR): errors: #{@errors.inspect}"
     end
 
     def validate_name
+      # $stderr.puts "DEBUG (Generator): args #{args}"
+      @namespaced = class_path.any?
       errors = []
+      # $stderr.puts "DEBUG (GENERATOR): validating name: #{class_name.inspect}"
       
-      # For namespaced names, validate module existence
-      # Alternative test in place due to failure of const_defined? method: 
-      # just check one of the required folders exists.
       if @namespaced
-        folder = File.join(destination_root, "app", "models")
-        class_name.split("::")[0..-2].each do |part|
-# This code is crashing the generator. TODO: Fix it.
-#          unless Module.const_defined?(part)
-          folder = File.join(folder, part.underscore)
-          unless Dir.exist?(folder)
-            errors << "#{part} is not a valid module"
+        # Validate module/sub-module exists
+        paths_to_check(folder).each do |path|
+          unless Dir.exist?(path)
+            errors << "#{path} not found, module #{module_name} has incomplete folder structure"
           end
+        end
+      else
+        # Tagables must have a module and class name
+        if @nesting == :tagable
+          errors << "Name for tagable must include both module and class with '::' separator"
         end
       end
         
       # Validate class name format
-      unless model_class.match?(/\A[A-Z][a-zA-Z0-9_]*\z/)
-        errors << "Model name '#{model_class}' is not a valid Ruby identifier"
+      unless model_class_name&.match?(/^[A-Z][a-zA-Z0-9_]*$/)
+        errors << "'#{model_class_name}' is not a valid Ruby class name"
       end
-       
+      
       if errors.any?
+        # $stderr.puts "DEBUG (GENERATOR): validating name: errors: #{errors.inspect}"
         say_status :error, "Name validation failed:", :red
         errors.each { |error| say_status :error, "  - #{error}", :red }
-        say_status :info, "Generator aborted. Please fix the name and try again.", :yellow
-        exit 1
+        say_status :info, "Please fix the name and try again.", :yellow
+        raise Thor::Error, "Aborting generator"
+      else
+        if @namespaced
+          say_status :info, "Generating model #{model_class_name} in module #{module_name}", :green
+        else
+          say_status :info, "Generating model #{model_class_name} in core application", :green
+        end
       end
     end
 
-    def process_fields
-#      puts "DEBUG: Starting process_fields with args: #{args.inspect}"
-      errors = []
-      valid_fields = []
-      
-      args.each do |arg|
-        begin
-          # Split the argument into parts
-          name, type, *options = arg.split(':')
-          
-          # Validate field name
-          unless name&.match?(/^[a-zA-Z_][a-zA-Z0-9_]*$/)
-            errors << "Invalid field name: #{name}. Must be a valid Ruby identifier"
-            next
-          end
-          
-          # Validate field type (no defaults)
-          if type.nil?
-            errors << "Missing field type for #{name}. Please specify a type"
-            next
-          end
-          
-          unless VALID_FIELD_TYPES.include?(type)
-            errors << "Unknown field type '#{type}' for #{name}. Valid types are: #{VALID_FIELD_TYPES.join(', ')}"
-            next
-          end
-          
-          # Validate options
-          options = options.uniq # Remove duplicates
-          invalid_options = options - VALID_OPTIONS
-          unless invalid_options.empty?
-            errors << "Unknown option(s) #{invalid_options.inspect} for #{name}. Valid options are: #{VALID_OPTIONS.join(', ')}"
-            next
-          end
-          
-          valid_fields << { name: name, type: type, options: options }
-        rescue ArgumentError => e
-          errors << "Invalid attribute: #{arg} - #{e.message}"
+    def resolve_fields
+      # Check for option to load arguments from file
+      if options[:definition]
+        if args.count > 1
+          say_status :error, "Cannot process command line arguments and file input together", :red
+          raise Thor::Error, "Aborting generator"
+        else
+          input_fields = load_definition(options[:definition])
         end
+      else
+        input_fields = prepare_cli(args || [])
       end
-      
-      # puts "DEBUG: Found #{errors.length} errors and #{valid_fields.length} valid fields"
-      
+      @fields, errors = process_fields(input_fields)
+          
       # Handle validation results
       if errors.any?
         say_status :error, "Validation errors found:", :red
         errors.each { |error| say_status :error, "  - #{error}", :red }
-        
-        if valid_fields.any?
-          say_status :warning, "Valid fields that could be processed:", :yellow
-          valid_fields.each { |field| say_status :info, "  - #{field[:name]}:#{field[:type]}#{field[:options].map { |opt| ":#{opt}" }.join('')}", :blue }
-          
-          say_status :prompt, "Continue with valid fields only? (Recommended: No) [y/N]", :yellow
-          response = $stdin.gets.chomp.downcase
-          
-          if response == 'y'
-            @fields = valid_fields
-            say_status :info, "Proceeding with #{valid_fields.length} valid fields.", :green
-          else
-            say_status :info, "Generator aborted. Please fix errors and run again.", :yellow
-            exit 1
-          end
-        else
-          say_status :error, "No valid fields found. Generator aborted.", :red
-          exit 1
-        end
+        say_status :info, "Please fix the errors and run again.", :yellow
+          # $stderr.puts "DEBUG (GENERATOR): errors: #{errors.inspect}"
+        raise Thor::Error, "Aborting generator"
       else
-        @fields = valid_fields
-        say_status :info, "All #{valid_fields.length} fields are valid.", :green
+        say_status :info, "All #{@fields.length} fields are valid.", :green if @fields.any?
+        # spit(@fields)
       end
-      
-      # puts "DEBUG: Final @fields: #{@fields.inspect}"
-      @fields
+      # Set up field sets convenience variables
+      field_sets
+      # $stderr.puts "DEBUG: GENERATOR: fields: #{@fields} \nnesting: #{@nesting}\nenum_fields: #{@enum_fields}"
     end
 
     def create_model_file
+      @ransack_attributes = (@searchable_fields.map { |f| f[:name].to_sym } + %i[created_at updated_at]).uniq
+      @ransack_associations = (@association_fields.map { |f| f[:name].to_sym } ).uniq
+      if @nesting == :tagable
+        @ransack_associations += [:tag, :tag_discipline, :tag_discipline_project]
+      elsif @nesting.in?(%i[project discipline tag])
+        @ransack_associations += [@nesting]
+      end
       template "model.rb.erb", File.join('app', 'models', "#{file_path}.rb")
     end
     
@@ -195,10 +139,15 @@ module ProjectAssistant
     end
     
     def create_controller_file
-      template "controller.rb.erb", File.join('app', 'controllers', "#{controller_file_path}_controller.rb")
+      if @nesting == :tagable
+        template "controller_extension.rb.erb", File.join('app', 'controllers', "#{file_path}_extension.rb")
+      else
+        template "controller.rb.erb", File.join('app', 'controllers', "#{controller_file_path}_controller.rb")
+      end
     end
     
     def create_view_files
+      @form_variables, @scope = set_form_variables(@nesting)
       template "views/index.html.erb", File.join('app', 'views', controller_file_path, 'index.html.erb')
       template "views/_header.html.erb", File.join('app', 'views', controller_file_path, '_header.html.erb')
       template "views/_row.html.erb", File.join('app', 'views', controller_file_path, '_row.html.erb')
@@ -218,34 +167,29 @@ module ProjectAssistant
     end
     
     def edit_routes_file
+      # Tagable models all share the single unified tagable route set
+      if @nesting == :tagable
+        say_status :info, "Skipping routes.rb - tagable models use the shared tagable routes.", :green
+        return
+      end
       # Update config/routes.rb
+      tab = "  "
       routes_file = Pathname.new(File.join(destination_root, "config", "routes.rb"))
       if File.exist?(routes_file)
         content = File.read(routes_file)
-        
-        if class_path.any?
-          # Find the insertion point
-          insertion_pattern = /^(\s*)(namespace\s+:#{class_path.last}\s+do)$/
-          if content.match?(insertion_pattern)
-            content.sub!(insertion_pattern) do
-              # $1 is the captured indentation, $2 is the namespace line
-              "#{$1}#{$2}\n#{$1}  resources :#{plural_name}\n"
-            end
-          else
-            say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Could not find namespace for #{class_path.last}", :red
-            return
+        if @nesting == :none
+          insertion_pattern = /^(\s*)(# Insertion point for non-nested routes)$/
+        else
+          insertion_pattern = /^(\s*)(end # #{@nesting.to_s} nested routes)$/
+        end
+        if content.match?(insertion_pattern)
+          content.sub!(insertion_pattern) do
+            # $1 is the captured indentation, $2 is the end comment line
+            "#{$1}#{tab}resources :#{plural_name}\n#{$1}#{$2}"
           end
         else
-          # Non-namespaced case - insert before root path route
-          root_pattern = /(# Defines the root path route)/
-          if content.match?(root_pattern)
-            content.sub!(root_pattern) do
-              "\n  resources :#{plural_name}\n\n#{$1}"
-            end
-          else
-            say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Could not find root path route", :red
-            return
-          end
+          say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Could not find routes section for #{@nesting.to_s}", :red
+          return
         end
         
         File.write(routes_file, content) unless options[:pretend]
@@ -257,47 +201,48 @@ module ProjectAssistant
          
     def update_constants
       # Update module constants with enum definitions
-      constants_file = @namespaced ? "#{class_path[0]}.yml" : "core.yml"
-      constants_file = Pathname.new(File.join(destination_root, "config", "constants", constants_file))
-      if File.exist?(constants_file)
-        content = File.read(constants_file)
-        
-        # Add the model key
-        if @namespaced
-          module_key = "#{class_path.last}:"
-          # Find the module key and capture its indentation
-          insertion_pattern = /^(\s*)(#{module_key})/
-          model_key = "#{singular_name}:"
-          
-          # Insert after the module key
-          if content.match?(insertion_pattern)
-            content.sub!(insertion_pattern) do
-              # $1 is the captured indentation, $2 is the module key
-              "\n#{$1}#{$2}#{$1}#{model_key}"
+      if @enum_fields.any?
+        constants_file = @namespaced ? "#{class_path[0]}.yml" : "core.yml"
+        constants_file = Pathname.new(File.join(destination_root, "config", "constants", constants_file))
+        if File.exist?(constants_file)
+          content = File.read(constants_file)
+          tab = "  "
+          insertion_text = "#{singular_name}:\n"
+          @enum_fields.each do |field|
+            field_name = field[:name]
+            field_indent = tab * (1 + class_path.count)
+            insertion_text += "#{field_indent}#{field_name}:\n"
+            if field[:options][:keys].any?
+              field[:options][:keys].each_with_index do |key, index|
+                insertion_text += "#{field_indent}#{tab}#{key}: #{index}\n"
+              end
+            end
+          end
+
+          if @namespaced
+            module_key = "#{class_path.last}:"
+            # Find the module key and capture its indentation
+            insertion_pattern = /^(\s*)(#{module_key})/
+            # Insert after the module key
+            if content.match?(insertion_pattern)
+              content.sub!(insertion_pattern) do
+                # $1 is the captured indentation, $2 is the module key
+                "#{$1}#{$2}\n#{$1}#{tab}#{insertion_text}"
+              end
+            else
+              say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Could not find module key #{module_key}", :red
+              return
             end
           else
-            say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Could not find module key #{module_key}", :red
-            return
+            # Non-namespaced case - add at root level
+            content += "\n#{insertion_text}"
           end
+
+          File.write(constants_file, content) unless options[:pretend]
+          say_status :update, "#{constants_file.relative_path_from(Rails.root)}: Added #{singular_name} key", :green
         else
-          # Non-namespaced case - add at root level
-          model_key = "\n#{singular_name}:"
-          content += "#{model_key}\n"
+          say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Not found", :red
         end
-        
-        # Add enum fields if they exist
-        enum_fields = @fields.select { |field| field[:type] == 'enum' || field[:type] == 'enum_translated' }
-        enum_fields.each do |field|
-          field_name = field[:name]
-          field_indent = " " * ((class_path.count) * 2)
-          content += "#{field_indent}#{field_name}:\n"
-          content += "#{field_indent}  #{field_name}_other: 0  # TODO: Add enum values\n"
-        end
-        
-        File.write(constants_file, content) unless options[:pretend]
-        say_status :update, "#{constants_file.relative_path_from(Rails.root)}: Added #{singular_name} key", :green
-      else
-        say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Not found", :red
       end
     end
 
@@ -305,7 +250,7 @@ module ProjectAssistant
       I18n.available_locales.each do |locale|
         if @namespaced
           translation_file = Pathname.new(File.join(destination_root, "config", "locales", 
-          module_path, locale.to_s, "#{locale}.#{class_path[-1]}.models.yml"))
+          folder, locale.to_s, "#{locale}.#{class_path[-1]}.models.yml"))
         else 
           translation_file = Pathname.new(File.join(destination_root, "config", "locales", 
           "core", locale.to_s, "#{locale}.models.yml"))
@@ -328,13 +273,8 @@ module ProjectAssistant
             end
           end
           
-          if @namespaced
-            model_insertion_regex = /models:\n((?:.+\n)*?)\s*(#{class_path[-1]}):.*\n/
-            attributes_insertion_regex = /attributes:\n((?:.+\n)*?)\s*(#{class_path[-1]}):.*\n/
-          else
-            model_insertion_regex = /models:\n/
-            attributes_insertion_regex = /attributes:\n/
-          end
+          model_insertion_regex = /models:\n/
+          attributes_insertion_regex = /attributes:\n/
           # Insert model name under models section
           if content.match?(model_insertion_regex)
             content.sub!(model_insertion_regex) { "models:\n#{$1}#{$2}:\n#{model_section}\n" }
@@ -358,7 +298,7 @@ module ProjectAssistant
         # Handle views translations
         if @namespaced
           views_file = Pathname.new(File.join(destination_root, "config", "locales", 
-          module_path, locale.to_s, "#{locale}.#{class_path[-1]}.views.yml"))
+          folder, locale.to_s, "#{locale}.#{class_path[-1]}.views.yml"))
         else
           views_file = Pathname.new(File.join(destination_root, "config", "locales", 
           "core", locale.to_s, "#{locale}.views.yml"))
@@ -370,13 +310,13 @@ module ProjectAssistant
           views_section = "\n" + tab*2 + "#{plural_name}:\n" +
             "      index:\n" +
             "        title:            \"#{human_name.pluralize}\"\n" +
-            "        header:           \"#{human_name.pluralize} Schedule for %{project}\"\n" +
+            "        header:           \"#{human_name.pluralize} Schedule for %{scope_text}\"\n" +
             "      edit:\n" +
             "        title:            \"Edit #{human_name}\"\n" +
             "        header:           \"Edit #{human_name}: %{label}\"\n" +
             "      new:\n" +
             "        title:            \"New #{human_name}\"\n" +
-            "        header:           \"New #{human_name}\"\n" +
+            "        header:           \"New #{human_name} in %{scope_text}\"\n" +
             "      show:\n" +
             "        title:            \"#{human_name}\"\n" +
             "        header:           \"#{human_name}: %{label}\""

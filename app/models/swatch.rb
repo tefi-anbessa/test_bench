@@ -4,6 +4,7 @@ class Swatch < ApplicationRecord
   # === Constants ===
 
   # === Gem macros ===
+  has_paper_trail
 
   # === Attributes ===
 

@@ -1,9 +1,11 @@
 <% provide(:title, t('.title')) %>
 <% provide(:header, t('.header', label: @light_cct.long_label)) %>
 <% provide(:button_text, t('actions.update')) %>
-<%= render "form",
+<% partial = File.join(@light_cct.model_name.collection, "form") %>
+<%= render partial,
   light_cct: @light_cct,
   tag: @tag,
+  parent: @tag,
   discipline: @discipline,
   swatch: @swatch
 %>

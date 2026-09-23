@@ -5,41 +5,43 @@
     <div class="card-header p-2" style="<%%= card_header_styles(@swatch) %>">
       <div class="row align-items-center p-2">
 
-        <!-- Discipline and project links -->
+        <!-- Back link -->
         <div class="col-2">
-          <% if @discipline.present? %>
-            <%= nav_button(action: :show_project, record: @discipline.project) %>
-            <%= nav_button(action: :show_discipline, record: @discipline) %>
-          <% elsif @project.present? %>
-            <%= nav_button(action: :show_project, record: @project) %>
-          <% end %>
+<%- if index_back_link[0].present? -%>
+          <%%= nav_button(action: <%= index_back_link[0] %>, record: <%= index_back_link[1] %>) %>
+<%- end -%>
         </div>
 
         <!-- Header Text (Left - 8 columns) -->
         <div class="col-8">
-          <%% project_text = current_project.present? ? 
-          [t('activerecord.models.project.one'), current_project.label].join(': ') : 
-          t('index.all', models: t('activerecord.models.project.other')) %>
-          <h5 class="mb-0"><%%= t('.header', project: project_text) %></h5>
+          <h5 class="mb-0"><%%= t('.header', scope_text: <%= index_scope_text %>) %></h5>
         </div>
 
         <!-- New Button (Right) -->
         <div class="col-2 align-content-end">
-          <% if policy(<%= class_name %>.new).new? %>
-            <%= nav_button(action: :new, path: new_<%= singular_table_name %>_path, record: <%= class_name %>.new) %>
-          <% end %>
+          <%% if policy(<%= new_build(@nesting) %>).new? %>
+            <%%= nav_button(action: :new, path: <%= new_path(@nesting) %>, record: <%= new_build(@nesting) %>) %>
+          <%% end %>
         </div>
       </div> <!-- end of row -->
     </div> <!-- end of card header -->
 
     <div class="card-body">
       <div class="row search-form">
+<%- case @nesting -%>
+<%- when :tagable -%>
+        <%%= search_form_for @q, url: discipline_tagables_path(@discipline) do |f| %>
+          <%%= hidden_field_tag :tagable_type, <%= class_name %> %>
+<%- when :none -%>
         <%%= search_form_for @q do |f| %>
-        <%- @fields.select { |field| SEARCHABLE_TYPES.include?(field[:type]) }.each do |field| -%>
+<%- else -%>
+        <%%= search_form_for [@<%= @nesting %>, @q] do |f| %>
+<%- end -%>
+<%- @searchable_fields.each do |field| -%>
           <%%= f.search_field :<%= field[:name] %>_cont,
                 class: "search_field",
                 placeholder: t("activerecord.attributes.<%= i18n_scope %>.<%= field[:name] %>") %>
-          <%- end -%>
+<%- end -%>
           <%%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
             <%%== bs_icon('search') %>
           <%% end %>
@@ -47,11 +49,17 @@
       </div>
 
       <!-- <% human_name %> -->
+<%- if @nesting == :tagable %>
+      <!-- Policies for tagables are invariate over the scope , so no need to look up policy for each record. -->
+      <%% can_show = policy(@discipline.tags.build()).show? %>
+      <%% can_edit = policy(@discipline.tags.build()).edit? %>
+      <%% can_delete = policy(@discipline.tags.build()).destroy? %>
+<%- end -%>
       <table id='<%= table_name %>' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
-        <%%= render 'header' %>
+        <%%= render '<%= File.join(controller_file_path, "header") %>' %>
         <tbody>
           <%% @<%= plural_name %>.each do |row| %>
-            <%%= render 'row', row: row %>
+            <%%= render '<%= File.join(controller_file_path, "row") %>', row: row %>
           <%% end %>
         </tbody>
       </table>

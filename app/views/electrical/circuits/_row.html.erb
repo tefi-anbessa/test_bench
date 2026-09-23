@@ -11,21 +11,9 @@
   <td><%= row.rating %></td>
   <td><%= row.curve %></td>
   <td><%= row.elcb %></td>
-  <td><%= row.contactor ? bs_icon('check', height: '1em') : ' ' %></td>
-  <td>
-    <% if row.feeder.present? && policy(row.feeder).show? %>
-      <%= link_to row.feeder.label, row.feeder %>
-    <% else %>
-      <%= t("index.unassigned") %>
-    <% end %>
-  </td>
-  <td>
-    <% if row.demand.present? && policy(row.demand).show? %>
-      <%= link_to row.demand.label, row.demand %>
-    <% else %>
-      <%= t("index.unassigned") %>
-    <% end %>
-  </td>
+  <td><%= boolean_icon(row.contactor) %></td>
+  <td><%= index_link(action: :show, record: row.feeder) %></td>
+  <td><%= index_link(action: :show, record: row.demand) %></td>
   <!-- Links -->
   <td>
     <% if can_show %>

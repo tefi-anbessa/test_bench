@@ -17,6 +17,11 @@ class Tag < ApplicationRecord
   has_many :children, class_name: 'Tag', foreign_key: 'parent_id', inverse_of: :parent, 
     dependent: :nullify
 
+  has_many :loop_elements,
+           class_name: "Tag",
+           primary_key: :loop_id,
+           foreign_key: :loop_id
+
   # === Scopes ===
   # Sort by loop_id, then by full_tag
   # scope :sort_by_loop, -> { order(:loop_id, :prefix, :suffix) }
@@ -30,7 +35,7 @@ class Tag < ApplicationRecord
   validates :prefix, length: { in: 1..6 }
 
   validates :serial, presence: true
-  validates :serial, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than: 10**Constants.tags.serial_digits.to_i }
+  validates :serial, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than: 10**Constants.tag.serial_digits.to_i }
   validates :suffix, length: { maximum: 5 }
   validates :service, length: { maximum: 40 }
   validates :stage, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 10 }
@@ -64,7 +69,7 @@ class Tag < ApplicationRecord
 
   # === Class methods ===
   def self.safe_tagable_types
-    Tag.tagable_types.select{ |type| type.safe_constantize.present? }.map { |type| [type.safe_constantize.model_name.human, type] }
+    Tag.tagable_types.select{ |type| type.safe_constantize.present? }
   end
 
   # === Class methods - Queries ===
@@ -99,7 +104,7 @@ class Tag < ApplicationRecord
   end
 
   def long_label
-    "#{discipline.code}#{Constants.tags.separator}#{full_tag}"
+    "#{discipline.code}#{Constants.tag.separator}#{full_tag}"
   end
 
   # Only use for tests
@@ -111,7 +116,7 @@ class Tag < ApplicationRecord
 
   # Public method to parse prefix components for form display
   def prefix_parts
-    return nil unless prefix.present? && prefix.length >= 2 && discipline&.prefix_schema.present?
+    return nil unless prefix.present? && discipline&.prefix_schema.present?
     parts = {}
     chars = prefix.chars
     if discipline.custom_schema?
@@ -126,7 +131,7 @@ class Tag < ApplicationRecord
     when :isa51
       char = chars.shift()
       # Check measured variables if they exist
-      if schema[:measured_variables]&.keys&.map(&:to_s)&.include?(char)
+      if schema[:measured_variable]&.keys&.map(&:to_s)&.include?(char)
         parts[:measured_variable] = char
       else
         # No valid measured variable character, not a valid isa prefix...
@@ -135,19 +140,37 @@ class Tag < ApplicationRecord
 
       char = chars.shift()
       # Check modifiers if they exist (optional section)
-      if schema[:modifiers]&.keys&.map(&:to_s)&.include?(char)
+      if schema[:modifier]&.keys&.map(&:to_s)&.include?(char)
         parts[:modifier] = char
+        if char >= "S"
+          # Check output functions before committing - S, X, Y, Z can be either modifier or function.
+          # If char is also a valid function, check that the following character is a valid function.
+          # If not, the modifier is not a modifier, it is the function. Got it?
+          if schema[:readout_function]&.keys&.map(&:to_s)&.include?(parts[:modifier]) ||
+            schema[:output_function]&.keys&.map(&:to_s)&.include?(parts[:modifier])
+            char = chars.shift()
+            if schema[:readout_function]&.keys&.map(&:to_s)&.include?(char) ||
+              schema[:output_function]&.keys&.map(&:to_s)&.include?(char)
+              # It's ok, we have a valid function, leave modifier as it is.
+              chars.unshift(char)
+            else
+              # It's a problem, modifier is probably the function.
+              chars.unshift(char)
+              chars.unshift(parts[:modifier])
+              parts[:modifier] = nil
+            end
+          end
+        end
       else
-        parts[:modifier] = nil
         chars.unshift(char)
+        parts[:modifier] = nil
       end
-
       char = chars.shift()
       # Check functions - either readout or output functions
-      if schema[:readout_functions]&.keys&.map(&:to_s)&.include?(char)
+      if schema[:readout_function]&.keys&.map(&:to_s)&.include?(char)
         parts[:readout_function] = char
         parts[:output_function] = nil
-      elsif schema[:output_functions]&.keys&.map(&:to_s)&.include?(char)
+      elsif schema[:output_function]&.keys&.map(&:to_s)&.include?(char)
         parts[:readout_function] = nil
         parts[:output_function] = char
       else
@@ -157,20 +180,11 @@ class Tag < ApplicationRecord
 
       # Check modifier functions if they exist (optional section)
       mf = chars.join # remaining characters
-      if schema[:modifier_functions]&.keys&.map(&:to_s)&.include?(mf)
+      if schema[:modifier_function]&.keys&.map(&:to_s)&.include?(mf)
         parts[:modifier_function] = mf
       else
         parts[:modifier_function] = nil
       end
-      return parts
-
-    when :dim1
-      if schema[:prefixes]&.keys&.map(&:to_s)&.include?(chars)
-        parts[:prefix] = chars
-      else
-        # Not a valid prefix in the standard list.
-        return nil
-      end 
       return parts
 
     when :dim2
@@ -180,6 +194,19 @@ class Tag < ApplicationRecord
       unless parts[:part2].present? && schema[:part2]&.key?(parts[:part2].to_sym)
         parts[:part2] = nil # return valid part 1 and nil part 2
       end
+      return parts
+
+    when :dim1
+      if schema[:prefix]&.keys&.map(&:to_s)&.include?(chars.join)
+        parts[:prefix] = chars.join
+      else
+        # Not a valid prefix in the standard list.
+        return nil
+      end 
+      return parts
+
+    when :default
+      parts[:prefix] = prefix
       return parts
     end
   end

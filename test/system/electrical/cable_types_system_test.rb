@@ -20,7 +20,7 @@ module Electrical
       # Model should generate sequential codes.
       @resource2 = create(:electrical_cable_type, discipline: @discipline)
       @discipline_resource_index_header = I18n.t('electrical.cable_types.index.header', 
-        scope_text: [@discipline.project.code, I18n.t("activerecord.models.discipline.one"), @discipline.long_label].join(' '))
+        scope_text: [@discipline.project.code, I18n.t("activerecord.models.discipline.one"), @discipline.label].join(' '))
       @project_resource_index_header = I18n.t('electrical.cable_types.index.header', 
         scope_text: [I18n.t("activerecord.models.project.one"), @project.label].join(': '))
       @project_resource_index_title = @discipline_resource_index_title = I18n.t('electrical.cable_types.index.title')
@@ -32,7 +32,7 @@ module Electrical
       # List index fields that should have ransack search capability.
       # The generator will only test for "contains" fields (_cont).
       # Don't include numeric or date fields, add model specific tests for these later in this file.
-      @search_fields = [:code, :notes]
+      @search_fields = [:conductor_material, :insulation]
 
       # List all fields that should appear in show (usually all)
       @show_fields = [:conductor_material, :groups, :construction, :csa, :neutral_csa, :earth_csa,
@@ -58,6 +58,15 @@ module Electrical
 
     def fill_in_model_specific_fields
       # No special fields in cable types
+    end
+
+    test "index search fields" do
+      # Test for eq search fields not covered by standard tests.
+      sign_in @accredited_user
+      # Mock current_project for this test
+      ApplicationController.any_instance.stubs(:current_project).returns(@project)
+      visit discipline_resource_index_path(@discipline)
+      assert_current_path discipline_resource_index_path(@discipline)
     end
   end
 end

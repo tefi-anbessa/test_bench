@@ -26,34 +26,17 @@
             <!-- Source format Details -->
             <div class="card mb-1" style="<%= card_styles(@swatch) %>">
               <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
-                <h5><%= t('activerecord.models.source_format') %></h5>
+                <h5><%= t('activerecord.models.source_format.one') %></h5>
               </div>
 
               <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
                 <%= render 'shared/error_messages', object: f.object %>
 
-                <%= f.text_field :vendor,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8" %>
-                <%= f.text_field :title,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8" %>
-                <%= f.text_field :file_extension,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8" %>
-                <%= f.text_field :revision,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8" %>
-                <%= f.text_area :notes,
-                        class: 'form-control form-control-sm',
-                        label_col: "col-sm-4",
-                        control_col: "col-sm-8",
-                        rows: 3 %>
-                
+                <%= form_field(f, :vendor, type: :string) %>
+                <%= form_field(f, :title, type: :string) %>
+                <%= form_field(f, :file_extension, type: :string) %>
+                <%= form_field(f, :revision, type: :string) %>
+                <%= form_field(f, :notes, type: :text) %>
               </div> <!-- end source_format card body -->
             </div> <!-- end source_format card -->
 

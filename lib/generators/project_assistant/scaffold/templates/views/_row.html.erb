@@ -1,25 +1,34 @@
-<tr scope="row">
+<tr>
   <%% unless current_project %>
-    <td scope = "col"><%%= row.project.code %></td>
+    <td><%%= row.project.code %></td>
   <%% end %>
-  <%- @fields.select { |field| INDEX_TYPES.include?(field[:type]) }.each do |field| -%>
-    <%- case field[:type] -%>
-    <%- when "string", "enum", "integer", "bigint", "decimal" -%>
-  <td><%%= row.<%= field[:name] %> || '-' %></td>
-    <%- when "float" -%>
-  <td><%%= number_to_human(row.<%= field[:name] %>, 
-    precision: 4, units: { unit: "x", thousand: "kx", million: "Mx" }) || '-' %></td>
-    <%- when "enum_translated" -%>
-  <td><%%= row.class.human_enum_name(:<%= field[:name] %>, row.<%= field[:name] %>) %></td>
-    <%- when "references" -%>
-  <td><%%= row.<%= field[:name] %>.present? ?
-    link_to(row.<%= field[:name] %>.label, row.<%= field[:name] %>) : 
-    '-' %></td>
-    <%- else -%>
-  <td><%%= row.<%= field[:name] %> || '-' %></td>
-    <%- end -%>
+<%- @index_fields.each do |field| -%>
+  <%- options = field[:options].slice(:precision, :scale, :units, :si) -%>
+  <%- opts = options.map { |k, v| "#{k}: #{v.inspect}" }.join(", ") -%>
+  <%- attr = "#{field[:name]}" -%>
+  <%- case field[:type] -%>
+  <%- when :string -%>
+  <td><%%= index_attribute(row, :<%= attr %>) %></td>
+  <%- when :integer, :bigint, :text, :jsonb, :boolean, :date, :datetime, :time, :timestamp, :enum, :enum_translated %>
+  <td><%%= index_attribute(row, :<%= attr %>, type: :<%= field[:type] %>) %></td>
+  <%- when :decimal, :float -%>
+  <td><%%= index_attribute(row, :<%= attr %>, type: :<%= field[:type] %><%= ", #{opts}" unless opts.empty? %>) %></td>
+  <%- when :references, :belongs_to -%>
+  <td><%%= index_attribute(row, :<%= attr %>, type: :association) %></td>
   <%- end -%>
+<%- end -%>
   <td>
+<%- if @nesting == :tagable -%>
+    <%% if can_show %>
+      <%%= nav_button(action: :show, record: row, icon_only: true) %>
+    <%% end %>
+    <%% if can_edit %>
+      <%%= nav_button(action: :edit, record: row, path: edit_<%= singular_table_name %>_path(row), icon_only: true) %>
+    <%% end %>
+    <%% if can_delete %>
+      <%%= nav_button(action: :delete, record: row, icon_only: true) %>
+    <%% end %>
+<%- else -%>
     <%% if policy(row).show? %>
       <%%= nav_button(action: :show, record: row, icon_only: true) %>
     <%% end %>
@@ -29,6 +38,7 @@
     <%% if policy(row).destroy? %>
       <%%= nav_button(action: :destroy, record: row, icon_only: true) %>
     <%% end %>
+<%- end -%>
   </td>
 </tr>
        

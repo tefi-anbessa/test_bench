@@ -1,10 +1,11 @@
+
 <div class="card" style="<%= card_styles(@swatch) %>" data-controller="tag"
      data-tag-model-name-value="<%= t('activerecord.models.tag') %>">
   <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
     <!-- Left Tag Header -->
     <div class="col text-left">
       <div class="d-flex flex-column align-items-left">
-        <div class="mt-1">
+        <div class="mt-1 h6">
           <%= tag.persisted? ? t('actions.edit') : t('actions.new') %>
           <span data-tag-target="preview">
             <% if tag.persisted? %>
@@ -24,9 +25,6 @@
   <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
     <%= render 'shared/error_messages', object: tag %>
 
-      <!-- Discipline -->
-      <%= tag_f.hidden_field :discipline_id, value: @discipline.id %>
-
       <!-- Stage -->
       <div class="row">
         <%= tag_f.number_field :stage,
@@ -38,10 +36,7 @@
       </div>
 
       <!-- Prefix Fields - Dynamic based on discipline schema -->
-      <%= render 'tags/prefix_fields', tag: tag, f: tag_f %>
-
-      <!-- Full tag preview -->
-      <%= hidden_field_tag :full_tag, id: 'tag_full_tag_preview' %>
+      <%= render 'tags/prefix_fields', tag: tag, form: tag_f, schema: @schema, parts: @parts %>
 
       <!-- Serial and Suffix -->
       <div class="row">
@@ -88,14 +83,14 @@
                 placeholder: t('activerecord.help.tag.notes') %>
       </div>
 
-      <!-- Tagable Type -->
+      <!-- Parent Tag -->
       <div class="row">
-        <%= tag_f.text_field :tagable_type,
-                label_col: "col-sm-3",
-                control_col: "col-sm-9",
-                disabled: true %>
+        <%= tag_f.collection_select :parent_id, @parents, :id, :full_tag,
+              { include_blank: t("form.none") },
+              { class: 'form-select' } %>
       </div>
-  </div>
 
-  <!-- Tag preview is now handled by the Stimulus controller -->
+      <!-- Tagable Type -->
+      <%= show_attribute(@tag, :tagable_type, type: :class) %>
+  </div>
 </div>

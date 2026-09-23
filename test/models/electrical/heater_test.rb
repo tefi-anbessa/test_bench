@@ -12,48 +12,64 @@ module Electrical
       @resource.electrical_demand = create(:electrical_demand, demandable: @resource)
     end
 
-    test "heater type must be present" do
-      @resource.heater_type = nil
-      refute @resource.valid?
-      assert_includes @resource.errors[:heater_type], I18n.t("errors.messages.blank")
-    end
-
-    test "application must be present" do
-      @resource.application = nil
-      refute @resource.valid?
-      assert_includes @resource.errors[:application], I18n.t("errors.messages.blank")
-    end
-
-    # Demand creation is tested separately in Demand model tests
-
-    test "destroy heater should nullify tagable" do
-      @resource.destroy
-      
-      @tag.reload
-      assert_nil @tag.tagable
-      assert_nil @tag.tagable_type
-      assert_nil @tag.tagable_id
-    end
+    test_required_fields(:heater_type, :application)
+    test_enum_field(:heater_type, keys: [:heater_type_other,
+                                          :cast_in,
+                                          :ceramic_fiber,
+                                          :circulation,
+                                          :drum,
+                                          :duct,
+                                          :enclosure,
+                                          :explosion_proof,
+                                          :flexible,
+                                          :forced_air,
+                                          :heat_torch,
+                                          :heat_tracing,
+                                          :heating_cable,
+                                          :immersion,
+                                          :induction,
+                                          :inline,
+                                          :over_the_side,
+                                          :radiant,
+                                          :radiant_flat_panel,
+                                          :radiant_reflective,
+                                          :radiant_floor,
+                                          :space,
+                                          :strip,
+                                          :tubular,
+                                          :water])
+    test_enum_field(:application, keys: [:application_other,
+                                          :annealing_heat_treating,
+                                          :curing_tempering,
+                                          :drying,
+                                          :melting,
+                                          :oem_custom,
+                                          :gases_vapors,
+                                          :clean_water,
+                                          :process_waters,
+                                          :high_purity_waters,
+                                          :lightweight_oils,
+                                          :heavy_weight_oils,
+                                          :medium_weight_oils,
+                                          :mild_corrosive,
+                                          :severe_corrosive,
+                                          :caustic_solutions,
+                                          :liquid_paraffin])
+    test_enum_field(:sheath_material, prefix: true, keys: [:sheath_material_other,
+                                          :sheath_material_none,
+                                          :aluminium,
+                                          :brass,
+                                          :copper,
+                                          :fluoropolymer,
+                                          :ht_foil,
+                                          :iron,
+                                          :nickel_alloy,
+                                          :polyimide,
+                                          :rubber,
+                                          :stainless_steel,
+                                          :steel,
+                                          :synthetic_rubber])
+    test_enum_field(:insulation_material, prefix: true, keys: [:insulation_material_other, :no_insulation, :ceramic, :magnesium_oxide, :mica, :mineral, :fluoropolymer, :fiberglass])
     
-    test "should have demand through demandable concern" do
-      assert_respond_to @resource, :electrical_demand
-    end
-    
-    test "should have tag through tagable concern" do
-      assert_respond_to @resource, :tag
-      assert_equal @tag, @resource.tag
-    end
-    
-    # Test enum definitions
-    test "should have enum attributes" do
-      assert_respond_to @resource, :heater_type
-      assert_respond_to @resource, :cast_in?
-      assert_respond_to @resource, :application
-      assert_respond_to @resource, :annealing_heat_treating?
-      assert_respond_to @resource, :sheath_material
-      assert_respond_to @resource, :sheath_material_aluminium?
-      assert_respond_to @resource, :insulation_material
-      assert_respond_to @resource, :insulation_material_ceramic?
-    end
   end
 end

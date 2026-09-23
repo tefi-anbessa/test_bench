@@ -11,15 +11,7 @@
 
         <!-- New Button (Right) -->
         <% if policy(@document.issues.build()).new? %>
-            <%= link_to new_document_issue_path(@document), 
-              class: "btn btn-outline-primary actions",
-              aria: { label: t('actions.new') },
-              title: t('actions.new') do %>
-              <%== bs_icon('plus-square-fill') %>
-              <span class="ms-1">
-                <%= [t('actions.new'), t("activerecord.models.issue")].join(' ') %>
-              </span>
-            <% end %>
+          <%= nav_button(action: :new, path: new_document_issue_path(@document), record: @document.issues.build()) %>
         <% end %>
       </div> <!-- end of d-flex -->
     </div> <!-- end of card header -->

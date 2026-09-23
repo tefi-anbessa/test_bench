@@ -271,7 +271,7 @@ module Electrical
 
       # Set one invalid resource param for tests
       def invalid_param
-        { electrical_circuit: { poles: 0 } }
+        { electrical_circuit: { poles: 10 } }
       end
 
       # Nominate an attribute to get changed during update tests

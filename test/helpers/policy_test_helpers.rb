@@ -20,6 +20,15 @@ module PolicyTestHelpers
     @team_member.grant(:team_member, @project)
     @regular_user = create(:user)
   end
+
+  def policy_class
+    @policy_class ||= "#{resource_class}Policy".constantize
+  end
+
+  # Helper to be overridden by subclasses
+  def resource_class
+    self.class.to_s.sub('PolicyTest', '').constantize
+  end
   
   # returns user_context for given user and project
   def user_context(user, project)

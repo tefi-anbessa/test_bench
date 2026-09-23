@@ -1,10 +1,11 @@
 <% provide(:title, t('.title')) %>
 <% provide(:header, t('.header', scope_text: @discipline.long_label)) %>
 <% provide(:button_text, t('actions.create')) %>
-<%= render "form",
+<% partial = File.join(@motor.model_name.collection, "form") %>
+<%= render partial,
   motor: @motor,
+  parent: @parent,
   tag: @tag,
-  ip_1: @ip_1,
-  ip_2: @ip_2,
+  discipline: @discipline,
   swatch: @swatch
 %>

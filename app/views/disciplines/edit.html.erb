@@ -1,6 +1,5 @@
 <% provide(:title, t('.title')) %>
-<% provide(:header, [t('projects.show.header', label: @project.label), 
-                      t('.header', label: @discipline.code)].join("; ")) %>
+<% provide(:header, t('.header', label: @discipline.code, scope_text: t("projects.show.header", label: @project.code))) %>
 <% provide(:button_text, t('actions.update')) %>
 <%= render "form",
   discipline: @discipline,

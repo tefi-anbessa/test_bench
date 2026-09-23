@@ -78,7 +78,7 @@
             <% end %> <!-- Project section -->
 
             <!-- Change section: if access is available to change models, make a dropdown menu -->
-            <% if current_project && policy(current_project.change_requests.build()).new? %> 
+            <% if current_project && policy(current_project.change_management_requests.build()).new? %> 
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle"
                     href="#"
@@ -86,12 +86,12 @@
                     id="project-change-menu-btn"
                     role="button"
                     aria-expanded="false">
-                    <%= t('module_name.project_change').pluralize %>
+                    <%= t('change_management.name') %>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="project-change-menu-btn">
-                  <% if policy(ProjectChange::Request).index? %>
-                    <li><%= link_to t('project_change.requests.index.title'),
-                          project_project_change_requests_path(current_project),
+                  <% if policy(ChangeManagement::Request).index? %>
+                    <li><%= link_to t('change_management.requests.index.title'),
+                          project_change_management_requests_path(current_project),
                           class: "dropdown-item" %></li>
                   <% end %>
                 </ul>

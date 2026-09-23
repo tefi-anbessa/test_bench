@@ -1,0 +1,7 @@
+change_management:
+  name: Change Management
+  request:
+    duration:
+      trial: 0
+      temporary: 1
+      permanent: 2

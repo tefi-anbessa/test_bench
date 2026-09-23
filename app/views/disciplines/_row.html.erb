@@ -1,9 +1,10 @@
 <tr scope="row">
+  <td><%= discipline.sort_order %></td>
   <td><%= discipline.code %></td>
   <td><%= discipline.name %></td>
   <td><%= discipline.prefix_schema&.[]('name') %></td>
   <td><%= discipline.required_role || '-' %></td>
-  <td><%= link_to discipline.swatch&.name, discipline.swatch %></td>
+  <td><%= index_link(action: :show, record: discipline.swatch) %></td>
   <td>
     <% if policy(discipline).show? %>
       <%= nav_button(action: :show, record: discipline, icon_only: true) %>

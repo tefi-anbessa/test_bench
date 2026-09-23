@@ -170,8 +170,8 @@ module Electrical
       sign_in @team_member
       # Mock current_project for this test
       ApplicationController.any_instance.stubs(:current_project).returns(@project)
-      visit electrical_switchboard_path(@switchboard1)
-      assert_current_path electrical_switchboard_path(@switchboard1)
+      visit tag_tagable_path(@switchboard1.tag)
+      assert_current_path tag_tagable_path(@switchboard1.tag)
 
       # Find the circuits link and click on it
       find("a[href='#{electrical_switchboard_circuits_path(@switchboard1)}']").click
@@ -189,7 +189,7 @@ module Electrical
       assert_text @circuit.long_label
       assert_sort_link("serial", I18n.t("activerecord.attributes.electrical/circuit.serial"))
       # assert_selector "svg.bi.bi-check" if @circuit.contactor?
-      assert_selector "a[href='#{electrical_cable_path(@circuit.feeder)}']" # if @circuit.feeder.present?
+      assert_selector "a[href='#{tag_tagable_path(@circuit.feeder.tag)}']" # if @circuit.feeder.present?
       assert_selector "a[href='#{electrical_demand_path(@circuit.demand)}']" # if @circuit.demand.present?
     end
 
@@ -229,8 +229,8 @@ module Electrical
       sign_in @team_member
       # Mock current_project for this test
       ApplicationController.any_instance.stubs(:current_project).returns(@project)
-      visit electrical_switchboard_path(@switchboard1)
-      assert_current_path electrical_switchboard_path(@switchboard1)
+      visit tag_tagable_path(@switchboard1.tag)
+      assert_current_path tag_tagable_path(@switchboard1.tag)
 
       find("a[href='#{electrical_switchboard_circuits_path(@switchboard1)}']").click
       assert_current_path electrical_switchboard_circuits_path(@switchboard1)

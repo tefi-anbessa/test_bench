@@ -6,14 +6,13 @@
       <div class="d-flex justify-content-between align-items-center">
 
         <!-- Discipline link -->
-        <%= link_to discipline_path(@discipline), class: "btn btn-outline-info" do %>
-          <%= @discipline.name %>
-          <%= bs_icon('collection', class: "me-1") %>
-        <% end %>
+        <div class="col-2">
+            <%%= nav_button(action: :show_discipline, record: @discipline) %>
+        </div>
         
         <!-- Header Text (Left) -->
         <div class="col-8">
-          <h5><%= t('.header',
+          <h5><%%= t('.header',
             scope_text: [@discipline.project.code, 
                           t("activerecord.models.discipline.one"), 
                           @discipline.code].join(' ')) %>
@@ -21,17 +20,11 @@
         </div>
 
         <!-- New Button (Right) -->
-        <%% if policy(<%= class_name %>).new? %>
-            <%%= link_to new_discipline_<%= singular_route_name %>_path(@discipline), 
-              class: "btn btn-outline-primary actions",
-              aria: { label: t('actions.new') },
-              title: t('actions.new') do %>
-              <%%== bs_icon('plus-square-fill') %>
-              <span class="ms-1">
-                <%%= [t('actions.new'), t('activerecord.models.<%= controller_i18n_scope.singular %>.one')].join(' ') %>
-              </span>
-            <%% end %>
-        <%% end %>
+        <div class="col-2 align-content-end">
+          <%% if policy(<%= class_name %>).new? %>
+            <%%= nav_button(action: :new, path: new_discipline_<%= singular_route_name %>_path(@discipline), record: <%= class_name %>.new) %>
+          <%% end %>
+        </div>
       </div> <!-- end of d-flex -->
     </div> <!-- end of card header -->
 
@@ -90,6 +83,10 @@
       <%% end %>
 
 <!-- <% human_name %> -->
+      <!-- Policies for tagables are invariate over the scope , so no need to look up policy for each record. -->
+      <%% can_show = policy(@discipline.tags.build()).show? %>
+      <%% can_edit = policy(@discipline.tags.build()).edit? %>
+      <%% can_delete = policy(@discipline.tags.build()).destroy? %>
       <table id='<%= table_name %>' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
         <%%= render 'header' %>
         <tbody>
@@ -112,7 +109,7 @@
             </tr>
           <%% end %>
           <%% @<%= plural_name %>.each do |row| %>
-            <%%= render 'row', row: row %>
+            <%%= render 'row', row: row, can_show: can_show, can_edit: can_edit, can_delete: can_delete %>
           <%% end %>
         </tbody>
       </table>

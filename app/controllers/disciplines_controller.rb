@@ -99,8 +99,7 @@ class DisciplinesController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_project
       unless params[:project_id].to_i == current_project.id
-        raise ApplicationController::ConflictError, 
-          :out_of_scope
+        raise ApplicationController::ConflictError, :out_of_scope
       end
       @project = current_project
     end
@@ -113,7 +112,7 @@ class DisciplinesController < ApplicationController
     end
 
     def set_swatch
-      @swatch = @discipline&.swatch || @discipline&.project&.swatch || Project.swatch || Swatch.find_by(name: 'app_theme')
+      @swatch = @discipline&.swatch || @discipline&.project&.swatch || Swatch.find_by(name: @discipline&.name) || Project.swatch || Swatch.find_by(name: 'app_theme')
     end
 
     def setup_form
@@ -127,7 +126,7 @@ class DisciplinesController < ApplicationController
       models = ActiveRecord::Base.descendants
       .select { |model| model.module_parent_name == @discipline.name && model.model_name.human != "Base" }
       .sort_by(&:model_name)
-      @model_links = models.map { |m| [m.model_name.human.pluralize, m.model_name.route_key] }
+      @model_links = models.map { |m| [m.model_name.human.pluralize, m.model_name.name] }
     end
 
     def set_prefix_schema_selection
@@ -177,7 +176,7 @@ class DisciplinesController < ApplicationController
     def discipline_params
       params.require(:discipline).permit(
         :code, :name, :required_role, :catalog_required_role, 
-        :sort_order, :notes, :project_id, :swatch_id,
+        :sort_order, :notes, :swatch_id,
         :prefix_schema
       )
     end

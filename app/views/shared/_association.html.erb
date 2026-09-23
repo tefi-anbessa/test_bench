@@ -1,24 +1,52 @@
 <!-- Abstracted display of dropdown collapsible card for associated records on show view. -->
-<!-- Expecting object and association variables. -->
-
+<!-- Expecting object and association variables, accepts header boolean, see below. -->
+<!-- 
+This partial resolves the provided association. 
+If the association results in a record, it looks for a partial named _card in the record's class' views. 
+If a partial is found it is rendered.
+To cater for different types of associations, the card header is derived as follows:
+If the caller provides variable header as either :model or :association, the symbol determines the header label.
+  :model looks for a translation of the record's class name, defaults to class.model_name.human.
+  :association looks for a translation of the passed association as an attribute of the passed object, defaults to no translation.
+If header is not present:
+  For polymorphic associations, the call to render the card passes the translated model name rather than the provided association,
+  as most polymorphic association names are internal constructs (e.g. tagable, demandable) not meant for UI. 
+  For other associations, the call to render the card looks for a translation of the association name as an attribute of the passed object.
+Note that the header is provided as the context variable to the card partial. Card partials use this to #id the card div element, 
+so it is significant for testing. Tests need to be aware of which mode is being used.
+If no partial is found, a link to the associated record is discplayed.
+If the assocation is valid but no associated record is found, unassigned message is displayed, 
+with label as translation of the association name.
+If the association is not valid, an invalid message is displayed, with the provided association name.
+-->
+<% header ||= :none %>
 <% if object.respond_to?(association) %>
   <% record = object.send(association) %>
   <% if record.present? %>
     <% partial = "#{record.model_name.collection}/card" %>
     <% if lookup_context.exists?(partial, [], true) %>
       <!-- Show a collapsible card for the associated object. -->
-      <% if object.class.reflect_on_association(association).polymorphic? %>
-        <!-- Try to translate the model name of the associated record. -->
-        <% associated = I18n.exists?("activerecord.models.#{record.class.model_name.i18n_key}.one") ?
-                t("activerecord.models.#{record.class.model_name.i18n_key}.one") :
-                record.class.model_name.human %>
+      <% case header %>
+      <% when :model %>
+        <!-- Try to translate the model name of the associated record, default to rails human method. -->
+        <% associated = t("activerecord.models.#{record.model_name.i18n_key}.one",
+            default: record.class.model_name.human) %>
+      <% when :association %>
+        <!-- Set label text to attribute translation, if it exists, otherwise use association without translation. -->
+        <% associated = t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}", 
+            default: association.to_s.humanize) %>
       <% else %>
-        <!-- Set label text to attribute translation, if it exists, otherwise associated model name translation. -->
-        <% associated = I18n.exists?("activerecord.attributes.#{object.model_name.i18n_key}.#{association}") ?
-                    t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}") :
-                    t("activerecord.models.#{object.reflect_on_association(association).klass.model_name.i18n_key}.one") %>
+        <% if object.class.reflect_on_association(association).polymorphic? %>
+          <!-- Default to the model name of the associated record. -->
+          <% associated = t("activerecord.models.#{record.model_name.i18n_key}.one",
+              default: record.class.model_name.human) %>
+        <% else %>
+          <!-- Set label text to attribute translation, if it exists, otherwise use association without translation. -->
+          <% associated = t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}", 
+              default: association.to_s.humanize) %>
+        <% end %>
       <% end %>
-      <%= render partial, object: record, context: associated %>
+      <%= render partial, object: record, context: associated, id: association %>
     <% else %>
       <!-- No card available for this type, show a link to the object. -->
       <div class="col-4 text-muted">

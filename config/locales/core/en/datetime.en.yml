@@ -1,0 +1,4 @@
+en:
+  date:
+    formats:
+      technical:  "%Y-%m-%d"

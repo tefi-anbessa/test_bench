@@ -5,9 +5,14 @@ module Electrical
   class SwitchboardsControllerTest < ActionController::TestCase
     include TagableControllerTests
     include Devise::Test::ControllerHelpers
+    tests TagablesController
 
+    def tagable_type
+      "Electrical::Switchboard"
+    end
+    
     setup do
-      setup_common_test_data
+      setup_tagables_controller_test
       setup_model_specific_data
     end
 
@@ -33,7 +38,7 @@ module Electrical
       }
     end
 
-    # Set invalid resource params for tests
+    # Set invalid resource param for tests
     def invalid_param
       { voltage_rating: 999 }  # Invalid voltage rating (enum only allows 0-9)
     end
@@ -56,6 +61,7 @@ module Electrical
         assert_difference('Circuit.count', 2) do
           post :create, params: {
             discipline_id: @discipline.id,
+            tagable_type: 'Electrical::Switchboard',
             electrical_switchboard: {
               voltage_rating: '600/1000V',
               busbar_rating: 200.0,

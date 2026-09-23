@@ -1,0 +1,22 @@
+# change model translations for en
+en:
+  activerecord:
+    models:
+      change_management/request: 
+        one: Change Request
+        other: Change Requests
+    attributes:
+      change_management/request:
+        project_id: "Project"
+        serial: "Number"
+        title: "Title"
+        reason: "Reason"
+        summary: "Summary"
+        duration: "Duration"
+        durations:
+          permanent: "Permanent"
+          trial: "Trial"
+          temporary: "Temporary"
+    errors:
+      change_management/request:
+        none: None

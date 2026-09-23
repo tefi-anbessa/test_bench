@@ -6,6 +6,7 @@ class TagsControllerTest < ActionController::TestCase
   include ControllerTestHelper
 
   setup do
+    @nesting = :discipline
     setup_projects_and_users # In test/helpers/test_login_helpers.rb
     setup_disciplines(name: "Electrical", required_role: :designer) 
     setup_accredited_users(:designer)
@@ -14,18 +15,6 @@ class TagsControllerTest < ActionController::TestCase
   end
 
   private
-
-  # Helper methods
-
-    # Required for nested routes
-    def new_nesting_params
-      { discipline_id: @discipline.id }
-    end
-
-    # Required for nested routes
-    def index_nesting_params
-      { discipline_id: @discipline.id }
-    end
 
     # Set the minimum required params for a valid resource
     def create_params

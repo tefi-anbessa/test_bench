@@ -1,8 +1,9 @@
 <% provide(:title, t('.title')) %>
 <% provide(:header, t('.header', label: @tag.label)) %>
 <% provide(:button_text, t('actions.update')) %>
-<%= render 'form', 
-          tag: @tag,
-          project: @project,
-          projects: @projects,
-          disciplines: @disciplines %>
+<%= render 'form',
+      tag: @tag,
+      discipline: @discipline,
+      schema: @schema,
+      parts: @parts,
+      parents: @parents %>

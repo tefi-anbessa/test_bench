@@ -12,8 +12,12 @@ module SystemTestHelpers
 
   private # Helper methods
 
+    def resource_name
+      self.class.name.sub('SystemTest', '').singularize
+    end
+
     def resource_class
-      self.class.name.sub('SystemTest', '').singularize.constantize
+      resource_name.safe_constantize
     end
 
     def field_type(field)
@@ -59,6 +63,11 @@ module SystemTestHelpers
     # Electrical::Cable -> discipline_electrical_cables_path(discipline)
     def discipline_resource_index_path(discipline)
       send("discipline_#{resource_class.model_name.route_key}_path", discipline)
+    end
+
+    # Electrical::Cable -> discipline_electrical_cables_path(discipline)
+    def discipline_tagable_resources_path(discipline)
+      discipline_tagables_path(discipline, tagable_type: resource_class.name)
     end
 
     # Document -> document_path
@@ -191,6 +200,39 @@ module SystemTestHelpers
       end
     end
 
+    def assert_tagable_nav_button(action, record = nil, path: nil, tagable_type: nil, label: nil, icon_only: false)
+      label ||= I18n.t("actions.#{action}")
+
+      case action
+      when :delete
+        path ||= tag_tagable_path(record.tag)
+        assert_selector "form[action='#{path}'] button", text: icon_only ? "" : label
+
+        # Rails method override
+        assert_selector "form[action='#{path}'] input[name='_method'][value='delete']",
+                        visible: false
+        return
+      when :new
+        if record.is_a?(Tag)
+          path ||= new_tag_tagable_path(record.tag)
+        elsif record.is_a?(Discipline)
+          path ||= new_discipline_tagable_path(record, tagable_type: tagable_type || resource_name)
+        else
+          raise ArgumentError, "assert_tagable_nav_button(:new, ...) expects a Tag or Discipline, got #{record.class}"
+        end
+        label = [I18n.t("actions.#{action}"), resource_class.model_name.human].join(' ')
+      when :edit
+        path ||= edit_tag_tagable_path(record.tag)
+      else
+        path ||= tag_tagable_path(record.tag)
+      end
+      if icon_only
+        assert_link "", href: path
+      else
+        assert_link label, href: path
+      end
+    end
+
     def assert_nav_button_disabled(action, label: nil)
       label ||= I18n.t("actions.#{action}")
 
@@ -202,19 +244,46 @@ module SystemTestHelpers
       assert_no_selector "form[action='#{path}'] input[name='_method'][value='delete']"
     end
 
-    def collapsible_assertions(object, association)
+    def collapsible_assertions(object, association, header: :none)
       assert object.respond_to?(association), "Object #{object.class} does not respond to #{association}"
       record = object.public_send(association)
-      id = record.id
-      component_id = "#{record.model_name.element}_#{id}_details"
+      case header
+      when :model
+        id_text = record.model_name.element
+        header_text = t("activerecord.models.#{record.model_name.i18n_key}.one",
+                        default: record.class.model_name.human)
+      when :association
+        id_text = association.to_s
+        header_text = I18n.t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}", 
+            default: association.to_s.humanize)
+      else
+        if object.class.reflect_on_association(association).polymorphic?
+          id_text = record.model_name.element
+          header_text = I18n.t("activerecord.models.#{record.model_name.i18n_key}.one",
+                          default: record.model_name.human)
+        else
+          id_text = association.to_s
+          header_text = I18n.t("activerecord.attributes.#{object.model_name.i18n_key}.#{association}", 
+              default: association.to_s.humanize)
+        end
+      end
+      component_id = "#{id_text}_#{record.id}_details"
       header_id = "#{component_id}_header"
+      assert_text header_text
       # Should start collapsed
       refute_selector "##{component_id}", visible: true
       assert_selector "##{component_id}", visible: :all
       find("##{header_id}").click
       assert_selector "##{component_id}.show", visible: :all
-      # Card shall include a link to the associated resource
-      assert_link href: polymorphic_path(record)
+      # Card shall include a link to the associated resource.
+      # Tagables have no route of their own - the card's nav_link reaches them
+      # via their tag - so mirror that here instead of polymorphic_path(record).
+      href = if record.class.respond_to?(:name) && Tag.safe_tagable_types.include?(record.class.name)
+        tag_tagable_path(record.tag)
+      else
+        polymorphic_path(record)
+      end
+      assert_link href: href
     end
 
     def children_collapsible_assertions(parent, association)
@@ -234,6 +303,22 @@ module SystemTestHelpers
 
     def tag_card_assertions
       collapsible_assertions(@resource, :tag)
+    end
+
+    def tag_detail_assertions(tag)
+      assert_text I18n.t("activerecord.attributes.tag.full_tag")
+      assert_text I18n.t("activerecord.attributes.tag.service")
+      assert_text I18n.t("activerecord.attributes.tag.stage")
+      assert_text I18n.t("activerecord.attributes.tag.location")
+      assert_text I18n.t("activerecord.attributes.tag.notes")
+      assert_text I18n.t("activerecord.attributes.tag.tagable_type")
+
+      assert_text tag.full_tag
+      assert_text tag.service
+      assert_text tag.stage
+      assert_text tag.location
+      assert_text tag.notes
+      assert_text tag.tagable_type.safe_constantize.model_name.human
     end
 
     def new_resource_form_assertions
@@ -290,15 +375,31 @@ module SystemTestHelpers
       assert_text I18n.t('activerecord.attributes.tag.tagable_type')
 
       # Data fields
-      # [TODO: Add a conditional test for prefix fields depending on schema]
       assert_field "#{resource_class.model_name.param_key}[tag][stage]", with: tag.present? ? tag.stage : ""
       assert_field "#{resource_class.model_name.param_key}[tag][serial]", with: tag.present? ? tag.serial.to_s.rjust(4, '0') : "0000"
       assert_field "#{resource_class.model_name.param_key}[tag][suffix]", with: tag.present? ? tag.suffix : ""
       assert_field "#{resource_class.model_name.param_key}[tag][service]", with: tag.present? ? tag.service : ""
       assert_field "#{resource_class.model_name.param_key}[tag][location]", with: tag.present? ? tag.location : ""
       assert_field "#{resource_class.model_name.param_key}[tag][notes]", with: tag.present? ? tag.notes : ""
-      assert_field "#{resource_class.model_name.param_key}[tag][tagable_type]", with: tag.present? ? tag.tagable_type : "#{resource_class.name}",
-             disabled: true
+      assert_text resource_class.model_name.human
+      
+      # Prefix elements depend on discipline prefix schema.
+      case @discipline.schema_for_form[:type]
+      when 'default'
+        assert_field "#{resource_class.model_name.param_key}[tag][prefix]"
+      when 'dim1'
+        assert_selector "select[name='#{resource_class.model_name.param_key}[tag][prefix]']"
+      when 'dim2'
+        assert_selector "select[name='part1']"
+        assert_selector "select[name='part2']"
+        assert_selector "[data-tag-prefix-target='prefix'][readonly]"
+      when 'isa51'
+        assert_selector "select[name='measured_variable']"
+        assert_selector "select[name='modifier']"
+        assert_selector "select[name='function']"
+        assert_selector "select[name='modifier_function']"
+        assert_selector "[data-tag-prefix-target='prefix'][readonly]"
+      end
     end
 
     # Form operations
@@ -322,8 +423,8 @@ module SystemTestHelpers
         fill_in "#{resource_class.model_name.param_key}[tag][prefix]", with: @tag.prefix
         @saved_prefix = @tag.prefix
       when 'dim1'
-        @saved_prefix = @discipline.schema_for_form.with_indifferent_access[:prefixes].keys.last
-        find("select[name='prefix_select'] option[value='#{@saved_prefix}']").select_option
+        @saved_prefix = @discipline.schema_for_form.with_indifferent_access[:prefix].keys.last
+        find("select[name='#{resource_class.model_name.param_key}[tag][prefix]'] option[value='#{@saved_prefix}']").select_option
       when 'dim2'
         value1 = @discipline.schema_for_form.with_indifferent_access[:part1].keys.last
         value2 = @discipline.schema_for_form.with_indifferent_access[:part2].keys.last

@@ -2,5 +2,7 @@
 <% provide(:header, t('.header', label: @issue.label )) %>
 <% provide(:button_text, t('actions.update')) %>
 <%= render "form",
-  issue: @issue
+  issue: @issue,
+  document: @document,
+  swatch: @swatch
 %>

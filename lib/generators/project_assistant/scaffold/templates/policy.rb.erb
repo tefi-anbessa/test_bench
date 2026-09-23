@@ -2,15 +2,15 @@
 <%- if @namespaced -%>
 module <%= module_name %>
 <%- end -%>
-  class <%= model_class %>Policy < ResourcePolicy
+  class <%= model_class_name %>Policy < <%= policy_resource_class %>
     # Returns the resource record
     def <%= singular_name %>
       record
     end
     
-    # Inherit Scope from ResourcePolicy
+    # Inherit Scope from <%= @resource_class %>
     
-    # Inherit all actions from ResourcePolicy
+    # Inherit all actions from <%= @resource_class %>
   end
 <%- if @namespaced -%>
 end

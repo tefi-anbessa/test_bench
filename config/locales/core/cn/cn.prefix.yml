@@ -1,4 +1,4 @@
-en:
+cn:
   prefix_schema:
     key:
       custom: "自定义"
@@ -98,5 +98,5 @@ en:
         'X': 'Unclassified'
     dim1:
     dim2:
-      1:
-      2:
+      part1:
+      part2:

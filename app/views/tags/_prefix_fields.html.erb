@@ -1,27 +1,116 @@
-<% if tag.present? %>
-  <% schema = tag.discipline&.prefix_schema %>
-  <% parts = tag.prefix_parts || {} %>
-<% else %>
-  <% schema = nil %>
-  <% parts = {} %>
-<% end %>
+<!-- Expects tag with discipline property set, form -->
+<div data-controller="tag-prefix">
+  <% schema = tag.discipline&.schema_for_form.with_indifferent_access %>
+  <% parts = tag.prefix_parts %>
+  <% conform = parts.present? %>
+  <% case schema[:type] %>
+  <% when 'default' %>
+    <%= form.text_field :prefix %>
+  <% when 'dim1' %>
+    <% key = :prefix %>
+    <% selected = conform ? parts[key] : nil %>
+    <% label = t("activerecord.attributes.tag.prefix_parts.#{key}", default: key.to_s.humanize) %>
+    <% options = schema[key].map do |option, value| 
+        text = [option, t("activerecord.attributes.tag.prefix_parts.#{key.to_s.pluralize}.#{option}", default: value)].join(": ")
+        [text, option]
+      end %>
+    <%= form.select key, options_for_select(options, selected), 
+        { include_blank: t("form.required"), class: "form-select" } %>
+    <% unless conform %>
+            <div class="row mb-3">
+              <div class="form-control-plaintext text-warning">
+                <%= t("prefix_schema.non_conforming", 
+                  schema: t("prefix_schema.types.#{schema['type']}")) %>
+              </div>
+            </div>
+    <% end %>
+  <% when 'dim2' %>
+    <div class="card mb-2" style="<%= card_styles(@swatch) %>">
+      <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+        <%= [t("prefix_schema.type"), t("prefix_schema.types.#{schema['type']}")].join(": ") %>
+      </div>
+      <div class="card-body p-2" style="<%= card_styles(@swatch) %>">
+        <% key = :part1 %>
+        <% selected = conform ? parts[key] : nil %>
+        <%= form_tag_prefix_element(schema, key, selected, label_cols: 3, value_cols: 9, required: true) %>
 
-<div data-tag-prefix-container
-     data-form-prefix="<%= f.object_name %>"
-     data-current-prefix="<%= tag&.prefix %>"
-     data-prefix-parts="<%= parts.to_json %>"
-     data-discipline-id="<%= tag&.discipline_id %>"
-     data-has-schema="<%= schema.present? %>"
-     data-tag-target="prefixContainer"
-     data-translations="<%= {
-       prefix: t('activerecord.attributes.tag.prefix'),
-       measured_variable: t('activerecord.attributes.tag.prefix_parts.measured_variable'),
-       modifier: t('activerecord.attributes.tag.prefix_parts.modifier'),
-       function: t('activerecord.attributes.tag.prefix_parts.function'),
-       modifier_function: t('activerecord.attributes.tag.prefix_parts.modifier_function'),
-       part1: t('activerecord.attributes.tag.prefix_parts.part1'),
-       part2: t('activerecord.attributes.tag.prefix_parts.part2'),
-       select_option: t('form.select_option')
-     }.to_json %>">
-  <!-- JavaScript will replace this content -->
+        <% key = :part2 %>
+        <% selected = conform ? parts[key] : nil %>
+        <%= form_tag_prefix_element(schema, key, selected, label_cols: 3, value_cols: 9, required: false) %>
+
+        <!-- Add a field to return the combined prefix. The stiumulus controller will update this field. -->
+        <div class="row mb-3">
+          <%= form.text_field :prefix, readonly: true, tabindex: -1,              
+              data: { tag_prefix_target: "prefix" }, 
+              label_col: "col-sm-3",
+              control_col: "col-sm-9" %>
+          <% unless conform %>
+            <div class="row mb-3">
+              <div class="form-control-plaintext text-warning">
+                <%= t("prefix_schema.non_conforming", 
+                  schema: t("prefix_schema.types.#{schema['type']}")) %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% when 'isa51' %>
+    <div class="card mb-2" style="<%= card_styles(@swatch) %>">
+      <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+        <%= [t("prefix_schema.type"), t("prefix_schema.types.#{schema['type']}")].join(": ") %>
+      </div>
+      <div class="card-body p-2" style="<%= card_styles(@swatch) %>">
+
+        <% key = :measured_variable %>
+        <% selected = conform ? parts[key] : nil %>
+        <%= form_tag_prefix_element(schema, key, selected, label_cols: 3, value_cols: 9, required: true) %> 
+
+        <% key = :modifier %>
+        <% selected = conform ? parts[key] : nil %>
+        <%= form_tag_prefix_element(schema, key, selected, label_cols: 3, value_cols: 9, required: false) %> 
+
+        <% keys = [:readout_function, :output_function] %>
+        <% label = t("prefix.isa51.function") %>
+        <% grouped = schema.slice(*keys).each_with_object({}) do |(key, options), h| 
+            group_label = I18n.t("activerecord.attributes.tag.prefix_parts.#{key}", default: key.to_s.humanize)
+            h[group_label] = options.map do |value, label|
+              [[value, t("activerecord.attributes.tag.prefix_parts.#{key}.#{value}", default: label)].join(": "), value]
+            end 
+          end %>
+        <% selected = conform ? parts[:readout_function] || parts[:output_function] : nil %>
+        <div class="row mb-1">
+          <div class="col-3 col-form-label text-muted">
+            <%= label %>
+          </div>
+          <div class = col-9>
+            <%= select_tag :function, grouped_options_for_select(grouped, selected), 
+              data: { action: "change->tag-prefix#updatePrefix", tag_prefix_target: "function" },
+              include_blank: t("form.required"), 
+              class: "form-select" %>
+          </div>
+        </div>
+
+        <% key = :modifier_function %>
+        <% selected = conform ? parts[key] : nil %>
+        <%= form_tag_prefix_element(schema, key, selected, label_cols: 3, value_cols: 9, required: false) %> 
+
+        <!-- Add a field to return the combined prefix. The stiumulus controller will update this field. -->
+        <div class="row mb-3">
+          <%= form.text_field :prefix, readonly: true, tabindex: -1,
+              data: { tag_prefix_target: "prefix" },
+              label_col: "col-sm-3",
+              control_col: "col-sm-9" %>
+          <% unless conform %>
+            <div class="row mb-3">
+              <div class="form-control-plaintext text-warning">
+                <%= t("prefix_schema.non_conforming", 
+                  schema: t("prefix_schema.types.#{schema['type']}")) %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
 </div>

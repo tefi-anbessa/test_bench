@@ -1,0 +1,24 @@
+# frozen_string_literal: true
+module <%= module_name %>
+  module <%= model_class_name %>Extension
+
+    private
+
+      def setup_additional_form_data
+        # Add any model specific form data here
+      end
+
+      def after_create_hook(<%= file_name %>)
+        # Add any model specific after create hook logic here
+      end
+
+      def after_update_hook(<%= file_name %>)
+        # Add any model specific after update hook logic here
+      end
+
+      def tagable_params
+        params.require(:<%= singular_table_name %>)
+        .permit(<%= @params %>)
+      end
+  end
+end

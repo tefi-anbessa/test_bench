@@ -19,12 +19,14 @@ en:
     discard:      "Discard changes"
     discard_new:  "Discard new"
     sure:         "Are you sure?"
-    link:         "Link to new %{resource}"
+    link:         "Link to new"
     jump_to:      "Jump to %{model}"
     # Button labels: keep short
     show:         "Show"
     show_project: "Show"
     show_discipline: "Show"
+    show_tag:     "Show"
+    show_document: "Show"
     new:          "New"
     edit:         "Edit"
     index:        "Index"
@@ -32,6 +34,9 @@ en:
     index_discipline: "Index"
     next:         "Next"
     previous:     "Prev"
+    up:           "Show"
+    down:         "Show"
+    children:     "Children"
     grant:        "Grant"
     revoke:       "Revoke"
 
@@ -62,6 +67,11 @@ en:
     label:        "Label"
     details:      "%{model} Details"
     associations: "Associations"
+    resource:     "Resource"
+    true:         "Yes"
+    false:        "No"
+    not_numeric:  "Not a numeric value"
+
   field:
     type:
       integer:      "integer"
@@ -82,8 +92,6 @@ en:
     undefined:    "Undefined"
     none:         "None"
     unknown:      "Unknown"
-    true:         "☑"
-    false:        "☒"
     error_message: 
       one:        "The form contains %{count} error"
       other:      "The form contains %{count} errors"

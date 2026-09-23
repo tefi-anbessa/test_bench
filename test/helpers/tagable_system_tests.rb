@@ -46,7 +46,7 @@ module TagableSystemTests
     refute_selector "a[href='projects_url']"
   end
 
-  def test_team_member_navigating_to_discipline_resource_index
+  def test_team_member_navigating_to_discipline_tagable_index
     sign_in @team_member
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
@@ -63,14 +63,14 @@ module TagableSystemTests
     find("#discipline-#{@discipline.id}").click
     assert_current_path discipline_path(@discipline)
 
-    find("a[href='#{discipline_resource_index_path(@discipline)}']").click
-    assert_current_path discipline_resource_index_path(@discipline)
+    find("a[href='#{discipline_tagable_resources_path(@discipline)}']").click
+    assert_current_path discipline_tagable_resources_path(@discipline)
 
-    assert_nav_button(:show, @resource)
+    assert_tagable_nav_button(:show, @resource)
     # Variable assertions
-    refute_selector "a[href='#{new_discipline_resource_path(@discipline)}']" # Link to new resource
-    refute_selector "a[href='#{edit_resource_path(@resource)}']" # team member cannot edit resource
-    refute_delete(resource_path(@resource)) # team member cannot delete resource
+    refute_selector "a[href='#{new_discipline_tagable_path(@discipline, tagable_type: resource_name)}']" # Link to new resource
+    refute_selector "a[href='#{edit_tag_tagable_path(@tag)}']" # team member cannot edit resource
+    refute_delete(tag_tagable_path(@tag)) # team member cannot delete resource
 
     discipline_resource_index_assertions
   end
@@ -79,13 +79,13 @@ module TagableSystemTests
     sign_in @accredited_user
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit discipline_resource_index_path(@discipline)
-    assert_current_path discipline_resource_index_path(@discipline)
+    visit discipline_tagable_resources_path(@discipline)
+    assert_current_path discipline_tagable_resources_path(@discipline)
 
     # Variable assertions
-    assert_nav_button(:new, path: new_discipline_resource_path(@discipline)) # Link to new resource
-    assert_nav_button(:edit, @resource, path: edit_resource_path(@resource), icon_only: true) # accredited user can edit resource
-    refute_delete(resource_path(@resource)) # accredited user cannot delete resource
+    assert_tagable_nav_button(:new, @discipline) # Link to new resource
+    assert_tagable_nav_button(:edit, @resource, icon_only: true) # accredited user can edit resource
+    refute_delete(tag_tagable_path(@tag)) # accredited user cannot delete resource
 
     discipline_resource_index_assertions
   end
@@ -94,13 +94,13 @@ module TagableSystemTests
     sign_in @admin
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit discipline_resource_index_path(@discipline)
-    assert_current_path discipline_resource_index_path(@discipline)
+    visit discipline_tagable_resources_path(@discipline)
+    assert_current_path discipline_tagable_resources_path(@discipline)
 
     # Variable assertions
-    assert_nav_button(:new, path: new_discipline_resource_path(@discipline)) # Link to new resource
-    assert_nav_button(:edit, @resource, path: edit_resource_path(@resource), icon_only: true) # admin can edit resource
-    assert_nav_button(:delete, @resource, icon_only: true) # admin can delete resource
+    assert_tagable_nav_button(:new, @discipline) # Link to new resource
+    assert_tagable_nav_button(:edit, @resource, icon_only: true) # admin can edit resource
+    assert_tagable_nav_button(:delete, @resource, icon_only: true) # admin can delete resource
 
     discipline_resource_index_assertions
   end
@@ -109,18 +109,20 @@ module TagableSystemTests
     sign_in @team_member
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit discipline_resource_index_path(@discipline)
-    click_link(href: resource_path(@resource))
-    assert_current_path resource_path(@resource)
+    visit discipline_tagable_resources_path(@discipline)
+    assert_current_path discipline_tagable_resources_path(@discipline)
+
+    click_link(href: tag_tagable_path(@tag))
+    assert_current_path tag_tagable_path(@tag)
 
     # Variable assertions
-    refute_selector "a[href='#{edit_resource_path(@resource)}']" # edit resource
-    refute_delete(resource_path(@resource)) # delete resource
-    refute_selector "a[href='#{new_discipline_resource_path(@discipline)}']" # Link to new resource
+    refute_selector "a[href='#{edit_tag_tagable_path(@tag)}']" # edit resource
+    refute_delete(tag_tagable_path(@tag)) # delete resource
+    refute_selector "a[href='#{new_discipline_tagable_path(@discipline, tagable_type: resource_name)}']" # Link to new resource
     
     # Test prev and next buttons
     assert_nav_button_disabled(:previous)
-    assert_nav_button(:next, @resource2)
+    assert_tagable_nav_button(:next, @resource2)
 
     tagable_show_assertions
   end
@@ -129,35 +131,35 @@ module TagableSystemTests
     sign_in @team_member
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit resource_path(@resource)
-    assert_current_path resource_path(@resource)
+    visit tag_tagable_path(@tag)
+    assert_current_path tag_tagable_path(@tag)
     
     # Header bar should include disabled previous button and enabled next button
     assert_nav_button_disabled(:previous)
-    assert_nav_button(:next, @resource2)
+    assert_tagable_nav_button(:next, @resource2)
     
     click_link I18n.t('actions.next')
-    assert_current_path resource_path(@resource2)
+    assert_current_path tag_tagable_path(@tag2)
 
     # Header bar should include enabled previous button and disabled next button
-    assert_nav_button(:previous, @resource)
+    assert_tagable_nav_button(:previous, @resource)
     assert_nav_button_disabled(:next)
 
     click_link I18n.t('actions.previous')
-    assert_current_path resource_path(@resource)
+    assert_current_path tag_tagable_path(@tag)
   end
 
   def test_accredited_user_resource_show_view
     sign_in @accredited_user
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit resource_path(@resource)
-    assert_current_path resource_path(@resource)
+    visit tag_tagable_path(@tag)
+    assert_current_path tag_tagable_path(@tag)
 
     # Variable assertions
-    assert_nav_button(:edit, @resource, path: edit_resource_path(@resource))
-    refute_delete(resource_path(@resource))
-    assert_nav_button(:new, @resource, path: new_discipline_resource_path(@discipline))
+    assert_tagable_nav_button(:edit, @resource)
+    refute_delete(tag_tagable_path(@tag))
+    assert_tagable_nav_button(:new, @discipline) 
 
     tagable_show_assertions
   end
@@ -166,13 +168,13 @@ module TagableSystemTests
     sign_in @project_admin
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit resource_path(@resource)
-    assert_current_path resource_path(@resource)
+    visit tag_tagable_path(@tag)
+    assert_current_path tag_tagable_path(@tag)
 
     # Variable assertions
-    assert_nav_button(:edit, @resource, path: edit_resource_path(@resource))
-    assert_nav_button(:delete, @resource)
-    assert_nav_button(:new, @resource, path: new_discipline_resource_path(@discipline))
+    assert_tagable_nav_button(:edit, @resource)
+    assert_tagable_nav_button(:delete, @resource)
+    assert_tagable_nav_button(:new, @discipline)
 
     tagable_show_assertions
   end
@@ -181,11 +183,11 @@ module TagableSystemTests
     sign_in @accredited_user
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit resource_path(@resource)
-    assert_current_path resource_path(@resource)
+    visit tag_tagable_path(@tag)
+    assert_current_path tag_tagable_path(@tag)
 
-    find("a[href='#{new_discipline_resource_path(@discipline)}']").click
-    assert_current_path new_discipline_resource_path(@discipline)
+    find("a[href='#{new_discipline_tagable_path(@discipline, tagable_type: resource_name)}']").click
+    assert_current_path new_discipline_tagable_path(@discipline, tagable_type: resource_name)
     assert_text I18n.t("#{view_key}.new.header", scope_text: @discipline.long_label)
     assert page.title.include?(I18n.t("#{view_key}.new.title"))
 
@@ -197,11 +199,11 @@ module TagableSystemTests
     sign_in @accredited_user
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit discipline_resource_index_path(@discipline)
-    assert_current_path discipline_resource_index_path(@discipline)
+    visit discipline_tagable_resources_path(@discipline)
+    assert_current_path discipline_tagable_resources_path(@discipline)
 
-    find("a[href='#{new_discipline_resource_path(@discipline)}']").click
-    assert_current_path new_discipline_resource_path(@discipline)
+    find("a[href='#{new_discipline_tagable_path(@discipline, tagable_type: resource_name)}']").click
+    assert_current_path new_discipline_tagable_path(@discipline, tagable_type: resource_name)
 
     tag_form_assertions(nil)
     new_resource_form_assertions
@@ -211,13 +213,13 @@ module TagableSystemTests
 
     # Submit the form data
     click_button I18n.t('actions.create')
-    sleep 2.0  # Give database time to commit
+    sleep 1.0  # Give database time to commit
     # Form data uses @tag as a template, serial increased + 1.
     new_tag = Tag.find_by(discipline: @discipline,
       prefix: @saved_prefix, 
       serial: @saved_serial,
       suffix: @tag.suffix)
-    assert_current_path resource_path(new_tag.tagable)
+    assert_current_path tag_tagable_path(new_tag)
     assert_equal new_tag.tagable.class, resource_class
   end
 
@@ -228,14 +230,14 @@ module TagableSystemTests
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit tag_path(@unassigned_tag)
     assert_current_path tag_path(@unassigned_tag)
-    find("a[href='#{new_tag_resource_path(@unassigned_tag)}']").click
-    assert_current_path new_tag_resource_path(@unassigned_tag)
+    find("a[href='#{new_tag_tagable_path(@unassigned_tag, tagable_type: resource_name)}']").click
+    assert_current_path new_tag_tagable_path(@unassigned_tag, tagable_type: resource_name)
     fill_in_resource_fields
 
     # Submit the form data
     click_button I18n.t('actions.create')
     sleep 1.0  # Give database time to commit
-    assert_current_path resource_path(@unassigned_tag.reload.tagable)
+    @unassigned_tag.reload
     assert_text @unassigned_tag.label
     assert_text I18n.t('flash.tagables.assigned_to',
                             resource_name: resource_class.model_name.human,
@@ -248,17 +250,17 @@ module TagableSystemTests
     sign_in @accredited_user
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit discipline_resource_index_path(@discipline)
-    assert_current_path discipline_resource_index_path(@discipline)
+    visit discipline_tagable_resources_path(@discipline)
+    assert_current_path discipline_tagable_resources_path(@discipline)
     original = @resource.dup
-    find("a[href='#{edit_resource_path(@resource)}']").click
-    assert_current_path edit_resource_path(@resource)
+    find("a[href='#{edit_tag_tagable_path(@tag)}']").click
+    assert_current_path edit_tag_tagable_path(@tag)
     
     assert_text I18n.t("#{view_key}.edit.header", label: @resource.long_label)
     assert page.title.include?(I18n.t("#{view_key}.edit.title"))
 
-    # Tag sub-form
-    tag_form_assertions(@tag)
+    # Tag details
+    tag_detail_assertions(@tag)
 
     # Main resource form
     edit_resource_form_assertions
@@ -271,8 +273,7 @@ module TagableSystemTests
     # Submit the form data
     click_button I18n.t('actions.update')
     sleep 0.5  # Give database time to commit
-    # @resource.reload
-    assert_current_path resource_path(@resource)
+    assert_current_path tag_tagable_path(@tag)
     @resource.reload
     assert_text @resource.label
     @edit_attributes.each do |field, value|
@@ -282,8 +283,8 @@ module TagableSystemTests
     assert_text I18n.t("flash.update.notice", resource_name: resource_class.model_name.human)
 
     # Make another edit to test the show view link, and then discard
-    click_link(href: edit_resource_path(@resource))
-    assert_current_path edit_resource_path(@resource)
+    click_link(href: edit_tag_tagable_path(@tag))
+    assert_current_path edit_tag_tagable_path(@tag)
 
     @edit_attributes.each do |key, value|
       fill_in "#{resource_class.model_name.param_key}[#{key}]", with: original.send(key)
@@ -292,7 +293,7 @@ module TagableSystemTests
     accept_confirm do
       click_link(text: I18n.t('actions.discard'))
     end
-    assert_current_path resource_path(@resource)
+    assert_current_path tag_tagable_path(@tag)
     @edit_attributes.each do |key, value|
       assert_text value
       assert_equal value, @resource.send(key)
@@ -303,13 +304,13 @@ module TagableSystemTests
     sign_in @admin
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit discipline_resource_index_path(@discipline)
-    assert_current_path discipline_resource_index_path(@discipline)
+    visit discipline_tagable_resources_path(@discipline)
+    assert_current_path discipline_tagable_resources_path(@discipline)
 
-    click_delete(resource_path(@resource))
-    assert_current_path discipline_resource_index_path(@discipline)
-    refute_selector "a[href='#{resource_path(@resource)}']"
-    assert_text I18n.t("flash.destroy.notice", resource_name: @resource.model_name.human)
+    click_delete(tag_tagable_path(@tag))
+    assert_current_path discipline_tagable_resources_path(@discipline)
+    refute_selector "a[href='#{tag_tagable_path(@tag)}']"
+    assert_text I18n.t("flash.destroy.notice", resource_name: resource_class.model_name.human)
     @tag.reload
     assert_nil @tag.tagable_id
   end
@@ -318,13 +319,13 @@ module TagableSystemTests
     sign_in @admin
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit resource_path(@resource)
-    assert_current_path resource_path(@resource)
+    visit tag_tagable_path(@tag)
+    assert_current_path tag_tagable_path(@tag)
     
-    click_delete(resource_path(@resource))
-    assert_current_path discipline_resource_index_path(@discipline)
-    refute_selector "a[href='#{resource_path(@resource)}']"
-    assert_text I18n.t("flash.destroy.notice", resource_name: @resource.model_name.human)
+    click_delete(tag_tagable_path(@tag))
+    assert_current_path discipline_tagable_resources_path(@discipline)
+    refute_selector "a[href='#{tag_tagable_path(@tag)}']"
+    assert_text I18n.t("flash.destroy.notice", resource_name: resource_class.model_name.human)
     @tag.reload
     assert_nil @tag.tagable_id
   end
@@ -341,7 +342,7 @@ module TagableSystemTests
       assert page.title.include?(I18n.t("#{view_key}.index.title"))
 
       assert_nav_button(:show_discipline, @discipline) # Link back to discipline show view
-      assert_nav_button(:show, @resource, icon_only: true) # Link to resource show view
+      assert_nav_button(:show, path: tag_tagable_path(@tag), icon_only: true) # Link to resource show view
       
       index_field_assertions
     end
@@ -359,7 +360,7 @@ module TagableSystemTests
 
       # Navigation
       # Link back to discipline resource index
-      assert_nav_button(:index, path: discipline_resource_index_path(@discipline))
+      assert_nav_button(:index, path: discipline_tagables_path(@discipline, tagable_type: resource_name))
 
       # Field labels
       @show_fields.each do |field|

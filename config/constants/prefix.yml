@@ -8,7 +8,7 @@ prefix_schemata:
     type: 'default'
   isa51:
     type: 'isa51'
-    measured_variables:
+    measured_variable:
       'A': 'Analysis'
       'B': 'Burner, combustion'
       'C': 'User''s choice'
@@ -37,7 +37,7 @@ prefix_schemata:
       'Z': 'Position, dimension'
 
     # Modifiers
-    modifiers:
+    modifier:
       'D': 'Differential'
       'F': 'Ration (fraction)'
       'J': 'Scan'
@@ -50,7 +50,7 @@ prefix_schemata:
       'Z': 'Z-axis'
 
     # Readout or Passive Functions
-    readout_functions:
+    readout_function:
       'A': 'Alarm'
       'B': 'User''s choice'
       'E': 'Sensor (primary element)'
@@ -66,7 +66,7 @@ prefix_schemata:
       'X': 'Unclassified'
 
     # Output Functions
-    output_functions:
+    output_function:
       'B': 'User''s choice'
       'C': 'Control'
       'K': 'Control Station'
@@ -80,7 +80,7 @@ prefix_schemata:
       'Z': 'Driver, actuator'
 
     # Modifier Functions
-    modifier_functions:
+    modifier_function:
       'B': 'User''s choice'
       'H': 'High'
       'HH': 'High high'
@@ -92,7 +92,7 @@ prefix_schemata:
       'X': 'Unclassified'
   dim1:
     type: 'dim1'
-    prefixes:
+    prefix:
       'A': 'Package'
       'B': 'Building'
       'EC': 'Electrical Cable'
@@ -118,7 +118,7 @@ prefix_schemata:
       'B': 'Box'
   alternate_inst:
     type: 'isa51'
-    measured_variables:
+    measured_variable:
       'A': 'Analysis'
       'B': 'Burner, combustion'
       'C': 'User''s choice'
@@ -147,7 +147,7 @@ prefix_schemata:
       'Z': 'Position, dimension'
 
     # Modifiers
-    modifiers:
+    modifier:
       'D': 'Differential'
       'F': 'Ration (fraction)'
       'J': 'Scan'
@@ -157,7 +157,7 @@ prefix_schemata:
       'Z': 'Safety (SIL rated)'
 
     # Readout or Passive Functions
-    readout_functions:
+    readout_function:
       'A': 'Alarm'
       'B': 'User''s choice'
       'E': 'Sensor (primary element)'
@@ -173,7 +173,7 @@ prefix_schemata:
       'X': 'Unclassified'
 
     # Output Functions
-    output_functions:
+    output_function:
       'B': 'User''s choice'
       'C': 'Control'
       'K': 'Control Station'
@@ -187,7 +187,7 @@ prefix_schemata:
       'Z': 'Driver, actuator'
 
     # Modifier Functions
-    modifier_functions:
+    modifier_function:
       'B': 'User''s choice'
       'H': 'High'
       'HH': 'High high'

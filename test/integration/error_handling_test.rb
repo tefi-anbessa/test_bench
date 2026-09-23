@@ -40,10 +40,11 @@ class ErrorHandlingTest < ActionDispatch::IntegrationTest
   test "shows custom conflict page for tag already associated" do
     sign_out @user
     sign_in @admin
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
     # Try to create another switchboard with the same tag
     assert_no_difference('Electrical::Switchboard.count') do
-      post electrical_switchboards_path, params: {
-        tag_id: @switchboard_tag.id,
+      post tag_tagable_path(@switchboard_tag), params: {
         electrical_switchboard: {
           voltage_rating: '600/1000V',
           busbar_rating: 200.0,

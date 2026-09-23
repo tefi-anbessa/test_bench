@@ -5,9 +5,14 @@ module Electrical
   class CablesControllerTest < ActionController::TestCase
     include TagableControllerTests
     include Devise::Test::ControllerHelpers
+    tests TagablesController
+
+    def tagable_type
+      "Electrical::Cable"
+    end
 
     setup do
-      setup_common_test_data
+      setup_tagables_controller_test
       setup_model_specific_data
     end
 

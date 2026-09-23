@@ -44,7 +44,7 @@ module TestSetupHelpers
 
   def setup_disciplines(name: nil, required_role: :designer)
     # Priority 1: Use explicitly provided name
-    # Priority 2: Try to find from resource_class
+    # Priority 2: Try to find from resource_class module
     discipline_name = name || (defined?(resource_class) && resource_class.module_parent_name)
     
     @discipline = @project.disciplines.find_by(name: discipline_name)

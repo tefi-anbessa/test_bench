@@ -9,7 +9,7 @@
         <!-- Switchboard or Discipline link -->
         <div class="col-2">
           <% if @switchboard.present?%>
-            <%= nav_button(action: :show, record: @switchboard) %>
+            <%= nav_button(action: :up, record: @switchboard) %>
           <% else %>
             <%= nav_button(action: :show_discipline, record: @discipline) %>
           <% end %>
@@ -27,7 +27,7 @@
         <div class="col-2 align-content-end">
           <% if @switchboard.present? && policy(@switchboard).new? %>
             <%= nav_button(action: :new, path: new_electrical_switchboard_circuit_path(@switchboard),
-                record: Electrical::Circuit.new) %>
+                record: @switchboard.circuits.new) %>
           <% end %>
         </div> 
       </div> <!-- row -->

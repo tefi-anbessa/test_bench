@@ -1,0 +1,19 @@
+<tr scope="row">
+  <% unless current_project %>
+    <td scope = "col"><%= row.project.code %></td>
+  <% end %>
+  <td><%= row.label || '-' %></td>  
+  <td><%= row.title || '-' %></td>  
+  <td><%= row.class.human_enum_name(:duration, row.duration) %></td>
+  <td>
+    <% if policy(row).show? %>
+      <%= nav_button(action: :show, record: row, icon_only: true) %>
+    <% end %>
+    <% if policy(row).edit? %>
+      <%= nav_button(action: :edit, record: row, path: edit_change_management_request_path(row), icon_only: true) %>
+    <% end %>
+    <% if policy(row).destroy? %>
+      <%= nav_button(action: :delete, record: row, icon_only: true) %>
+    <% end %>
+  </td>
+</tr>

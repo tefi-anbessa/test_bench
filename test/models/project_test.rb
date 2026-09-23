@@ -49,7 +49,7 @@ class ProjectTest < ActiveSupport::TestCase
 
   test "has change requests with dependent destroy" do
     assert_respond_to @project, :change_requests
-    assert_kind_of ActiveRecord::Associations::CollectionProxy, @project.change_requests
+    assert_kind_of ActiveRecord::Associations::CollectionProxy, @project.change_management_requests
   end
 
   # Validations

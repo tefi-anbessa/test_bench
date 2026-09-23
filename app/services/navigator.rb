@@ -1,7 +1,7 @@
 # app/services/navigator.rb
 class Navigator
   def initialize(scope:, record:)
-    @scope  = scope
+    @scope  = scope.unscope(:order)
     @record = record
   end
 

@@ -2,23 +2,39 @@
 
 module Electrical
   class Cable < Base
+
+  # === Mixins ===
     include ::Tagable
 
-    # Default scope to sort by tag's loop_id, prefix, and suffix
-    # default_scope { includes(:tag).order('tags.loop_id', 'tags.prefix', 'tags.suffix') }
-  
+  # === Constants ===
+
+  # === Gem macros ===
+
+  # === Attributes ===
+
+  # === Associations ===
     belongs_to :electrical_cable_type, class_name: 'Electrical::CableType'
 
     belongs_to :from, polymorphic: true, optional: true
     belongs_to :to, polymorphic: true, optional: true
 
-    # Validations
-    validates :electrical_cable_type, presence: true
+  # === Scopes ===
 
-    # In Cable model
+  # === Validations ===
+    validates :electrical_cable_type, presence: true
     validate :validate_from_uniqueness
     validate :validate_to_uniqueness
 
+  # === Callbacks ===
+
+  # === Class methods ===
+    def self.safe_connection_types
+      Constants.electrical.connect_options.select{ |type| type.safe_constantize.present? }
+    end
+
+  # === Public methods ===
+
+  # === Private methods ===
     private
 
     def validate_from_uniqueness

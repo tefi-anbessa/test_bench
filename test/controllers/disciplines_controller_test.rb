@@ -7,6 +7,7 @@ class DisciplinesControllerTest < ActionController::TestCase
   include ControllerTestHelper
 
   setup do
+    @nesting = :project
     # Don't use the standard helper setup, discipline model will get confused.
     setup_projects_and_users
     setup_disciplines(name: "Electrical", required_role: :designer)
@@ -17,6 +18,8 @@ class DisciplinesControllerTest < ActionController::TestCase
   def setup_model_specific_data
     # Override accredited users. :project_admin can create disciplines
     @accredited_user = @project_admin
+    # Give accredited user the required role to pass the setup test.
+    @accredited_user.grant(:designer, @discipline)
     # Set up instances of discipline
     @resource = @project.disciplines.find_by(name: "Electrical")
     @other_resource = @other_project.disciplines.find_by(name: "Electrical")
