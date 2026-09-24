@@ -20,16 +20,19 @@
         label_col: "col-sm-4", 
         control_col: "col-sm-8") do |f| %>
 
-      <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
+      <div class="card-body p-2" data-controller="electrical-demand" style="<%= form_styles(@swatch) %>">
         <%= render 'shared/error_messages', object: f.object %>
 
         <div class="row justify-content-center">
           <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
-            <%= form_field(f, :basis, type: :enum_translated, required: true) %>
+            <%= form_field(f, :basis, type: :enum_translated, required: true,
+                data: { electrical_demand_target: "basis", action: "change->electrical-demand#recalculate" }) %>
             <%= form_field(f, :basis_notes, type: :text) %>
-            <%= form_field(f, :config, type: :enum_translated, required: true) %>
-            <%= form_field(f, :supply, type: :number, required: true, step: 1.0, units: "V") %>
+            <%= form_field(f, :config, type: :enum_translated, required: true,
+                data: { electrical_demand_target: "config", action: "change->electrical-demand#recalculate" }) %>
+            <%= form_field(f, :supply, type: :number, required: true, step: 1.0, units: "V",
+                data: { electrical_demand_target: "supply", action: "input->electrical-demand#recalculate" }) %>
 
             <% disabled = [:current, :power, :vector, :power_factor] %>
             <% case demand.basis %>
@@ -47,40 +50,23 @@
               <% disabled.delete(:current) %>
               <% disabled.delete(:power) %>
             <% end %>
-        
-            <div class="row">
-              <%= f.number_field :current,
-                    value: number_to_human(f.object.current, precision: 4),
-                    disabled: disabled.include?(:current), append: "A" %>
-            </div>
 
-            <div class="row">
-              <%= f.number_field :power,
-                    value: number_to_human(f.object.power, precision: 4),
-                    disabled: disabled.include?(:power), append: "W" %>
-            </div>
+            <%= form_field(f, :current, type: :number, units: "A",
+                disabled: disabled.include?(:current),
+                data: { electrical_demand_target: "current", action: "input->electrical-demand#recalculate" }) %>
+            <%= form_field(f, :power, type: :number, units: "W",
+                disabled: disabled.include?(:power),
+                data: { electrical_demand_target: "power", action: "input->electrical-demand#recalculate" }) %>
+            <%= form_field(f, :power_factor, type: :number, in: -1.0 .. 1.0, step: 0.01,
+                disabled: disabled.include?(:power_factor),
+                data: { electrical_demand_target: "pf", action: "input->electrical-demand#recalculate" }) %>
+            <%= form_field(f, :vector, type: :number, units: "VA",
+                disabled: disabled.include?(:vector),
+                data: { electrical_demand_target: "vector", action: "input->electrical-demand#recalculate" }) %>
 
-            <div class="row">
-              <%= f.number_field :power_factor, in: -1.0 .. 1.0, step: 0.01,
-                    disabled: disabled.include?(:power_factor) %>
-            </div>
-
-            <div class="row">
-              <%= f.number_field :vector,
-                    value: number_to_human(f.object.vector, precision: 4),
-                    disabled: disabled.include?(:vector), append: "VA" %>
-            </div>
-
-            <div class="row">
-              <%= f.number_field :duty, in: 0.0 .. 1.0, step: 0.01,
-                    help: t('activerecord.help.electrical/demand.duty') %>
-            </div>
-            
-            <div class="row">
-              <%= f.text_area :notes,
-                  help: t('activerecord.help.electrical/demand.notes') %>
-            </div>
-          </div> <!-- end responsive columns --> 
+            <%= form_field(f, :duty, type: :number, in: 0 .. 1.0, step: 0.01) %>
+            <%= form_field(f, :notes, type: :text) %>
+          </div> <!-- end responsive columns -->
         </div>
       </div> <!-- card body -->
 

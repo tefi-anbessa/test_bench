@@ -8,8 +8,7 @@ export default class extends Controller {
     "current",
     "power",
     "pf",
-    "vector",
-    "voltageReference"
+    "vector"
   ]
 
   connect() {
@@ -17,17 +16,39 @@ export default class extends Controller {
   }
 
   // ----------------------------
+  // Which fields are user-entered (enabled) per basis - mirrors the
+  // `disabled` array built server-side in _form.html.erb.
+  // ----------------------------
+
+  static basisFields = {
+    summation: [],
+    power_pf: ["power", "pf"],
+    vector_pf: ["vector", "pf"],
+    current_pf: ["current", "pf"],
+    current_power: ["current", "power"]
+  }
+
+  updateDisabledFields(basis) {
+    const enabled = this.constructor.basisFields[basis] || []
+    for (const name of ["current", "power", "pf", "vector"]) {
+      const target = this[`${name}Target`]
+      if (target) target.disabled = !enabled.includes(name)
+    }
+  }
+
+  // ----------------------------
   // Events
   // ----------------------------
 
   recalculate() {
+    const basis = this.basisTarget.value
+    this.updateDisabledFields(basis)
+
     const V = this.voltage()
     const I = this.val(this.currentTarget)
     const P = this.val(this.powerTarget)
     const pf = this.val(this.pfTarget)
     const S = this.val(this.vectorTarget)
-
-    const basis = this.basisTarget.value
 
     let newI = I
     let newP = P
@@ -66,17 +87,13 @@ export default class extends Controller {
   }
 
   // ----------------------------
-  // Voltage handling (IMPORTANT FIX)
+  // Voltage handling
   // ----------------------------
 
+  // We do NOT convert voltage silently - we rely on config-specific
+  // formulas instead (see apparentPowerFromCurrent/currentFromApparent).
   voltage() {
-    const V = this.val(this.supplyTarget)
-    const ref = this.voltageReferenceTarget?.value
-
-    // IMPORTANT:
-    // We do NOT convert voltage silently anymore.
-    // We rely on config-specific formulas instead.
-    return V
+    return this.val(this.supplyTarget)
   }
 
   // ----------------------------
@@ -139,8 +156,10 @@ export default class extends Controller {
     return parseFloat(el.value) || 0
   }
 
+  // Only ever writes into the calculated (disabled) field for the current
+  // basis - never overwrites the field the user is actively typing into.
   set(el, value) {
-    if (!el || el.disabled) return
+    if (!el || !el.disabled) return
     if (!isFinite(value)) return
     el.value = value.toFixed(4)
   }

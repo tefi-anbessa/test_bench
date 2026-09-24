@@ -337,15 +337,15 @@ module ViewHelper
       blank = options.delete(:required) ? t("form.required") : t("form.optional")
       values = form.object.class.send(attr.to_s.pluralize).keys
       collection = values.map { |v| [v, v] }
-      form.select(attr, collection, { include_blank: blank }, class: "form-select")
+      form.select(attr, collection, { include_blank: blank }, class: "form-select", **options)
 
     when :enum_translated
       # expects :required in options
       blank = options.delete(:required) ? t("form.required") : t("form.optional")
       values = form.object.class.send(attr.to_s.pluralize).keys
       collection = values.map { |v| [form.object.class.human_enum_name(attr, v), v] }
-      form.select(attr, collection, { include_blank: blank }, 
-        label_col: "col-sm-#{label_cols}", control_col: "col-sm-#{control_cols}", class: "form-select")
+      form.select(attr, collection, { include_blank: blank },
+        label_col: "col-sm-#{label_cols}", control_col: "col-sm-#{control_cols}", class: "form-select", **options)
 
     when :boolean
       form.form_group(attr, label: { text: form.object.class.human_attribute_name(attr) }) do

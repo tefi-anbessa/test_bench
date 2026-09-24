@@ -51,7 +51,7 @@ module Electrical
 
     # === Callbacks ===
     before_validation :set_supply
-    before_save :load_calculator
+    before_save :apply_load_calculation
 
     # === Class methods ===
     def self.required_role
@@ -93,27 +93,19 @@ module Electrical
     # === Private methods ===
     private
 
-    def load_calculator
-      case self.config
-      when "dc", "one"
-        conductors = 1
-      when "two_120", "two_180"
-        conductors = 2
-      when "three_3c", "three_4c"
-        conductors = 3
-      else
-        conductors = 1
-      end
-
-      self.vector = if self.basis == 'current' && self.current.present?
-        self.current * self.supply * conductors * (self.power_factor || 1.0)
-      elsif self.basis == 'power_pf' && self.power.present? && self.supply.present?
-        self.power / (self.supply * (self.power_factor || 1.0) * conductors)
-      elsif self.basis == 'power_va' && self.power.present? && self.supply.present?
-        self.power / (self.supply * conductors)
-      else
-        0.0
-      end
+    # Recalculates whichever of current/power/power_factor/vector are derived
+    # (rather than user-entered) for the current basis, via LoadCalculator -
+    # see app/services/electrical/load_calculator.rb. Keeps persisted values
+    # consistent with what the form's live JS calculation shows.
+    def apply_load_calculation
+      calculator = Electrical::LoadCalculator.new(
+        basis: basis, config: config, supply: supply,
+        current: current, power: power, power_factor: power_factor, vector: vector
+      )
+      self.current = calculator.current
+      self.power = calculator.power
+      self.power_factor = calculator.power_factor
+      self.vector = calculator.vector
     end
 
     def set_supply
