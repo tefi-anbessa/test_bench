@@ -112,6 +112,7 @@ en:
       show:
         title:            "Load"
         header:           "Load %{label}"
+        downstream_analysis: "Downstream Load Analysis"
 
     heaters:
       index:

@@ -4,6 +4,7 @@ module Electrical
     # === Mixins ===
     include Tagable
     include Electrical::Demandable
+    include Electrical::Distributable
 
     # === Constants ===
     enum :voltage_rating, Constants.electrical.voltage_ratings.to_h
@@ -27,6 +28,9 @@ module Electrical
     # === Class methods ===
 
     # === Public methods ===
+    def downstream_connections
+      circuits
+    end
 
     # === Private methods ===
     private

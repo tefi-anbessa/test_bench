@@ -73,6 +73,34 @@
               <%= show_attribute(@demand, :duty, type: :float) %>
             </div>  <!-- temporary end inner card body -->
 
+            <!-- Downstream Load Analysis (basis: summation only) -->
+            <% if @downstream_totals.present? || @downstream_analysis_error.present? %>
+              <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
+                <h4 class="mb-0"><%= t('.downstream_analysis') %></h4>
+              </div>
+              <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
+                <% if @downstream_analysis_error.present? %>
+                  <div class="alert alert-warning mb-0">
+                    <%== bs_icon('exclamation-triangle') %>
+                    <%= @downstream_analysis_error %>
+                  </div>
+                <% else %>
+                  <div class="row mb-1 fw-bold text-muted">
+                    <div class="col-4"><%= t('activerecord.attributes.electrical/circuit.phase') %></div>
+                    <div class="col-4"><%= t('activerecord.attributes.electrical/demand.current') %></div>
+                    <div class="col-4"><%= t('activerecord.attributes.electrical/demand.power_factor') %></div>
+                  </div>
+                  <% @downstream_totals.each do |phase, phasor| %>
+                    <div class="row mb-1">
+                      <div class="col-4"><%= phase %></div>
+                      <div class="col-4"><%= number_with_precision(phasor.current, precision: 4) %> A</div>
+                      <div class="col-4"><%= number_with_precision(phasor.power_factor, precision: 4) %></div>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+            <% end %>
+
             <!-- Associations -->
             <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
               <h4 class="mb-0"><%= t('show.associations', model: @demand.model_name.human) %></h4>

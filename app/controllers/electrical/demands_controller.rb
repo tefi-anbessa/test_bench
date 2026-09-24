@@ -18,6 +18,7 @@ module Electrical
     def show
       authorize @demand
       @neighbours = Navigator.new(scope: @scope, record: @demand).neighbours
+      set_downstream_totals
     end
 
     # GET /tag/1/demands/new
@@ -108,6 +109,24 @@ module Electrical
 
       def set_swatch
         @swatch = Electrical::Demand.swatch
+      end
+
+      # For a "summation" basis demand on a distributable (e.g. a switchboard),
+      # compute the downstream network's per-phase resultant current. This is
+      # a standalone analysis, not persisted onto the demand - see
+      # Electrical::DownstreamLoadAnalysis.
+      #
+      # A problem found in the wiring data (a circular reference, or a
+      # single-phase board feeding a three-phase one) is bad data, not a
+      # security conflict - show it as a flash/notice on this page rather
+      # than raising ConflictError.
+      def set_downstream_totals
+        return unless @demand.basis == "summation" && @demand.demandable.is_a?(Electrical::Distributable)
+
+        @downstream_totals = Electrical::DownstreamLoadAnalysis.new(@demand.demandable).call
+      rescue Electrical::DownstreamLoadAnalysis::AnalysisError => e
+        @downstream_analysis_error = e.message
+        flash.now[:alert] = e.message
       end
 
       # Only allow a list of trusted parameters through.
