@@ -8,7 +8,7 @@ class SwatchesController < ApplicationController
   def index
     authorize Swatch
     @q = policy_scope(Swatch).ransack(params[:q])
-    @pagy, @swatches = pagy(@q.result, limit: 20)
+    @pagy, @swatches = pagy(@q.result)
   end
 
   # GET /swatches/1

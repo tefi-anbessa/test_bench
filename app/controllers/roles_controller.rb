@@ -20,7 +20,7 @@ class RolesController < ApplicationController
   def index
     # Get paginated roles with users
     roles_scope = policy_scope(Role).includes(:users)
-    @pagy, @roles = pagy(roles_scope, limit: 20)
+    @pagy, @roles = pagy(roles_scope)
     authorize @roles
 
     # Set up variables for the view

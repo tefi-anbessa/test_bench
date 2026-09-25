@@ -375,17 +375,17 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Complete switchboard controller test.
 - [x] Complete cable system tests for from and to after switchboard, demand, and circuit tests are working.
 - [x] Use of button text for new and edit forms is mixed. Standardise on create for new, update for edit.
-- [ ] Demand form live update of calculated values not working.
+- [x] Demand form live update of calculated values not working.
 - [ ] Workflow for cable types with no current project.
 - [x] Refine the collapsibles component to retain state after refresh operations (e.g. sorting links with ransack). Make a generalised solution, maybe use turbo.
-- [ ] Fix the page size js controller.
+- [x] Fix the page size js controller. Fixed pagy usage in preference.
 - [ ] Write thorough tests for the tag parser and builder.
 - [x] Cable types routing should be nested under projects.
 - [ ] Cable types controller should be revised to suit nesting and protect against current project setting.
 - [ ] Add searching and sorting for from and to fields in cables index.
-- [ ] Expand tagable and scaffold generator tests to include all types and options.
+- [x] Expand tagable and scaffold generator tests to include all types and options.
 - [ ] Improve system test template for scaffold generator.
-- [ ] Scaffold generator check for valid module names is not working correctly.
+- [x] Scaffold generator check for valid module names is not working correctly.
 - [x] Verify if two set of routes are really needed for tagables.
 - [ ] Review all use of the method underscore. It apparently is not aware of the OS and uses '/' as the separator. Use File.join wherever appropriate.
 - [ ] Fix module generator to use nested parent modules.

@@ -10,7 +10,7 @@ module Electrical
     def index
       authorize CableType
       @q = @scope.ransack(params[:q])
-      @pagy, @cable_types = pagy(@q.result.includes(:electrical_cables), limit: 10)
+      @pagy, @cable_types = pagy(@q.result.includes(:electrical_cables))
     end
 
     # GET /electrical/cable_types/1 or /electrical/cable_types/1.json

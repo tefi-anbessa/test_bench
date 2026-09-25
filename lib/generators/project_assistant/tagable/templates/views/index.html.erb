@@ -114,8 +114,9 @@
         </tbody>
       </table>
     <div class="card-footer">
-      <%%== pagy_bootstrap_nav(@pagy) %>
+      <%%== pagy_bootstrap_nav(@pagy, classes: 'pagination pagination-sm') %>
       <%%== pagy_info(@pagy) %>
+      <%%== pagy_limit_selector_js(@pagy) %>
     </div>
   </div> <!-- end of card -->
 </div> <!-- end of container -->

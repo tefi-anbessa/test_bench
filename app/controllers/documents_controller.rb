@@ -13,7 +13,7 @@ class DocumentsController < ApplicationController
 
     @q = @scope.ransack(params[:q])
     result = @q.result.includes(:doc_type, discipline: :project)
-    @pagy, @documents = pagy(result, limit: 20)
+    @pagy, @documents = pagy(result)
   end
 
   # GET /documents/1

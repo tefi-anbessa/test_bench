@@ -17,7 +17,7 @@ module ResourcesController
       authorize resource_class, :index?
       @q = policy_scope(resource_class).ransack(params[:q])
       result = @q.result
-      @pagy, @resources = pagy(result, limit: 20)
+      @pagy, @resources = pagy(result)
       # Set the resources instance variable (e.g., @documents)
       resources_var_name = "@#{controller_name}"
       instance_variable_set(resources_var_name, @resources)

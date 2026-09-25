@@ -10,7 +10,7 @@ class IssuesController < ApplicationController
   def index
     authorize @document
     @q = @document.issues.ransack(params[:q])
-    @pagy, @issues = pagy(@q.result, limit: 20)
+    @pagy, @issues = pagy(@q.result)
   end
 
   # GET /issues/1

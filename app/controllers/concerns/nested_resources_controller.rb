@@ -16,7 +16,7 @@ module NestedResourcesController
       authorize resource_class, :index?
       @q = policy_scope(resource_class).ransack(params[:q])
       result = @q.result
-      @pagy, @resources = pagy(result, limit: 20)
+      @pagy, @resources = pagy(result)
       resources_var_name = "@#{controller_name}"
       # Separate resources with tags from orphans (resources without tags)
       @resources, @orphans = @resources.partition { |r| r.public_send(nesting).present? }

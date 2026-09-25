@@ -158,13 +158,6 @@ en:
     unauthorized: "You are not authorized to %{action} %{objects}"
     discipline: "You do not have the required role for %{discipline}"
 
-  pagination:
-    per_page: "Items per page"
-    per_page_aria: "Select number of items per page"
-    apply_page_size: "Apply page size"
-    go: "Go"
-    page_info: "Showing %{items} items per page"
-
   footer:
     credit:           "Website by frankie fusion. "
 

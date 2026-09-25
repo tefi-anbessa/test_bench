@@ -11,6 +11,11 @@ import 'bootstrap'
 // Bootstrap components are already available via the window.bootstrap object
 // when using the pre-built bundle
 
+import 'pagy'
+// Pagy is already available via the window.Pagy object when using the gem's
+// pre-built bundle - Pagy.init() wires up any [data-pagy] element on the page
+// (pagy_limit_selector_js, *_nav_js, *_combo_nav_js).
+
 // Import JSONEditor from vendor/javascript
 // import { JSONEditor } from 'jsoneditor'
 // Make it available globally if needed
@@ -58,4 +63,17 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initializeBootstrapComponents)
 } else {
   initializeBootstrapComponents()
+}
+
+// Wire up Pagy's JS-powered nav/selector elements the same way - re-run on
+// every Turbo page load/render, since Turbo swaps content without a full reload.
+const initializePagy = () => window.Pagy?.init()
+
+document.addEventListener('turbo:load', initializePagy)
+document.addEventListener('turbo:render', initializePagy)
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializePagy)
+} else {
+  initializePagy()
 }

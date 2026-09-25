@@ -1,5 +1,4 @@
 class ProjectsController < ApplicationController
-  include PageSizeable
   include RolesHelper
   include ProjectRolesConcern
   
@@ -12,7 +11,7 @@ class ProjectsController < ApplicationController
   def index
     authorize Project
     @q = policy_scope(Project).ransack(params[:q])
-    @pagy, @projects = pagy(@q.result.ordered, limit: 20)
+    @pagy, @projects = pagy(@q.result.ordered)
     # Permissions do not change for delete
     @can_delete = policy(Project).destroy?
   end
@@ -147,7 +146,7 @@ class ProjectsController < ApplicationController
     end
 
     def set_swatch
-      @swatch = @project&.swatch || Project.swatch
+      @swatch = @project&.swatch || Project.swatch || Swatch.find_by(name: 'app_theme')
     end
 
     def setup_user_roles

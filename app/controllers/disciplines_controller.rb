@@ -13,7 +13,7 @@ class DisciplinesController < ApplicationController
     authorize Discipline
     @scope = policy_scope(Discipline).joins(:project)
     @q = @scope.ransack(params[:q])
-    @pagy, @disciplines = pagy(@q.result, limit: 20)
+    @pagy, @disciplines = pagy(@q.result)
     @discipline = @project.disciplines.build()
   end
 

@@ -70,13 +70,6 @@ km:
   pundit:
     unauthorized: "អ្នកមិនមានសិទ្ធិអនុវត្តសកម្មភាពនេះទេ។"
 
-  pagination:
-    per_page: "ធាតុក្នុងមួយទំព័រ"
-    per_page_aria: "ជ្រើសរើសចំនួនធាតុក្នុងមួយទំព័រ"
-    apply_page_size: "អនុវត្តទំហំទំព័រ"
-    go: "ទៅ"
-    page_info: "បង្ហាញ %{items} ធាតុក្នុងមួយទំព័រ"
-
   index:
     admin: "អ្នកគ្រប់គ្រង"
     orphans: "%{models} ដែលមិនមានស្លាកភ្ជាប់៖"

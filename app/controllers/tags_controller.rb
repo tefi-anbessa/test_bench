@@ -12,7 +12,7 @@ class TagsController < ApplicationController
 
     @q = @scope.ransack(params[:q])
     result = @q.result.includes(discipline: :project)
-    @pagy, @tags = pagy(result, limit: 20)
+    @pagy, @tags = pagy(result)
   end
 
   # GET /tags/1 or /tags/1.json

@@ -8,7 +8,7 @@ class SourceFormatsController < ApplicationController
   def index
     authorize SourceFormat, :index?
     @q = policy_scope(SourceFormat).ransack(params[:q])
-    @pagy, @source_formats = pagy(@q.result, limit: 20)
+    @pagy, @source_formats = pagy(@q.result)
   end
 
   # GET /source_formats/1

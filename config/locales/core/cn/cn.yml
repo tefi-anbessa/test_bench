@@ -130,13 +130,6 @@ cn:
   pundit:
     unauthorized: "You are not authorized to %{action} %{objects}"
 
-  pagination:
-    per_page: "Items per page"
-    per_page_aria: "Select number of items per page"
-    apply_page_size: "Apply page size"
-    go: "Go"
-    page_info: "Showing %{items} items per page"
-
   footer:
     credit:           "Website by frankie fusion. "
 

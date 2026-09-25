@@ -44,9 +44,10 @@
       </table>
     </div> <!-- end of card-body -->
 
-    <div class="card-footer">
-      <%== pagy_bootstrap_nav(@pagy) %>
-      <%== pagy_info(@pagy) %>
+    <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <%%== pagy_bootstrap_nav(@pagy) %>
+      <%%== pagy_info(@pagy) %>
+      <%%== pagy_limit_selector_js(@pagy) %>
     </div>
   </div> <!-- end of card -->
 </div> <!-- end of container -->

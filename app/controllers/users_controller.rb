@@ -3,7 +3,7 @@ class UsersController < ApplicationController
 
   def index
     @q = User.ransack(params[:q])
-    @pagy, @users = pagy(@q.result, limit: 10)
+    @pagy, @users = pagy(@q.result)
     authorize @users
   end
 

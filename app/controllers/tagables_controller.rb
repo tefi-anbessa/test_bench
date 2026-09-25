@@ -17,7 +17,7 @@ class TagablesController < ApplicationController
         .where(tags: { discipline_id: @discipline.id })
       @q = @scope.ransack(params[:q])
       result = @q.result.includes(tag: { discipline: :project })
-      @pagy, @resources = pagy(result, limit: 20)
+      @pagy, @resources = pagy(result)
       # Separate resources with tags from orphans (resources without tags)
       @resources, @orphans = @resources.partition(&:tag)
       instance_variable_set(resources_var_name, @resources)

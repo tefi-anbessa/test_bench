@@ -10,7 +10,7 @@ module Electrical
     def index
       authorize Electrical::Demand
       @q = policy_scope(Electrical::Demand).ransack(params[:q])
-      @pagy, @demands = pagy(@q.result.includes(:demandable), limit: 20)
+      @pagy, @demands = pagy(@q.result.includes(:demandable))
       @demands, @orphans = @demands.partition(&:demandable)
     end
 

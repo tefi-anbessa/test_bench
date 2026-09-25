@@ -10,7 +10,7 @@
 # You can set any pagy variable as a Pagy::DEFAULT. They can also be overridden per instance by just passing them to
 # Pagy.new|Pagy::Countless.new|Pagy::Calendar::*.new or any of the #pagy* controller methods
 # Here are the few that make more sense as DEFAULTs:
-Pagy::DEFAULT[:items] = 20  # Default items per page
+Pagy::DEFAULT[:limit] = 20  # Default items per page (already the gem's own default; kept explicit for clarity)
 # Pagy::DEFAULT[:size]        = 7                     # default
 # Pagy::DEFAULT[:ends]        = true                  # default
 # Pagy::DEFAULT[:page_param]  = :page                 # default
@@ -143,7 +143,7 @@ require 'pagy/extras/bootstrap'
 
 # Limit extra: Allow the client to request a custom limit per page with an optional selector UI
 # See https://ddnexus.github.io/pagy/docs/extras/limit
-# require 'pagy/extras/limit'
+require 'pagy/extras/limit'
 # set to false only if you want to make :limit_extra an opt-in variable
 # Pagy::DEFAULT[:limit_extra] = false    # default true
 # Pagy::DEFAULT[:limit_param] = :limit   # default
@@ -180,6 +180,10 @@ Pagy::DEFAULT[:overflow] = :empty_page    # default  (other options: :last_page 
 # With the asset pipeline
 # Sprockets need to look into the pagy javascripts dir, so add it to the assets paths
 # Rails.application.config.assets.paths << Pagy.root.join('javascripts')
+
+# This app uses Propshaft + importmap-rails, not Sprockets, so the gem's bundled
+# pagy.min.js is vendored directly instead - see vendor/assets/javascript/pagy.min.js,
+# its pin in config/importmap.rb, and the Pagy.init() wiring in app/javascript/application.js.
 
 # I18n
 

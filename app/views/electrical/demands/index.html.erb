@@ -67,8 +67,11 @@
           <% end %>
         </tbody>
       </table>
-      <%== pagy_bootstrap_nav(@pagy) %>
-      <%== pagy_info(@pagy) %>
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <%== pagy_bootstrap_nav(@pagy, classes: 'pagination pagination-sm') %>
+        <%== pagy_info(@pagy) %>
+        <%== pagy_limit_selector_js(@pagy) %>
+      </div>
     </div> <!-- end of card-body -->
   </div> <!-- end of card -->
 </div>
