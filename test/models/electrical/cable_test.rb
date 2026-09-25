@@ -102,51 +102,62 @@ module Electrical
     end
     
     test "navigation between cables" do
-      skip "Navigation between cables is not working properly"
       # Create test cables with different serials but same prefix
-      tag1 = create(:tag, prefix: 'EC', serial: 201,  discipline: @discipline_e)
+      tag1 = create(:tag, prefix: 'EC', serial: 201,  discipline: @resource_discipline)
       cable1 = create(:electrical_cable, tag: tag1, electrical_cable_type: @cable_type)
 
-      tag2 = create(:tag, prefix: 'EC', serial: 202,  discipline: @discipline_e)
+      tag2 = create(:tag, prefix: 'EC', serial: 202,  discipline: @resource_discipline)
       cable2 = create(:electrical_cable, tag: tag2, electrical_cable_type: @cable_type)
 
-      tag3 = create(:tag, prefix: 'EC', serial: 203,  discipline: @discipline_e)
+      tag3 = create(:tag, prefix: 'EC', serial: 203,  discipline: @resource_discipline)
       cable3 = create(:electrical_cable, tag: tag3, electrical_cable_type: @cable_type)
 
-      # Test next/prev navigation
-      assert_equal cable2, cable1.next
-      assert_equal cable3, cable2.next
-      assert_equal cable3, cable3.next  # Returns self when no next
+      # Navigation is done via Navigator, the same way TagablesController#show
+      # builds it (scope joined through tag/discipline/project, ordered via
+      # navigator_order_sql) - Cable itself has no next/prev methods.
+      assert_equal cable2, navigator_for(cable1).next
+      assert_equal cable3, navigator_for(cable2).next
+      assert_nil navigator_for(cable3).next  # No next past the last cable
 
-      assert_equal cable1, cable1.prev  # Returns self when no previous
-      assert_equal cable1, cable2.prev
-      assert_equal cable2, cable3.prev
+      # setup_common_test_data's @resource2 (tag "AA0002") sorts immediately
+      # before cable1 (tag "EC0201") within the same discipline.
+      assert_equal @resource2, navigator_for(cable1).prev
+      assert_equal cable1, navigator_for(cable2).prev
+      assert_equal cable2, navigator_for(cable3).prev
     end
-    
-    test "navigation with different loop_ids" do
-      skip "Navigation between cables is not working properly"
 
+    test "navigation with different loop_ids" do
       # First cable with prefix 'EC'
-      tag1 = create(:tag, prefix: 'EC', serial: 201,  discipline: @discipline_e)
+      tag1 = create(:tag, prefix: 'EC', serial: 201,  discipline: @resource_discipline)
       cable1 = create(:electrical_cable, tag: tag1, electrical_cable_type: @cable_type)
 
       # Second cable with different prefix will have a different loop_id
       # due to the first letter of the prefix being different
-      tag2 = create(:tag, prefix: 'FC', serial: 202, discipline: @discipline_e)
+      tag2 = create(:tag, prefix: 'FC', serial: 202, discipline: @resource_discipline)
       cable2 = create(:electrical_cable, tag: tag2, electrical_cable_type: @cable_type)
 
       # Test navigation respects loop_id ordering
-      assert_equal cable2, cable1.next
-      assert_equal cable2, cable2.next  # Returns self when no next
+      assert_equal cable2, navigator_for(cable1).next
+      assert_nil navigator_for(cable2).next  # No next past the last cable
 
-      assert_equal cable1, cable1.prev  # Returns self when no previous
-      assert_equal cable1, cable2.prev
+      # setup_common_test_data's @resource2 (tag "AA0002") sorts immediately
+      # before cable1 (tag "EC0201") within the same discipline.
+      assert_equal @resource2, navigator_for(cable1).prev
+      assert_equal cable1, navigator_for(cable2).prev
     end
-    
+
     test "navigation with missing tag" do
       cable = Electrical::Cable.new
       assert_equal cable, cable.next  # Returns self when there's no tag
       assert_equal cable, cable.prev  # Returns self when there's no tag
     end
+
+    private
+
+      # Mirrors TagablesController#set_tagable's @scope, the actual scope the
+      # app navigates a tagable resource's show page with.
+      def navigator_for(cable)
+        Navigator.new(scope: Electrical::Cable.joins(tag: { discipline: :project }), record: cable)
+      end
   end
 end

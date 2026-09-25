@@ -112,9 +112,11 @@ module Electrical
       sign_in_and_set_project @accredited_user, @project
       new_serial = (@switchboard.circuits.maximum(:serial) || 0) + 1
       assert_difference('Electrical::Circuit.count', 1) do
-        post :create, params: new_nesting_params.merge(
-          create_params.deep_merge(electrical_circuit: { serial: new_serial })
-        ).merge({ electrical_cable: { from_id: @cable2.id, to_id: @motor_demand.id } })
+        post :create, params: new_params.merge(
+          create_params.deep_merge(electrical_circuit: {
+            serial: new_serial, feeder_id: @cable2.id, demand_id: @motor_demand.id
+          })
+        )
       end
       new_circuit = Electrical::Circuit.find_by(switchboard: @switchboard,
        serial: new_serial)
@@ -123,32 +125,32 @@ module Electrical
       assert_redirected_to new_circuit
       expected_messages = [
         I18n.t('flash.create.notice', resource_name: I18n.t("activerecord.models.electrical/circuit.one")),
-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder")),
-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.demand"))
+        I18n.t('flash.assigned', count: 1, resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder")),
+        I18n.t('flash.assigned', count: 1, resource_name: I18n.t("activerecord.attributes.electrical/circuit.demand"))
       ]
       assert_flash_messages :success, expected_messages
     end
 
     test "accredited user can assign new feeder to circuit" do
       sign_in_and_set_project @accredited_user, @project
-      patch :update, params: update_params.merge(id: @circuit.id).merge(
-        { electrical_cable: { from_id: @cable2.id } })
+      patch :update, params: update_params.merge(id: @circuit.id).deep_merge(
+        electrical_circuit: { feeder_id: @cable2.id })
       assert_redirected_to @circuit
       expected_messages = [
         I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical/circuit.one")),
-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder"))
+        I18n.t('flash.assigned', count: 1, resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder"))
       ]
       assert_flash_messages :success, expected_messages
     end
 
     test "accredited user can update feeder and demand to circuit through feeder" do
       sign_in_and_set_project @accredited_user, @project
-      patch :update, params: update_params.merge(id: @circuit.id).merge(
-        { electrical_cable: { from_id: @cable2.id, to_id: @motor_demand.id } })
+      patch :update, params: update_params.merge(id: @circuit.id).deep_merge(
+        electrical_circuit: { feeder_id: @cable2.id, demand_id: @motor_demand.id })
       expected_messages = [
         I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical/circuit.one")),
-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder")),
-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.demand"))
+        I18n.t('flash.assigned', count: 1, resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder")),
+        I18n.t('flash.assigned', count: 1, resource_name: I18n.t("activerecord.attributes.electrical/circuit.demand"))
       ]
       assert_flash_messages :success, expected_messages
       assert_redirected_to @circuit
@@ -156,8 +158,8 @@ module Electrical
 
     test "accredited user cannot assign invalid feeder to circuit" do
       sign_in_and_set_project @accredited_user, @project
-      patch :update, params: update_params.merge(id: @circuit.id).merge(
-        { electrical_cable: { from_id: @other_cable.id } })
+      patch :update, params: update_params.merge(id: @circuit.id).deep_merge(
+        electrical_circuit: { feeder_id: @other_cable.id })
       assert_conflict
     end
 
@@ -170,8 +172,8 @@ module Electrical
       @cable2.update(to: @motor_demand)
       # Re-assign the @circuit feeder to @cable2
       # This should nullify @cable1 :from
-      patch :update, params: update_params.merge(id: @circuit.id).merge(
-        { electrical_cable: { from_id: @cable2.id } })
+      patch :update, params: update_params.merge(id: @circuit.id).deep_merge(
+        electrical_circuit: { feeder_id: @cable2.id })
       @cable1.reload
       @cable2.reload
       assert_equal @cable2, @circuit.feeder
@@ -179,7 +181,7 @@ module Electrical
       assert_redirected_to @circuit
       expected_messages = [
         I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical/circuit.one")),
-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder"))
+        I18n.t('flash.assigned', count: 1, resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder"))
       ]
       assert_flash_messages :success, expected_messages
     end
@@ -189,10 +191,8 @@ module Electrical
       # set up another circuit with no feeder
       new_serial = (@switchboard.circuits.maximum(:serial) || 0) + 1
       @new_circuit = create(:electrical_circuit, switchboard: @switchboard, serial: new_serial)
-      patch :update, params: update_params.merge(
-        id: @new_circuit.id).deep_merge(
-          electrical_circuit: { serial: new_serial }).merge(
-            { electrical_cable: { to_id: @motor_demand.id } })
+      patch :update, params: update_params.merge(id: @new_circuit.id).deep_merge(
+        electrical_circuit: { serial: new_serial, demand_id: @motor_demand.id })
       assert_template :edit
       assert_response :unprocessable_content
       expected = I18n.t('flash.required', 
@@ -209,8 +209,8 @@ module Electrical
       @cable2.update(to: @motor_demand)
 
       # Assign this already assigned demand to the first circuit. 
-      patch :update, params: update_params.merge(id: @circuit.id).merge(
-        { electrical_cable: { to_id: @motor_demand.id } })
+      patch :update, params: update_params.merge(id: @circuit.id).deep_merge(
+        electrical_circuit: { demand_id: @motor_demand.id })
       @cable1.reload
       @cable2.reload
       assert_equal @circuit.demand, @motor_demand
@@ -218,7 +218,7 @@ module Electrical
       assert_redirected_to @circuit
       expected_messages = [
         I18n.t('flash.update.notice', resource_name: I18n.t("activerecord.models.electrical/circuit.one")),
-        I18n.t('flash.assigned', resource_name: I18n.t("activerecord.attributes.electrical/circuit.feeder"))
+        I18n.t('flash.assigned', count: 1, resource_name: I18n.t("activerecord.attributes.electrical/circuit.demand"))
       ]
       assert_flash_messages :success, expected_messages
     end
@@ -227,20 +227,21 @@ module Electrical
       sign_in_and_set_project @accredited_user, @project
       # Set up an "out of scope" demand
       @motor_tag.update(discipline: @other_discipline)
-      patch :update, params: update_params.merge(id: @circuit.id).merge(
-        { electrical_cable: { to_id: @motor_demand.id } })
+      patch :update, params: update_params.merge(id: @circuit.id).deep_merge(
+        electrical_circuit: { demand_id: @motor_demand.id })
       assert_conflict
     end
     
     private
 
-      # Required for nested routes
-      def new_nesting_params
+      # Circuit is nested under its switchboard, not under the generic
+      # tag/document/discipline/project nesting the shared helper knows about
+      # (see ControllerTestHelper#index_params/#new_params) - override both here.
+      def new_params
         { switchboard_id: @switchboard.id }
       end
 
-      # Required for nested routes
-      def index_nesting_params
+      def index_params
         { switchboard_id: @switchboard.id }
       end
 

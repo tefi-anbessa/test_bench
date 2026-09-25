@@ -491,6 +491,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Build in git commit before scaffold generator and tagable generator run.
 - [ ] Add polymorphic option to associations in generators.
 - [ ] Consider changing "discard" to "cancel" on all forms.
+- [ ] Review all labels and use of labels, in headers, on buttons, and for popover titles. Establish consistency across usages, including across show and index views.
 
 ## Potential Features
 

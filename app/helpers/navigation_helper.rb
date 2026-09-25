@@ -223,18 +223,6 @@ module NavigationHelper
     end
   end
 
-  # Resolves the link target for a record that may be a tagable. Tagable models
-  # (switchboard, cable, heater, motor, light_cct, socket_cct, ...) have no route
-  # of their own - they are only reachable nested under their tag - so a plain
-  # polymorphic_path(record) would resolve to a route that no longer exists.
-  # Non-tagable records (swatches, disciplines, demands, circuits, ...) are
-  # returned unchanged for normal polymorphic_path resolution.
-  def tagable_or_record_path(record)
-    return record unless record.present? && record.class.respond_to?(:name) &&
-      Tag.safe_tagable_types.include?(record.class.name)
-    tag_tagable_path(record.tag)
-  end
-
   def button_face(icon, label, icon_only = false)
     if icon_only
       bs_icon(icon)
@@ -353,5 +341,14 @@ module NavigationHelper
           content
         end
     end
+  end
+
+  # A tagable record can exist with no tag (e.g. seeded/imported data, or a tag
+  # deleted independently of its tagable) - there is no route to it in that
+  # case, so nil is returned and callers must handle that as "no link".
+  def tagable_or_record_path(record)
+    return record unless record.present? && record.class.respond_to?(:name) &&
+      Tag.safe_tagable_types.include?(record.class.name)
+    record.tag.present? ? tag_tagable_path(record.tag) : nil
   end
 end

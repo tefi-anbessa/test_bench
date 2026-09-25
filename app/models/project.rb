@@ -18,6 +18,7 @@ class Project < ApplicationRecord
   has_many :tags, through: :disciplines
   has_many :documents, through: :disciplines
   has_many :doc_types, through: :disciplines
+  has_many :electrical_cable_types, through: :disciplines
   has_many :change_management_requests, class_name: "ChangeManagement::Request", dependent: :destroy
 
   # === Scopes ===

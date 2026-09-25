@@ -191,7 +191,7 @@ module Electrical
       end
 
       def set_swatch
-        @swatch = @switchboard&.discipline&.swatch || Electrical::Circuit.swatch
+        @swatch = @switchboard&.discipline&.swatch || @discipline&.swatch || Electrical::Circuit.swatch
       end
 
       def process_cable_params(feeder_id, demand_id) 

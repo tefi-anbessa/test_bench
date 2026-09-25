@@ -6,13 +6,7 @@
       <div class="col text-center">
         <div class="d-flex flex-column align-items-center">
           <div class="badge fs-6" style="<%= badge_styles(@swatch) %>">
-              <%= cable_type.persisted? ? t('actions.edit') : t('actions.new') %> 
-              <% if cable_type.present? && cable_type.persisted? %>
-                <%= [t('activerecord.models.electrical/cable_type'), cable_type.label].join(': ') %>
-                <small class="text-muted ms-2"><%= cable_type.long_label %></small>
-              <% else %>
-                <%= t('activerecord.models.electrical/cable_type') %>
-              <% end %>
+              <%= yield(:header) %>
           </div>
         </div>
       </div>
@@ -53,13 +47,6 @@
                       { wrapper: { class: 'mb-1' },
                         class: 'form-select' } %>
             </div>
-            <div class="row">
-                <%= f.select :insulation,
-                      Electrical::CableType.insulations.map { |k, v| [k, k] },
-                      { include_blank: t("form.none"),
-                      wrapper: { class: 'mb-1' } } %>
-            </div>
-
             <div class="row">
                 <%= f.select :csa,
                       @csa_select.map { |csa| ["#{csa} mm²", csa] },

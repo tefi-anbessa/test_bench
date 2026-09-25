@@ -8,9 +8,10 @@
         <!-- Left Navigation -->
         <div class="col-auto">
           <div class="d-flex align-items-center">
-            <!-- Index Button -->
-            <% if policy(@discipline).index? %>
-              <%= nav_button(action: :index, path: discipline_electrical_cable_types_path(@discipline), record: @cable_type) %>
+            <!-- Index Buttons -->
+            <% if policy(Electrical::CableType).index? %>
+              <%= nav_button(action: :index_project, path: project_electrical_cable_types_path(@discipline.project), record: @cable_type) %>
+              <%= nav_button(action: :index_discipline, path: discipline_electrical_cable_types_path(@discipline), record: @cable_type) %>
             <% end %>
             <!-- Previous Button -->
             <%= nav_button(action: :previous, record: @neighbours[0]) %>
@@ -21,9 +22,7 @@
         <div class="col text-center">
           <div class="d-flex flex-column align-items-center">
             <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
-              <%= [@cable_type.model_name.human, 
-                @cable_type&.id].compact.join(' ') %>
-                <small class="text-muted"><%= @cable_type.long_label %></small>
+              <%= t('.header', label: @cable_type.long_label) %>
             </span>
           </div>
         </div>

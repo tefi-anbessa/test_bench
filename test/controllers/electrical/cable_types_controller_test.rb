@@ -14,6 +14,9 @@ module Electrical
       setup_accredited_users(:designer)
       setup_discipline_resources
       setup_model_specific_data
+      # CableType is nested under discipline - a nesting type ControllerTestHelper
+      # already knows about (see #index_params/#new_params/#resource_index_path).
+      @nesting = :discipline
     end
 
     def setup_model_specific_data
@@ -29,16 +32,6 @@ module Electrical
     end
 
     private
-
-      # Required for nested routes
-      def new_nesting_params
-        { discipline_id: @discipline.id }
-      end
-
-      # Required for nested routes
-      def index_nesting_params
-        new_nesting_params
-      end
 
       # Set the expected params for a valid resource create
       def create_params

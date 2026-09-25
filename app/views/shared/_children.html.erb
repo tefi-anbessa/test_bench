@@ -23,8 +23,13 @@ Relation must reflect a has_many association. -->
     <% if children.any? %>
         <% children.each do |child| %>
           <% text = text_method.present? ? child.send(text_method) : "" %>
+          <% path = tagable_or_record_path(child) %>
           <div class="row">
-            <%= link_to [child.label || "No label", text].join(' '), polymorphic_path(child) %>
+            <% if path.present? %>
+              <%= link_to [child.label || "No label", text].join(' '), path %>
+            <% else %>
+              <span class="text-muted"><%= [child.label || "No label", text].join(' ') %></span>
+            <% end %>
           </div>
         <% end %>
     <% end %>

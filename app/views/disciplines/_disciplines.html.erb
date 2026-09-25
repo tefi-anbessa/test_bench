@@ -54,12 +54,25 @@
             <% if policy(DocType).index? %>
               <%= link_to discipline_doc_types_path(discipline),
                   class: "btn btn-outline-info btn-sm",
-                  aria: { 
+                  aria: {
                     label: t('activerecord.models.doc_type', count: discipline.doc_types.count)
                   } do %>
                 <%== bs_icon('file') %>
                 <%= t('activerecord.models.doc_type', count: discipline.doc_types.count) %>
                 <span class="badge bg-info ms-1"><%= discipline.doc_types.count %></span>
+              <% end %>
+            <% end %>
+
+            <!-- Only show the cable_types index link to users that can create cable_types. -->
+            <% if policy(Electrical::CableType).index? %>
+              <%= link_to discipline_electrical_cable_types_path(discipline),
+                  class: "btn btn-outline-info btn-sm",
+                  aria: {
+                    label: t('activerecord.models.electrical/cable_type', count: discipline.electrical_cable_types.count)
+                  } do %>
+                <%== bs_icon('file') %>
+                <%= t('activerecord.models.electrical/cable_type', count: discipline.electrical_cable_types.count) %>
+                <span class="badge bg-info ms-1"><%= discipline.electrical_cable_types.count %></span>
               <% end %>
             <% end %>
           </div>

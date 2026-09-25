@@ -126,7 +126,22 @@ class DisciplinesController < ApplicationController
       models = ActiveRecord::Base.descendants
       .select { |model| model.module_parent_name == @discipline.name && model.model_name.human != "Base" }
       .sort_by(&:model_name)
-      @model_links = models.map { |m| [m.model_name.human.pluralize, m.model_name.name] }
+      @model_links = models.filter_map { |m| model_link_for(m) }
+    end
+
+    # Tagable models (see Tag.safe_tagable_types) share the single unified
+    # tagable index route; everything else (Demand, Circuit, ...) keeps its
+    # own dedicated discipline-nested route, if it has one. Models with
+    # neither (e.g. project-nested ones) are skipped rather than raising.
+    def model_link_for(model)
+      path = if Tag.safe_tagable_types.include?(model.name)
+        discipline_tagables_path(@discipline, tagable_type: model.name)
+      else
+        send("discipline_#{model.model_name.route_key}_path", @discipline)
+      end
+      [model.model_name.human.pluralize, path]
+    rescue NoMethodError
+      nil
     end
 
     def set_prefix_schema_selection

@@ -50,7 +50,7 @@ module Electrical
 
       # Set an attribute/s to be modified in edit test
       # Only working with text fields at present
-      @edit_attributes = { title: "REVISED FOR TEST" }
+      @edit_attributes = { notes: "REVISED FOR TEST" }
     end
 
     def fill_in_model_specific_fields
@@ -278,7 +278,108 @@ module Electrical
       end
     end
 
+    # Downstream network analysis (basis: summation) - see
+    # Electrical::DownstreamLoadAnalysis. These build their own switchboards
+    # directly rather than using @resource/@tagable, since @tagable here is a
+    # Motor (not distributable).
+    test "accredited user views a valid downstream load analysis" do
+      sign_in @accredited_user
+      ApplicationController.any_instance.stubs(:current_project).returns(@project)
+
+      board = create(:electrical_switchboard, discipline: @discipline)
+      l1 = create(:electrical_circuit, switchboard: board, phase: "L1")
+      connect_circuit(l1, create(:electrical_demand, basis: "current_pf", current: 12.0, power_factor: 1.0))
+      summation_demand = create(:electrical_demand, demandable: board, basis: "summation")
+
+      visit resource_path(summation_demand)
+      assert_current_path resource_path(summation_demand)
+
+      assert_text I18n.t("electrical.demands.show.downstream_analysis")
+      assert_text "L1"
+      assert_text "12.0000 A"
+    end
+
+    test "a circular downstream reference shows a flash notice, not a conflict page" do
+      sign_in @accredited_user
+      ApplicationController.any_instance.stubs(:current_project).returns(@project)
+
+      board = create(:electrical_switchboard, discipline: @discipline)
+      demand = create(:electrical_demand, demandable: board, basis: "summation")
+      circuit = create(:electrical_circuit, switchboard: board, phase: "L1")
+      connect_circuit(circuit, demand)
+
+      visit resource_path(demand)
+      assert_current_path resource_path(demand)
+
+      refute_text "409"
+      assert_text I18n.t("electrical.demands.show.downstream_analysis")
+      assert_text "loops back"
+    end
+
+    test "a single-phase board feeding a three-phase board shows a flash notice" do
+      sign_in @accredited_user
+      ApplicationController.any_instance.stubs(:current_project).returns(@project)
+
+      three_phase_board = create(:electrical_switchboard, discipline: @discipline)
+      three_phase_demand = create(:electrical_demand, demandable: three_phase_board,
+                                   basis: "summation", config: "three_3c")
+
+      single_phase_board = create(:electrical_switchboard, discipline: @discipline)
+      single_phase_demand = create(:electrical_demand, demandable: single_phase_board,
+                                    basis: "summation", config: "one")
+      feeder = create(:electrical_circuit, switchboard: single_phase_board, phase: "L1")
+      connect_circuit(feeder, three_phase_demand)
+
+      visit resource_path(single_phase_demand)
+      assert_current_path resource_path(single_phase_demand)
+
+      refute_text "409"
+      assert_text "three-phase"
+      assert_text "single-phase"
+    end
+
       private
+
+      # Connects a circuit to a demand via a feeder cable, as the real app does.
+      def connect_circuit(circuit, demand)
+        create(:electrical_cable, from: circuit, to: demand)
+      end
+
+      # current/power/vector/power_factor are basis-dependent: for any given
+      # basis exactly two are user-entered (enabled) and two are calculated
+      # (disabled) - see app/views/electrical/demands/_form.html.erb's
+      # `disabled` array. The generic edit_resource_form_assertions assumes
+      # every field in @edit_fields is enabled, which doesn't hold for these
+      # four, so this overrides it for Demand specifically.
+      BASIS_DEPENDENT_FIELDS = %i[current power vector power_factor].freeze
+      ENABLED_FIELDS_BY_BASIS = {
+        "summation"     => [],
+        "power_pf"      => %i[power power_factor],
+        "vector_pf"     => %i[vector power_factor],
+        "current_pf"    => %i[current power_factor],
+        "current_power" => %i[current power]
+      }.freeze
+
+      def edit_resource_form_assertions
+        form_labels_assertions(@edit_fields)
+        field_form_edit_assertions(@edit_fields.except(*BASIS_DEPENDENT_FIELDS))
+        basis_dependent_field_assertions
+        assert_selector "button[type='submit']"
+        assert_selector "a.btn.btn-warning", text: I18n.t('actions.discard')
+      end
+
+      def basis_dependent_field_assertions
+        key = resource_class.model_name.param_key
+        enabled = ENABLED_FIELDS_BY_BASIS.fetch(@resource.basis, [])
+        BASIS_DEPENDENT_FIELDS.each do |field|
+          name = "#{key}[#{field}]"
+          if enabled.include?(field)
+            assert_field name, with: @resource.send(field).to_s, type: "number"
+          else
+            assert_field name, disabled: true, type: "number"
+          end
+        end
+      end
 
       # Assertions
       # This assertion is specific to demand model

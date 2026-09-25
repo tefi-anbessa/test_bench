@@ -68,5 +68,52 @@ module Electrical
       visit discipline_resource_index_path(@discipline)
       assert_current_path discipline_resource_index_path(@discipline)
     end
+
+    private
+
+      # csa/neutral_csa/earth_csa are decimal columns, but the form renders them
+      # as a select of standard sizes (see _form.html.erb) rather than a plain
+      # number input - the generic field assertions assume decimal columns are
+      # always number inputs, which doesn't hold for these three.
+      CSA_FIELDS = %i[csa neutral_csa earth_csa].freeze
+
+      def new_resource_form_assertions
+        form_labels_assertions(@new_fields)
+        field_form_new_assertions(@new_fields.except(*CSA_FIELDS))
+        csa_field_assertions
+        assert_selector "button[type='submit']"
+        assert_selector "a.btn.btn-warning", text: I18n.t('actions.discard')
+      end
+
+      def edit_resource_form_assertions
+        form_labels_assertions(@edit_fields)
+        field_form_edit_assertions(@edit_fields.except(*CSA_FIELDS))
+        csa_field_assertions
+        assert_selector "button[type='submit']"
+        assert_selector "a.btn.btn-warning", text: I18n.t('actions.discard')
+      end
+
+      def csa_field_assertions
+        key = resource_class.model_name.param_key
+        CSA_FIELDS.each do |field|
+          assert_selector "select[name='#{key}[#{field}]']"
+        end
+      end
+
+      # The generic fill_in_resource_fields assumes decimal columns are always
+      # a text/number input - fill the CSA selects ourselves, then delegate the
+      # rest of @new_fields (minus the CSA fields) to the shared implementation.
+      def fill_in_resource_fields
+        key = resource_class.model_name.param_key
+        CSA_FIELDS.each do |field|
+          value = @resource.send(field)
+          find("select[name='#{key}[#{field}]'] option[value='#{value}']").select_option
+        end
+        original_new_fields = @new_fields
+        @new_fields = @new_fields.except(*CSA_FIELDS)
+        super
+      ensure
+        @new_fields = original_new_fields
+      end
   end
 end

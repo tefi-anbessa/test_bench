@@ -120,15 +120,28 @@ class DisciplineSystemTest < ApplicationSystemTestCase
       assert_current_path discipline_path(disc)
 
       # Model links
-      # Mimic the controller setup_dashboard method
+      # Mimic the controller's setup_dashboard/model_link_for methods -
+      # tagable models (see Tag.safe_tagable_types) share the unified tagable
+      # index route; everything else keeps its own dedicated discipline route,
+      # if it has one.
       models = ActiveRecord::Base.descendants
         .select { |model| model.module_parent_name == disc.name && model.model_name.human != "Base" }
         .sort_by(&:model_name)
-      @model_links = models.map { |m| [m.model_name.human.pluralize, m.model_name.route_key] }
+      @model_links = models.filter_map do |m|
+        if Tag.safe_tagable_types.include?(m.name)
+          [m.model_name.human.pluralize, discipline_tagables_path(disc, tagable_type: m.name)]
+        else
+          begin
+            [m.model_name.human.pluralize, send("discipline_#{m.model_name.route_key}_path", disc)]
+          rescue NoMethodError
+            nil
+          end
+        end
+      end
       @model_links.each do |link|
-        assert_selector "a[href='#{send("discipline_#{link[1]}_path", disc)}']", text: link[0]
-        find("a[href='#{send("discipline_#{link[1]}_path", disc)}']", text: link[0]).click
-        assert_current_path send("discipline_#{link[1]}_path", disc)
+        assert_selector "a[href='#{link[1]}']", text: link[0]
+        find("a[href='#{link[1]}']", text: link[0]).click
+        assert_current_path link[1]
         find("a[href='#{discipline_path(disc)}']", text: disc.name).click
         assert_current_path discipline_path(disc)
       end

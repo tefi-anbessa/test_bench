@@ -37,7 +37,9 @@
     
     <div class="card-body">
       <div class="row search-form">
-        <%= search_form_for @q, url: discipline_electrical_cable_types_path(@discipline) do |f| %>
+        <%= search_form_for @q, url: @discipline.present? ?
+              discipline_electrical_cable_types_path(@discipline) :
+              project_electrical_cable_types_path(@project) do |f| %>
           <%= f.search_field :conductor_material_cont,
                 class: "search_field",
                 placeholder: t('activerecord.attributes.electrical/cable_type.conductor_material') %>

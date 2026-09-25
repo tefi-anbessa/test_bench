@@ -8,9 +8,9 @@ module Electrical
 
     # GET /electrical/cable_types or /electrical/cable_types.json
     def index
-      @q = @discipline.electrical_cable_types.ransack(params[:q])
-      @pagy, @cable_types = pagy(@q.result.includes(:electrical_cables), limit: 10)
       authorize CableType
+      @q = @scope.ransack(params[:q])
+      @pagy, @cable_types = pagy(@q.result.includes(:electrical_cables), limit: 10)
     end
 
     # GET /electrical/cable_types/1 or /electrical/cable_types/1.json
@@ -106,7 +106,7 @@ module Electrical
       end
 
       def set_swatch
-        @swatch = @discipline&.swatch || @discipline&.project.swatch || Electrical::CableType.swatch || Swatch.find-by(name: "app_theme")
+        @swatch = @discipline&.swatch || @project&.swatch || Electrical::CableType.swatch || Swatch.find_by(name: "app_theme")
       end
 
       def setup_form
