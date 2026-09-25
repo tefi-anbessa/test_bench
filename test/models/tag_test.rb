@@ -84,7 +84,7 @@ class TagTest < ActiveSupport::TestCase
     
     @tag.serial = 10000
     refute @tag.valid?
-    assert_includes @tag.errors[:serial], I18n.t("errors.messages.less_than", count: 10**Constants.tags.serial_digits.to_i)
+    assert_includes @tag.errors[:serial], I18n.t("errors.messages.less_than", count: 10**Constants.tag.serial_digits.to_i)
     
     @tag.serial = 0
     assert @tag.valid?
@@ -311,6 +311,120 @@ class TagTest < ActiveSupport::TestCase
     assert_equal 'HH', parts[:modifier_function]
     assert_nil parts[:modifier]
     assert_nil parts[:output_function]
+  end
+
+  # isa51 letters S, X, Y, Z can be either a modifier or a function - the parser
+  # must look ahead at the next character to decide which. Uses an inline custom
+  # schema (rather than Constants.prefix_schemata) so this doesn't depend on the
+  # real ISA51 letter assignments, only on the ambiguity the parser must resolve.
+  def isa51_ambiguous_schema
+    {
+      name: 'custom_isa51_ambiguous', type: 'isa51',
+      measured_variable: { 'A' => 'Analysis' },
+      modifier: { 'S' => 'Safety' },
+      readout_function: { 'L' => 'Light' },
+      output_function: { 'S' => 'Switch', 'T' => 'Transmit' },
+      modifier_function: { 'H' => 'High' }
+    }
+  end
+
+  test "tag prefix parser isa51 should resolve S as modifier when a valid function follows" do
+    @discipline.prefix_schema = isa51_ambiguous_schema
+    tag = create(:tag, discipline: @discipline, prefix: 'AST')
+    parts = tag.prefix_parts
+    assert_equal 'A', parts[:measured_variable]
+    assert_equal 'S', parts[:modifier]
+    assert_equal 'T', parts[:output_function]
+    assert_nil parts[:readout_function]
+    assert_nil parts[:modifier_function]
+  end
+
+  test "tag prefix parser isa51 should reinterpret S as the function when no valid function follows" do
+    @discipline.prefix_schema = isa51_ambiguous_schema
+    tag = create(:tag, discipline: @discipline, prefix: 'AS')
+    parts = tag.prefix_parts
+    assert_equal 'A', parts[:measured_variable]
+    assert_nil parts[:modifier]
+    assert_equal 'S', parts[:output_function]
+    assert_nil parts[:readout_function]
+  end
+
+  test "tag prefix parser isa51 should return nil for a non-conforming prefix" do
+    @discipline.prefix_schema = isa51_ambiguous_schema
+    # 'Z' is not a valid measured_variable in this schema
+    tag = create(:tag, discipline: @discipline, prefix: 'ZL')
+    assert_nil tag.prefix_parts
+
+    # 'A' is a valid measured_variable, but 'X' is neither a modifier nor a function
+    tag2 = create(:tag, discipline: @discipline, prefix: 'AX')
+    assert_nil tag2.prefix_parts
+  end
+
+  test "tag prefix parser dim1 should be correct" do
+    @discipline.prefix_schema = {
+      name: 'custom_dim1', type: 'dim1',
+      prefix: { 'PM' => 'Pump Motor', 'JB' => 'Junction Box' }
+    }
+    tag = create(:tag, discipline: @discipline, prefix: 'PM')
+    assert_equal({ prefix: 'PM' }, tag.prefix_parts)
+  end
+
+  test "tag prefix parser dim1 should return nil for a prefix not in the schema" do
+    @discipline.prefix_schema = {
+      name: 'custom_dim1', type: 'dim1',
+      prefix: { 'PM' => 'Pump Motor', 'JB' => 'Junction Box' }
+    }
+    tag = create(:tag, discipline: @discipline, prefix: 'ZZ')
+    assert_nil tag.prefix_parts
+  end
+
+  test "tag prefix parser dim2 should be correct" do
+    @discipline.prefix_schema = {
+      name: 'custom_dim2', type: 'dim2',
+      part1: { 'P' => 'Pump' }, part2: { 'M' => 'Motor' }
+    }
+    tag = create(:tag, discipline: @discipline, prefix: 'PM')
+    parts = tag.prefix_parts
+    assert_equal 'P', parts[:part1]
+    assert_equal 'M', parts[:part2]
+  end
+
+  test "tag prefix parser dim2 should allow an optional part2" do
+    @discipline.prefix_schema = {
+      name: 'custom_dim2', type: 'dim2',
+      part1: { 'P' => 'Pump' }, part2: { 'M' => 'Motor' }
+    }
+    tag = create(:tag, discipline: @discipline, prefix: 'P')
+    parts = tag.prefix_parts
+    assert_equal 'P', parts[:part1]
+    assert_nil parts[:part2]
+  end
+
+  test "tag prefix parser dim2 should return nil when part1 does not match the schema" do
+    @discipline.prefix_schema = {
+      name: 'custom_dim2', type: 'dim2',
+      part1: { 'P' => 'Pump' }, part2: { 'M' => 'Motor' }
+    }
+    tag = create(:tag, discipline: @discipline, prefix: 'X')
+    assert_nil tag.prefix_parts
+  end
+
+  test "tag prefix parser default should just return the raw prefix" do
+    @discipline.prefix_schema = { name: 'custom_default', type: 'default' }
+    tag = create(:tag, discipline: @discipline, prefix: 'ABCDEF')
+    assert_equal({ prefix: 'ABCDEF' }, tag.prefix_parts)
+  end
+
+  test "tag prefix parser should return nil when the tag has no prefix" do
+    tag = create(:tag, discipline: @discipline, prefix: 'AAA')
+    tag.prefix = nil
+    assert_nil tag.prefix_parts
+  end
+
+  test "tag prefix parser should return nil when the discipline has no prefix schema" do
+    tag = create(:tag, discipline: @discipline, prefix: 'BBB')
+    tag.discipline.prefix_schema = nil
+    assert_nil tag.prefix_parts
   end
 
   # When changing an invalid tagable, tagable_id should be reset.

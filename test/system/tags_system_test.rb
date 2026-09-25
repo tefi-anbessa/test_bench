@@ -323,6 +323,37 @@ class TagsSystemTest < ApplicationSystemTestCase
     sign_out @j_user
   end
 
+  # isa51 letters S, X, Y, Z can be either a modifier or a function - Tag#prefix_parts
+  # has to look ahead at the next character to decide which when parsing an existing
+  # prefix back into the edit form's dropdowns. This confirms the view renders that
+  # disambiguation correctly in both directions, using real isa51 letters (A, S, T).
+  test "editing an isa51 tag disambiguates a modifier/function letter correctly" do
+    sample_disciplines_setup
+    sign_in @j_user
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+
+    # "AST": A (measured_variable) + S (modifier, confirmed because T is a valid
+    # function that follows) + T (output_function).
+    confirmed_modifier_tag = create(:tag, :unique_tag, discipline: @discipline_j, prefix: "AST")
+    visit edit_tag_path(confirmed_modifier_tag)
+    assert_current_path edit_tag_path(confirmed_modifier_tag)
+    assert_equal 'A', find_field('measured_variable').value
+    assert_equal 'S', find_field('modifier').value
+    assert_equal 'T', find_field('function').value
+
+    # "AS": A (measured_variable) + S - with nothing following, S cannot be a
+    # modifier (no function would remain), so it must be reinterpreted as the
+    # function itself, leaving modifier blank.
+    reinterpreted_function_tag = create(:tag, :unique_tag, discipline: @discipline_j, prefix: "AS")
+    visit edit_tag_path(reinterpreted_function_tag)
+    assert_current_path edit_tag_path(reinterpreted_function_tag)
+    assert_equal 'A', find_field('measured_variable').value
+    assert_equal '', find_field('modifier').value
+    assert_equal 'S', find_field('function').value
+    sign_out @j_user
+  end
+
   test "accredited users create new tags" do
     # Additional discipline setup
     sample_disciplines_setup

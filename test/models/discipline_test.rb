@@ -107,6 +107,68 @@ class DisciplineTest < ActiveSupport::TestCase
       )
   end
 
+  test "custom_schema? should be false for a standard named schema" do
+    @discipline.prefix_schema = { name: 'isa51' }
+    refute @discipline.custom_schema?
+  end
+
+  test "custom_schema? should be true for a schema whose name is not a standard constant" do
+    @discipline.prefix_schema = { name: 'my_custom', type: 'dim1', prefix: { 'A' => 'Alpha' } }
+    assert @discipline.custom_schema?
+  end
+
+  test "custom_schema? should be false when prefix_schema is blank" do
+    @discipline.prefix_schema = nil
+    refute @discipline.custom_schema?
+  end
+
+  test "isa51_type_schema? should be true for the standard isa51 schema" do
+    @discipline.prefix_schema = { name: 'isa51' }
+    assert @discipline.isa51_type_schema?
+  end
+
+  test "isa51_type_schema? should be true for a custom schema of type isa51" do
+    @discipline.prefix_schema = { name: 'my_isa51_variant', type: 'isa51' }
+    assert @discipline.isa51_type_schema?
+  end
+
+  test "isa51_type_schema? should be false for a custom schema of a different type" do
+    @discipline.prefix_schema = { name: 'my_custom', type: 'dim1', prefix: { 'A' => 'Alpha' } }
+    refute @discipline.isa51_type_schema?
+  end
+
+  test "isa51_type_schema? should be false for a different standard schema" do
+    @discipline.prefix_schema = { name: 'default' }
+    refute @discipline.isa51_type_schema?
+  end
+
+  test "default_prefix_schema_name should return the schema's own name when present" do
+    @discipline.prefix_schema = { name: 'isa51' }
+    assert_equal 'isa51', @discipline.default_prefix_schema_name
+  end
+
+  test "default_prefix_schema_name should fall back to project and code when prefix_schema is blank" do
+    @discipline.prefix_schema = nil
+    expected = "#{@discipline.project&.label}_#{@discipline.code}".parameterize.underscore
+    assert_equal expected, @discipline.default_prefix_schema_name
+  end
+
+  test "schema_for_form should return an empty hash when prefix_schema is blank" do
+    @discipline.prefix_schema = nil
+    assert_equal({}, @discipline.schema_for_form)
+  end
+
+  test "schema_for_form should return the full constant for a standard named schema" do
+    @discipline.prefix_schema = { name: 'isa51' }
+    assert_equal Constants.prefix_schemata[:isa51], @discipline.schema_for_form
+  end
+
+  test "schema_for_form should return the schema itself for a custom schema" do
+    custom = { 'name' => 'my_custom', 'type' => 'dim1', 'prefix' => { 'A' => 'Alpha' } }
+    @discipline.prefix_schema = custom
+    assert_equal custom, @discipline.schema_for_form
+  end
+
   test "required_role must be a valid discipline role" do
     @discipline.required_role = "invalid_role"
     refute @discipline.valid?
