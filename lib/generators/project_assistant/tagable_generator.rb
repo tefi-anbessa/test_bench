@@ -550,8 +550,8 @@ module ProjectAssistant
         end
         
         # Handle views translations
-        views_file = Pathname.new(File.join(destination_root, "config", "locales", 
-          module_name.underscore, locale.to_s, "#{locale}.#{module_name.underscore}.views.yml"))
+        views_file = Pathname.new(File.join(destination_root, "config", "locales",
+          *class_path, locale.to_s, "#{locale}.#{class_path[-1]}.views.yml"))
         
         if File.exist?(views_file)
           content = File.read(views_file)

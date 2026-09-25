@@ -71,7 +71,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     assert_text I18n.t("projects.show.header", label: @project.code)
     assert page.title.include?(I18n.t("projects.show.title"))
 
-    # Discipline links 
+    # Discipline links
     assert_selector "h5", text: I18n.t('disciplines.index.header', scope_text: @project.label)
     @project.disciplines.each do |disc|
       next unless disc.persisted?
@@ -106,13 +106,13 @@ class DisciplineSystemTest < ApplicationSystemTestCase
       assert_text disc.prefix_schema['name'] # [TODO: Write a test for collapsible on attribute rather than association.]
       refute_text disc.swatch&.name if disc.swatch.present?
       # Discipline links for tags and documents
-      assert_selector "a[href='#{discipline_tags_path(disc)}']", 
+      assert_selector "a[href='#{discipline_tags_path(disc)}']",
         text: I18n.t('activerecord.models.tag', count: disc.tags.count)
       find("a[href='#{discipline_tags_path(disc)}']").click
       assert_current_path discipline_tags_path(disc)
       find("a[href='#{discipline_path(disc)}']").click
       assert_current_path discipline_path(disc)
-      assert_selector "a[href='#{discipline_documents_path(disc)}']", 
+      assert_selector "a[href='#{discipline_documents_path(disc)}']",
         text: I18n.t('activerecord.models.document', count: disc.documents.count)
       find("a[href='#{discipline_documents_path(disc)}']").click
       assert_current_path discipline_documents_path(disc)
@@ -194,7 +194,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     @project.disciplines.each do |disc|
       next unless disc.persisted?
       visit discipline_path(disc)
-      # Header links 
+      # Header links
       assert_nav_button(:show_project, disc.project)
       assert_nav_button(:index, path: project_disciplines_path(disc.project))
       assert_nav_button(:edit, disc, path: edit_discipline_path(disc)) # Edit discipline link
@@ -216,7 +216,6 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     @project.disciplines.each do |disc|
-      # puts "BEFORE: #{disc.inspect} | persisted?: #{disc.persisted?}"
       next unless disc.persisted?
       visit discipline_path(disc)
       # Doc_types links
@@ -233,6 +232,10 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     sign_in @project_admin
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    # Discipline.new(project:) rather than @project.disciplines.build - the
+    # latter appends to the disciplines association's own in-memory array,
+    # which the loop below is iterating and would then also visit.
+    new_discipline = Discipline.new(project: @project)
     @project.disciplines.each do |disc|
       next unless disc.persisted?
       visit discipline_path(disc)
@@ -241,7 +244,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
       assert_nav_button(:index, path: project_disciplines_path(disc.project))
       assert_nav_button(:edit, disc, path: edit_discipline_path(disc)) # Edit discipline link
       assert_nav_button(:delete, disc) # Delete discipline link
-      assert_nav_button(:new, @project.disciplines.build, path: new_project_discipline_path(@project)) # New discipline link
+      assert_nav_button(:new, new_discipline, path: new_project_discipline_path(@project)) # New discipline link
     end
   end
 
