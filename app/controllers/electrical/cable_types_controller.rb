@@ -10,7 +10,12 @@ module Electrical
     def index
       authorize CableType
       @q = @scope.ransack(params[:q])
-      @pagy, @cable_types = pagy(@q.result.includes(:electrical_cables))
+      @pagy, @cable_types = pagy(@q.result.includes(:electrical_cables, discipline: :project))
+      # One cable_type per discipline present on this page is enough to
+      # compute permissions for every row of that discipline - see
+      # ApplicationController#permissions_by_group.
+      probes = @cable_types.group_by(&:discipline_id).except(nil).transform_values(&:first)
+      @permissions = permissions_by_group(probes)
     end
 
     # GET /electrical/cable_types/1 or /electrical/cable_types/1.json

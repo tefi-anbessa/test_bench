@@ -5,13 +5,14 @@
   <td><%= row.doc_number || '-' %></td>
   <td><%= row.title || '-' %></td>
   <td>
-    <% if policy(row).show? %>
+    <% perms = @permissions&.[](row.discipline_id) || permissions_for(row) %>
+    <% if perms[:show] %>
       <%= nav_button(action: :show, record: row, icon_only: true) %>
     <% end %>
-    <% if policy(row).edit? %>
+    <% if perms[:edit] %>
       <%= nav_button(action: :edit, record: row, path: edit_document_path(row), icon_only: true) %>
     <% end %>
-    <% if policy(row).destroy? %>
+    <% if perms[:destroy] %>
       <%= nav_button(action: :delete, record: row, icon_only: true) %>
     <% end %>
   </td>

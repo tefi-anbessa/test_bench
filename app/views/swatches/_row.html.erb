@@ -12,13 +12,14 @@
   <td style="background-color: <%= row.bg %>; color: <%= row.link_text %>"><%= row.link_text || '-' %></td>
   <td style="background-color: <%= row.bg %>; color: <%= row.link_hover %>"><%= row.link_hover || '-' %></td>
   <td>
-    <% if policy(row).show? %>
+    <% perms = @permissions || permissions_for(row) %>
+    <% if perms[:show] %>
       <%= nav_button(action: :show, record: row, icon_only: true) %>
     <% end %>
-    <% if policy(row).edit? %>
+    <% if perms[:edit] %>
       <%= nav_button(action: :edit, record: row, path: edit_swatch_path(row), icon_only: true) %>
     <% end %>
-    <% if policy(row).destroy? %>
+    <% if perms[:destroy] %>
       <%= nav_button(action: :delete, record: row, icon_only: true) %>
     <% end %>
   </td>

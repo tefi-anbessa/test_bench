@@ -14,6 +14,12 @@ class DocTypesController < ApplicationController
     @q = @scope.ransack(params[:q])
     result = @q.result.includes(discipline: :project)
     @pagy, @doc_types = pagy(result)
+    # One doc_type per discipline present on this page is enough to compute
+    # permissions for every row of that discipline - see
+    # ApplicationController#permissions_by_group.
+    probes = @doc_types.group_by(&:discipline_id).except(nil).transform_values(&:first)
+    @permissions = permissions_by_group(probes)
+    @document_counts = counts_by(Document, :doc_type_id, @doc_types.map(&:id))
   end
 
   # GET /doc_types/1

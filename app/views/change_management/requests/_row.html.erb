@@ -6,13 +6,14 @@
   <td><%= row.title || '-' %></td>  
   <td><%= row.class.human_enum_name(:duration, row.duration) %></td>
   <td>
-    <% if policy(row).show? %>
+    <% perms = @permissions || permissions_for(row) %>
+    <% if perms[:show] %>
       <%= nav_button(action: :show, record: row, icon_only: true) %>
     <% end %>
-    <% if policy(row).edit? %>
+    <% if perms[:edit] %>
       <%= nav_button(action: :edit, record: row, path: edit_change_management_request_path(row), icon_only: true) %>
     <% end %>
-    <% if policy(row).destroy? %>
+    <% if perms[:destroy] %>
       <%= nav_button(action: :delete, record: row, icon_only: true) %>
     <% end %>
   </td>

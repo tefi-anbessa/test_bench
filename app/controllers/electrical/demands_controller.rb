@@ -10,7 +10,11 @@ module Electrical
     def index
       authorize Electrical::Demand
       @q = policy_scope(Electrical::Demand).ransack(params[:q])
-      @pagy, @demands = pagy(@q.result.includes(:demandable))
+      # Preload what each row links to directly - demandable, incomer and
+      # circuit - so none of them issue a query per row (see
+      # electrical/demands/_row.html.erb). Demand#tag deliberately always
+      # queries fresh (see its comment), so it isn't preloaded here.
+      @pagy, @demands = pagy(@q.result.includes(:demandable, :incomer, :circuit))
       @demands, @orphans = @demands.partition(&:demandable)
     end
 

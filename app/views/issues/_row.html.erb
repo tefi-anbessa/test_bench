@@ -5,21 +5,22 @@
     link_to(row.source_format.label, row.source_format) : 
     '-' %></td>
   <td>
-    <% if policy(row).show? %>
+    <% perms = @permissions || permissions_for(row) %>
+    <% if perms[:show] %>
       <%= link_to row, class: "btn btn-outline-info btn-sm icon-link",
             aria: { label: t('actions.show') },
             title: t('actions.show') do %>
         <%== bs_icon('eye') %>
       <% end %>
     <% end %>
-    <% if policy(row).edit? %>
+    <% if perms[:edit] %>
       <%= link_to edit_issue_path(row), class: "btn btn-outline-warning btn-sm icon-link",
             aria: { label: t('actions.edit') },
             title: t('actions.edit') do %>
         <%== bs_icon('pencil') %>
       <% end %>
     <% end %>
-    <% if policy(row).destroy? %>
+    <% if perms[:destroy] %>
     <%= link_to row,
             data: { method: :delete, confirm: t('actions.delete_sure') },
             class: "btn btn-outline-danger btn-sm icon-link",

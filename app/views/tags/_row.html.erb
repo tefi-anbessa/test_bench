@@ -12,18 +12,19 @@
   <td><%= row.service %></td>
   <td><%= row.location %></td>
   <td><%= row.parent.present? ? index_link(action: :show_tag, record: row.parent) : "-" %></td>
-  <td><%= row.children.count %></td>
+  <td><%= @children_counts ? @children_counts.fetch(row.id, 0) : row.children.count %></td>
   <td>
     <%= render "tags/tagable_link", row: row, view: "index" %>
   </td>
   <td>
-    <% if policy(row).show? %>
+    <% perms = @permissions&.[](row.discipline_id) || { show: policy(row).show?, edit: policy(row).edit?, destroy: policy(row).destroy? } %>
+    <% if perms[:show] %>
       <%= nav_button(action: :show, record: row, icon_only: true) %>
     <% end %>
-    <% if policy(row).edit? %>
+    <% if perms[:edit] %>
       <%= nav_button(action: :edit, record: row, path: edit_tag_path(row), icon_only: true) %>
     <% end %>
-    <% if policy(row).destroy? %>
+    <% if perms[:destroy] %>
       <%= nav_button(action: :delete, record: row, icon_only: true) %>
     <% end %>
   </td>

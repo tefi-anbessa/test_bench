@@ -14,6 +14,11 @@ class DocumentsController < ApplicationController
     @q = @scope.ransack(params[:q])
     result = @q.result.includes(:doc_type, discipline: :project)
     @pagy, @documents = pagy(result)
+    # One document per discipline present on this page is enough to compute
+    # permissions for every row of that discipline - see
+    # ApplicationController#permissions_by_group.
+    probes = @documents.group_by(&:discipline_id).except(nil).transform_values(&:first)
+    @permissions = permissions_by_group(probes)
   end
 
   # GET /documents/1

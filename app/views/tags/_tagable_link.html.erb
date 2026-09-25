@@ -1,7 +1,11 @@
 
 <% if Tag.safe_tagable_types.include?(row.tagable_type) %>
-  <% if row.tagable.present? %>
-    <%= index_link(action: :down, record: row.tagable) %>
+  <% tagable = row.tagable %>
+  <% if tagable.present? %>
+    <%# We already have this tagable's tag (it's row) - pre-fill its :tag
+        association so tagable_or_record_path doesn't re-query for it. %>
+    <% tagable.association(:tag).target = row %>
+    <%= index_link(action: :down, record: tagable) %>
   <% else %>
     <% if policy(row.build_tagable()).new? %>
       <%= index_link(action: :link, path: new_tag_tagable_path(row), record: row.build_tagable()) %>

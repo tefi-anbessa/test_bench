@@ -48,6 +48,7 @@ module Electrical
 
     # === Public methods ===
     def label
+      return nil if serial.nil?
       format("#%02d", serial)
     end
 

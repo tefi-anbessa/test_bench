@@ -157,7 +157,7 @@ module SystemTestHelpers
 
       # Navigation
       assert_nav_button(:index_project, path: project_resource_index_path(@project), label: @project.code) # Link back to project resource index
-      assert_nav_button(:index_discipline, path: discipline_resource_index_path(@discipline), label: @discipline.name) # Link back to discipline resource index
+      assert_nav_button(:index_discipline, path: discipline_resource_index_path(@discipline), label: @discipline.code) # Link back to discipline resource index
 
       # Field labels
       @show_fields.each do |field|

@@ -9,6 +9,10 @@ class SwatchesController < ApplicationController
     authorize Swatch
     @q = policy_scope(Swatch).ransack(params[:q])
     @pagy, @swatches = pagy(@q.result)
+    # SwatchPolicy's show?/edit?/destroy? don't depend on the record at all
+    # (just global admin/app_owner checks), so every row gets an identical
+    # answer - compute it once. See ApplicationController#permissions_for.
+    @permissions = permissions_for(Swatch.new)
   end
 
   # GET /swatches/1

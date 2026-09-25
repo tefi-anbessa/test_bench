@@ -9,6 +9,11 @@ class ApplicationController < ActionController::Base
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :set_paper_trail_whodunnit
 
+  # So views can fall back to a live per-record check with the same
+  # {show:, edit:, destroy:} shape when a controller hasn't precomputed
+  # @permissions (e.g. an orphaned record, or a caller that doesn't set it).
+  helper_method :permissions_for
+
   # Custom error handling for trapped bad requests
   class ConflictError < StandardError; end
   rescue_from ConflictError, with: :handle_conflict
@@ -115,6 +120,35 @@ class ApplicationController < ActionController::Base
     end
 
   private
+
+    # Many DisciplineResourcePolicy/ProjectResourcePolicy show?/edit?/destroy?
+    # implementations only ever depend on the record's own discipline/project,
+    # not on the record itself - so every row sharing that discipline/project
+    # gets an identical answer. Computing this once per group - instead of
+    # calling policy(record) for every row in an index - avoids a Pundit
+    # evaluation (and its internal role queries) per row.
+    # probes_by_key: { group_key => a_record_belonging_to_that_group }
+    # Returns: { group_key => { show:, edit:, destroy: } }
+    def permissions_by_group(probes_by_key)
+      probes_by_key.transform_values { |probe| permissions_for(probe) }
+    end
+
+    # For an index page where every row shares one identical permission answer
+    # (e.g. scoped to a single project/discipline/document, or a policy that
+    # doesn't vary by record at all, like SwatchPolicy) - compute it once.
+    # Returns: { show:, edit:, destroy: }
+    def permissions_for(probe)
+      { show: policy(probe).show?, edit: policy(probe).edit?, destroy: policy(probe).destroy? }
+    end
+
+    # { id => number of `model` rows whose `foreign_key` is that id }, in one
+    # query - avoids a COUNT(*) per row for an index's "how many children"
+    # column (e.g. tags/_row.html.erb's children, doc_types' documents,
+    # cable_types' electrical_cables). Ids with zero matches are simply
+    # absent from the hash, so callers should use #fetch(id, 0), not #[].
+    def counts_by(model, foreign_key, ids)
+      model.where(foreign_key => ids).group(foreign_key).count
+    end
 
     def handle_conflict(exception)
       # Log security incident

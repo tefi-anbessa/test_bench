@@ -11,6 +11,11 @@ class IssuesController < ApplicationController
     authorize @document
     @q = @document.issues.ransack(params[:q])
     @pagy, @issues = pagy(@q.result)
+    # This index is always scoped to a single document, hence a single
+    # discipline/project, and IssuePolicy's show?/edit?/destroy? only depend
+    # on those - so every row gets an identical answer. Compute it once -
+    # see ApplicationController#permissions_for.
+    @permissions = permissions_for(@document.issues.build)
   end
 
   # GET /issues/1

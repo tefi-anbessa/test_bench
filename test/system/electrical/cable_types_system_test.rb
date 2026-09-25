@@ -40,7 +40,7 @@ module Electrical
             :temperature_rating, :voltage_rating, :notes, :code]
 
       # List all associations that should have a collapsible card on the show view
-      @show_associations = [:project, :discipline]
+      @show_associations = [:discipline]
 
       # List all fields that should appear in forms (usually all).
       # New and edit required separately because some models have read only fields that can't be edited.

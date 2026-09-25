@@ -15,6 +15,11 @@ class DisciplinesController < ApplicationController
     @q = @scope.ransack(params[:q])
     @pagy, @disciplines = pagy(@q.result)
     @discipline = @project.disciplines.build()
+    # This index is always scoped to a single project (see set_project), and
+    # DisciplinePolicy's show?/edit?/destroy? only depend on record.project -
+    # so every row gets an identical answer. Compute it once - see
+    # ApplicationController#permissions_for.
+    @permissions = permissions_for(@discipline)
   end
 
   # GET /disciplines/1 or /disciplines/1.json

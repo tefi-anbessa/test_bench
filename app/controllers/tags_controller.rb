@@ -11,8 +11,14 @@ class TagsController < ApplicationController
     @orphans = Tag.where(discipline_id: nil)
 
     @q = @scope.ransack(params[:q])
-    result = @q.result.includes(discipline: :project)
+    result = @q.result.includes(:parent, discipline: :project)
     @pagy, @tags = pagy(result)
+    # One tag per discipline present on this page is enough to compute
+    # permissions for every row of that discipline - see
+    # ApplicationController#permissions_by_group.
+    probes = @tags.group_by(&:discipline_id).except(nil).transform_values(&:first)
+    @permissions = permissions_by_group(probes)
+    @children_counts = counts_by(Tag, :parent_id, @tags.map(&:id))
   end
 
   # GET /tags/1 or /tags/1.json

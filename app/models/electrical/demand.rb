@@ -70,6 +70,10 @@ module Electrical
 
     # === Public methods ===
     def tag
+      # Deliberately always a fresh query, not demandable&.tag - a cached
+      # association can go stale relative to the DB (e.g. after some other
+      # code path updates the tag's row), whereas this always reflects the
+      # current row. Don't "optimize" this into reusing an association cache.
       @tag ||= Tag.find_by(
         tagable_type: demandable_type,
         tagable_id: demandable_id

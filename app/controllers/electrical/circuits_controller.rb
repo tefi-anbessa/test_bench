@@ -9,14 +9,17 @@ module Electrical
         # Cater for index on given switchboard
         authorize @switchboard
         @q = @switchboard.circuits.ransack(params[:q])
-        @pagy, @circuits = pagy(@q.result)
       else
         # Cater for index on all circuits in current project
         authorize Electrical::Switchboard
         @q = Electrical::Circuit.joins(switchboard: [tag: [discipline: :project]])
               .merge(policy_scope(Electrical::Switchboard)).ransack(params[:q])
-        @pagy, @circuits = pagy(@q.result)
       end
+      # Each row links to its feeder and its demand - preload both directly
+      # (rather than nesting :to under :feeder) since a has_one :through
+      # reader doesn't reuse an already-preloaded intermediate association;
+      # see electrical/circuits/_row.html.erb.
+      @pagy, @circuits = pagy(@q.result.includes(:feeder, :demand))
       set_swatch
     end
     

@@ -18,7 +18,7 @@
   <td>
     <%= render 'electrical/demands/index_link', row: row %>
   </td>
-  <td><%= index_link(action: :children, path: electrical_switchboard_circuits_path(row), count: row.circuits.count) %></td>
+  <td><%= index_link(action: :children, path: electrical_switchboard_circuits_path(row), count: @circuit_counts ? @circuit_counts.fetch(row.id, 0) : row.circuits.count) %></td>
   <td>
     <% if can_show %>
       <%= nav_button(action: :show_tagable, record: row, icon_only: true) %>

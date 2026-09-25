@@ -63,9 +63,10 @@
             </div> <!-- end inner card header -->
 
             <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
+              <%= show_attribute(@cable_type, :code) %>
               <%= show_attribute(@cable_type, :conductor_material, type: :enum) %>
               <%= show_attribute(@cable_type, :groups, type: :integer) %>
-              <%= show_attribute(@cable_type, :construction, type: :enum) %>
+              <%= show_attribute(@cable_type, :construction, type: :enum_translated) %>
               <%= show_attribute(@cable_type, :csa, type: :float, units: "mm²") %>
               <%= show_attribute(@cable_type, :neutral_csa, type: :float, units: "mm²") %>
               <%= show_attribute(@cable_type, :earth_csa, type: :float, units: "mm²") %>

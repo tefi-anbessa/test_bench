@@ -16,7 +16,11 @@ class TagablesController < ApplicationController
         .joins(:tag)
         .where(tags: { discipline_id: @discipline.id })
       @q = @scope.ransack(params[:q])
-      result = @q.result.includes(tag: { discipline: :project })
+      result = @q.result.includes(tag: { discipline: :project, parent: {} })
+      # Most tagable types (all but Cable) have an electrical_demand - preload
+      # it where it exists, so each row's demand link doesn't issue its own
+      # query (see Electrical::Demandable, app/views/electrical/demands/_index_link.html.erb).
+      result = result.includes(:electrical_demand) if @resource_class.reflect_on_association(:electrical_demand)
       @pagy, @resources = pagy(result)
       # Separate resources with tags from orphans (resources without tags)
       @resources, @orphans = @resources.partition(&:tag)
@@ -25,6 +29,16 @@ class TagablesController < ApplicationController
       @link_errors = policy_scope(Tag).select { |tag| tag.tagable_type == @resource_class.name && tag.tagable.nil? }
       # Separate incomplete links (no tagable_id) from broken links (has tagable_id but missing resource)
       @link_incomplete, @link_broken = @link_errors.partition { |tag| tag.tagable_id.nil? }
+      # This index is always scoped to a single discipline, so one probe tag
+      # (built, not persisted) is enough to compute permissions for every row -
+      # see ApplicationController#permissions_by_group.
+      @permissions = permissions_by_group(@discipline.id => @discipline.tags.build)
+      @children_counts = counts_by(Tag, :parent_id, @resources.map { |r| r.tag.id })
+      # Switchboards' row shows how many circuits it has - batch that too,
+      # rather than a COUNT(*) per row (see electrical/switchboards/_row.html.erb).
+      if @resource_class == Electrical::Switchboard
+        @circuit_counts = counts_by(Electrical::Circuit, :electrical_switchboard_id, @resources.map(&:id))
+      end
       set_swatch
       render template: "#{@resource_class.model_name.collection}/index"
     end

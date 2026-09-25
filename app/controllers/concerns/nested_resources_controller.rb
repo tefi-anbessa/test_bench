@@ -21,6 +21,13 @@ module NestedResourcesController
       # Separate resources with tags from orphans (resources without tags)
       @resources, @orphans = @resources.partition { |r| r.public_send(nesting).present? }
       instance_variable_set(resources_var_name, @resources)
+      # This index is always scoped to a single tag/discipline/project (see
+      # set_parent), so if the resource's policy only depends on that (as
+      # ProjectResourcePolicy/DisciplineResourcePolicy-based ones do), every
+      # row gets an identical answer - compute it once instead of per row.
+      # Revisit this if a future user of this concern has a policy that
+      # varies per-record within that same scope.
+      @permissions = permissions_for(@parent.public_send(resource_class.model_name.plural).build)
       set_swatch
     end
 
