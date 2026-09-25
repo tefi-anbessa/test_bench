@@ -16,11 +16,6 @@ import 'pagy'
 // pre-built bundle - Pagy.init() wires up any [data-pagy] element on the page
 // (pagy_limit_selector_js, *_nav_js, *_combo_nav_js).
 
-// Import JSONEditor from vendor/javascript
-// import { JSONEditor } from 'jsoneditor'
-// Make it available globally if needed
-// window.JSONEditor = JSONEditor
-
 // Initialize Bootstrap components when the page loads
 const initializeBootstrapComponents = () => {
   // Initialize dropdowns

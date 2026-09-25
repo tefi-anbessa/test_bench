@@ -1,13 +1,7 @@
 
 @use "rails_bootstrap_forms";
 
-// Import JSON Editor styles from vendor/stylesheets
-@use 'jsoneditor.min.css' as *;
-
 @use "bootstrap.min.css" as *;
-
-// JSON Editor icon path
-// $jsoneditor-img-path: 'jsoneditor/dist/img/' !default;
 
 // Custom styles
 @use "custom" as *;
