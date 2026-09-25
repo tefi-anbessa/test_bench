@@ -355,8 +355,27 @@ module ViewHelper
       end
 
     when :colour, :color
-      form.color_field(attr, class: "form-control", 
+      form.color_field(attr, class: "form-control",
         label_col: "col-sm-#{label_cols}", control_col: "col-sm-#{control_cols}", **options)
+
+    when :jsonb
+      # Mounts a vanilla-jsoneditor tree/code editor (see
+      # app/javascript/controllers/json_editor_controller.js) over a hidden
+      # field, so the submitted param is a JSON string - ActiveRecord's jsonb
+      # type casts a string param by parsing it, same as any other attribute.
+      value = form.object.send(attr)
+      json_text = value.present? ? value.to_json : "{}"
+      form.form_group(attr,
+          label: { text: form.object.class.human_attribute_name(attr) },
+          label_col: "col-sm-#{label_cols}", control_col: "col-sm-#{control_cols}") do
+        content_tag(:div, data: { controller: "json-editor" }) do
+          safe_join([
+            content_tag(:div, "", class: "border rounded", style: "min-height: 300px;",
+              data: { json_editor_target: "container" }),
+            form.hidden_field(attr, value: json_text, data: { json_editor_target: "input" })
+          ])
+        end
+      end
 
     else
       raise ArgumentError, "Unknown field type: #{type}"
