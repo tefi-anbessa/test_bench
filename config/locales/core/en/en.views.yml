@@ -105,6 +105,15 @@ en:
     edit:
       title:            "Edit Tag"
       header:           "Edit Tag: %{label}"
+    imports:
+      new:
+        title:              "Import Tags"
+        header_discipline:  "Import Tags into %{discipline}"
+        header_project:     "Import Tags into %{project}"
+        help:               "Upload a spreadsheet (.csv, .xlsx or .ods) of tags. You'll be able to review every row before anything is saved."
+        file_label:         "Spreadsheet"
+        file_help:          "Accepted formats: CSV, Excel (.xlsx), OpenDocument (.ods)."
+        submit:             "Upload"
   roles:
     index:
       title:            "Roles"
@@ -118,6 +127,37 @@ en:
       message_html:     "Assign a new user role for %{resource}"
       no_roles_assigned:  "No roles have been assigned yet"
       existing_roles:  "Existing roles"
+  import_batches:
+    show:
+      already_finished: "This import has already been finished."
+    mapping:
+      title:                  "Map Columns"
+      header:                 "Map Columns - %{filename}"
+      help:                   "Match each column in your file to a field. Columns left as \"Ignore this column\" won't be imported."
+      column_header:          "Column in your file"
+      field_header:           "Field"
+      ignore_column:          "Ignore this column"
+      single_discipline_label: "Discipline for this whole file"
+      single_discipline_blank: "Select a discipline"
+      single_discipline_help: "Only needed if you didn't map a Discipline column above - every row will use this discipline."
+      submit:                 "Continue"
+    review:
+      title:            "Review Import"
+      header:           "Review Import - %{filename}"
+      all_valid:        "All %{count} rows are valid and ready to import."
+      some_invalid:     "%{valid} row(s) are valid, %{invalid} have a problem - fix them or choose to skip them below."
+      row_number:       "Row"
+      status:           "Status"
+      details:          "Details"
+      valid:            "Valid"
+      invalid:          "Invalid"
+      partial_label:    "Skip the %{invalid} invalid row(s) and import the rest"
+      back_to_mapping:  "Back to column mapping"
+      commit:           "Import"
+    commit:
+      notice:           "Imported %{imported} tag(s). Skipped %{skipped}."
+    destroy:
+      notice:           "Import cancelled."
   swatches:
     index:
       title:            "Swatches"

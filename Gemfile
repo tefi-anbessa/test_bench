@@ -94,6 +94,12 @@ gem "rolify"
 gem "pundit"
 gem 'paper_trail'
 
+# Use roo for reading spreadsheet imports (.xlsx/.ods/.csv - legacy .xls and
+# Google Sheets need separate gems, roo-xls/roo-google, not added for now)
+gem "roo", "~> 2.10"
+# roo depends on stdlib csv, which stops being a default gem in Ruby 3.4
+gem "csv"
+
 # End of added gems +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 group :development, :test do

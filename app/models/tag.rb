@@ -2,6 +2,10 @@ class Tag < ApplicationRecord
   # === Mixins ===
   
   # === Constants ===
+  # The single allowlist for what a user (via the manual form) or a
+  # spreadsheet import may set directly - see TagsController#tag_params and
+  # Import::Tags#permitted_attributes.
+  IMPORTABLE_ATTRIBUTES = %i[discipline_id stage prefix serial suffix service location notes tagable_type parent_id].freeze
 
   # === Gem macros ===
   has_paper_trail

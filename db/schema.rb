@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_30_001525) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_26_010001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -208,6 +208,32 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_30_001525) do
     t.text "notes"
   end
 
+  create_table "import_batches", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "project_id", null: false
+    t.bigint "discipline_id"
+    t.string "importer_key", null: false
+    t.string "original_filename", null: false
+    t.binary "file_data", null: false
+    t.jsonb "column_mapping", default: {}, null: false
+    t.integer "status", default: 0, null: false
+    t.integer "row_count"
+    t.datetime "expires_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["expires_at"], name: "index_import_batches_on_expires_at"
+    t.index ["user_id"], name: "index_import_batches_on_user_id"
+  end
+
+  create_table "import_mapping_presets", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "importer_key", null: false
+    t.jsonb "column_mapping", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "importer_key"], name: "index_import_mapping_presets_on_user_and_importer_key", unique: true
+  end
+
   create_table "issues", force: :cascade do |t|
     t.bigint "document_id", null: false
     t.string "code", null: false
@@ -351,6 +377,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_30_001525) do
   add_foreign_key "electrical_cable_types", "disciplines"
   add_foreign_key "electrical_cables", "electrical_cable_types"
   add_foreign_key "electrical_circuits", "electrical_switchboards"
+  add_foreign_key "import_batches", "disciplines"
+  add_foreign_key "import_batches", "projects"
   add_foreign_key "issues", "source_formats"
   add_foreign_key "projects", "swatches"
   add_foreign_key "tags", "disciplines"

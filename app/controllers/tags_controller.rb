@@ -127,8 +127,7 @@ class TagsController < ApplicationController
     end
 
     def tag_params
-      params.require(:tag).permit(:discipline_id, :stage, :prefix, :serial, :suffix,
-                                  :service, :location, :notes, :tagable_type, :parent_id)
+      params.require(:tag).permit(*Tag::IMPORTABLE_ATTRIBUTES)
     end
 
 

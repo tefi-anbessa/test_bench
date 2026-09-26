@@ -23,7 +23,12 @@ Rails.application.routes.draw do
       end
 
       # Project nested index routes
-      resources :tags, :documents, :doc_types, only: [:index]
+      resources :tags, only: [:index] do
+        collection do
+          resource :import, only: [:new, :create], controller: "tags/imports", as: :tags_import
+        end
+      end
+      resources :documents, :doc_types, only: [:index]
       namespace :electrical do
         resources :cable_types, only: [:index]
       end
@@ -41,7 +46,11 @@ Rails.application.routes.draw do
     resources :disciplines, shallow: true, only: [] do
       # Discipline nested routes
       # INSERTION POINT 1 FOR MODULE GENERATOR
-      resources :tags
+      resources :tags do
+        collection do
+          resource :import, only: [:new, :create], controller: "tags/imports", as: :tags_import
+        end
+      end
       resources :documents, shallow: true do
         # Document nested resources
         resources :issues
@@ -89,6 +98,14 @@ Rails.application.routes.draw do
     # Issue nested routes
     resources :issues, shallow: true, only: [] do
     end # issue nested routes
+
+    # Spreadsheet import wizard - generic across every importer (see
+    # Import::Base's registry): only the upload entry point is model/context
+    # specific (e.g. tags/imports, above); everything from here on operates
+    # on the Import::Batch itself.
+    resources :import_batches, only: [:show, :update, :destroy] do
+      member { post :commit }
+    end
 
     # Global resource routes
     resources :source_formats

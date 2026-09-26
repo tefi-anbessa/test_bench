@@ -1,0 +1,65 @@
+<% provide(:title, t(".title")) %>
+<% valid_count = @rows.count(&:valid?) %>
+<% invalid_count = @rows.size - valid_count %>
+<div class="container mt-3" style="<%= container_styles(@swatch) %>">
+  <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+      <h5 class="mb-0"><%= t(".header", filename: @batch.original_filename) %></h5>
+    </div>
+
+    <div class="card-body p-3" style="<%= form_styles(@swatch) %>">
+      <% if invalid_count.zero? %>
+        <div class="alert alert-success"><%= t(".all_valid", count: valid_count) %></div>
+      <% else %>
+        <div class="alert alert-warning"><%= t(".some_invalid", valid: valid_count, invalid: invalid_count) %></div>
+      <% end %>
+
+      <div class="table-responsive mb-3" style="max-height: 500px; overflow-y: auto;">
+        <table class="table table-sm table-striped">
+          <thead>
+            <tr>
+              <th><%= t(".row_number") %></th>
+              <th><%= t(".status") %></th>
+              <th><%= t(".details") %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @rows.each do |row| %>
+              <tr class="<%= row.valid? ? "" : "table-danger" %>">
+                <td><%= row.row_number %></td>
+                <td>
+                  <% if row.valid? %>
+                    <span class="badge bg-success"><%= t(".valid") %></span>
+                  <% else %>
+                    <span class="badge bg-danger"><%= t(".invalid") %></span>
+                  <% end %>
+                </td>
+                <td>
+                  <% if row.valid? %>
+                    <%= row.raw.values.compact.join(" · ") %>
+                  <% else %>
+                    <%= row.error_messages.join("; ") %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <%= form_with url: commit_import_batch_path(@batch), method: :post, local: true do %>
+        <% if invalid_count.positive? %>
+          <div class="form-check mb-3">
+            <%= check_box_tag "partial", "1", false, class: "form-check-input" %>
+            <%= label_tag "partial", t(".partial_label", invalid: invalid_count), class: "form-check-label" %>
+          </div>
+        <% end %>
+
+        <div class="d-flex justify-content-between">
+          <%= link_to t(".back_to_mapping"), import_batch_path(@batch), class: "btn btn-outline-secondary" %>
+          <%= submit_tag t(".commit"), class: "btn btn-primary", disabled: invalid_count.positive? && valid_count.zero? %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
