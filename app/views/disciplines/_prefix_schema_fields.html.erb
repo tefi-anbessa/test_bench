@@ -1,4 +1,4 @@
-<div class="card mb-4" 
+<div class="card mb-4"
      data-controller="prefix-schema"
      data-prefix-schema-schemata-value='<%= Constants.prefix_schemata.to_json %>'
      data-prefix-schema-messages-value='<%= {
@@ -6,8 +6,8 @@
        initialize: t("prefix_schema.messages.initialize")
      }.to_json %>'
      data-prefix-schema-initial-selection-value='<%= @prefix_schema_selection %>'
-     data-prefix-schema-initial-schema-value='<%= @discipline.prefix_schema.to_json if @discipline.prefix_schema.present? %>'
-     data-prefix-schema-default-name-value='<%= @default_prefix_schema_name %>'>
+     data-prefix-schema-default-name-value='<%= @default_prefix_schema_name %>'
+     data-prefix-schema-json-editor-outlet=".schema-json-editor-mount">
   
   <div class="card-header">
     <%= t('activerecord.attributes.discipline.prefix_schema') %>
@@ -77,26 +77,20 @@
       
       <!-- Schema Editor -->
       <div class="form-group" data-prefix-schema-target="schemaEditorWrapper">
-        <%# Using a regular textarea without the form builder to avoid automatic required attribute %>
-        <label for="discipline_prefix_schema_editor" class="form-label"><%= t('prefix_schema.custom_schema') %></label>
-        <textarea id="discipline_prefix_schema_editor"
-                class="form-control font-monospace"
-                rows="10"
-                data-prefix-schema-target="schemaEditor"
-                data-action="input->prefix-schema#updateSchemaInput"
-                <%= 'required' if form.object.class.validators_on(:prefix_schema).any? { |v| v.is_a?(ActiveModel::Validations::PresenceValidator) } %>>
-          <%= @discipline.prefix_schema.present? ? JSON.pretty_generate(@discipline.prefix_schema) : '' %>
-        </textarea>
+        <label class="form-label"><%= t('prefix_schema.custom_schema') %></label>
+        <div class="schema-json-editor-mount" data-controller="json-editor" data-prefix-schema-target="schemaEditor">
+          <div data-json-editor-target="container" class="border rounded" style="min-height: 300px;"></div>
+          <%# The hidden field must live inside this div, not alongside it - Stimulus
+              targets must be descendants of the element carrying data-controller. %>
+          <%= form.hidden_field :prefix_schema,
+                              value: @discipline.prefix_schema.present? ? @discipline.prefix_schema.to_json : '',
+                              data: { prefix_schema_target: 'schemaInput', json_editor_target: 'input' },
+                              required: form.object.class.validators_on(:prefix_schema).any? { |v| v.is_a?(ActiveModel::Validations::PresenceValidator) } %>
+        </div>
         <small class="form-text text-muted">
           <%= t('prefix_schema.schema_help') %>
         </small>
       </div>
-      
-      <!-- Hidden input that will be submitted with the form -->
-      <%= form.hidden_field :prefix_schema, 
-                          value: @discipline.prefix_schema.present? ? @discipline.prefix_schema.to_json : '',
-                          data: { prefix_schema_target: 'schemaInput' },
-                          required: form.object.class.validators_on(:prefix_schema).any? { |v| v.is_a?(ActiveModel::Validations::PresenceValidator) } %>
     </div>
   </div>
 </div>

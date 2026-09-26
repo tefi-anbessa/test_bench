@@ -38,4 +38,18 @@ export default class extends Controller {
     this.editor?.destroy()
     this.editor = null
   }
+
+  // Public API for other controllers (e.g. via a Stimulus outlet) that need
+  // to replace this editor's content programmatically - a plain assignment
+  // to inputTarget.value wouldn't update what's actually rendered.
+  setContent(json) {
+    this.editor?.set({ json })
+  }
+
+  // The editor can mount while its container is display:none (e.g. it starts
+  // hidden behind a mode selector) and mis-measure its layout as a result -
+  // call this after making a previously-hidden editor visible.
+  refresh() {
+    this.editor?.refresh()
+  }
 }
