@@ -117,6 +117,23 @@ module ViewHelper
         content_tag(:div, label + ": ", class: "col-#{label_cols} text-muted") +
         content_tag(:div, value.safe_constantize.model_name.human, class: "col-#{value_cols}")
       end
+    when :jsonb
+      # Read-only vanilla-jsoneditor tree view (see
+      # app/javascript/controllers/json_editor_controller.js) - no hidden
+      # field, since a show view has nothing to submit.
+      json_text = value.present? ? value.to_json : "{}"
+      content_tag(:div, class: "mb-1") do
+        content_tag(:div, label + ": ", class: "text-muted mb-1") +
+        content_tag(:div,
+            data: {
+              controller: "json-editor",
+              json_editor_content_value: json_text,
+              json_editor_read_only_value: true
+            }) do
+          content_tag(:div, "", class: "border rounded", style: "min-height: 200px;",
+            data: { json_editor_target: "container" })
+        end
+      end
     end
   end
 

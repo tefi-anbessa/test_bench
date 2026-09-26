@@ -1,17 +1,27 @@
 import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="json-editor"
-// Mounts vanilla-jsoneditor onto containerTarget, keeping inputTarget (the
-// hidden field actually submitted with the form) in sync with its content.
-// vanilla-jsoneditor is only needed on the few forms that edit a jsonb
-// column, so it's dynamically imported here rather than loaded on every page.
+// Mounts vanilla-jsoneditor onto containerTarget. Two uses:
+// - Editable (see ViewHelper#form_field's :jsonb case): has an inputTarget,
+//   the hidden field actually submitted with the form - its value seeds the
+//   editor's initial content, and is kept in sync with further edits.
+// - Read-only (see ViewHelper#show_attribute's :jsonb case): no inputTarget;
+//   initial content instead comes from contentValue, and readOnlyValue
+//   disables editing.
+// vanilla-jsoneditor is only needed on the few pages that show or edit a
+// jsonb column, so it's dynamically imported here rather than loaded on
+// every page.
 export default class extends Controller {
   static targets = ["container", "input"]
+  static values = {
+    content: { type: String, default: "" },
+    readOnly: { type: Boolean, default: false }
+  }
 
   async connect() {
     const { createJSONEditor } = await import("vanilla-jsoneditor")
 
-    const raw = this.inputTarget.value
+    const raw = this.hasInputTarget ? this.inputTarget.value : this.contentValue
     let content
     try {
       content = { json: raw.trim().length > 0 ? JSON.parse(raw) : {} }
@@ -25,11 +35,26 @@ export default class extends Controller {
       target: this.containerTarget,
       props: {
         content,
-        onChange: (updatedContent) => {
-          this.inputTarget.value = "json" in updatedContent
-            ? JSON.stringify(updatedContent.json)
-            : updatedContent.text
-        }
+        readOnly: this.readOnlyValue,
+        // Lock to tree mode always (edit or read-only) - text/table mode let
+        // the user type or paste arbitrary raw text, which is unnecessary
+        // surface area for a jsonb column that should only ever hold
+        // structured data.
+        mode: "tree",
+        // Read-only usages (ViewHelper#show_attribute, and the named-schema
+        // viewer in disciplines/_prefix_schema_fields) have nothing for a
+        // menu bar to do - no editing, and the mode switcher would just let
+        // the user flip out of tree mode. Editable usages keep it, both for
+        // its own tree-mode controls (search, undo/redo) and because an
+        // editor already has full latitude over the field's raw data anyway.
+        mainMenuBar: !this.readOnlyValue,
+        onChange: this.hasInputTarget
+          ? (updatedContent) => {
+              this.inputTarget.value = "json" in updatedContent
+                ? JSON.stringify(updatedContent.json)
+                : updatedContent.text
+            }
+          : undefined
       }
     })
   }

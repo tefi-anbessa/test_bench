@@ -103,12 +103,7 @@ class Discipline < ApplicationRecord
       begin
         parsed = case prefix_schema
                 when String
-                  # Try JSON first, then YAML
-                  begin
-                    JSON.parse(prefix_schema)
-                  rescue JSON::ParserError
-                    YAML.safe_load(prefix_schema) rescue prefix_schema
-                  end
+                  JSON.parse(prefix_schema)
                 when Hash
                   prefix_schema
                 else

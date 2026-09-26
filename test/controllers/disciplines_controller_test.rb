@@ -114,7 +114,7 @@ class DisciplinesControllerTest < ActionController::TestCase
         {
         name: "Test Discipline",
         code: "TD",
-        prefix_schema: "name: default",
+        prefix_schema: { name: "default" }.to_json,
         required_role: "designer"
         } 
       }

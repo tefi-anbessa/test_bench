@@ -4,8 +4,6 @@
   title: [t("activerecord.attributes.discipline.prefix_schema"), schema['name']].join(': '),
   expanded: false,
   header_class: 'py-1' do %>
-    <div class="bg-light p-3 rounded">
-      <pre class="mb-0"><code class="language-json"><%= JSON.pretty_generate(schema.presence || {}) %></code></pre>
-    </div>
+    <%= show_attribute(@discipline, :prefix_schema, type: :jsonb) %>
   <% end %>
 </div>

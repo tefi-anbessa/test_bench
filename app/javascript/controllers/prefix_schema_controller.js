@@ -2,12 +2,25 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="prefix-schema"
 export default class extends Controller {
-  static targets = ["schemaInput", "schemaKey", "customSchemaFields", "schemaViewer", "schemaViewerContent", "schemaEditor", "schemaEditorWrapper", "schemaTypeSelector"]
+  static targets = ["schemaInput", "schemaKey", "customSchemaFields", "schemaViewer", "schemaEditor", "schemaEditorWrapper", "schemaTypeSelector"]
   static outlets = ["json-editor"]
   static values = {
     schemata: { type: Object, default: {} },
     messages: { type: Object, default: {} },
     initialSelection: { type: String, default: null }
+  }
+
+  // There are two json-editor-controlled elements on this form - the
+  // editable custom schema editor, and the read-only named-schema viewer -
+  // both matched by the same outlet selector (see the outlet attribute in
+  // _prefix_schema_fields.html.erb), so jsonEditorOutlet (singular) would be
+  // ambiguous. These pick out the right one by its mount class.
+  get customEditorOutlet() {
+    return this.jsonEditorOutlets.find((outlet) => outlet.element.classList.contains('schema-json-editor-mount'));
+  }
+
+  get viewerEditorOutlet() {
+    return this.jsonEditorOutlets.find((outlet) => outlet.element.classList.contains('schema-viewer-mount'));
   }
 
   connect() {
@@ -65,9 +78,12 @@ export default class extends Controller {
       }
 
       // Display the schema in the viewer
-      if (this.hasSchemaViewerTarget && this.hasSchemaViewerContentTarget) {
-        this.schemaViewerContentTarget.textContent = JSON.stringify(schema, null, 2);
+      if (this.hasSchemaViewerTarget) {
+        this.viewerEditorOutlet?.setContent(schema);
         this.schemaViewerTarget.style.display = 'block';
+        // As in showCustomSchemaEditor - this element may have mounted while
+        // hidden, so make sure it's sized correctly now it's visible.
+        this.viewerEditorOutlet?.refresh();
       }
 
       // Show the selector in case they want to change it
@@ -105,9 +121,7 @@ export default class extends Controller {
 
     // The editor may have mounted while hidden (display:none) - vanilla-jsoneditor
     // can mis-measure its layout in that state, so refresh it now it's visible.
-    if (this.hasJsonEditorOutlet) {
-      this.jsonEditorOutlet.refresh();
-    }
+    this.customEditorOutlet?.refresh();
   }
 
   hideAllElements() {
@@ -238,9 +252,7 @@ export default class extends Controller {
     if (this.hasSchemaInputTarget) {
       this.schemaInputTarget.value = JSON.stringify(schema);
     }
-    if (this.hasJsonEditorOutlet) {
-      this.jsonEditorOutlet.setContent(schema);
-    }
+    this.customEditorOutlet?.setContent(schema);
   }
 
   // Clean up event listeners

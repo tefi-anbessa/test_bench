@@ -251,7 +251,7 @@ Errors are categorized as:
 - Controllers need to be designed carefully to ensure all user provided data is sanitized. Frequent use of enum attributes, length validation, strong parameters, and explicit type checking can help prevent these attacks.
 - When a controller detects invalid parameters, custom error class ConflictError should be raised, with a message key specific to the actual error.
 - ConflictErrors are handled in ApplicationController by rescue_from ConflictError and method handle_conflict.
-- handle_conflict logs the error with the message code, redirects to the custom /409 conflict page, and logs out the current user.
+- handle_conflict logs the error with the message code, redirects to the custom /409 conflict page, and logs out the current user [HOLD: Logout user might be OTT. Some conflicts can be data race conditions.].
 - At present, the custom /409 page includes a flash alert with the translated error message. This may not be required in production if it is considered that 409 errors are definitely hacking attempts.
 - Controller tests should include thorough test of each path through the controller to ensure that all security breach attempts are trapped.
 - Tests can use the test helper method assert_conflict.
@@ -298,11 +298,11 @@ Errors are categorized as:
   
 ## Known Issues
 
-### Tagable Validation
+### Tagable Validation - fixed
 
 It is possible to create multiple tags referencing the same tagable element, despite the validations in place.
 
-### Pagination
+### Pagination - fixed
 
 - **Issue**: The pagination system is not respecting the `per_page` parameter correctly.
 - **Symptoms**:  
@@ -330,7 +330,8 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Build a module generator.
 - [x] Build a tagable generator.
 - [x] Build a scaffold generator for models without links to tags.
-- [ ] Enhance electrical model with network load calculations.
+- [x] Enhance electrical model with network load calculations.
+- [ ] Add import and export of data.
 - [ ] Enhance the existing database models to include revison control of data.
 - [ ] Build a document control module to manage document storage, issue, history including versions and workflow.
 - [ ] Add polymorphic comments.
@@ -379,22 +380,21 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Workflow for cable types with no current project.
 - [x] Refine the collapsibles component to retain state after refresh operations (e.g. sorting links with ransack). Make a generalised solution, maybe use turbo.
 - [x] Fix the page size js controller. Fixed pagy usage in preference.
-- [ ] Write thorough tests for the tag parser and builder.
+- [x] Write thorough tests for the tag parser and builder.
 - [x] Cable types routing should be nested under projects.
 - [ ] Cable types controller should be revised to suit nesting and protect against current project setting.
-- [ ] Add searching and sorting for from and to fields in cables index.
 - [x] Expand tagable and scaffold generator tests to include all types and options.
 - [ ] Improve system test template for scaffold generator.
 - [x] Scaffold generator check for valid module names is not working correctly.
 - [x] Verify if two set of routes are really needed for tagables.
-- [ ] Review all use of the method underscore. It apparently is not aware of the OS and uses '/' as the separator. Use File.join wherever appropriate.
+- [x] Review all use of the method underscore. It is not aware of the OS and uses '/' as the separator, so is not appropriate when generating file paths. Use File.join wherever appropriate.
 - [ ] Fix module generator to use nested parent modules.
 - [ ] Provide a means for admins to edit tags to remove broken links to tagable.
 - [x] Add tagable controller checks to ensure discipline belongs to current project.
 - [x] Cable factory begets discipline, project, then cable_type, but cable_type begets its own project. Should inherit from cable factory.
-- [ ] Add model tests for read only attributes - documents, tags.
+- [x] Add model tests for read only attributes - documents, tags.
 - [x] Review security of all controllers wrt injection attacks.
-- [ ] Check that usage of accepts_nested_attributes_for is correct for tagable concern.
+- [x] Check that usage of accepts_nested_attributes_for is correct for tagable concern. It isn't - removed.
 - [x] Fix previous and next functionality in tagable navigation, and generalise it for non tagables. All models next and prev should only look inside policy scope. At present can raise forbidden.
 - [ ] RBAC still has anomalous behaviour when resource wide roles are applied. Scope will include all projects, and allow selection of any project as current, but accessing the project without a specific role will result in forbidden. Either block resource wide roles or implement them in policies.
 - [ ] Clean up responsive views - test all on simulator.
@@ -405,7 +405,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Fix error in discipline system test where the test seems to be building new disciplines.
 - [ ] Write a test for collapsible on attribute rather than association (specifically discipline prefix schema).
 - [ ] Decide what to do about deletion of data. It is affecting many aspects of the architecture.
-- [ ] Complete demand system test after refactor.
+- [x] Complete demand system test after refactor.
 - [ ] Fix tag prefix warning message for non-conforming prefix.
 - [ ] Fix assertion in projects system test for show link with no text.
 - [ ] Improve cable index and search options.
@@ -445,13 +445,13 @@ It is possible to create multiple tags referencing the same tagable element, des
   - [x] provide default format for each discipline, e.g. isa5.1
   - [x] add next/previous functionality
   - [x] add colour code by discipline
-- [ ] Look at use of hover on buttons, and use turbo to prevent page refresh.
+- [x] Look at use of hover on buttons, and use turbo to prevent page refresh.
 - [x] Improve implementation of Discipline model, including translation. Consider using constants hash for each project.
 - [ ] Refactor colour system to use CSS variables.
 - [ ] Abstract ingress protection functionality so it can be reused by instrument module.
 - [ ] Change all delete links to use turbo to prevent full page refresh.
 - [ ] Revise index views to use turbo for ransack searches.
-- [ ] Replace devise views with bespoke views in the style of the rest of the application.
+- [x] Replace devise views with bespoke views in the style of the rest of the application.
 - [ ] Add user profile info.
 - [x] Refactor RBAC system with functional roles limited to project scope, and project admin roles.
 - [ ] Refactor all controllers to use the preferred safe params expect rather than require.
@@ -461,21 +461,21 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Add catalog required roles in disciplines, to allow different role for cable types and doc types, etc.
 - [ ] Refactor cable and cable types to be core module available to electrical, instruments, telecoms (any module). Should belong to discipline.
 - [x] Index views should preload permissions and not check every row.
-- [ ] Scaffold generators should include enum configuration, or build a separate generator.
-- [ ] Include a valid value for fields in generators args.
-- [ ] Consider whether the same improvement applies to demand.
+- [x] Scaffold generators should include enum configuration, or build a separate generator.
+- [x] Include a valid value for fields in generators args.
+- [x] Consider whether the same improvement applies to demand.
 - [x] Remove unnecessary namespacing within electrical module naming, e.g. switchboard has many electrical_circuits. Switchboards can refer to circuits, and circuits can refer to switchboards, without the module prefix.
 - [x] Transition documents to discipline nested.
-- [x] Transition cable types to core module, discipline nested. This should allow other disciplines (instrument, communication) to create appropriate cable types.
-- [ ] Revise index views to get credentials once and use for links, for all resources where the credentials are not granular, which would be most everything that is discipline nested.
+- [ ] Transition cable types to core module, discipline nested. This should allow other disciplines (instrument, communication) to create appropriate cable types.
+- [x] Revise index views to get credentials once and use for links, for all resources where the credentials are not granular, which would be most everything that is discipline nested.
 - [x] Refactor model translations with count.
 - [x] Revert activerecord translations to convention with / instead of . key for namespaced models.
-- [ ] Rename project change module to change management.
+- [x] Rename project change module to change management.
 - [ ] Set up ransack to sort on translated attributes where relevant (discipline, enums).
-- [ ] Add a prefix breakdown drop down on tags show view.
+- [x] Add a prefix breakdown drop down on tags show view.
 - [ ] Use scopify to simplify setup for role assignment views.
-- [ ] Refactor show views in style of documents, include generator templates.
-- [ ] Decide on a standard clear presentation for booleans in show views, add it to show view for circuits, and add it to generic tests and generator templates.
+- [x] Refactor show views in style of documents, include generator templates.
+- [x] Decide on a standard clear presentation for booleans in show views, add it to show view for circuits, and add it to generic tests and generator templates.
 - [ ] Prettification.
 - [ ] Refactor collapsible component to use only stimulus js.
 - [ ] Consider expanding scope for models to include all projects for which user has a role.
@@ -484,14 +484,15 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Ditto cables: remove fk and associate discipline through cable_type. At the same time, sort out a decent label and add unique constraint on code.
 - [x] Refactor show views using standardised attributes helper.
 - [x] Refactor form views using standardised form fields helper.
-- [ ] Extend views helper for attributes to include decimal numbers with units.
-- [ ] Carefully consider use of nested collapsible cards, as in cables from and to. Prefer a more robust nav_link?
-- [ ] Include a scope for unique fields in generators.
-- [ ] Add migration and test implementation to generator testing.
+- [x] Extend views helper for attributes to include decimal numbers with units.
+- [ ] Carefully consider use of nested collapsible cards, as in cables from and to. Prefer a more robust nav_link? Ok for now...
+- [x] Include a scope for unique fields in generators.
+- [ ] Add migration and test implementation to generator testing. Very difficult...
 - [ ] Build in git commit before scaffold generator and tagable generator run.
 - [ ] Add polymorphic option to associations in generators.
-- [ ] Consider changing "discard" to "cancel" on all forms.
+- [x] Consider changing "discard" to "cancel" on all forms.
 - [ ] Review all labels and use of labels, in headers, on buttons, and for popover titles. Establish consistency across usages, including across show and index views.
+- [ ] Add searching and sorting for from and to fields in cables index.
 
 ## Potential Features
 

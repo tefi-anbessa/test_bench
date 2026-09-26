@@ -311,6 +311,89 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     assert_equal "New Alternative", @discipline.name
   end
 
+  test "discipline show view renders prefix_schema as a read-only JSON tree" do
+    @discipline.update!(prefix_schema: { name: "dim1" })
+    sign_in @team_member
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit discipline_path(@discipline)
+
+    # The prefix_schema card is a collapsible, starting collapsed.
+    find(".card-header", text: I18n.t("activerecord.attributes.discipline.prefix_schema")).click
+
+    assert_json_editor_text("[data-controller='json-editor']", "dim1")
+    assert_json_editor_read_only("[data-controller='json-editor']")
+    assert_no_json_editor_menu_bar("[data-controller='json-editor']")
+  end
+
+  test "editing a discipline's custom prefix_schema loads and saves through the JSON editor" do
+    @discipline.update!(prefix_schema: { name: "custom", type: "isa51", foo: "bar123" })
+    sign_in @project_admin
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit edit_discipline_path(@discipline)
+
+    assert_json_editor_text(".schema-json-editor-mount", "bar123")
+    assert_json_editor_editable(".schema-json-editor-mount")
+    # Starts in tree mode - the menu bar (and its mode switcher) stays
+    # available here, unlike the read-only viewer/show cases, since a user
+    # who can edit this field already has full latitude over its raw data.
+    within(".schema-json-editor-mount [data-json-editor-target='container']") do
+      assert_selector "button.jse-selected[title*='tree mode']"
+    end
+
+    # Submitting without touching the editor should round-trip the existing
+    # schema unchanged - the editor's onChange keeps the submitted hidden
+    # field in sync with what's displayed, not the other way round.
+    click_button I18n.t("actions.update")
+    assert_current_path discipline_path(@discipline)
+    @discipline.reload
+    assert_equal "bar123", @discipline.prefix_schema["foo"]
+  end
+
+  test "switching the discipline schema selector between a preset and custom keeps the JSON editor correctly sized" do
+    @discipline.update!(prefix_schema: { name: "custom", type: "isa51", foo: "initial" })
+    sign_in @project_admin
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit edit_discipline_path(@discipline)
+
+    # Leaving "custom" discards its content, so this transition confirms.
+    accept_confirm { select "default", from: "discipline_schema_key" }
+    assert_json_editor_hidden(".schema-json-editor-mount")
+
+    select "custom", from: "discipline_schema_key"
+    assert_json_editor_visible(".schema-json-editor-mount")
+  end
+
+  test "picking a schema template populates the custom JSON editor" do
+    @discipline.update!(prefix_schema: { name: "custom", type: "isa51" })
+    sign_in @project_admin
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit edit_discipline_path(@discipline)
+
+    accept_confirm { select "Default", from: "discipline_template" }
+    assert_json_editor_text(".schema-json-editor-mount", "default")
+  end
+
+  test "discipline edit form shows named schemas in a read-only JSON viewer" do
+    @discipline.update!(prefix_schema: { name: "dim1" })
+    sign_in @project_admin
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit edit_discipline_path(@discipline)
+
+    assert_json_editor_text(".schema-viewer-mount", "dim1")
+    assert_json_editor_read_only(".schema-viewer-mount")
+    assert_no_json_editor_menu_bar(".schema-viewer-mount")
+
+    # Switching between two named schemas doesn't confirm - unlike leaving
+    # "custom", it's trivial to revert (just pick the previous one again).
+    select "isa51", from: "discipline_schema_key"
+    assert_json_editor_text(".schema-viewer-mount", "isa51")
+  end
+
   test "project admin destroy discipline from the index view" do
     sign_in @project_admin
     # Mock current_project for this test

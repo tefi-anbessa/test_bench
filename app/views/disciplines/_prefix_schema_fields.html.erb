@@ -7,7 +7,7 @@
      }.to_json %>'
      data-prefix-schema-initial-selection-value='<%= @prefix_schema_selection %>'
      data-prefix-schema-default-name-value='<%= @default_prefix_schema_name %>'
-     data-prefix-schema-json-editor-outlet=".schema-json-editor-mount">
+     data-prefix-schema-json-editor-outlet=".schema-json-editor-mount, .schema-viewer-mount">
   
   <div class="card-header">
     <%= t('activerecord.attributes.discipline.prefix_schema') %>
@@ -41,9 +41,11 @@
     <div data-prefix-schema-target="schemaViewer" class="mb-3" style="display: none;">
       <div class="form-group">
         <label class="form-label"><%= t('prefix_schema.viewing_schema') %></label>
-        <pre class="bg-light p-3 rounded" style="max-height: 300px; overflow: auto;">
-          <code data-prefix-schema-target="schemaViewerContent"></code>
-        </pre>
+        <div class="schema-viewer-mount" data-controller="json-editor"
+             data-json-editor-read-only-value="true"
+             data-json-editor-content-value='<%= (Constants.prefix_schemata[@prefix_schema_selection.to_sym] || {}).to_json if @prefix_schema_selection.present? && @prefix_schema_selection != "custom" %>'>
+          <div data-json-editor-target="container" class="border rounded" style="min-height: 200px;"></div>
+        </div>
       </div>
     </div>
     

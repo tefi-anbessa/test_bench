@@ -244,6 +244,60 @@ module SystemTestHelpers
       assert_no_selector "form[action='#{path}'] input[name='_method'][value='delete']"
     end
 
+    # Helpers for any vanilla-jsoneditor instance mounted by
+    # app/javascript/controllers/json_editor_controller.js - i.e. any
+    # ViewHelper#form_field/#show_attribute field using type: :jsonb. `scope`
+    # is a CSS selector for the element carrying data-controller="json-editor"
+    # (or any unique ancestor of it), needed to disambiguate when a page
+    # mounts more than one editor.
+
+    def json_editor_container(scope)
+      find("#{scope} [data-json-editor-target='container']", visible: :all)
+    end
+
+    def assert_json_editor_text(scope, text)
+      within(json_editor_container(scope)) { assert_text text }
+    end
+
+    def json_editor_read_only?(scope)
+      page.evaluate_script(<<~JS)
+        !!document.querySelector("#{scope} [data-json-editor-target='container'] .jse-readonly")
+      JS
+    end
+
+    def assert_json_editor_read_only(scope)
+      assert json_editor_read_only?(scope), "expected the JSON editor at #{scope} to be read-only"
+    end
+
+    def assert_json_editor_editable(scope)
+      refute json_editor_read_only?(scope), "expected the JSON editor at #{scope} to be editable"
+    end
+
+    def assert_no_json_editor_menu_bar(scope)
+      has_menu_bar = page.evaluate_script(<<~JS)
+        !!document.querySelector("#{scope} [data-json-editor-target='container'] .jse-menu")
+      JS
+      assert_not has_menu_bar, "expected no menu bar (mode switcher) on the JSON editor at #{scope}"
+    end
+
+    # Container height is 0 while hidden (e.g. behind a collapsed section or
+    # an unselected mode) - useful for confirming an editor that mounted
+    # while hidden became correctly sized once revealed (see
+    # json_editor_controller.js#refresh).
+    def json_editor_container_height(scope)
+      page.evaluate_script(<<~JS).to_f
+        document.querySelector("#{scope} [data-json-editor-target='container']")?.getBoundingClientRect().height || 0
+      JS
+    end
+
+    def assert_json_editor_visible(scope)
+      assert json_editor_container_height(scope) > 0, "expected the JSON editor at #{scope} to be visible with non-zero height"
+    end
+
+    def assert_json_editor_hidden(scope)
+      assert_equal 0, json_editor_container_height(scope), "expected the JSON editor at #{scope} to be hidden (zero height)"
+    end
+
     def collapsible_assertions(object, association, header: :none)
       assert object.respond_to?(association), "Object #{object.class} does not respond to #{association}"
       record = object.public_send(association)
