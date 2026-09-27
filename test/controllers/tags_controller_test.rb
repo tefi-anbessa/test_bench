@@ -14,6 +14,54 @@ class TagsControllerTest < ActionController::TestCase
     @request.env["devise.mapping"] = Devise.mappings[:user]
   end
 
+  # === Spreadsheet import (see app/controllers/concerns/importable.rb) ===
+
+  def csv_upload
+    fixture_file_upload(Rails.root.join("test/fixtures/files/import/tags.csv"), "text/csv")
+  end
+
+  test "accredited user can reach the discipline-scoped import form" do
+    sign_in_and_set_project(@accredited_user, @project)
+    get :import, params: { discipline_id: @discipline.id }
+    assert_response :success
+  end
+
+  test "team member without a role on the discipline cannot reach the import form" do
+    sign_in_and_set_project(@team_member, @project)
+    get :import, params: { discipline_id: @discipline.id }
+    assert_response :forbidden
+  end
+
+  test "uploading a valid file creates a batch and redirects to it" do
+    sign_in_and_set_project(@accredited_user, @project)
+    assert_difference("Import::Batch.count", 1) do
+      post :create_import, params: { discipline_id: @discipline.id, file: csv_upload }
+    end
+    batch = Import::Batch.last
+    assert_equal @accredited_user, batch.user
+    assert_equal @discipline, batch.discipline
+    assert_equal "tags", batch.importer_key
+    assert_redirected_to import_batch_path(batch)
+  end
+
+  test "uploading an unsupported file type is rejected before creating a batch" do
+    sign_in_and_set_project(@accredited_user, @project)
+    bad_file = fixture_file_upload(Rails.root.join("test/fixtures/files/import/tags.pdf"), "application/pdf")
+
+    assert_no_difference("Import::Batch.count") do
+      post :create_import, params: { discipline_id: @discipline.id, file: bad_file }
+    end
+    assert_response :unprocessable_content
+  end
+
+  test "project-wide upload creates a batch with no discipline set" do
+    sign_in_and_set_project(@accredited_user, @project)
+    assert_difference("Import::Batch.count", 1) do
+      post :create_import, params: { project_id: @project.id, file: csv_upload }
+    end
+    assert_nil Import::Batch.last.discipline
+  end
+
   private
 
     # Set the minimum required params for a valid resource

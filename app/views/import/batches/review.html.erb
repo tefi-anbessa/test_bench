@@ -57,7 +57,12 @@
 
         <div class="d-flex justify-content-between">
           <%= link_to t(".back_to_mapping"), import_batch_path(@batch), class: "btn btn-outline-secondary" %>
-          <%= submit_tag t(".commit"), class: "btn btn-primary", disabled: invalid_count.positive? && valid_count.zero? %>
+          <div class="d-flex gap-2">
+            <%= link_to t("actions.cancel"), import_batch_path(@batch),
+                  class: "btn btn-warning",
+                  data: { turbo_method: :delete, turbo_confirm: t("actions.sure") } %>
+            <%= submit_tag t(".commit"), class: "btn btn-primary", disabled: invalid_count.positive? && valid_count.zero? %>
+          </div>
         </div>
       <% end %>
     </div>

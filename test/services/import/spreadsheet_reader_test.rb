@@ -46,6 +46,35 @@ module Import
       end
     end
 
+    test "sheet_names lists every worksheet, in order" do
+      reader = SpreadsheetReader.new(import_fixture("tags_multi_sheet.xlsx"), original_filename: "tags_multi_sheet.xlsx")
+      assert_equal ["Electrical", "Mechanical"], reader.sheet_names
+    end
+
+    test "a single-sheet file reports its one sheet" do
+      reader = SpreadsheetReader.new(import_fixture("tags.csv"), original_filename: "tags.csv")
+      assert_equal 1, reader.sheet_names.size
+    end
+
+    test "reads the requested sheet, not the workbook's default first sheet" do
+      reader = SpreadsheetReader.new(import_fixture("tags_multi_sheet.xlsx"), original_filename: "tags_multi_sheet.xlsx", sheet: "Mechanical")
+      assert_equal ["Tag Number", "Discipline", "Service", "Notes", "Stage"], reader.headers
+      assert_equal(
+        [{ "Tag Number" => "FT0001", "Discipline" => "M", "Service" => "Flow Transmitter", "Notes" => "Third row", "Stage" => "5" }],
+        reader.rows
+      )
+    end
+
+    test "excludes a blank header cell rather than offering an unmappable column" do
+      Tempfile.create(["upload", ".csv"]) do |tempfile|
+        tempfile.write("Tag Number,,Service\nPT0001A,x,Pressure Transmitter\n")
+        tempfile.flush
+
+        reader = SpreadsheetReader.new(tempfile.path, original_filename: "tags.csv")
+        assert_equal ["Tag Number", "Service"], reader.headers
+      end
+    end
+
     test "raises a clear error for an unsupported file type" do
       error = assert_raises(SpreadsheetReader::UnsupportedFormatError) do
         SpreadsheetReader.new(import_fixture("tags.csv"), original_filename: "tags.pdf").rows

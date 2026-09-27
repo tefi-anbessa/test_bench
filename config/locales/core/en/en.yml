@@ -18,6 +18,7 @@ en:
     delete_sure:  "Are you sure? Delete cannot be undone."
     discard:      "Discard changes"
     discard_new:  "Discard new"
+    cancel:       "Cancel"
     sure:         "Are you sure?"
     link:         "Link to new"
     jump_to:      "Jump to %{model}"
@@ -37,6 +38,7 @@ en:
     up:           "Show"
     down:         "Show"
     children:     "Children"
+    import:       "Import"
     grant:        "Grant"
     revoke:       "Revoke"
 

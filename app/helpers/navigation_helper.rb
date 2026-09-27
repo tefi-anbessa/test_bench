@@ -22,6 +22,10 @@ module NavigationHelper
       bs_color: "primary",
       bs_icon: "plus-square-fill"
     },
+    import: {
+      bs_color: "primary",
+      bs_icon: "file-earmark-arrow-up"
+    },
     link: {
       bs_color: "primary",
       bs_icon: "link"
@@ -126,7 +130,7 @@ module NavigationHelper
         I18n.t("actions.edit")
       when :delete, :delete_tagable
         I18n.t("actions.delete")
-      when :previous, :next, :show, :index
+      when :previous, :next, :show, :index, :import
         I18n.t("actions.#{action}")
       when :show_tagable, :edit_tagable, :previous_tagable, :next_tagable
         I18n.t("actions.#{action.to_s.sub('_tagable', '')}")

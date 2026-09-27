@@ -192,6 +192,39 @@ module DisciplineResourcePolicyTest
       refute policy(nil, @project, @new_resource).new?
     end
 
+    # Import tests - see DisciplineResourcePolicy#import?, used by
+    # Importable/Import::Base for a spreadsheet import's entry point.
+    test 'import allows admins and accredited users on current project, called with a discipline-scoped instance' do
+      assert policy(@admin, @project, @new_resource).import?
+      assert policy(@app_owner, @project, @new_resource).import?
+      assert policy(@project_admin, @project, @new_resource).import?
+      assert policy(@accredited_user, @project, @new_resource).import?
+    end
+
+    test 'import denies users without required role, called with a discipline-scoped instance' do
+      refute policy(@team_member, @project, @new_resource).import?
+      refute policy(@regular_user, @project, @new_resource).import?
+      refute policy(nil, @project, @new_resource).import?
+    end
+
+    test 'import allows admins and accredited users on current project, called with the class (project-wide, no discipline known yet)' do
+      assert policy(@admin, @project).import?
+      assert policy(@app_owner, @project).import?
+      assert policy(@project_admin, @project).import?
+      assert policy(@accredited_user, @project).import?
+    end
+
+    test 'import denies users without a required role anywhere on the project, called with the class' do
+      refute policy(@team_member, @project).import?
+      refute policy(@regular_user, @project).import?
+      refute policy(nil, @project).import?
+    end
+
+    test 'import denies with nil current project regardless of role, called with the class' do
+      refute policy(@admin, nil).import?
+      refute policy(@accredited_user, nil).import?
+    end
+
     # Create Tests
     test 'create allows admins and accredited users to create resource on the current project' do
       assert policy(@admin, @project, @new_resource).create?

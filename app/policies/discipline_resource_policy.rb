@@ -75,6 +75,29 @@ class DisciplineResourcePolicy < ApplicationPolicy
     user_is_accredited?(record) && record.project == current_project
   end
 
+  # Spreadsheet import (see Importable/Import::Base). A discipline-scoped
+  # import already knows its discipline, so it's checked exactly like new?/
+  # create? there. A project-wide import has no single discipline yet - it
+  # can span several - so, called with the class itself, this instead asks
+  # "is the user accredited on *any* discipline in this project", reusing
+  # user_is_accredited? itself (rather than a separately-written check) so a
+  # subclass's own override of it (e.g. DocTypePolicy/CableTypePolicy check
+  # a document_controller role, not the discipline's generic required_role)
+  # is honoured here too, not bypassed. Real per-discipline authorization
+  # still happens once a project-wide file's rows (and therefore which
+  # disciplines are actually involved) are resolved - see
+  # Import::Base#dry_run_rows.
+  def import?
+    return false if user.nil?
+    if record.is_a?(ApplicationRecord)
+      user_is_accredited?(record) && record.project == current_project
+    else
+      return false if current_project.nil?
+      return true if user.is_admin? || user.is_app_owner?
+      Discipline.where(project_id: current_project.id).any? { |discipline| user_is_accredited?(record.new(discipline: discipline)) }
+    end
+  end
+
   def destroy?
     # Protect against url injection
     return false if user.nil?

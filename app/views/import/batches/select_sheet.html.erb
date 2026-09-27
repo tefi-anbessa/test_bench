@@ -1,0 +1,26 @@
+<% provide(:title, t(".title")) %>
+<div class="container mt-3" style="<%= container_styles(@swatch) %>">
+  <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+      <h5 class="mb-0"><%= t(".header", filename: @batch.original_filename) %></h5>
+    </div>
+
+    <div class="card-body p-3" style="<%= form_styles(@swatch) %>">
+      <p class="text-muted"><%= t(".help") %></p>
+
+      <%= form_with url: import_batch_path(@batch), method: :patch, local: true do %>
+        <div class="mb-3">
+          <label class="form-label"><%= t(".sheet_label") %></label>
+          <%= select_tag "sheet_name", options_for_select(@sheet_names), class: "form-select" %>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <%= link_to t("actions.cancel"), import_batch_path(@batch),
+                class: "btn btn-warning",
+                data: { turbo_method: :delete, turbo_confirm: t("actions.sure") } %>
+          <%= submit_tag t(".submit"), class: "btn btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

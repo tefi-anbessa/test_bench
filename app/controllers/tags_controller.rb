@@ -1,9 +1,11 @@
 class TagsController < ApplicationController
+  include Importable
+
   before_action :authenticate_user!
-  before_action :require_project!, only: %i[ new create edit update]
-  before_action :set_discipline, only: %i[ index new create ]
+  before_action :require_project!, only: %i[ new create edit update import create_import ]
+  before_action :set_discipline, only: %i[ index new create import create_import ]
   before_action :set_tag, only: %i[ show edit update destroy ]
-  before_action :set_swatch, only: %i[ index show ]
+  before_action :set_swatch, only: %i[ index show import create_import ]
 
   # GET /tags
   def index
@@ -128,6 +130,19 @@ class TagsController < ApplicationController
 
     def tag_params
       params.require(:tag).permit(*Tag::IMPORTABLE_ATTRIBUTES)
+    end
+
+    # === Importable concern hooks (see app/controllers/concerns/importable.rb) ===
+
+    def importer_key
+      "tags"
+    end
+
+    def authorize_import!
+      # A discipline-scoped import already knows which discipline, so it can
+      # be authorized precisely upfront - a project-wide import can't be
+      # (see Importable#authorize_import!'s own comment).
+      authorize @discipline.tags.build, :import? if @discipline.present?
     end
 
 

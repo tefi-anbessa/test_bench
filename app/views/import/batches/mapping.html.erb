@@ -43,7 +43,18 @@
           </div>
         <% end %>
 
-        <div class="d-flex justify-content-end">
+        <div class="d-flex justify-content-end gap-2">
+          <% if @batch.sheet_name.present? %>
+            <%# Chose the wrong worksheet - let them pick again without
+                re-uploading the file, rather than aborting the whole batch. %>
+            <%= link_to t("actions.cancel"), import_batch_path(@batch, sheet_name: ""),
+                  class: "btn btn-warning",
+                  data: { turbo_method: :patch } %>
+          <% else %>
+            <%= link_to t("actions.cancel"), import_batch_path(@batch),
+                  class: "btn btn-warning",
+                  data: { turbo_method: :delete, turbo_confirm: t("actions.sure") } %>
+          <% end %>
           <%= submit_tag t(".submit"), class: "btn btn-primary" %>
         </div>
       <% end %>

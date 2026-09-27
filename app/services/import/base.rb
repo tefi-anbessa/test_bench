@@ -87,11 +87,15 @@ module Import
     # === Provided ===
 
     def reader
-      @reader ||= SpreadsheetReader.new(batch_file_path, original_filename: batch.original_filename)
+      @reader ||= SpreadsheetReader.new(batch_file_path, original_filename: batch.original_filename, sheet: batch.sheet_name)
     end
 
     def headers
       reader.headers
+    end
+
+    def sheet_names
+      reader.sheet_names
     end
 
     def column_mapper(preset_mapping: {})
@@ -121,14 +125,22 @@ module Import
     private
 
     def batch_file_path
-      # file_data lives in Postgres (see Import::Batch), not on local disk -
-      # write it to a tempfile so SpreadsheetReader (and roo underneath it)
-      # can open it as a normal file path.
-      @batch_file_path ||= begin
-        tempfile = Tempfile.new(["import_batch_", File.extname(batch.original_filename)], binmode: true)
+      batch_tempfile.path
+    end
+
+    # file_data lives in Postgres (see Import::Batch), not on local disk -
+    # write it to a tempfile so SpreadsheetReader (and roo underneath it) can
+    # open it as a normal file path. Kept as an instance variable
+    # deliberately, not just its #path: a Tempfile unlinks its underlying
+    # file when the Tempfile object itself is garbage-collected, regardless
+    # of whether some other object still holds its path string - confirmed
+    # directly (GC.start after discarding the Tempfile reference reliably
+    # deletes the file). Holding the object here keeps it alive exactly as
+    # long as this importer instance is.
+    def batch_tempfile
+      @batch_tempfile ||= Tempfile.new(["import_batch_", File.extname(batch.original_filename)], binmode: true).tap do |tempfile|
         tempfile.write(batch.file_data)
         tempfile.flush
-        tempfile.path
       end
     end
 

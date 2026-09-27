@@ -25,10 +25,17 @@
           <h5><%= t('.header', scope_text: scope_text) %></h5>
         </div>
 
-        <!-- New Button (Right) -->
+        <!-- New / Import Buttons (Right) -->
         <div class="col-2 align-content-end">
-          <% if @discipline.present? && policy(@discipline.tags.build()).new? %>
-            <%= nav_button(action: :new, path: new_discipline_tag_path(@discipline), record: Tag.new) %>
+          <% if @discipline.present? %>
+            <% if policy(@discipline.tags.build()).new? %>
+              <%= nav_button(action: :new, path: new_discipline_tag_path(@discipline), record: Tag.new) %>
+            <% end %>
+            <% if policy(@discipline.tags.build()).import? %>
+              <%= nav_button(action: :import, path: import_discipline_tags_path(@discipline), record: Tag.new) %>
+            <% end %>
+          <% elsif @project.present? && policy(Tag).import? %>
+            <%= nav_button(action: :import, path: import_project_tags_path(@project), record: Tag.new) %>
           <% end %>
         </div>
       </div> <!-- end of row -->
