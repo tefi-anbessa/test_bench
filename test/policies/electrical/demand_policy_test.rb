@@ -14,10 +14,6 @@ module Electrical
       setup_disciplines(required_role: :designer)
       # Set up accredited users for electrical disciplines in each project
       setup_accredited_users(:designer)
-      # Dummy alternate_discipline and alternate_accredited_user to pass irrelevant test in abstracted tests
-      @alternate_discipline = create(:discipline, project: @project, name: "Test", 
-        swatch: @swatch, required_role: :designer)
-      @alternate_accredited_user = @accredited_user
       # Set up tags in and out of scope for testing
       setup_tags
       # Set up demandables, default is light_cct
@@ -26,11 +22,6 @@ module Electrical
       # Set up demands
       @resource = create(:electrical_demand, demandable: @demandable)
       @other_resource = create(:electrical_demand, demandable: @other_demandable)
-    end
-
-    def new_resource(discipline)
-      # Uses demand factory to build new demand with tag association, using default prefix and unique serial.
-      build(:electrical_demand, demandable: create(:electrical_motor, tag: create(:tag, :unique_tag, discipline: discipline)))
     end
 
     # Override: For demands, tag is on demandable, not demand itself

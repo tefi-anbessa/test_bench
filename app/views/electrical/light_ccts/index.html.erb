@@ -19,7 +19,7 @@
 
         <!-- New Button (Right) -->
         <div class="col-2 text-end">
-          <% if @discipline.present? && policy(Electrical::LightCct).new? %>
+          <% if @discipline.present? && policy(@discipline.tags.build()).new? %>
             <%= nav_button(action: :new, path: new_discipline_tagable_path(@discipline, tagable_type: "Electrical::LightCct"), record: Electrical::LightCct.new) %>
           <% end %>
         </div>

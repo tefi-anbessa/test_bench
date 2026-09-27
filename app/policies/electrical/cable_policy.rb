@@ -11,9 +11,7 @@ module Electrical
     end
 
     # No need to override Scope as it's already defined in ResourcePolicy
-    
-    # No need to override edit?/update? as the parent implementation is sufficient
-    
+
     # No need to override user_has_project_role? as the parent implementation is sufficient
   end
 end

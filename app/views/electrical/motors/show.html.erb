@@ -37,15 +37,15 @@
 
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
-              <% if policy(@motor).edit? %>
+              <% if policy(@motor.tag).edit? %>
                 <%= nav_button(action: :edit_tagable, path: edit_tag_tagable_path(@tag), record: @motor) %>
               <% end %>
 
-              <% if policy(@motor).destroy? %>
+              <% if policy(@motor.tag).destroy? %>
                 <%= nav_button(action: :delete, path: tag_tagable_path(@tag), record: @motor) %>
               <% end %>
 
-              <% if policy(@motor).new? %>
+              <% if policy(@motor.tag).new? %>
                 <%= nav_button(action: :new, path: new_discipline_tagable_path(@discipline.id, tagable_type: "Electrical::Motor"),
                   record: Electrical::Motor.new) %>
               <% end %>

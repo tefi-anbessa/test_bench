@@ -25,15 +25,20 @@ module Electrical
         current_count = switchboard.circuits.count
         count = desired_count - current_count
         if count > 0
-          authorize switchboard, :create?
-          
+          # TagablePolicy no longer defines create?/destroy? - the real
+          # authorization for a tagable is always its tag's (see
+          # app/policies/tagable_policy.rb's own comment), so this checks
+          # TagPolicy via the switchboard's own tag, same as every view now
+          # does for edit?/destroy?/new?.
+          authorize switchboard.tag, :create?
+
           count.times do |i|
             switchboard.circuits.create(serial: current_count + i + 1)
           end
           resource_name = Electrical::Circuit.model_name.human(count: count)
           flash[:success] << t("flash.assigned", count: count, resource_name: resource_name)
         elsif count < 0
-          authorize switchboard, :destroy?
+          authorize switchboard.tag, :destroy?
           switchboard.circuits
                     .order(serial: :desc)
                     .limit(current_count - desired_count)

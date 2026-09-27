@@ -37,17 +37,6 @@ module TagablePolicyTest
       setup_tags
       # Set up resource associated with each tag
       setup_tagable_resources
-      # Set up an alternate discipline in the same project for testing new action
-      @alternate_discipline = create(:discipline, project: @project, name: "Test", 
-      swatch: @swatch, required_role: :designer)
-      @alternate_accredited_user = create(:user)
-      @alternate_accredited_user.grant(:designer, @alternate_discipline)
-    end
-
-    # Helper to build resource with tag association for tagable models.
-    # Other models need to implement their own new_resource method.
-    def new_resource(discipline)
-      build(resource_class.model_name.param_key, tag: build(:tag, :unique_tag, discipline: discipline))
     end
 
     test "project and user setup is valid" do
@@ -208,146 +197,13 @@ module TagablePolicyTest
       refute policy(nil, @project, @resource).show?
     end
 
-    # New tests 
-    test 'new allows accredited user to access the form' do
-      assert policy(@admin, @project, nil).new?
-      assert policy(@app_owner, @project, nil).new?
-      assert policy(@project_admin, @project, nil).new?
-      assert policy(@accredited_user, @project, nil).new?
-      assert policy(@alternate_accredited_user, @project, nil).new?
-    end
-
-    test 'new denies users with nil current project to access the form' do
-      refute policy(@admin, nil, nil).new?
-      refute policy(@app_owner, nil, nil).new?
-      refute policy(@accredited_user, nil, nil).new?
-    end
-
-    test "new denies any user without accreditation to access the form" do
-      refute policy(@project_manager, @project, nil).new?
-      refute policy(@team_member, @project, nil).new?
-      refute policy(@accredited_user_other_project, @project, nil).new?
-      refute policy(@regular_user, @project, nil).new?
-      refute policy(nil, @project, nil).new?
-    end
-  
-    # Create Tests
-    test 'create allows admins and accredited team members to create resource on the current project' do
-      assert policy(@admin, @project, new_resource(@discipline)).create?
-      assert policy(@app_owner, @project, new_resource(@discipline)).create?
-      assert policy(@project_admin, @project, new_resource(@discipline)).create?
-      assert policy(@accredited_user, @project, new_resource(@discipline)).create?
-      assert policy(@alternate_accredited_user, @project, new_resource(@alternate_discipline)).create?
-    end
-
-    test 'create denies users with nil current project to create resource on any project' do
-      refute policy(@admin, nil, new_resource(@discipline)).create?
-      refute policy(@app_owner, nil, new_resource(@discipline)).create?
-      refute policy(@admin, nil, new_resource(@other_discipline)).create?
-      refute policy(@app_owner, nil, new_resource(@other_discipline)).create?
-      refute policy(@accredited_user, nil, new_resource(@discipline)).create?
-      refute policy(@accredited_user, nil, new_resource(@other_discipline)).create?
-    end
-
-    test "create denies any user without accreditation to create resource on current project" do
-      refute policy(@project_manager, @project, new_resource(@discipline)).create?
-      refute policy(@team_member, @project, new_resource(@discipline)).create?
-      refute policy(@accredited_user_other_project, @project, new_resource(@discipline)).create?
-      refute policy(@regular_user, @project, new_resource(@discipline)).create?
-      refute policy(nil, @project, new_resource(@discipline)).create?
-    end
-
-    # Regression test: create? used to only check "does this user have any
-    # discipline role in the current project" - a user accredited on one
-    # discipline could create resources tagged against a completely
-    # different discipline in the same project. TagablesController#create
-    # always resolves a specific discipline before authorizing (from a
-    # checked discipline_id param, or from an existing tag), so create? can
-    # and should check that specific discipline, exactly like edit?/update?.
-    test "create denies a user accredited on a different discipline in the same project" do
-      # Electrical::Demand is a documented exception - it's always governed
-      # by the project's own Electrical discipline specifically (see
-      # DemandPolicy's own user_is_accredited?), not by whichever discipline
-      # the record's tag happens to belong to.
-      skip if resource_class == Electrical::Demand
-      refute policy(@alternate_accredited_user, @project, new_resource(@discipline)).create?
-      refute policy(@accredited_user, @project, new_resource(@alternate_discipline)).create?
-    end
-
-    # Edit tests
-    test 'edit allows accredited users to access the form on the current project' do
-      assert policy(@admin, @project, @resource).edit?
-      assert policy(@app_owner, @project, @resource).edit?
-      assert policy(@project_admin, @project, @resource).edit?
-      assert policy(@accredited_user, @project, @resource).edit?
-    end
-
-    test 'edit denies any users without current project set to access the form' do
-      refute policy(@admin, nil, @resource).edit?
-      refute policy(@app_owner, nil, @resource).edit?
-      refute policy(@accredited_user, nil, @resource).edit?
-    end
-
-    test 'edit denies any users without accreditation to access the form' do
-      refute policy(@project_manager, @project, @resource).edit?
-      refute policy(@team_member, @project, @resource).edit?
-      refute policy(@accredited_user_other_project, @project, @resource).edit?
-      refute policy(@regular_user, @project, @resource).edit?
-      refute policy(nil, @project, @resource).edit?
-    end
-
-    # Update Tests
-    test 'update allows admins and accredited team members to update resource on the current project' do
-      assert policy(@admin, @project, @resource).update?
-      assert policy(@app_owner, @project, @resource).update?
-      assert policy(@project_admin, @project, @resource).update?
-      assert policy(@accredited_user, @project, @resource).update?
-    end
-
-# This test is a placeholder in case we figure out how to authorize resources directly.
-    test 'update denies accredited users on current project to update resource on different project' do
-      unless Tag.tagable_types.include?(resource_class.name) 
-      # Tagable types can create a new tag as part of the resource update action,
-      # this allows rescue of orphaned resources. Pundit does not have access to the project association
-      # of the new tag when updating a resource. Authorise the tag in the same controller action to
-      # assure that resources aren't being updated in another project.
-      # Other resources which can access their parent tag at update time can be tested.
-        refute policy(@admin, @project, @other_resource).update?
-        refute policy(@app_owner, @project, @other_resource).update?
-        refute policy(@accredited_user, @project, @other_resource).update?
-      end
-      assert true # dummy assertion to avoid warning message
-    end
-
-    test 'update denies any users with nil current project to update resources on any project' do
-      refute policy(@admin, nil, @resource).update?
-      refute policy(@app_owner, nil, @resource).update?
-      refute policy(@accredited_user, nil, @resource).update?
-      refute policy(@admin, nil, @other_resource).update?
-      refute policy(@app_owner, nil, @other_resource).update?
-      refute policy(@accredited_user, nil, @other_resource).update?
-    end
-
-    test 'update denies users without accreditation and project role' do
-      refute policy(@project_manager, @project, @resource).update?
-      refute policy(@team_member, @project, @resource).update?
-      refute policy(@regular_user, @project, @resource).update?
-      refute policy(@accredited_user_other_project, @project, @resource).update?
-      refute policy(nil, @project, @resource).update?
-    end
-
-    # Destroy Tests
-    test 'destroy allows admin and app_owner' do
-      assert policy(@admin, @project, @resource).destroy?
-      assert policy(@app_owner, @project, @resource).destroy?
-      assert policy(@project_admin, @project, @resource).destroy?
-    end
-
-    test 'destroy denies project manager, team members and regular users' do
-      refute policy(@project_manager, @project, @resource).destroy?
-      refute policy(@team_member, @project, @resource).destroy?
-      refute policy(@regular_user, @project, @resource).destroy?
-      refute policy(nil, @project, @resource).destroy?
-    end
+    # new?/create?/edit?/update?/destroy? are deliberately not tested here -
+    # TagablePolicy no longer defines them. TagablesController's own
+    # create/new/edit/update/destroy actions authorize @tag, not the
+    # tagable, so the real authorization for all of those is TagPolicy's
+    # (via @discipline.tags.build/@tagable.tag) - already covered by
+    # TagPolicy's own test suite and by test/helpers/tagable_controller_tests.rb,
+    # which drives real requests through that actual path. See
+    # app/policies/tagable_policy.rb's own comment for the full reasoning.
   end
 end

@@ -19,7 +19,8 @@
 
         <!-- New Button (Right) -->
         <div class="col-2 align-content-end">
-          <%% if policy(<%= new_build(@nesting) %>).new? %>
+<%- new_policy_target = @nesting == :tagable ? "@discipline.tags.build()" : new_build(@nesting) -%>
+          <%% if policy(<%= new_policy_target %>).new? %>
             <%%= nav_button(action: :new, path: <%= new_path(@nesting) %>, record: <%= new_build(@nesting) %>) %>
           <%% end %>
         </div>

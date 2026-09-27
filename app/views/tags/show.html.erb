@@ -102,7 +102,7 @@
                 <% if @tag.tagable_type.present? %>
                   <% if Tag.safe_tagable_types.include?(@tag.tagable_type) %>
                     <% text = @tag.tagable_type.constantize.model_name.human %>
-                    <% if policy(@tag.build_tagable()).new? %>
+                    <% if policy(@tag).new? %>
                       <!-- Setup a link to create the tagable. -->
                       <% resource = @tag.tagable_type.constantize.model_name.singular %>
                       <%= nav_button(action: :link, path: eval("new_tag_tagable_path(#{@tag.id}, tagable_type: @tag.tagable_type)"), record: @tag.build_tagable()) %>

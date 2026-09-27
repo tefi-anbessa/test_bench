@@ -7,7 +7,7 @@
     <% tagable.association(:tag).target = row %>
     <%= index_link(action: :down, record: tagable) %>
   <% else %>
-    <% if policy(row.build_tagable()).new? %>
+    <% if policy(row).new? %>
       <%= index_link(action: :link, path: new_tag_tagable_path(row), record: row.build_tagable()) %>
     <% else %>
       <%= row.tagable_type.constantize.model_name.human %>
