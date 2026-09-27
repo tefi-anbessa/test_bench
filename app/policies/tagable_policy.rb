@@ -53,10 +53,14 @@ class TagablePolicy < ApplicationPolicy
     return false if user.nil?
     # Content modification actions require current project to be set
     return false unless current_project.present?
-    # new? action is a special case for discipline scoped resources. 
-    # User must have at least one discpline role to access new, or have admin role.
-    user_has_a_required_role?(current_project) || 
-      user&.is_admin? || 
+    # Unlike create?, new? is genuinely checked before any discipline is
+    # chosen (the bare resource class, not an instance - see the shared
+    # TagablePolicyTest's own new? tests, which always pass a nil record) -
+    # this generic "has at least one discipline role in the project" check
+    # is intentional here, not stale, and record_discipline isn't available
+    # to narrow it further at this point.
+    user_has_a_required_role?(current_project) ||
+      user&.is_admin? ||
       user&.is_app_owner? ||
       user&.is_project_admin_of?(current_project)
   end
@@ -66,14 +70,8 @@ class TagablePolicy < ApplicationPolicy
     return false if user.nil?
     # Content modification actions require current project to be set
     return false unless current_project.present?
-    # Tagable policy can't check project association of new resource and tag because
-    # the tag is not persisted at time of authorization.
-    # Authorization relies on the resource controller also checking tag permissions
-    # when creating a new tag at the same time as a resource, and using single transaction.
-    user_has_a_required_role?(current_project) || 
-      user&.is_admin? || 
-      user&.is_app_owner? ||
-      user&.is_project_admin_of?(current_project)
+    discipline = record_discipline
+    user_is_accredited?(discipline) && discipline&.project == current_project
   end
 
   def edit?
@@ -101,4 +99,17 @@ class TagablePolicy < ApplicationPolicy
   end
 
   private
+
+    # record.discipline (has_one, through: :tag) only resolves via a real
+    # SQL join, which requires the tag to already be persisted - for a
+    # brand-new tagable being authorized before its tag is saved,
+    # record.discipline is nil even when a discipline is genuinely already
+    # known. record.tag itself is always already set at this point (built
+    # directly by TagablesController#create/#new), and tag.discipline is a
+    # plain belongs_to, which resolves correctly in memory regardless of
+    # whether the tag has been saved yet - confirmed directly against an
+    # unsaved tag+tagable pair.
+    def record_discipline
+      record.tag&.discipline
+    end
 end

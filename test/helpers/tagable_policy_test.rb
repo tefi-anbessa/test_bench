@@ -257,6 +257,23 @@ module TagablePolicyTest
       refute policy(nil, @project, new_resource(@discipline)).create?
     end
 
+    # Regression test: create? used to only check "does this user have any
+    # discipline role in the current project" - a user accredited on one
+    # discipline could create resources tagged against a completely
+    # different discipline in the same project. TagablesController#create
+    # always resolves a specific discipline before authorizing (from a
+    # checked discipline_id param, or from an existing tag), so create? can
+    # and should check that specific discipline, exactly like edit?/update?.
+    test "create denies a user accredited on a different discipline in the same project" do
+      # Electrical::Demand is a documented exception - it's always governed
+      # by the project's own Electrical discipline specifically (see
+      # DemandPolicy's own user_is_accredited?), not by whichever discipline
+      # the record's tag happens to belong to.
+      skip if resource_class == Electrical::Demand
+      refute policy(@alternate_accredited_user, @project, new_resource(@discipline)).create?
+      refute policy(@accredited_user, @project, new_resource(@alternate_discipline)).create?
+    end
+
     # Edit tests
     test 'edit allows accredited users to access the form on the current project' do
       assert policy(@admin, @project, @resource).edit?

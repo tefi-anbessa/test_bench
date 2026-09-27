@@ -1,9 +1,10 @@
 # Mixed into a model's own controller (see TagsController) to add a
 # spreadsheet-import entry point as two plain actions, `import`/
-# `create_import`, reusing whatever before_actions that controller already
-# has for its normal CRUD actions (e.g. TagsController's set_discipline
-# already sets @project/@discipline from either a discipline_id or a
-# project_id param) - nothing here re-derives that context.
+# `create_import`. The host controller's own before_actions are expected to
+# set @discipline and, where relevant, @project (e.g. via its existing
+# set_discipline) - @project is derived from @discipline as a fallback below
+# for a controller whose set_discipline doesn't already set it (not every
+# one needs to, for its own non-import actions).
 #
 # Everything after the upload (column mapping, dry-run review, commit) is
 # fully generic and lives on Import::Batch / Import::BatchesController -
@@ -35,7 +36,12 @@ module Importable
 
     batch = Import::Batch.new(
       user: current_user,
-      project: @project,
+      # Not every host controller's own set_discipline sets @project too
+      # when resolving from a discipline_id param (TagsController's does;
+      # DocumentsController's, e.g., doesn't need to for its own actions) -
+      # derived here rather than assumed, so this concern doesn't silently
+      # depend on that as an undocumented precondition.
+      project: @project || @discipline&.project,
       discipline: @discipline,
       importer_key: importer_key,
       original_filename: uploaded_file.original_filename,

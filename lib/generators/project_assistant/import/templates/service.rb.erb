@@ -1,0 +1,120 @@
+# app/services/import/<%= import_key %>.rb
+module Import
+<%- if model_namespaced? -%>
+  module <%= module_name %>
+<%- end -%>
+  # <%= model_class_name %> plugin for the import framework - see
+  # Import::Base for what's generic. Resolved by
+  # Import::Base.registered("<%= import_key %>") via naming convention.
+  #
+  # <%= "⚠" %> REVIEW REQUIRED <%= "⚠" %>
+  # #column_definitions below was auto-derived from <%= model_class_name %>'s
+  # own columns, intersected with the host controller's existing strong
+  # params allowlist - review the labels, add any :aliases a real
+  # spreadsheet header might use, and add a :coercer for anything that
+  # isn't a plain string (see Import::ColumnDefinition). If a real column
+  # combines several of these into one spreadsheet header (the way
+  # Import::Tags decomposes a single "Tag Number" column into
+  # prefix/serial/suffix), override #post_process_attributes to split it -
+  # this generator has no way to infer that on its own.
+<%- if non_discipline_fks.any? -%>
+  #
+  # <%= "⚠" %> The following foreign key(s) are NOT resolved by this
+  # generated file and were left out of #column_definitions entirely:
+  # <%= non_discipline_fks.join(", ") %>. Resolving them (mapping a
+  # spreadsheet column to the right natural key, e.g. a code or name, and
+  # looking up the real record) needs case-by-case judgement - see
+  # Import::Tags#resolve_tagable_type! for a worked example of resolving a
+  # non-discipline reference.
+<%- end -%>
+  class <%= model_class_name.pluralize %> < Base
+<%- if model_namespaced? -%>
+    # Leading "::" and the fully-qualified name below, not bare
+    # "<%= model_class_name %>" - this file is itself nested inside `module
+    # Import; module <%= module_name %>`, and a bare reference here does NOT
+    # reliably reach the real top-level <%= class_name %>: Ruby's constant
+    # lookup finds Import::<%= module_name %> first and looks for
+    # <%= module_name %> *inside* that, raising NameError - confirmed
+    # directly with a throwaway script reproducing this exact nesting shape.
+<%- end -%>
+    def model_class
+      ::<%= class_name %>
+    end
+
+    def permitted_attributes
+      ::<%= class_name %>::IMPORTABLE_ATTRIBUTES
+    end
+
+    def column_definitions
+      definitions = [
+<%- column_stub.each do |col| -%>
+        ColumnDefinition.new(key: :<%= col[:key] %>, label: "<%= col[:label] %>"<%= col[:required] ? ", required: true" : "" %>),
+<%- end -%>
+      ]
+      # Only a project-wide import (no discipline fixed via the URL, and
+      # none chosen for the whole batch) needs a discipline column to map
+      # at all - see #resolve_discipline! below.
+      definitions << ColumnDefinition.new(key: :discipline, label: "Discipline", aliases: ["Disc"]) if context[:discipline].nil?
+      definitions
+    end
+
+    def resolve_foreign_keys(row, context:)
+      resolve_discipline!(row, context)
+    end
+
+    def authorize!(rows, pundit_user:)
+      discipline_ids = rows.filter_map { |row| row.attributes[:discipline_id] }.uniq
+      discipline_ids.each do |discipline_id|
+        discipline = discipline_cache[discipline_id]
+        next unless discipline
+        unless <%= policy_class_name %>.new(pundit_user, discipline.<%= discipline_association_name %>.build).create?
+          raise Pundit::NotAuthorizedError, "not allowed to import <%= import_key.tr("/", " ").tr("_", " ") %> into #{discipline.long_label}"
+        end
+      end
+    end
+
+    private
+
+    # Generic discipline resolution - identical in shape to
+    # Import::Tags#resolve_discipline!. context[:discipline] is already
+    # resolved (discipline-scoped import, or a single discipline chosen
+    # for the whole project-wide batch); otherwise each row resolves its
+    # own via a mapped Discipline column (by code, then by name).
+    def resolve_discipline!(row, context)
+      if context[:discipline]
+        row.attributes.delete(:discipline)
+        row.attributes[:discipline_id] = context[:discipline].id
+        return
+      end
+
+      value = row.attributes.delete(:discipline)
+      if value.blank?
+        row.add_resolution_error("No discipline could be determined for this row - map a discipline column, or choose a single discipline for this import")
+        return
+      end
+
+      discipline = find_discipline(context[:project], value)
+      if discipline
+        row.attributes[:discipline_id] = discipline.id
+        discipline_cache[discipline.id] = discipline
+      else
+        row.add_resolution_error("Discipline '#{value}' not found in this project")
+      end
+    end
+
+    def find_discipline(project, value)
+      code_or_name = value.to_s.strip
+      return nil if code_or_name.blank?
+      project.disciplines.find_by(code: code_or_name) || project.disciplines.find_by(name: code_or_name)
+    end
+
+    def discipline_cache
+      @discipline_cache ||= {}.tap do |cache|
+        cache[context[:discipline].id] = context[:discipline] if context[:discipline]
+      end
+    end
+  end
+<%- if model_namespaced? -%>
+  end
+<%- end -%>
+end

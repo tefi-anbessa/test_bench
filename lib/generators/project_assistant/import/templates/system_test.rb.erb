@@ -1,0 +1,37 @@
+require "application_system_test_case"
+require "helpers/test_setup_helpers"
+
+# Starter system test - stops at the review screen rather than asserting a
+# full commit, since a full commit may still need any non-discipline foreign
+# key flagged in app/services/import/<%= import_key %>.rb to be resolved
+# first (see that file's own comments). Extend once that's been reviewed.
+class <%= full_plural_class_name %>ImportSystemTest < ApplicationSystemTestCase
+  include Devise::Test::IntegrationHelpers
+  include Warden::Test::Helpers
+  include TestSetupHelpers
+
+  def resource_class
+    <%= class_name %>
+  end
+
+  setup do
+    setup_projects_and_users
+    setup_disciplines(name: "Electrical", required_role: :designer)
+    setup_accredited_users(:designer)
+  end
+
+  test "uploading and mapping a discipline-scoped <%= import_key %> import reaches review" do
+    sign_in @accredited_user
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+
+    visit import_discipline_<%= import_route_key %>_path(@discipline)
+    attach_file "file", Rails.root.join("test/fixtures/files/import/<%= import_route_key %>.csv")
+    click_button I18n.t("import.upload_form.submit")
+
+    assert_current_path %r{/import/batches/\d+}
+    assert_selector "select[name='column_mapping[<%= required_headers.first %>]']"
+    click_button I18n.t("import.batches.mapping.submit")
+
+    assert_text I18n.t("import.batches.review.all_valid", count: 1)
+  end
+end

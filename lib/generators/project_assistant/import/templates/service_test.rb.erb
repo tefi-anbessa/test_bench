@@ -1,0 +1,68 @@
+require "test_helper"
+
+# Starter tests for the auto-generated Import::<%= full_plural_class_name %>
+# (see app/services/import/<%= import_key %>.rb). Deliberately stops at the
+# dry-run stage (column resolution, authorization, record validity) rather
+# than asserting a full commit - this generator only guarantees discipline
+# resolution out of the box; any other foreign key it flagged as a manual
+# TODO may still need real data (e.g. an associated record) before a full
+# commit succeeds. Extend these once the generated column_definitions/
+# resolve_foreign_keys have been reviewed.
+# References the importer as Import::<%= full_plural_class_name %> (fully
+# qualified) throughout, rather than nesting this test class inside a
+# matching module structure - this class's own name doesn't need to match
+# the importer's namespace, and a fully-qualified reference resolves
+# correctly regardless of load order.
+class <%= full_plural_class_name %>Test < ActiveSupport::TestCase
+  setup do
+    @project = create(:project)
+    # Project creation auto-creates the standard set of disciplines (see
+    # Discipline.create_all_for_project) - find and configure one rather
+    # than creating a new one.
+    @electrical = @project.disciplines.find_by!(name: "Electrical").tap { |d| d.update!(required_role: "designer") }
+    @user = create(:user)
+    @user.grant(:designer, @electrical)
+    @pundit_user = ApplicationPolicy::UserContext.new(@user, @project)
+  end
+
+  def build_batch(csv:, discipline: nil, column_mapping:)
+    create(:import_batch,
+      user: @user, project: @project, discipline: discipline,
+      original_filename: "<%= import_route_key %>.csv", file_data: csv, column_mapping: column_mapping)
+  end
+
+  test "discipline-scoped import needs no discipline column and every row uses the fixed discipline" do
+    csv = "<%= required_headers.join(",") %>\n<%= required_values.join(",") %>\n"
+    batch = build_batch(csv: csv, discipline: @electrical, column_mapping: <%= required_mapping.inspect %>)
+
+    importer = Import::<%= full_plural_class_name %>.new(batch)
+    refute importer.column_definitions.any? { |d| d.key == :discipline }, "discipline shouldn't be mappable when fixed"
+
+    rows = importer.dry_run_rows(pundit_user: @pundit_user)
+    assert_equal 1, rows.size
+    assert rows.all?(&:valid?), rows.flat_map(&:error_messages).join(", ")
+    assert_equal [@electrical.id], rows.map { |r| r.record.discipline_id }
+  end
+
+  test "project-wide import resolves a mapped discipline column, by code" do
+    csv = "<%= required_headers.join(",") %>,Discipline\n<%= required_values.join(",") %>,E\n"
+    batch = build_batch(csv: csv, discipline: nil, column_mapping: <%= required_mapping.merge("Discipline" => "discipline").inspect %>)
+
+    importer = Import::<%= full_plural_class_name %>.new(batch)
+    assert importer.column_definitions.any? { |d| d.key == :discipline }, "discipline should be mappable when not fixed"
+
+    rows = importer.dry_run_rows(pundit_user: @pundit_user)
+    assert rows.all?(&:valid?), rows.flat_map(&:error_messages).join(", ")
+    assert_equal [@electrical.id], rows.map { |r| r.record.discipline_id }
+  end
+
+  test "authorize! rejects a user without a role on the resolved discipline" do
+    other_user = create(:user)
+    other_pundit_user = ApplicationPolicy::UserContext.new(other_user, @project)
+    csv = "<%= required_headers.join(",") %>\n<%= required_values.join(",") %>\n"
+    batch = build_batch(csv: csv, discipline: @electrical, column_mapping: <%= required_mapping.inspect %>)
+
+    importer = Import::<%= full_plural_class_name %>.new(batch)
+    assert_raises(Pundit::NotAuthorizedError) { importer.dry_run_rows(pundit_user: other_pundit_user) }
+  end
+end

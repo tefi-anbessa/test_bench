@@ -102,12 +102,18 @@ module Import
     end
 
     # Where to land the user once this batch is finished with (imported or
-    # aborted). Only one importer exists today (tags), so this is a plain
-    # case rather than speculative per-importer routing config - add a
-    # branch here (keyed on @batch.importer_key) when a second model's
-    # import is added.
+    # aborted). Fully generic across every importer: every discipline-scoped
+    # model in this app follows the same discipline_<route_key>_path/
+    # project_<route_key>_path route-helper convention, and model_name.
+    # route_key is Rails' own primitive for the (possibly namespaced) route
+    # segment - e.g. "documents" for Document, "electrical_cable_types" for
+    # Electrical::CableType. Deliberately not @batch.importer_key here: that
+    # string is slash-joined for a namespaced model (so Import::Base can
+    # camelize it back into a real "Namespace::Model" constant), which is
+    # not the same string Rails uses to build route helper names.
     def model_index_path
-      @batch.discipline.present? ? discipline_tags_path(@batch.discipline) : project_tags_path(@batch.project)
+      route_key = @batch.importer.model_class.model_name.route_key
+      @batch.discipline.present? ? send("discipline_#{route_key}_path", @batch.discipline) : send("project_#{route_key}_path", @batch.project)
     end
   end
 end
