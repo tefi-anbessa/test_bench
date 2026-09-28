@@ -78,5 +78,57 @@ module Import
       assert_equal 2, result.skipped_count
       assert_equal 1, Tag.where(discipline: @electrical).count # only the pre-existing PT0001
     end
+
+    # A minimal fake importer, isolated from Import::Tags entirely, just to
+    # exercise Import::Committer's own after_commit_row/error-wrapping
+    # behavior (see Import::TagableBase, which relies on both).
+    class FakeImporter < Base
+      attr_accessor :after_commit_row_calls, :raise_in_after_commit_row
+
+      def initialize
+        @after_commit_row_calls = []
+        @raise_in_after_commit_row = false
+      end
+
+      def model_class = Tag
+      def column_definitions = []
+      def permitted_attributes = []
+      def resolve_foreign_keys(row, context:) = nil
+      def authorize!(rows, pundit_user:) = nil
+
+      def after_commit_row(row)
+        raise "boom" if raise_in_after_commit_row
+        after_commit_row_calls << row
+      end
+    end
+
+    def fake_row(discipline)
+      row = Row.new(row_number: 1, raw: {})
+      row.record = build(:tag, discipline: discipline)
+      row
+    end
+
+    test "after_commit_row runs once per committed row, after that row's own save" do
+      importer = FakeImporter.new
+      row = fake_row(@electrical)
+      refute row.record.persisted?
+
+      Committer.new(importer: importer, rows: [row], partial: false).call
+
+      assert row.record.persisted?
+      assert_equal [row], importer.after_commit_row_calls
+    end
+
+    test "a raising after_commit_row rolls back the whole commit and surfaces as InvalidRowsError" do
+      importer = FakeImporter.new
+      importer.raise_in_after_commit_row = true
+      row = fake_row(@electrical)
+
+      assert_raises(Committer::InvalidRowsError) do
+        Committer.new(importer: importer, rows: [row], partial: false).call
+      end
+      refute row.record.persisted?
+      assert_equal 0, Tag.where(discipline: @electrical).count
+    end
   end
 end

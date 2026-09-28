@@ -84,6 +84,38 @@ module Import
     # "Tag Number" column into prefix/serial/suffix. Default: no-op.
     def post_process_attributes(attrs) = attrs
 
+    # Called by Import::Committer immediately after a row's own record is
+    # saved, inside the same transaction - for anything an importer needs to
+    # do to an already-persisted, non-batch record as a result (e.g. a
+    # tagable importer linking itself onto the existing Tag it resolved -
+    # see Import::TagableBase). Any exception here aborts the whole commit.
+    # Default: nothing to do.
+    def after_commit_row(row) = nil
+
+    # Whether this importer supports creating a new record (e.g. a Tag) as
+    # part of resolving a row's foreign key, when nothing existing is found -
+    # governs whether the mapping page offers an opt-in "create missing"
+    # checkbox at all. Default: no such capability. See Import::TagableBase.
+    def supports_tag_creation? = false
+
+    # The path to redirect to once a batch is finished with (imported or
+    # aborted) - default matches every plain discipline-resource importer's
+    # own route convention (discipline_<route_key>_path/
+    # project_<route_key>_path). url_helpers is the calling controller
+    # itself (already has all its own route helpers) - not re-derived here,
+    # since a route helper isn't available as a plain method outside a
+    # controller/view context. Override when a model doesn't have its own
+    # such route - e.g. every tagable shares one controller/route
+    # (discipline_tagables_path) instead of a per-model one.
+    def index_path(batch, url_helpers)
+      route_key = model_class.model_name.route_key
+      if batch.discipline.present?
+        url_helpers.send("discipline_#{route_key}_path", batch.discipline)
+      else
+        url_helpers.send("project_#{route_key}_path", batch.project)
+      end
+    end
+
     # === Provided ===
 
     def reader

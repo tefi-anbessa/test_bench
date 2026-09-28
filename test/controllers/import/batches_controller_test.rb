@@ -24,6 +24,13 @@ module Import
         original_filename: "tags.csv", file_data: csv, column_mapping: column_mapping)
     end
 
+    def build_motor_batch(csv:, column_mapping: {})
+      create(:import_batch,
+        user: @accredited_user, project: @project, discipline: @discipline,
+        importer_key: "electrical/motors", original_filename: "motors.csv",
+        file_data: csv, column_mapping: column_mapping)
+    end
+
     def build_multi_sheet_batch(discipline: @discipline, sheet_name: nil, column_mapping: {})
       file_data = Rails.root.join("test/fixtures/files/import/tags_multi_sheet.xlsx").binread
       create(:import_batch,
@@ -99,6 +106,53 @@ module Import
       assert_equal({ "Tag Number" => "full_tag", "Stage" => "stage" }, preset.column_mapping)
     end
 
+    test "update persists the create_missing_tags checkbox for an importer that supports it" do
+      batch = build_motor_batch(csv: "Tag,Motor Type,Frame Size\nMTR0099,induction,100\n")
+      patch :update, params: { id: batch.id,
+        column_mapping: { "Tag" => "full_tag", "Motor Type" => "motor_type", "Frame Size" => "frame_size" },
+        create_missing_tags: "1" }
+
+      assert batch.reload.create_missing_tags?
+    end
+
+    test "update ignores create_missing_tags for an importer that doesn't support it" do
+      batch = build_batch(csv: csv_for("Tag Number", "PT0001A"))
+      patch :update, params: { id: batch.id,
+        column_mapping: { "Tag Number" => "full_tag", "Stage" => "stage" },
+        create_missing_tags: "1" }
+
+      refute batch.reload.create_missing_tags?
+    end
+
+    test "back_to_mapping sends a mapped batch back to the mapping form without touching its data" do
+      batch = build_batch(csv: csv_for("Tag Number", "PT0001A"), column_mapping: { "Tag Number" => "full_tag", "Stage" => "stage" })
+      batch.update!(status: :mapped)
+
+      patch :back_to_mapping, params: { id: batch.id }
+
+      assert_redirected_to import_batch_path(batch)
+      batch.reload
+      assert batch.uploaded?
+      assert_equal({ "Tag Number" => "full_tag", "Stage" => "stage" }, batch.column_mapping)
+
+      get :show, params: { id: batch.id }
+      assert_response :success
+      assert_select "select[name='column_mapping[Tag Number]']"
+    end
+
+    test "back_to_mapping is rejected on a batch still awaiting its first mapping" do
+      batch = build_batch(csv: csv_for("Tag Number", "PT0001A"))
+      patch :back_to_mapping, params: { id: batch.id }
+      assert_response :conflict
+    end
+
+    test "back_to_mapping is rejected on an already-imported batch" do
+      batch = build_batch(csv: csv_for("Tag Number", "PT0001A"), column_mapping: { "Tag Number" => "full_tag", "Stage" => "stage" })
+      batch.update!(status: :imported)
+      patch :back_to_mapping, params: { id: batch.id }
+      assert_response :conflict
+    end
+
     test "show renders the dry-run review once mapped" do
       batch = build_batch(csv: csv_for("Tag Number", "PT0001A"), column_mapping: { "Tag Number" => "full_tag", "Stage" => "stage" })
       batch.update!(status: :mapped)
@@ -162,6 +216,77 @@ module Import
         post :commit, params: { id: batch.id }
       end
       assert_response :conflict
+    end
+
+    # Tempfile unlinks its underlying file when the object itself is
+    # garbage-collected, regardless of whether fixture_file_upload still
+    # holds its path - keep a live reference for the life of the test.
+    def csv_upload(content)
+      file = Tempfile.new(["refresh", ".csv"])
+      file.write(content)
+      file.flush
+      (@csv_uploads ||= []) << file
+      fixture_file_upload(file.path, "text/csv")
+    end
+
+    test "refresh_file is rejected while the batch is still awaiting mapping" do
+      batch = build_batch(csv: csv_for("Tag Number", "PT0001A"))
+      patch :refresh_file, params: { id: batch.id, file: csv_upload(csv_for("Tag Number", "PT0002A")) }
+      assert_response :conflict
+    end
+
+    test "refresh_file is rejected on an already-imported batch" do
+      batch = build_batch(csv: csv_for("Tag Number", "PT0001A"), column_mapping: { "Tag Number" => "full_tag", "Stage" => "stage" })
+      batch.update!(status: :imported)
+      patch :refresh_file, params: { id: batch.id, file: csv_upload(csv_for("Tag Number", "PT0002A")) }
+      assert_response :conflict
+    end
+
+    test "refresh_file is rejected on an aborted batch" do
+      batch = build_batch(csv: csv_for("Tag Number", "PT0001A"), column_mapping: { "Tag Number" => "full_tag", "Stage" => "stage" })
+      batch.update!(status: :aborted)
+      patch :refresh_file, params: { id: batch.id, file: csv_upload(csv_for("Tag Number", "PT0002A")) }
+      assert_response :conflict
+    end
+
+    test "refresh_file with an unsupported format re-renders review and leaves the batch untouched" do
+      batch = build_batch(csv: csv_for("Tag Number", "PT0001A"), column_mapping: { "Tag Number" => "full_tag", "Stage" => "stage" })
+      batch.update!(status: :mapped)
+      bad_file = fixture_file_upload(Rails.root.join("test/fixtures/files/import/tags.pdf"), "application/pdf")
+
+      patch :refresh_file, params: { id: batch.id, file: bad_file }
+
+      assert_response :unprocessable_content
+      assert_select ".alert"
+      batch.reload
+      assert batch.mapped?
+      assert_equal({ "Tag Number" => "full_tag", "Stage" => "stage" }, batch.column_mapping)
+    end
+
+    test "refresh_file replaces the file and resets the batch back to mapping" do
+      batch = build_batch(csv: csv_for("Tag Number", "PT0001A"), column_mapping: { "Tag Number" => "full_tag", "Stage" => "stage" })
+      batch.update!(status: :mapped)
+      old_expiry = batch.expires_at
+      new_content = csv_for("Tag Number", "PT0002A")
+
+      patch :refresh_file, params: { id: batch.id, file: csv_upload(new_content) }
+
+      assert_redirected_to import_batch_path(batch)
+      batch.reload
+      assert batch.uploaded?
+      assert_nil batch.sheet_name
+      assert_equal({}, batch.column_mapping)
+      assert batch.expires_at > old_expiry
+      assert_equal new_content, batch.file_data
+    end
+
+    test "refresh_file on another user's batch is not found" do
+      other_user = create(:user)
+      batch = build_batch(csv: csv_for("Tag Number", "PT0001A"), column_mapping: { "Tag Number" => "full_tag", "Stage" => "stage" })
+      batch.update!(status: :mapped, user: other_user)
+      assert_raises(ActiveRecord::RecordNotFound) do
+        patch :refresh_file, params: { id: batch.id, file: csv_upload(csv_for("Tag Number", "PT0002A")) }
+      end
     end
 
     test "destroy aborts the batch without deleting it" do

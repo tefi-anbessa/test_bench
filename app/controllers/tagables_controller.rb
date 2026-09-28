@@ -1,8 +1,15 @@
 class TagablesController < ApplicationController
+    include Importable
 
     before_action :authenticate_user!
-    before_action :require_project!, only: [:new, :create, :edit, :update]
+    before_action :require_project!, only: [:new, :create, :edit, :update, :import, :create_import]
     before_action :set_tagable, only: [:show, :edit, :update, :destroy]
+    # import/create_import (see app/controllers/concerns/importable.rb) need
+    # @discipline/@type resolved the same way index does - set_discipline/
+    # set_type aren't before_actions elsewhere in this controller (index/new/
+    # create call them directly instead), so these are dedicated
+    # registrations, not extensions of an existing one.
+    before_action :set_discipline, :set_type, :set_swatch, only: [:import, :create_import]
 
     # Main abstracted methods
     # GET /index - abstracted index action with proper authorization
@@ -309,5 +316,26 @@ class TagablesController < ApplicationController
               :location,
               :notes
             )
+    end
+
+    # === Importable concern hooks (see app/controllers/concerns/importable.rb) ===
+
+    def importer_key
+      # e.g. "electrical/motors" - matches Import::Base's own registry key
+      # formula (model_class.name.underscore.pluralize), resolved
+      # dynamically since this one controller serves every tagable type.
+      @resource_class.name.underscore.pluralize
+    end
+
+    def authorize_import!
+      authorize @discipline.tags.build(tagable_type: @type), :import?
+    end
+
+    # This controller has no view path of its own - every action renders
+    # from @resource_class's own view directory instead (see #index/#show/
+    # etc. above) - overridden to match, rather than the default
+    # app/views/tagables/import.html.erb Importable's own version assumes.
+    def render_import_form(status: nil)
+      render(**{ template: "#{@resource_class.model_name.collection}/import", status: status }.compact)
     end
 end

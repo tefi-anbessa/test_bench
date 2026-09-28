@@ -20,10 +20,21 @@ module ProjectAssistant
     include ProjectAssistant::Shared::ImportHelper
     source_root File.expand_path("import/templates", __dir__)
 
+    # The fixture/system test's shared placeholder tag reference for
+    # --tagable mode - "TAG" + 4-digit-padded serial "0001" (confirmed:
+    # Constants.tag.serial_digits is 4), matching how
+    # tagable_system_test.rb.erb seeds its own @unassigned_tag
+    # (prefix: "TAG", serial: 1, suffix: "").
+    TAGABLE_FIXTURE_TAG = "TAG0001"
+
     class_option :discipline_association, type: :string, default: nil,
       desc: "Override the Discipline has_many association name, if reflection can't resolve it"
     class_option :nesting, type: :string, default: "project,discipline",
       desc: "Comma-separated route contexts to retrofit: project, discipline, or both"
+    class_option :tagable, type: :boolean, default: false,
+      desc: "Target is a tagable model (policy < TagablePolicy, includes Tagable) - attaches to an " \
+        "existing, unassigned Tag by natural key instead of resolving a discipline_id column. " \
+        "Controller/routes are shared (TagablesController) and never generated/injected."
 
     def validate_model
       errors = []
@@ -42,16 +53,29 @@ module ProjectAssistant
       # was never checked at all.
       @policy_class = policy_class_name.safe_constantize
       errors = []
-      errors << "#{policy_class_name} does not exist" if @policy_class.nil?
-      if @policy_class && !(@policy_class < DisciplineResourcePolicy)
-        errors << "#{policy_class_name} does not inherit from DisciplineResourcePolicy - " \
-          "this generator only supports that convention (see app/policies/discipline_resource_policy.rb#import?). " \
-          "A model with a different policy shape (e.g. a tagable model's TagablePolicy) needs import built by hand."
+      if tagable?
+        errors << "#{policy_class_name} does not exist" if @policy_class.nil?
+        if @policy_class && !(@policy_class < TagablePolicy)
+          errors << "#{policy_class_name} does not inherit from TagablePolicy, but --tagable was given."
+        end
+        errors << "#{class_name} does not include Tagable, but --tagable was given." unless model_class.include?(Tagable)
+      else
+        errors << "#{policy_class_name} does not exist" if @policy_class.nil?
+        if @policy_class && !(@policy_class < DisciplineResourcePolicy)
+          errors << "#{policy_class_name} does not inherit from DisciplineResourcePolicy - " \
+            "this generator only supports that convention (see app/policies/discipline_resource_policy.rb#import?), " \
+            "or --tagable for a model whose policy inherits TagablePolicy instead."
+        end
       end
       abort_with(errors)
     end
 
     def validate_discipline_association
+      if tagable?
+        say_status :info, "--tagable: skipping discipline-association reflection - every tagable attaches to a Tag directly", :green
+        return
+      end
+
       if options[:discipline_association].present?
         @discipline_association = options[:discipline_association].to_sym
         return
@@ -66,6 +90,11 @@ module ProjectAssistant
     end
 
     def validate_controller
+      if tagable?
+        say_status :info, "--tagable: skipping controller validation - every tagable shares TagablesController, already wired for import", :green
+        return
+      end
+
       errors = []
       unless File.exist?(controller_path)
         errors << "#{controller_path.relative_path_from(destination_root_pathname)} not found"
@@ -77,6 +106,11 @@ module ProjectAssistant
     end
 
     def validate_routes
+      if tagable?
+        say_status :info, "--tagable: skipping route validation - the shared tagables import route already exists", :green
+        return
+      end
+
       errors = []
       route_contexts.each do |context|
         section = routes_section(context)
@@ -93,24 +127,36 @@ module ProjectAssistant
 
     def create_importer_service
       @column_stub = import_column_stub_for(model_class, permitted_attributes: permitted_attributes_suggestion)
-      @non_discipline_fks = import_non_discipline_fks_for(model_class, discipline_fk: discipline_fk)
-      template "service.rb.erb", File.join("app", "services", "import", "#{import_key}.rb")
+      @non_discipline_fks = tagable? ? import_non_discipline_fks_for(model_class, discipline_fk: nil) : import_non_discipline_fks_for(model_class, discipline_fk: discipline_fk)
+      template tagable? ? "tagable_service.rb.erb" : "service.rb.erb", File.join("app", "services", "import", "#{import_key}.rb")
     end
 
     def create_view_file
-      template "view.html.erb", File.join("app", "views", controller_file_path, "import.html.erb")
+      template tagable? ? "tagable_view.html.erb" : "view.html.erb", File.join("app", "views", controller_file_path, "import.html.erb")
     end
 
     def create_fixture_and_tests
+      fixture_headers = tagable? ? ["Tag"] + required_headers : required_headers
+      fixture_values = tagable? ? [TAGABLE_FIXTURE_TAG] + required_values : required_values
       create_file File.join("test", "fixtures", "files", "import", "#{import_route_key}.csv"),
-        "#{required_headers.join(",")}\n#{required_values.join(",")}\n"
+        "#{fixture_headers.join(",")}\n#{fixture_values.join(",")}\n"
 
-      template "service_test.rb.erb", File.join("test", "services", "import", "#{import_key}_test.rb")
-      template "controller_test.rb.erb", File.join("test", "controllers", "#{controller_file_path}_import_test.rb")
-      template "system_test.rb.erb", File.join("test", "system", "#{controller_file_path}_import_system_test.rb")
+      if tagable?
+        template "tagable_service_test.rb.erb", File.join("test", "services", "import", "#{import_key}_test.rb")
+        template "tagable_controller_test.rb.erb", File.join("test", "controllers", "#{controller_file_path}_import_test.rb")
+        template "tagable_system_test.rb.erb", File.join("test", "system", "#{controller_file_path}_import_system_test.rb")
+      else
+        template "service_test.rb.erb", File.join("test", "services", "import", "#{import_key}_test.rb")
+        template "controller_test.rb.erb", File.join("test", "controllers", "#{controller_file_path}_import_test.rb")
+        template "system_test.rb.erb", File.join("test", "system", "#{controller_file_path}_import_system_test.rb")
+      end
     end
 
     def inject_controller
+      if tagable?
+        say_status :info, "--tagable: skipping controller injection - TagablesController already has import/create_import wired in", :green
+        return
+      end
       # IMPORTANT: registering the same before_action method name twice with
       # different :only lists does NOT add a second independent filter -
       # Rails' callback system replaces the earlier registration entirely,
@@ -157,6 +203,10 @@ module ProjectAssistant
     end
 
     def inject_routes
+      if tagable?
+        say_status :info, "--tagable: skipping route injection - the shared tagables import route already exists", :green
+        return
+      end
       return if options[:pretend]
 
       content = File.read(routes_path)
@@ -176,7 +226,14 @@ module ProjectAssistant
         file = i18n_views_file(locale)
         next unless File.exist?(file)
 
-        anchor = /^(\s*)#{Regexp.escape(plural_name)}:\s*\n/
+        # [ \t]*, not \s* (which also matches \n): this locale file's own
+        # sections are separated by blank lines (electrical's own, unlike
+        # core's) - \s* greedily captured the *preceding* blank line as
+        # "indentation" (confirmed directly - base_indent came back as
+        # "\n    ", not "    "), which then prefixed every injected line
+        # with a stray extra newline. [ \t]* only ever matches the current
+        # line's own leading whitespace, regardless of what precedes it.
+        anchor = /^([ \t]*)#{Regexp.escape(plural_name)}:[ \t]*\n/
         content = File.read(file)
         unless content.match?(anchor)
           say_status :error, "#{file.relative_path_from(destination_root_pathname)}: could not find `#{plural_name}:` key - add the import: block by hand", :red
@@ -184,12 +241,23 @@ module ProjectAssistant
         end
 
         base_indent = content.match(anchor)[1]
-        block = <<~YAML
-          import:
-            title:              "#{values[:title]}"
-            header_discipline:  "#{values[:header_discipline]}"
-            header_project:     "#{values[:header_project]}"
-        YAML
+        # A tagable import is always discipline-scoped (no project-wide
+        # variant - see Import::TagableBase), so only one header string is
+        # needed, unlike a plain discipline-resource importer's two.
+        if tagable?
+          block = <<~YAML
+            import:
+              title:   "#{values[:title]}"
+              header:  "#{values[:header_discipline]}"
+          YAML
+        else
+          block = <<~YAML
+            import:
+              title:              "#{values[:title]}"
+              header_discipline:  "#{values[:header_discipline]}"
+              header_project:     "#{values[:header_project]}"
+          YAML
+        end
         block = pad_lines(block, "#{base_indent}  ")
         content.sub!(anchor) { "#{$&}#{block}" } unless options[:pretend]
         File.write(file, content) unless options[:pretend]
@@ -205,7 +273,11 @@ module ProjectAssistant
       end
 
       content = File.read(view_path)
-      anchor = /(<!-- New Button \(Right\) -->\s*\n\s*<div class="col-2 align-content-end">\s*\n\s*<% if @discipline\.present\? && policy\((.*?)\)\.new\? %>\s*\n\s*(<%= nav_button\(action: :new,.*?%>)\s*\n\s*<% end %>\s*\n\s*<\/div>)/m
+      # The div class varies (discipline-resource index views use
+      # "col-2 align-content-end"; tagable ones use "col-2 text-end" -
+      # confirmed directly) - captured and reused as-is rather than
+      # hardcoded, so this never silently changes an unrelated class.
+      anchor = /(<!-- New Button \(Right\) -->\s*\n\s*<div class="(col-2[^"]*)">\s*\n\s*<% if @discipline\.present\? && policy\((.*?)\)\.new\? %>\s*\n\s*(<%= nav_button\(action: :new,.*?%>)\s*\n\s*<% end %>\s*\n\s*<\/div>)/m
       match = content.match(anchor)
       unless match
         say_status :info, "#{controller_file_path}/index.html.erb: New Button (Right) anchor not found - " \
@@ -213,23 +285,40 @@ module ProjectAssistant
         return
       end
 
-      new_record_probe = match[2]
-      new_button_line = match[3]
-      replacement = <<~ERB
-        <!-- New / Import Buttons (Right) -->
-                <div class="col-2 align-content-end">
-                  <% if @discipline.present? %>
-                    <% if policy(#{new_record_probe}).new? %>
-                      #{new_button_line}
+      div_class = match[2]
+      new_record_probe = match[3]
+      new_button_line = match[4]
+      if tagable?
+        replacement = <<~ERB
+          <!-- New / Import Buttons (Right) -->
+                  <div class="#{div_class}">
+                    <% if @discipline.present? %>
+                      <% if policy(#{new_record_probe}).new? %>
+                        #{new_button_line}
+                      <% end %>
+                      <% if policy(#{new_record_probe}).import? %>
+                        <%= nav_button(action: :import, path: import_discipline_tagables_path(@discipline, tagable_type: "#{class_name}"), record: #{class_name}.new) %>
+                      <% end %>
                     <% end %>
-                    <% if policy(#{new_record_probe}).import? %>
-                      <%= nav_button(action: :import, path: import_discipline_#{import_route_key}_path(@discipline), record: #{class_name}.new) %>
+                  </div>
+        ERB
+      else
+        replacement = <<~ERB
+          <!-- New / Import Buttons (Right) -->
+                  <div class="#{div_class}">
+                    <% if @discipline.present? %>
+                      <% if policy(#{new_record_probe}).new? %>
+                        #{new_button_line}
+                      <% end %>
+                      <% if policy(#{new_record_probe}).import? %>
+                        <%= nav_button(action: :import, path: import_discipline_#{import_route_key}_path(@discipline), record: #{class_name}.new) %>
+                      <% end %>
+                    <% elsif @project.present? && policy(#{class_name}).import? %>
+                      <%= nav_button(action: :import, path: import_project_#{import_route_key}_path(@project), record: #{class_name}.new) %>
                     <% end %>
-                  <% elsif @project.present? && policy(#{class_name}).import? %>
-                    <%= nav_button(action: :import, path: import_project_#{import_route_key}_path(@project), record: #{class_name}.new) %>
-                  <% end %>
-                </div>
-      ERB
+                  </div>
+        ERB
+      end
       content = content.sub(anchor) { replacement.rstrip }
       File.write(view_path, content) unless options[:pretend]
       say_status :inject, "#{controller_file_path}/index.html.erb: added Import button", :green
@@ -237,12 +326,14 @@ module ProjectAssistant
 
     def print_manual_todo_summary
       say_status :info, "---- Manual follow-up needed ----", :yellow
-      say_status :info, "Add this constant to #{class_name} (suggested from #{controller_class_name}Controller's own permit lists):", :yellow
-      say_status :info, "  IMPORTABLE_ATTRIBUTES = %i[#{([discipline_fk] + permitted_attributes_suggestion).uniq.join(' ')}].freeze", :yellow
+      suggested_attributes = tagable? ? permitted_attributes_suggestion : ([discipline_fk] + permitted_attributes_suggestion).uniq
+      source = tagable? ? "#{extension_class_name}#tagable_params" : "#{controller_class_name}Controller's own permit lists"
+      say_status :info, "Add this constant to #{class_name} (suggested from #{source}):", :yellow
+      say_status :info, "  IMPORTABLE_ATTRIBUTES = %i[#{suggested_attributes.join(' ')}].freeze", :yellow
       if @non_discipline_fks.any?
         say_status :info, "Not resolved by the generated importer - needs case-by-case judgement: #{@non_discipline_fks.join(', ')}", :yellow
       end
-      say_status :info, "Review app/services/import/#{import_key}.rb's column_definitions - see its own REVIEW REQUIRED comment.", :yellow
+      say_status :info, "Review app/services/import/#{import_key}.rb's #{tagable? ? "own_" : ""}column_definitions - see its own REVIEW REQUIRED comment.", :yellow
     end
 
     private
@@ -282,9 +373,18 @@ module ProjectAssistant
     def routes_path = Pathname.new(File.join(destination_root, "config", "routes.rb"))
     def destination_root_pathname = Pathname.new(destination_root)
     def route_contexts = options[:nesting].to_s.split(",").map(&:strip)
+    def tagable? = options[:tagable]
+
+    # A tagable model's own strong-params allowlist doesn't live on a
+    # per-model controller (there is none - every tagable shares
+    # TagablesController) but on its own "*_extension.rb" module (see
+    # app/controllers/electrical/motor_extension.rb), matched by the
+    # existing extend_tagable convention ("#{model}Extension").
+    def extension_class_name = "#{class_name}Extension"
+    def extension_path = Pathname.new(File.join(destination_root, "app", "controllers", folder, "#{file_name}_extension.rb"))
 
     def permitted_attributes_suggestion
-      @permitted_attributes_suggestion ||= import_permitted_attributes_from(File.read(controller_path))
+      @permitted_attributes_suggestion ||= import_permitted_attributes_from(File.read(tagable? ? extension_path : controller_path))
     end
 
     # The controller's own strong-params allowlist never includes the

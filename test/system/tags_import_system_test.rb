@@ -135,6 +135,22 @@ class TagsImportSystemTest < ApplicationSystemTestCase
     assert_no_selector "td", text: "Pressure"
   end
 
+  test "back to column mapping from the review screen actually returns to mapping" do
+    sign_in @accredited_user
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+
+    visit import_discipline_tags_path(@discipline)
+    attach_file "file", Rails.root.join("test/fixtures/files/import/tags_with_stage.csv")
+    click_button I18n.t("import.upload_form.submit")
+    click_button I18n.t("import.batches.mapping.submit")
+
+    assert_text I18n.t("import.batches.review.all_valid", count: 2)
+    click_link I18n.t("import.batches.review.back_to_mapping")
+
+    assert_selector "select[name='column_mapping[Tag Number]']"
+    assert_equal "full_tag", find_field("column_mapping[Tag Number]").value
+  end
+
   test "discarding from the review screen aborts the batch and imports nothing" do
     sign_in @accredited_user
     ApplicationController.any_instance.stubs(:current_project).returns(@project)

@@ -58,6 +58,9 @@ en:
         header:           "Circuit %{label}"
 
     motors:
+      import:
+        title:              "Import Motors"
+        header:             "Import Motors into %{discipline}"
       index:
         title:            "Motors"
         header:           "Motors Schedule for %{scope_text}"

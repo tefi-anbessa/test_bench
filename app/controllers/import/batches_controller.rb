@@ -37,6 +37,7 @@ module Import
 
       @batch.column_mapping = params.require(:column_mapping).to_unsafe_h
       @batch.discipline_id = params[:single_discipline_id] if params[:single_discipline_id].present?
+      @batch.create_missing_tags = params[:create_missing_tags] == "1" if @batch.importer.supports_tag_creation?
       @batch.status = :mapped
       if @batch.save
         Import::MappingPreset.remember!(user: current_user, importer_key: @batch.importer_key, column_mapping: @batch.column_mapping)
@@ -67,6 +68,43 @@ module Import
     def destroy
       @batch.update!(status: :aborted)
       redirect_to model_index_path, notice: t(".notice")
+    end
+
+    # Lets a user swap in a corrected file for this batch without losing
+    # their place (discipline/tagable_type/etc. stay put) - resets the batch
+    # back through sheet-select/mapping. column_mapping resets to {} since
+    # the new file's headers might differ, but Import::MappingPreset (keyed
+    # by user+importer_key, not by batch) re-suggests the same mapping again
+    # as long as the headers still match.
+    def refresh_file
+      raise ApplicationController::ConflictError, :out_of_scope unless @batch.mapped? || @batch.validated?
+
+      uploaded_file = params.require(:file)
+
+      begin
+        Import::SpreadsheetReader.new(uploaded_file.tempfile.path, original_filename: uploaded_file.original_filename).headers
+      rescue Import::SpreadsheetReader::UnsupportedFormatError => e
+        flash.now[:alert] = e.message
+        run_dry_run
+        render :review, status: :unprocessable_content
+        return
+      end
+
+      @batch.update!(file_data: uploaded_file.read, original_filename: uploaded_file.original_filename,
+        sheet_name: nil, column_mapping: {}, status: :uploaded, expires_at: 1.day.from_now)
+      redirect_to import_batch_path(@batch)
+    end
+
+    # Lets a user return to column mapping from the review screen to adjust
+    # their choices - the existing file/column_mapping/sheet_name are left
+    # untouched, so the mapping page shows the same selections as before
+    # (also re-suggested from Import::MappingPreset regardless, since that
+    # was saved from this exact mapping on the way to review).
+    def back_to_mapping
+      raise ApplicationController::ConflictError, :out_of_scope unless @batch.mapped? || @batch.validated?
+
+      @batch.update!(status: :uploaded)
+      redirect_to import_batch_path(@batch)
     end
 
     private
@@ -102,18 +140,12 @@ module Import
     end
 
     # Where to land the user once this batch is finished with (imported or
-    # aborted). Fully generic across every importer: every discipline-scoped
-    # model in this app follows the same discipline_<route_key>_path/
-    # project_<route_key>_path route-helper convention, and model_name.
-    # route_key is Rails' own primitive for the (possibly namespaced) route
-    # segment - e.g. "documents" for Document, "electrical_cable_types" for
-    # Electrical::CableType. Deliberately not @batch.importer_key here: that
-    # string is slash-joined for a namespaced model (so Import::Base can
-    # camelize it back into a real "Namespace::Model" constant), which is
-    # not the same string Rails uses to build route helper names.
+    # aborted) - delegates to the importer itself (Import::Base#index_path),
+    # since not every model has its own per-model route to build this from
+    # (every tagable shares one controller/route instead - see
+    # Import::TagableBase#index_path).
     def model_index_path
-      route_key = @batch.importer.model_class.model_name.route_key
-      @batch.discipline.present? ? send("discipline_#{route_key}_path", @batch.discipline) : send("project_#{route_key}_path", @batch.project)
+      @batch.importer.index_path(@batch, self)
     end
   end
 end

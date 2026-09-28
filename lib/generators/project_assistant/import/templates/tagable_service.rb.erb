@@ -1,0 +1,47 @@
+# app/services/import/<%= import_key %>.rb
+module Import
+<%- if model_namespaced? -%>
+  module <%= module_name %>
+<%- end -%>
+  # <%= model_class_name %> plugin for the import framework - see
+  # Import::TagableBase for what's generic to every tagable importer (it
+  # always attaches to an already-persisted, unassigned Tag by natural key -
+  # never creates a Tag). Resolved by
+  # Import::Base.registered("<%= import_key %>") via naming convention.
+  #
+  # <%= "⚠" %> REVIEW REQUIRED <%= "⚠" %>
+  # #own_column_definitions below was auto-derived from <%= model_class_name %>'s
+  # own columns, intersected with <%= extension_class_name %>#tagable_params'
+  # existing strong params allowlist - review the labels, add any :aliases a
+  # real spreadsheet header might use, and add a :coercer for anything that
+  # isn't a plain string (see Import::ColumnDefinition and
+  # Import::Electrical::Motors for a worked example, including an enum
+  # coercer).
+<%- if non_discipline_fks.any? -%>
+  #
+  # <%= "⚠" %> The following foreign key(s) are NOT resolved by this
+  # generated file and were left out of #own_column_definitions entirely:
+  # <%= non_discipline_fks.join(", ") %>. Resolving them needs case-by-case
+  # judgement.
+<%- end -%>
+  class <%= model_class_name.pluralize %> < TagableBase
+    def model_class
+      ::<%= class_name %>
+    end
+
+    def permitted_attributes
+      ::<%= class_name %>::IMPORTABLE_ATTRIBUTES
+    end
+
+    def own_column_definitions
+      [
+<%- column_stub.each do |col| -%>
+        ColumnDefinition.new(key: :<%= col[:key] %>, label: "<%= col[:label] %>"<%= col[:required] ? ", required: true" : "" %>),
+<%- end -%>
+      ]
+    end
+  end
+<%- if model_namespaced? -%>
+end
+<%- end -%>
+end

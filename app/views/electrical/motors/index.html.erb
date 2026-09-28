@@ -12,16 +12,22 @@
         </div>
 
         <!-- Header Text (Left) -->
-        <div class="col-8">
+        <div class="col-6">
           <% scope_text = [@discipline.project.label, @discipline.model_name.human, @discipline.label].join(' ')  %>
           <h5><%= t('.header', scope_text: scope_text) %></h5>
         </div>
 
-        <!-- New Button (Right) -->
-        <div class="col-2 text-end">
-          <% if @discipline.present? && policy(@discipline.tags.build()).new? %>
-            <%= nav_button(action: :new, path: new_discipline_tagable_path(@discipline, tagable_type: "Electrical::Motor"),
-                record: Electrical::Motor.new) %>
+        <!-- New / Import Buttons (Right) -->
+        <div class="col-4 text-end">
+          <% if @discipline.present? %>
+            <% if policy(@discipline.tags.build()).new? %>
+              <%= nav_button(action: :new, path: new_discipline_tagable_path(@discipline, tagable_type: "Electrical::Motor"),
+                  record: Electrical::Motor.new) %>
+            <% end %>
+            <% if policy(@discipline.tags.build(tagable_type: "Electrical::Motor")).import? %>
+              <%= nav_button(action: :import, path: import_discipline_tagables_path(@discipline, tagable_type: "Electrical::Motor"),
+                  record: Electrical::Motor.new) %>
+            <% end %>
           <% end %>
         </div>
       </div> <!-- end of row -->

@@ -1,0 +1,57 @@
+# frozen_string_literal: true
+require "test_helper"
+require "helpers/test_setup_helpers"
+
+module Electrical
+  # Standalone import-only controller test - deliberately not merged into
+  # MotorsControllerTest (which owns its own TagableControllerTests setup for
+  # ordinary CRUD actions); see app/controllers/concerns/importable.rb and
+  # TagablesController's own importer_key/authorize_import!/
+  # render_import_form overrides.
+  class MotorsImportTest < ActionController::TestCase
+    tests TagablesController
+    include Devise::Test::ControllerHelpers
+    include TestSetupHelpers
+
+    setup do
+      setup_projects_and_users
+      setup_disciplines(name: "Electrical", required_role: :designer)
+      setup_accredited_users(:designer)
+      @request.env["devise.mapping"] = Devise.mappings[:user]
+    end
+
+    def csv_upload
+      fixture_file_upload(Rails.root.join("test/fixtures/files/import/motors.csv"), "text/csv")
+    end
+
+    test "accredited user can reach the import form" do
+      sign_in_and_set_project(@accredited_user, @project)
+      get :import, params: { discipline_id: @discipline.id, tagable_type: "Electrical::Motor" }
+      assert_response :success
+    end
+
+    test "team member without a role on the discipline cannot reach the import form" do
+      sign_in_and_set_project(@team_member, @project)
+      get :import, params: { discipline_id: @discipline.id, tagable_type: "Electrical::Motor" }
+      assert_response :forbidden
+    end
+
+    test "missing tagable_type is a conflict" do
+      sign_in_and_set_project(@accredited_user, @project)
+      get :import, params: { discipline_id: @discipline.id }
+      assert_response :conflict
+    end
+
+    test "uploading a valid file creates a batch and redirects to it" do
+      sign_in_and_set_project(@accredited_user, @project)
+      assert_difference("Import::Batch.count", 1) do
+        post :create_import, params: { discipline_id: @discipline.id, tagable_type: "Electrical::Motor", file: csv_upload }
+      end
+      batch = Import::Batch.last
+      assert_equal @accredited_user, batch.user
+      assert_equal @discipline, batch.discipline
+      assert_equal "electrical/motors", batch.importer_key
+      assert_redirected_to import_batch_path(batch)
+    end
+  end
+end

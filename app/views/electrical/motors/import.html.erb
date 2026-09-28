@@ -1,0 +1,5 @@
+<% provide(:title, t(".title")) %>
+<%= render "import/upload_form",
+      header: t(".header", discipline: @discipline.long_label),
+      url: import_discipline_tagables_path(@discipline, tagable_type: @type),
+      cancel_url: discipline_tagables_path(@discipline, tagable_type: @type) %>

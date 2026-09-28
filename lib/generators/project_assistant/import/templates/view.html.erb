@@ -1,4 +1,5 @@
 <%% provide(:title, t(".title")) %>
 <%%= render "import/upload_form",
       header: (@discipline.present? ? t(".header_discipline", discipline: @discipline.long_label) : t(".header_project", project: @project.label)),
-      url: (@discipline.present? ? import_discipline_<%= import_route_key %>_path(@discipline) : import_project_<%= import_route_key %>_path(@project)) %>
+      url: (@discipline.present? ? import_discipline_<%= import_route_key %>_path(@discipline) : import_project_<%= import_route_key %>_path(@project)),
+      cancel_url: (@discipline.present? ? discipline_<%= import_route_key %>_path(@discipline) : project_<%= import_route_key %>_path(@project)) %>

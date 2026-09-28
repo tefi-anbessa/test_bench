@@ -82,7 +82,12 @@ Rails.application.routes.draw do
       resource :tagable, only: [:new, :create], controller: :tagables
     end
     resources :disciplines, only: [] do
-      resources :tagables, only: [:index]
+      resources :tagables, only: [:index] do
+        collection do
+          get :import
+          post :import, action: :create_import
+        end
+      end
     end
 
     # Child-of-tagable routes: models that belong to one specific tagable instance
@@ -108,7 +113,11 @@ Rails.application.routes.draw do
     # everything from here on operates on the Import::Batch itself.
     namespace :import do
       resources :batches, only: [:show, :update, :destroy] do
-        member { post :commit }
+        member do
+          post :commit
+          patch :refresh_file
+          patch :back_to_mapping
+        end
       end
     end
 

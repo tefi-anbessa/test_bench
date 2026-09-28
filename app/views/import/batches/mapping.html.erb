@@ -33,6 +33,13 @@
           </tbody>
         </table>
 
+        <% if @importer.supports_tag_creation? %>
+          <div class="form-check mb-3">
+            <%= check_box_tag "create_missing_tags", "1", @batch.create_missing_tags, class: "form-check-input" %>
+            <%= label_tag "create_missing_tags", t(".create_missing_tags_label"), class: "form-check-label" %>
+          </div>
+        <% end %>
+
         <% if @disciplines.present? %>
           <div class="mb-3">
             <label class="form-label"><%= t(".single_discipline_label") %></label>

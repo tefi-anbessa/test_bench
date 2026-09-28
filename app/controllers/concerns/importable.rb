@@ -15,6 +15,7 @@ module Importable
   # GET - render app/views/<controller>/import.html.erb
   def import
     authorize_import!
+    render_import_form
   end
 
   # POST - validate the upload, stage it as an Import::Batch, hand off to
@@ -30,7 +31,7 @@ module Importable
       Import::SpreadsheetReader.new(uploaded_file.tempfile.path, original_filename: uploaded_file.original_filename).headers
     rescue Import::SpreadsheetReader::UnsupportedFormatError => e
       flash.now[:alert] = e.message
-      render :import, status: :unprocessable_content
+      render_import_form(status: :unprocessable_content)
       return
     end
 
@@ -52,7 +53,7 @@ module Importable
       redirect_to import_batch_path(batch)
     else
       flash.now[:alert] = batch.errors.full_messages.to_sentence
-      render :import, status: :unprocessable_content
+      render_import_form(status: :unprocessable_content)
     end
   end
 
@@ -70,5 +71,14 @@ module Importable
   # authorization happens once rows (and therefore which disciplines are
   # involved) are known - see Import::Base#dry_run_rows - not here.
   def authorize_import!
+  end
+
+  # Override when a host controller doesn't have its own default view path
+  # matching its own name - e.g. TagablesController, which serves every
+  # tagable type from ITS controller name but renders each type's own view
+  # directory (see its own override). Default matches ordinary Rails
+  # rendering (app/views/<controller>/import.html.erb).
+  def render_import_form(status: nil)
+    render(**{ action: :import, status: status }.compact)
   end
 end

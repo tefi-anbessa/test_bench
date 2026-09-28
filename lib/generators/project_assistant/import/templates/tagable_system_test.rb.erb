@@ -1,0 +1,43 @@
+require "application_system_test_case"
+require "helpers/test_setup_helpers"
+
+class <%= full_plural_class_name %>ImportSystemTest < ApplicationSystemTestCase
+  include Devise::Test::IntegrationHelpers
+  include Warden::Test::Helpers
+  include TestSetupHelpers
+
+  def resource_class
+    <%= class_name %>
+  end
+
+  setup do
+    setup_projects_and_users
+    setup_disciplines(name: "Electrical", required_role: :designer)
+    setup_accredited_users(:designer)
+    # Orphaned, correctly-typed tag - as if bulk-imported via Import::Tags
+    # already, and left deliberately unassigned for this step to attach to.
+    @unassigned_tag = create(:tag, :unique_tag, discipline: @discipline, prefix: "TAG", suffix: "",
+      tagable_type: "<%= class_name %>")
+  end
+
+  test "uploading and committing an import attaches to the existing unassigned tag" do
+    sign_in @accredited_user
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+
+    visit import_discipline_tagables_path(@discipline, tagable_type: "<%= class_name %>")
+    attach_file "file", Rails.root.join("test/fixtures/files/import/<%= import_route_key %>.csv")
+    click_button I18n.t("import.upload_form.submit")
+
+    assert_current_path %r{/import/batches/\d+}
+    assert_selector "select[name='column_mapping[Tag]']"
+    click_button I18n.t("import.batches.mapping.submit")
+
+    assert_text I18n.t("import.batches.review.all_valid", count: 1)
+    click_button I18n.t("import.batches.review.commit")
+
+    assert_current_path discipline_tagables_path(@discipline, tagable_type: "<%= class_name %>")
+    @unassigned_tag.reload
+    assert_equal "<%= class_name %>", @unassigned_tag.tagable_type
+    assert @unassigned_tag.tagable_id.present?
+  end
+end

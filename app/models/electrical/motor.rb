@@ -8,6 +8,9 @@ module Electrical
     # === Constants ===
     enum :motor_type, Constants.electrical.motor.motor_type.to_h
     enum :frame_size, Constants.electrical.motor.frame_size.to_h
+    # Mirrors Electrical::MotorExtension#tagable_params - see
+    # app/services/import/electrical/motors.rb.
+    IMPORTABLE_ATTRIBUTES = %i[motor_type frame_size poles ingress_protection speed_rated notes].freeze
 
     # === Gem macros ===
 
@@ -19,7 +22,6 @@ module Electrical
 
     # === Validations ===
     validates :motor_type, presence: true
-    validates :frame_size, presence: true
 
     # === Callbacks ===
 

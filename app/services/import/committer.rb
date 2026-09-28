@@ -26,11 +26,23 @@ module Import
       committable, skipped = partition_rows
 
       ActiveRecord::Base.transaction do
-        committable.each { |row| row.record.save! }
+        committable.each do |row|
+          row.record.save!
+          importer.after_commit_row(row)
+        end
         link_deferred_references!(committable)
       end
 
       Result.new(committed_rows: committable, skipped_rows: skipped)
+    rescue StandardError => e
+      # Wrapped so Import::BatchesController#commit's existing rescue
+      # already renders a friendly re-render instead of an unhandled 500 -
+      # needed in particular for Import::TagableBase#after_commit_row, which
+      # can legitimately fail here (a real time-of-check/time-of-use race:
+      # the target Tag it resolved at dry-run time could have been claimed
+      # via the ordinary manual UI by the time commit actually runs).
+      raise if e.is_a?(InvalidRowsError)
+      raise InvalidRowsError, "Could not complete this import: #{e.message}"
     end
 
     private

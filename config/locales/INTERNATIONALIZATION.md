@@ -22,7 +22,7 @@
 - At level 3, the core application provides all translations for the core functions in a file named simply with the language code (e.g. core/en/en.yml, core/km/km.yml). Extension modules should not use these file names.
 - Core functions are generally applicable to rails workflow, such as actions, views, menu items, etc.
 - The core/xx/ folder also includes files for:
-  - views: the [views.yml](core/en/en.views.yml) files include all translations that can be short-cut using the i18n system based on the controller name, for the core resources with UI: users, roles, projects, tags, documents.
+  - views: the [views.yml](core/en/en.views.yml) files include all translations that can be short-cut using the i18n system based on the rendering view's own path - see "Where a Translation Belongs" under Usage below for the full rule and how non-model views (roles, errors, import, ...) fit in alongside full CRUD resources.
   - models: the [models.yml](core/en/en.models.yml) files include the activerecord translations that rails uses by default for validation messages, labels for fields, field help, etc.
   - a [devise.yml](core/en/en.devise.yml) file for translations required for the devise gem, externally provided. Translations are available for many languages at [devise wiki](https://github.com/heartcombo/devise/wiki/I18n) on github.
   - a [rolify.yml](core/en/en.rolify.yml) file for translations associated with the Role Based Access Control (RBAC) system.
@@ -100,6 +100,17 @@ config/locales/
 ```
 
 ## Usage
+
+### Where a Translation Belongs (en.yml vs en.views.yml)
+
+Both files hold "core" (non-namespaced) translations, but for two different lookup mechanisms - deciding which one a new string belongs in matters more than it looks.
+
+- **`en.views.yml`** holds translations resolved by Rails' implicit "." lookup (`t(".key")`), which resolves relative to the *rendering view's own virtual path* - e.g. a view at `app/views/tags/import.html.erb` resolves `t(".header")` to `tags.import.header`. Each top-level key in this file corresponds to one view directory under `app/views/` (core, non-namespaced views only - a namespaced module's own views use `en.<module>.views.yml` instead, e.g. `electrical/en/en.electrical.views.yml`).
+  - This is **not** limited to views backed by a full CRUD model with index/new/edit/show. Any view directory gets a top-level key the same way - `roles:` (a one-off role-assignment flow, not a CRUD resource), `errors:` (the two dedicated whole-page error views, `errors/forbidden` and `errors/conflict`, rendered via `rescue_from` rather than a normal controller action), and `import:` (the shared `app/views/import/` wizard views) are all real examples already in this file, sitting alongside full CRUD resources like `tags:`/`documents:`.
+  - A partial shared across several callers (e.g. `import/_upload_form.html.erb`) still resolves `t(".help")` against its own real path (`import.upload_form.help`), regardless of which controller/action renders it.
+- **`en.yml`** holds everything translated via an explicit, fully-scoped `t("some.key")` call instead - typically from a controller, model, service, or policy, where there's no single view path to shortcut against (a flash message set in a controller and rendered by the generic layout; an exception message raised from a service class like `Import::SpreadsheetReader`). Content here is grouped by subject/feature (`pundit:`, `flash:`, `projects:`, `import:`, ...), not by view path.
+  - The same top-level key name can legitimately exist in both files with different content: `import:` in `en.yml` holds `Import::SpreadsheetReader`'s own exception messages; `import:` in `en.views.yml` holds the import wizard *views'* own strings. They don't collide because they're resolved by two different mechanisms and live in two different files.
+- Quick test: if the string is only ever rendered by one specific view (or a partial with one clear virtual path) via `t(".foo")`, it belongs in `en.views.yml`. If it's raised or set from non-view Ruby code with an explicit scope, it belongs in `en.yml`.
 
 ### Translation Keys
 

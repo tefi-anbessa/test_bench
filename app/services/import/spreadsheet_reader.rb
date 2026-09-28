@@ -58,9 +58,9 @@ module Import
     def spreadsheet
       @spreadsheet ||= begin
         unless SUPPORTED_EXTENSIONS.include?(extension)
-          raise UnsupportedFormatError,
-            "Unsupported file type #{extension.presence || "(none)"} for #{original_filename} - " \
-            "expected one of #{SUPPORTED_EXTENSIONS.join(", ")}."
+          raise UnsupportedFormatError, I18n.t("import.unsupported_file_type",
+            extension: extension.presence || "(none)", filename: original_filename,
+            formats: SUPPORTED_EXTENSIONS.join(", "))
         end
 
         begin
@@ -75,7 +75,7 @@ module Import
           # isn't a valid file of the type it claims to be" to the caller,
           # not surface a third-party library's own exception class. e is
           # preserved as #cause.
-          raise UnsupportedFormatError, "Could not read #{original_filename}: #{e.message}"
+          raise UnsupportedFormatError, I18n.t("import.unreadable_file", filename: original_filename, error: e.message)
         end
       end
     end

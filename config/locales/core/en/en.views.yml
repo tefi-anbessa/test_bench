@@ -144,6 +144,7 @@ en:
         column_header:          "Column in your file"
         field_header:           "Field"
         ignore_column:          "Ignore this column"
+        create_missing_tags_label: "Create a new tag for any reference that doesn't already exist"
         single_discipline_label: "Discipline for this whole file"
         single_discipline_blank: "Select a discipline"
         single_discipline_help: "Only needed if you didn't map a Discipline column above - every row will use this discipline."
@@ -161,6 +162,9 @@ en:
         partial_label:    "Skip the %{invalid} invalid row(s) and import the rest"
         back_to_mapping:  "Back to column mapping"
         commit:           "Import"
+        refresh_file_label:  "Found a mistake? Upload a corrected file"
+        refresh_file_help:   "Accepted formats: CSV, Excel (.xlsx), OpenDocument (.ods)."
+        refresh_file_submit: "Refresh file"
       commit:
         notice:           "Imported %{imported} tag(s). Skipped %{skipped}."
       destroy:

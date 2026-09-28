@@ -1,0 +1,87 @@
+require "test_helper"
+
+# Starter tests for the auto-generated Import::<%= full_plural_class_name %>
+# (see app/services/import/<%= import_key %>.rb). Mirrors
+# Import::Electrical::Motors' own hand-written tests structurally - extend
+# once #own_column_definitions above has been reviewed.
+class <%= full_plural_class_name %>Test < ActiveSupport::TestCase
+  setup do
+    @project = create(:project)
+    # Project creation auto-creates the standard set of disciplines (see
+    # Discipline.create_all_for_project) - find and configure one rather
+    # than creating a new one.
+    @electrical = @project.disciplines.find_by!(name: "Electrical").tap { |d| d.update!(required_role: "designer") }
+    @user = create(:user)
+    @user.grant(:designer, @electrical)
+    @pundit_user = ApplicationPolicy::UserContext.new(@user, @project)
+  end
+
+  # An existing, persisted, unassigned tag of the right type - as if
+  # bulk-imported via Import::Tags already, with tagable_type set and
+  # deliberately left unassigned for this importer to attach to.
+  def orphaned_tag(prefix: "TAG", serial: 1)
+    create(:tag, :unique_tag, discipline: @electrical, prefix: prefix, serial: serial, suffix: "", tagable_type: "<%= class_name %>")
+  end
+
+  def build_batch(csv:, column_mapping:)
+    create(:import_batch,
+      user: @user, project: @project, discipline: @electrical,
+      original_filename: "<%= import_route_key %>.csv", file_data: csv, column_mapping: column_mapping)
+  end
+
+  test "resolves an existing, unassigned, correctly-typed tag by bare full_tag" do
+    tag = orphaned_tag
+    csv = "Tag,<%= required_headers.join(",") %>\n#{tag.full_tag},<%= required_values.join(",") %>\n"
+    batch = build_batch(csv: csv, column_mapping: { "Tag" => "full_tag" }.merge(<%= required_mapping.inspect %>))
+
+    importer = Import::<%= full_plural_class_name %>.new(batch)
+    rows = importer.dry_run_rows(pundit_user: @pundit_user)
+
+    assert_equal 1, rows.size
+    assert rows.all?(&:valid?), rows.flat_map(&:error_messages).join(", ")
+  end
+
+  test "tag not found is a hard per-row error" do
+    csv = "Tag,<%= required_headers.join(",") %>\nNOPE9999,<%= required_values.join(",") %>\n"
+    batch = build_batch(csv: csv, column_mapping: { "Tag" => "full_tag" }.merge(<%= required_mapping.inspect %>))
+
+    rows = Import::<%= full_plural_class_name %>.new(batch).dry_run_rows(pundit_user: @pundit_user)
+    refute rows.first.valid?
+    assert_match "not found", rows.first.error_messages.join
+  end
+
+  test "a tag already assigned to another tagable is a hard per-row error" do
+    tag = orphaned_tag
+    create(:<%= class_name.underscore.tr("/", "_") %>, tag: tag)
+    csv = "Tag,<%= required_headers.join(",") %>\n#{tag.full_tag},<%= required_values.join(",") %>\n"
+    batch = build_batch(csv: csv, column_mapping: { "Tag" => "full_tag" }.merge(<%= required_mapping.inspect %>))
+
+    rows = Import::<%= full_plural_class_name %>.new(batch).dry_run_rows(pundit_user: @pundit_user)
+    refute rows.first.valid?
+    assert_match "already assigned", rows.first.error_messages.join
+  end
+
+  test "authorize! rejects a user without a role on the resolved tag's discipline" do
+    tag = orphaned_tag
+    other_user = create(:user)
+    other_pundit_user = ApplicationPolicy::UserContext.new(other_user, @project)
+    csv = "Tag,<%= required_headers.join(",") %>\n#{tag.full_tag},<%= required_values.join(",") %>\n"
+    batch = build_batch(csv: csv, column_mapping: { "Tag" => "full_tag" }.merge(<%= required_mapping.inspect %>))
+
+    assert_raises(Pundit::NotAuthorizedError) { Import::<%= full_plural_class_name %>.new(batch).dry_run_rows(pundit_user: other_pundit_user) }
+  end
+
+  test "commit links the tagable to the resolved tag" do
+    tag = orphaned_tag
+    csv = "Tag,<%= required_headers.join(",") %>\n#{tag.full_tag},<%= required_values.join(",") %>\n"
+    batch = build_batch(csv: csv, column_mapping: { "Tag" => "full_tag" }.merge(<%= required_mapping.inspect %>))
+    importer = Import::<%= full_plural_class_name %>.new(batch)
+    rows = importer.dry_run_rows(pundit_user: @pundit_user)
+
+    Import::Committer.new(importer: importer, rows: rows, partial: false).call
+
+    tag.reload
+    assert_equal "<%= class_name %>", tag.tagable_type
+    assert tag.tagable_id.present?
+  end
+end

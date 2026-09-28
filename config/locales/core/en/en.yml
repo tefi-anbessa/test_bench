@@ -157,8 +157,12 @@ en:
 
   # Pundit authorization messages
   pundit:
-    unauthorized: "You are not authorized to %{action} %{objects}"
+    unauthorized: "You are not authorized to %{action.to_s} %{objects}"
     discipline: "You do not have the required role for %{discipline}"
+
+  import:
+    unsupported_file_type: "Unsupported file type %{extension} for %{filename} - expected one of %{formats}."
+    unreadable_file: "Could not read %{filename}: %{error}"
 
   footer:
     credit:           "Website by frankie fusion. "

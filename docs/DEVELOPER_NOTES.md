@@ -117,7 +117,20 @@ Documents can be generated from the application database, or stored in a content
 
 Generally, tagable models are segregated into modules according to their discipline. This is primarily to keep the file structure manageable, but flows into the presentation of views, which are accessed by project or discipline. Disciplines are able to impart some default properties to their members through inheritance from the Base model for each module.
 
-Exceptions to this structure are the Cable and Cable Types models, which are used by the electrical, instrument, and communication disciplines, so reside in the application core.
+Exceptions to this structure are the Cable and Cable Types models, which are used by the electrical, instrument, and communication disciplines, and are intended to reside in the application core. [TODO: not yet moved - as of this writing both models are still namespaced under Electrical (`app/models/electrical/cable.rb`, `app/models/electrical/cable_type.rb`); see the "Move cable and cable type" items under Architecture Considerations and Refactoring Opportunities below.]
+
+#### Import
+
+Bulk import of spreadsheet data (CSV, Excel `.xlsx`/`.xlsm`, OpenDocument `.ods`) is provided by a generic framework, not a one-off feature per model. It is optional - only add it to a model where bulk loading is a real user need.
+
+- `Import::Base` is the abstract superclass every importable model's plugin extends. It provides the shared wizard mechanics: spreadsheet reading (via `Import::SpreadsheetReader`, any supported format), column-mapping suggestion, dry-run row building/validation, and deferred/self-referential reference resolution (e.g. a Tag's own parent reference).
+- `Import::Committer` performs the actual commit once a batch has been reviewed, inside a transaction. A generic `InvalidRowsError` rescue means an unexpected per-row save failure surfaces as a friendly re-render rather than a raw 500 - see Error Handling below.
+- `Import::BatchesController` drives the shared wizard: upload -> (optional) worksheet selection -> column mapping -> dry-run review -> commit. A model's own controller only needs an entry point (`import`/`create_import` actions), added via the `Importable` concern.
+- Two kinds of model can be imported:
+  - **Discipline-resource models** (Tag, Document, DocType) import directly - each row becomes a new record.
+  - **Tagable models** (Motor, Heater, etc.) import via `Import::TagableBase`, which never creates a Tag - it only *attaches* to an already-persisted, unassigned Tag by natural key (full_tag). Expected workflow: bulk-import the Tag register first (`Import::Tags`, with `tagable_type` set, left deliberately unassigned), then bulk-import the type-specific detail columns, which resolve and attach to those tags. Optional Tag-level columns (Service, Stage, Location, Tag Notes) can also be set in the same pass, without ever overwriting an existing value with a blank cell.
+- New model support is added via the `project_assistant:import` generator (`--tagable` flag for tagable models), which scaffolds the importer service, view, locale entries, index-button injection, and starter tests - the same "generator first" convention as the scaffold and tagable generators.
+- Bulk import is authorised the same way the single-record path already is (e.g. `TagPolicy#create?` for tagables) - it is not a separate authorization story.
 
 ### Internationalization
 
@@ -129,7 +142,8 @@ The application has been designed for international use from the outset.
 - For reference, a copy of the en version of the translations is saved in [config/locales/rails-i18n gem en for reference/en.yml.ref](../config/locales/rails-i18n%20gem%20en%20for%20reference/en.yml.ref). This file is not used in the application, it is simply a copy of the en.yml file that is provided by the rails-i18n gem. Check in this file if you are not sure whether a translation is already provided, and *avoid duplicating core translations* if possible. Also note that not all language files include all translations! It is a community work in progress...
 - The locale setting follows the basic guidelines in [Rails Internationalization (I18n) API section 2.2](https://guides.rubyonrails.org/i18n.html#setting-the-locale-from-url-params).
 - Changing locale is available in the layout header via a drop down menu.
-- The storage of translation files is detailed in the [INTERNATIONALIZATION](INTERNATIONALIZATION.md) document.
+- The storage of translation files is detailed in the [INTERNATIONALIZATION](../config/locales/INTERNATIONALIZATION.md) document.
+- In brief: a string rendered by one specific view via the implicit `t(".key")` shorthand belongs in `en.views.yml`, keyed by that view's own path - this applies to any view directory, not just ones backed by a full CRUD model (e.g. `roles:`, `errors:`, `import:` are all non-model view directories keyed this way). A string raised or set from non-view Ruby code (controller flash messages, service/model exceptions) with an explicit scope belongs in `en.yml` instead, grouped by subject rather than view path. See [INTERNATIONALIZATION](../config/locales/INTERNATIONALIZATION.md) for the full rule and worked examples.
 
 ### Constants
 
@@ -192,6 +206,7 @@ In addition, a card partial should be provided for collapsible view on pages whe
 - Navigation buttons for index and show views shall include "return" index or show links to the higher level views, located to the left of the header.
 - Navigation buttons for show views shall also include previous and next buttons, located left and right of the header.
 - Index views shall also include new "action" button to the right of the header, conditional on user permissions.
+- Where a model supports bulk import (see the Import section below), an Import "action" button should be included alongside the new button, also conditional on user permissions. This is optional - only importable models need it.
 - Show views shall also include edit, delete, and new "action" buttons to the right of the header, conditional on user permissions.
 - Title and header shall be translated using a `views.yml` file in the locales structure, see [INTERNATIONALIZATION](../config/locales/INTERNATIONALIZATION.md).
 - Views should not include complex logical processing.
@@ -244,14 +259,23 @@ Errors are categorized as:
 - More complex validations of associations use custom error messages with their translations.
 - Model tests should include test of each validation to ensure that user data entry errors are caught and translated error messages are added to the model object.
 
+#### Bulk import row errors
+
+- These arise during the spreadsheet-import wizard (see the Import section above) - a batch of rows, each independently valid or invalid.
+- Per-row problems (missing required column, invalid enum value, reference not found, etc.) are shown in a review table before commit, with valid/invalid counts and an option to skip invalid rows and import the rest.
+- `Import::Committer::InvalidRowsError` covers a different case: an unexpected failure *during* commit itself (e.g. a race condition - see `Import::TagableBase#after_commit_row`, which re-verifies a resolved Tag is still available immediately before linking it). This is rescued in `Import::BatchesController#commit` and rendered as a friendly re-render of the review step, not a raw 500.
+- Tests should cover both: the per-row dry-run validation table, and a forced commit-time failure (e.g. a race condition) surfacing cleanly.
+
 #### Security breach attempts
 
 - These are trapped forbidden operations that should not be possible using normal workflows.
 - They are probably injected HTML or JSON requests in an attempt to defeat the permissions system.
 - Controllers need to be designed carefully to ensure all user provided data is sanitized. Frequent use of enum attributes, length validation, strong parameters, and explicit type checking can help prevent these attacks.
 - When a controller detects invalid parameters, custom error class ConflictError should be raised, with a message key specific to the actual error.
+- ConflictError is intentionally reserved for clear hacking/injection attempts only. Never raise it for anything a normal user workflow could trigger, including race conditions - those belong under "User data entry errors" above, or a dedicated rescue of their own.
 - ConflictErrors are handled in ApplicationController by rescue_from ConflictError and method handle_conflict.
-- handle_conflict logs the error with the message code, redirects to the custom /409 conflict page, and logs out the current user [HOLD: Logout user might be OTT. Some conflicts can be data race conditions.].
+- handle_conflict is designed to log the error with the message code, render the custom /409 conflict page, and log out the current user, since a genuine hacking attempt warrants it. The logout step is currently deferred (not implemented): some existing ConflictError call sites can still be triggered by data races rather than a genuine attack, and logging a user out for a race condition would be worse than the problem it's meant to solve.
+- TODO: audit existing ConflictError raise sites for any that a normal user (not an attacker) could trigger via a race condition or other non-malicious path, and fix or reclassify them. Only once that audit is clean should the logout step be reinstated.
 - At present, the custom /409 page includes a flash alert with the translated error message. This may not be required in production if it is considered that 409 errors are definitely hacking attempts.
 - Controller tests should include thorough test of each path through the controller to ensure that all security breach attempts are trapped.
 - Tests can use the test helper method assert_conflict.
@@ -288,6 +312,7 @@ Errors are categorized as:
   - "eye" class "-info" for link to view other objects
   - "link" class "-primary" for link to open a form for a new child object
   - "plus" class "-primary" for new buttons to open a form
+  - "file-earmark-arrow-up" class "-primary" for import buttons (bulk spreadsheet import - optional, see the Import section below)
   - "pencil" class "-warning" for edit buttons to open a form
   - "trash" class "-danger" for delete buttons to delete the object
   - "search" class "-primary" for search buttons on views
@@ -331,8 +356,12 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Build a tagable generator.
 - [x] Build a scaffold generator for models without links to tags.
 - [x] Enhance electrical model with network load calculations.
-- [ ] Add import and export of data.
-- [ ] Enhance the existing database models to include revison control of data.
+- [x] Add bulk import of data (spreadsheet-based, generic framework + generator - see the Import section below; developed on branch `data-import`).
+- [ ] Add bulk export of data. [Planned as a separate branch, once import has landed.]
+- [ ] Add a license file.
+- [ ] Add a location model as a precursor to the hazardous area and risk assessment functions. Convert tag to allow location as foreign key.
+- [ ] Write a generator to add a field and another to remove a field.
+- [ ] Enhance the existing database models to include history of data.
 - [ ] Build a document control module to manage document storage, issue, history including versions and workflow.
 - [ ] Add polymorphic comments.
 - [ ] Management of Change with workflows.
@@ -410,7 +439,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Fix assertion in projects system test for show link with no text.
 - [ ] Improve cable index and search options.
 - [ ] Generators file input from ruby format.
-- [ ] Clean up abstraction of policies and policy tests. Update generator and tests.
+- [x] Clean up abstraction of policies and policy tests. Update generator and tests.
 - [ ] Abstract controllers for project, discipline and tag nested resources.
 - [ ] Generic tag_resource_policy may be required. Generator provides for tag nesting but use case is not certain. Only demands are tag linked but not tagable.
 - [ ] Complete nested system test for scaffold generator.
@@ -497,7 +526,6 @@ It is possible to create multiple tags referencing the same tagable element, des
 ## Potential Features
 
 - [ ] Implement copy from other project
-- [ ] Implement bulk import/export
 - [ ] Data revision management
 - [ ] Customize devise users:
   - [ ] Add policy for users
@@ -510,9 +538,9 @@ It is possible to create multiple tags referencing the same tagable element, des
   - [x] Customize error trapping for forbidden
 - [ ] Improve locale setting, and include language/currency/flag in locale selection. Include regions with fallback to language for most translations.
 - [x] Develop an application colour theme set. Consider discipline colour coding, also need to consider module colour coding.
-- [ ] Build an IP55 object to allow fully flexible reusable IP code generation.
+- [ ] Build an IP object to allow fully flexible reusable IP code generation.
 - [ ] Allow projects to add role names.
-- [ ] Add a generator for scaffolding nested models.
+- [x] Add a generator for scaffolding nested models.
 - [ ] Add a "locator" so accessing index view from show view centres the index on the present record.
 - [ ] Add a clear search button for index views. Add hover title for search button.
 - [ ] Add highlight to search results for all index views (refer projects).
@@ -523,9 +551,11 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Move Electrical to a module or namespace.
 - [x] Nest routes for project related resource under projects to improve security around assignment to other than the current project.
 - [x] Nest tag, document resources under disciplines.
+- [ ] Change locales to regionalised codes.
+- [ ] Couple disciplines and modules tightly for tagables.
 - [ ] Move cable and cable type back to core, as they are shared by electrical and instrument disciplines, also communications.
 - [ ] Move document issues to change module, generalise so it can be used for other entities (polymorphic).
-- [ ] Plan for database scaling as data grows
+- [ ] Plan for database scaling as data grows.
 
 ## Notes
 
