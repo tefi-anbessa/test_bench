@@ -67,5 +67,8 @@ ip_rating:
 safety_pattern:
   type: boolean
   valid: false
+accessories:
+  type: jsonb
+  valid: "Snubber: Required"
 notes:
   type: text
