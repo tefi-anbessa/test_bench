@@ -431,8 +431,8 @@ module ProjectAssistant
           @searchable_field_names = @searchable_fields.map { |field| "#{field[:name]}" } 
           @attribute_names = @attribute_fields.map { |field| "#{field[:name]}" } 
           @association_names = @association_fields.map { |field| "#{field[:name]}" } 
-          @params = [@attribute_fields.map { |field| ":#{field[:name]}" }, 
-                @association_fields.map { |field| ":#{field[:name]}_id" } ].join(', ')
+          @params = (@attribute_fields.map { |field| ":#{field[:name]}" } +
+                @association_fields.map { |field| ":#{field[:name]}_id" }).join(', ')
         end
 
         # Set variables for new and edit templates to pass into form

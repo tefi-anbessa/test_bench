@@ -221,14 +221,25 @@ module ProjectAssistant
 
           if @namespaced
             module_key = "#{class_path.last}:"
-            # Find the module key and capture its indentation
-            insertion_pattern = /^(\s*)(#{module_key})/
-            # Insert after the module key
-            if content.match?(insertion_pattern)
-              content.sub!(insertion_pattern) do
-                # $1 is the captured indentation, $2 is the module key
-                "#{$1}#{$2}\n#{$1}#{tab}#{insertion_text}"
-              end
+            # Find the module key's own line and indentation
+            key_pattern = /^([ \t]*)#{Regexp.escape(module_key)}[ \t]*\n/
+            if (match = content.match(key_pattern))
+              indent = match[1]
+              insert_at = match.end(0)
+              # Find the end of the module's existing block: the next line
+              # at the same (or lesser) indentation as the module key
+              # itself, or EOF - so new content is appended after existing
+              # content (e.g. a `name:` key) rather than spliced in
+              # immediately after the opening key line, ahead of it.
+              rest = content[insert_at..]
+              block_end = rest =~ /^#{Regexp.escape(indent)}\S/
+              insert_at += block_end || rest.length
+              # The file may end (or the preceding line may end) without a
+              # trailing newline - e.g. a module's whole existing content
+              # is just `name: Instrument` at EOF - so only the content
+              # that already ends in \n can be trusted not to need one.
+              needs_newline = insert_at > 0 && content[insert_at - 1] != "\n"
+              content = content[0...insert_at] + (needs_newline ? "\n" : "") + "#{indent}#{tab}#{insertion_text}" + content[insert_at..]
             else
               say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Could not find module key #{module_key}", :red
               return
@@ -266,26 +277,34 @@ module ProjectAssistant
             # Use field[:name].humanize as dummy translation
             attributes_section += tab*(3 + class_path.count) + "#{field[:name]}: \"#{field[:name].humanize}\"\n"
             
-            # Add enum translations for enum_translated fields
-            if field[:type] == 'enum_translated'
+            # Add a translation per enum key for enum_translated fields -
+            # plain :enum fields are numeric/symbolic/standard-reference
+            # and don't need translation (see docs/CONSTANTS.md)
+            if field[:type] == :enum_translated
               attributes_section += tab*(3 + class_path.count) + "#{field[:name].pluralize}:\n"
-              attributes_section += tab*(4 + class_path.count) + "other_#{field[:name]}: \"Other #{field[:name].humanize}\"\n"
+              field[:options][:keys].each do |key|
+                attributes_section += tab*(4 + class_path.count) + "#{key}: \"#{key.to_s.humanize}\"\n"
+              end
             end
           end
-          
-          model_insertion_regex = /models:\n/
-          attributes_insertion_regex = /attributes:\n/
+
+          # Matches both the bare `models:` stub a module generates before
+          # its first model, and `models: {}` (the empty-hash form used so
+          # an unpopulated module doesn't clobber other modules' entries
+          # when merged - see module_generator.rb).
+          model_insertion_regex = /models:[ \t]*(\{\})?\n/
+          attributes_insertion_regex = /attributes:[ \t]*(\{\})?\n/
           # Insert model name under models section
           if content.match?(model_insertion_regex)
-            content.sub!(model_insertion_regex) { "models:\n#{$1}#{$2}:\n#{model_section}\n" }
+            content.sub!(model_insertion_regex) { "models:\n#{model_section}\n" }
           else
             say_status :error, "#{translation_file.relative_path_from(Rails.root)}: Models key not found", :red
             return
           end
-          
+
           # Insert attributes under attributes section
           if content.match?(attributes_insertion_regex)
-            content.sub!(attributes_insertion_regex) { "attributes:\n#{$1}#{$2}:\n#{attributes_section}" }
+            content.sub!(attributes_insertion_regex) { "attributes:\n#{attributes_section}" }
             File.write(translation_file, content) unless options[:pretend]
             say_status :update, "#{translation_file.relative_path_from(Rails.root)}: Added #{class_name} translations", :green
           else

@@ -1,2 +1,66 @@
 instrument:
-  name: Instrument
+  name: Instrument  pressure_gauge:
+    measurement_type:
+      positive_pressure: 0
+      vacuum: 1
+      absolute: 2
+      differential: 3
+    pressure_unit:
+      bar: 0
+      psi: 1
+      kpa: 2
+      kgf_cm2: 3
+      in_hg: 4
+      other: 5
+    fluid_phase:
+      gas: 0
+      liquid: 1
+      steam: 2
+      other: 3
+    process_fluid:
+      air: 0
+      water: 1
+      oil: 2
+      steam: 3
+      other: 4
+    accuracy_class:
+      grade_1_0: 0
+      grade_1_6: 1
+      grade_2_5: 2
+      other: 3
+    dial_size:
+      mm63: 0
+      mm100: 1
+      mm150: 2
+      other: 3
+    connection_type:
+      npt: 0
+      bsp: 1
+      flanged: 2
+      other: 3
+    connection_size:
+      in_1_4: 0
+      in_1_2: 1
+      in_3_4: 2
+      other: 3
+    case_material:
+      stainless_steel: 0
+      carbon_steel: 1
+      aluminium: 2
+      phenolic: 3
+      other: 4
+    wetted_material:
+      ss316: 0
+      brass: 1
+      monel: 2
+      other: 3
+    movement_type:
+      bourdon_tube: 0
+      diaphragm: 1
+      bellows: 2
+      other: 3
+    fill_fluid:
+      none: 0
+      glycerine: 1
+      silicone: 2
+      other: 3

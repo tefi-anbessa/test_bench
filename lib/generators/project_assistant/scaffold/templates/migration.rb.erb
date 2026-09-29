@@ -2,7 +2,7 @@ class Create<%= singular_table_name.camelize %> < ActiveRecord::Migration[<%= Ra
   def change
     create_table :<%= table_name %> do |t|
 <%- @attribute_fields.each do |field| -%>
-  <%- field_type = if ['enum', 'enum_translated'].include?(field[:type])
+  <%- field_type = if [:enum, :enum_translated].include?(field[:type])
                       'integer'
                     else
                       field[:type].to_s

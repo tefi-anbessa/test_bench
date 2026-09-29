@@ -13,7 +13,7 @@ class <%= model_class_name %> < ApplicationRecord
   # === Constants ===
     # enum declarations
 <%- @enum_fields.each do |field| -%>
-    enum :<%= field[:name] %>, Constants.<%= i18n_scope %>.<%= field[:name] %>.to_h
+    enum :<%= field[:name] %>, Constants.<%= i18n_scope %>.<%= field[:name] %>.to_h, prefix: true
 <%- end -%>
 
   # === Gem macros ===
@@ -49,10 +49,12 @@ class <%= model_class_name %> < ApplicationRecord
   # === Class methods ===
 
   # === Class methods - Queries ===
+<%- unless @nesting == :tagable -%>
     # Provide SQL for ordering records in the navigator
     def self.navigator_order_sql
       "<%= table_name %>.created_at ASC"
     end
+<%- end -%>
 
   # === Public methods ===
 

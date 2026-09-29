@@ -75,6 +75,26 @@ The tag model provides the following functionality:
   * If the generator included a migration (whether run inside the generator or manually), be sure to rollback the migration before running destroy.
   * Destroy is not infallible, particularly on complex generators like those used in this app. Be sure to do a manual check after running destroy.
   * Destroy does not reverse file edits, or file creation by other than templates.
+* Because `destroy` is unreliable for this app's generators (see above), the safe way to trial a generator and be able to cleanly retry is a git-based checkpoint, not `destroy`:
+  1. Before running the generator, commit whatever you want to keep (hand corrections, a definition file, etc.) as a checkpoint:
+
+     ```bash
+     git add -A
+     git commit -m "checkpoint before generator trial"
+     ```
+  2. Run the generator (`--pretend` first if you want to preview before committing to it for real).
+  3. To revert back to the checkpoint, restore tracked files with a hard reset, then remove the generator's untracked output interactively rather than with a blind `-f`:
+
+     ```bash
+     git reset --hard HEAD
+     git clean -i app/ test/ config/ db/migrate/
+     ```
+
+     `git reset --hard HEAD` only touches tracked files and resets them to the exact checkpoint commit - safe, since there's no merge involved and nothing is lost as long as the checkpoint has everything you want kept. **This also means: commit everything you want to keep before running it, including edits unrelated to the current generator trial - it resets the whole repository to the checkpoint, not just the files the trial touched.**
+
+     `git clean -i` (interactive mode) lists every untracked file/directory under the given paths and lets you choose what to remove, rather than deleting blindly. Scoping it to the directories a generator actually writes to (`app/ test/ config/ db/migrate/`, adjust as needed - the module and scaffold generators create new, untracked files under `config/constants/` and `config/locales/` too, not just `app/`/`test/`) also means it physically can't touch unrelated untracked work sitting elsewhere in the repo.
+  4. **Never run `git clean -f`/`-fd` without either `-i` or a prior `-n` dry run, and never run it unscoped (no paths) across the whole repo.** Untracked files have no git-based recovery path at all once deleted this way - not even `git fsck` can find them, since they were never staged.
+* This procedure also works for correcting bugs found in a generator itself: commit the fix, retry the generator, and reset-and-clean again if the output still isn't right - without needing `destroy` at all.
 
 ## MODULE GENERATOR
 
