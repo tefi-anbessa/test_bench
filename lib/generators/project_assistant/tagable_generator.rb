@@ -419,39 +419,17 @@ module ProjectAssistant
       template "system_test.rb.erb", File.join('test', 'system', "#{controller_file_path}_system_test.rb")
     end
     
-    def edit_routes_file
-      # Update config/routes.rb
-      routes_file = Pathname.new(File.join(destination_root, "config", "routes.rb"))
-      if File.exist?(routes_file)
-        content = File.read(routes_file)
-        
-        # Find the first insertion point comment and insert after it
-        insertion_pattern = /(namespace\s+:#{class_path.last}\s+do.*?# INSERTION POINT 1 FOR TAGABLE GENERATOR)/m
-        if content.match?(insertion_pattern)
-          content.sub!(insertion_pattern) do
-            "#{$1}\n    resources :#{plural_name}, only: [:index, :new, :create]"
-          end
-        else
-          say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Could not find insertion point 1 for tagable generator", :red
-          return
-        end
-        
-        # Find the second insertion point comment and insert after it
-        insertion_pattern = /(namespace\s+:#{module_name.underscore}\s+do.*?# INSERTION POINT 2 FOR TAGABLE GENERATOR)/m
-        if content.match?(insertion_pattern)
-          content.sub!(insertion_pattern) do
-            "#{$1}\n      resources :#{plural_name}, except: [:index]"
-          end
-        else
-          say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Could not find insertion point 2 for tagable generator", :red
-          return
-        end
-        
-        File.write(routes_file, content) unless options[:pretend]
-        say_status :update, "#{routes_file.relative_path_from(Rails.root)}: Updated with #{tagable_name.pluralize} resources", :green
-      else
-        say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Not found", :red
-      end
+    # No routes.rb edit at all - every tagable type shares one controller
+    # (TagablesController) and one generic set of routes, keyed by
+    # tagable_type at request time, already wired up once for the whole app
+    # (see config/routes.rb's "Tagable routes" section). A newly-generated
+    # tagable model needs zero route changes to work. This used to insert
+    # per-model resources lines into a per-module namespace ModuleGenerator
+    # seeded for it, from before that shared-routes refactor - retired along
+    # with ModuleGenerator's own matching tagable-marker scaffolding.
+    def routes_info
+      say_status :info, "Routes: tagable models share the generic tagable routes " \
+        "(resources :tags/:disciplines do resource :tagable end) - no per-model route changes needed.", :green
     end
          
     def update_constants

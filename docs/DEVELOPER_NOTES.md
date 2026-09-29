@@ -446,7 +446,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Generic tag_resource_policy may be required. Generator provides for tag nesting but use case is not certain. Only demands are tag linked but not tagable.
 - [ ] Complete nested system test for scaffold generator.
 - [ ] Scaffold generator to build routes for namespaced models other than tagables.
-- [ ] Update module generator routes edit action with new tagable structure. The insert hooks are all changed.
+- [x] Update module generator routes edit action with new tagable structure. The insert hooks are all changed.
 
 ## Refactoring Opportunities
 

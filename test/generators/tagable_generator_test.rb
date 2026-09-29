@@ -727,18 +727,21 @@ module ProjectAssistant
       end
     end
 
-    test "updates routes file" do
+    test "does not touch routes file and prints routes info" do
       routes_file = File.join(destination_root, "config", "routes.rb")
-      
-      # Run the generator
-      run_generator @args
-      
-      # Check that the routes file was updated
-      assert_file routes_file do |content|        
-        # Check that the new resource lines were added to routes file
-        assert_match(/resources\s+:#{@plural_name}, only: \[:index, :new, :create\]/, content)
-        assert_match(/resources\s+:#{@plural_name}, except: \[:index\]/, content)
+      original_content = File.read(routes_file)
+
+      # Tagable models share the generic tagable routes already wired up once
+      # for the whole app (see TagableGenerator#routes_info) - no route
+      # changes are needed, so routes.rb should be left byte-for-byte as-is.
+      # (run_generator swallows stdout internally, so call .start directly
+      # to capture it ourselves.)
+      output = capture(:stdout) do
+        ProjectAssistant::TagableGenerator.start(@args, destination_root: destination_root)
       end
+
+      assert_equal original_content, File.read(routes_file)
+      assert_match(/Routes: tagable models share the generic tagable routes/, output)
     end
 
     test "creates model translations" do

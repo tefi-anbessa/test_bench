@@ -164,23 +164,16 @@ module ProjectAssistant
       assert_file File.join("app", "models", @nested_module_dir, "#{@nested_module_name}.rb")
     end
     
-    test "updates routes with module namespace" do
+    test "updates routes with an empty module namespace at both insertion points" do
       run_generator [@module_name]
       routes_content = File.read(File.join(destination_root, 'config', 'routes.rb'))
-      
-      # First insertion point pattern components
-      namespace_start = /namespace :#{@module_name} do/
-      tagable_point1 = /\s+# INSERTION POINT 1 FOR TAGABLE GENERATOR/
-      comment1 = /\s+# Insert #{@module_name} member routes here with only: \[:index, :new, :create\]/
-      namespace_end = /\s+end/
-      first_pattern = /#{namespace_start}\n#{tagable_point1}\n#{comment1}\n#{namespace_end}/
-      assert_match(first_pattern, routes_content)
-      
-      # Second insertion point pattern components
-      tagable_point2 = /\s+# INSERTION POINT 2 FOR TAGABLE GENERATOR/
-      comment2 = /\s+# Insert #{@module_name} collection routes here with except: \[:index\]/
-      second_pattern = /#{namespace_start}\n#{tagable_point2}\n#{comment2}\n#{namespace_end}/m
-      assert_match(second_pattern, routes_content)
+
+      # Tagable models need no route changes at all (see TagableGenerator's
+      # own routes_info step) - this just seeds a plain, empty namespace as
+      # a ready-made home for any non-tagable, module-namespaced model's own
+      # routes, added later by the scaffold generator or by hand.
+      empty_namespace = /namespace :#{@module_name} do\n\s*end/
+      assert_equal 2, routes_content.scan(empty_namespace).size
     end
 
     test "creates constants file" do

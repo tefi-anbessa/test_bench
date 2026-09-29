@@ -132,19 +132,17 @@ module ProjectAssistant
     end
 
     def edit_routes_file
-      # say_status :skip, "Skipping edit_routes_file method for debugging", :blue
-      # return
-      # Add two routes namespaces 
-      # [TODO verify if the first set of routes is really needed. 
-      # They arose because of a conflict on index routes, but that may have been a special case]
-      # Update routes.rb for both insertion points
+      # Seeds an empty namespace at both insertion points (project-nested and
+      # discipline-nested) - a ready-made home for any non-tagable,
+      # module-namespaced model's own routes (e.g. Electrical::CableType),
+      # added later by the scaffold generator or by hand. Tagable models
+      # need no route changes at all (every tagable type shares the generic
+      # tagable routes, keyed by tagable_type - see TagableGenerator, which
+      # no longer touches routes.rb either), so this no longer seeds any
+      # tagable-specific sub-markers the way it once did.
       routes_file = Pathname.new(File.join(destination_root, 'config', 'routes.rb'))
       if routes_file.exist?
-        # puts "DEBUG: Reading routes file..."
         routes_content = routes_file.read
-        # puts "DEBUG: Routes file read successfully"
-        comment = ["member routes here with only: [:index, :new, :create]",
-                    "collection routes here with except: [:index]"]
         (1..2).each do |i|
           # If nested module, the insertion point is after the parent namespace
           if @nested_module
@@ -153,11 +151,9 @@ module ProjectAssistant
             insertion_pattern = /^(?<indent>[ \t]*)(?<key># INSERTION POINT #{i} FOR MODULE GENERATOR)/
           end
           if match = routes_content.match(insertion_pattern)
-            # Insert module namespace after the insertion point comment
+            # Insert an empty module namespace after the insertion point comment
             insertion_text = "\n" + \
                       match[:indent] + "namespace :#{singular_name} do\n" + \
-                      match[:indent] + "  # INSERTION POINT #{i} FOR TAGABLE GENERATOR\n" + \
-                      match[:indent] + "  # Insert #{singular_name} #{comment[i-1]}\n" + \
                       match[:indent] + "end\n"
             routes_content.sub!(insertion_pattern, match[0] + insertion_text)
           else

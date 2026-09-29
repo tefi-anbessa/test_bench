@@ -30,6 +30,7 @@ Rails.application.routes.draw do
         end
       end
       resources :documents, :doc_types, only: [:index]
+      # INSERTION POINT 2 FOR MODULE GENERATOR
       namespace :electrical do
         resources :cable_types, only: [:index]
       end

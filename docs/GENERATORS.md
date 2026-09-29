@@ -113,21 +113,14 @@ The tag model provides the following functionality:
         * `config/constants/#{module_name}.yml`
 
     * The edits made are:
-      * In `config/routes.rb`, generator looks for a line containing `# INSERTION POINT 1 FOR MODULE GENERATOR`, and inserts the following code for top level routes:
+      * In `config/routes.rb`, the generator looks for a line containing `# INSERTION POINT 1 FOR MODULE GENERATOR` (in the discipline-nested routes section) and a line containing `# INSERTION POINT 2 FOR MODULE GENERATOR` (in the project-nested routes section), and inserts an empty namespace at each:
 
         ```ruby
         namespace :#{module_name} do
-          # Add #{module_name} routes here with only: [:index, :new, :create]
         end
         ```
 
-      * It then looks for a line containing `# INSERTION POINT 2 FOR MODULE GENERATOR`, and inserts the following code for shallow nested routes under tags:
-
-        ```ruby
-        namespace :#{module_name} do
-          # Add #{module_name} routes here with except: [:index]
-        end
-        ```
+        This is a ready-made home for any non-tagable, module-namespaced model's own routes (for example `Electrical::CableType`), added later by the scaffold generator or by hand. Tagable models need no route changes at all - every tagable type shares one generic set of routes, keyed by `tagable_type` at request time, already wired up once for the whole app (see the "Tagable routes" section of `config/routes.rb`) - so nothing tagable-specific is inserted here.
 
       * In `config/constants/tagable.yml`, after the line `tagable:` the following comment line is added, as the placeholder to define tagable models in the module:
 
@@ -710,7 +703,7 @@ Run with `--pretend` first, exactly as for the scaffold generator, to see every 
 
 4. Open the generated view file, fixture, and three test files, and run each test file individually (per this project's own testing convention - never combine multiple files in one `rails test` invocation). Adjust the fixture/tests as needed - the generator's own auto-filled sample values are a starting point, not guaranteed to be meaningful for every model's own validations (e.g. an enum column needs a real key, not a generic placeholder string).
 
-5. For `--tagable`, note that `Import::TagableBase` already provides two things for free, with nothing to add here: optional Tag-level columns (Service/Stage/Location/Tag Notes) that can also be set while attaching, and an opt-in "create tags that don't exist" checkbox on the mapping page. Just be aware they're available on the generated import form.
+5. For `--tagable`, note that `Import::TagableBase` already provides two things for free, with nothing to add here: optional Tag-level columns (Service/Stage/Location/Tag Notes) that can also be set while importing, and an opt-in "create tags that don't exist" checkbox on the mapping page. Just be aware they're available on the generated import form.
 
 6. Test the feature in dev: start the server, sign in, navigate to the model's own index view, and confirm the new Import button reaches the upload form, walks through mapping -> review -> commit, and lands back on the index view with the new/updated record(s) visible.
 
