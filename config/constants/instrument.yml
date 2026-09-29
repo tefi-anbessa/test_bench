@@ -1,1 +1,2 @@
-instrument: Instrument
+instrument:
+  name: Instrument
