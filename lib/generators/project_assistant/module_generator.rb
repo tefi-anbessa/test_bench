@@ -3,7 +3,12 @@ require "rails/generators/named_base"
 
 module ProjectAssistant
   class ModuleGenerator < Rails::Generators::NamedBase
-    desc "Create file structure, templates and config entries for a new module in Project Assistant app"
+    # No explicit `desc` here, deliberately - Rails::Generators::Base#desc
+    # only falls back to reading the USAGE file (module/USAGE) when no
+    # literal desc string has ever been set; an explicit desc call
+    # permanently short-circuits that lookup. Confirmed directly by reading
+    # the gem source after this generator's own USAGE file was silently
+    # never showing up in --help.
     source_root File.expand_path('module/templates', __dir__)
     APP_DIRECTORIES = %w[controllers helpers models policies views]
     TEST_DIRECTORIES = %w[controllers factories models policies system]

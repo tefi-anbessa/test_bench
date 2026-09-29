@@ -1,0 +1,18 @@
+Description:
+    Creates the folder structure, base files, and routes/constants insertion
+    points for a new top-level module (e.g. Electrical) - the prerequisite
+    step before scaffolding any model inside that module.
+
+    Pass the module name in CamelCase. Nested sub-modules are not properly
+    supported yet - avoid them.
+
+    Creates app/models/<module>/base.rb (the shared parent class for every
+    model in the module), locale folders for every configured language, a
+    constants file, and inserts routing/constants markers used by the
+    scaffold generator afterward.
+
+    After running, open app/models/<module>/base.rb and set its default
+    swatch and discipline name if they shouldn't just match the module name.
+
+Examples:
+    `bin/rails generate project_assistant:module Electrical`

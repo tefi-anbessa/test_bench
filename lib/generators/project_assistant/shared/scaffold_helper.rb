@@ -196,7 +196,8 @@ module ProjectAssistant
             normalize_fields(data)
           # TODO: implement safe load of ruby definition file
           elsif File.exist?(path_rb)
-            eval(File.read(path_rb)) # or require safely
+            data = eval(File.read(path_rb)) # or require safely
+            normalize_fields(data)
           else
             say_status :error, "#{path_yml}: Could not find definition file", :red
             raise Thor::Error, "Aborting generator"

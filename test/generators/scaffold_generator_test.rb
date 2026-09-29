@@ -116,6 +116,13 @@ nr: "Not Required"
       assert_no_match(/error/i, output)
     end
 
+    test "generator runs without errors from a ruby-format definition file" do
+      output = capture(:stderr) do
+        run_generator [@class_name, "--definition=electrical_test_rb"]
+      end
+      assert_no_match(/error/i, output)
+    end
+
     test "generator runs without errors from definition file" do
       generator = ProjectAssistant::ScaffoldGenerator.new(
         [@class_name],

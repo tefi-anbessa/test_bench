@@ -1,0 +1,25 @@
+Description:
+    Retrofits spreadsheet bulk-import support onto a model that already
+    exists (built via the scaffold generator, or by hand) - never creates a
+    model itself.
+
+    Pass the model name (CamelCased, module-prefixed if namespaced). The
+    model's policy must already inherit DisciplineResourcePolicy, or
+    TagablePolicy if using --tagable.
+
+    --tagable: target is a tagable model. Skips controller and route
+    injection entirely, since every tagable type already shares one
+    controller and one generic set of routes - only the importer service,
+    view, fixture, and tests are generated.
+
+    Without --tagable, injects the Importable concern and import/
+    create_import routes into the model's own existing controller/routes.
+    --discipline-association and --nesting fine-tune that injection - see
+    docs/GENERATORS.md for details.
+
+    Run with --pretend first to preview every file/edit without touching
+    anything.
+
+Examples:
+    `bin/rails generate project_assistant:import Document`
+    `bin/rails generate project_assistant:import Electrical::Motor --tagable`

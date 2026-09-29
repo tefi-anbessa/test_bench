@@ -119,6 +119,8 @@ Generally, tagable models are segregated into modules according to their discipl
 
 Exceptions to this structure are the Cable and Cable Types models, which are used by the electrical, instrument, and communication disciplines, and are intended to reside in the application core. [TODO: not yet moved - as of this writing both models are still namespaced under Electrical (`app/models/electrical/cable.rb`, `app/models/electrical/cable_type.rb`); see the "Move cable and cable type" items under Architecture Considerations and Refactoring Opportunities below.]
 
+Refer to [GENERATORS](GENERATORS.md) for details on the module, scaffold, and import generators used to scaffold new modules and models.
+
 #### Import
 
 Bulk import of spreadsheet data (CSV, Excel `.xlsx`/`.xlsm`, OpenDocument `.ods`) is provided by a generic framework, not a one-off feature per model. It is optional - only add it to a model where bulk loading is a real user need.
@@ -444,6 +446,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Generic tag_resource_policy may be required. Generator provides for tag nesting but use case is not certain. Only demands are tag linked but not tagable.
 - [ ] Complete nested system test for scaffold generator.
 - [ ] Scaffold generator to build routes for namespaced models other than tagables.
+- [ ] Update module generator routes edit action with new tagable structure. The insert hooks are all changed.
 
 ## Refactoring Opportunities
 
@@ -522,6 +525,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Consider changing "discard" to "cancel" on all forms.
 - [ ] Review all labels and use of labels, in headers, on buttons, and for popover titles. Establish consistency across usages, including across show and index views.
 - [ ] Add searching and sorting for from and to fields in cables index.
+- [ ] Refactor the generator's `:step` option to allow the literal value `"any"` (currently coerced as a decimal, so `"any"` is rejected).
 
 ## Potential Features
 
