@@ -1,0 +1,73 @@
+range_min:
+  type: float
+  units: "bar"
+  precision: 6
+  scale: 2
+  step: 0.01
+  valid: 0
+range_max:
+  type: float
+  units: "bar"
+  precision: 6
+  scale: 2
+  step: 0.01
+  required: true
+  valid: 10
+pressure_unit:
+  type: enum_translated
+  keys: [bar, psi, kpa, kgf_cm2]
+  valid: bar
+accuracy_class:
+  type: enum_translated
+  keys: [grade_1_0, grade_1_6, grade_2_5]
+  valid: grade_1_6
+dial_size:
+  type: enum_translated
+  keys: [mm63, mm100, mm150]
+  valid: mm100
+connection_type:
+  type: enum_translated
+  keys: [npt, bsp, flanged]
+  valid: npt
+connection_size:
+  type: enum_translated
+  keys: [in_1_4, in_1_2, in_3_4]
+  valid: in_1_2
+case_material:
+  type: enum_translated
+  keys: [stainless_steel, carbon_steel, aluminium, phenolic]
+  valid: stainless_steel
+wetted_material:
+  type: enum_translated
+  keys: [ss316, brass, monel]
+  valid: ss316
+movement_type:
+  type: enum_translated
+  keys: [bourdon_tube, diaphragm, bellows]
+  valid: bourdon_tube
+liquid_filled:
+  type: boolean
+  valid: true
+fill_fluid:
+  type: enum_translated
+  keys: [none, glycerine, silicone]
+  valid: glycerine
+ip_rating:
+  type: enum_translated
+  keys: [ip54, ip65, ip66, ip67]
+  valid: ip65
+safety_pattern:
+  type: boolean
+  valid: false
+hazardous_area_cert:
+  type: enum_translated
+  keys: [none, atex, iecex]
+  valid: none
+manufacturer:
+  type: string
+  valid: "Wika"
+model_number:
+  type: string
+  valid: "232.50"
+notes:
+  type: text

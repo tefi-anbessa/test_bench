@@ -1,0 +1,5 @@
+th:
+  activerecord:
+    models:
+    attributes:
+    errors:

@@ -31,6 +31,9 @@ Rails.application.routes.draw do
       end
       resources :documents, :doc_types, only: [:index]
       # INSERTION POINT 2 FOR MODULE GENERATOR
+      namespace :instrument do
+      end
+
       namespace :electrical do
         resources :cable_types, only: [:index]
       end
@@ -48,6 +51,9 @@ Rails.application.routes.draw do
     resources :disciplines, shallow: true, only: [] do
       # Discipline nested routes
       # INSERTION POINT 1 FOR MODULE GENERATOR
+      namespace :instrument do
+      end
+
       resources :tags do
         collection do
           get :import
