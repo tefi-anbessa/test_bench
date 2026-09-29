@@ -571,10 +571,14 @@ Run the generator command using the --pretend option (or simply -p) first. This 
 
     * Run the policy test (in our example `test/policies/electrical/test_policy_test.rb`).
 
-10. Open the controller file for review.
+10. Open the controller file (or extension file for tagables) for review.
 
-    * For `--nesting=tagable`: this is the extension file (in our example `app/controllers/electrical/test_extension.rb`), mixed into the shared `TagablesController` - there is no dedicated per-model controller to review. If the safe params line (`tagable_params`) is too long, insert new lines after commas as required so it is readable. Add any required additional functionality for form setup, create, or update in `setup_additional_form_data`/`after_create_hook`/`after_update_hook`.
-    * For every other nesting value: this is the dedicated controller (in our example `app/controllers/electrical/tests_controller.rb`). If the safe params line is too long, insert new lines after commas as required so it is readable. Usually, that will be the only controller edit required at this stage. If the model has related entities, as for example electrical switchboards has circuits, this will usually need to be built before the controller requirements are known. Add any required additional functionality for form setup, create, or update in `setup_additional_form_data`/`after_create_hook`/`after_update_hook`.
+    * For `--nesting=tagable`: this is the extension file (in our example `app/controllers/electrical/test_extension.rb`), mixed into the shared `TagablesController` - there is no dedicated per-model controller to review. 
+    * For every other nesting value: this is the dedicated controller (in our example `app/controllers/electrical/tests_controller.rb`).
+    If the safe params line (`tagable_params`) is too long, insert new lines after commas as required so it is readable. Add any required additional functionality for form setup, create, or update in `setup_additional_form_data`/`after_create_hook`/`after_update_hook`.
+       * If the safe params line is too long, insert new lines after commas as required so it is readable.
+       * If the model has association fields, check that form setup includes building instance variables for the association collection, for use in select fields in the form. Any other model specific form setup goes here also.
+       * If the model has other requirements (e.g. electrical switchboards create can build circuits), this can be built into `after_create_hook` and `after_update_hook`.
     * Save and close the controller/extension file.
 
 11. Open the routes file config/routes.rb.

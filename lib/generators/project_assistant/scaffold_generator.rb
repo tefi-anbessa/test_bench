@@ -269,9 +269,17 @@ module ProjectAssistant
         tab = "  "
         if File.exist?(translation_file)
           content = File.read(translation_file)
-          # Prepare model name and attributes sections
-          model_section = tab*(2 + class_path.count) + "#{singular_name}: #{human_name}"
-          attributes_section = tab*(2 + class_path.count) + "#{singular_name}:\n"
+          # Prepare model name and attributes sections. The key must match
+          # Rails' own model_name.i18n_key convention for namespaced models
+          # (module and class joined with "/", e.g. "electrical/heater" -
+          # confirmed against config/locales/electrical/en/en.electrical.models.yml),
+          # and the model name itself needs one/other pluralization, not a
+          # flat string, to satisfy model_name.human's lookup.
+          i18n_model_key = @namespaced ? "#{folder}/#{singular_name}" : singular_name
+          model_section = tab*(2 + class_path.count) + "#{i18n_model_key}:\n" +
+            tab*(3 + class_path.count) + "one: \"#{human_name}\"\n" +
+            tab*(3 + class_path.count) + "other: \"#{human_name.pluralize}\"\n"
+          attributes_section = tab*(2 + class_path.count) + "#{i18n_model_key}:\n"
           
           @fields.each do |field|
             # Use field[:name].humanize as dummy translation
@@ -296,7 +304,7 @@ module ProjectAssistant
           attributes_insertion_regex = /attributes:[ \t]*(\{\})?\n/
           # Insert model name under models section
           if content.match?(model_insertion_regex)
-            content.sub!(model_insertion_regex) { "models:\n#{model_section}\n" }
+            content.sub!(model_insertion_regex) { "models:\n#{model_section}" }
           else
             say_status :error, "#{translation_file.relative_path_from(Rails.root)}: Models key not found", :red
             return
