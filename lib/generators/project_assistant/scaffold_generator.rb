@@ -200,13 +200,17 @@ module ProjectAssistant
     end
          
     def update_constants
-      # Update module constants with enum definitions
-      if @enum_fields.any?
-        constants_file = @namespaced ? "#{class_path[0]}.yml" : "core.yml"
-        constants_file = Pathname.new(File.join(destination_root, "config", "constants", constants_file))
-        if File.exist?(constants_file)
-          content = File.read(constants_file)
-          tab = "  "
+      # Update module constants with the new model's key - always, even
+      # when it has no enum fields, so Constants.<module>.<model> is a
+      # Hash rather than nil once the model exists (an empty hash, not a
+      # bare key, for the same clobber-on-merge reason as module_generator's
+      # own {} fix - see docs/GENERATORS.md).
+      constants_file = @namespaced ? "#{class_path[0]}.yml" : "core.yml"
+      constants_file = Pathname.new(File.join(destination_root, "config", "constants", constants_file))
+      if File.exist?(constants_file)
+        content = File.read(constants_file)
+        tab = "  "
+        if @enum_fields.any?
           insertion_text = "#{singular_name}:\n"
           @enum_fields.each do |field|
             field_name = field[:name]
@@ -218,41 +222,57 @@ module ProjectAssistant
               end
             end
           end
-
-          if @namespaced
-            module_key = "#{class_path.last}:"
-            # Find the module key's own line and indentation
-            key_pattern = /^([ \t]*)#{Regexp.escape(module_key)}[ \t]*\n/
-            if (match = content.match(key_pattern))
-              indent = match[1]
-              insert_at = match.end(0)
-              # Find the end of the module's existing block: the next line
-              # at the same (or lesser) indentation as the module key
-              # itself, or EOF - so new content is appended after existing
-              # content (e.g. a `name:` key) rather than spliced in
-              # immediately after the opening key line, ahead of it.
-              rest = content[insert_at..]
-              block_end = rest =~ /^#{Regexp.escape(indent)}\S/
-              insert_at += block_end || rest.length
-              # The file may end (or the preceding line may end) without a
-              # trailing newline - e.g. a module's whole existing content
-              # is just `name: Instrument` at EOF - so only the content
-              # that already ends in \n can be trusted not to need one.
-              needs_newline = insert_at > 0 && content[insert_at - 1] != "\n"
-              content = content[0...insert_at] + (needs_newline ? "\n" : "") + "#{indent}#{tab}#{insertion_text}" + content[insert_at..]
-            else
-              say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Could not find module key #{module_key}", :red
-              return
-            end
-          else
-            # Non-namespaced case - add at root level
-            content += "\n#{insertion_text}"
-          end
-
-          File.write(constants_file, content) unless options[:pretend]
-          say_status :update, "#{constants_file.relative_path_from(Rails.root)}: Added #{singular_name} key", :green
         else
-          say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Not found", :red
+          insertion_text = "#{singular_name}: {}\n"
+        end
+
+        if @namespaced
+          module_key = "#{class_path.last}:"
+          # Find the module key's own line and indentation
+          key_pattern = /^([ \t]*)#{Regexp.escape(module_key)}[ \t]*\n/
+          if (match = content.match(key_pattern))
+            indent = match[1]
+            insert_at = match.end(0)
+            # Find the end of the module's existing block: the next line
+            # at the same (or lesser) indentation as the module key
+            # itself, or EOF - so new content is appended after existing
+            # content (e.g. a `name:` key) rather than spliced in
+            # immediately after the opening key line, ahead of it.
+            rest = content[insert_at..]
+            block_end = rest =~ /^#{Regexp.escape(indent)}\S/
+            insert_at += block_end || rest.length
+            # The file may end (or the preceding line may end) without a
+            # trailing newline - e.g. a module's whole existing content
+            # is just `name: Instrument` at EOF - so only the content
+            # that already ends in \n can be trusted not to need one.
+            needs_newline = insert_at > 0 && content[insert_at - 1] != "\n"
+            content = content[0...insert_at] + (needs_newline ? "\n" : "") + "#{indent}#{tab}#{insertion_text}" + content[insert_at..]
+          else
+            say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Could not find module key #{module_key}", :red
+            return
+          end
+        else
+          # Non-namespaced case - add at root level
+          content += "\n#{insertion_text}"
+        end
+
+        File.write(constants_file, content) unless options[:pretend]
+        say_status :update, "#{constants_file.relative_path_from(Rails.root)}: Added #{singular_name} key", :green
+      else
+        say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Not found", :red
+      end
+
+      # Update tagable.yml
+      if @nesting == :tagable
+        tagable_file = Pathname.new(File.join(destination_root, "config", "constants", "tagable.yml"))
+        if File.exist?(tagable_file)
+          content = File.read(tagable_file)
+          # Match the module name in the comment and append the class name
+          content.sub!(/(#\s+#{module_name}\n)/, "\\1  - #{class_name}\n")
+          File.write(tagable_file, content) unless options[:pretend]
+          say_status :update, "#{tagable_file.relative_path_from(Rails.root)}: Added #{class_name} to Constants tagable list", :green
+        else
+          say_status :error, "#{tagable_file.relative_path_from(Rails.root)}: Not found", :red
         end
       end
     end
@@ -269,17 +289,13 @@ module ProjectAssistant
         tab = "  "
         if File.exist?(translation_file)
           content = File.read(translation_file)
-          # Prepare model name and attributes sections. The key must match
-          # Rails' own model_name.i18n_key convention for namespaced models
-          # (module and class joined with "/", e.g. "electrical/heater" -
-          # confirmed against config/locales/electrical/en/en.electrical.models.yml),
-          # and the model name itself needs one/other pluralization, not a
-          # flat string, to satisfy model_name.human's lookup.
-          i18n_model_key = @namespaced ? "#{folder}/#{singular_name}" : singular_name
-          model_section = tab*(2 + class_path.count) + "#{i18n_model_key}:\n" +
+          # Prepare model name and attributes sections. The key must match Rails' convention 
+          # for namespaced models (ref lib/generators/project_assistant/shared/scaffold_helper.rb)
+          # and the model name itself needs one/other pluralization.
+          model_section = tab*(2 + class_path.count) + "#{i18n_model_scope}:\n" +
             tab*(3 + class_path.count) + "one: \"#{human_name}\"\n" +
             tab*(3 + class_path.count) + "other: \"#{human_name.pluralize}\"\n"
-          attributes_section = tab*(2 + class_path.count) + "#{i18n_model_key}:\n"
+          attributes_section = tab*(2 + class_path.count) + "#{i18n_model_scope}:\n"
           
           @fields.each do |field|
             # Use field[:name].humanize as dummy translation
@@ -334,7 +350,7 @@ module ProjectAssistant
           content = File.read(views_file)
           tab = "  "
           # Prepare views translations section
-          views_section = "\n" + tab*2 + "#{plural_name}:\n" +
+          views_section = tab*2 + "#{plural_name}:\n" +
             "      index:\n" +
             "        title:            \"#{human_name.pluralize}\"\n" +
             "        header:           \"#{human_name.pluralize} Schedule for %{scope_text}\"\n" +
@@ -346,11 +362,32 @@ module ProjectAssistant
             "        header:           \"New #{human_name} in %{scope_text}\"\n" +
             "      show:\n" +
             "        title:            \"#{human_name}\"\n" +
-            "        header:           \"#{human_name}: %{label}\""
-          
-          # Append to the end of the file
-          content += views_section
-          
+            "        header:           \"#{human_name}: %{label}\"\n"
+
+          if @namespaced
+            # Matches this file's own single per-module key (the module's
+            # name, e.g. "instrument" - not the model's), however it's
+            # currently represented: a bare, valueless placeholder
+            # (`instrument:`) or an explicit empty hash (`instrument: {}`),
+            # either of which is a valid, inert state for a module with no
+            # views translations yet. Replacing (rather than blindly
+            # appending at EOF) means this also inserts correctly once
+            # real content already exists here from an earlier model.
+            module_key = class_path.last
+            module_key_pattern = /^([ \t]*)#{Regexp.escape(module_key)}:[ \t]*(\{\})?[ \t]*\n?/
+            if content.match?(module_key_pattern)
+              content.sub!(module_key_pattern) { "#{$1}#{module_key}:\n#{views_section}" }
+            else
+              say_status :error, "#{views_file.relative_path_from(Rails.root)}: #{module_key} key not found", :red
+              return
+            end
+          else
+            # Non-namespaced case - the file has no single wrapping key
+            # (core translations sit flat at the top level), so add a new
+            # top-level entry at the end instead.
+            content += "\n#{views_section}"
+          end
+
           File.write(views_file, content) unless options[:pretend]
           say_status :update, "#{views_file.relative_path_from(Rails.root)}: Added #{class_name} views translations", :green
         else

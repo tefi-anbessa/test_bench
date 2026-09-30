@@ -1,0 +1,14 @@
+<thead>
+  <% unless current_project %>
+    <th><%= sort_link(@q, :project_code, t('activerecord.models.project.one')) %></th>
+  <% end %>
+  <th><%= sort_link(@q, :measurement_type) %></th>
+  <th><%= sort_link(@q, :movement_type) %></th>
+  <th><%= sort_link(@q, :range_min) %></th>
+  <th><%= sort_link(@q, :range_max) %></th>
+  <th><%= sort_link(@q, :fluid_phase) %></th>
+  <th><%= sort_link(@q, :process_fluid) %></th>
+  <th><%= sort_link(@q, :dial_size) %></th>
+  <th><%= sort_link(@q, :notes) %></th>
+  <th width="150px"><%= t('table.links')%></th>
+</thead>

@@ -20,7 +20,7 @@ range_max:
   valid: 10
 fluid_phase:
   type: enum_translated
-  keys: [gas, liquid, steam, other]
+  keys: [gas, liquid, other]
   valid: gas
 process_fluid:
   type: enum_translated

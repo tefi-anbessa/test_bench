@@ -97,22 +97,27 @@ module ProjectAssistant
         dir_path = File.join(destination_root, 'config', 'locales', @full_path, language)
         empty_directory(dir_path)
         
-        # Create [locale].[singular_name].yml for general translations
+        # Create [locale].[singular_name].yml for general translations.
+        # An empty hash, not a bare (nil) key, so the file is safe to
+        # merge/access before any real content is added to it.
         general = File.join(dir_path, "#{language}.#{singular_name}.yml")
         create_file(general, <<~YAML) unless File.exist?(general)
           # General translations for #{singular_name} module in #{language}
           #{language}:
-            #{singular_name}:
+            #{singular_name}: {}
         YAML
 
-        # Create activerecord translation file
+        # Create activerecord translation file. models:/attributes:/errors:
+        # are shared, global i18n namespaces across every module - a bare
+        # (nil) key here would clobber every other module's entries on
+        # merge, so these must be empty hashes, not bare keys.
         models = File.join(dir_path, "#{language}.#{singular_name}.models.yml")
         create_file(models, <<~YAML) unless File.exist?(models)
 #{language}:
   activerecord:
-    models:
-    attributes:
-    errors:
+    models: {}
+    attributes: {}
+    errors: {}
         YAML
 
         # Create views translation file
@@ -120,7 +125,7 @@ module ProjectAssistant
         create_file(views, <<~YAML) unless File.exist?(views)
 # #{singular_name} views translations for #{language}
 #{language}:
-  #{singular_name}:
+  #{singular_name}: {}
         YAML
       end
     end

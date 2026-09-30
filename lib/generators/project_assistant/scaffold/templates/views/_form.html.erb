@@ -12,7 +12,7 @@
       </div>
     </div>
 
-    <%%= bootstrap_form_with model: <%= form_model %>,
+    <%%= bootstrap_form_with(model: <%= form_model %>,
 <%- if form_url.present? -%>
           url: <%= form_url %>,
 <%- end -%>
@@ -20,7 +20,7 @@
           layout: :horizontal,
           label_col: "col-sm-4",
           control_col: "col-sm-8"
-        do |f| %>
+        ) do |f| %>
 
       <div class="card-body p-2" style="<%%= card_styles(@swatch) %>">
         <div class="row justify-content-center">

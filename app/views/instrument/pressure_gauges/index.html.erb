@@ -1,0 +1,104 @@
+<% provide(:title, t('.title')) %>
+<div class="container mt-3 mx-auto"style="<%= container_styles(@swatch)%>"
+  <!-- Header Card -->
+  <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+      <div class="row align-items-center p-2">
+
+        <!-- Back link -->
+        <div class="col-2">
+          <%= nav_button(action: :show_discipline, record: @discipline) %>
+        </div>
+
+        <!-- Header Text (Left - 8 columns) -->
+        <div class="col-8">
+          <h5 class="mb-0"><%= t('.header', scope_text: [t('activerecord.models.discipline.one'), @discipline.label].join(': ')) %></h5>
+        </div>
+
+        <!-- New Button (Right) -->
+        <div class="col-2 align-content-end">
+          <% if policy(@discipline.tags.build()).new? %>
+            <%= nav_button(action: :new, path: new_discipline_tagable_path(@discipline, 
+                tagable_type: 'Instrument::PressureGauge'), 
+                record: Instrument::PressureGauge.new) %>
+          <% end %>
+        </div>
+      </div> <!-- end of row -->
+    </div> <!-- end of card header -->
+
+    <div class="card-body">
+      <div class="row search-form">
+        <%= search_form_for @q, url: discipline_tagables_path(@discipline) do |f| %>
+          <%= hidden_field_tag :tagable_type, Instrument::PressureGauge %>
+          <%= f.search_field :measurement_type_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.instrument/pressure_gauge.measurement_type") %>
+          <%= f.search_field :pressure_unit_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.instrument/pressure_gauge.pressure_unit") %>
+          <%= f.search_field :fluid_phase_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.instrument/pressure_gauge.fluid_phase") %>
+          <%= f.search_field :process_fluid_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.instrument/pressure_gauge.process_fluid") %>
+          <%= f.search_field :accuracy_class_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.instrument/pressure_gauge.accuracy_class") %>
+          <%= f.search_field :dial_size_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.instrument/pressure_gauge.dial_size") %>
+          <%= f.search_field :connection_type_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.instrument/pressure_gauge.connection_type") %>
+          <%= f.search_field :connection_size_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.instrument/pressure_gauge.connection_size") %>
+          <%= f.search_field :case_material_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.instrument/pressure_gauge.case_material") %>
+          <%= f.search_field :wetted_material_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.instrument/pressure_gauge.wetted_material") %>
+          <%= f.search_field :movement_type_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.instrument/pressure_gauge.movement_type") %>
+          <%= f.search_field :fill_fluid_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.instrument/pressure_gauge.fill_fluid") %>
+          <%= f.search_field :ip_rating_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.instrument/pressure_gauge.ip_rating") %>
+          <%= f.search_field :accessories_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.instrument/pressure_gauge.accessories") %>
+          <%= f.search_field :notes_cont,
+                class: "search_field",
+                placeholder: t("activerecord.attributes.instrument/pressure_gauge.notes") %>
+          <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
+            <%== bs_icon('search') %>
+          <% end %>
+        <% end %>
+      </div>
+
+      <!--  -->
+
+      <!-- Policies for tagables are invariate over the scope , so no need to look up policy for each record. -->
+      <% can_show = policy(@discipline.tags.build()).show? %>
+      <% can_edit = policy(@discipline.tags.build()).edit? %>
+      <% can_delete = policy(@discipline.tags.build()).destroy? %>
+      <table id='instrument_pressure_gauges' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
+        <%= render 'instrument/pressure_gauges/header' %>
+        <tbody>
+          <% @pressure_gauges.each do |row| %>
+            <%= render 'instrument/pressure_gauges/row', row: row, can_show: can_show, can_edit: can_edit, can_delete: can_delete %>
+          <% end %>
+        </tbody>
+      </table>
+    <div class="card-footer">
+      <%== pagy_bootstrap_nav(@pagy, classes: 'pagination pagination-sm') %>
+      <%== pagy_info(@pagy) %>
+      <%== pagy_limit_selector_js(@pagy) %>
+    </div>
+  </div> <!-- end of card -->
+</div> <!-- end of container -->

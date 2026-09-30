@@ -338,11 +338,7 @@ Note: unlike the old tagable generator, **no helper file is created** for any ne
 ##### Constants
 
 * The generator shall look for the file `config/constants/#{module_name}.yml` (or `config/constants/core.yml` for a non-namespaced model). If found, a key shall be appended for defining any required model constants. Primarily, these are expected to be enum key definitions.
-
-```ruby
-  #{singular_name}:
-```
-
+* If the model has no enum fields, the key shall be given an empty hash value rather than left bare (which would error on intialisation).
 * If any enum fields have been specified (either :enum or :enum_translated), the generator shall insert a key for each required field name, followed by the list of key values, each with numeric index:
 
 ```ruby
@@ -352,7 +348,9 @@ Note: unlike the old tagable generator, **no helper file is created** for any ne
       ...
 ```
 
-The generator shall issue a success message if the file edit is completed. If the file is not found, the generator shall log an error message.
+   The generator shall issue a success message if the file edit is completed. If the file is not found, the generator shall log an error message.
+
+* For tagable models, the generator shall edit `config/constants/tagable.yml`, appending the model's full class name as a new list entry directly under its module's own comment heading (e.g. `# Electrical`), so the model is recorded in the master list of tagable types alongside the others in its module. If the module's comment heading isn't found, the generator shall log an error message; otherwise a success message.
 
 ##### Translations
 
@@ -496,7 +494,7 @@ Run the generator command using the --pretend option (or simply -p) first. This 
 
 2. Open the model file (in our example app/models/electrical/test.rb).
 
-    * For `--nesting=tagable` electrical models with load information required (most), after
+    * For tagable electrical models with load information required (most), after
       `include Tagable`
       add the line:
       `include Electrical::Demandable`.

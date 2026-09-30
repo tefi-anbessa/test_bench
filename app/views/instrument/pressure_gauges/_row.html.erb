@@ -1,0 +1,26 @@
+<tr>
+  <% unless current_project %>
+    <td><%= row.project.code %></td>
+  <% end %>
+
+  <td><%= index_attribute(row, :measurement_type, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :movement_type, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :range_min, type: :float, precision: 6) %></td>
+  <td><%= index_attribute(row, :range_max, type: :float, precision: 6) %></td>
+  <td><%= index_attribute(row, :fluid_phase, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :process_fluid, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :dial_size, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :notes, type: :text) %></td>
+  <td>
+    <% if can_show %>
+      <%= nav_button(action: :show_tagable, record: row, icon_only: true) %>
+    <% end %>
+    <% if can_edit %>
+      <%= nav_button(action: :edit_tagable, record: row, icon_only: true) %>
+    <% end %>
+    <% if can_delete %>
+      <%= nav_button(action: :delete_tagable, record: row, icon_only: true) %>
+    <% end %>
+  </td>
+</tr>
+       

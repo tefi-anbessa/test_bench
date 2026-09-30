@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_28_010000) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_29_074954) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -234,6 +234,30 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_28_010000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id", "importer_key"], name: "index_import_mapping_presets_on_user_and_importer_key", unique: true
+  end
+
+  create_table "instrument_pressure_gauges", force: :cascade do |t|
+    t.integer "measurement_type", null: false
+    t.integer "pressure_unit"
+    t.float "range_min", null: false
+    t.float "range_max", null: false
+    t.integer "fluid_phase"
+    t.integer "process_fluid"
+    t.integer "accuracy_class"
+    t.integer "dial_size"
+    t.integer "connection_type"
+    t.integer "connection_size"
+    t.integer "case_material"
+    t.integer "wetted_material"
+    t.integer "movement_type"
+    t.boolean "liquid_filled"
+    t.integer "fill_fluid"
+    t.string "ip_rating"
+    t.boolean "safety_pattern"
+    t.jsonb "accessories"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "issues", force: :cascade do |t|

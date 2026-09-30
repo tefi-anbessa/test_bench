@@ -786,15 +786,42 @@ nr: "Not Required"
       end
     end
 
+    test "adds empty hash to constants when model has no enum fields" do
+      # An empty hash, not a bare key, so Constants.<module>.<model> is a
+      # Hash rather than nil - same clobber-on-merge reasoning as
+      # module_generator's own {} fix.
+      no_enum_args = ['name:string:required:valid=Test_name']
+      run_generator [@class_name, *no_enum_args]
+      constants_file = File.join(destination_root, 'config', 'constants', "#{module_name.underscore}.yml")
+      assert_file constants_file do |content|
+        assert_match(/#{@singular_name}: \{\}/, content)
+      end
+    end
+
+    test "adds model to constants tagable.yml for tagable nesting" do
+      run_generator [@class_name, *@args, "--nesting=tagable"]
+      tagable_file = File.join(destination_root, 'config', 'constants', 'tagable.yml')
+      assert_file tagable_file do |content|
+        # Entry must be nested directly under the model's own module
+        # comment heading (e.g. "# ExistingModule"), not just anywhere
+        # in the file.
+        assert_match(/#\s+#{module_name}\n\s*- #{Regexp.escape(@class_name)}\n/, content)
+      end
+    end
+
     test "creates model translations" do
-      run_generator @args
+      run_generator [@class_name, *@args]
       I18n.available_locales.each do |locale|
-      
+
         # Check models file
-        models_file = File.join(destination_root, "config", "locales", folder, 
+        models_file = File.join(destination_root, "config", "locales", folder,
           locale.to_s, "#{locale.to_s}.#{module_name.underscore}.models.yml")
         assert_file models_file do |content|
-          assert_match(/#{folder}\/#{@singular_name}:\s+"#{@model_class_name.underscore.humanize}"/, content)
+          # Models key is namespaced (module/model, matching Rails' own
+          # model_name.i18n_key convention) and pluralized (one/other),
+          # not a flat string - see config/locales/electrical/en/en.electrical.models.yml
+          assert_match(/#{folder}\/#{@singular_name}:\s*\n\s*one:\s+"#{@model_class_name.underscore.humanize}"/, content)
+          assert_match(/other:\s+"#{@model_class_name.underscore.humanize.pluralize}"/, content)
           @fields.each do |field|
             assert_match(/#{field[:name]}:\s+\"#{field[:name].humanize}\"/, content)
           end
@@ -803,18 +830,18 @@ nr: "Not Required"
     end
 
     test "creates views translations" do
-      run_generator @args
+      run_generator [@class_name, *@args]
       I18n.available_locales.each do |locale|
       views_file = File.join(destination_root, "config", "locales", folder, 
             locale.to_s, "#{locale.to_s}.#{module_name.underscore}.views.yml")
         assert_file views_file do |content|
           assert_match(/#{@plural_name}:/, content)
           assert_match(/title:\s*"#{@human_name.pluralize}"/, content)
-          assert_match(/header:\s*"#{@human_name.pluralize} Schedule for %{project}"/, content)
+          assert_match(/header:\s*"#{@human_name.pluralize} Schedule for %{scope_text}"/, content)
           assert_match(/title:\s*"Edit #{@human_name}"/, content)
           assert_match(/header:\s*"Edit #{@human_name}: %{label}"/, content)
           assert_match(/title:\s*"New #{@human_name}"/, content)
-          assert_match(/header:\s*"New #{@human_name}"/, content)
+          assert_match(/header:\s*"New #{@human_name} in %{scope_text}"/, content)
           assert_match(/title:\s*"#{@human_name}"/, content)
           assert_match(/header:\s*"#{@human_name}: %{label}"/, content)
         end
@@ -822,8 +849,8 @@ nr: "Not Required"
     end
 
     test "handles enum_translated fields correctly in translations" do
-      run_generator @args
-      enum_translated_fields = @fields.select { |f| ['enum_translated'].include?(f[:type]) }
+      run_generator [@class_name, *@args]
+      enum_translated_fields = @fields.select { |f| f[:type] == :enum_translated }
       if enum_translated_fields.any?
         I18n.available_locales.each do |locale|
           # Check models file

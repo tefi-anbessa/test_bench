@@ -112,7 +112,12 @@ module ProjectAssistant
 
       # Test template files - base.rb is now under models/<module_name>/
       assert_file "app/models/#{@module_name}/base.rb"
-      assert_file "app/models/#{@module_name}.rb"
+      assert_file "app/models/#{@module_name}.rb" do |content|
+        # table_name_prefix must be a quoted string, not bare Ruby code -
+        # unquoted, it's an undefined local variable/method reference and
+        # raises NameError as soon as the module is loaded.
+        assert_match(/table_name_prefix\s*\n\s*'#{@module_name}_'/, content)
+      end
     end
 
     test "creates all required directories and files for nested module" do

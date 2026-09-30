@@ -195,6 +195,7 @@ class TagablesController < ApplicationController
       raise ApplicationController::ConflictError, :invalid_type unless @tag.tagable_type.in?(Tag.safe_tagable_types)
       @tagable = @tag.tagable
       @discipline = @tag.discipline
+      @parent = @tag
       @type = @tag.tagable_type
       @resource_class = @type.classify.safe_constantize
       @scope = policy_scope(@resource_class).joins(tag: { discipline: :project })

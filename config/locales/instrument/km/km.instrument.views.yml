@@ -15,3 +15,16 @@ km:
       show:
         title:            "Pressure gauge"
         header:           "Pressure gauge: %{label}"
+    pressure_gauges:
+      index:
+        title:            "Pressure gauges"
+        header:           "Pressure gauges Schedule for %{scope_text}"
+      edit:
+        title:            "Edit Pressure gauge"
+        header:           "Edit Pressure gauge: %{label}"
+      new:
+        title:            "New Pressure gauge"
+        header:           "New Pressure gauge in %{scope_text}"
+      show:
+        title:            "Pressure gauge"
+        header:           "Pressure gauge: %{label}"

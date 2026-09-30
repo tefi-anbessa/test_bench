@@ -66,6 +66,10 @@ module ProjectAssistant
           class_name.split('::').last # "NewModel"
         end
 
+        def i18n_model_scope
+          @namespaced ? "#{folder}/#{singular_name}" : singular_name
+        end
+
         def name_setup_for_test
           # Generator::NamedBase methods not available in test environment
           # @class_name examples: ModuleName::SubModule::NewModel; ModuleName::NewModel; NewModel
@@ -75,10 +79,14 @@ module ProjectAssistant
           @plural_name = @singular_name.pluralize # "new_models"
           @human_name = @singular_name.humanize # "New model"
           @class_path = @module_name.split('::').to_a.map(&:underscore) # ["existing_module", "sub_module"]; ["existing_module"]; []
+          @namespaced = @class_path.any?
           @table_name = [*@class_path, @singular_name.pluralize].join"_" # "existing_module_sub_module_new_models"; "existing_module_new_models"; "new_models"
           @singular_table_name = @table_name.singularize # "existing_module_sub_module_new_model"; "existing_module_new_model"; "new_model"
           @folder = File.join(*@class_path) # "existing_module/sub_module"; "existing_module"; ""
+          # @i18n_scope mimics NamedBased but is inaptly named. It is used for Constants.
           @i18n_scope = [*@class_path, @singular_name].join('.') # "existing_module.sub_module.new_model"; "existing_modulenew_model"; "new_model"
+          # @i18n_model_scope actually matches the keys required for activerecord translations.
+          @i18n_model_scope = @namespaced ? "#{@folder}/#{@singular_name}" : @singular_name # "existing_module/sub_module/new_model"; "existing_module/new_model"; "new_model"
         end
       
         # Helper methods for path generation
@@ -104,7 +112,10 @@ module ProjectAssistant
         def new_path(nesting)
           case nesting
           when :tagable
-            "new_discipline_#{singular_table_name}_path(@discipline, tagable_type: '#{class_name}')"
+            # Generic, shared route (see index_path's :tagable case for
+            # the same pattern) - there's no per-type route since the
+            # "retire per-type tagable routes" refactor.
+            "new_discipline_tagable_path(@discipline, tagable_type: '#{class_name}')"
           when :none
             "new_#{singular_table_name}_path"
           else
@@ -115,7 +126,13 @@ module ProjectAssistant
         def new_build(nesting)
           case nesting
           when :tagable
-            "@discipline.#{table_name}.build"
+            # Used for the nav_button's record: (labeling/path purposes
+            # only - the actual policy check target for tagable models is
+            # a new Tag, hardcoded separately in index.html.erb, since
+            # every tagable type shares the generic tags association).
+            # See app/views/electrical/switchboards/index.html.erb for
+            # the same pattern in a real, working view.
+            "#{class_name}.new"
           when :none
             "#{class_name}.new"
           else
@@ -442,6 +459,7 @@ module ProjectAssistant
           case nesting
           when :tagable
             form_variables << "tag: @tag"
+            form_variables << "parent: @parent"
             scope = "scope_text: @tag.long_label"
           when :none
             scope = "scope_text: @#{singular_name}.long_label"
@@ -649,7 +667,7 @@ module ProjectAssistant
             field_type =
               case field[:type]
               # Check for translation of custom types
-              when 'enum', 'enum_translated'
+              when :enum, :enum_translated
                 "integer"
               else
                 field[:type].to_s
@@ -727,10 +745,18 @@ module ProjectAssistant
         end
 
         def test_assertions_index_view(content, nesting)
-          assert_includes content, "if policy(#{new_build(nesting)}).new?"
+          # The policy check target differs from the nav_button record for
+          # :tagable - see index.html.erb's own new_policy_target logic:
+          # tagable models share one generic tags association for policy
+          # purposes, but the nav_button's record just needs a new
+          # instance of the actual class for labeling/path purposes.
+          policy_target = nesting == :tagable ? "@discipline.tags.build()" : new_build(nesting)
+          assert_includes content, "if policy(#{policy_target}).new?"
           assert_includes content, "nav_button(action: :new, path: #{new_path(nesting)}, record: #{new_build(nesting)}"
           @searchable_fields.each do |field|
             assert_includes content, "f.search_field :#{field[:name]}_cont"
+            # i18n key uses "/" not "." between module and model - previously untested
+            assert_includes content, "placeholder: t(\"activerecord.attributes.#{i18n_model_scope}.#{field[:name]}\")"
           end
           header = File.join(*@class_path, @plural_name, "header")
           assert_includes content, "render '#{header}'"
@@ -752,6 +778,15 @@ module ProjectAssistant
             when :enum, :enum_translated, :integer, :bigint, :decimal, :float, :boolean, :date, :datetime, :timestamp, :jsonb, :binary
               assert_includes content, "index_attribute(row, :#{field[:name]}, type: :#{field[:type]}"
             end
+          end
+          if nesting == :tagable
+            assert_includes content, "nav_button(action: :show_tagable, record: row, icon_only: true)"
+            assert_includes content, "nav_button(action: :edit_tagable, record: row, icon_only: true)"
+            assert_includes content, "nav_button(action: :delete_tagable, record: row, icon_only: true)"
+          else
+            assert_includes content, "nav_button(action: :show, record: row, icon_only: true)"
+            assert_includes content, "nav_button(action: :edit, record: row, path: edit_#{singular_table_name}_path(row), icon_only: true)"
+            assert_includes content, "nav_button(action: :destroy, record: row, icon_only: true)"
           end
         end
 
@@ -782,7 +817,7 @@ module ProjectAssistant
               assert_includes content, "show_attribute(@#{@singular_name}, :#{field[:name]}, type: :#{field[:type]}"
             when :text, :jsonb
               assert_includes content, "show_attribute(@#{@singular_name}, :#{field[:name]}, type: :#{field[:type]}"
-            when "binary"
+            when :binary
               assert_includes content, "PLACEHOLDER FOR BINARY FIELD"
             end
           end
@@ -806,6 +841,9 @@ module ProjectAssistant
           end
           assert_includes content, "render partial"
           assert_includes content, [*form_variables].join(",\n\t")
+          # _form.html.erb references a bare `parent` local for its
+          # polymorphic_path - must be passed through as a local here too
+          assert_includes content, "parent: @parent" if nesting == :tagable
         end
 
         def test_assertions_edit_view(content, nesting)
@@ -814,36 +852,37 @@ module ProjectAssistant
           assert_includes content, "provide(:header, t('.header', label: @#{@singular_name}.label))"
           assert_includes content, "render partial"
           assert_includes content, [*form_variables].join(",\n\t")
+          assert_includes content, "parent: @parent" if nesting == :tagable
         end
 
         def test_assertions_form_view(content, nesting)
           assert_includes content, "yield(:header)"
           case nesting
           when :none, :tagable
-            assert_includes content, "bootstrap_form_with model: #{@singular_name}"
+            assert_includes content, "bootstrap_form_with(model: #{@singular_name}"
           else
-            assert_includes content, "bootstrap_form_with model: [#{nesting}, #{@singular_name}]"
+            assert_includes content, "bootstrap_form_with(model: [#{nesting}, #{@singular_name}]"
           end
           @fields.each do |field|
             case field[:type]
-            when "string"
-              assert_match(/f\.text_field\s+:#{field[:name]}/, content)
-            when "text"
-              assert_match(/f\.text_area\s+:#{field[:name]}/, content)
-            when "integer", "bigint"
-              assert_match(/f\.number_field\s+:#{field[:name]}/, content)
-            when "float", "decimal"
-              assert_match(/f\.number_field\s+:#{field[:name]}/, content)
-            when "datetime", "timestamp", "time", "date"
-              assert_match(/f\.datetime_select\s+:#{field[:name]}/, content)
-            when "boolean"
-              assert_match(/f\.check_box\s+:#{field[:name]}/, content)
-            when "jsonb"
-              assert_match(/f\.text_area\s+:#{field[:name]}/, content)
-            when "enum"
-              assert_match(/f\.select\s+:#{field[:name]}/, content)
-            when "enum_translated"
-              assert_match(/f\.select\s+:#{field[:name]}/, content)
+            when :string
+              assert_match(/form_field\(f,\s*:#{field[:name]}/, content)
+            when :text, :jsonb
+              assert_match(/form_field\(f,\s*:#{field[:name]},\s*type:\s*:text/, content)
+            when :integer, :bigint, :float, :decimal
+              assert_match(/form_field\(f,\s*:#{field[:name]},\s*type:\s*:number/, content)
+            when :datetime, :timestamp, :time
+              assert_match(/form_field\(f,\s*:#{field[:name]},\s*type:\s*:datetime/, content)
+            when :date
+              assert_match(/form_field\(f,\s*:#{field[:name]},\s*type:\s*:date/, content)
+            when :boolean
+              assert_match(/form_field\(f,\s*:#{field[:name]},\s*type:\s*:boolean/, content)
+            when :enum
+              assert_match(/form_field\(f,\s*:#{field[:name]},\s*type:\s*:enum\)/, content)
+            when :enum_translated
+              assert_match(/form_field\(f,\s*:#{field[:name]},\s*type:\s*:enum_translated/, content)
+            when :references, :belongs_to
+              assert_match(/form_field\(f,\s*:#{field[:name]},\s*type:\s*:select/, content)
             end
           end
         end
@@ -861,7 +900,7 @@ module ProjectAssistant
               assert_includes content, "show_attribute(#{singular_name}, :#{field[:name]}, type: :#{field[:type]}"
             when :text, :jsonb
               assert_includes content, "show_attribute(#{singular_name}, :#{field[:name]}, type: :#{field[:type]}"
-            when "binary"
+            when :binary
               assert_includes content, "PLACEHOLDER FOR BINARY FIELD"
             end
           end

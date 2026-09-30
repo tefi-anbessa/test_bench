@@ -1,0 +1,90 @@
+<div class="container mt-3" style="<%= container_styles(@swatch) %>">
+  <div class="card" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+
+      <!-- Center Tag Info -->
+      <div class="col text-center">
+        <div class="d-flex flex-column align-items-center">
+            <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
+            <%= yield(:header) %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%= bootstrap_form_with(model: pressure_gauge,
+          url: polymorphic_path([parent, :tagable]),
+          local: true,
+          layout: :horizontal,
+          label_col: "col-sm-4",
+          control_col: "col-sm-8"
+        ) do |f| %>
+
+      <div class="card-body p-2" style="<%= card_styles(@swatch) %>">
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-10 col-lg-8 col-xl-6">        <!-- Adjust to fit field width requirements -->
+
+
+            <!-- Tag -->
+            <% if tag.persisted? %>
+              <%= render'tags/tag', tag: tag, swatch: swatch %>
+            <% else %>
+              <%= f.fields_for tag do |tag_f| %>
+                <%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
+              <% end %>
+            <% end %>
+            <%= hidden_field_tag :tagable_type, tag.tagable_type %>
+            <!-- Pressure gauge Details -->
+            <div class="card mb-1" style="<%= card_styles(@swatch) %>">
+              <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+                <h6><%= yield(:header) %></h6>
+              </div>
+
+              <div class="card-body p-2" style="<%= form_styles(@swatch) %>">
+                <%= render 'shared/error_messages', object: f.object %>
+
+                <%= form_field(f, :measurement_type, type: :enum_translated, required: true) %>
+                <%= form_field(f, :pressure_unit, type: :enum_translated) %>
+                <%= form_field(f, :range_min, type: :number, precision: 6, step: 0.1e-1, required: true) %>
+                <%= form_field(f, :range_max, type: :number, precision: 6, step: 0.1e-1, required: true) %>
+                <%= form_field(f, :fluid_phase, type: :enum_translated) %>
+                <%= form_field(f, :process_fluid, type: :enum_translated) %>
+                <%= form_field(f, :accuracy_class, type: :enum_translated) %>
+                <%= form_field(f, :dial_size, type: :enum_translated) %>
+                <%= form_field(f, :connection_type, type: :enum_translated) %>
+                <%= form_field(f, :connection_size, type: :enum_translated) %>
+                <%= form_field(f, :case_material, type: :enum_translated) %>
+                <%= form_field(f, :wetted_material, type: :enum_translated) %>
+                <%= form_field(f, :movement_type, type: :enum_translated) %>
+                <%= form_field(f, :liquid_filled, type: :boolean) %>
+                <%= form_field(f, :fill_fluid, type: :enum_translated) %>
+                <%= form_field(f, :ip_rating) %>
+                <%= form_field(f, :safety_pattern, type: :boolean) %>
+                <%= form_field(f, :accessories, type: :text) %>
+                <%= form_field(f, :notes, type: :text) %>
+                
+              </div> <!-- end pressure_gauge card body -->
+            </div> <!-- end pressure_gauge card -->
+
+            <!-- Card Footer with Actions -->
+            <div class="card-footer bg-transparent text-end p-2">
+              <%= link_to(pressure_gauge.persisted? ? 
+                tag_tagable_path(tag) : 
+                discipline_tagables_path(tag.discipline, tagable_type: Instrument::PressureGauge),
+                    class: 'btn btn-warning',
+                    data: { confirm: t('actions.sure'), turbo: false }) do %>
+                <%= t('actions.discard') %>
+                <%== bs_icon('x-square') %>
+              <% end %>
+
+              <%= f.button :submit, class: 'btn btn-primary', name: 'form[:submit]' do %>
+                <%= yield(:button_text) %>
+                <%== bs_icon('save') %>
+              <% end %>
+            </div> <!-- end card footer -->
+          </div> <!-- end responsive columns -->
+        </div> <!-- end row -->
+      </div> <!-- end card body -->
+    <% end %> <!-- end bootstrap_form_with -->
+  </div> <!-- end card -->
+</div> <!-- end container -->
