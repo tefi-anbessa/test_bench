@@ -52,8 +52,10 @@
   <%- case field[:type] -%>
     <%- when :string -%>
                 <%%= form_field(f, :<%= field[:name] %><%= ", #{opts}" unless opts.empty? %>) %>
-    <%- when :text, :jsonb -%>
+    <%- when :text -%>
                 <%%= form_field(f, :<%= field[:name] %>, type: :text<%= ", #{opts}" unless opts.empty? %>) %>
+    <%- when :jsonb -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :jsonb<%= ", #{opts}" unless opts.empty? %>) %>
     <%- when :integer, :bigint -%>
                 <%%= form_field(f, :<%= field[:name] %>, type: :number<%= ", #{opts}" unless opts.empty? %>) %>
     <%- when :float, :decimal -%>

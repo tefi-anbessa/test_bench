@@ -60,7 +60,7 @@
                 <%= form_field(f, :fill_fluid, type: :enum_translated) %>
                 <%= form_field(f, :ip_rating) %>
                 <%= form_field(f, :safety_pattern, type: :boolean) %>
-                <%= form_field(f, :accessories, type: :text) %>
+                <%= form_field(f, :accessories, type: :jsonb) %>
                 <%= form_field(f, :notes, type: :text) %>
                 
               </div> <!-- end pressure_gauge card body -->
@@ -70,7 +70,7 @@
             <div class="card-footer bg-transparent text-end p-2">
               <%= link_to(pressure_gauge.persisted? ? 
                 tag_tagable_path(tag) : 
-                discipline_tagables_path(tag.discipline, tagable_type: Instrument::PressureGauge),
+                discipline_tagables_path(tag.discipline, tagable_type: 'Instrument::PressureGauge'),
                     class: 'btn btn-warning',
                     data: { confirm: t('actions.sure'), turbo: false }) do %>
                 <%= t('actions.discard') %>

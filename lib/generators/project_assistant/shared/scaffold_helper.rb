@@ -494,7 +494,7 @@ module ProjectAssistant
         def form_discard
           case @nesting
           when :tagable
-            ["tag_tagable_path(tag)", "discipline_tagables_path(tag.discipline, tagable_type: #{class_name})"]
+            ["tag_tagable_path(tag)", "discipline_tagables_path(tag.discipline, tagable_type: '#{class_name}')"]
           when :none
             ["#{singular_name}", "#{plural_route_name}_path"]
           else
@@ -531,7 +531,7 @@ module ProjectAssistant
         def show_back_link
           case @nesting
           when :tagable
-            "discipline_tagables_path(@discipline, tagable_type: #{class_name})"
+            "discipline_tagables_path(@discipline, tagable_type: '#{class_name}')"
           when :none
             "#{index_helper(type: 'path')}"
           else
@@ -867,8 +867,10 @@ module ProjectAssistant
             case field[:type]
             when :string
               assert_match(/form_field\(f,\s*:#{field[:name]}/, content)
-            when :text, :jsonb
+            when :text
               assert_match(/form_field\(f,\s*:#{field[:name]},\s*type:\s*:text/, content)
+            when :jsonb
+              assert_match(/form_field\(f,\s*:#{field[:name]},\s*type:\s*:jsonb/, content)
             when :integer, :bigint, :float, :decimal
               assert_match(/form_field\(f,\s*:#{field[:name]},\s*type:\s*:number/, content)
             when :datetime, :timestamp, :time
@@ -888,7 +890,10 @@ module ProjectAssistant
         end
 
         def test_assertions_card_view(content, nesting)
-          assert_includes content, "nav_link(action: :show, record: #{singular_name})"
+          # Anchored on "<%=", not just the bare call - assert_includes on the
+          # bare text can't tell a rendered "<%= ... %>" from a silent,
+          # output-dropping "<% ... %>" (confirmed missing here once already).
+          assert_includes content, "<%= nav_link(action: :show, record: #{singular_name}) %>"
           @attribute_fields.each do |field|
             case field[:type]
             # Breaking these lines causes errors...

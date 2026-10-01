@@ -9,7 +9,7 @@
   header_class: 'py-1' do %>
   
     <div class="container-fluid">
-      <%% nav_link(action: :show, record: <%= singular_name %>) %>
+      <%%= nav_link(action: :show, record: <%= singular_name %>) %>
 <%- @attribute_fields.each do |field| -%>
   <%- options = field[:options].slice(:precision, :scale, :units, :si) -%>
   <%- opts = options.map { |k, v| "#{k}: #{v.inspect}" }.join(", ") -%>

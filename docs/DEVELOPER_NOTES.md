@@ -447,6 +447,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Complete nested system test for scaffold generator.
 - [ ] Scaffold generator to build routes for namespaced models other than tagables.
 - [x] Update module generator routes edit action with new tagable structure. The insert hooks are all changed.
+- [x] In show views with loop children (only instruments), loop children should only be in the same discipline.
 
 ## Refactoring Opportunities
 

@@ -69,38 +69,23 @@
             <div class="card-body p-3">
  
               <%= show_attribute(@pressure_gauge, :measurement_type, type: :enum_translated) %>
- 
               <%= show_attribute(@pressure_gauge, :pressure_unit, type: :enum_translated) %>
               <%= show_attribute(@pressure_gauge, :range_min, type: :float, precision: 6) %>
               <%= show_attribute(@pressure_gauge, :range_max, type: :float, precision: 6) %>
- 
               <%= show_attribute(@pressure_gauge, :fluid_phase, type: :enum_translated) %>
- 
               <%= show_attribute(@pressure_gauge, :process_fluid, type: :enum_translated) %>
- 
               <%= show_attribute(@pressure_gauge, :accuracy_class, type: :enum_translated) %>
- 
               <%= show_attribute(@pressure_gauge, :dial_size, type: :enum_translated) %>
- 
               <%= show_attribute(@pressure_gauge, :connection_type, type: :enum_translated) %>
- 
               <%= show_attribute(@pressure_gauge, :connection_size, type: :enum_translated) %>
- 
               <%= show_attribute(@pressure_gauge, :case_material, type: :enum_translated) %>
- 
               <%= show_attribute(@pressure_gauge, :wetted_material, type: :enum_translated) %>
- 
               <%= show_attribute(@pressure_gauge, :movement_type, type: :enum_translated) %>
- 
               <%= show_attribute(@pressure_gauge, :liquid_filled, type: :boolean) %>
- 
               <%= show_attribute(@pressure_gauge, :fill_fluid, type: :enum_translated) %>
               <%= show_attribute(@pressure_gauge, :ip_rating) %>
- 
               <%= show_attribute(@pressure_gauge, :safety_pattern, type: :boolean) %>
- 
               <%= show_attribute(@pressure_gauge, :accessories, type: :jsonb) %>
- 
               <%= show_attribute(@pressure_gauge, :notes, type: :text) %>
             </div>   <!-- temporary end inner card body -->
 

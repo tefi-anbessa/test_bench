@@ -22,6 +22,7 @@ class Tag < ApplicationRecord
     dependent: :nullify
 
   has_many :loop_elements,
+           ->(tag) { where(discipline_id: tag.discipline_id) },
            class_name: "Tag",
            primary_key: :loop_id,
            foreign_key: :loop_id
