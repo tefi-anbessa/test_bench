@@ -460,7 +460,14 @@ module ProjectAssistant
           when :tagable
             form_variables << "tag: @tag"
             form_variables << "parent: @parent"
-            scope = "scope_text: @tag.long_label"
+            # @discipline, not @tag - on the "fresh tag + fresh resource"
+            # path (the common case), @tag is a brand new, unpersisted Tag
+            # with no prefix/serial yet, so @tag.long_label would be blank
+            # or misleading in the new page's header. Confirmed against
+            # every real tagable new.html.erb (e.g.
+            # electrical/heaters/new.html.erb), which all use
+            # @discipline.long_label here instead.
+            scope = "scope_text: @discipline.long_label"
           when :none
             scope = "scope_text: @#{singular_name}.long_label"
           else
@@ -548,13 +555,12 @@ module ProjectAssistant
           end
         end
 
+        # Used only on the show page's own destroy button - confirmed against
+        # every real tagable show.html.erb (e.g. electrical/heaters/show.html.erb,
+        # electrical/switchboards/show.html.erb), which all use plain :delete
+        # here (unlike the index row's :delete_tagable - a different button).
         def delete_button_action(nesting)
-          case nesting
-          when :tagable
-            :delete_tagable
-          else
-            :delete
-          end
+          :delete
         end
 
         def controller_test_create_params
@@ -717,6 +723,27 @@ module ProjectAssistant
               say_status :error, "#{views_file.relative_path_from(Rails.root)}: Not found", :red
             end
           end
+        end
+
+        # Shared with TagableGenerator's system_test.rb.erb - a best-effort
+        # default for TagableSystemTests' @edit_attributes (only string/text
+        # fields work there at present, per its own callers' use of
+        # `fill_in`), preferring a field named "notes" since that's the
+        # convention nearly every tagable model already follows.
+        def tagable_edit_attributes_stub
+          field = @attribute_fields.find { |f| f[:name] == "notes" && f[:type].in?(%i[string text]) } ||
+                  @attribute_fields.find { |f| f[:type].in?(%i[string text]) }
+          return "{}" unless field
+          "{ #{field[:name]}: \"Updated value\" }"
+        end
+
+        # Shared with TagableGenerator's views/index.html.erb - the fixed
+        # part of the "broken/incomplete links" row's colspan (stage + tag +
+        # the model's own index fields + the links column). The project
+        # column is conditional on current_project at runtime, so it's added
+        # separately in the view itself, not here.
+        def tagable_index_colspan
+          2 + @index_fields.count + 1
         end
 
         def test_assertions_model(content, nesting)
@@ -898,7 +925,14 @@ module ProjectAssistant
           # purposes, but the nav_button's record just needs a new
           # instance of the actual class for labeling/path purposes.
           policy_target = nesting == :tagable ? "@discipline.tags.build()" : new_build(nesting)
-          assert_includes content, "if policy(#{policy_target}).new?"
+          if nesting == :tagable
+            # Confirmed against every real tagable index.html.erb (e.g.
+            # electrical/heaters/index.html.erb) - the new-button is also
+            # guarded on @discipline.present?, not just the policy check.
+            assert_includes content, "if @discipline.present? && policy(#{policy_target}).new?"
+          else
+            assert_includes content, "if policy(#{policy_target}).new?"
+          end
           assert_includes content, "nav_button(action: :new, path: #{new_path(nesting)}, record: #{new_build(nesting)}"
           @searchable_fields.each do |field|
             assert_includes content, "f.search_field :#{field[:name]}_cont"
@@ -939,20 +973,30 @@ module ProjectAssistant
 
         def test_assertions_show_view(content, nesting)
           case nesting
-          when :tagable 
+          when :tagable
             action_suffix = "_tagable"
+            index_action = "index_discipline"
+            index_policy_target = "@#{@singular_name}.tag"
+            new_record = new_build(nesting)
+            edit_path_fragment = "path: edit_tag_tagable_path(@tag), "
+            delete_path_fragment = "path: tag_tagable_path(@tag), "
           else
             action_suffix = ""
+            index_action = "index"
+            index_policy_target = "@#{@singular_name}"
+            new_record = "@#{@singular_name}"
+            edit_path_fragment = ""
+            delete_path_fragment = ""
           end
           assert_includes content, "<% provide(:title, t('.title')) %>"
-          assert_includes content, "policy(@#{@singular_name}).index?"
-          assert_includes content, "nav_button(action: :index, path: #{index_path(nesting)}, record: @#{@singular_name})"
+          assert_includes content, "policy(#{index_policy_target}).index?"
+          assert_includes content, "nav_button(action: :#{index_action}, path: #{index_path(nesting)}, record: @#{@singular_name})"
           assert_includes content, "nav_button(action: :previous#{action_suffix}, record: @neighbours[0])"
           assert_includes content, "nav_button(action: :next#{action_suffix}, record: @neighbours[1])"
           assert_includes content, "<%= t('.header', label: "
-          assert_includes content, "nav_button(action: :#{edit_button_action(nesting)}, record: @#{@singular_name})"
-          assert_includes content, "nav_button(action: :#{delete_button_action(nesting)}, record: @#{@singular_name})"
-          assert_includes content, "nav_button(action: :new, path: #{new_path(nesting)}, record: @#{@singular_name}"
+          assert_includes content, "nav_button(action: :#{edit_button_action(nesting)}, #{edit_path_fragment}record: @#{@singular_name})"
+          assert_includes content, "nav_button(action: :#{delete_button_action(nesting)}, #{delete_path_fragment}record: @#{@singular_name})"
+          assert_includes content, "nav_button(action: :new, path: #{new_path(nesting)}, record: #{new_record}"
           @attribute_fields.each do |field|
             case field[:type]
             # Breaking these lines causes errors...
@@ -1063,15 +1107,24 @@ module ProjectAssistant
 
         def test_assertions_controller_test(content, nesting)
           assert_includes content, "class #{@model_class_name.pluralize}ControllerTest"
-          assert_includes content, "@nesting = #{nesting.inspect}"
-          assert_includes content, "setup_controller_test"
           case nesting
           when :tag, :document, :discipline, :project
+            assert_includes content, "@nesting = #{nesting.inspect}"
+            assert_includes content, "setup_controller_test"
             assert_includes content, "include ControllerTestHelper"
             assert_includes content, "@resource = create(:#{@singular_table_name}, #{nesting.to_s}: @#{nesting.to_s})"
           when :tagable
+            # Confirmed against every real tagable controller test (e.g.
+            # test/controllers/electrical/switchboards_controller_test.rb) -
+            # no @nesting assignment, and a different setup method entirely
+            # (TagableControllerTests never defines setup_controller_test).
             assert_includes content, "include TagableControllerTests"
+            assert_includes content, "tests TagablesController"
+            assert_includes content, "def tagable_type"
+            assert_includes content, "setup_tagables_controller_test"
           when :none
+            assert_includes content, "@nesting = #{nesting.inspect}"
+            assert_includes content, "setup_controller_test"
             assert_includes content, "@resource = create(:#{@singular_table_name})"
           end
           assert_includes content, "def create_params"

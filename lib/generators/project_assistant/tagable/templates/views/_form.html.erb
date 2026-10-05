@@ -1,0 +1,101 @@
+<div class="container mt-3" style="<%%= container_styles(swatch) %>">
+  <div class="card" style="<%%= card_styles(swatch) %>">
+    <div class="card-header p-2" style="<%%= card_header_styles(swatch) %>">
+
+      <!-- Center Tag Info -->
+      <div class="col text-center">
+        <div class="d-flex flex-column align-items-center">
+          <div class="badge fs-6" style="<%%= badge_styles(swatch) %>">
+            <%%= yield(:header) %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%%= bootstrap_form_with(model: <%= singular_name %>,
+          url: <%= form_url %>,
+          local: true,
+          layout: :horizontal,
+          label_col: "col-sm-4",
+          control_col: "col-sm-8",
+          wrapper_class: 'mb-1',
+          ) do |f| %>
+
+      <div class="card-body p-2" style="<%%= form_styles(swatch) %>">
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-10 col-lg-8 col-xl-6">        <!-- Adjust to fit requirements -->
+
+            <!-- Tag -->
+            <%% if tag.persisted? %>
+              <%%= render 'tags/tag', tag: tag, swatch: swatch %>
+            <%% else %>
+              <%%= f.fields_for tag do |tag_f| %>
+                <%%= render 'tags/form_nested', tag_f: tag_f, tag: tag %>
+              <%% end %>
+            <%% end %>
+            <%%= hidden_field_tag :tagable_type, tag.tagable_type %>
+
+            <!-- <%= human_name %> Details -->
+            <div class="card mb-1" style="<%%= card_styles(swatch) %>">
+              <div class="card-header p-2" style="<%%= card_header_styles(swatch) %>">
+                <h6><%%= yield(:header) %></h6>
+              </div>
+
+              <div class="card-body p-2" style="<%%= form_styles(swatch) %>">
+                <%%= render 'shared/error_messages', object: f.object %>
+
+<%- @fields.each do |field| -%>
+  <%- options = field[:options].except(:index, :uniq, :unique, :valid, :keys) -%>
+  <%- opts = options.map { |k, v| "#{k}: #{v.inspect}" }.join(", ") -%>
+  <%- case field[:type] -%>
+    <%- when :string -%>
+                <%%= form_field(f, :<%= field[:name] %><%= ", #{opts}" unless opts.empty? %>) %>
+    <%- when :text -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :text<%= ", #{opts}" unless opts.empty? %>) %>
+    <%- when :jsonb -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :jsonb<%= ", #{opts}" unless opts.empty? %>) %>
+    <%- when :integer, :bigint -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :number<%= ", #{opts}" unless opts.empty? %>) %>
+    <%- when :float, :decimal -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :number<%= ", #{opts}" unless opts.empty? %>) %>
+    <%- when :datetime, :timestamp, :time -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :datetime<%= ", #{opts}" unless opts.empty? %>) %>
+    <%- when :date -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :date<%= ", #{opts}" unless opts.empty? %>) %>
+    <%- when :boolean -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :boolean)<%= ", #{opts}" unless opts.empty? %> %>
+    <%- when :enum -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :enum<%= ", #{opts}" unless opts.empty? %>) %>
+    <%- when :enum_translated -%>
+                <%%= form_field(f, :<%= field[:name] %>, type: :enum_translated<%= ", #{opts}" unless opts.empty? %>) %>
+    <%- when :references, :belongs_to -%>
+                <%% collection = options_for_select(<%= field[:name].pluralize %>, selected: <%= singular_name %>.<%= field[:name] %>_id) %>
+                <%%= form_field(f, :<%= field[:name] %>, type: :select, collection: collection<%= ", #{opts}" unless opts.empty? %>) %>
+  <%- end -%>
+<%- end -%>
+
+              </div> <!-- end <%= singular_name %> card body -->
+            </div> <!-- end <%= singular_name %> card -->
+
+            <!-- Card Footer with Actions -->
+            <div class="card-footer bg-transparent text-end p-2">
+              <%%= link_to(<%= singular_name %>.persisted? ?
+                <%= form_discard[0] %> :
+                <%= form_discard[1] %>,
+                    class: 'btn btn-warning',
+                    data: { confirm: t('actions.sure'), turbo: false }) do %>
+                <%%= t('actions.discard') %>
+                <%%== bs_icon('x-square') %>
+              <%% end %>
+
+              <%%= f.button :submit, class: 'btn btn-primary', name: 'form[submit]' do %>
+                <%%= yield(:button_text) %>
+                <%%== bs_icon('save') %>
+              <%% end %>
+            </div> <!-- end card footer -->
+          </div> <!-- end responsive columns -->
+        </div> <!-- end row -->
+      </div> <!-- end card body -->
+    <%% end %> <!-- end bootstrap_form_with -->
+  </div> <!-- end card -->
+</div> <!-- end container -->

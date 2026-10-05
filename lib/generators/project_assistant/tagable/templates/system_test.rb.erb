@@ -1,0 +1,48 @@
+require "application_system_test_case"
+require "helpers/tagable_system_tests"
+module <%= module_name %>
+  class <%= model_class_name.pluralize %>SystemTest < ApplicationSystemTestCase
+    include Devise::Test::IntegrationHelpers
+    include Warden::Test::Helpers
+    include TagableSystemTests
+
+    setup do
+      setup_common_tagable_data
+      setup_model_specific_data
+    end
+
+    def setup_model_specific_data
+
+      # List fields that should appear in index.
+      # The generator will include test for sort link header for each included field,
+      # and test for an appropriate value field for the type.
+      @index_fields = %i[<%= @index_field_names.join(" ") %>]
+
+      # List index fields that should have ransack search capability.
+      # The generator will only build and test for "contains" predicates (_cont).
+      # Don't include numeric or date fields here, add model specific tests for these later in this file if required.
+      @search_fields = %i[<%= @searchable_field_names.join(" ") %>]
+
+      # List all attribute fields that should appear in show.
+      @show_fields = %i[<%= @attribute_names.join(" ") %>]
+
+      # List all associations that should have a collapsible card on the show view.
+      @show_associations = %i[<%= @association_names.join(" ") %>]
+
+      # List all fields that should appear in forms (usually all).
+      # New and edit required separately because some models have read only fields that can't be edited.
+      # Set a different valid value for the field if it is required to be unique, otherwise set nil for factory default.
+      @new_fields = { <%= @all_field_names.map { |f| "#{f}: nil" }.join(", ") %> }
+      @edit_fields = @new_fields
+
+      # Set an attribute/s to be modified in edit test.
+      # Only working with string/text fields at present.
+      @edit_attributes = <%= tagable_edit_attributes_stub %>
+    end
+
+    def fill_in_model_specific_fields
+      # Code for filling in any fields that don't follow the assumed pattern of the field type.
+      # E.g. numeric fields with a drop down selector.
+    end
+  end
+end

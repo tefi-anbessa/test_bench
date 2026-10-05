@@ -1,0 +1,42 @@
+# frozen_string_literal: true
+require "test_helper"
+require "helpers/tagable_controller_tests"
+module <%= module_name %>
+  class <%= model_class_name.pluralize %>ControllerTest < ActionController::TestCase
+    include TagableControllerTests
+    include Devise::Test::ControllerHelpers
+    tests TagablesController
+
+    def tagable_type
+      "<%= class_name %>"
+    end
+
+    setup do
+      setup_tagables_controller_test
+    end
+
+    private
+
+      # Set the expected params for a valid resource
+      def create_params
+        {
+          <%= controller_test_create_params.join(",\n\t\t\t\t\t") %>
+        }
+      end
+
+      # Set invalid resource param for tests.
+      def invalid_param
+        { }  # Set an invalid value for an attribute.
+      end
+
+      # Nominate an attribute to get changed during update tests.
+      def update_attribute_name
+        # Set one attribute name as a symbol
+      end
+
+      # Nominate a valid value to update the attribute to, observe the correct type.
+      def updated_attribute_value
+        "new_value"
+      end
+  end
+end
