@@ -1,58 +1,54 @@
 # frozen_string_literal: true
-
 module <%= module_name %>
-  class <%= tagable_name %> < Base
-
-    # === Mixins ===
+  class <%= model_class_name %> < Base
+  # === Mixins ===
     include Tagable
 
-    # === Constants ===
+  # === Constants ===
     # enum declarations
-    <%- @enum_fields.each do |field| -%>
-    enum :<%= field[:name] %>, Constants.<%= module_name.underscore %>.<%= singular_name %>.<%= field[:name] %>.to_h
-    <%- end -%>
+<%- @enum_fields.each do |field| -%>
+    enum :<%= field[:name] %>, Constants.<%= i18n_scope %>.<%= field[:name] %>.to_h, prefix: true
+<%- end -%>
 
-    # === Gem macros ===
+  # === Gem macros ===
 
-    # === Attributes ===
+  # === Attributes ===
 
-    # === Associations ===
-    # Belongs to associatons
-    <%- @association_fields.each do |field| -%>
-    belongs_to :<%= field[:name] %><%- unless field[:options][:required] == true %>, optional: true<%- end %>
-    <%- end -%>
+  # === Associations ===
+<%- @association_fields.each do |field| -%>
+    belongs_to :<%= field[:name] %><%- unless field[:options][:required] == true -%>, optional: true<%- end %>
+<%- end -%>
 
-    # === Scopes ===
+  # === Scopes ===
 
-    # === Validations ===
+  # === Validations ===
     # Presence validation for required fields.
-    <%- @required_fields.each do |field| -%>
+<%- @required_fields.each do |field| -%>
     validates :<%= field[:name] %>, presence: true
-    <%- end -%>
-    <%- @unique_fields.each do |field| -%>
+<%- end -%>
+
+    # Uniqueness validation for unique fields.
+<%- @unique_fields.each do |field| -%>
     validates :<%= field[:name] %>, uniqueness: true
-    <%- end -%>
+<%- end -%>
 
-    # === Callbacks ===
+  # === Callbacks ===
 
-    # === Class methods ===
+  # === Class methods ===
 
-    # === Public methods ===
+  # === Class methods - Queries ===
 
-    # === Private methods ===
+  # === Public methods ===
+
+  # === Private methods ===
     private
 
     def self.ransackable_attributes(auth_object = nil)
-      [<%= (@fields.select { |f| SEARCHABLE_TYPES.include?(f[:type]) }.map { |f| ":#{f[:name]}" } + 
-      [':created_at', ':updated_at']).join(', ') %>]
+      <%= @ransack_attributes %>
     end
 
     def self.ransackable_associations(auth_object = nil)
-      <%- associations = [ :tag, :tag_discipline, :tag_discipline_project ] -%>
-      <%- @association_fields.each do |field| -%>
-        <%- associations << field[:name].to_sym -%>
-      <%- end -%>
-      <%= associations %>
+      <%= @ransack_associations %>
     end
   end
 end

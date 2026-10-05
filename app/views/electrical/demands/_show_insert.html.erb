@@ -15,7 +15,7 @@ Expecting object variable.
       <!-- Cannot create a new demand without a tag. -->
       <% link_text = t("actions.link", resource: text) %>
       <% if object.tag&.present? %>
-        <% if policy(Electrical::Demand).new? %> 
+        <% if policy(Electrical::Demand).new? %>
           <%= link_to new_tag_electrical_demand_path(object.tag),
               class: "btn btn-sm btn-outline-primary mb-2",
               title: link_text do %>

@@ -1,15 +1,18 @@
 # frozen_string_literal: true
-require "helpers/controller_test_helper"
+require "test_helper"
 require "helpers/tagable_controller_tests"
 module Instrument
   class PressureGaugesControllerTest < ActionController::TestCase
-    include Devise::Test::ControllerHelpers
-
     include TagableControllerTests
-    setup do
-      @nesting = :tagable
-      setup_controller_test # In test/helpers/controller_test_helper.rb or test/helpers/tagable_controller_tests
+    include Devise::Test::ControllerHelpers
+    tests TagablesController
 
+    def tagable_type
+      "Instrument::PressureGauge"
+    end
+
+    setup do
+      setup_tagables_controller_test
     end
 
     private

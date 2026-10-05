@@ -18,8 +18,8 @@ class TagablesController < ApplicationController
     def index
       set_discipline
       set_type
-      authorize @resource_class
-      @scope = policy_scope(@resource_class)
+      authorize Tag
+      @scope = tagable_scope(@resource_class)
         .joins(:tag)
         .where(tags: { discipline_id: @discipline.id })
       @q = @scope.ransack(params[:q])
@@ -52,7 +52,7 @@ class TagablesController < ApplicationController
 
     # GET /tag_tagables
     def show
-      authorize @tagable
+      authorize @tag
       instance_variable_set(resource_var_name, @tagable)
       @neighbours = Navigator.new(scope: @scope, record: @tagable).neighbours
       set_swatch
@@ -198,7 +198,7 @@ class TagablesController < ApplicationController
       @parent = @tag
       @type = @tag.tagable_type
       @resource_class = @type.classify.safe_constantize
-      @scope = policy_scope(@resource_class).joins(tag: { discipline: :project })
+      @scope = tagable_scope(@resource_class).joins(tag: { discipline: :project })
     end
 
     # For new action

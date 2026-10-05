@@ -22,7 +22,7 @@ module Electrical
 
           # Safe policy_scope call with fallback
           begin
-            scope = policy_scope(model_class)
+            scope = tagable_scope(model_class)
             options[model_name] = (scope || []).map { |record| [record.label, record.id] }
           rescue => e
             # Fallback to empty array if policy_scope fails

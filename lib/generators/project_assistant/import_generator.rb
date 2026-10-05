@@ -32,7 +32,8 @@ module ProjectAssistant
     class_option :nesting, type: :string, default: "project,discipline",
       desc: "Comma-separated route contexts to retrofit: project, discipline, or both"
     class_option :tagable, type: :boolean, default: false,
-      desc: "Target is a tagable model (policy < TagablePolicy, includes Tagable) - attaches to an " \
+      desc: "Target is a tagable model (includes Tagable, no policy of its own - authorization " \
+        "routes through TagPolicy via its tag association) - attaches to an " \
         "existing, unassigned Tag by natural key instead of resolving a discipline_id column. " \
         "Controller/routes are shared (TagablesController) and never generated/injected."
 
@@ -51,20 +52,20 @@ module ProjectAssistant
       # Confirmed the hard way: this originally reported "MotorPolicy does
       # not exist" for Electrical::Motor even though Electrical::MotorPolicy
       # was never checked at all.
-      @policy_class = policy_class_name.safe_constantize
       errors = []
       if tagable?
-        errors << "#{policy_class_name} does not exist" if @policy_class.nil?
-        if @policy_class && !(@policy_class < TagablePolicy)
-          errors << "#{policy_class_name} does not inherit from TagablePolicy, but --tagable was given."
-        end
+        # Tagable models have no policy of their own - authorization always
+        # routes through TagPolicy via the model's own `tag` association
+        # (see app/policies/tag_policy.rb), so there's no policy class to
+        # check here at all, only that the model really is tagable.
         errors << "#{class_name} does not include Tagable, but --tagable was given." unless model_class.include?(Tagable)
       else
+        @policy_class = policy_class_name.safe_constantize
         errors << "#{policy_class_name} does not exist" if @policy_class.nil?
         if @policy_class && !(@policy_class < DisciplineResourcePolicy)
           errors << "#{policy_class_name} does not inherit from DisciplineResourcePolicy - " \
             "this generator only supports that convention (see app/policies/discipline_resource_policy.rb#import?), " \
-            "or --tagable for a model whose policy inherits TagablePolicy instead."
+            "or --tagable for a model whose authorization routes through TagPolicy instead."
         end
       end
       abort_with(errors)

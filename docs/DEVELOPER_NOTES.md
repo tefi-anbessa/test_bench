@@ -530,7 +530,13 @@ It is possible to create multiple tags referencing the same tagable element, des
 
 ## Potential Features
 
-- [ ] Implement copy from other project
+- [ ] Implement copy from other project. Global admins' ability to view (`show?`/`index?`) any
+      resource on any project, bypassing the normal current-project ring fence, exists informally to
+      support this unbuilt workflow - it was never given a clear spec of its own. In hindsight, this
+      should be a separate `#copy` action with its own Pundit policy method, not a standing exception
+      on `show?`/`index?`. When this is actually built, reassess whether the general cross-project
+      view-anywhere admin prerogative is still needed at all, since `#copy` would need its own
+      authorization regardless (see `app/policies/discipline_resource_policy.rb#show?`).
 - [ ] Data revision management
 - [ ] Customize devise users:
   - [ ] Add policy for users

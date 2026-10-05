@@ -86,12 +86,12 @@ module Electrical
 
       def set_demand
         @demand = policy_scope(Electrical::Demand).find_by(id: params[:id])
-        raise ApplicationController::ConflictError, 
+        raise ApplicationController::ConflictError,
           :out_of_scope if @demand.nil?
         if @demand.demandable.present? && @demand.demandable.tag.present?
           @tag = @demand.tag
         else
-          raise ApplicationController::ConflictError, 
+          raise ApplicationController::ConflictError,
             :record_is_orphan
         end
         @discipline = @demand.demandable.tag.discipline

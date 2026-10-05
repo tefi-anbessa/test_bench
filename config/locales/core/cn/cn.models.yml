@@ -1,13 +1,34 @@
 cn:
   activerecord:
     models:
-      document: "Document"
-      swatch: "Swatch"
+      document:
+        one: "Document"
+        other: "Documents"
+      swatch: 
+        one: "Swatch"
+        other: "Swatches"
       resource:           "Resource"
-      user:               "User"
-      project:            "Project"
-      discipline:         "Discipline"
-      tag:                "Tag"
+      user:
+        one:              "User"
+        other:            "Users"
+      project:
+        one:                "Project"
+        other:              "Projects"
+      discipline:
+        one:              "Discipline"
+        other:            "Disciplines"
+      tag:
+        one: "Tag"
+        other: "Tags"
+      doc_type:
+        one: "Document Type"
+        other: "Document Types"
+      issue:
+        one: "Issue"
+        other: "Issues"
+      source_format: 
+        one: "Source Format"
+        other: "Source Formats"
       role:               "Role"
     attributes:
       document:

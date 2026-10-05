@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :<%=singular_table_name%>, class: <%=class_name%> do
     # Tag can be passed explicitly, if not tag will be created.
     # If discipline is passed, tag will be created on that discipline.
-    # Otherwise, tag will be created on a new project with default "Electrical" discipline.
+    # Otherwise, tag will be created on a new project with a matching discipline.
     transient do
       tag { nil }
       discipline { nil }
@@ -10,14 +10,15 @@ FactoryBot.define do
     # Associations
 <%- @association_fields.each do |field|-%>
     association :<%= field[:name] %>
-<%- end -%> 
+<%- end -%>
+
     # Attributes
 <%- @attribute_fields.each do |field|-%>
-<%-   valid = field.dig(:options, :valid) || 
+<%-   valid = field.dig(:options, :valid) ||
         (if [:enum, :enum_translated].include?(field[:type])
           field.dig(:options, :keys)&.first
         end) -%>
-    <%= field[:name] %> { <%= (valid || nil) %> }
+    <%= field[:name] %> { <%= (valid.inspect || nil) %> }
 <%- end -%>
 
     # Create tag association in a single transaction

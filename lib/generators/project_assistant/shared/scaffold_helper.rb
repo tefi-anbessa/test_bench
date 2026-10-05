@@ -572,6 +572,153 @@ module ProjectAssistant
           params
         end
 
+        # Shared between ScaffoldGenerator and TagableGenerator - inserts an
+        # enum-constants key for the new model into its module's constants
+        # file (or core.yml for a non-namespaced model). No nesting-specific
+        # logic at all; genuinely identical for every nesting type.
+        def insert_enum_constants
+          constants_file = @namespaced ? "#{class_path[0]}.yml" : "core.yml"
+          constants_file = Pathname.new(File.join(destination_root, "config", "constants", constants_file))
+          if File.exist?(constants_file)
+            content = File.read(constants_file)
+            tab = "  "
+            if @enum_fields.any?
+              insertion_text = "#{singular_name}:\n"
+              @enum_fields.each do |field|
+                field_name = field[:name]
+                field_indent = tab * (1 + class_path.count)
+                insertion_text += "#{field_indent}#{field_name}:\n"
+                if field[:options][:keys].any?
+                  field[:options][:keys].each_with_index do |key, index|
+                    insertion_text += "#{field_indent}#{tab}#{key}: #{index}\n"
+                  end
+                end
+              end
+            else
+              insertion_text = "#{singular_name}: {}\n"
+            end
+
+            if @namespaced
+              module_key = "#{class_path.last}:"
+              key_pattern = /^([ \t]*)#{Regexp.escape(module_key)}[ \t]*\n/
+              if (match = content.match(key_pattern))
+                indent = match[1]
+                insert_at = match.end(0)
+                rest = content[insert_at..]
+                block_end = rest =~ /^#{Regexp.escape(indent)}\S/
+                insert_at += block_end || rest.length
+                needs_newline = insert_at > 0 && content[insert_at - 1] != "\n"
+                content = content[0...insert_at] + (needs_newline ? "\n" : "") + "#{indent}#{tab}#{insertion_text}" + content[insert_at..]
+              else
+                say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Could not find module key #{module_key}", :red
+                return
+              end
+            else
+              content += "\n#{insertion_text}"
+            end
+
+            File.write(constants_file, content) unless options[:pretend]
+            say_status :update, "#{constants_file.relative_path_from(Rails.root)}: Added #{singular_name} key", :green
+          else
+            say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Not found", :red
+          end
+        end
+
+        # Shared between ScaffoldGenerator and TagableGenerator - edits the
+        # model translations file for each locale. No nesting-specific logic
+        # anywhere in this method.
+        def insert_translations
+          I18n.available_locales.each do |locale|
+            if @namespaced
+              translation_file = Pathname.new(File.join(destination_root, "config", "locales",
+              folder, locale.to_s, "#{locale}.#{class_path[-1]}.models.yml"))
+            else
+              translation_file = Pathname.new(File.join(destination_root, "config", "locales",
+              "core", locale.to_s, "#{locale}.models.yml"))
+            end
+            tab = "  "
+            if File.exist?(translation_file)
+              content = File.read(translation_file)
+              model_section = tab*(2 + class_path.count) + "#{i18n_model_scope}:\n" +
+                tab*(3 + class_path.count) + "one: \"#{human_name}\"\n" +
+                tab*(3 + class_path.count) + "other: \"#{human_name.pluralize}\"\n"
+              attributes_section = tab*(2 + class_path.count) + "#{i18n_model_scope}:\n"
+
+              @fields.each do |field|
+                attributes_section += tab*(3 + class_path.count) + "#{field[:name]}: \"#{field[:name].humanize}\"\n"
+                if field[:type] == :enum_translated
+                  attributes_section += tab*(3 + class_path.count) + "#{field[:name].pluralize}:\n"
+                  field[:options][:keys].each do |key|
+                    attributes_section += tab*(4 + class_path.count) + "#{key}: \"#{key.to_s.humanize}\"\n"
+                  end
+                end
+              end
+
+              model_insertion_regex = /models:[ \t]*(\{\})?\n/
+              attributes_insertion_regex = /attributes:[ \t]*(\{\})?\n/
+              if content.match?(model_insertion_regex)
+                content.sub!(model_insertion_regex) { "models:\n#{model_section}" }
+              else
+                say_status :error, "#{translation_file.relative_path_from(Rails.root)}: Models key not found", :red
+                return
+              end
+
+              if content.match?(attributes_insertion_regex)
+                content.sub!(attributes_insertion_regex) { "attributes:\n#{attributes_section}" }
+                File.write(translation_file, content) unless options[:pretend]
+                say_status :update, "#{translation_file.relative_path_from(Rails.root)}: Added #{class_name} translations", :green
+              else
+                say_status :error, "#{translation_file.relative_path_from(Rails.root)}: Attributes key not found", :red
+              end
+            else
+              say_status :error, "#{translation_file.relative_path_from(Rails.root)}: Not found", :red
+            end
+
+            if @namespaced
+              views_file = Pathname.new(File.join(destination_root, "config", "locales",
+              folder, locale.to_s, "#{locale}.#{class_path[-1]}.views.yml"))
+            else
+              views_file = Pathname.new(File.join(destination_root, "config", "locales",
+              "core", locale.to_s, "#{locale}.views.yml"))
+            end
+            if File.exist?(views_file)
+              content = File.read(views_file)
+              tab = "  "
+              views_section = tab*2 + "#{plural_name}:\n" +
+                "      index:\n" +
+                "        title:            \"#{human_name.pluralize}\"\n" +
+                "        header:           \"#{human_name.pluralize} Schedule for %{scope_text}\"\n" +
+                "      edit:\n" +
+                "        title:            \"Edit #{human_name}\"\n" +
+                "        header:           \"Edit #{human_name}: %{label}\"\n" +
+                "      new:\n" +
+                "        title:            \"New #{human_name}\"\n" +
+                "        header:           \"New #{human_name} in %{scope_text}\"\n" +
+                "      show:\n" +
+                "        title:            \"#{human_name}\"\n" +
+                "        header:           \"#{human_name}: %{label}\"\n"
+
+              if @namespaced
+                module_key = class_path.last
+                module_key_pattern = /^([ \t]*)#{Regexp.escape(module_key)}:[ \t]*(\{\})?[ \t]*\n?/
+                if content.match?(module_key_pattern)
+                  content.sub!(module_key_pattern) { "#{$1}#{module_key}:\n#{views_section}" }
+                else
+                  say_status :error, "#{views_file.relative_path_from(Rails.root)}: #{module_key} key not found", :red
+                  return
+                end
+              else
+                content += "\n#{views_section}"
+              end
+
+              File.write(views_file, content) unless options[:pretend]
+              say_status :update, "#{views_file.relative_path_from(Rails.root)}: Added #{class_name} views translations", :green
+            else
+              say_status :error, "#{views_file.relative_path_from(Rails.root)}: Not found", :red
+            end
+          end
+        end
+
         def test_assertions_model(content, nesting)
           # Check for mixins
           if nesting == :tagable

@@ -7,13 +7,13 @@ module ProjectAssistant
     include ProjectAssistant::Shared::ScaffoldHelper
     source_root File.expand_path("scaffold/templates", __dir__)
     class_option :definition, type: :string, desc: "Fields definition file name"
-    class_option :nesting, type: :string, desc: "Parent class, options: none (default), project, discipline, tag, tagable"
+    class_option :nesting, type: :string, desc: "Parent class, options: none (default), project, discipline, tag, document, issue"
     
     def validate_nesting
       # $stderr.puts "DEBUG (GENERATOR): options[:nesting]: #{options[:nesting].inspect} (#{options[:nesting].class})"
       errors = []
       if options[:nesting].present?
-        unless options[:nesting].in? %w[project discipline tag document issue tagable none]
+        unless options[:nesting].in? %w[project discipline tag document issue none]
           errors << "Invalid nesting option #{options[:nesting]}"
         end
         @nesting = options[:nesting].to_sym
@@ -46,13 +46,8 @@ module ProjectAssistant
             errors << "#{path} not found, module #{module_name} has incomplete folder structure"
           end
         end
-      else
-        # Tagables must have a module and class name
-        if @nesting == :tagable
-          errors << "Name for tagable must include both module and class with '::' separator"
-        end
       end
-        
+
       # Validate class name format
       unless model_class_name&.match?(/^[A-Z][a-zA-Z0-9_]*$/)
         errors << "'#{model_class_name}' is not a valid Ruby class name"
@@ -106,9 +101,7 @@ module ProjectAssistant
     def create_model_file
       @ransack_attributes = (@searchable_fields.map { |f| f[:name].to_sym } + %i[created_at updated_at]).uniq
       @ransack_associations = (@association_fields.map { |f| f[:name].to_sym } ).uniq
-      if @nesting == :tagable
-        @ransack_associations += [:tag, :tag_discipline, :tag_discipline_project]
-      elsif @nesting.in?(%i[project discipline tag])
+      if @nesting.in?(%i[project discipline tag])
         @ransack_associations += [@nesting]
       end
       template "model.rb.erb", File.join('app', 'models', "#{file_path}.rb")
@@ -139,11 +132,7 @@ module ProjectAssistant
     end
     
     def create_controller_file
-      if @nesting == :tagable
-        template "controller_extension.rb.erb", File.join('app', 'controllers', "#{file_path}_extension.rb")
-      else
-        template "controller.rb.erb", File.join('app', 'controllers', "#{controller_file_path}_controller.rb")
-      end
+      template "controller.rb.erb", File.join('app', 'controllers', "#{controller_file_path}_controller.rb")
     end
     
     def create_view_files
@@ -167,11 +156,6 @@ module ProjectAssistant
     end
     
     def edit_routes_file
-      # Tagable models all share the single unified tagable route set
-      if @nesting == :tagable
-        say_status :info, "Skipping routes.rb - tagable models use the shared tagable routes.", :green
-        return
-      end
       # Update config/routes.rb
       tab = "  "
       routes_file = Pathname.new(File.join(destination_root, "config", "routes.rb"))
@@ -200,200 +184,11 @@ module ProjectAssistant
     end
          
     def update_constants
-      # Update module constants with the new model's key - always, even
-      # when it has no enum fields, so Constants.<module>.<model> is a
-      # Hash rather than nil once the model exists (an empty hash, not a
-      # bare key, for the same clobber-on-merge reason as module_generator's
-      # own {} fix - see docs/GENERATORS.md).
-      constants_file = @namespaced ? "#{class_path[0]}.yml" : "core.yml"
-      constants_file = Pathname.new(File.join(destination_root, "config", "constants", constants_file))
-      if File.exist?(constants_file)
-        content = File.read(constants_file)
-        tab = "  "
-        if @enum_fields.any?
-          insertion_text = "#{singular_name}:\n"
-          @enum_fields.each do |field|
-            field_name = field[:name]
-            field_indent = tab * (1 + class_path.count)
-            insertion_text += "#{field_indent}#{field_name}:\n"
-            if field[:options][:keys].any?
-              field[:options][:keys].each_with_index do |key, index|
-                insertion_text += "#{field_indent}#{tab}#{key}: #{index}\n"
-              end
-            end
-          end
-        else
-          insertion_text = "#{singular_name}: {}\n"
-        end
-
-        if @namespaced
-          module_key = "#{class_path.last}:"
-          # Find the module key's own line and indentation
-          key_pattern = /^([ \t]*)#{Regexp.escape(module_key)}[ \t]*\n/
-          if (match = content.match(key_pattern))
-            indent = match[1]
-            insert_at = match.end(0)
-            # Find the end of the module's existing block: the next line
-            # at the same (or lesser) indentation as the module key
-            # itself, or EOF - so new content is appended after existing
-            # content (e.g. a `name:` key) rather than spliced in
-            # immediately after the opening key line, ahead of it.
-            rest = content[insert_at..]
-            block_end = rest =~ /^#{Regexp.escape(indent)}\S/
-            insert_at += block_end || rest.length
-            # The file may end (or the preceding line may end) without a
-            # trailing newline - e.g. a module's whole existing content
-            # is just `name: Instrument` at EOF - so only the content
-            # that already ends in \n can be trusted not to need one.
-            needs_newline = insert_at > 0 && content[insert_at - 1] != "\n"
-            content = content[0...insert_at] + (needs_newline ? "\n" : "") + "#{indent}#{tab}#{insertion_text}" + content[insert_at..]
-          else
-            say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Could not find module key #{module_key}", :red
-            return
-          end
-        else
-          # Non-namespaced case - add at root level
-          content += "\n#{insertion_text}"
-        end
-
-        File.write(constants_file, content) unless options[:pretend]
-        say_status :update, "#{constants_file.relative_path_from(Rails.root)}: Added #{singular_name} key", :green
-      else
-        say_status :error, "#{constants_file.relative_path_from(Rails.root)}: Not found", :red
-      end
-
-      # Update tagable.yml
-      if @nesting == :tagable
-        tagable_file = Pathname.new(File.join(destination_root, "config", "constants", "tagable.yml"))
-        if File.exist?(tagable_file)
-          content = File.read(tagable_file)
-          # Match the module name in the comment and append the class name
-          content.sub!(/(#\s+#{module_name}\n)/, "\\1  - #{class_name}\n")
-          File.write(tagable_file, content) unless options[:pretend]
-          say_status :update, "#{tagable_file.relative_path_from(Rails.root)}: Added #{class_name} to Constants tagable list", :green
-        else
-          say_status :error, "#{tagable_file.relative_path_from(Rails.root)}: Not found", :red
-        end
-      end
+      insert_enum_constants
     end
 
     def add_translations
-      I18n.available_locales.each do |locale|
-        if @namespaced
-          translation_file = Pathname.new(File.join(destination_root, "config", "locales", 
-          folder, locale.to_s, "#{locale}.#{class_path[-1]}.models.yml"))
-        else 
-          translation_file = Pathname.new(File.join(destination_root, "config", "locales", 
-          "core", locale.to_s, "#{locale}.models.yml"))
-        end
-        tab = "  "
-        if File.exist?(translation_file)
-          content = File.read(translation_file)
-          # Prepare model name and attributes sections. The key must match Rails' convention 
-          # for namespaced models (ref lib/generators/project_assistant/shared/scaffold_helper.rb)
-          # and the model name itself needs one/other pluralization.
-          model_section = tab*(2 + class_path.count) + "#{i18n_model_scope}:\n" +
-            tab*(3 + class_path.count) + "one: \"#{human_name}\"\n" +
-            tab*(3 + class_path.count) + "other: \"#{human_name.pluralize}\"\n"
-          attributes_section = tab*(2 + class_path.count) + "#{i18n_model_scope}:\n"
-          
-          @fields.each do |field|
-            # Use field[:name].humanize as dummy translation
-            attributes_section += tab*(3 + class_path.count) + "#{field[:name]}: \"#{field[:name].humanize}\"\n"
-            
-            # Add a translation per enum key for enum_translated fields -
-            # plain :enum fields are numeric/symbolic/standard-reference
-            # and don't need translation (see docs/CONSTANTS.md)
-            if field[:type] == :enum_translated
-              attributes_section += tab*(3 + class_path.count) + "#{field[:name].pluralize}:\n"
-              field[:options][:keys].each do |key|
-                attributes_section += tab*(4 + class_path.count) + "#{key}: \"#{key.to_s.humanize}\"\n"
-              end
-            end
-          end
-
-          # Matches both the bare `models:` stub a module generates before
-          # its first model, and `models: {}` (the empty-hash form used so
-          # an unpopulated module doesn't clobber other modules' entries
-          # when merged - see module_generator.rb).
-          model_insertion_regex = /models:[ \t]*(\{\})?\n/
-          attributes_insertion_regex = /attributes:[ \t]*(\{\})?\n/
-          # Insert model name under models section
-          if content.match?(model_insertion_regex)
-            content.sub!(model_insertion_regex) { "models:\n#{model_section}" }
-          else
-            say_status :error, "#{translation_file.relative_path_from(Rails.root)}: Models key not found", :red
-            return
-          end
-
-          # Insert attributes under attributes section
-          if content.match?(attributes_insertion_regex)
-            content.sub!(attributes_insertion_regex) { "attributes:\n#{attributes_section}" }
-            File.write(translation_file, content) unless options[:pretend]
-            say_status :update, "#{translation_file.relative_path_from(Rails.root)}: Added #{class_name} translations", :green
-          else
-            say_status :error, "#{translation_file.relative_path_from(Rails.root)}: Attributes key not found", :red
-          end
-        else
-          say_status :error, "#{translation_file.relative_path_from(Rails.root)}: Not found", :red
-        end
-        
-        # Handle views translations
-        if @namespaced
-          views_file = Pathname.new(File.join(destination_root, "config", "locales", 
-          folder, locale.to_s, "#{locale}.#{class_path[-1]}.views.yml"))
-        else
-          views_file = Pathname.new(File.join(destination_root, "config", "locales", 
-          "core", locale.to_s, "#{locale}.views.yml"))
-        end
-        if File.exist?(views_file)
-          content = File.read(views_file)
-          tab = "  "
-          # Prepare views translations section
-          views_section = tab*2 + "#{plural_name}:\n" +
-            "      index:\n" +
-            "        title:            \"#{human_name.pluralize}\"\n" +
-            "        header:           \"#{human_name.pluralize} Schedule for %{scope_text}\"\n" +
-            "      edit:\n" +
-            "        title:            \"Edit #{human_name}\"\n" +
-            "        header:           \"Edit #{human_name}: %{label}\"\n" +
-            "      new:\n" +
-            "        title:            \"New #{human_name}\"\n" +
-            "        header:           \"New #{human_name} in %{scope_text}\"\n" +
-            "      show:\n" +
-            "        title:            \"#{human_name}\"\n" +
-            "        header:           \"#{human_name}: %{label}\"\n"
-
-          if @namespaced
-            # Matches this file's own single per-module key (the module's
-            # name, e.g. "instrument" - not the model's), however it's
-            # currently represented: a bare, valueless placeholder
-            # (`instrument:`) or an explicit empty hash (`instrument: {}`),
-            # either of which is a valid, inert state for a module with no
-            # views translations yet. Replacing (rather than blindly
-            # appending at EOF) means this also inserts correctly once
-            # real content already exists here from an earlier model.
-            module_key = class_path.last
-            module_key_pattern = /^([ \t]*)#{Regexp.escape(module_key)}:[ \t]*(\{\})?[ \t]*\n?/
-            if content.match?(module_key_pattern)
-              content.sub!(module_key_pattern) { "#{$1}#{module_key}:\n#{views_section}" }
-            else
-              say_status :error, "#{views_file.relative_path_from(Rails.root)}: #{module_key} key not found", :red
-              return
-            end
-          else
-            # Non-namespaced case - the file has no single wrapping key
-            # (core translations sit flat at the top level), so add a new
-            # top-level entry at the end instead.
-            content += "\n#{views_section}"
-          end
-
-          File.write(views_file, content) unless options[:pretend]
-          say_status :update, "#{views_file.relative_path_from(Rails.root)}: Added #{class_name} views translations", :green
-        else
-          say_status :error, "#{views_file.relative_path_from(Rails.root)}: Not found", :red
-        end
-      end
+      insert_translations
     end
   end
 end

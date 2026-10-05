@@ -25,11 +25,11 @@ module Electrical
         current_count = switchboard.circuits.count
         count = desired_count - current_count
         if count > 0
-          # TagablePolicy no longer defines create?/destroy? - the real
+          # Tagable models have no policy of their own - the real
           # authorization for a tagable is always its tag's (see
-          # app/policies/tagable_policy.rb's own comment), so this checks
-          # TagPolicy via the switchboard's own tag, same as every view now
-          # does for edit?/destroy?/new?.
+          # app/policies/tag_policy.rb), so this checks TagPolicy via the
+          # switchboard's own tag, same as every view does for
+          # edit?/destroy?/new?/index?.
           authorize switchboard.tag, :create?
 
           count.times do |i|

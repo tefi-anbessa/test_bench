@@ -1,21 +1,27 @@
 
 module Electrical
-  class DemandPolicy < TagablePolicy
+  # Demand is not a true tagable - unlike every other tagable model, it has
+  # no has_one :tag, as: :tagable association of its own (see its own #tag
+  # method's comment in app/models/electrical/demand.rb). Its "tag" is
+  # borrowed from its demandable (the switchboard/motor/etc. it belongs to),
+  # so it needs its own policy rather than routing through TagPolicy like
+  # every genuinely tagable model does.
+  class DemandPolicy < ApplicationPolicy
     # Returns the demand record
     def demand
       record
     end
-    
+
     # Get the demandable object (Motor, LightCct, etc.)
     def demandable
       demand&.demandable
     end
-    
+
     # Override tag method to use demandable's tag association
     def tag
       record.demandable&.tag
     end
-    
+
     class Scope < ApplicationPolicy::Scope
       def resolve
         if current_project.present? && 
@@ -36,17 +42,27 @@ module Electrical
       end
     end
 
+    def index?
+      # Protect against url injection
+      return false if user.nil?
+      # Global admins can see index irrespective of current project
+      return true if user&.is_admin? || user&.is_app_owner?
+      current_project.present? && user_has_project_role?(current_project)
+    end
+
     def show?
       # Protect against url injection
       return false if user.nil?
-      if current_project.present?
-        # Only allow show of records on current project, if it is set
-        (user_has_project_role?(current_project) || user&.is_admin? || user&.is_app_owner?) &&
-          tag.project == current_project
-      else
-        # Admin and app_owner can view when current project is nil
-        user&.is_admin? || user&.is_app_owner?
-      end
+      # Global admins can see any record on any project - a deliberate
+      # exception to the current-project ring fence below, kept to support
+      # the unbuilt "copy from other project" workflow (see
+      # docs/DEVELOPER_NOTES.md).
+      return true if user&.is_admin? || user&.is_app_owner?
+      # Everyone else is restricted to the currently selected project, even
+      # if they also hold a role on the record's actual project.
+      current_project.present? &&
+        tag.project == current_project &&
+        user_has_project_role?(current_project)
     end
 
     def new?

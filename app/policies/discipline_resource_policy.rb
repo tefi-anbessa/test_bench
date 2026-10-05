@@ -2,7 +2,9 @@
 
 # Base policy for resources that belong to a discipline (Tag, Document, etc.)
 # Class must delegate or implement project method.
-# Tagable resources should inherit from TagablePolicy.
+# Tagable resources have no policy of their own - every pundit call for one
+# goes through this policy via its tag (TagPolicy < DisciplineResourcePolicy,
+# see app/policies/tag_policy.rb), never a per-model policy.
 
 # Scope to current project
 class DisciplineResourcePolicy < ApplicationPolicy
@@ -34,11 +36,16 @@ class DisciplineResourcePolicy < ApplicationPolicy
   def show?
     # Protect against url injection
     return false if user.nil?
-    # Global admins can see any record
+    # Global admins can see any record on any project - a deliberate exception
+    # to the current-project ring fence below, kept to support the unbuilt
+    # "copy from other project" workflow (see docs/DEVELOPER_NOTES.md).
     return true if user&.is_admin? || user&.is_app_owner?
-    # User should have a role on the record's project
+    # Everyone else is restricted to the currently selected project, even if
+    # they also hold a role on the record's actual project.
     record.is_a?(ApplicationRecord) &&
-      user_has_project_role?(record.project)
+      current_project.present? &&
+      record.project == current_project &&
+      user_has_project_role?(current_project)
   end
 
   def new?

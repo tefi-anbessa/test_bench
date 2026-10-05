@@ -8,7 +8,7 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Index Button -->
-            <% if policy(@socket_cct).index? %>
+            <% if policy(@socket_cct.tag).index? %>
               <%= nav_button(action: :index_discipline, path: discipline_tagables_path(@discipline, tagable_type: "Electrical::SocketCct"), record: @socket_cct) %>
             <% end %>
 

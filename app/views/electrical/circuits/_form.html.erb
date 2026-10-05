@@ -44,7 +44,7 @@
             <%= form_field(f, :elcb, type: :enum, control_cols: 4, required: false) %>
             <%= form_field(f, :contactor, type: :boolean) %>
 
-            <% enabled = cables.any? && cable.present? && policy(cable).edit? %>
+            <% enabled = cables.any? && cable.present? && policy(cable.tag).edit? %>
             <% collection = options_for_select(cables || [], selected: circuit.feeder&.id) %>
             <%= form_field(f, :feeder_id, type: :select, collection: collection, required: false, disabled: !enabled) %>
             <% enabled &= demands.any? %>

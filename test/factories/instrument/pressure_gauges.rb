@@ -15,7 +15,7 @@ FactoryBot.define do
     range_min { 0.0 }
     range_max { 10.0 }
     fluid_phase { "gas" }
-    process_fluid { "gas" }
+    process_fluid { "air" }
     accuracy_class { "grade_1_6" }
     dial_size { "mm100" }
     connection_type { "npt" }

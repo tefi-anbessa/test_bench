@@ -8,7 +8,7 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Index Button -->
-            <% if policy(@pressure_gauge).index? %>
+            <% if policy(@pressure_gauge.tag).index? %>
               <%= nav_button(action: :index, path: discipline_tagables_path(@discipline, tagable_type: 'Instrument::PressureGauge'), record: @pressure_gauge) %>
             <% end %>
 

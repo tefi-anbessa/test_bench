@@ -135,7 +135,7 @@ module DisciplineResourcePolicyTest
       assert policy(@accredited_user, @project, @resource).show?
     end
 
-    test 'show denies team members to view resource on other project where they have no role' do
+    test 'show denies non-admins a resource on a different project than the one currently selected' do
       refute policy(@project_manager, @project, @other_resource).show?
       refute policy(@project_admin, @project, @other_resource).show?
       refute policy(@team_member, @project, @other_resource).show?
@@ -149,14 +149,14 @@ module DisciplineResourcePolicyTest
       assert policy(@admin, nil, @other_resource).show?
     end
     
-    test 'show does not require current project to view any resource' do
-      assert policy(@team_member, nil, @resource).show?
+    test 'show denies non-admins any resource when no current project is selected' do
+      refute policy(@team_member, nil, @resource).show?
       refute policy(@team_member, nil, @other_resource).show?
-      assert policy(@project_manager, nil, @resource).show?
+      refute policy(@project_manager, nil, @resource).show?
       refute policy(@project_manager, nil, @other_resource).show?
-      assert policy(@project_admin, nil, @resource).show?
+      refute policy(@project_admin, nil, @resource).show?
       refute policy(@project_admin, nil, @other_resource).show?
-      assert policy(@accredited_user, nil, @resource).show?
+      refute policy(@accredited_user, nil, @resource).show?
       refute policy(@accredited_user, nil, @other_resource).show?
     end
 

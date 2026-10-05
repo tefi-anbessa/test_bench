@@ -27,7 +27,7 @@ km:
   projects:
     index:
       title:            "គម្រោង"
-      header:           "បញ្ជីគម្រោង"
+      header:           "បញ្ជីគម្រោង: %{label}"
     select:
       title:            "ជ្រើសរើសគម្រោង"
       header:           "ការជ្រើសរើសគម្រោង"

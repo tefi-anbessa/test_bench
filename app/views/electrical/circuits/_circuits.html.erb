@@ -5,7 +5,7 @@
 <div class="card mb-1" style="<%= card_styles(@swatch) %>">
   <div class="card-header d-flex justify-content-between align-items-center py-2" style="<%= card_header_styles(@swatch) %>">
     <!-- Link to index view -->
-    <% if policy(switchboard).index? %>
+    <% if policy(switchboard.tag).index? %>
       <% text = [t("activerecord.attributes.electrical/switchboard.circuits"), t('actions.index'), switchboard.tag&.full_tag].join(' ')%>
       <%= link_to electrical_switchboard_circuits_path(switchboard),
             class: "btn btn-sm btn-outline-info me-2",
@@ -17,7 +17,7 @@
     <% end %>
 
     <h5 class="mb-0"><%= t('electrical.circuits.index.header', scope_text: switchboard.label) %></h5>
-    <% if policy(switchboard).new? %>
+    <% if policy(switchboard.tag).new? %>
       <%= link_to new_electrical_switchboard_circuit_path(switchboard),
             class: "btn btn-outline-primary btn-sm",
             data: { turbo: false },
@@ -27,8 +27,8 @@
       <% end %>
     <% end %>
   </div>
-  <% can_edit = policy(switchboard).edit? %>
-  <% can_destroy = policy(switchboard).destroy? %>
+  <% can_edit = policy(switchboard.tag).edit? %>
+  <% can_destroy = policy(switchboard.tag).destroy? %>
   <div class="card-body p-3">
     <div class="row align-items-center py-2 border-bottom">
       <div class="col-2">
@@ -73,7 +73,7 @@
         <!-- Feeder -->
         <div class="col-md-2">
           <% feeder_path = circuit.feeder.present? ? tagable_or_record_path(circuit.feeder) : nil %>
-          <% if feeder_path.present? && policy(circuit.feeder).show? %>
+          <% if feeder_path.present? && policy(circuit.feeder.tag).show? %>
             <%= link_to circuit.feeder.label, feeder_path %>
           <% else %>
             <%= t("index.unassigned") %>

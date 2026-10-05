@@ -141,6 +141,17 @@ class ApplicationController < ActionController::Base
       { show: policy(probe).show?, edit: policy(probe).edit?, destroy: policy(probe).destroy? }
     end
 
+    # Scope a tagable class to the records whose tag is within the current
+    # user's Tag policy scope. Tagable models have no policy of their own -
+    # authorization for them always routes through TagPolicy via their
+    # `tag` association - so this is how a controller gets an authorized
+    # list/lookup of tagable records directly (e.g. candidate feeder cables
+    # for a circuit), in place of `policy_scope(SomeTagableClass)`.
+    def tagable_scope(klass)
+      tag_ids = policy_scope(Tag).where(tagable_type: klass.name).select(:tagable_id)
+      klass.where(id: tag_ids)
+    end
+
     # { id => number of `model` rows whose `foreign_key` is that id }, in one
     # query - avoids a COUNT(*) per row for an index's "how many children"
     # column (e.g. tags/_row.html.erb's children, doc_types' documents,

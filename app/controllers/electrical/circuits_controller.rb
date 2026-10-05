@@ -7,13 +7,13 @@ module Electrical
     def index
       if @switchboard.present?
         # Cater for index on given switchboard
-        authorize @switchboard
+        authorize @switchboard.tag
         @q = @switchboard.circuits.ransack(params[:q])
       else
         # Cater for index on all circuits in current project
-        authorize Electrical::Switchboard
+        authorize Tag
         @q = Electrical::Circuit.joins(switchboard: [tag: [discipline: :project]])
-              .merge(policy_scope(Electrical::Switchboard)).ransack(params[:q])
+              .merge(tagable_scope(Electrical::Switchboard)).ransack(params[:q])
       end
       # Each row links to its feeder and its demand - preload both directly
       # (rather than nesting :to under :feeder) since a has_one :through
@@ -24,19 +24,19 @@ module Electrical
     end
     
     def show
-      authorize @circuit.switchboard
+      authorize @circuit.switchboard.tag
       @neighbours = Navigator.new(scope: @scope, record: @circuit).neighbours
       set_swatch
     end
     
     def new
-      authorize @switchboard
+      authorize @switchboard.tag
       @circuit = @switchboard.circuits.new
       setup_form
     end
     
     def create
-      authorize @switchboard
+      authorize @switchboard.tag
       # Catch enum validation errors
       begin
         attributes = circuit_params
@@ -86,12 +86,12 @@ module Electrical
     end
 
     def edit
-      authorize @switchboard
+      authorize @switchboard.tag
       setup_form
     end
     
     def update
-      authorize @switchboard
+      authorize @switchboard.tag
       # Catch enum validation errors
       begin
         attributes = circuit_params
@@ -158,7 +158,7 @@ module Electrical
     end
     
     def destroy
-      authorize @switchboard
+      authorize @switchboard.tag
       if @circuit.destroy
         flash[:success] = t("flash.destroy.notice", resource_name: t("activerecord.models.electrical/circuit.one"))
       else
@@ -172,7 +172,7 @@ module Electrical
       def set_switchboard
         if params[:switchboard_id].present?
           # Index for single switchboard
-          @switchboard = policy_scope(Electrical::Switchboard).find_by(id: params[:switchboard_id])
+          @switchboard = tagable_scope(Electrical::Switchboard).find_by(id: params[:switchboard_id])
           raise ApplicationController::ConflictError, :out_of_scope if @switchboard.nil?
           @discipline = @switchboard.discipline
         else
@@ -182,10 +182,10 @@ module Electrical
           raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
         end
       end
-      
+
       def set_circuit
         @circuit = Electrical::Circuit.joins(:switchboard)
-              .merge(policy_scope(Electrical::Switchboard))
+              .merge(tagable_scope(Electrical::Switchboard))
               .find_by(id: params[:id])
         raise ApplicationController::ConflictError, :out_of_scope if @circuit.nil?
         @switchboard = @circuit.switchboard
@@ -225,12 +225,12 @@ module Electrical
       # To change an existing allocation, user must edit the cable itself.
       def set_feeder(feeder_id)
         # Check that the cable requested exists and is in scope
-        unless feeder = policy_scope(Electrical::Cable).find_by(id: feeder_id)
+        unless feeder = tagable_scope(Electrical::Cable).find_by(id: feeder_id)
           raise ApplicationController::ConflictError, :invalid_assignment
         end
 
         # Check that user has permission to edit cable
-        unless policy(feeder).edit?
+        unless policy(feeder.tag).edit?
           flash[:alert] = t("pundit.unauthorized", 
                                 action: t("actions.edit"), 
                                 objects: @circuit.feeder.model_name.human.pluralize.downcase)
@@ -256,7 +256,7 @@ module Electrical
         end
 
         # Check that user has permission to edit the feeder
-        unless policy(feeder).edit?
+        unless policy(feeder.tag).edit?
           flash[:alert] = t("pundit.unauthorized", 
                                 action: t("actions.edit"), 
                                 objects: feeder.model_name.human.pluralize.downcase)
@@ -270,11 +270,11 @@ module Electrical
       def setup_form
         # Filter cables that are not already assigned as feeders (from association is nil)
         # but include the current assignment to show selected on form.
-        @cables = policy_scope(Electrical::Cable).where(from: nil)
-                                .or(policy_scope(Electrical::Cable).where(from: @circuit))
+        @cables = tagable_scope(Electrical::Cable).where(from: nil)
+                                .or(tagable_scope(Electrical::Cable).where(from: @circuit))
                                 .map { |cable| [cable.label, cable.id] }
-        @cable = policy_scope(Electrical::Cable).first # dummy cable for policy testing
-        
+        @cable = tagable_scope(Electrical::Cable).first # dummy cable for policy testing
+
         # Filter demands that don't already have an incomer cable
         # Build the base scope for demands
         demands_scope = policy_scope(Electrical::Demand)

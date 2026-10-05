@@ -3,9 +3,11 @@ Description:
     exists (built via the scaffold generator, or by hand) - never creates a
     model itself.
 
-    Pass the model name (CamelCased, module-prefixed if namespaced). The
-    model's policy must already inherit DisciplineResourcePolicy, or
-    TagablePolicy if using --tagable.
+    Pass the model name (CamelCased, module-prefixed if namespaced). Without
+    --tagable, the model's policy must already inherit
+    DisciplineResourcePolicy. With --tagable, the model has no policy of its
+    own at all - it just needs to include Tagable, since authorization
+    routes through TagPolicy via its tag association.
 
     --tagable: target is a tagable model. Skips controller and route
     injection entirely, since every tagable type already shares one

@@ -16,7 +16,7 @@ module ProjectAssistant
       @class_name = "ExistingModule::NewModel" # Default namespaced class
       # Set the namedbase substitutes
       name_setup_for_test
-      @nesting_options = %i[project discipline tag tagable none]
+      @nesting_options = %i[project discipline tag none]
 
       # Create clean files for testing (avoid conflicts with real app files)
       FileUtils.mkdir_p(File.join(destination_root, 'config'))
@@ -795,17 +795,6 @@ nr: "Not Required"
       constants_file = File.join(destination_root, 'config', 'constants', "#{module_name.underscore}.yml")
       assert_file constants_file do |content|
         assert_match(/#{@singular_name}: \{\}/, content)
-      end
-    end
-
-    test "adds model to constants tagable.yml for tagable nesting" do
-      run_generator [@class_name, *@args, "--nesting=tagable"]
-      tagable_file = File.join(destination_root, 'config', 'constants', 'tagable.yml')
-      assert_file tagable_file do |content|
-        # Entry must be nested directly under the model's own module
-        # comment heading (e.g. "# ExistingModule"), not just anywhere
-        # in the file.
-        assert_match(/#\s+#{module_name}\n\s*- #{Regexp.escape(@class_name)}\n/, content)
       end
     end
 

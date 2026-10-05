@@ -8,7 +8,7 @@
         <div class="col-auto">
           <div class="d-flex align-items-center">
             <!-- Index Button -->
-            <% if policy(@circuit.switchboard).index? %>
+            <% if policy(@circuit.switchboard.tag).index? %>
               <%= nav_button(action: :index, path: electrical_switchboard_circuits_path(@switchboard), record: @circuit) %>
             <% end %>
 
@@ -36,15 +36,15 @@
 
             <!-- Action Buttons -->
             <div class="btn-group btn-group-sm gap-1">
-              <% if policy(@switchboard).edit? %>
+              <% if policy(@switchboard.tag).edit? %>
                 <%= nav_button(action: :edit, path: edit_electrical_circuit_path(@circuit), record: @circuit) %>
               <% end %>
 
-              <% if policy(@switchboard).destroy? %>
+              <% if policy(@switchboard.tag).destroy? %>
                 <%= nav_button(action: :delete, record: @circuit) %>
               <% end %>
 
-              <% if policy(@switchboard).new? %>
+              <% if policy(@switchboard.tag).new? %>
                 <%= nav_button(action: :new, path: new_electrical_switchboard_circuit_path(@switchboard), record: @circuit) %>
               <% end %>
             </div> <!-- end button group -->
