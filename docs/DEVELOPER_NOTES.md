@@ -494,6 +494,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Add catalog required roles in disciplines, to allow different role for cable types and doc types, etc.
 - [ ] Refactor cable and cable types to be core module available to electrical, instruments, telecoms (any module). Should belong to discipline.
 - [x] Index views should preload permissions and not check every row.
+- [ ] Share enums reused across models.
 - [x] Scaffold generators should include enum configuration, or build a separate generator.
 - [x] Include a valid value for fields in generators args.
 - [x] Consider whether the same improvement applies to demand.
