@@ -67,9 +67,10 @@ The tag model provides the following functionality:
   * Correct initial file content.
   * Greatly reduced development time.
 * Rails provides a number of generators for common tasks, such as creating a model, controller, or migration. These are typically very primitive, providing only bare bones of an application.
-* The Rails scaffold generator is more comprehensive, providing a full suite of model, migration, controller, routes, views and associated tests conforming with the application's requirements.
-* This application's bespoke generators are namespaced in the /lib folder under the application name ProjectAssistant. This prevents generator name clashes with other gems and rails standard generators.
-* Generators comprise a sequence of instructions to create folders, create files from templates, or edit files. (They can also run migrations and all sorts of marvellous things, but the generators to date don't use these features.)
+* The Rails scaffold generator is more comprehensive, providing a full suite of model, migration, controller, routes, views and associated tests.
+* This application's bespoke generators build models and infrastructure that meets the application standards and requirements. 
+* The generators are namespaced in the /lib folder under the application name ProjectAssistant. This prevents generator name clashes with other gems and rails standard generators.
+* Generators comprise a sequence of instructions to create folders, create files from templates, or edit files. (They can also run migrations and all sorts of marvellous things, but the app's generators to date don't use these features.)
 * Rails provides the facility to reverse a generator's action using the rails destroy command. Some points to consider about destroy:
   * Destroy bases its actions on the current generator file, so cannot properly destroy actions that are no longer in the generator, if it has been edited.
   * If the generator included a migration (whether run inside the generator or manually), be sure to rollback the migration before running destroy.
@@ -82,6 +83,7 @@ The tag model provides the following functionality:
      git add -A
      git commit -m "checkpoint before generator trial"
      ```
+
   2. Run the generator (`--pretend` first if you want to preview before committing to it for real).
   3. To revert back to the checkpoint, restore tracked files with a hard reset, then remove the generator's untracked output interactively rather than with a blind `-f`:
 
@@ -121,15 +123,15 @@ The tag model provides the following functionality:
       * `config/locales/#{module_name}`
       * `config/locales/#{module_name}/#{locale}` for each locale in `I18n.available_locales`
     * The files created are:
-      * from template `lib/generators/project_assistant/templates/module.rb.erb`, to provide the module table name prefix, and any other functionality the module requires at the top level:
+      * from template `lib/generators/project_assistant/module/templates/module.rb.erb`, to provide the module table name prefix, and any other functionality the module requires at the top level:
         * `app/models/#{module_name}.rb`
-      * from template `lib/generators/project_assistant/templates/base.rb.erb`, to provide shared functionality for all models in the module:
+      * from template `lib/generators/project_assistant/module/templates/base.rb.erb`, to provide shared functionality for all models in the module:
         * `app/models/#{module_name}/base.rb`
       * for each locale in `I18n.available_locales`, files with no content:
         * `config/locales/#{module_name}/#{locale}.#{module_name}.yml`
         * `config/locales/#{module_name}/#{locale}.#{module_name}.models.yml`
         * `config/locales/#{module_name}/#{locale}.#{module_name}.views.yml`
-      * from template `lib/generators/project_assistant/templates/constants.yml`, to provide constants such as enum options for the module:
+      * from template `lib/generators/project_assistant/module/templates/module.yml.erb`, to provide constants such as enum options for the module:
         * `config/constants/#{module_name}.yml`
 
     * The edits made are:
@@ -140,7 +142,7 @@ The tag model provides the following functionality:
         end
         ```
 
-        This is a ready-made home for any non-tagable, module-namespaced model's own routes (for example `Electrical::CableType`), added later by the scaffold generator or by hand. Tagable models need no route changes at all - every tagable type shares one generic set of routes, keyed by `tagable_type` at request time, already wired up once for the whole app (see the "Tagable routes" section of `config/routes.rb`) - so nothing tagable-specific is inserted here.
+        This is a ready-made home for any non-tagable, module-namespaced model's own routes (for example `Electrical::CableType`), added later by the scaffold generator or by hand. Tagable models need no route changes.
 
       * In `config/constants/tagable.yml`, after the line `tagable:` the following comment line is added, as the placeholder to define tagable models in the module:
 
@@ -160,45 +162,27 @@ The tag model provides the following functionality:
   * If you are sure that the existing folder does not contain anything that needs to be retained, respond with 'y'.
   * If you are not sure, respond with 'n'. The generator will abort.
 * The generator will create the folders, files and edits required to add a new module. The generator output will show the files and edits created.
-* IMPORTANT. The module generator creates a locale file folder, with files for each locale for models, views, and general translations. These files have a namespace key, but no content. If you do not create a model in the new module, the empty locale file (for models at least) will break the translations. Either remove the empty locale file, or add content to it.
+* The module generator creates a locale file folder, with files for each locale for models, views, and general translations. These files have their namespace keys set to empty hashes.
 * The generator creates a base class for the module, which is used as the parent class for all models in the module. This base class is used to define shared behavior for all models in the module.
 * The base class defaults the colour swatch to "app_theme". Set as required.
-* The base class defaults the module discpline to the same name as the module. This is used in testing. The user can set any discipline names for each project, they are not constrained to the module name.
+* The base class defaults the module discipline to the same name as the module. This is used in testing.
 * The base class defaults label and long_label methods to inherit from tag. If the module is not used for tagable models, this should be changed to something suitable, or removed.
 
 ## SCAFFOLD GENERATOR
 
-A scaffold generator is provided as an alternative to the rails standard scaffold generator, to build a model with consistent structure and content matching the rest of the application, and facilitate rapid deployment. It supersedes the old, separate `project_assistant:tagable` generator entirely - a `--nesting=tagable` option on this generator now builds a tagable model directly, and does so correctly against the application's current architecture, which the old tagable generator no longer did (see [History](#history) below).
+A scaffold generator is provided to build a model with consistent structure and content matching the rest of the application, and facilitate rapid deployment. Tagable models are not built by this generator. Use `project_assistant:tagable` for those (see [Tagable Generator](#tagable-generator)).
 
 The generator itself is reasonably self documented, refer to [scaffold_generator](../lib/generators/project_assistant/scaffold_generator.rb).
-
-### History
-
-The application originally had two generators: `project_assistant:tagable` for models with tag linkage, and `project_assistant:scaffold` for everything else. The scaffold generator was later extended with a `--nesting` option covering every relationship shape a model might need, including `tagable` - making it a strict superset of what the tagable generator did, with the added benefit of also supporting nested modules and core-level (non-namespaced) models, which the tagable generator never allowed.
-
-A later refactor ("retire the old per-type tagable routes/controllers") consolidated every tagable model onto one shared `TagablesController` and one generic set of routes, keyed by a `tagable_type` string rather than one dedicated controller and route set per model. The scaffold generator's `--nesting=tagable` mode was updated to match: it generates a `*_extension.rb` module (mixed into the shared controller) and adds no routes at all, since the shared routes already cover every tagable type unconditionally. The old, separate tagable generator was never updated for this refactor - it still generates a dedicated per-model controller and injects dedicated per-model routes, neither of which match how a tagable model actually works today. For that reason it has been retired in favour of this generator's `--nesting=tagable` option, and its documentation has been folded into this section.
 
 ### Specification
 
 #### Command Line
 
-The generator shall be invoked using the rails generate command. The command line must include the generator name `project_assistant:scaffold`, and the model name as a Ruby class specifier in CamelCase - either bare (e.g. `Swatch`, for a core, non-namespaced model) or module-prefixed (e.g. `Electrical::Heater`). A list of arguments for the fields to be created can either be provided on the command line, or read from a definition file. Definition files must be YAML or Ruby format. By using a definition file, more complex information is easier to read, check and edit than with a long unformatted command line. Saving the definition file to revision history is useful.
+The generator shall be invoked using the rails generate command. The command line must include the generator name `project_assistant:scaffold`, and the model name as a Ruby class specifier in CamelCase - either bare (e.g. `Swatch`, for a core, non-namespaced model) or module-prefixed (e.g. `ChangeManagement::Request`). A list of arguments for the fields to be created can either be provided on the command line, or read from a definition file. Definition files must be YAML or Ruby format. By using a definition file, more complex information is easier to read, check and edit than with a long unformatted command line. Saving the definition file to revision history is useful.
 
-**Important - option order**: `--nesting` (and any other `--option`) must come **after** the field arguments on the command line, not before. When options are placed before the field list, Thor's argument parsing silently drops every field that follows - the generator runs, reports the right nesting, but produces a model with none of the requested fields, with no error at all. Field arguments placed after `--nesting=...` parse correctly.
+**Important - option order**: `--nesting` (and any other `--option`) must come **after** the field arguments on the command line, not before. When options are placed before the field list, Thor's argument parsing silently drops every field that follows - the generator runs, reports the right nesting, but produces a model with none of the requested fields, with no error at all.
 
-Here is an example generate command for an electrical heater, using `--nesting=tagable` (note only one of the enums has keys expounded, this really is a case where a definition file would be clearer):
-
-```bash
-rails generate project_assistant:scaffold Electrical::Heater heater_type:enum_translated:required application:enum_translated:required ingress_protection:string sheath_temperature_max:float:units="deg C" power_density_min:float power_density_max:float sheath_material:enum_translated insulation_material:enum_translated:keys="insulation_material_other","no_insulation","ceramic","magnesium_oxide","mica","mineral","fluoropolymer","fiberglass" notes:text --nesting=tagable
-```
-
-Here is the alternate command line using a definition file (no field arguments on the command line, so option order doesn't matter here):
-
-```bash
-rails generate project_assistant:scaffold Electrical::Heater --nesting=tagable --definition=electrical_heater
-```
-
-The generator will look in folder `lib/generators/project_assistant/scaffold/definitions` for a file name as specified, with extension `.yml` or `.rb`.
+If a `--definition=filename` option is specified, the generator will look in folder `lib/generators/project_assistant/scaffold/definitions` for a file name as specified, with extension `.yml` or `.rb`.
 
 For a namespaced model, the module (and every level of a nested module) must already exist, with its associated folders and files in place, before running the generator - always use the module generator first to ensure that structure is ready. A non-namespaced (core) model has no such prerequisite.
 
@@ -210,14 +194,39 @@ The `--nesting` option selects the model's relationship shape, and drives severa
 
 * `none` (the default): a plain, non-nested model with no automatic association. No route nesting; the route is inserted at the top-level "Insertion point for non-nested routes" marker in `config/routes.rb`.
 * `project`: adds `belongs_to :project`. Policy is `ProjectResourcePolicy`-based; controller includes the `ProjectResourcesController` concern. Route inserted under the project-nested routes section. Example: ChangeManagement::Request and other models are project nested.
-* `discipline`: adds `belongs_to :discipline`. Policy is `DisciplineResourcePolicy`-based; controller includes the `DisciplineResourcesController` concern. Route inserted under the discipline-nested routes section. This is the shape most discipline-scoped, non-tagable models use (e.g. a model like `Electrical::CableType`).
-* `tag`: adds `belongs_to :tag`. Policy is `TagResourcePolicy`-based; controller includes the `TagResourcesController` concern. Route inserted under the tag-nested routes section. Use for a model that's linked to a tag but is not itself a tagable delegated type (e.g. `Electrical::Demand`).
-* `document` / `issue`: adds `belongs_to :document` / `belongs_to :issue` respectively. Route inserted under the corresponding nested routes section. Used rarely; verify the generated routes edit landed in the right place before relying on it, as these two nesting values are less exercised than the others.
-* `tagable`: builds a genuine tagable delegated-type model - `include Tagable` in the model, no `belongs_to`. The name **must** be module-prefixed (`Module::Class`), since a core-level tagable model isn't supported (matching the old tagable generator's own requirement). Policy inherits `TagablePolicy`. **No dedicated controller is generated** - instead, a `*_extension.rb` module is generated and mixed into the shared `TagablesController` at runtime (see Files, below). **No route is inserted at all** - the shared, generic tagable routes (`resources :tags do resource :tagable end`, `resources :disciplines do resource :tagable, only: [:new, :create] end`, `resources :disciplines do resources :tagables, only: [:index] do ... end end`) already cover every tagable type unconditionally.
+* `discipline`: adds `belongs_to :discipline`. Policy is `DisciplineResourcePolicy`-based; controller includes the `DisciplineResourcesController` concern. Route inserted under the discipline-nested routes section. This is the shape most discipline-scoped, non-tagable models use (e.g. a model like `Document`).
+* `tag` (not fully developed; will be built out when a model needs it): adds `belongs_to :tag`. Policy is `TagResourcePolicy`-based; controller includes the `TagResourcesController` concern. Route inserted under the tag-nested routes section. Use for a model that's linked to a tag but is not itself a tagable delegated type (e.g. `Electrical::Demand`).
+* `document` / `issue` (not fully developed; will be built out when a model needs them): adds `belongs_to :document` / `belongs_to :issue` respectively. Route inserted under the corresponding nested routes section. Used rarely; verify the generated routes edit landed in the right place before relying on it, as these two nesting values are less exercised than the others.
+* Tagable models are not built by this generator. Use `project_assistant:tagable` (see [Tagable Generator](#tagable-generator)).
 
-#### Command Line Input of Fields
+#### Fields
 
-When using command line input for fields, following the model name and any `--nesting`/`--definition` options, all fields to be included in the model shall be specified with their type and options, separated by colons with no spaces.
+The user shall specify the model's required attributes by providing a set of fields. Fields can be specified on the command line, or alternatively in a definition file.
+
+When using command line input for fields, following the model name, all fields to be included in the model shall be listed with their type and options. Fields are separated by whitespace. Within a field specification, the name, type, and options are separated by colons with no spaces allowed.
+
+When using a definition file for fields, the command line shall include the option: `definition=filename`. Note that the filename extension shall not be provided.
+
+The accepted YAML file format is of the form:
+
+```yaml
+name: 
+  type: 
+  option:
+  option:
+```
+
+Refer to [electrical_test.yml](../lib/generators/project_assistant/scaffold/definitions/electrical_test.yml) for an example of a YAML definition file.
+
+The accepted Ruby file format is of the form:
+
+```ruby
+name: { type: :string, required: true }
+```
+
+Refer to [electrical_test.rb](../lib/generators/project_assistant/scaffold/definitions/electrical_test_rb.rb) for an example of a Ruby definition file.
+
+Fields are given either on the command line or in a definition file, never both: the generator shall abort if `--definition` is given together with field arguments. Any `--nesting` option goes after the fields.
 
 * Names must be valid ruby identifiers.
 * Types implemented shall be the standard rails types, with custom additions for this generator as listed below.
@@ -225,27 +234,19 @@ When using command line input for fields, following the model name and any `--ne
 * The generator shall implement `:references` or `:belongs_to` types as associations between models. These should only be used on the belongs_to model. They shall add the foreign key field to the migration, and provide appropriate view links.
 * The generator shall implement the custom `:enum` type to create an enumerated field. The generator shall set integer type in the migration, and shall create a framework for the enum in the model, views, and constants files for the module. The allowable values for the enum should be included as a list of keys as strings in the command line option, or in the definition file.
 * The generator shall implement the custom `:enum_translated` type to specify an enumerated field (with translations). The generator shall set integer type in the migration, and shall create a framework for the enum in the model, views, and constants as for `:enum` type. In addition, the locales files for the module shall be edited with placeholders for the field name and option translations. The translations for the enum will need to be set manually after generation.
-* "Flag options" don't require a value in he command line, their presence implies true and absence implies false. However, they do accept a valid boolean (true or "1", false or "0") as a value.
+* "Flag options" don't require a value in the command line, their presence implies true and absence implies false. However, they do accept a valid boolean (true or "1", false or "0") as a value. When used in a definition file, a valid boolean is required to conform to the file's language.
   * The generator shall respond to the `:index` flag option. This is standard rails generator format. This option shall result in an index being added in the migration.
   * The generator shall respond to the `:uniq` or `unique` flag options, instead of `:index`. This option shall result in a unique index being added in the migration.
-  * The generator shall respond to the `:required` flag option after the type. This is not standard rails generator format but is less ambiguous than the `:null` option rails uses. It shall result in a presence validation in the model, and an associated model test. IMPORTANT: The `:required` option for association types is significant. With rails, :belongs_to defaults to required, but in the generator it will be set to optional unless :required is true.
+  * The generator shall respond to the `:required` flag option. This is not standard rails generator format but is less ambiguous than the `:null` option rails uses. It shall result in a presence validation in the model, and an associated model test. IMPORTANT: The `:required` option for association types is significant. With rails, :belongs_to defaults to required, but in the generator it will be set to optional unless :required is true.
 * Value options require a value. In the command line, the option and value are separated by '='. In a definition file, the syntax must conform to the selected language.
   * The generator shall respond to the :valid option for all types. The value provided must be valid for the field's type. The value will be used to default the test factory, and also in controller tests.
   * The generator shall respond to the :keys option, but only for :enum and :enum_translated field types. The value shall be an array of strings. On the command line, there must not be any spaces between elements (space is the separator between fields). The array elements shall be used as the enum keys by adding them to the Constants structure. For :enum_translated type, they shall also be added to the model translation files.
   * The generator shall respond to the :precision and :scale value options, but only for :decimal and :float types. The values provided must be valid integers. The options shall be passed to the migration for :decimal types. They shall be passed to view helpers for display formatting.
   * The generator shall respond to the :units option, but only for :float and :decimal types. The value shall be coerced to string class, and passed to display helpers for formatting.
   * The generator shall respond to the :si option, but only for :float and :decimal types. The value shall be a valid boolean. The value shall be passed to display helpers for formatting.
-  * The generator shall respond to the :step option, but only for numeric types :integer, :bigint, :float, and :decimal. The value must be a valid decimal. The value shall be passed to form field helpers for implementing the step option on number_field tags. Use with caution with real numbers: the step option causes input to be rejected if it does not fall exactly on a step value.
+  * The generator shall respond to the :step option, but only for numeric types :integer, :bigint, :float, and :decimal. The value must be a valid decimal. The value shall be passed to form field helpers for implementing the step option on number_field tags.
 
 The generator shall first parse all arguments. If invalid names, types, or options are provided, a warning shall be issued listing the invalid arguments. The generator shall abort unless all names, fields and options are valid.
-
-#### File Definition of Fields
-
-The rules for fields defined in a file are the same as for the command line. Fields shall be defined in a YAML file, or as a valid Ruby hash (to be implemented).
-
-Differences from command line options are as follows:
-
-* The "flag" options index, uniq/unique, and required shall be specified with a value true, rather than just be present.
 
 #### Folders
 
@@ -264,13 +265,13 @@ The generator shall create these files:
 ##### Model
 
 * A model definition file including:
-  * `include Tagable` for `--nesting=tagable`; a `belongs_to` for every other nesting value except `none`
+  * a `belongs_to` for every nesting value except `none`
   * enum declarations for any enum fields
   * belongs_to association declarations for any `:references`/`:belongs_to` fields
   * presence validations for any required fields
   * uniqueness validations for any unique fields
   * ransackable attributes for searching and sorting all attributes
-  * ransackable associations for any fields of type `:references`, plus `:tag, :tag_discipline, :tag_discipline_project` for `--nesting=tagable`
+  * ransackable associations for any fields of type `:references`
   * `app/models/#{file_path}.rb`
 
 ##### Policy
@@ -280,12 +281,9 @@ The generator shall create these files:
 
 ##### Controller
 
-* For every nesting value **except** `tagable`: a controller file with the standard RESTful actions deferring to the matching `*ResourcesController` concern, and safe parameters set to the defined fields:
+* A controller file with the standard RESTful actions deferring to the matching `*ResourcesController` concern, and safe parameters set to the defined fields:
   * `app/controllers/#{controller_file_path}_controller.rb`
-* For `--nesting=tagable` **only**: no dedicated controller. Instead, an extension module (`setup_additional_form_data`/`after_create_hook`/`after_update_hook`/`tagable_params` hooks, mixed into the shared `TagablesController` by naming convention):
-  * `app/controllers/#{file_path}_extension.rb`
-
-Note: unlike the old tagable generator, **no helper file is created** for any nesting value.
+No helper file is created.
 
 ##### Views
 
@@ -330,8 +328,7 @@ Note: unlike the old tagable generator, **no helper file is created** for any ne
 
 ##### Routes
 
-* For `--nesting=tagable`: **no routes edit at all** - the shared tagable routes already cover every type. The generator shall log an informational message confirming this rather than editing `config/routes.rb`.
-* For every other nesting value: **one** `resources :#{plural_name}` line shall be inserted into `config/routes.rb`, at the nested-routes section matching the nesting value (e.g. `--nesting=discipline` inserts just before `end # discipline nested routes`), or at the "Insertion point for non-nested routes" marker for `--nesting=none`. If the model is namespaced under a module and that module has its own `namespace :#{module_name} do ... end` block already present in the target section, move the newly-inserted line into it by hand afterward for a tidier result - the generator itself always inserts flat, at the top level of the nesting section, not inside a module namespace.
+* One `resources :#{plural_name}` line shall be inserted into `config/routes.rb`, at the nested-routes section matching the nesting value (e.g. `--nesting=project` inserts just before `end # discipline nested routes`), or at the "Insertion point for non-nested routes" marker for `--nesting=none`. If the model is namespaced under a module and that module has its own `namespace :#{module_name} do ... end` block already present in the target section, move the newly-inserted line into it by hand afterward for a tidier result - the generator itself always inserts flat, at the top level of the nesting section, not inside a module namespace.
 * If the expected marker/section is not found, the generator shall log an error message.
 * The generator shall provide a success message if the file edit is completed.
 
@@ -350,7 +347,6 @@ Note: unlike the old tagable generator, **no helper file is created** for any ne
 
    The generator shall issue a success message if the file edit is completed. If the file is not found, the generator shall log an error message.
 
-* For tagable models, the generator shall edit `config/constants/tagable.yml`, appending the model's full class name as a new list entry directly under its module's own comment heading (e.g. `# Electrical`), so the model is recorded in the master list of tagable types alongside the others in its module. If the module's comment heading isn't found, the generator shall log an error message; otherwise a success message.
 
 ##### Translations
 
@@ -361,20 +357,16 @@ Note: unlike the old tagable generator, **no helper file is created** for any ne
       activerecord:
         models:
           ...
-          electrical/heater: "Heater"
+          change_management/request: "Change Request"
         attributes:
-          electrical/heater:
-            heater_type: "Heater type"
-            heater_types:
-              heater_type_other: Other heater type
-              cast_in: Cast-In Heater
-              ...
-            application: "Application"
-            applications:
-              application_other: Other application
-              annealing_heat_treating: Annealing _ Heat Treating
-              ...
-            sheath_temperature_max: "Sheath temperature max"
+          change_management/request:
+            title: "Title"
+            reason: "Reason"
+            duration: "Duration"
+            durations:
+              permanent: "Permanent"
+              trial: "Trial"
+              temporary: "Temporary"
             ...
     ```
 
@@ -385,19 +377,19 @@ Note: unlike the old tagable generator, **no helper file is created** for any ne
 2. For each locale in I18n.available_locales, the generator shall edit the matching views translations file, appending the model name at the end of the file, with the standard actions translations. Example:
 
     ```yml
-        heaters:
+        requests:
           index:
-            title:            "Heaters"
-            header:           "Heaters Schedule for %{scope_text}"
+            title:            "Change Requests"
+            header:           "Change Requests Schedule for %{scope_text}"
           edit:
-            title:            "Edit Heater"
-            header:           "Edit Heater %{label}"
+            title:            "Edit Change Request"
+            header:           "Edit Change Request %{label}"
           new:
-            title:            "New Heater"
-            header:           "New Heater in %{scope_text}"
+            title:            "New Change Request"
+            header:           "New Change Request in %{scope_text}"
           show:
-            title:            "Heater"
-            header:           "Heater %{label}"
+            title:            "Change Request"
+            header:           "Change Request %{label}"
     ```
 
     The generator shall provide a success message if the file edit is completed. If the file is not found, the generator shall log an error message.
@@ -410,7 +402,7 @@ Usage is explained using the example used by the generator test, which covers al
 
 1. Before running this complex generator, it is strongly recommended to commit all changes to git, so there is a safe return point if things get messy. Generators can be partly reversed with destroy action, but this does not undo the edits made (in fact destroy repeats the edits), nor does it remove migrations because they are timestamped. The safest way for recovering is to use git.
 
-2. The second and most important step is to make a list of all the fields that will be on the data sheet, determine their types, and record the options required. Include all the necessary fields required to specify items of the new type. Unless the model is very simple, it is recommended to use an editor to prepare a definition file.
+2. The second and most important step is to make a list of all the model's attributes, determine their types, and record the options required. Include all the necessary fields required to specify items of the new type. Unless the model is very simple, it is recommended to use an editor to prepare either the command line or a definition file.
 
     * Field names must be valid ruby identifiers.
 
@@ -441,29 +433,27 @@ Usage is explained using the example used by the generator test, which covers al
         * :required: use this option for fields that must have a value set. Use carefully, as a record cannot be saved if it has a missing required field, which may degrade the user experience.
 
       * Value options:
-        * :valid is available to all types but is ignored for enum types. The value provided must match the field type.
+        * :valid is available to all types. The value provided must match the field type.
         * :keys is only available for :enum and :enum_translated field types. The value must be an array of strings.
         * :precision and :scale are available for :float and :decimal types. The value must be a valid integer. They correspond to rails' options of the same name, and for :decimal types are enforced in the database.
-        * :units is only available for :float and :decimal types. The value must be a string. It is used for presentation only.
-        * :si is only available for :float and :decimal types. The value must be a boolean. It is for future use in presentation only.
-        * :step is only available for number types (:integer, :bigint, :float, :decimal). The value must be a decimal. It is used for number fields on forms only.
+        * :units is only available for :float and :decimal types. The value must be a string. It is appended to the value in views.
+        * :si is only available for :float and :decimal types. The value must be a boolean. When true, the show views will scale the value to an engineering value between 1 and 1000, and use the scale to add the appropriate SI prefix to the units.
+        * :step is only available for number types (:integer, :bigint, :float, :decimal). The value must be a decimal. It is used for number fields on forms only. Use with caution with real numbers: the step option causes input to be rejected if it does not fall exactly on a step value.
 
-3. Note that enum field option keys become class methods for the model, so have to be unique across the whole class, and may not include Ruby method names. "None" is an easy trap to fall into, but is a standard class method so cannot be used as an option. The solution is to use the prefix or suffix options, see the "Follow Up" section.
+3. Note that enum field option keys become class methods for the model, so have to be unique across the whole class, and may not include Ruby method names. "None" is an easy trap to fall into, but is a standard class method so cannot be used as an option. For this reason the generator adds the prefix option in the model definition.
 
-4. For `--nesting=tagable`, include a field `notes:text` at the end of the list. Every tagable model has this field, and the shared tagable system test expects it to be there.
+4. The generator has dependencies, which should automatically be met if the module generator has been used for setting up the module (for a namespaced model). Refer to the module generator documentation to see what is expected, and check that all requirements are in place.
 
-5. The generator has dependencies, which should automatically be met if the module generator has been used for setting up the module (for a namespaced model). Refer to the module generator documentation to see what is expected, and check that all requirements are in place.
+5. The generator uses [field_types.rb](../lib/generators/project_assistant/field_types.rb) to make assumptions on how to present the various field types. Only field types in `SEARCHABLE_TYPES` will have search fields on the index view. Only field types in `INDEX_TYPES` will appear in the index view. If these assumptions don't suit the model being generated, it is acceptable to edit `field_types.rb` temporarily, but ensure it is restored when complete. For minor differences, it may be easier to edit the generated scaffold after the run, but be aware of the dependencies: test files need to match the code files. If this is a regular occurrence, consider adding named versions of field_types.rb.
 
-6. The generator uses [field_types.rb](../lib/generators/project_assistant/field_types.rb) to make assumptions on how to present the various field types. Only field types in `SEARCHABLE_TYPES` will have search fields on the index view. Only field types in `INDEX_TYPES` will appear in the index view. If these assumptions don't suit the model being generated, it is acceptable to edit `field_types.rb` temporarily, but ensure it is restored when complete. For minor differences, it may be easier to edit the generated scaffold after the run, but be aware of the dependencies: test files need to match the code files. If this is a regular occurrence, consider adding named versions of field_types.rb.
-
-7. With all the fields ready, it's time to prepare the command line.
+6. With all the fields ready, it's time to prepare the command line.
 
 #### Command with Definition File
 
 If you have prepared a definition file, the command line is of the form:
 
 ```bash
-rails generate project_assistant:scaffold Electrical::Test --nesting=tagable --definition=electrical_test
+rails generate project_assistant:scaffold ChangeManagement::Request --nesting=project --definition=change_management_request
 ```
 
 By convention, the file should be named as the snake case of the new model's class name, but this is not presently enforced. The generator will look for the file name provided, with .yml or .rb extension. YAML takes precedence if both are there.
@@ -475,7 +465,7 @@ You can type the command directly into a terminal, but if you are building a lar
 Here is the example command line tweaked using the generator test arguments:
 
   ```bash
-  rails generate project_assistant:scaffold Electrical::Test name:string:required:valid="Test_name" description:text:valid="Factory_generated_description" selector:enum:keys=["s1","s2","s3"] status:enum_translated:keys=["draft","published","archived"] sort_order:integer:index:valid=100 power:float:precision=4:units=m:si=true:valid=5.555 money:decimal:precision=5:scale=2:valid=1.55 switch:boolean birthday:date created:datetime flex_field:jsonb code:string:uniq parent:references owner:belongs_to:required=true --nesting=tagable
+  rails generate project_assistant:scaffold ChangeManagement::Request name:string:required:valid="Test_name" description:text:valid="Factory_generated_description" selector:enum:keys=["s1","s2","s3"] status:enum_translated:keys=["draft","published","archived"] sort_order:integer:index:valid=100 power:float:precision=4:units=m:si=true:valid=5.555 money:decimal:precision=5:scale=2:valid=1.55 switch:boolean birthday:date created:datetime flex_field:jsonb code:string:uniq parent:references owner:belongs_to:required=true --nesting=project
   ```
 
 Note the limitations of the command line: no spaces allowed. This mainly affects string option values: you cannot have multi-word valid values. Also be sure there are no spaces in the enum value arrays. Note also the option-order requirement above: `--nesting` goes at the end, after every field argument.
@@ -492,61 +482,50 @@ Run the generator command using the --pretend option (or simply -p) first. This 
 
 1. If using guard for testing, it is probably better to exit before completing follow up, as some edits will trigger lots of failing tests.
 
-2. Open the model file (in our example app/models/electrical/test.rb).
+2. Open the model file (in our example app/models/change_management/request.rb).
 
-    * For tagable electrical models with load information required (most), after
-      `include Tagable`
-      add the line:
-      `include Electrical::Demandable`.
-    * [TODO future: similar for process module].
-    * Check that associations are correctly defined for :references fields. The generator adds `belongs_to` statements, but no options. These must be added if required. The generator assumes that the referenced class is in the same module/sub-module as the generated model. Add the inverse relation (has_many or has_one) to the referenced model.
+    * Check that associations are correctly defined for :references fields. The generator adds `belongs_to` statements, but no options. These must be added if required. The generator assumes that the referenced class is in the same module/sub-module as the generated model. Add the inverse relation (has_many or has_one) to the referenced model, then save and close that file.
     * Check that any required :enum and :enum_translated type fields are specified as enum with reference to the constants defining the field options.
     * Check that the fields with :required option have presence validations.
     * Add any other validations required, such as range limits, numericality, format, etc.
     * If the `ransackable_attributes` line is too long, split it after a comma for ease of reading.
     * Check that `ransackable_associations` meet requirements.
 
-3. Open the module constants file (in our example config/constants/electrical.yml).
+3. Open the module constants file (in our example config/constants/change_management.yml).
 
-    * There should be a new key for the model (test: in our example)
+    * There should be a new key for the model (request: in our example)
     * For each enum field, there should be a line with the field name as key.
     * Indented under the field name, each option key should have a unique integer value.
-    * Check all of the enum options for all enum fields in the model. If there are any duplications, they must be made unique. The usual way to do this is to add a prefix in the model definition. For example, Electrical::Heater has sheath material and insulation material both having the option `fluoropolymer`, so we have edited the heater.rb file:
-
-         ```ruby
-         enum :sheath_material, Constants.electrical.heater.sheath_material.to_h, prefix: true
-         enum :insulation_material, Constants.electrical.heater.insulation_material.to_h, prefix: true
-         ```
-
+    * Every enum option key becomes a class method on the model, so key names must be unique across all enums in the model. The generator adds the prefix: true option in the model definition, in order to ensure all methods are unique. 
       * Note this prefix only affects the class method names, it doesn't change the values that are displayed in forms or views.
     * Save the model file and the module constants file.
 
-4. Open the default locale file for models (in our example config/locales/en/electrical/models.yml).
+4. Open the default locale file for models (in our example config/locales/change_management/en/en.change_management.models.yml).
 
     * Check that the model translation and all field translations are included as expected. The translations have been defaulted using Rails' `humanize` method, but they can be edited as required.
     * For any enum_translated fields, there should be a key for the options as plural of the field name, and a line for each option. Again, the translations are defaulted using Rails' humanize method.
     * Edit the translations for all locales (this can be deferred and passed to translators).
     * Save and close all the model translation files.
 
-5. Open the default locale file for views (in our example config/locales/en/electrical/views.yml).
+5. Open the default locale file for views (in our example config/locales/change_management/en/en.change_management.views.yml).
 
     * Check that the view translations are included as expected. The translations have been defaulted using Rails `humanize` method, but they can be edited as required.
     * In particular, the header for the index page should be checked to match group noun expectations for the model. For example, cables use schedule, instruments typically use index, others may use list, catalog, etc.
     * Edit the translations for all locales (this can be deferred and passed to translators).
     * Save and close all the view files.
 
-6. Open the migration file (which should be the last migration created), in our example db/migrate/20251226040639_create_electrical_test.rb.
+6. Open the migration file (which should be the last migration created), in our example db/migrate/20251226040639_create_change_management_requests.rb.
 
     * Check all fields are included as expected.
     * Check index and uniq/unique options have been correctly implemented.
     * If there are any decimal fields, check the required precision and scale options are present.
-    * Check that any references to existing tables are to the correct table name. For example, an electrical cable belongs_to electrical_cable_type, and the migration includes the line
-      `t.references :electrical_cable_type, foreign_key: true`
+    * Check that any references to existing tables are to the correct table name. For example, a model that belongs_to `widget` has the migration line
+      `t.references :widget, foreign_key: true`
       However, if the referenced table does not exist yet, it will be better to create a new migration to add the reference later.
     * Other options are available, but not usually required. Refer to [http://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/SchemaStatements.html#method-i-add_column]
     * Save and close the migration file, then in a terminal, run `rails db:migrate`.
 
-7. Open the factory file (in our example test/factories/electrical/tests.rb).
+7. Open the factory file (in our example test/factories/change_management/requests.rb).
 
     * Check all fields are included as expected.
     * Ensure a valid value has been provided for any required fields, as the factory setup is used in testing and tests will fail if no value is entered.
@@ -555,43 +534,41 @@ Run the generator command using the --pretend option (or simply -p) first. This 
     * In the terminal, run `rails test test/factories_test.rb` and ensure there are no errors related to the present model.
     * Close the factory file.
 
-8. Open the model test file (in our example `test/models/electrical/test_test.rb`).
+8. Open the model test file (in our example `test/models/change_management/request_test.rb`).
 
     * Check that validations are tested for required fields.
     * Add tests for any other validations that have been added.
     * For electrical models, if it is a demandable type (has load information), add `test_demandable_association`.
     * Add tests for any other model functionality required.
     * Save the model test file.
-    * In the terminal, run the test (in our example `rails test test/models/electrical/test_test.rb`).
+    * In the terminal, run the test (in our example `rails test test/models/change_management/request_test.rb`).
     * Clear any errors before proceeding, then close the model test file.
 
 9. Unless the new model has special permissions requirements, the policy and policy_test files should not need editing.
 
-    * Run the policy test (in our example `test/policies/electrical/test_policy_test.rb`).
+    * Run the policy test (in our example `test/policies/change_management/request_policy_test.rb`).
 
-10. Open the controller file (or extension file for tagables) for review.
+10. Open the controller file for review.
 
-    * For `--nesting=tagable`: this is the extension file (in our example `app/controllers/electrical/test_extension.rb`), mixed into the shared `TagablesController` - there is no dedicated per-model controller to review. 
-    * For every other nesting value: this is the dedicated controller (in our example `app/controllers/electrical/tests_controller.rb`).
-    If the safe params line (`tagable_params`) is too long, insert new lines after commas as required so it is readable. Add any required additional functionality for form setup, create, or update in `setup_additional_form_data`/`after_create_hook`/`after_update_hook`.
+    * This is the dedicated controller (in our example `app/controllers/change_management/requests_controller.rb`).
+    If the safe params line (`resource_params`) is too long, insert new lines after commas as required so it is readable. Add any required additional functionality for form setup, create, or update in `setup_additional_form_data`/`after_create_hook`/`after_update_hook`.
        * If the safe params line is too long, insert new lines after commas as required so it is readable.
        * If the model has association fields, check that form setup includes building instance variables for the association collection, for use in select fields in the form. Any other model specific form setup goes here also.
-       * If the model has other requirements (e.g. electrical switchboards create can build circuits), this can be built into `after_create_hook` and `after_update_hook`.
-    * Save and close the controller/extension file.
+       * If the model has other requirements (for example, a model whose create also builds child records), this can be built into `after_create_hook` and `after_update_hook`.
+    * Save and close the controller file.
 
 11. Open the routes file config/routes.rb.
 
-    * For `--nesting=tagable`: the generator made no routes edit at all - there is nothing to check here.
-    * For every other nesting value: the generator should have added one `resources :#{plural_name}` line for the new model. If the model is namespaced and its module already has its own `namespace :#{module_name} do ... end` block in the same routes section, it's tidier to move the generated line into that namespace list along with the module's other models, then remove the line the generator added. Save and close the routes file.
+    * The generator should have added one `resources :#{plural_name}` line for the new model. If the model is namespaced and its module already has its own `namespace :#{module_name} do ... end` block in the same routes section, it's tidier to move the generated line into that namespace list along with the module's other models, then remove the line the generator added. Save and close the routes file.
 
-12. Open the controller test file (in our example `test/controllers/electrical/tests_controller_test.rb`).
+12. Open the controller test file (in our example `test/controllers/change_management/requests_controller_test.rb`).
 
-    * The controller test has a method called `valid_resource_params` (or `create_params`) which sets the expected params from a form submission for testing. Check there is an entry for each field. Ensure that any field with the :required option has a valid value set.
+    * The controller test has a method called `create_params` which sets the expected params from a form submission for testing. Check there is an entry for each field. Ensure that any field with the :required option has a valid value set.
     * The controller test has a method called `invalid_param` which sets up a failing test, to test controller validation failure paths. Set one parameter to an invalid state here. It could be setting a required field to nil, or out of range, or an enum to a value not included in the enum options.
     * The controller test has two methods called `update_attribute_name` and `updated_attribute_value` which are used for testing the controller update action. Set update attribute name to any suitable attribute, and set updated attribute value to anything valid other than the value set in the factory.
-    * The controller test has a method called `setup_model_specific_data`. This is where setup code is placed for any additional testing outside the shared test-pattern helper's own tests. For example, the electrical switchboards controller test has a setup for a switchboard with child circuits, part of the additional functionality of this controller. Leave the method empty if no additional setup is required.
+    * The controller test has a method called `setup_model_specific_data`. This is where setup code is placed for any additional testing outside the shared test-pattern helper's own tests. For example, a controller test for a model with child records can set up parent and child records here, as part of the additional functionality of the controller. Leave the method empty if no additional setup is required.
     * After the updated_attribute_value method, insert any additional tests for additional controller functionality.
-    * Save the controller test file, then run the controller tests (in our example `rails test test/controllers/electrical/tests_controller_test.rb`).
+    * Save the controller test file, then run the controller tests (in our example `rails test test/controllers/change_management/requests_controller_test.rb`).
     * Clear any errors before proceeding, then save and close the controller test file.
 
 13. If the model is electrical and has load information, edit the [electrical constants file](../config/constants/electrical.yml).
@@ -607,27 +584,91 @@ Run the generator command using the --pretend option (or simply -p) first. This 
     * Navigate to an existing sandbox project.
     * Navigate to the discipline (or other scope) representing the new model's nesting. The new model should appear as expected in the app's navigation.
     * Navigate to the index view and check it is in order.
-    * Navigate to the new form and build a new item (for `--nesting=tagable`, this means building a new tag and associated model together).
+    * Navigate to the new form and build a new item.
     * Save the item, and you should be redirected to the show view.
-    * For `--nesting=tagable`: the show view should include a dropdown card for the item's tag. Open it, and navigate to the tag. The tag view should include a dropdown card for the tagable model. Open it, and check the contents.
     * Throughout this process, there may have been errors raised. Log them, and build a correction process.
     * Also through the process, there may have been parts of the model that didn't meet expectations. Log them, and build a correction process.
     * Depending on the complexity of change required, the correction process might entail using git to revert the whole generation, modify the arguments, and repeat the generation and checking process.
 
-15. When any necessary corrections are complete, open the system test file (in our example `test/system/electrical/tests_system_test.rb`).
+15. When any necessary corrections are complete, open the system test file (in our example `test/system/change_management/requests_system_test.rb`).
 
     * System tests are abstracted by nesting option, so all models sharing a nesting value follow the same basic tests.
-    * The field sets in the system test are set up by the generator according to the [field_types.rb](../lib/generators/project_assistant/field_types.rb) file. Any special field types will need to be coded in the provided hooks. For example, electrical circuits model has a rating field that is a float value but the form uses a select field. The generator doesn't know how this works, so the system test has to set that field specially.
-    * If the model has features not tested by the standard tests, add tests for them in the system test file. For example, electrical switchboards are integrated with circuits, so have a number of related tests.
+    * The field sets in the system test are set up by the generator according to the [field_types.rb](../lib/generators/project_assistant/field_types.rb) file. Any special field types will need to be coded in the provided hooks. For example, a model may have a float field that the form presents as a select. The generator doesn't know how this works, so the system test has to set that field specially.
+    * If the model has features not tested by the standard tests, add tests for them in the system test file. For example, a model with child records has a number of related tests.
     * Save and close the system test file.
     * Run the system test.
     * As before, log any errors, build a correction process and apply it, if required.
 
 Congratulations! The new model is now built and tested. Deployment from dev to production is covered elsewhere.
 
+## TAGABLE GENERATOR
+
+A tagable generator builds a tagable model: a delegated-type model (`include Tagable`) that serves as the datasheet for one type of tagged element. It is split out of the scaffold generator, since tagable models differ in shape and routing enough to be generated on their own.
+
+### Specification
+
+#### Command Line
+
+The command line must include the generator name `project_assistant:tagable` and the model name. The model name must be module-prefixed (e.g. `Electrical::Heater`); a core, non-namespaced tagable model is not supported. Fields are given as command line arguments, or read from a definition file, in the same format as the scaffold generator (see [File Definition of Fields](#file-definition-of-fields) and [Command Line Input of Fields](#command-line-input-of-fields)).
+
+The only option is `--definition`. Definition files live in `lib/generators/project_assistant/scaffold/definitions`, shared with the scaffold generator, and are named without the extension.
+
+Here is an example generate command for an electrical heater:
+
+```bash
+rails generate project_assistant:tagable Electrical::Heater heater_type:enum_translated:required application:enum_translated:required ingress_protection:string sheath_temperature_max:float:units="deg C" power_density_min:float power_density_max:float sheath_material:enum_translated insulation_material:enum_translated:keys="insulation_material_other","no_insulation","ceramic","magnesium_oxide","mica","mineral","fluoropolymer","fiberglass" notes:text
+```
+
+The same model from a definition file:
+
+```bash
+rails generate project_assistant:tagable Electrical::Heater --definition=electrical_heater
+```
+
+For a namespaced model, the module (and every level of a nested module) must already exist. Use the module generator first.
+
+#### Files
+
+* A migration: `db/migrate/#{timestamp}_create_#{table_name}.rb`
+* A model: `app/models/#{file_path}.rb`, with `include Tagable`, enum declarations (with `prefix: true`), `belongs_to` for reference fields, presence and uniqueness validations, and ransackable attributes and associations, including `:tag, :tag_discipline, :tag_discipline_project`. No policy file is created.
+* A controller extension: `app/controllers/#{file_path}_extension.rb`, a singular name directly under the module folder, providing `setup_additional_form_data`, `after_create_hook`, `after_update_hook` and `tagable_params`. It is mixed into the shared `TagablesController`.
+* Views: `app/views/#{controller_file_path}/` containing `index`, `_header`, `_row`, `show`, `new`, `edit`, `_form` and `_card`.
+* A factory: `test/factories/#{controller_file_path}.rb`, with transient `tag` and `discipline` attributes. A tag is created when none is given.
+* A model test: `test/models/#{file_path}_test.rb`, including `TagableModelTests`.
+* A controller test: `test/controllers/#{controller_file_path}_controller_test.rb`, including `TagableControllerTests`, with `tests TagablesController` and a `tagable_type` method.
+* A system test: `test/system/#{controller_file_path}_system_test.rb`, including `TagableSystemTests`.
+
+Not created: a policy (tagable models are authorized through `TagPolicy`, via their `tag`), a dedicated controller, a helper, or routes. The shared tagable routes already cover every tagable type.
+
+#### Edits
+
+* `config/constants/tagable.yml`: the model's full class name is added directly under its module's comment (e.g. `# Electrical`). If the module has no comment yet, one is added at the end of the list. A type that is already listed is not added again.
+* `config/constants/#{module_name}.yml`: a key for the model, with its enum values, as for the scaffold generator.
+* Translations: the model and views files for each locale, as for the scaffold generator.
+* Routes: none.
+
+### Usage
+
+#### Preparation
+
+Prepare the field list as for the scaffold generator (see [Preparation](#preparation)). In addition:
+
+1. Include a `notes:text` field as the last field. Every tagable model has it, and the shared tagable system tests expect it.
+
+#### Follow Up
+
+1. Open the model file (in our example `app/models/electrical/heater.rb`).
+    * For electrical tagable models with load information (most), add `include Electrical::Demandable` directly after `include Tagable`.
+    * [TODO future: similar for process module].
+    * Apply the same checks as for the scaffold generator (associations, enum prefixes, validations, ransackable lists).
+2. Open the extension file (in our example `app/controllers/electrical/heater_extension.rb`), which is mixed into the shared `TagablesController`. There is no dedicated controller to review. Check `tagable_params`, and add any form setup or create and update behaviour to the hooks.
+3. Run the migration with `rails db:migrate`, then check `db/schema.rb`.
+4. Run the model test and the system test for the new model.
+5. In dev, the show view should have a dropdown card for the item's tag. Open it, and navigate to the tag. The tag view should have a dropdown card for the tagable model.
+
 ## IMPORT GENERATOR
 
-A generator is provided to retrofit spreadsheet bulk-import support (see [DEVELOPER_NOTES](DEVELOPER_NOTES.md)'s Import section for the underlying `Import::Base`/`Import::Committer`/`Import::BatchesController` framework this generates code against) onto a model that **already exists** - built via the scaffold generator, or by hand. This is a different job from the scaffold generator: it never creates a model, migration, policy, or controller - it only adds import support to one that's already working.
+A generator is provided to retrofit spreadsheet bulk-import support (see [DEVELOPER_NOTES](DEVELOPER_NOTES.md)'s Import section for the underlying `Import::Base`/`Import::Committer`/`Import::BatchesController` framework this generates code against) onto a model that **already exists** - built via the scaffold or tagable generator, or by hand.
 
 The generator itself is reasonably self documented, refer to [import_generator](../lib/generators/project_assistant/import_generator.rb).
 
@@ -637,7 +678,7 @@ The generator itself is reasonably self documented, refer to [import_generator](
 
 Before running this generator, the target model must already have:
 
-* A policy class that inherits either `DisciplineResourcePolicy` (a plain discipline-resource model) or `TagablePolicy` (a tagable model, used with `--tagable`). The generator validates this and aborts with a clear error if it doesn't.
+* For a plain discipline-resource model: a policy class that inherits `DisciplineResourcePolicy`. The generator validates this and aborts with a clear error if it doesn't. A tagable model (`--tagable`) has no policy of its own; it only needs to include `Tagable`.
 * For a non-tagable model: an existing controller file, not yet including the `Importable` concern (the generator aborts if it's already there, to avoid double-injecting).
 * For a tagable model: nothing controller/routes-wise is required - every tagable type shares the one `TagablesController` and its generic routes, already wired up once for the whole app.
 
@@ -650,7 +691,7 @@ rails generate project_assistant:import Electrical::Motor --tagable
 
 Options:
 
-* `--tagable` (boolean, default false): target is a tagable model (delegated type, includes `Tagable`, policy `< TagablePolicy`). Skips controller and route injection entirely - see Prerequisites above. Without this flag, the generator assumes the plain "discipline resource" shape (policy `< DisciplineResourcePolicy`).
+* `--tagable` (boolean, default false): target is a tagable model (delegated type, includes `Tagable`, no policy of its own). Skips controller and route injection entirely - see Prerequisites above. Without this flag, the generator assumes the plain "discipline resource" shape (policy `< DisciplineResourcePolicy`).
 * `--discipline-association=NAME` (default: auto-detected): overrides the `has_many` association name on `Discipline` that points back at this model, for the rare case reflection can't resolve it automatically (e.g. an association name that doesn't match the model's own pluralized name).
 * `--nesting=project,discipline` (default: both): comma-separated list of which route contexts to retrofit import into - `project`, `discipline`, or both. Ignored entirely for `--tagable` (no routes are touched either way).
 

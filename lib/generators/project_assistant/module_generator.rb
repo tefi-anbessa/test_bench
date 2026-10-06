@@ -16,8 +16,6 @@ module ProjectAssistant
 
     def initialize(args, *options)
       super
-      File.write('/tmp/generator_initialize.txt', "Generator initialized with args: #{args.inspect}")
-      File.write('/tmp/generator_class_path.txt', "class_path: #{class_path.inspect}, name: #{name.inspect}, singular_name: #{singular_name.inspect}")
       @nested_module = class_path.count > 0
       @parent_directory = @nested_module ? File.join(*class_path) : nil
       @full_path = @nested_module ? File.join(@parent_directory, singular_name) : singular_name

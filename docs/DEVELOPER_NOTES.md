@@ -520,7 +520,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Refactor form views using standardised form fields helper.
 - [x] Extend views helper for attributes to include decimal numbers with units.
 - [ ] Carefully consider use of nested collapsible cards, as in cables from and to. Prefer a more robust nav_link? Ok for now...
-- [x] Include a scope for unique fields in generators.
+- [ ] Include a scope for unique fields in generators.
 - [ ] Add migration and test implementation to generator testing. Very difficult...
 - [ ] Build in git commit before scaffold generator and tagable generator run.
 - [ ] Add polymorphic option to associations in generators.
