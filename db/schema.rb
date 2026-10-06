@@ -148,6 +148,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_06_000742) do
     t.text "notes"
     t.string "demandable_type"
     t.integer "supply_reference"
+    t.integer "voltage_reference"
     t.index ["demandable_type", "demandable_id"], name: "index_electrical_demands_on_demandable"
   end
 

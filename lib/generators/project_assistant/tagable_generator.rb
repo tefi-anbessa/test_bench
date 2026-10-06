@@ -128,9 +128,15 @@ module ProjectAssistant
         if content.match?(entry_pattern)
           say_status :info, "#{registry_file.relative_path_from(Rails.root)}: #{class_name} already registered", :yellow
         else
-          content = content.sub(/\n*\z/, "\n")
-          content += "  - #{class_name}\n"
-          File.write(registry_file, content) unless options[:pretend]
+          lines = content.sub(/\n*\z/, "\n").lines
+          group_index = lines.index { |line| line.strip == "# #{module_name}" }
+          entry = "  - #{class_name}\n"
+          if group_index
+            lines.insert(group_index + 1, entry)
+          else
+            lines << "  # #{module_name}\n" << entry
+          end
+          File.write(registry_file, lines.join) unless options[:pretend]
           say_status :update, "#{registry_file.relative_path_from(Rails.root)}: Registered #{class_name} as a tagable type", :green
         end
       else

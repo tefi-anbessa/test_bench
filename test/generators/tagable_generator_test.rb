@@ -250,6 +250,21 @@ module ProjectAssistant
       assert_equal 1, content.scan(/^\s*-\s*#{Regexp.escape(@class_name)}\s*$/).count
     end
 
+    test "registers the new type directly under its module comment" do
+      registry_file = File.join(destination_root, 'config', 'constants', 'tagable.yml')
+      File.write(registry_file, <<~YAML)
+        tagable:
+          # ExistingModule
+          - ExistingModule::Other
+          # Piping
+          - Piping::Pipe
+      YAML
+      run_generator [@class_name, *@args]
+      assert_file registry_file do |content|
+        assert_includes content, "  # ExistingModule\n  - #{@class_name}\n  - ExistingModule::Other\n"
+      end
+    end
+
     test "adds enum constants" do
       run_generator [@class_name, *@args]
       constants_file = File.join(destination_root, 'config', 'constants', "#{@module_name.underscore}.yml")
