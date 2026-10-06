@@ -1,35 +1,35 @@
 require "test_helper"
-require "helpers/test_setup_helpers"
+require 'helpers/tagable_model_tests'
 module Instrument
   class PressureGaugeTest < ActiveSupport::TestCase
-    include TestSetupHelpers
+    include TagableModelTests
 
     def setup
       setup_common_test_data
       setup_model_specific_data
     end
-    
+
     def setup_model_specific_data
-      @resource = create(:instrument_pressure_gauge)
+      # @resource and its tag are already created by setup_common_test_data.
       # Insert model specific test setup here, including relationships with other models.
       # E.g. setup electrical_demand for electrical models.
     end
 
-    test "measurement_type must be present" do
-      @resource.measurement_type = nil
-      refute @resource.valid?
-      assert_includes @resource.errors[:measurement_type], I18n.t("errors.messages.blank")
-    end
-    test "range_min must be present" do
-      @resource.range_min = nil
-      refute @resource.valid?
-      assert_includes @resource.errors[:range_min], I18n.t("errors.messages.blank")
-    end
-    test "range_max must be present" do
-      @resource.range_max = nil
-      refute @resource.valid?
-      assert_includes @resource.errors[:range_max], I18n.t("errors.messages.blank")
-    end
+    test_required_fields(:measurement_type, :range_min, :range_max)
+    test_enum_field(:measurement_type, prefix: true)
+    test_enum_field(:pressure_unit, prefix: true)
+    test_enum_field(:fluid_phase, prefix: true)
+    test_enum_field(:process_fluid, prefix: true)
+    test_enum_field(:accuracy_class, prefix: true)
+    test_enum_field(:dial_size, prefix: true)
+    test_enum_field(:connection_type, prefix: true)
+    test_enum_field(:connection_size, prefix: true)
+    test_enum_field(:case_material, prefix: true)
+    test_enum_field(:wetted_material, prefix: true)
+    test_enum_field(:movement_type, prefix: true)
+    test_enum_field(:fill_fluid, prefix: true)
+    test_enum_translations(:measurement_type, :pressure_unit, :fluid_phase, :process_fluid, :accuracy_class,
+      :dial_size, :connection_type, :connection_size, :case_material, :wetted_material, :movement_type, :fill_fluid)
 
     # Insert model specific tests here.
     # E.g. test electrical_demand for electrical models.

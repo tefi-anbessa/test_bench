@@ -13,7 +13,7 @@ module Electrical
     end
 
     test_required_fields(:socket_type)
-    test_enum_field(:socket_type, keys: [:other, :"10A", :"10A_HVAC", :"15A", :"20A", :"32A", :"40A", :"50A", :"63A", :"80A", :"100A", :"125A"] )
+    test_enum_field(:socket_type)
     test_demandable_association
 
     test "socket circuit quantity must be greater than 0" do

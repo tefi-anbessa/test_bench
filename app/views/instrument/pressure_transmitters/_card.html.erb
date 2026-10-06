@@ -1,0 +1,32 @@
+<!-- Pressure transmitter collapsible card -->
+<!-- Expecting 'object', 'context' and 'id' variables, passed from the shared/_association partial. -->
+<!-- The card uses the context name in the header and the id for the block (for testing). -->
+<% pressure_transmitter = object %>
+<% context ||= pressure_transmitter.model_name.human %>
+<%= render 'components/collapsible', id: "#{id}_#{pressure_transmitter.id}_details",
+  title: [context, pressure_transmitter.long_label].join(': '),
+  expanded: false,
+  header_class: 'py-1' do %>
+
+    <div class="container-fluid">
+      <%= nav_link(action: :show, record: pressure_transmitter) %>
+      <%= show_attribute(pressure_transmitter, :measurement_type, type: :enum_translated) %>
+      <%= show_attribute(pressure_transmitter, :pressure_unit, type: :enum_translated) %>
+      <%= show_attribute(pressure_transmitter, :range_min, type: :float, precision: 6) %>
+      <%= show_attribute(pressure_transmitter, :range_max, type: :float, precision: 6) %>
+      <%= show_attribute(pressure_transmitter, :signal, type: :enum_translated) %>
+      <%= show_attribute(pressure_transmitter, :communication, type: :enum_translated) %>
+      <%= show_attribute(pressure_transmitter, :fluid_phase, type: :enum_translated) %>
+      <%= show_attribute(pressure_transmitter, :process_fluid, type: :enum_translated) %>
+      <%= show_attribute(pressure_transmitter, :accuracy_class, type: :enum_translated) %>
+      <%= show_attribute(pressure_transmitter, :connection_type, type: :enum_translated) %>
+      <%= show_attribute(pressure_transmitter, :connection_size, type: :enum_translated) %>
+      <%= show_attribute(pressure_transmitter, :case_material, type: :enum_translated) %>
+      <%= show_attribute(pressure_transmitter, :wetted_material, type: :enum_translated) %>
+      <%= show_attribute(pressure_transmitter, :movement_type, type: :enum_translated) %>
+      <%= show_attribute(pressure_transmitter, :ip_rating) %>
+      <%= show_attribute(pressure_transmitter, :accessories, type: :jsonb) %>
+      <%= show_attribute(pressure_transmitter, :notes, type: :text) %>
+
+    </div> <!-- end container-fluid -->
+<% end %>

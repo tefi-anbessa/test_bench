@@ -13,7 +13,7 @@ module Electrical
     end
 
     test_required_fields(:voltage_rating, :busbar_rating)
-    test_enum_field(:voltage_rating, keys: [:other, :"300/500V", :"450/750V", :"600/1000V", :"1.9/3.3kV", :"3.3/6.6kV", :"6.6/11kV", :"11/33kV", :"33/66kV", :"66/132kV", :"132/220kV"])
+    test_enum_field(:voltage_rating, constants_path: "electrical.voltage_ratings")
 
     test "circuit setup must be valid" do
       assert @circuit.valid?

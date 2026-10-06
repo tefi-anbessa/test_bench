@@ -1,11 +1,11 @@
 <thead>
   <%% unless current_project %>
-    <th scope="col"><%%= sort_link(@q, 'tag_discipline_project_code', t('activerecord.models.project.one')) %></th>
+    <th><%%= sort_link(@q, 'tag_discipline_project_code', t('activerecord.models.project.one')) %></th>
   <%% end %>
-  <th scope="col"><%%= sort_link(@q, :tag_stage) %></th>
-  <th scope="col"><%%= sort_link(@q, :tag) %></th>
+  <th><%%= sort_link(@q, :tag_stage) %></th>
+  <th><%%= sort_link(@q, :tag) %></th>
 <%- @index_fields.each do |field| -%>
-  <th scope="col"><%%= sort_link(@q, <%= ":#{field[:name]}" %>) %></th>
+  <th><%%= sort_link(@q, <%= ":#{field[:name]}" %>) %></th>
 <%- end -%>
-  <th scope="col" width="150px"><%%= t('table.links')%></th>
+  <th width="150px"><%%= t('table.links')%></th>
 </thead>

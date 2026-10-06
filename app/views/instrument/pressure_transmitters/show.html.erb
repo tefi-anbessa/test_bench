@@ -1,0 +1,109 @@
+<% provide(:title, t('.title')) %>
+<div class="container mt-3" style="<%= container_styles(@swatch) %>">
+  <!-- Pressure transmitter Header Card -->
+  <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+    <div class="card-header p-2" style="<%= card_header_styles(@swatch) %>">
+      <div class="row align-items-center">
+        <!-- Left Navigation -->
+        <div class="col-auto">
+          <div class="d-flex align-items-center">
+            <!-- Index Button -->
+            <% if policy(@pressure_transmitter.tag).index? %>
+              <%= nav_button(action: :index_discipline, path: discipline_tagables_path(@discipline, tagable_type: 'Instrument::PressureTransmitter'), record: @pressure_transmitter) %>
+            <% end %>
+
+            <!-- Previous Button -->
+            <%= nav_button(action: :previous_tagable, record: @neighbours[0]) %>
+          </div>
+        </div>
+
+        <!-- Center Tag Info -->
+        <div class="col text-center">
+          <div class="d-flex flex-column align-items-center">
+            <div class="mt-1">
+              <span class="badge fs-6" style="<%= badge_styles(@swatch) %>">
+                <%= t('.header', label: @pressure_transmitter.long_label)%>
+                <%= @pressure_transmitter.tag.service.presence %>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Navigation and Actions -->
+        <div class="col-auto">
+          <div class="d-flex align-items-center">
+            <!-- Next Button -->
+            <%= nav_button(action: :next_tagable, record: @neighbours[1]) %>
+
+            <!-- Action Buttons -->
+            <div class="btn-group btn-group-sm gap-1">
+              <% if policy(@pressure_transmitter.tag).edit? %>
+                <%= nav_button(action: :edit_tagable, path: edit_tag_tagable_path(@tag), record: @pressure_transmitter) %>
+              <% end %>
+
+              <% if policy(@pressure_transmitter.tag).destroy? %>
+                <%= nav_button(action: :delete, path: tag_tagable_path(@tag), record: @pressure_transmitter) %>
+              <% end %>
+
+              <% if policy(@pressure_transmitter.tag).new? %>
+                <%= nav_button(action: :new, path: new_discipline_tagable_path(@discipline, tagable_type: 'Instrument::PressureTransmitter'), record: Instrument::PressureTransmitter.new) %>
+              <% end %>
+            </div> <!-- end button group -->
+          </div> <!-- end d-flex -->
+        </div> <!-- end col-auto -->
+      </div> <!-- end row -->
+    </div> <!-- end card header -->
+
+    <div class="card-body">
+      <div class="row justify-content-center">
+        <div class="col-sm-12 col-10 col-md-8 col-lg-6 col-xl-6">
+
+          <!-- PressureTransmitter Details Card -->
+          <div class="card mb-4">
+            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
+              <h4 class="mb-0"><%= t('show.details', model: t('activerecord.models.instrument/pressure_transmitter.one')) %></h4>
+            </div>
+
+            <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
+              <%= show_attribute(@pressure_transmitter, :measurement_type, type: :enum_translated) %>
+              <%= show_attribute(@pressure_transmitter, :pressure_unit, type: :enum_translated) %>
+              <%= show_attribute(@pressure_transmitter, :range_min, type: :float, precision: 6) %>
+              <%= show_attribute(@pressure_transmitter, :range_max, type: :float, precision: 6) %>
+              <%= show_attribute(@pressure_transmitter, :signal, type: :enum_translated) %>
+              <%= show_attribute(@pressure_transmitter, :communication, type: :enum_translated) %>
+              <%= show_attribute(@pressure_transmitter, :fluid_phase, type: :enum_translated) %>
+              <%= show_attribute(@pressure_transmitter, :process_fluid, type: :enum_translated) %>
+              <%= show_attribute(@pressure_transmitter, :accuracy_class, type: :enum_translated) %>
+              <%= show_attribute(@pressure_transmitter, :connection_type, type: :enum_translated) %>
+              <%= show_attribute(@pressure_transmitter, :connection_size, type: :enum_translated) %>
+              <%= show_attribute(@pressure_transmitter, :case_material, type: :enum_translated) %>
+              <%= show_attribute(@pressure_transmitter, :wetted_material, type: :enum_translated) %>
+              <%= show_attribute(@pressure_transmitter, :movement_type, type: :enum_translated) %>
+              <%= show_attribute(@pressure_transmitter, :ip_rating) %>
+              <%= show_attribute(@pressure_transmitter, :accessories, type: :jsonb) %>
+              <%= show_attribute(@pressure_transmitter, :notes, type: :text) %>
+            </div>  <!-- temporary end inner card body -->
+
+            <!-- Associations -->
+            <div class="card-header py-1" style="<%= card_header_styles(@swatch) %>">
+              <h4 class="mb-0"><%= t('show.associations', model: @pressure_transmitter.class.model_name.human) %></h4>
+            </div>
+
+            <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
+              <!-- Tag Card -->
+              <% if @pressure_transmitter.tag.present? %>
+                <%= show_association(@pressure_transmitter, :tag) %>
+              <% else %>
+                <div class="row g-3 mb-3">
+                  <div class="alert alert-danger">
+                    <%= t('show.orphan', model: Tag.model_name.human.downcase) %>
+                  </div>
+                </div>
+              <% end %>
+            </div>  <!-- end inner card body -->
+          </div> <!-- end inner card -->
+        </div> <!-- end responsive columns -->
+      </div> <!-- end justify-content-center -->
+    </div> <!-- end card body -->
+  </div> <!-- end card -->
+</div> <!-- end container -->

@@ -823,13 +823,24 @@ module ProjectAssistant
 
         def test_assertions_model_test(content, nesting = nil)
           assert_includes content, "class #{@model_class_name}Test < ActiveSupport::TestCase"
-          @required_fields.each do |field|
-            assert_includes content, "test \"#{field[:name]} must be present\" do"
-            assert_includes content, "@resource.#{field[:name]} = nil"
+          required_attributes = @required_fields - @association_fields
+          required_associations = @required_fields & @association_fields
+          if required_attributes.any?
+            assert_includes content, "test_required_fields(#{required_attributes.map { |f| ":#{f[:name]}" }.join(", ")})"
           end
-          @unique_fields.each do |field|
-            assert_includes content, "test \"#{field[:name]} must be unique\" do"
-            assert_includes content, "refute new_resource.valid?"
+          if required_associations.any?
+            assert_includes content, "test_required_associations(#{required_associations.map { |f| ":#{f[:name]}" }.join(", ")})"
+          end
+          if @unique_fields.any?
+            assert_includes content, "test_unique_fields(#{@unique_fields.map { |f| ":#{f[:name]}" }.join(", ")})"
+          end
+          assert_includes content, "include ModelTestMacros" unless nesting == :tagable
+          @enum_fields.each do |field|
+            assert_includes content, "test_enum_field(:#{field[:name]}, prefix: true)"
+          end
+          translated_fields = @enum_fields.select { |f| f[:type] == :enum_translated }
+          if translated_fields.any?
+            assert_includes content, "test_enum_translations(#{translated_fields.map { |f| ":#{f[:name]}" }.join(", ")})"
           end
         end
 
@@ -1043,7 +1054,6 @@ module ProjectAssistant
           assert_includes content, "provide(:header, t('.header', label: @#{@singular_name}.label))"
           assert_includes content, "render partial"
           assert_includes content, [*form_variables].join(",\n\t")
-          assert_includes content, "parent: @parent" if nesting == :tagable
         end
 
         def test_assertions_form_view(content, nesting)

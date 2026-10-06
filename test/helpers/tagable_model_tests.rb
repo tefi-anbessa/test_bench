@@ -1,8 +1,11 @@
+require 'helpers/model_test_macros'
+
 # This module provides common test patterns for tagable models
 # Include this in the model test and all the explicit test methods will run.
 # Optional test methods for required, unique, and enum fields are provided. 
 module TagableModelTests
   extend ActiveSupport::Concern
+  include ModelTestMacros
 # Setup common to all tagable models
   def setup_common_test_data
     # Create project with standard disciplines
@@ -80,50 +83,6 @@ module TagableModelTests
       define_method("test_responds_to_association") do
         fields.each do |field|
           assert_respond_to @resource, field
-        end
-      end
-    end
-
-    def test_required_fields(*fields)
-      define_method("test_required_fields_presence") do
-        fields.each do |field|
-          resource = @resource.dup
-          resource.public_send("#{field}=", nil)
-
-          refute resource.valid?,
-            "Expected #{field} to be invalid when nil"
-
-          assert_includes resource.errors[field],
-            I18n.t("errors.messages.blank"),
-            "Expected #{field} to have a blank error, got #{@resource.errors[field].inspect}"
-        end
-      end
-    end
-
-    def test_unique_fields(*fields)
-      define_method("test_unique_fields_uniqueness") do
-        fields.each do |field|
-          resource = @resource.dup
-          @resource2.public_send("#{field}=", @resource.public_send(field))
-
-          refute @resource2.valid?,
-            "Expected #{field} to be invalid when duplicated"
-
-          assert_includes resource.errors[field],
-            I18n.t("errors.messages.taken"),
-              "Expected #{field} to have a taken error, got #{@resource.errors[field].inspect}"
-        end
-      end
-    end
-
-    def test_enum_field(field, prefix: false, keys:)
-      define_method("test_#{field}_enum_predicates") do
-        actual_keys = @resource.class.public_send(field.to_s.pluralize).keys
-        keys.each do |key|
-          assert_includes actual_keys, key.to_s
-          method = prefix ? "#{field}_#{key.to_s}?" : "#{key.to_s}?"
-          assert_respond_to @resource, method,
-            "Expected enum #{field} to respond to #{method}"
         end
       end
     end

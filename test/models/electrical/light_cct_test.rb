@@ -13,7 +13,7 @@ module Electrical
     end
 
     test_required_fields(:light_fitting_type)
-    test_enum_field(:light_fitting_type, keys: [:other, :general, :outdoor])
+    test_enum_field(:light_fitting_type)
     test_demandable_association
 
     test "light circuit quantity must be greater than 0" do

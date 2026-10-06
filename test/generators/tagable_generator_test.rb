@@ -157,7 +157,7 @@ module ProjectAssistant
       run_generator [@class_name, *@args]
       assert_file File.join(destination_root, 'test', 'models', @folder, "#{@singular_name}_test.rb") do |content|
         assert_includes content, "module #{@module_name}"
-        test_assertions_model_test(content)
+        test_assertions_model_test(content, @nesting)
       end
     end
 
@@ -198,7 +198,7 @@ module ProjectAssistant
         test_assertions_new_view(content, @nesting)
       end
       assert_file File.join(views_dir, 'edit.html.erb') do |content|
-        test_assertions_edit_view(content, @nesting)
+        assert_tagable_edit_view(content)
       end
       assert_file File.join(views_dir, '_form.html.erb') do |content|
         test_assertions_form_view(content, @nesting)
@@ -316,6 +316,14 @@ module ProjectAssistant
 
     def singular_table_name
       [*@class_path, @singular_name].join"_"
+    end
+
+    def assert_tagable_edit_view(content)
+      form_variables, _scope = set_form_variables(:tagable)
+      assert_includes content, "provide(:title, t('.title'))"
+      assert_includes content, "provide(:header, t('.header', label: @#{@singular_name}.long_label))"
+      assert_includes content, "render partial"
+      assert_includes content, [*form_variables].join(",\n\t")
     end
   end
 end

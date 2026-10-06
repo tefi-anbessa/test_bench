@@ -1,10 +1,12 @@
 require "test_helper"
 require "helpers/test_setup_helpers"
+require "helpers/model_test_macros"
 <%- if @namespaced -%>
 module <%= module_name %>
 <%- end -%>
   class <%= model_class_name %>Test < ActiveSupport::TestCase
     include TestSetupHelpers
+    include ModelTestMacros
 
     def setup
       setup_common_test_data
@@ -17,24 +19,23 @@ module <%= module_name %>
       # E.g. setup electrical_demand for electrical models.
     end
 
-<%- @required_fields.each do |field| -%>
-    test "<%= field[:name] %> must be present" do
-      @resource.<%= field[:name] %> = nil
-      refute @resource.valid?
-      <%- if field[:type] == 'references' -%>
-      assert_includes @resource.errors[:<%= field[:name] %>], I18n.t("errors.messages.required")
-      <%- else -%>
-      assert_includes @resource.errors[:<%= field[:name] %>], I18n.t("errors.messages.blank")
-      <%- end -%>
-    end
+<%- required_attributes = @required_fields - @association_fields -%>
+<%- required_associations = @required_fields & @association_fields -%>
+<%- if required_attributes.any? -%>
+    test_required_fields(<%= required_attributes.map { |f| ":#{f[:name]}" }.join(", ") %>)
 <%- end -%>
-<%- @unique_fields.each do |field| -%>
-    test "<%= field[:name] %> must be unique" do
-      new_resource = build(:<%= singular_table_name %>)
-      new_resource.<%= field[:name] %> = @resource.<%= field[:name] %>
-      refute new_resource.valid?
-      assert_includes @resource.errors[:<%= field[:name] %>], I18n.t("errors.messages.taken")
-    end
+<%- if required_associations.any? -%>
+    test_required_associations(<%= required_associations.map { |f| ":#{f[:name]}" }.join(", ") %>)
+<%- end -%>
+<%- if @unique_fields.any? -%>
+    test_unique_fields(<%= @unique_fields.map { |f| ":#{f[:name]}" }.join(", ") %>)
+<%- end -%>
+<%- @enum_fields.each do |field| -%>
+    test_enum_field(:<%= field[:name] %>, prefix: true)
+<%- end -%>
+<%- translated_fields = @enum_fields.select { |f| f[:type] == :enum_translated } -%>
+<%- if translated_fields.any? -%>
+    test_enum_translations(<%= translated_fields.map { |f| ":#{f[:name]}" }.join(", ") %>)
 <%- end -%>
 
     # Insert model specific tests here.

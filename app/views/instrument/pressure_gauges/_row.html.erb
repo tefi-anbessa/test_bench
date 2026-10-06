@@ -2,14 +2,33 @@
   <% unless current_project %>
     <td><%= row.project.code %></td>
   <% end %>
-
+  <% if row.tag&.nil? %>
+    <td>-</td>
+    <td class="table-danger"><%= t("index.no_tag", id: row.id) %></td>
+  <% else %>
+    <td><%= row.tag.stage %></td>
+    <td><%= index_link(action: :show_tag, record: row.tag) %></td>
+  <% end %>
   <td><%= index_attribute(row, :measurement_type, type: :enum_translated) %></td>
   <td><%= index_attribute(row, :movement_type, type: :enum_translated) %></td>
   <td><%= index_attribute(row, :range_min, type: :float, precision: 6) %></td>
   <td><%= index_attribute(row, :range_max, type: :float, precision: 6) %></td>
   <td><%= index_attribute(row, :fluid_phase, type: :enum_translated) %></td>
   <td><%= index_attribute(row, :process_fluid, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :accuracy_class, type: :enum_translated) %></td>
   <td><%= index_attribute(row, :dial_size, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :connection_type, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :connection_size, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :case_material, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :wetted_material, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :case_material, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :wetted_material, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :movement_type, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :liquid_filled, type: :boolean) %></td>
+  <td><%= index_attribute(row, :fill_fluid, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :ip_rating) %></td>
+  <td><%= index_attribute(row, :safety_pattern, type: :boolean) %></td>
+  <td><%= index_attribute(row, :accessories, type: :jsonb) %></td>
   <td><%= index_attribute(row, :notes, type: :text) %></td>
   <td>
     <% if can_show %>

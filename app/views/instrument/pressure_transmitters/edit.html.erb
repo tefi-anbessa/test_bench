@@ -1,0 +1,9 @@
+<% provide(:title, t('.title')) %>
+<% provide(:header, t('.header', label: @pressure_transmitter.long_label)) %>
+<% provide(:button_text, t('actions.update')) %>
+<% partial = File.join(@pressure_transmitter.model_name.collection, "form") %>
+<%= render partial,
+  pressure_transmitter: @pressure_transmitter,
+	swatch: @swatch,
+	tag: @tag,
+	parent: @parent %>

@@ -1,0 +1,30 @@
+<tr scope="row">
+  <% unless current_project %>
+    <td scope="col"><%= row.tag&.nil? ? '-' : row.tag.discipline.project.code %></td>
+  <% end %>
+  <% if row.tag&.nil? %>
+    <td>-</td>
+    <td class="table-danger"><%= t("index.no_tag", id: row.id) %></td>
+  <% else %>
+    <td><%= row.tag.stage %></td>
+    <td><%= index_link(action: :show_tag, record: row.tag) %></td>
+  <% end %>
+  <td><%= index_attribute(row, :measurement_type, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :pressure_unit, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :range_min, type: :float, precision: 6) %></td>
+  <td><%= index_attribute(row, :range_max, type: :float, precision: 6) %></td>
+  <td><%= index_attribute(row, :signal, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :communication, type: :enum_translated) %></td>
+  <td><%= index_attribute(row, :notes, type: :text) %></td>
+  <td>
+    <% if can_show %>
+      <%= nav_button(action: :show_tagable, record: row, icon_only: true) %>
+    <% end %>
+    <% if can_edit %>
+      <%= nav_button(action: :edit_tagable, record: row, icon_only: true) %>
+    <% end %>
+    <% if can_delete %>
+      <%= nav_button(action: :delete_tagable, record: row, icon_only: true) %>
+    <% end %>
+  </td>
+</tr>

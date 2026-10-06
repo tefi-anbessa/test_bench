@@ -12,8 +12,8 @@ module Electrical
     end
 
     test_required_fields(:motor_type)
-    test_enum_field(:motor_type, keys: [:other, :induction, :synchronous, :dc, :servo, :stepper, :brushless_dc, :universal])
-    test_enum_field(:frame_size, keys: [:"63", :"71", :"80", :"90", :"100", :"112", :"132", :"160", :"180", :"200", :"225", :"250", :"280", :"315", :"355", :"400", :"450", :"500", :"560", :"630"])
+    test_enum_field(:motor_type)
+    test_enum_field(:frame_size)
     test_demandable_association
   end
 end

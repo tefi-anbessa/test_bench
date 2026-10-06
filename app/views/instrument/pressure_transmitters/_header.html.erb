@@ -1,0 +1,15 @@
+<thead>
+  <% unless current_project %>
+    <th scope="col"><%= sort_link(@q, 'tag_discipline_project_code', t('activerecord.models.project.one')) %></th>
+  <% end %>
+  <th scope="col"><%= sort_link(@q, :tag_stage) %></th>
+  <th scope="col"><%= sort_link(@q, :tag) %></th>
+  <th scope="col"><%= sort_link(@q, :measurement_type) %></th>
+  <th scope="col"><%= sort_link(@q, :pressure_unit) %></th>
+  <th scope="col"><%= sort_link(@q, :range_min) %></th>
+  <th scope="col"><%= sort_link(@q, :range_max) %></th>
+  <th scope="col"><%= sort_link(@q, :signal) %></th>
+  <th scope="col"><%= sort_link(@q, :communication) %></th>
+  <th scope="col"><%= sort_link(@q, :notes) %></th>
+  <th scope="col" width="150px"><%= t('table.links')%></th>
+</thead>

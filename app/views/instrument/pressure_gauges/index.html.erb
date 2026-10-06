@@ -12,7 +12,8 @@
 
         <!-- Header Text (Left - 8 columns) -->
         <div class="col-8">
-          <h5 class="mb-0"><%= t('.header', scope_text: [t('activerecord.models.discipline.one'), @discipline.label].join(': ')) %></h5>
+          <% scope_text = [@discipline.project.label, @discipline.model_name.human, @discipline.label].join(' ') %>
+          <h5><%= t('.header', scope_text: scope_text) %></h5>
         </div>
 
         <!-- New Button (Right) -->

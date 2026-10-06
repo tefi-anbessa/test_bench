@@ -14,3 +14,4 @@ tagable:
   - Piping::Pipe
   - Piping::Source
   - Piping::Consumer
+  - Instrument::PressureTransmitter

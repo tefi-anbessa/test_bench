@@ -7,7 +7,7 @@ module TagableSystemTests
 
   def setup_common_tagable_data
     setup_projects_and_users
-    setup_disciplines(name: "Electrical", required_role: :designer)
+    setup_disciplines(name: module_name, required_role: :designer)
     setup_accredited_users(role = :designer)
     setup_tags
     setup_tagable_resources

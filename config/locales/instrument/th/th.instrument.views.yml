@@ -1,6 +1,19 @@
 # instrument views translations for th
 th:
   instrument:
+    pressure_transmitters:
+      index:
+        title:            "Pressure transmitters"
+        header:           "Pressure transmitters Schedule for %{scope_text}"
+      edit:
+        title:            "Edit Pressure transmitter"
+        header:           "Edit Pressure transmitter: %{label}"
+      new:
+        title:            "New Pressure transmitter"
+        header:           "New Pressure transmitter in %{scope_text}"
+      show:
+        title:            "Pressure transmitter"
+        header:           "Pressure transmitter: %{label}"
 
     pressure_gauges:
       index:

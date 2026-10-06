@@ -587,7 +587,7 @@ Run the generator command using the --pretend option (or simply -p) first. This 
 12. Open the controller test file (in our example `test/controllers/electrical/tests_controller_test.rb`).
 
     * The controller test has a method called `valid_resource_params` (or `create_params`) which sets the expected params from a form submission for testing. Check there is an entry for each field. Ensure that any field with the :required option has a valid value set.
-    * The controller test has a method called `invalid_resource_params` (or `invalid_param`) which sets up a failing test, to test controller validation failure paths. Set one parameter to an invalid state here. It could be setting a required field to nil, or out of range, or an enum to a value not included in the enum options.
+    * The controller test has a method called `invalid_param` which sets up a failing test, to test controller validation failure paths. Set one parameter to an invalid state here. It could be setting a required field to nil, or out of range, or an enum to a value not included in the enum options.
     * The controller test has two methods called `update_attribute_name` and `updated_attribute_value` which are used for testing the controller update action. Set update attribute name to any suitable attribute, and set updated attribute value to anything valid other than the value set in the factory.
     * The controller test has a method called `setup_model_specific_data`. This is where setup code is placed for any additional testing outside the shared test-pattern helper's own tests. For example, the electrical switchboards controller test has a setup for a switchboard with child circuits, part of the additional functionality of this controller. Leave the method empty if no additional setup is required.
     * After the updated_attribute_value method, insert any additional tests for additional controller functionality.
@@ -601,7 +601,7 @@ Run the generator command using the --pretend option (or simply -p) first. This 
 
 14. With the controller tests working, it is time to test the model in dev.
 
-    * Start the dev server.
+    * Start (or restart) the dev server.
     * Open a browser and navigate to local_host:3000.
     * Sign in as admin.
     * Navigate to an existing sandbox project.

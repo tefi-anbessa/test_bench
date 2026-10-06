@@ -528,6 +528,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Review all labels and use of labels, in headers, on buttons, and for popover titles. Establish consistency across usages, including across show and index views.
 - [ ] Add searching and sorting for from and to fields in cables index.
 - [ ] Refactor the generator's `:step` option to allow the literal value `"any"` (currently coerced as a decimal, so `"any"` is rejected).
+- [ ] Improve index views to allow horizontal scrolling for wider views.
 
 ## Potential Features
 

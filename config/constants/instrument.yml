@@ -64,3 +64,67 @@ instrument:
       glycerine: 1
       silicone: 2
       other: 3
+  pressure_transmitter:
+    measurement_type:
+      positive_pressure: 0
+      vacuum: 1
+      absolute: 2
+      differential: 3
+    pressure_unit:
+      bar: 0
+      psi: 1
+      kpa: 2
+      kgf_cm2: 3
+      in_hg: 4
+      other: 5
+    signal:
+      ma_4_20: 0
+      voltage_1_5: 1
+      voltage_0_10: 2
+      other: 3
+    communication:
+      hart: 0
+      profibus: 1
+      foundation_fieldbus: 2
+      other: 3
+    fluid_phase:
+      gas: 0
+      liquid: 1
+      other: 2
+    process_fluid:
+      air: 0
+      water: 1
+      oil: 2
+      steam: 3
+      other: 4
+    accuracy_class:
+      grade_1_0: 0
+      grade_1_6: 1
+      grade_2_5: 2
+      other: 3
+    connection_type:
+      npt: 0
+      bsp: 1
+      flanged: 2
+      other: 3
+    connection_size:
+      in_1_4: 0
+      in_1_2: 1
+      in_3_4: 2
+      other: 3
+    case_material:
+      stainless_steel: 0
+      carbon_steel: 1
+      aluminium: 2
+      phenolic: 3
+      other: 4
+    wetted_material:
+      ss316: 0
+      brass: 1
+      monel: 2
+      other: 3
+    movement_type:
+      bourdon_tube: 0
+      diaphragm: 1
+      bellows: 2
+      other: 3

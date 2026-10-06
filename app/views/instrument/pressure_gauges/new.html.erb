@@ -1,11 +1,9 @@
 <% provide(:title, t('.title')) %>
-<% provide(:header, t('.header', scope_text: @tag.long_label)) %>
+<% provide(:header, t('.header', scope_text: @tag.discipline.long_label)) %>
 <% provide(:button_text, t('actions.create')) %>
 <% partial = File.join(@pressure_gauge.model_name.collection, "form") %>
 <%= render partial,
   pressure_gauge: @pressure_gauge,
 	parent: @parent,
   tag: @tag,
-  discipline: @discipline,
-	swatch: @swatch,
-	tag: @tag %>
+	swatch: @swatch %>

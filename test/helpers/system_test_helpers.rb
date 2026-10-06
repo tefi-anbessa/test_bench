@@ -144,7 +144,7 @@ module SystemTestHelpers
 
       # Ransack sort headers
       @index_fields.each do |field|
-        assert_selector "a[href*='q%5Bs%5D=#{field}']" unless field_type(field) == :text
+        assert_selector "a[href*='q%5Bs%5D=#{field}']" unless field_type(field).in?([:text, :jsonb])
       end
       
       # Data
@@ -490,7 +490,7 @@ module SystemTestHelpers
         of = @discipline.schema_for_form.with_indifferent_access[:output_function].keys.last
         @saved_prefix = mv + of
         find("select[name='measured_variable'] option[value='#{mv}']").select_option
-        find("select[name='output_function'] option[value='#{of}']").select_option
+        find("select[name='function'] option[value='#{of}']").select_option
       end
     end
 
@@ -522,6 +522,7 @@ module SystemTestHelpers
           fill_in name, with: value.to_s
         when :text
           fill_in name, with: value.to_s
+        when :jsonb
         else # string, etc.
           fill_in name, with: value.to_s
         end
@@ -549,6 +550,8 @@ module SystemTestHelpers
           assert_text I18n.l(value, format: :default)
         when :text
           assert_text value.to_s.first(10)
+        when :jsonb
+          # Rendered by the JSON editor in the browser; see assert_json_editor_text.
         else # string, text, integer, etc.
           assert_text value.to_s
         end
@@ -575,10 +578,13 @@ module SystemTestHelpers
         when :integer, :float, :decimal
           assert_field name, with: value.to_s, type: 'number'
         when :boolean
-          assert_field name, checked: value
+          assert_field name, checked: value ? true : false
         when :date, :datetime # [TODO] test datetime-local
           expected = value&.strftime("%Y-%m-%dT%H:%M")
           assert_field name, with: expected
+        when :jsonb
+          assert_selector "[data-controller='json-editor'] [data-json-editor-target='container']"
+          assert_selector "input[type='hidden'][name='#{name}']", visible: :all
         when :text
           assert_field name, with: value.to_s, type: 'textarea'
         else # string, text, integer, etc.
@@ -606,6 +612,9 @@ module SystemTestHelpers
           assert_selector "input[type='checkbox'][name='#{name}']"
         when :date, :datetime # [TODO] test datetime-local
           assert_field name, type: 'datetime-local'
+        when :jsonb
+          assert_selector "[data-controller='json-editor'] [data-json-editor-target='container']"
+          assert_selector "input[type='hidden'][name='#{name}']", visible: :all
         when :text
           assert_field name, type: 'textarea'
         else # string, text, integer, etc.

@@ -1,11 +1,95 @@
 km:
   activerecord:
     models:
+      instrument/pressure_transmitter:
+        one: "Pressure transmitter"
+        other: "Pressure transmitters"
       instrument/pressure_gauge:
         one: "Pressure gauge"
         other: "Pressure gauges"
       pressure_gauge: Pressure gauge
     attributes:
+      instrument/pressure_transmitter:
+        measurement_type: "Measurement type"
+        measurement_types:
+          positive_pressure: "Positive pressure"
+          vacuum: "Vacuum"
+          absolute: "Absolute"
+          differential: "Differential"
+        pressure_unit: "Pressure unit"
+        pressure_units:
+          bar: "Bar"
+          psi: "Psi"
+          kpa: "Kpa"
+          kgf_cm2: "Kgf cm2"
+          in_hg: "In hg"
+          other: "Other"
+        range_min: "Range min"
+        range_max: "Range max"
+        signal: "Signal"
+        signals:
+          ma_4_20: "Ma 4 20"
+          voltage_1_5: "Voltage 1 5"
+          voltage_0_10: "Voltage 0 10"
+          other: "Other"
+        communication: "Communication"
+        communications:
+          hart: "Hart"
+          profibus: "Profibus"
+          foundation_fieldbus: "Foundation fieldbus"
+          other: "Other"
+        fluid_phase: "Fluid phase"
+        fluid_phases:
+          gas: "Gas"
+          liquid: "Liquid"
+          other: "Other"
+        process_fluid: "Process fluid"
+        process_fluids:
+          air: "Air"
+          water: "Water"
+          oil: "Oil"
+          steam: "Steam"
+          other: "Other"
+        accuracy_class: "Accuracy class"
+        accuracy_classes:
+          grade_1_0: "Grade 1 0"
+          grade_1_6: "Grade 1 6"
+          grade_2_5: "Grade 2 5"
+          other: "Other"
+        connection_type: "Connection type"
+        connection_types:
+          npt: "Npt"
+          bsp: "Bsp"
+          flanged: "Flanged"
+          other: "Other"
+        connection_size: "Connection size"
+        connection_sizes:
+          in_1_4: "In 1 4"
+          in_1_2: "In 1 2"
+          in_3_4: "In 3 4"
+          other: "Other"
+        case_material: "Case material"
+        case_materials:
+          stainless_steel: "Stainless steel"
+          carbon_steel: "Carbon steel"
+          aluminium: "Aluminium"
+          phenolic: "Phenolic"
+          other: "Other"
+        wetted_material: "Wetted material"
+        wetted_materials:
+          ss316: "Ss316"
+          brass: "Brass"
+          monel: "Monel"
+          other: "Other"
+        movement_type: "Movement type"
+        movement_types:
+          bourdon_tube: "Bourdon tube"
+          diaphragm: "Diaphragm"
+          bellows: "Bellows"
+          other: "Other"
+        ip_rating: "Ip rating"
+        accessories: "Accessories"
+        notes: "Notes"
       instrument/pressure_gauge:
         measurement_type: "Measurement type"
         measurement_types:
