@@ -13,6 +13,7 @@
     </div>
 
     <%= bootstrap_form_with(model: issue,
+      html: { novalidate: true },
       url: issue.persisted? ? issue : document_issues_path(document),
       layout: :horizontal,
       label_col: "col-sm-4",

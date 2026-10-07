@@ -13,6 +13,7 @@
     </div>
 
     <%= bootstrap_form_with(model: doc_type,
+          html: { novalidate: true },
           url: doc_type.persisted? ? doc_type : discipline_doc_types_path(discipline),
           layout: :horizontal,
           label_col: "col-sm-4",

@@ -10,7 +10,7 @@
       <div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
-          <%= bootstrap_form_with url: import_batch_path(@batch), method: :patch, local: true do |f| %>
+          <%= bootstrap_form_with url: import_batch_path(@batch), method: :patch, local: true, html: { novalidate: true } do |f| %>
             <%= f.select :sheet_name, @sheet_names, label: t(".sheet_label") %>
 
             <div class="d-flex justify-content-end gap-2">

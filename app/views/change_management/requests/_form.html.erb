@@ -13,6 +13,7 @@
     </div>
 
     <%= bootstrap_form_with(model: request,
+          html: { novalidate: true },
           url: request.persisted? ? request : project_change_management_requests_path(@project),
           layout: :horizontal,
           label_col: "col-sm-4",

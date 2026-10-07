@@ -4,7 +4,7 @@
 
 <div class="row justify-content-center">
   <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-    <%= bootstrap_form_with(model: role || Role.new, url: roles_path, data: { turbo: true }) do |f| %>
+    <%= bootstrap_form_with(model: role || Role.new, url: roles_path, data: { turbo: true }, html: { novalidate: true }) do |f| %>
       <%= render 'shared/error_messages', object: f.object %>
 
       <div class="card shadow-sm bg-light mb-3">

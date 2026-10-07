@@ -12,6 +12,7 @@
       </div>
     </div>
     <%= bootstrap_form_with(model: switchboard,
+          html: { novalidate: true },
           url: polymorphic_path([parent, :tagable]),
           local: true,
           layout: :horizontal, 

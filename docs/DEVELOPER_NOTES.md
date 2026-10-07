@@ -401,7 +401,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Complete proper ordering by switchboard tag and serial for circuits.
 - [x] Update index view header lines.
 - [ ] Custom 404 not found error page. E.g. Case where admin deletes a record than uses browser back button.
-- [ ] Translation of html5 messages on required fields. Alternatively, suppress html 5 and use client side js.
+- [x] Suppress translation of html5 messages on required fields.
 - [x] Complete discipline system tests.
 - [x] Complete swatch system tests.
 - [x] Complete switchboard controller test.

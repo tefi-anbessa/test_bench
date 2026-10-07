@@ -1058,6 +1058,7 @@ module ProjectAssistant
 
         def test_assertions_form_view(content, nesting)
           assert_includes content, "yield(:header)"
+          assert_includes content, "html: { novalidate: true }"
           case nesting
           when :none, :tagable
             assert_includes content, "bootstrap_form_with(model: #{@singular_name}"

@@ -12,6 +12,7 @@
     </div>
 
     <%= bootstrap_form_with(model: socket_cct,
+          html: { novalidate: true },
           url: polymorphic_path([parent, :tagable]),
           local: true,
           layout: :horizontal,

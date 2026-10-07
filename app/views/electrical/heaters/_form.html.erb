@@ -13,6 +13,7 @@
     </div>
 
     <%= bootstrap_form_with(model: heater,
+          html: { novalidate: true },
           url: polymorphic_path([parent, :tagable]),
           local: true,
           layout: :horizontal,

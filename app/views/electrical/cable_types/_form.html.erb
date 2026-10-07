@@ -13,6 +13,7 @@
     </div> <!-- end of card header -->
 
     <%= bootstrap_form_with(model: cable_type,
+            html: { novalidate: true },
             url: cable_type.persisted? ? cable_type : discipline_electrical_cable_types_path(@discipline),
             layout: :horizontal,
             label_col: "col-sm-6",

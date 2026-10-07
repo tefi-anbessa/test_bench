@@ -12,6 +12,9 @@ Rails.application.configure do
   # Full error reports are disabled.
   config.consider_all_requests_local = false
 
+  # Route unhandled exceptions through the app's error pages (see routes.rb).
+  config.exceptions_app = routes
+
   # Turn on fragment caching in view templates.
   config.action_controller.perform_caching = true
 

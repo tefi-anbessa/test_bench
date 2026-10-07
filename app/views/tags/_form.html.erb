@@ -18,6 +18,7 @@
     </div>
 
     <%= bootstrap_form_with(model: tag,
+      html: { novalidate: true },
       url: tag.persisted? ? tag : discipline_tags_path(tag.discipline),
       layout: :horizontal,
       label_col: "col-sm-4",

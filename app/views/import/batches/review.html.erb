@@ -16,7 +16,7 @@
 
       <div class="row justify-content-center mb-3">
         <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-          <%= bootstrap_form_with url: refresh_file_import_batch_path(@batch), method: :patch, multipart: true, local: true do |f| %>
+          <%= bootstrap_form_with url: refresh_file_import_batch_path(@batch), method: :patch, multipart: true, local: true, html: { novalidate: true } do |f| %>
             <%= f.file_field :file, label: t(".refresh_file_label"), help: t(".refresh_file_help"),
                   accept: Import::SpreadsheetReader::SUPPORTED_EXTENSIONS.join(","), required: true %>
             <div class="d-flex justify-content-end">
@@ -62,7 +62,7 @@
       <div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
-          <%= bootstrap_form_with url: commit_import_batch_path(@batch), method: :post, local: true do |f| %>
+          <%= bootstrap_form_with url: commit_import_batch_path(@batch), method: :post, local: true, html: { novalidate: true } do |f| %>
             <% if invalid_count.positive? %>
               <%= f.check_box :partial, label: t(".partial_label", invalid: invalid_count) %>
             <% end %>

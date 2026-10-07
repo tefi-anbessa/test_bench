@@ -12,6 +12,7 @@
     </div>
 
     <%= bootstrap_form_with(model: @project,
+      html: { novalidate: true },
       layout: :horizontal,
       label_col: "col-sm-4",
       control_col: "col-sm-8",

@@ -15,6 +15,7 @@
     </div>
 
     <%= bootstrap_form_with(model: demand,
+        html: { novalidate: true },
         url: demand.persisted? ? demand : tag_electrical_demands_path(tag),
         layout: :horizontal, 
         label_col: "col-sm-4", 

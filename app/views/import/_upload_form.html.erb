@@ -16,7 +16,7 @@
       <div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-8 col-xl-6">
 
-          <%= bootstrap_form_with url: url, method: :post, multipart: true, local: true do |f| %>
+          <%= bootstrap_form_with url: url, method: :post, multipart: true, local: true, html: { novalidate: true } do |f| %>
             <%= f.file_field :file, label: t(".file_label"), help: t(".file_help"),
                   accept: Import::SpreadsheetReader::SUPPORTED_EXTENSIONS.join(","), required: true %>
 

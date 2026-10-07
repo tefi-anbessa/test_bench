@@ -13,6 +13,7 @@
     </div>
 
     <%%= bootstrap_form_with(model: <%= singular_name %>,
+          html: { novalidate: true },
           url: <%= form_url %>,
           local: true,
           layout: :horizontal,

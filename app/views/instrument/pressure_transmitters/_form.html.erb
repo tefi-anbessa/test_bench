@@ -13,6 +13,7 @@
     </div>
 
     <%= bootstrap_form_with(model: pressure_transmitter,
+          html: { novalidate: true },
           url: polymorphic_path([parent, :tagable]),
           local: true,
           layout: :horizontal,

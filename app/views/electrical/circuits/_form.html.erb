@@ -15,6 +15,7 @@
     </div>
 
     <%= bootstrap_form_with(model: [switchboard, circuit],
+          html: { novalidate: true },
           url: circuit.persisted? ?
             circuit : 
             electrical_switchboard_circuits_path(switchboard),

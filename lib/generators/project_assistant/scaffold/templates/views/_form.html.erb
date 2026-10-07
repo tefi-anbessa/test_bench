@@ -13,6 +13,7 @@
     </div>
 
     <%%= bootstrap_form_with(model: <%= form_model %>,
+          html: { novalidate: true },
 <%- if form_url.present? -%>
           url: <%= form_url %>,
 <%- end -%>

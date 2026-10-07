@@ -35,6 +35,12 @@ en:
       project:      "Current Project:"
       back_to_home: "Back to Home"
       go_back:      "Go Back"
+    not_found:
+      title:        "Not Found"
+      header:       "Page Not Found"
+      message:      "The page you are looking for doesn't exist, or the item you were working on has been removed."
+      back_to_home: "Back to Home"
+      go_back:      "Go Back"
     conflict:
       title:        "Conflict"
       header:       "Conflict Detected"
