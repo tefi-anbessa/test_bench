@@ -203,6 +203,17 @@ module ProjectAssistant
         
         # Convert YAML format to array of { name: type: options: }
         def load_definition(name)
+          # `name` comes straight from the --definition CLI option. Without this
+          # check it is interpolated unsanitized into a file path below, so a
+          # value such as "../../../../etc/passwd" (or any other path containing
+          # a separator) would walk outside definitions/ entirely. Restricting it
+          # to a bare filename-safe token keeps every definition load confined to
+          # that directory.
+          unless name.match?(/\A[\w-]+\z/)
+            say_status :error, "#{name.inspect}: invalid definition file name", :red
+            raise Thor::Error, "Aborting generator"
+          end
+
           path_yml = Rails.root.join("lib/generators/project_assistant/scaffold/definitions/#{name}.yml")
           path_rb  = Rails.root.join("lib/generators/project_assistant/scaffold/definitions/#{name}.rb")
 
@@ -211,14 +222,76 @@ module ProjectAssistant
             data = YAML.load_file(path_yml).deep_symbolize_keys
               # $stderr.puts "DEBUG (HELPER): normalizing data: #{data.inspect}"
             normalize_fields(data)
-          # TODO: implement safe load of ruby definition file
           elsif File.exist?(path_rb)
-            data = eval(File.read(path_rb)) # or require safely
+            data = parse_ruby_literal(path_rb)
             normalize_fields(data)
           else
             say_status :error, "#{path_yml}: Could not find definition file", :red
             raise Thor::Error, "Aborting generator"
           end
+        end
+
+        # A definition file's .rb format is read for its data only - the file is
+        # expected to contain nothing but a single Hash literal, same shape as the
+        # .yml format. The file's parse tree is walked rather than evaluated, so
+        # only literal nodes (Hash, Array, String, Symbol, number, true/false/nil)
+        # are accepted; a method call, constant reference, interpolated string, or
+        # anything else that would require actually running code raises instead of
+        # executing.
+        DefinitionNotLiteralError = Class.new(StandardError)
+        private_constant :DefinitionNotLiteralError
+
+        def parse_ruby_literal(path)
+          source = File.read(path)
+          root = RubyVM::AbstractSyntaxTree.parse(source).children.last
+
+          unless root.type == :HASH
+            raise DefinitionNotLiteralError, "definition file must contain a single Hash literal"
+          end
+
+          literal_node_value(root)
+        rescue SyntaxError => e
+          say_status :error, "#{path}: invalid Ruby syntax in definition file (#{e.message})", :red
+          raise Thor::Error, "Aborting generator"
+        rescue DefinitionNotLiteralError => e
+          say_status :error, "#{path}: #{e.message}", :red
+          raise Thor::Error, "Aborting generator"
+        end
+
+        # Recursively turns an AbstractSyntaxTree node into the plain Ruby value
+        # it's a literal for, raising for any node that isn't a literal (so
+        # nothing in the file ever actually runs).
+        def literal_node_value(node)
+          case node.type
+          when :HASH
+            literal_list_elements(node.children[0]).each_slice(2).to_h { |k, v| [literal_node_value(k), literal_node_value(v)] }
+          when :LIST
+            literal_list_elements(node).map { |element| literal_node_value(element) }
+          when :ZLIST
+            []
+          when :LIT, :STR
+            node.children[0]
+          when :TRUE
+            true
+          when :FALSE
+            false
+          when :NIL
+            nil
+          else
+            raise DefinitionNotLiteralError, "unsupported expression `#{node.type}` on line #{node.first_lineno} - only a literal Hash/Array/String/Symbol/number/boolean/nil is allowed"
+          end
+        end
+
+        # A LIST node's children are the list's elements followed by a trailing
+        # Ruby `nil` marking the end of the list - not an AST node, so it must be
+        # dropped before recursing, as opposed to an element that is itself a
+        # literal `nil` (which shows up as a `NIL` node, not a bare nil).
+        def literal_list_elements(list_node)
+          return [] if list_node.nil?
+
+          elements = list_node.children
+          elements = elements[0..-2] if elements.last.nil?
+          elements
         end
 
         def normalize_fields(hash)

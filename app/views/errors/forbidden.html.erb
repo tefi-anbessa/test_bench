@@ -1,13 +1,7 @@
 <% provide(:title, t('.title')) %>
 <div class="row justify-content-center mt-5">
   <div class="col-md-8 text-center">
-    <%# HAL 9000 Image - using a placeholder if the image doesn't exist %>
-    <%= image_tag(
-      'HAL9000.jpg', 
-      class: "img-fluid mb-4", 
-      alt: "HAL 9000", 
-      style: "max-width: 300px;"
-    ) rescue image_tag("https://via.placeholder.com/300x200?text=HAL+9000", class: "img-fluid mb-4") %>
+    <%= error_image('HAL9000.jpg', 403, max_width: 300) %>
     
     <h1 class="display-4 text-warning">403: <%= t('.header') %></h1>
     
@@ -55,24 +49,18 @@
           
           <% if defined?(current_project) && current_project %>
             <p class="card-text">
-              <strong><%= t(".project") %></strong> 
+              <strong><%= t(".project") %></strong>
               <%= current_project.label %>
             </p>
           <% end %>
-        </div>
       </div>
-      
-      <div class="mt-4">
-        <%= link_to root_path, class: "btn btn-primary me-2" do %>
-          <i class="bi bi-house-door"></i> 
-          <%= t('.back_to_home') %>
+      <div class="card-footer bg-transparent">
+        <%= link_to root_path, class: 'btn btn-primary' do %>
+          <%== bs_icon('house-door') %> <%= t('.back_to_home') %>
         <% end %>
-        
-        <% if defined?(current_project) && current_project %>
-          <%= link_to project_path(current_project), class: "btn btn-outline-primary" do %>
-            <i class="bi bi-arrow-left"></i> 
-            <%= t('.go_back') %>
-          <% end %>
+
+        <%= link_to '#', class: 'btn btn-outline-secondary ms-2', onclick: 'history.back(); return false;' do %>
+          <%== bs_icon('arrow-return-left') %> <%= t('.go_back') %>
         <% end %>
       </div>
     </div>

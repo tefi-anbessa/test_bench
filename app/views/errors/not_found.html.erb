@@ -1,6 +1,8 @@
 <% provide(:title, t('.title')) %>
 <div class="row justify-content-center mt-5">
   <div class="col-md-8 text-center">
+    <%= error_image('HAL9000v3.jpg', 404) %>
+
     <h1 class="display-4 text-secondary">404: <%= t('.header') %></h1>
 
     <div class="card mt-4">
@@ -9,11 +11,11 @@
       </div>
       <div class="card-footer bg-transparent">
         <%= link_to root_path, class: 'btn btn-primary' do %>
-          <i class="bi bi-house-door"></i> <%= t('.back_to_home') %>
+          <%== bs_icon('house-door') %> <%= t('.back_to_home') %>
         <% end %>
 
         <%= link_to '#', class: 'btn btn-outline-secondary ms-2', onclick: 'history.back(); return false;' do %>
-          <i class="bi bi-arrow-return-left"></i> <%= t('.go_back') %>
+          <%== bs_icon('arrow-return-left') %> <%= t('.go_back') %>
         <% end %>
       </div>
     </div>
