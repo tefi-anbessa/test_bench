@@ -400,7 +400,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Complete workflows with admin and no project selected.
 - [x] Complete proper ordering by switchboard tag and serial for circuits.
 - [x] Update index view header lines.
-- [ ] Custom 404 not found error page. E.g. Case where admin deletes a record than uses browser back button.
+- [x] Custom 404 not found error page. E.g. Case where admin deletes a record than uses browser back button.
 - [x] Suppress translation of html5 messages on required fields.
 - [x] Complete discipline system tests.
 - [x] Complete swatch system tests.
@@ -428,24 +428,23 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Check that usage of accepts_nested_attributes_for is correct for tagable concern. It isn't - removed.
 - [x] Fix previous and next functionality in tagable navigation, and generalise it for non tagables. All models next and prev should only look inside policy scope. At present can raise forbidden.
 - [ ] RBAC still has anomalous behaviour when resource wide roles are applied. Scope will include all projects, and allow selection of any project as current, but accessing the project without a specific role will result in forbidden. Either block resource wide roles or implement them in policies.
-- [ ] Clean up responsive views - test all on simulator.
 - [x] Issue policy has been removed. Assess whether it is required or just use document policy, like circuits.
 - [x] Fix update test in tag system test.
 - [x] Fix error in doc_types system test (edit).
 - [ ] Refactor cable and cable type system tests after restructure to core.
-- [ ] Fix error in discipline system test where the test seems to be building new disciplines.
+- [ ] Fix error in discipline system test where the test seems to be building new disciplines. This appears to be a Capybara issue, Claude couldn't solve it.
 - [ ] Write a test for collapsible on attribute rather than association (specifically discipline prefix schema).
 - [ ] Decide what to do about deletion of data. It is affecting many aspects of the architecture.
 - [x] Complete demand system test after refactor.
 - [ ] Fix tag prefix warning message for non-conforming prefix.
 - [ ] Fix assertion in projects system test for show link with no text.
 - [ ] Improve cable index and search options.
-- [ ] Generators file input from ruby format.
+- [x] Generators file input from ruby format.
 - [x] Clean up abstraction of policies and policy tests. Update generator and tests.
 - [ ] Abstract controllers for project, discipline and tag nested resources.
-- [ ] Generic tag_resource_policy may be required. Generator provides for tag nesting but use case is not certain. Only demands are tag linked but not tagable.
+- [x] Generic tag_resource_policy may be required. Generator provides for tag nesting but use case is not certain. Only demands are tag linked but not tagable.
 - [ ] Complete nested system test for scaffold generator.
-- [ ] Scaffold generator to build routes for namespaced models other than tagables.
+- [x] Scaffold generator to build routes for namespaced models other than tagables.
 - [x] Update module generator routes edit action with new tagable structure. The insert hooks are all changed.
 - [x] In show views with loop children (only instruments), loop children should only be in the same discipline.
 
@@ -454,10 +453,10 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Improve role and permissions implementation and workflow.
 - [x] Refactor models to include a universal "label" attribute to be used when presenting polymorphic associations.
 - [x] Refactor projects controller with improved workflow.
-- [ ] Add type checking with Sorbet or RBS
-- [ ] Implement caching for frequently accessed data
-- [x] Upgrade to Rails 8 (Completed in rails8 branch)
-- [x] Refactor electrical policy classes (CablePolicy, SwitchboardPolicy, MotorPolicy, LightCctPolicy, SocketCctPolicy) to use a shared concern or base class to reduce code duplication
+- [x] Add type checking with Sorbet or RBS - rejected.
+- [x] Implement caching for frequently accessed data - deferred: nothing in the app calls `Rails.cache` or uses fragment caching today, so there's nothing to tune yet. Rails only caches automatically for per-request AR queries and fingerprinted assets (already configured). Revisit once production shows an actual slow view or repeated lookup; at that point switch `config.cache_store` (currently the file-based default) to `:redis_cache_store`, reusing the Redis already provisioned for Action Cable.
+- [x] Upgrade to Rails 8 (Completed in rails8 branch).
+- [x] Refactor electrical policy classes (CablePolicy, SwitchboardPolicy, MotorPolicy, LightCctPolicy, SocketCctPolicy) to use a shared concern or base class to reduce code duplication.
 - [x] Refactor all views to use pundit policy checks.
 - [x] Change terminology and implementation from project owner to project manager.
 - [ ] Refactor projects controller and application controller setting of current project: `def after_sign_in_path_for(resource)to use app/controllers/concerns/current_project_concern.rb to reduce code duplication.
@@ -529,6 +528,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Add searching and sorting for from and to fields in cables index.
 - [ ] Refactor the generator's `:step` option to allow the literal value `"any"` (currently coerced as a decimal, so `"any"` is rejected).
 - [ ] Improve index views to allow horizontal scrolling for wider views.
+- [ ] Clean up responsive views - test all on simulator.
 
 ## Potential Features
 

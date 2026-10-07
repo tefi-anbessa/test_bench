@@ -2,7 +2,9 @@ module CurrentProjectConcern
   extend ActiveSupport::Concern
 
   included do
-    helper_method :set_current_project
+    # set_current_project is deliberately not a helper_method - it mutates
+    # session/cookie state, and views should only ever read current_project,
+    # never set it.
     helper_method :current_project
     helper_method :project_selected?
     

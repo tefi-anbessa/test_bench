@@ -78,25 +78,18 @@ class ApplicationController < ActionController::Base
   protected
 
     def after_sign_in_path_for(resource)
-      project = load_current_project
-      # If the current user's project cookie is set,
-      # save it to session, update @current_project, and go to project dashboard.
-      if project
-        set_current_project(project)
-        return project_path(project)
-      end
+      # Prefer the project already remembered via session/cookie. Failing
+      # that (the `||` only evaluates this when it is), auto-select when the
+      # user only has exactly one project available to them at all.
+      project = load_current_project || sole_available_project
 
-      # If no project cookie is set, check if user has exactly one project available
+      set_current_project(project)
+      project ? project_path(project) : projects_path
+    end
+
+    def sole_available_project
       available_projects = ProjectPolicy::Scope.new(pundit_user, Project).resolve
-      if available_projects.count == 1
-        project = available_projects.first
-        set_current_project(project)
-        return project_path(project)
-      end
-
-      # Multiple or no projects available, go to projects index to select
-      set_current_project(nil)
-      projects_path
+      available_projects.first if available_projects.count == 1
     end
 
     def default_url_options

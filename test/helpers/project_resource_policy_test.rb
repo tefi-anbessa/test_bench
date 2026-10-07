@@ -147,6 +147,14 @@ module ProjectResourcePolicyTest
       assert policy(@admin, nil, @other_resource).show?
     end
 
+    test 'show? denies a user with a role on the resource project when it is not the current project' do
+      # @accredited_user_other_project holds a role on @other_project (via
+      # @other_discipline), the project @other_resource actually belongs to -
+      # but here @project (not @other_project) is current, so this must be
+      # denied even though the user is a legitimate member of @other_project.
+      refute policy(@accredited_user_other_project, @project, @other_resource).show?
+    end
+
     test 'show denies users without project access' do
       refute policy(@accredited_user_other_project, @project, @resource).show?
       refute policy(@regular_user, @project, @resource).show?

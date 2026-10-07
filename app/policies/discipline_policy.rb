@@ -26,9 +26,9 @@ class DisciplinePolicy < ProjectResourcePolicy
   def new?
     return false if user.nil?
     return false if current_project.nil?
-    user.is_admin? || 
-      user.is_app_owner? || 
-      user.is_project_admin_of?(current_project)
+    user.is_admin? ||
+      user.is_app_owner? ||
+      (user.is_project_admin_of?(current_project) && record.project == current_project)
   end
 
   def create?
