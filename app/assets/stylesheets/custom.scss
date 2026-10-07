@@ -1,3 +1,52 @@
+// Bootstrap's default "info" is cyan ($info: $cyan). This swaps it for
+// Bootstrap's own teal instead - reads calmer/more "informational" without
+// introducing a color outside Bootstrap's palette. Since this app loads the
+// prebuilt bootstrap.min.css rather than compiling Bootstrap's Sass, there's
+// no $info variable to override - every value below is copied from
+// bootstrap.min.css's own cyan rules with cyan swapped for teal (#20c997),
+// keeping the exact same tint/shade ratios Bootstrap used for the originals.
+// This covers everything that reads --bs-info* at runtime (alerts, badges,
+// .text-info/.bg-info/.border-info); .btn-info/.btn-outline-info don't - they
+// hardcode their own colors as local custom properties - so those are
+// overridden directly, state by state, below.
+:root {
+  --bs-info: #20c997;
+  --bs-info-rgb: 32, 201, 151;
+  --bs-info-bg-subtle: #d2f4ea;
+  --bs-info-border-subtle: #a6e9d5;
+  --bs-info-text-emphasis: #0d503c;
+}
+
+[data-bs-theme="dark"] {
+  --bs-info-bg-subtle: #06281e;
+  --bs-info-border-subtle: #13795b;
+  --bs-info-text-emphasis: #79dfc1;
+}
+
+.btn-info {
+  --bs-btn-bg: #20c997;
+  --bs-btn-border-color: #20c997;
+  --bs-btn-hover-bg: #41d1a7;
+  --bs-btn-hover-border-color: #36cea1;
+  --bs-btn-active-bg: #4dd4ac;
+  --bs-btn-active-border-color: #36cea1;
+  --bs-btn-disabled-bg: #20c997;
+  --bs-btn-disabled-border-color: #20c997;
+  --bs-btn-focus-shadow-rgb: 27, 171, 128;
+}
+
+.btn-outline-info {
+  --bs-btn-color: #20c997;
+  --bs-btn-border-color: #20c997;
+  --bs-btn-hover-bg: #20c997;
+  --bs-btn-hover-border-color: #20c997;
+  --bs-btn-focus-shadow-rgb: 32, 201, 151;
+  --bs-btn-active-bg: #20c997;
+  --bs-btn-active-border-color: #20c997;
+  --bs-btn-disabled-color: #20c997;
+  --bs-btn-disabled-border-color: #20c997;
+}
+
 .themed {
   background-color: var(--bg);
   color: var(--text);
