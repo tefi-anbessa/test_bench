@@ -122,26 +122,6 @@ electrical:
       "400V": 400.0
       "415V": 415.0
       "480V": 480.0
-  ingress_protection:
-    first_digit:
-      no_protection: 0
-      solid_objects_50mm: 1
-      solid_objects_12mm: 2
-      solid_objects_2_5mm: 3
-      solid_objects_1mm: 4
-      dust_protected: 5
-      dust_tight: 6
-    second_digit:
-      no_protection: 0
-      dripping_water: 1
-      dripping_water_tilted: 2
-      spraying_water: 3
-      splashing_water: 4
-      water_jets: 5
-      powerful_water_jets: 6
-      temporary_immersion: 7
-      continuous_immersion: 8
-      high_pressure_water_jets: 9
   motor:
     motor_type:
       other: 0

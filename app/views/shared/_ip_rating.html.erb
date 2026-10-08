@@ -1,20 +1,30 @@
 <!-- Expects form, object -->
 <!-- Retrieves options from constants, no need for controller setup -->
-<% ip_1 = Constants.electrical.ingress_protection.first_digit.to_h %>
-<% ip_2 = Constants.electrical.ingress_protection.second_digit.to_h %>
+<!--
+  Ingress protection is model-agnostic (an IEC 60529 standard, not something
+  that varies per model), so its keys/labels live under the shared
+  Constants.ingress_protection / t('ingress_protection...') namespace rather
+  than any one model's. That means ApplicationRecord#human_enum_name can't be
+  used for these labels - it only ever looks up
+  activerecord.attributes.<model>.<field>.<key>, which assumes an enum is
+  tied to one model's field. Translating directly with t(), scoped to the
+  shared key, is the correct replacement here, not a workaround.
+-->
+<% ip_1 = Constants.ingress_protection.first_digit.to_h %>
+<% ip_2 = Constants.ingress_protection.second_digit.to_h %>
 <div class="card p-2 mb-2" data-controller="ip-rating">
   <div class="row">
     <div class="col-4">
       <%= form.text_field :ingress_protection,
               class: 'form-control form-control-sm',
               layout: :vertical,
-              prepend: 'IP',
+              prepend: t('ingress_protection.ip'),
               data: { 'ip-rating-target': 'output' } %>
     </div>
     <div class="col-6">
       <div class="row">
       <%= select_tag :ip_1,
-        options_for_select(ip_1.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] },
+        options_for_select(ip_1.map { |k, v| ["#{v} - #{t("ingress_protection.first_digit.#{k}")}", v] },
           object.ingress_protection&.first),
         {
           class: 'form-select mb-0',
@@ -28,7 +38,7 @@
       </div>
       <div class="row">
         <%= select_tag :ip_2,
-          options_for_select(ip_2.map { |k, v| ["#{v} - #{k.to_s.titleize}", v] },
+          options_for_select(ip_2.map { |k, v| ["#{v} - #{t("ingress_protection.second_digit.#{k}")}", v] },
             object.ingress_protection&.last),
             {
               class: 'form-select mb-0',
