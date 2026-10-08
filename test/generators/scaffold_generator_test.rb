@@ -178,6 +178,17 @@ nr: "Not Required"
       end
     end
 
+    test "generator rejects :ip fields - only the tagable generator supports it" do
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, "ingress_protection:ip"],
+        {},
+        destination_root: destination_root
+      )
+      assert_raises(Thor::Error) do
+        generator.invoke_all
+      end
+    end
+
     test "generator checks nesting option is valid" do
       generator = ProjectAssistant::ScaffoldGenerator.new(
         [@class_name, "name:string"],

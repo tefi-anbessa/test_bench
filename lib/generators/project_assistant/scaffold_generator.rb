@@ -81,7 +81,17 @@ module ProjectAssistant
         input_fields = prepare_cli(args || [])
       end
       @fields, errors = process_fields(input_fields)
-          
+
+      # :ip is syntactically valid (process_fields/VALID_FIELD_TYPES is shared
+      # with the tagable generator, which does support it), but this
+      # generator's own templates have no case for it - reject it here
+      # rather than let it through to silently produce broken/incomplete
+      # views (missing form field, misaligned index row).
+      @fields.each do |field|
+        next unless field[:type] == :ip
+        errors << "#{field[:name]}: :ip is only supported by the tagable generator."
+      end
+
       # Handle validation results
       if errors.any?
         say_status :error, "Validation errors found:", :red

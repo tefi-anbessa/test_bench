@@ -211,7 +211,7 @@ The accepted YAML file format is of the form:
 
 ```yaml
 name: 
-  type: 
+  type: string
   option:
   option:
 ```
@@ -444,7 +444,7 @@ Usage is explained using the example used by the generator test, which covers al
 
 4. The generator has dependencies, which should automatically be met if the module generator has been used for setting up the module (for a namespaced model). Refer to the module generator documentation to see what is expected, and check that all requirements are in place.
 
-5. The generator uses [field_types.rb](../lib/generators/project_assistant/field_types.rb) to make assumptions on how to present the various field types. Only field types in `SEARCHABLE_TYPES` will have search fields on the index view. Only field types in `INDEX_TYPES` will appear in the index view. If these assumptions don't suit the model being generated, it is acceptable to edit `field_types.rb` temporarily, but ensure it is restored when complete. For minor differences, it may be easier to edit the generated scaffold after the run, but be aware of the dependencies: test files need to match the code files. If this is a regular occurrence, consider adding named versions of field_types.rb.
+5. The generator uses the `SEARCHABLE_TYPES`/`INDEX_TYPES` constants in [scaffold_helper.rb](../lib/generators/project_assistant/shared/scaffold_helper.rb) to make assumptions on how to present the various field types. Only field types in `SEARCHABLE_TYPES` will have search fields on the index view. Only field types in `INDEX_TYPES` will appear in the index view. If these assumptions don't suit the model being generated, it is acceptable to edit these constants temporarily, but ensure they are restored when complete. For minor differences, it may be easier to edit the generated scaffold after the run, but be aware of the dependencies: test files need to match the code files.
 
 6. With all the fields ready, it's time to prepare the command line.
 
@@ -593,7 +593,7 @@ Run the generator command using the --pretend option (or simply -p) first. This 
 15. When any necessary corrections are complete, open the system test file (in our example `test/system/change_management/requests_system_test.rb`).
 
     * System tests are abstracted by nesting option, so all models sharing a nesting value follow the same basic tests.
-    * The field sets in the system test are set up by the generator according to the [field_types.rb](../lib/generators/project_assistant/field_types.rb) file. Any special field types will need to be coded in the provided hooks. For example, a model may have a float field that the form presents as a select. The generator doesn't know how this works, so the system test has to set that field specially.
+    * The field sets in the system test are set up by the generator according to the `SEARCHABLE_TYPES`/`INDEX_TYPES` constants in [scaffold_helper.rb](../lib/generators/project_assistant/shared/scaffold_helper.rb). Any special field types will need to be coded in the provided hooks. For example, a model may have a float field that the form presents as a select. The generator doesn't know how this works, so the system test has to set that field specially.
     * If the model has features not tested by the standard tests, add tests for them in the system test file. For example, a model with child records has a number of related tests.
     * Save and close the system test file.
     * Run the system test.
@@ -609,14 +609,18 @@ A tagable generator builds a tagable model: a delegated-type model (`include Tag
 
 #### Command Line
 
-The command line must include the generator name `project_assistant:tagable` and the model name. The model name must be module-prefixed (e.g. `Electrical::Heater`); a core, non-namespaced tagable model is not supported. Fields are given as command line arguments, or read from a definition file, in the same format as the scaffold generator (see [File Definition of Fields](#file-definition-of-fields) and [Command Line Input of Fields](#command-line-input-of-fields)).
+The command line must include the generator name `project_assistant:tagable` and the model name. The model name must be module-prefixed (e.g. `Electrical::Heater`); a core, non-namespaced tagable model is not supported. Fields are given as command line arguments, or read from a definition file, in the same format as the scaffold generator (see [File Definition of Fields](#file-definition-of-fields) and [Command Line Input of Fields](#command-line-input-of-fields)), plus one additional type available only here: `:ip`.
+
+* The tagable generator shall implement the additional custom `:ip` type for an IEC 60529 ingress protection rating. This type is only implemented for the tagable generator; the scaffold generator has no case for it in its own templates, and shall reject a `:ip` field as a validation error rather than generate incomplete views from it. The generator shall set string type in the migration (the value is stored as the two rating digits, e.g. `"65"`). In the form, the generator shall render the shared `shared/ip_rating` partial - two selects (first/second digit) combined into the field by the `ip-rating` Stimulus controller - instead of a plain text field. Views that merely display the value (index, show, card) treat it exactly as `:string`. Because the partial itself calls `object.ingress_protection`, not a parameterized attribute, a `:ip` field must be named `ingress_protection`; the generator shall abort otherwise.
+
+
 
 The only option is `--definition`. Definition files live in `lib/generators/project_assistant/scaffold/definitions`, shared with the scaffold generator, and are named without the extension.
 
 Here is an example generate command for an electrical heater:
 
 ```bash
-rails generate project_assistant:tagable Electrical::Heater heater_type:enum_translated:required application:enum_translated:required ingress_protection:string sheath_temperature_max:float:units="deg C" power_density_min:float power_density_max:float sheath_material:enum_translated insulation_material:enum_translated:keys="insulation_material_other","no_insulation","ceramic","magnesium_oxide","mica","mineral","fluoropolymer","fiberglass" notes:text
+rails generate project_assistant:tagable Electrical::Heater heater_type:enum_translated:required application:enum_translated:required ingress_protection:ip sheath_temperature_max:float:units="deg C" power_density_min:float power_density_max:float sheath_material:enum_translated insulation_material:enum_translated:keys="insulation_material_other","no_insulation","ceramic","magnesium_oxide","mica","mineral","fluoropolymer","fiberglass" notes:text
 ```
 
 The same model from a definition file:
@@ -653,6 +657,7 @@ Not created: a policy (tagable models are authorized through `TagPolicy`, via th
 
 Prepare the field list as for the scaffold generator (see [Preparation](#preparation)). In addition:
 
+1. Include a field named ingress_protection` with type `:ip` if required.
 1. Include a `notes:text` field as the last field. Every tagable model has it, and the shared tagable system tests expect it.
 
 #### Follow Up
