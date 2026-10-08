@@ -12,7 +12,15 @@ module ProjectAssistant
       ].freeze
 
       # Types can be added, but you will have to write the generator and test code to implement them.
-      SPECIAL_FIELD_TYPES = %i[references belongs_to enum enum_translated].freeze
+      # :ip is a plain string column backed by the shared shared/ip_rating form
+      # partial (two digit selects combined into one field by the ip-rating
+      # Stimulus controller) instead of a bare text field - see
+      # app/views/shared/_ip_rating.html.erb. Only the tagable generator
+      # actually renders it; realistically every ip field belongs to a
+      # tagable instrument/electrical model. The field must be named
+      # "ingress_protection" - see process_fields below - since the partial
+      # itself calls object.ingress_protection, not a parameterized name.
+      SPECIAL_FIELD_TYPES = %i[references belongs_to enum enum_translated ip].freeze
 
       # Don't edit this.
       VALID_FIELD_TYPES = (RAILS_FIELD_TYPES + SPECIAL_FIELD_TYPES).freeze
@@ -343,6 +351,14 @@ module ProjectAssistant
                 type = type.to_sym
                 unless VALID_FIELD_TYPES.include?(type)
                   errors << "#{name}: unknown field type #{type}. Valid types are: #{VALID_FIELD_TYPES.join(', ')}."
+                  @valid = false
+                end
+
+                # The shared/ip_rating partial calls object.ingress_protection
+                # directly, not a parameterized attribute name, so a :ip field
+                # can't be called anything else.
+                if type == :ip && name != "ingress_protection"
+                  errors << "#{name}: a :ip field must be named ingress_protection."
                   @valid = false
                 end
               end
@@ -927,6 +943,8 @@ module ProjectAssistant
               # Check for translation of custom types
               when :enum, :enum_translated
                 "integer"
+              when :ip
+                "string"
               else
                 field[:type].to_s
               end
@@ -1038,7 +1056,7 @@ module ProjectAssistant
         def test_assertions_row_view(content, nesting)
           @index_fields.each do |field|
             case field[:type]
-            when :string
+            when :string, :ip
               assert_includes content, "index_attribute(row, :#{field[:name]}"
             when :enum, :enum_translated, :integer, :bigint, :decimal, :float, :boolean, :date, :datetime, :timestamp, :jsonb, :binary
               assert_includes content, "index_attribute(row, :#{field[:name]}, type: :#{field[:type]}"
@@ -1084,7 +1102,7 @@ module ProjectAssistant
           @attribute_fields.each do |field|
             case field[:type]
             # Breaking these lines causes errors...
-            when :string
+            when :string, :ip
               assert_includes content, "show_attribute(@#{@singular_name}, :#{field[:name]})"
             when :integer, :bigint, :boolean, :date, :datetime, :timestamp, :time, :enum, :enum_translated
               assert_includes content, "show_attribute(@#{@singular_name}, :#{field[:name]}, type: :#{field[:type]}"
@@ -1160,6 +1178,8 @@ module ProjectAssistant
               assert_match(/form_field\(f,\s*:#{field[:name]},\s*type:\s*:enum_translated/, content)
             when :references, :belongs_to
               assert_match(/form_field\(f,\s*:#{field[:name]},\s*type:\s*:select/, content)
+            when :ip
+              assert_match(%r{render\s*["']shared/ip_rating["']}, content)
             end
           end
         end
@@ -1172,7 +1192,7 @@ module ProjectAssistant
           @attribute_fields.each do |field|
             case field[:type]
             # Breaking these lines causes errors...
-            when :string
+            when :string, :ip
               assert_includes content, "show_attribute(#{singular_name}, :#{field[:name]})"
             when :integer, :bigint, :boolean, :date, :datetime, :timestamp, :time, :enum, :enum_translated
               assert_includes content, "show_attribute(#{singular_name}, :#{field[:name]}, type: :#{field[:type]}"

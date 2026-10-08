@@ -69,7 +69,7 @@
   <%- options = field[:options].slice(:precision, :scale, :units, :si) -%>
   <%- opts = options.map { |k, v| "#{k}: #{v.inspect}" }.join(", ") -%>
   <%- case field[:type] -%>
-  <%- when :string -%>
+  <%- when :string, :ip -%>
               <%%= show_attribute(@<%= singular_name %>, :<%= field[:name] %>) %>
   <%- when :integer, :bigint, :boolean, :date, :datetime, :timestamp, :time, :enum, :enum_translated -%>
               <%%= show_attribute(@<%= singular_name %>, :<%= field[:name] %>, type: :<%= field[:type] %>) %>

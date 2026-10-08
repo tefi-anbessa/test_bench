@@ -14,7 +14,7 @@
   <%- opts = options.map { |k, v| "#{k}: #{v.inspect}" }.join(", ") -%>
   <%- attr = "#{field[:name]}" -%>
   <%- case field[:type] -%>
-  <%- when :string -%>
+  <%- when :string, :ip -%>
   <td><%%= index_attribute(row, :<%= attr %>) %></td>
   <%- when :integer, :bigint, :text, :jsonb, :boolean, :date, :datetime, :time, :timestamp, :enum, :enum_translated -%>
   <td><%%= index_attribute(row, :<%= attr %>, type: :<%= field[:type] %>) %></td>

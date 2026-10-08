@@ -72,6 +72,8 @@
     <%- when :references, :belongs_to -%>
                 <%% collection = options_for_select(<%= field[:name].pluralize %>, selected: <%= singular_name %>.<%= field[:name] %>_id) %>
                 <%%= form_field(f, :<%= field[:name] %>, type: :select, collection: collection<%= ", #{opts}" unless opts.empty? %>) %>
+    <%- when :ip -%>
+                <%%= render "shared/ip_rating", form: f, object: <%= singular_name %> %>
   <%- end -%>
 <%- end -%>
 

@@ -61,6 +61,7 @@ module ProjectAssistant
         'created:datetime',
         'flex_field:jsonb',
         'code:string:uniq:valid=AA',
+        'ingress_protection:ip:valid=65',
       ]
 
       input_fields = prepare_cli(@args)
