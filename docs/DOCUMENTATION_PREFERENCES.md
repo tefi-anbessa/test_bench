@@ -1,34 +1,40 @@
 # Documentation Preferences
 
 ## Overview
+
 Guidelines for maintaining comprehensive documentation in the codebase for both human and AI reference.
 
 ## Protected Documentation
 
 The following core documentation files are READ-ONLY and must not be modified by AI:
+
 1. `docs/Documentation Preferences.md`
-  - Purpose:
-    - This document explains the purpose of the various other documents used to manage this software application development project.
+
+   - Purpose:
+      - This document explains the purpose of the various other documents used to manage this software application development project.
+
 2. `docs/DEVELOPER_NOTES.md`
-  - Purposes:
-    - Guidance for new developer and reminder for original developer on how the application is structured and intended to behave
-    - Guidance on the implementation techniques to be followed to maintain consistency
-    - Guidance for AI on how to interact with the project
-    - Record the history of how things were done
-    - Lists of things to do:
-      - ongoing development check list (Development TODO)
-      - outstanding fixes required (Technical Debt)
-      - future improvements (Potential Features)
-      - major restructure (Architecture Considerations)
+
+   - Purposes:
+      - Guidance for new developer and reminder for original developer on how the application is structured and intended to behave
+      - Guidance on the implementation techniques to be followed to maintain consistency
+      - Guidance for AI on how to interact with the project
+      - Record the history of how things were done
+      - Lists of things to do:
+        - ongoing development check list (Development TODO)
+        - outstanding fixes required (Technical Debt)
+        - future improvements (Potential Features)
+        - major restructure (Architecture Considerations)
+
 2. `docs/TESTING.md`
   - Purposes:
     - Provide clear guidance and rules for testing the application.
+
 3. `docs/ROLES_AND_PERMISSIONS.md`
   - Purposes:
     - Explains the roles based access control (RBAC) system
     - Details the roles and permissions for each module, as the basis for setting up tests 
     - Explains how the roles and permission system is implemented
-
 
 ### Protection Methods
 - **AI Restriction**: 
@@ -58,23 +64,25 @@ The following core documentation files are READ-ONLY and must not be modified by
 ## Best Practices
 
 ### 1. Documentation Structure
+
 - Keep documentation in the project root or `docs/` directory
 - Use clear, descriptive filenames
 - Organize related documents in subdirectories when needed
 
 ### 2. Formatting
+
 - Use Markdown for all documentation
 - Include a table of contents for longer documents
 - Use consistent heading levels
-- Add code blocks with syntax highlighting
+- Add code blocks with syntax highlighti
 
-### 3. Content Guidelines
 - Document both what and why, not just how
 - Keep documentation up-to-date with code changes
 - Include examples where helpful
 - Document edge cases and gotchas
 
 ### 4. AI Considerations
+
 - Document project-specific patterns and conventions
 - Include context that might not be obvious from code
 - Keep documentation in version control

@@ -18,7 +18,7 @@ module Instrument
 
       def tagable_params
         params.require(:instrument_pressure_gauge)
-        .permit(:measurement_type, :pressure_unit, :range_min, :range_max, :fluid_phase, :process_fluid, :accuracy_class, :dial_size, :connection_type, :connection_size, :case_material, :wetted_material, :movement_type, :liquid_filled, :fill_fluid, :ip_rating, :safety_pattern, :accessories, :notes)
+        .permit(:measurement_type, :pressure_unit, :range_min, :range_max, :fluid_phase, :process_fluid, :accuracy_class, :dial_size, :connection_type, :connection_size, :case_material, :wetted_material, :movement_type, :liquid_filled, :fill_fluid, :ingress_protection, :safety_pattern, :accessories, :notes)
       end
   end
 end

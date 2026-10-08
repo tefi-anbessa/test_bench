@@ -59,7 +59,7 @@
                 <%= form_field(f, :movement_type, type: :enum_translated) %>
                 <%= form_field(f, :liquid_filled, type: :boolean) %>
                 <%= form_field(f, :fill_fluid, type: :enum_translated) %>
-                <%= form_field(f, :ip_rating) %>
+                <%= render "shared/ip_rating", form: f, object: pressure_gauge %>
                 <%= form_field(f, :safety_pattern, type: :boolean) %>
                 <%= form_field(f, :accessories, type: :jsonb) %>
                 <%= form_field(f, :notes, type: :text) %>

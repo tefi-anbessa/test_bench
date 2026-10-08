@@ -47,7 +47,7 @@ module Instrument
     private
 
     def self.ransackable_attributes(auth_object = nil)
-      [:measurement_type, :pressure_unit, :fluid_phase, :process_fluid, :accuracy_class, :dial_size, :connection_type, :connection_size, :case_material, :wetted_material, :movement_type, :fill_fluid, :ip_rating, :accessories, :notes, :created_at, :updated_at]
+      [:measurement_type, :pressure_unit, :fluid_phase, :process_fluid, :accuracy_class, :dial_size, :connection_type, :connection_size, :case_material, :wetted_material, :movement_type, :fill_fluid, :ingress_protection, :accessories, :notes, :created_at, :updated_at]
     end
 
     def self.ransackable_associations(auth_object = nil)

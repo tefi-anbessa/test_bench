@@ -109,7 +109,7 @@ class TagablesController < ApplicationController
       end
 
       unless @tagable.valid?
-        flash.now[:alert] = t('flash.create.alert', 
+        flash.now[:alert] = t('flash.create.alert',
           resource_name: @tagable.model_name.human(count: 1).downcase)
         failed_to_save
         return

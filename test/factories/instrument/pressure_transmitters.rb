@@ -24,7 +24,7 @@ FactoryBot.define do
     case_material { "stainless_steel" }
     wetted_material { "ss316" }
     movement_type { "bourdon_tube" }
-    ip_rating { "65" }
+    ingress_protection { "65" }
     accessories { "Diaphram seal: Required" }
     notes { nil }
 

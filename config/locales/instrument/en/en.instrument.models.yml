@@ -86,7 +86,7 @@ en:
           diaphragm: "Diaphragm"
           bellows: "Bellows"
           other: "Other"
-        ip_rating: "Ip rating"
+        ingress_protection: "Ingress protection"
         accessories: "Accessories"
         notes: "Notes"
       instrument/pressure_gauge:
@@ -168,7 +168,7 @@ en:
           glycerine: "Glycerine"
           silicone: "Silicone"
           other: "Other"
-        ip_rating: "IP rating"
+        ingress_protection: "Ingress protection"
         safety_pattern: "Safety pattern"
         accessories: "Accessories"
         notes: "Notes"

@@ -61,7 +61,7 @@ fill_fluid:
   type: enum_translated
   keys: [none, glycerine, silicone, other]
   valid: glycerine
-ip_rating:
+ingress_protection:
   type: string
   valid: 65
 safety_pattern:

@@ -25,7 +25,7 @@ module Instrument
 					range_min: 0.0,
 					range_max: 10.0,
 					fluid_phase: "gas",
-					process_fluid: "gas",
+					process_fluid: "air",
 					accuracy_class: "grade_1_6",
 					dial_size: "mm100",
 					connection_type: "npt",
@@ -35,7 +35,7 @@ module Instrument
 					movement_type: "bourdon_tube",
 					liquid_filled: true,
 					fill_fluid: "glycerine",
-					ip_rating: "65",
+					ingress_protection: "65",
 					safety_pattern: nil,
 					accessories: "Snubber: Required",
 					notes: nil
@@ -44,17 +44,17 @@ module Instrument
 
       # Set invalid resource param for tests.
       def invalid_param
-        { }  # Set an invalid value for an attribute.
+        { fluid_phase: "steam" }  # Set an invalid value for an attribute.
       end
 
       # Nominate an attribute to get changed during update tests.
       def update_attribute_name
-        # Set one attribute name as a symbol
+        :ingress_protection
       end
 
       # Nominate a valid value to update the attribute to, observe the correct type.
       def updated_attribute_value
-        "new_value"
+        "66"
       end
   end
 end

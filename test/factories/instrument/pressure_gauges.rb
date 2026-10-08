@@ -25,7 +25,7 @@ FactoryBot.define do
     movement_type { "bourdon_tube" }
     liquid_filled { true }
     fill_fluid { "glycerine" }
-    ip_rating { "65" }
+    ingress_protection { "65" }
     safety_pattern { nil }
     accessories { "Snubber: Required" }
     notes { nil }

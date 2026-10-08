@@ -34,7 +34,7 @@ module Instrument
 					case_material: "stainless_steel",
 					wetted_material: "ss316",
 					movement_type: "bourdon_tube",
-					ip_rating: "65",
+					ingress_protection: "65",
 					accessories: "Diaphram seal: Required",
 					notes: nil
         }
@@ -48,7 +48,7 @@ module Instrument
       # Nominate an attribute to get changed during update tests.
       def update_attribute_name
         # Set one attribute name as a symbol
-        :ip_rating
+        :ingress_protection
       end
 
       # Nominate a valid value to update the attribute to, observe the correct type.

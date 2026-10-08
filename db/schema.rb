@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_06_000742) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_08_034810) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -253,7 +253,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_06_000742) do
     t.integer "movement_type"
     t.boolean "liquid_filled"
     t.integer "fill_fluid"
-    t.string "ip_rating"
+    t.string "ingress_protection"
     t.boolean "safety_pattern"
     t.jsonb "accessories"
     t.text "notes"
@@ -276,7 +276,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_06_000742) do
     t.integer "case_material"
     t.integer "wetted_material"
     t.integer "movement_type"
-    t.string "ip_rating"
+    t.string "ingress_protection"
     t.jsonb "accessories"
     t.text "notes"
     t.datetime "created_at", null: false
