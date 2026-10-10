@@ -18,7 +18,7 @@ module Electrical
     end
 
     def self.swatch
-      Swatch.find_by(name: "Electrical")
+      Swatch.find_by(name: "Discipline E")
     end
   end
 end

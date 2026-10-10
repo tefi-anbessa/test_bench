@@ -115,7 +115,12 @@
                   class: "dropdown-item" %>
               </li>
               <li>
-                <%= link_to t('menu.edit'),
+                <%= link_to t('menu.edit_profile'),
+                  edit_user_path(current_user),
+                  class: "dropdown-item" %>
+              </li>
+              <li>
+                <%= link_to t('menu.edit_account'),
                   edit_user_registration_path,
                   class: "dropdown-item" %>
               </li>

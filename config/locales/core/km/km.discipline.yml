@@ -1,17 +1,15 @@
-# The discipline model has standardised content available, with translations.
-# Custom content is not translated.
+# Default display names for the standard disciplines (config/constants/
+# discipline.yml), keyed by code - the structural identifier, not the
+# (project-customizable) name. Custom, project-defined discipline names are
+# not translated - the `default:` on each t() call simply shows whatever
+# the project named it.
 km:
   discipline:
     name:
-      Administration: 'រដ្ឋបាល'
-      Architecture: 'ស្ថាបត្យកម្ម'
-      Civil: 'ស៊ីវិល'
-      Completions: 'ការបញ្ចប់'
-      Electrical: 'អគ្គិសនី'
-      Hvac: 'ប្រព័ន្ធកង្ហារអាកាស'
-      Instrument: 'ឧបករណ៍វัดឌិន'
-      InformationTechnology: 'ព័ត៌មានវិទ្យា'
-      Mechanical: 'មេកានិក'
-      Piping: 'បំពង់'
-      Process: 'ដំណើរការ'
-      Structural: 'រចនាសម្ព័ន្ធ'
+      E: 'អគ្គិសនី'
+      J: 'ឧបករណ៍វัดឌិន'
+      P: 'ដំណើរការ'
+      IT: 'ព័ត៌មានវិទ្យា'
+      M: 'មេកានិក'
+      PIP: 'បំពង់'
+      C: 'ស៊ីវិល'

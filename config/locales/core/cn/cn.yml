@@ -63,7 +63,8 @@ cn:
   menu:
     toggle:       "Toggle navigation"
     profile:      "Profile"
-    edit:         "Edit"
+    edit_profile: "Edit Profile"
+    edit_account: "Account Settings"
     log_out:      "Sign out"
     log_in:       "Sign in"
     home:         "Home"

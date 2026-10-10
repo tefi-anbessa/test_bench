@@ -9,5 +9,10 @@ FactoryBot.define do
     sequence(:title) { |n| "Project #{n}" }
     description { "A test project" }
 
+    # Defaults to every standard discipline, matching the old
+    # create_all_for_project behaviour - most tests assume any standard
+    # discipline they need already exists on @project. Override with a
+    # specific list to test the new selective behaviour itself.
+    discipline_codes { Discipline.standard_options.keys.map(&:to_s) }
   end
 end

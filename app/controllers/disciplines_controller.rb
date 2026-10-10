@@ -117,7 +117,9 @@ class DisciplinesController < ApplicationController
     end
 
     def set_swatch
-      @swatch = @discipline&.swatch || @discipline&.project&.swatch || Swatch.find_by(name: @discipline&.name) || Project.swatch || Swatch.find_by(name: 'app_theme')
+      @swatch = @discipline&.swatch || @discipline&.project&.swatch ||
+                (Swatch.find_by(name: "Discipline #{@discipline&.code}") if @discipline&.code) ||
+                Project.swatch || Swatch.find_by(name: 'app_theme')
     end
 
     def setup_form
@@ -128,8 +130,10 @@ class DisciplinesController < ApplicationController
 
     def setup_dashboard
       Rails.application.eager_load! if Rails.env.development?
+      module_name = @discipline.module_name
+      return @model_links = [] if module_name.nil?
       models = ActiveRecord::Base.descendants
-      .select { |model| model.module_parent_name == @discipline.name && model.model_name.human != "Base" }
+      .select { |model| model.module_parent_name == module_name && model.model_name.human != "Base" }
       .sort_by(&:model_name)
       @model_links = models.filter_map { |m| model_link_for(m) }
     end

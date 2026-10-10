@@ -6,58 +6,52 @@ Guidelines for maintaining comprehensive documentation in the codebase for both 
 
 ## Protected Documentation
 
-The following core documentation files are READ-ONLY and must not be modified by AI:
+The following core documentation files require the developer's explicit, individual permission before any AI edit. Having discussed the topic isn't permission to edit the file - each specific change needs its own go-ahead from the developer, every time.
 
-1. `docs/Documentation Preferences.md`
+1. `docs/DOCUMENTATION_PREFERENCES.md` (this file)
 
    - Purpose:
-      - This document explains the purpose of the various other documents used to manage this software application development project.
+     - Explains the other documents used to manage this project, and sets this permission rule.
 
-2. `docs/DEVELOPER_NOTES.md`
+1. `docs/DEVELOPER_NOTES.md`
 
    - Purposes:
-      - Guidance for new developer and reminder for original developer on how the application is structured and intended to behave
-      - Guidance on the implementation techniques to be followed to maintain consistency
-      - Guidance for AI on how to interact with the project
-      - Record the history of how things were done
-      - Lists of things to do:
-        - ongoing development check list (Development TODO)
-        - outstanding fixes required (Technical Debt)
-        - future improvements (Potential Features)
-        - major restructure (Architecture Considerations)
+     - Guidance for a new developer and reminder for the original developer on how the application is structured and intended to behave
+     - Guidance on the implementation techniques to be followed to maintain consistency
+     - Guidance for AI on how to interact with the project
+     - Record the history of how things were done
+     - Lists of things to do:
+       - ongoing development check list (Development TODO)
+       - outstanding fixes required (Technical Debt)
+       - future improvements (Potential Features / Refactoring Opportunities)
+       - major restructure (Architecture Considerations)
 
-2. `docs/TESTING.md`
-  - Purposes:
-    - Provide clear guidance and rules for testing the application.
+1. `docs/TESTING.md`
 
-3. `docs/ROLES_AND_PERMISSIONS.md`
-  - Purposes:
-    - Explains the roles based access control (RBAC) system
-    - Details the roles and permissions for each module, as the basis for setting up tests 
-    - Explains how the roles and permission system is implemented
+   - Purposes:
+     - Provide clear guidance and rules for testing the application.
 
-### Protection Methods
-- **AI Restriction**: 
-  - These files are marked as read-only for AI assistance
-  - AI will not modify these files under any circumstances
-- **User Access**: 
-  - Files remain fully writable by the user
-  - No OS-level read-only restrictions are applied
-- **Git Protection**: 
-  - Marked as `-crlf -diff -merge` in Git attributes
-  - Helps prevent accidental modifications
-  - Can be overridden when intentional changes are needed
+1. `docs/ROLES_AND_PERMISSIONS.md`
+
+   - Purposes:
+     - Explains the role based access control (RBAC) system
+     - Details the roles and permissions for each module, as the basis for setting up tests
+     - Explains how the roles and permission system is implemented
 
 ## Key Documentation Files
 
 ### 1. Core Documentation
+
 - `README.md` - This document will become the default landing page in github when the app is deployed. It should conform to rails conventions for README files, including basic installation instructions, user instructions, and links to further information. It should be updated as the project matures, AI can assist.
 - `docs/DEVELOPER_NOTES.md` - Development guidelines and practices (Protected)
 - `docs/TESTING.md` - Testing guidelines and practices (Protected)
 - `docs/ROLES_AND_PERMISSIONS.md` - Role and permission structure (Protected)
+- `docs/GENERATORS.md` - Specification and usage of the project's Rails generators
+- `docs/CONSTANTS.md` - The constants management system, and how each use case uses it
 - [HOLD] `docs/MIGRATION.md` - Database migration guides
 
 ### 2. Project-Specific Documentation
+
 - `docs/USER_GUIDE.md` - End-user documentation [TODO: Create user documentation when the project has matured enough to be deployed in production, and ready to share to other users] [HOLD: consider if it is required, or README is sufficient]
 - `AI memories/` - AI-specific context and knowledge
 
@@ -74,7 +68,7 @@ The following core documentation files are READ-ONLY and must not be modified by
 - Use Markdown for all documentation
 - Include a table of contents for longer documents
 - Use consistent heading levels
-- Add code blocks with syntax highlighti
+- Add code blocks with syntax highlighting
 
 - Document both what and why, not just how
 - Keep documentation up-to-date with code changes

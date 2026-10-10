@@ -59,7 +59,7 @@ movement_type:
   keys: [bourdon_tube, diaphragm, bellows, other]
   valid: bourdon_tube
 ingress_protection:
-  type: string
+  type: ip
   valid: 65
 accessories:
   type: jsonb

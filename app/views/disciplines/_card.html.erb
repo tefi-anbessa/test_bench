@@ -4,7 +4,7 @@
 <% discipline = object %>
 <%= render 'components/collapsible',
       id: "#{id}_#{discipline.id}_details",
-      title: [context, discipline.name].join(': '),
+      title: [context, discipline.display_name].join(': '),
       expanded: false,
       header_class: 'py-1' do %>
   

@@ -1,58 +1,80 @@
-# Standard engineering disciplines available in the system
-# These will be available to all projects
+# Standard engineering disciplines available in the system.
+#
+# Keyed by `code` - the short, stable identifier set on each project's own
+# Discipline row (see app/models/discipline.rb). `code` is the structural
+# key here: it's what ties a Discipline to a backing Ruby module (if any)
+# and to these defaults. `name` below is only the *default* display label -
+# each project is free to rename its own Discipline#name to whatever it
+# likes (see discipline.name.<code> translations); that never changes
+# which module, if any, backs it, or which of these defaults apply.
+#
+# A discipline with `module: null` is not a mistake or a stub - tags and
+# documents work for it exactly as for any other discipline. It just has
+# no generated equipment models/views (yet, or ever).
 #
 # Fields:
-#   code: Short 1-5 character code for identification, incorporated into document numbers and tags
-#   prefix_schema: Schema for tag/document numbering
-#   sort_order: Display order in UI (lower numbers first)
+#   name: Default display name - used as a default for Discipline#name and
+#     for the discipline.name.<code> translation default.
+#   module: The Ruby module backing this discipline's content (e.g.
+#     tagable equipment models), or null if none exists yet.
+#   prefix_schema: Schema for tag/document numbering.
+#   sort_order: Display order in UI (lower numbers first).
 #   required_role: Default required role for content creation (:designer, :checker, :approver, :controller or nil)
+#   catalog_required_role: Default required role for catalog-type records (e.g. CableType)
 
 disciplines:
 
-  Process:
-    code: P
-    prefix_schema: { name: 'dim2' }
-    sort_order: 30
-    required_role: :designer
-    catalog_required_role: :custodian
-
-  Electrical:
-    code: E
+  E:
+    name: "Electrical"
+    module: Electrical
     prefix_schema: { name: 'dim1' }
     sort_order: 10
     required_role: :designer
     catalog_required_role: :custodian
 
-  Instrument:
-    code: J
+  J:
+    name: "Instrument"
+    module: Instrument
     prefix_schema: { name: 'isa51' }
     sort_order: 40
     required_role: :designer
     catalog_required_role: :custodian
 
-  InformationTechnology:
-    code: IT
+  P:
+    name: "Process"
+    module: null
+    prefix_schema: { name: 'dim2' }
+    sort_order: 30
+    required_role: :designer
+    catalog_required_role: :custodian
+
+  IT:
+    name: "Information Technology"
+    module: null
     prefix_schema: { name: 'default' }
     sort_order: 50
     required_role: :designer
     catalog_required_role: :custodian
 
-  Mechanical:
-    code: M
+  M:
+    name: "Mechanical"
+    module: null
     prefix_schema: { name: 'dim1' }
     sort_order: 60
     required_role: :designer
     catalog_required_role: :custodian
 
-  Piping:
-    code: PIP
+  PIP:
+    name: "Piping"
+    module: null
     prefix_schema: { name: 'default' }
     sort_order: 70
     required_role: :designer
     catalog_required_role: :custodian
 
-  Civil:
-    code: C
+  C:
+    name: "Civil"
+    module: null
     prefix_schema: { name: 'default' }
     sort_order: 80
     required_role: :designer

@@ -17,6 +17,7 @@ class User < ApplicationRecord
   attr_writer :login
 
   # === Associations ===
+  has_one_attached :avatar
 
   # === Scopes ===
 
@@ -33,9 +34,19 @@ class User < ApplicationRecord
                    format: { with: VALID_EMAIL_REGEX },
                    uniqueness: true
 
+  validates :time_zone, presence: true, inclusion: { in: ActiveSupport::TimeZone.all.map(&:name) }
+  validates :preferred_locale, inclusion: { in: I18n.available_locales.map(&:to_s) }, allow_blank: true
+  validates :job_title, length: { maximum: 100 }, allow_blank: true
+
   # === Callbacks ===
 
   # === Class methods ===
+  # === Class methods - Queries ===
+  # Provide SQL for ordering users in the navigator (show page prev/next)
+  def self.navigator_order_sql
+    "users.name ASC"
+  end
+
   # from devise wiki for allowing alternate login keys (name or email)
   def self.find_for_database_authentication(warden_conditions)
     conditions = warden_conditions.dup
@@ -57,11 +68,20 @@ class User < ApplicationRecord
     name
   end
 
+  # Fallback avatar content when no image has been attached - initials from
+  # the name, same idea as the gravatar it replaces but with no dependency on
+  # a third party image fetch succeeding. The name format here doesn't allow
+  # spaces (see validation above), so this is the name's first two
+  # characters, not "first letter of each word".
+  def initials
+    name.to_s[0, 2].upcase
+  end
+
   private
-  
+
     # === Private methods ===
     def self.ransackable_attributes(auth_object = nil)
-      ["name", "email", "created_at", "updated_at"]
+      ["name", "email", "job_title", "created_at", "updated_at"]
     end
 
     def self.ransackable_associations(auth_object = nil)

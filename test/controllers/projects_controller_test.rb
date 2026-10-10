@@ -86,6 +86,32 @@ class ProjectsControllerTest < ActionController::TestCase
     assert_redirected_to project_url(Project.last)
   end
 
+  test "admin can create project with selected disciplines" do
+    sign_in @admin
+    post :create, params: {
+      project: {
+        code: 'ZX',
+        title: 'New Project',
+        description: 'A new test project',
+        discipline_codes: ["E", "J"]
+      }
+    }
+    project = Project.last
+    assert_equal %w[E J], project.disciplines.order(:code).pluck(:code)
+  end
+
+  test "admin can create project with no disciplines selected" do
+    sign_in @admin
+    post :create, params: {
+      project: {
+        code: 'ZW',
+        title: 'New Project',
+        description: 'A new test project'
+      }
+    }
+    assert_empty Project.last.disciplines
+  end
+
   test "only app owner can create project" do
     sign_in @app_owner
     assert_difference('Project.count') do

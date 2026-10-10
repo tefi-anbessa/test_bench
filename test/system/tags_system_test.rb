@@ -188,7 +188,7 @@ class TagsSystemTest < ApplicationSystemTestCase
 
     # Header bar navigation links
     assert_nav_button(:index_project, path: project_tags_path(@project), label: @project.code) # Link back to project tags index
-    assert_nav_button(:index_discipline, path: discipline_tags_path(@discipline), label: @discipline.name) # Link back to discipline tags index
+    assert_nav_button(:index_discipline, path: discipline_tags_path(@discipline), label: [@discipline.label, I18n.t("actions.index")].join(" ")) # Link back to discipline tags index - current label uses discipline.label (code), not name; see DEVELOPER_NOTES on labels/long_labels
     refute_link I18n.t('actions.edit'), href: edit_tag_path(@tag) # team member cannot edit tag
     refute_delete(tag_path(@tag))  # team member cannot delete tag
     refute_link I18n.t('actions.new'), href: new_discipline_tag_path(@discipline) # team member cannot create new tag in discipline
@@ -245,7 +245,7 @@ class TagsSystemTest < ApplicationSystemTestCase
 
     # Header bar navigation links
     assert_nav_button(:index_project, path: project_tags_path(@project), label: @project.code) # Link back to project tags index
-    assert_nav_button(:index_discipline, path: discipline_tags_path(@discipline), label: @discipline.name) # Link back to discipline tags index
+    assert_nav_button(:index_discipline, path: discipline_tags_path(@discipline), label: [@discipline.label, I18n.t("actions.index")].join(" ")) # Link back to discipline tags index - current label uses discipline.label (code), not name; see DEVELOPER_NOTES on labels/long_labels
     assert_nav_button(:edit, path: edit_tag_path(@tag)) # accredited user can edit tag
     refute_delete(tag_path(@tag)) # accredited user cannot delete tag
     assert_nav_button(:new, path: new_discipline_tag_path(@discipline)) # accredited user can create new tag in discipline
@@ -260,7 +260,7 @@ class TagsSystemTest < ApplicationSystemTestCase
 
     # Header bar navigation links
     assert_nav_button(:index_project, path: project_tags_path(@project), label: @project.code) # Link back to project tags index
-    assert_nav_button(:index_discipline, path: discipline_tags_path(@discipline), label: @discipline.name) # Link back to discipline tags index
+    assert_nav_button(:index_discipline, path: discipline_tags_path(@discipline), label: [@discipline.label, I18n.t("actions.index")].join(" ")) # Link back to discipline tags index - current label uses discipline.label (code), not name; see DEVELOPER_NOTES on labels/long_labels
     assert_nav_button(:edit, path: edit_tag_path(@tag)) # admin can edit tag
     assert_nav_button(:delete, path: tag_path(@tag)) # admin can delete tag
     assert_nav_button(:new, path: new_discipline_tag_path(@discipline)) # admin can create new tag in discipline

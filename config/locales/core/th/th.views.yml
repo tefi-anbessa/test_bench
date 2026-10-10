@@ -13,12 +13,16 @@ th:
       title:        "Users"
       header:       "Users Index"
       message:      "Sign in"
-      gravatar:     "Gravatar"
+      avatar:       "Avatar"
     show:
       title:        "User"
       header:       "Show User"
       message:      "Sign in"
-      gravatar:     "Gravatar"
+      avatar:       "Avatar"
+    edit:
+      title:        "Edit %{name}"
+      header:       "Edit Profile: %{name}"
+      use_app_default: "Use app default"
   errors:
     forbidden:
       title:        "Forbidden"

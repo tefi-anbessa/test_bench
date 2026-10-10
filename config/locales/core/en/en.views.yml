@@ -13,12 +13,16 @@ en:
       title:        "Users"
       header:       "Users Index"
       message:      "Sign in"
-      gravatar:     "Gravatar"
+      avatar:       "Avatar"
     show:
       title:        "User"
       header:       "Show User"
       message:      "Sign in"
-      gravatar:     "Gravatar"
+      avatar:       "Avatar"
+    edit:
+      title:        "Edit %{name}"
+      header:       "Edit Profile: %{name}"
+      use_app_default: "Use app default"
     users:
       header:       "Team for %{scope_text}"
       no_users:     "No users in %{scope_text}"
@@ -85,6 +89,11 @@ en:
     edit:
       title:            "Edit Project"
       header:           "Edit Project: %{label}"
+    form:
+      disciplines_label: "Disciplines"
+      disciplines_help:  "Choose the disciplines this project needs. More can be added later."
+      module_ready:      "Ready"
+      module_pending:    "Coming soon"
   disciplines:
     index:
       title:            "Disciplines"

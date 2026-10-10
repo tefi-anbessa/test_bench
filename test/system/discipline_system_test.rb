@@ -75,8 +75,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     assert_selector "h5", text: I18n.t('disciplines.index.header', scope_text: @project.label)
     @project.disciplines.each do |disc|
       next unless disc.persisted?
-      name = I18n.exists?("discipline.name.#{disc.name}") ? I18n.t("discipline.name.#{disc.name}") : disc.name
-      text = [disc.code, name].join(": ")
+      text = [disc.code, disc.display_name].join(": ")
       assert_selector "a[href='#{discipline_path(disc)}']", text: text # Link to show discipline
       assert_nav_button(:show, disc, icon_only: true)
       assert_selector "a[href='#{discipline_tags_path(disc)}']"
@@ -85,7 +84,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
       find("#discipline-#{disc.id}").click
       assert_current_path discipline_path(disc)
       # Header
-      assert_selector "#discipline-header", text: I18n.t('disciplines.show.header', label: I18n.t("discipline.name.#{disc.name}"))
+      assert_selector "#discipline-header", text: I18n.t('disciplines.show.header', label: disc.display_name)
       assert page.title.include?(I18n.t("disciplines.show.title"))
       # Header links 
       assert_nav_button(:show_project, disc.project)
@@ -275,6 +274,33 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     assert_current_path discipline_path(new_discipline) 
     assert_text "Alternative"
     assert_text I18n.t("flash.create.notice", resource_name: I18n.t("activerecord.models.discipline", count: 1))
+  end
+
+  test "copy from standard pre-fills the form for a discipline excluded at project creation" do
+    # Simulate a discipline that was excluded when the project was created.
+    @project.disciplines.find_by(code: "P").destroy!
+
+    sign_in @project_admin
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit new_project_discipline_path(@project)
+
+    select I18n.t("discipline.name.P"), from: "discipline_copy_from_standard"
+
+    assert_equal "Process", find_field("discipline_name").value
+    assert_equal "P", find_field("discipline_code").value
+    assert_equal "30", find_field("discipline_sort_order").value
+    assert_equal "designer", find_field("discipline_required_role").value
+    assert_equal "custodian", find_field("discipline_catalog_required_role").value
+    assert_equal "dim2", find_field("discipline_schema_key").value
+
+    select "app_theme", from: "discipline_swatch_id"
+    click_button I18n.t('actions.create')
+    sleep 0.1
+
+    new_discipline = @project.disciplines.find_by(code: "P")
+    assert_not_nil new_discipline
+    assert_equal "Process", new_discipline.name
+    assert_equal({ "name" => "dim2" }, new_discipline.prefix_schema)
   end
 
   test "project manager edit discipline" do

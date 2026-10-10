@@ -15,7 +15,7 @@
       <div class="row align-items-center py-2 border-bottom">
         <!-- Discipline Name Column -->
         <div class="col-md-4">
-          <% name = t("discipline.name.#{discipline.name}", default: discipline.name) %>
+          <% name = discipline.display_name %>
           <% text = [discipline.code, name].join(": ") %>
           <%= link_to discipline,
               id: "discipline-#{discipline.id}",

@@ -20,7 +20,8 @@ th:
   menu:
     sr_message01: ".th Toggle navigation"
     profile:      ".th Profile"
-    edit:         ".th Edit"
+    edit_profile: ".th Edit Profile"
+    edit_account: ".th Edit"
     log_out:      ".th Sign out"
     log_in:       ".th Sign in"
     home:         ".th Home"

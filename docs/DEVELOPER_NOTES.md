@@ -1,9 +1,9 @@
 # Developer Guidance
 
 1. Read [Readme](../README.md), it is the primary documentation for installers and users. It explains the application's capabilities. [TODO: update readme]
-2. Read [DOCUMENTATION_PREFERENCES](DOCUMENTATION_PREFERENCES.md), it explains the available documentation for the application and how to use it.
-3. Read [ROLES_AND_PERMISSIONS](ROLES_AND_PERMISSIONS.md), it explains the role based access control (RBAC) system, one of the pillars of the application.
-4. Read the following sections of this document:
+1. Read [DOCUMENTATION_PREFERENCES](DOCUMENTATION_PREFERENCES.md), it explains the available documentation for the application and how to use it.
+1. Read [ROLES_AND_PERMISSIONS](ROLES_AND_PERMISSIONS.md), it explains the role based access control (RBAC) system, one of the pillars of the application.
+1. Read the following sections of this document:
    - AI Integration
    - KISS Principle Guidelines
    - Implementation
@@ -14,33 +14,38 @@
    - Refactoring Opportunities
    - Potential Features
 
+## Application Objective
+
+This application provides a unified approach to generating and maintaining the records associated with an engineer, procure, construct and operate project. The fundamental premise is to have a single source of information for all records available and readily accessed from anywhere it may logically be required.
+
+The application caters for various user scenarios, including:
+
+- design and execute team such as a constructor, using a shared website app.
+- engineering design service for multiple clients, using a shared website app.
+- application installed in house for a single client.
+
 ## AI Integration
 
-From git commit 6da446f onwards, this project has used Windsurf/Cascade AI to speed up development and improve code quality. The learnings of this process including coding conventions and project peculiarities, etc. have been captured in "Memories" on the Cascade server side.
+This project has used more than one AI coding tool over time. AI can assist with repetitive tasks, can advise on coding conventions, can research the internet for use cases, and can assist with debugging. AI should not be relied upon when making fundamental design and architecture decisions.
 
-### AI Rules
-
-Windsurf IDE has introduced a new feature called "AI Rules". These are rules that are applied to the code by the AI. The rules are defined in the .windsurf/rules directory.
-
-Progressively build the set of rules to implement these guidelines.
+The operational rules an AI must actually follow live in a file or files specific to the tool. This is a fast changing technology so the guidance should be checked before using. [CLAUDE.md](../CLAUDE.md), not here - this section is background and day-to-day practice, not a second copy of the rules themselves.
 
 ### Developers Using AI
 
-1. When initiating a new session with AI, request it to review the project guiding documentation:
-   - `README.md`
-   - Project documentation in `docs/`:
-      - `docs/DEVELOPER_NOTES.md`
-      - `docs/DOCUMENTATION_PREFERENCES.md
-      - `docs/TESTING.md`
-      - `docs/ROLES_AND_PERMISSIONS.md`
-2. Request AI to review the memories and follow the guidance therein. If memories are not available, refer to the duplicated documentation in `docs/AI memories/`.
+#### Cascade
+
+1. Cascade reads all contents in .windsurf/rules at the commencement of each session. Within rules, fundamentals.md directs it to read this document.
+
+#### Claude
+
+1. Claude Code reads [CLAUDE.md](../CLAUDE.md) automatically at the start of every session, which in turn points it at this document, `docs/DOCUMENTATION_PREFERENCES.md`, `docs/TESTING.md`, and `docs/ROLES_AND_PERMISSIONS.md`. A different AI tool won't necessarily do this on its own - point it at the same documents directly.
+1. Let a tool consult whatever persistent memory it maintains rather than re-deriving project context from scratch each session.
 
 ### Documentation Maintenance
 
-- These guidelines and requirements will evolve over time.
+- These guidelines and requirements evolve over time.
 - Any changes should be reflected in the documentation.
-- When modifying role permissions or access controls, ensure both [ROLES_AND_PERMISSIONS](ROLES_AND_PERMISSIONS.md)`and the corresponding policy files are updated.
-- Request the AI to update its Memories when significant changes occur. [waste of time]
+- When modifying role permissions or access controls, ensure both [ROLES_AND_PERMISSIONS](ROLES_AND_PERMISSIONS.md) and the corresponding policy files are updated.
 
 ## KISS Principle Guidelines
 
@@ -51,22 +56,22 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
    - Avoid adding unrequested functionality
    - Keep initial implementations simple and focused
 
-2. **Testing Foundation**:
+1. **Testing Foundation**:
    - Ensure all tests pass before adding new features
    - Maintain test coverage for core functionality
    - Focus on stable, working features over feature completeness
 
-3. **Incremental Development**:
+1. **Incremental Development**:
    - Build a solid foundation before adding enhancements
    - Get approval for each feature before moving forward
    - Keep pull requests and changes small and focused
 
-4. **Focus**:
+1. **Focus**:
    - Application functionality is always the priority
    - Format and presentation should be deferred until core functionality is stable
    - Avoid premature optimization or over-engineering
 
-5. **Code Review Guidelines**:
+1. **Code Review Guidelines**:
    - Question any added complexity
    - Challenge features that weren't explicitly requested
    - Prefer simple, maintainable solutions over complex ones
@@ -75,15 +80,9 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 
 ### Application Structure
 
-The application caters for various user scenarios, including:
-
-- design and execute team such as a constructor, using a shared website app.
-- engineering design service for multiple clients, using a shared website app.
-- application installed in house for a single client.
-
 The application has a core structure encompassing Users and the associated access control system, Projects, Disciplines, Tags and Documents. Further functionality is encapsulated in modules, which correspond to engineering disciplines.
 
-Only one level of module nesting is envisaged, however some features have provisioned for sub-modules.
+Only one level of module nesting is envisaged, however some features have provisioned for future sub-modules.
 
 Refer to [ROLES_AND_PERMISSIONS](ROLES_AND_PERMISSIONS.md) for details on the RBAC system.
 
@@ -91,9 +90,11 @@ Refer to [ROLES_AND_PERMISSIONS](ROLES_AND_PERMISSIONS.md) for details on the RB
 
 Projects are the top level resource of this application. Projects are "ring-fenced" for security, so users are always working on their current project. Users with access to more than one project can copy from one to the other. [TODO: not implemented yet]
 
-#### Disciplines
+#### Disciplines and Modules
 
-Disciplines are used to group engineering objects, and associate them to functional requirements. Each project is provided with a standard set of disciplines including instrument, electrical, mechanical, etc.
+Disciplines are used to group engineering objects, and associate them to functional requirements. Each project has disciplines which can be selected from a core set including instrument, electrical, mechanical, etc. Core disciplines have associated modules, which provide the code for discipline specific elements. Projects may add bespoke disciplines with no linked module for functionality.
+
+Modules keep the app's file structure manageable. 
 
 #### Tags
 
@@ -101,7 +102,7 @@ Engineering design elements require a tag to be assigned. Tags are used to label
 
 #### Tagables
 
-Tags can have a "tagable" model attached, which extends the information linked to the tag to include the specific information relevant to the type of element. For example, a motor and a cable have different information requirements, so the database needs to have a different table for each, but they share the structure of the tags table. Each of these models is known as a tagable model. All tagables are grouped into modules, and modules are coupled to the disciplines provided.
+Tags can have a "tagable" model attached, which extends the information linked to the tag to include the specific information relevant to the type of element. For example, a motor and a cable have different information requirements, so the database needs to have a different table for each, but they share the structure of the tags table. Each of these models is known as a tagable model. All tagables are grouped into modules which associate them to the correct discipline.
 
 #### Documents
 
@@ -113,13 +114,9 @@ Documents can be generated from the application database, or stored in a content
 
 [HOLD At present, no repository is included, only a document register].
 
-#### Modules
+#### Change Management
 
-Generally, tagable models are segregated into modules according to their discipline. This is primarily to keep the file structure manageable, but flows into the presentation of views, which are accessed by project or discipline. Disciplines are able to impart some default properties to their members through inheritance from the Base model for each module.
-
-Exceptions to this structure are the Cable and Cable Types models, which are used by the electrical, instrument, and communication disciplines, and are intended to reside in the application core. [TODO: not yet moved - as of this writing both models are still namespaced under Electrical (`app/models/electrical/cable.rb`, `app/models/electrical/cable_type.rb`); see the "Move cable and cable type" items under Architecture Considerations and Refactoring Opportunities below.]
-
-Refer to [GENERATORS](GENERATORS.md) for details on the module, scaffold, and import generators used to scaffold new modules and models.
+TBC
 
 #### Import
 
@@ -163,6 +160,8 @@ Ruby on Rails implements the Model View Controller (MVC) pattern for data driven
 
 #### Models
 
+- In this application, models correspond to database tables. For example, there is a tags table holding the data for the class Tag.
+- Every tagable type has its own model.
 - Model classes include all logic pertaining to the object.
 - Model classes should include custom validations where required. Custom validations must include i18n translation of custom error messages.
 - All resource models should have a label method, which is used to present a human readable, non language specific identifier, preferably unique, for the model. This can be simply a reference to another attribute, or a combination of attributes. It will be used in views as a card header, link id, etc.
@@ -432,7 +431,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Fix update test in tag system test.
 - [x] Fix error in doc_types system test (edit).
 - [ ] Refactor cable and cable type system tests after restructure to core.
-- [ ] Fix error in discipline system test where the test seems to be building new disciplines. This appears to be a Capybara issue, Claude couldn't solve it.
+- [-] Fix error in discipline system test where the test seems to be building new disciplines. This appears to be a Capybara issue, Claude couldn't solve it.
 - [ ] Write a test for collapsible on attribute rather than association (specifically discipline prefix schema).
 - [ ] Decide what to do about deletion of data. It is affecting many aspects of the architecture.
 - [x] Complete demand system test after refactor.
@@ -459,7 +458,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Refactor electrical policy classes (CablePolicy, SwitchboardPolicy, MotorPolicy, LightCctPolicy, SocketCctPolicy) to use a shared concern or base class to reduce code duplication.
 - [x] Refactor all views to use pundit policy checks.
 - [x] Change terminology and implementation from project owner to project manager.
-- [ ] Refactor projects controller and application controller setting of current project: `def after_sign_in_path_for(resource)to use app/controllers/concerns/current_project_concern.rb to reduce code duplication.
+- [x] Refactor projects controller and application controller setting of current project: `def after_sign_in_path_for(resource)to use app/controllers/concerns/current_project_concern.rb to reduce code duplication.
 - [x] Tags:
   - [x] Refactor tag 'description' to 'service'.
   - [x] Add location attribute to tag, remove from all tagables.
@@ -471,7 +470,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Motors:
   - [x] convert motor type to enum.
   - [x] convert frame size to enum.
-  - [ ] build a view helper and a form helper for ingress protection, convert ingress protection to use them.
+  - [x] build a view helper and a form helper for ingress protection, convert ingress protection to use them.
 - [x] Redesign tag module:
   - [x] builder/parser model for each discipline which creates the string according to the required format, and can parse the string back into the components.
   - [x] provide default format for each discipline, e.g. isa5.1
@@ -479,17 +478,17 @@ It is possible to create multiple tags referencing the same tagable element, des
   - [x] add colour code by discipline
 - [x] Look at use of hover on buttons, and use turbo to prevent page refresh.
 - [x] Improve implementation of Discipline model, including translation. Consider using constants hash for each project.
-- [ ] Refactor colour system to use CSS variables.
-- [ ] Abstract ingress protection functionality so it can be reused by instrument module.
-- [ ] Change all delete links to use turbo to prevent full page refresh.
+- [-] Refactor colour system to use CSS variables. Deferred - probably not worthwhile.
+- [x] Abstract ingress protection functionality so it can be reused by instrument module.
+- [ ] Change index delete links to use turbo to prevent full page refresh.
 - [ ] Revise index views to use turbo for ransack searches.
 - [x] Replace devise views with bespoke views in the style of the rest of the application.
-- [ ] Add user profile info.
+- [x] Add user profile info.
 - [x] Refactor RBAC system with functional roles limited to project scope, and project admin roles.
 - [ ] Refactor all controllers to use the preferred safe params expect rather than require.
 - [x] Refactor test helpers to minimise code duplication, and simplify generation of new models.
 - [ ] Improve forbidden error logging messages, include user. Consider automatic sign out.
-- [ ] Abstract controllers for project linked models, similar to tagables controller.
+- [-] Abstract controllers for project linked models, similar to tagables controller. Defer until after developing change control and document issues, when requirements will be understood better.
 - [x] Add catalog required roles in disciplines, to allow different role for cable types and doc types, etc.
 - [ ] Refactor cable and cable types to be core module available to electrical, instruments, telecoms (any module). Should belong to discipline.
 - [x] Index views should preload permissions and not check every row.
@@ -551,7 +550,7 @@ It is possible to create multiple tags referencing the same tagable element, des
   - [x] Customize error trapping for forbidden
 - [ ] Improve locale setting, and include language/currency/flag in locale selection. Include regions with fallback to language for most translations.
 - [x] Develop an application colour theme set. Consider discipline colour coding, also need to consider module colour coding.
-- [ ] Build an IP object to allow fully flexible reusable IP code generation.
+- [-] Build an IP object to allow fully flexible reusable IP code generation. Not required.
 - [ ] Allow projects to add role names.
 - [x] Add a generator for scaffolding nested models.
 - [ ] Add a "locator" so accessing index view from show view centres the index on the present record.
@@ -567,7 +566,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Change locales to regionalised codes.
 - [ ] Couple disciplines and modules tightly for tagables.
 - [ ] Move cable and cable type back to core, as they are shared by electrical and instrument disciplines, also communications.
-- [ ] Move document issues to change module, generalise so it can be used for other entities (polymorphic).
+- [ ] Move document issues to change module, generalise so it can be used for other entities (polymorphic). HOLD.
 - [ ] Plan for database scaling as data grows.
 
 ## Notes

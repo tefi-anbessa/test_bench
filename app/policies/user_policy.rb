@@ -32,4 +32,14 @@ class UserPolicy < ApplicationPolicy
     # Protect against url injection, rely on scope
     !user.nil?
   end
+
+  # Edits here are the profile fields (job title, time zone, preferred
+  # locale, avatar) added by UsersController#edit/#update - not Devise's own
+  # account/security form, which is unconditionally self-only and doesn't go
+  # through Pundit at all.
+  def edit?
+    return false if user.nil?
+    user == record || user.is_admin? || user.is_app_owner?
+  end
+  alias update? edit?
 end

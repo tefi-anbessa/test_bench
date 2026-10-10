@@ -55,20 +55,88 @@ class Discipline < ApplicationRecord
     "#{project.label} - #{code}"
   end
 
-  # Create all disciplines for a new project from constants
-  def self.create_all_for_project(project)
-    return [] unless Constants.respond_to?(:disciplines)
+  # The name to display for this discipline, in the viewer's current
+  # locale. Only translates when the name still matches the standard
+  # registry's default for this code - i.e. the project never customized
+  # it. A renamed (or project-defined, non-standard) discipline shows its
+  # own stored name as-is, untranslated - "custom content is not
+  # translated", same rule the old discipline.<locale>.yml files already
+  # stated. Translating unconditionally by code (ignoring whether the name
+  # was customized) would show "Electrical" forever even after a project
+  # renamed it to something else, which defeats the point of the rename.
+  def display_name
+    entry = registry_entry
+    return name if entry.nil? || name != entry[:name]
+    I18n.t("discipline.name.#{code}", default: name)
+  end
+
+  # The standard discipline registry (config/constants/discipline.yml),
+  # keyed by code - the structural identifier. Used both to offer choices
+  # when creating a project and to resolve per-discipline defaults (see
+  # #registry_entry below). Not every project needs every entry here, and a
+  # project may also have disciplines with codes that aren't in this list
+  # at all - those are project-defined, module-less disciplines, same as
+  # any entry below with module: nil.
+  def self.standard_options
+    return {} unless Constants.respond_to?(:disciplines)
+    Constants.disciplines.to_h
+  end
+
+  # Create only the selected disciplines for a new project, from the
+  # standard registry. Replaces the old create_all_for_project, which gave
+  # every project every standard discipline whether it needed it or not.
+  def self.create_selected_for_project(project, codes:)
     return [] unless project.disciplines.count == 0
-    Constants.disciplines.to_h.map do |name, attrs|
+    codes.filter_map do |code|
+      attrs = standard_options[code.to_sym]
+      next unless attrs
       create!(
         project: project,
-        name: name.to_s,
-        code: attrs[:code],
+        name: attrs[:name],
+        code: code.to_s,
         prefix_schema: attrs[:prefix_schema],
         sort_order: attrs[:sort_order],
         required_role: attrs[:required_role]
       )
     end
+  end
+
+  # This discipline's entry in the standard registry, if it has one - a
+  # project-defined discipline whose code isn't in config/constants/
+  # discipline.yml simply has none, and falls back to whatever its own
+  # columns say (see #default_required_role et al below).
+  def registry_entry
+    self.class.standard_options[code&.to_sym]
+  end
+
+  # The bare Ruby module name backing this discipline's content (e.g.
+  # "Electrical"), or nil if none exists yet - see discipline.yml's module:
+  # field. A discipline with no backing module is not broken; it just has
+  # no generated equipment forms. Tags and documents work regardless.
+  def module_name
+    registry_entry&.[](:module)&.to_s
+  end
+
+  # The module's Base class (e.g. Electrical::Base), where defaults like
+  # #swatch live - see app/models/electrical/base.rb.
+  def backing_module
+    return nil if module_name.nil?
+    "#{module_name}::Base".safe_constantize
+  end
+
+  def module_backed?
+    backing_module.present?
+  end
+
+  # Falls back to the registry's default for this code, not to the backing
+  # module's own class method - the registry (data) is the single source
+  # of truth for these defaults now, not a second copy living in Ruby.
+  def default_required_role
+    registry_entry&.[](:required_role)&.to_s
+  end
+
+  def default_catalog_required_role
+    registry_entry&.[](:catalog_required_role)&.to_s
   end
 
   def custom_schema?

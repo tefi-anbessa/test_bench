@@ -55,6 +55,9 @@ cn:
         email:            "Email"
         password:         "Password"
         password_confirmation:  "Confirm password"
+        job_title:        "Job title"
+        time_zone:        "Time zone"
+        preferred_locale: "Preferred language"
       project:
         code:             "Code"
         code_help:        "2 uppercase characters"

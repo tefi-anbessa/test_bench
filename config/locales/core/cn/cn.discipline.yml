@@ -1,17 +1,15 @@
-# The discipline model has standardised content available, with translations.
-# Custom content is not translated.
+# Default display names for the standard disciplines (config/constants/
+# discipline.yml), keyed by code - the structural identifier, not the
+# (project-customizable) name. Custom, project-defined discipline names are
+# not translated - the `default:` on each t() call simply shows whatever
+# the project named it.
 cn:
   discipline:
     name:
-      Administration: '管理'
-      Architecture: '建筑'
-      Civil: '土建'
-      Completions: '完工'
-      Electrical: '电气'
-      Hvac: '暖通空调'
-      Instrument: '仪表'
-      InformationTechnology: '信息技术'
-      Mechanical: '机械'
-      Piping: '管道'
-      Process: '工艺'
-      Structural: '结构'
+      E: '电气'
+      J: '仪表'
+      P: '工艺'
+      IT: '信息技术'
+      M: '机械'
+      PIP: '管道'
+      C: '土建'

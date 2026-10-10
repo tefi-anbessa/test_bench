@@ -25,45 +25,34 @@
       <% end %>
     <% end %>
     <%== pagy_bootstrap_nav(@pagy, classes: 'pagination pagination-sm') %>
-    <table id='projects' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
-      <thead>
-        <th scope="col" width="150px"><%= t('.gravatar')%></th>
-        <th scope="col"><%= sort_link(@q, :name) %></th>
-        <th scope="col"><%= sort_link(@q, :email) %></th>
-        <th scope="col" width="150px"><%= t('table.links')%></th>
-      </thead>
-      <tbody>
-        <% @users.each do |u| %>
-          <tr scope="row">
-            <td><%= gravatar_for u, size: 20 %></td>
-            <td><%= link_to u.name, user_path(u) %></td>
-            <td><%= highlight u.email, params.dig(:q, :email_cont)  %></td>
-            <td>
-              <%= link_to user_path(u), class: "btn btn-secondary btn-sm icon-link",
-                    aria: { label: t('actions.show') },
-                    title: t('actions.show'),
-                    display: "inline" do %>
-                <%== bs_icon('eye') %>
-              <% end %>
-              <%= link_to edit_user_registration_path(u), class: "btn btn-warning btn-sm icon-link",
-                    aria: { label: t('actions.edit') },
-                    title: t('actions.edit'),
-                    display: "inline"  do %>
-                <%== bs_icon('pencil') %>
-              <% end %>
-              <% if current_user&.is_admin? %>
-                <%= link_to u, method: :delete, class: "btn btn-danger btn-sm icon-link",
-                      aria: { label: t('actions.delete') },
-                      title: t('actions.delete'),
-                      display: "inline"  do %>
-                  <%== bs_icon('trash') %>
+    <div class="card mb-3" style="<%= card_styles(@swatch) %>">
+      <table id='projects' class='table table-responsive table-condensed table-striped table-hoverable table-bordered mb-0' >
+        <thead>
+          <th scope="col" width="150px"><%= t('.avatar')%></th>
+          <th scope="col"><%= sort_link(@q, :name) %></th>
+          <th scope="col"><%= sort_link(@q, :email) %></th>
+          <th scope="col" width="150px"><%= t('table.links')%></th>
+        </thead>
+        <tbody>
+          <% @users.each do |u| %>
+            <tr scope="row">
+              <td><%= avatar_for u, size: 20 %></td>
+              <td><%= link_to u.name, user_path(u) %></td>
+              <td><%= highlight u.email, params.dig(:q, :email_cont)  %></td>
+              <td>
+                <%= nav_button(action: :show, record: u, icon_only: true) %>
+                <% if policy(u).edit? %>
+                  <%= nav_button(action: :edit, record: u, icon_only: true) %>
                 <% end %>
-              <% end %>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
+                <% if policy(u).destroy? %>
+                  <%= nav_button(action: :delete, record: u, icon_only: true) %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
       <%== pagy_bootstrap_nav(@pagy, classes: 'pagination pagination-sm') %>
       <%== pagy_info(@pagy) %>

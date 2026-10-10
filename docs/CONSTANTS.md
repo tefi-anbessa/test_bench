@@ -14,24 +14,24 @@ The commonly used options for implementing constants are
 
 1. Hard code constants in the application, usually in model definitions.
    - Pro:
-      - Speed: fast to access - predefined variables
-      - Simple for developer to initially write and understand
+      - Speed: fast to access - predefined variables.
+      - Simple for developer to initially write and understand.
    - Con:
-      - Obscure to other developers, high maintenance cost
+      - Obscure to other developers, high maintenance cost.
       - Completely opaque to users who may have a stake in the constants requirements.
-      - Not flexible: Requires code change and restart server to modify
+      - Not flexible: Requires code change and restart server to modify.
 1. Hard code constants in the application configuration (usually in initializer files).
    - Pro:
-      - Speed: moderately fast to access - lookup hash required
-      - Simple for non-developers to provide requirements and modifications
+      - Speed: moderately fast to access - lookup hash required.
+      - Simple for non-developers to provide requirements and modifications.
    - Con:
-      - Not particularly flexible: Requires file change and restart server to modify
+      - Not particularly flexible: Requires file change and restart server to modify.
 1. Use database content.
    - Pro:
-      - User can provide modifications
+      - User can provide modifications.
    - Con:
-      - Speed: slow - requires database lookup for every constant access
-      - Requires UI code for each use case
+      - Speed: slow - requires database lookup for every constant access.
+      - Requires UI code for each use case.
 
 - The application implements a constants management system based on this article: [say-goodbye-to-messy-constants by vladhilko](https://dev.to/vladhilko/say-goodbye-to-messy-constants-a-new-approach-to-moving-constants-away-from-your-model-58i1).
 - This system uses YAML files to store the constants. YAML files follow a fairly simple structure that can be learned by non-developers, enabling users to contribute to maintenance of the application.
@@ -57,20 +57,26 @@ Translations of role names and associated messages are stored in
 
 ### Disciplines
 
-Disciplines are an edge case for constants. The application originally hard coded disciplines, then switched to a database model with no UI. As the concept eveloved, and the need for improved isolation between projects became apparent, it was realized that disciplines were a suitable vehicle for allowing projects to customize themselves to suit end user requirements. Disciplines are a means of grouping engineering objects such as documents and tags, but their functionality has been extended here. Prefix schema, associated functional modules, access control, and form colour swatches are linked to discipline.
+Disciplines are an edge case for constants. The application originally hard coded disciplines, then switched to a database model with no UI. As the concept evolved, and the need for improved isolation between projects became apparent, it was realized that disciplines were a suitable vehicle for allowing projects to customize themselves to suit end user requirements. Disciplines are a means of grouping engineering objects such as documents and tags, but their functionality has been extended here. Prefix schema, associated functional modules, access control, and form colour swatches are linked to discipline.
 
-Projects must define their own set of disciplines, but this can be done simply by adding 'standard' disciplines such as Instrument and Electrical, and this is the recommended usage. However, the project is free to modify the standard disciplines to suit requirements, or indeed generate new disciplines from scratch. One use case is to use alternative translations of the discipline names and labels.
+#### The discipline registry
 
-"Standard" disciplines are defined in
-`config/constants/discipline.yml`
-Translations of discipline names and labels are stored in
-`config/locales/core/xx/xx.discipline.yml`.
+`config/constants/discipline.yml` holds the **discipline registry** - the set of "standard" disciplines (Electrical, Instrument, Process, and so on) a project can choose from, along with each one's defaults. "Registry" here just means this one constants file, read via `Discipline.standard_options`.
+
+The registry is keyed by **code** (`E`, `J`, `P`, ...), not by name. This matters: `code` is the structural identifier - it's what ties a project's `Discipline` row back to a registry entry, and from there to whichever Ruby module (if any) backs that discipline's content. `name` is just the *default display label* for that entry; a project is always free to rename its own `Discipline#name` to whatever it likes (e.g. "Power Systems" instead of "Electrical") without that affecting which module or registry defaults apply - those stay anchored to the unchanging `code`. `Discipline#display_name` reflects this: it only translates the name per the viewer's locale while the discipline still has its registry default name; once renamed, it shows the project's own text as-is, untranslated.
+
+A registry entry's `module:` field names the Ruby module backing that discipline's tagable equipment models (e.g. `Electrical`), or is `null` if none exists yet. A discipline with no backing module is not broken or incomplete - tags and documents work for it exactly as for any other discipline, it simply has no generated equipment forms. `Discipline#registry_entry`, `#module_name`, `#backing_module` and `#module_backed?` are the accessors for this. A discipline doesn't have to be a registry entry at all - a project can also define a discipline with a code that isn't in the registry, for a purely organisational grouping with no standard defaults; `#registry_entry` is simply `nil` for one of those.
+
+Projects choose which registry disciplines they want on a checklist shown at project creation (each option flagged "Ready" or "Coming soon" based on `module:`), rather than getting every standard discipline automatically - a project only needing Electrical isn't forced to also carry Process, Civil, and so on. A discipline excluded at creation isn't locked out forever: the "copy from standard" option on the regular new-discipline form (`disciplines_controller.rb`/`discipline-copy` Stimulus controller) pre-fills a new discipline's fields from a chosen registry entry, so adding one back later is a few clicks, not a database edit. The project remains free to modify any of its own disciplines after creation, or add ones with no registry entry at all.
+
+Translations of the registry's default discipline names are stored in
+`config/locales/core/xx/xx.discipline.yml`, keyed by code - a project's own renamed or custom discipline names are never translated, only the registry's defaults.
 
 ### Prefixes
 
 A fundamantal strength of the application is requiring tag prefixes to conform to a schema, to prevent proliferation of individual choices for the same object type. Historically different schemata have been used by different engineering companies and their disciplines, with the ISA standard 5.1 used for tagging instruments probably being the originator of the concept. This application allows each discipline on each project to define their own prefix schema, but provides a number of 'standard' schemata as well, which can be used as they are, or copied and modified.
 
-"Standard' prefix schemata are defined in
+"Standard" prefix schemata are defined in
 `config/constants/prefix.yml`.
 Translations of prefix names and labels are stored in
 `config/locales/core/xx/xx.prefix.yml`.

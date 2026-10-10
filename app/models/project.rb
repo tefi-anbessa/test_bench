@@ -11,6 +11,10 @@ class Project < ApplicationRecord
   has_paper_trail
 
   # === Attributes ===
+  # Not persisted - the discipline codes chosen on the new-project form (see
+  # ProjectsController#create). Read once, by create_disciplines, right
+  # after this project is created.
+  attr_accessor :discipline_codes
 
   # === Associations ===
   belongs_to :swatch, optional: true
@@ -67,7 +71,11 @@ class Project < ApplicationRecord
       [ :disciplines, :tags, :electrical_cable_types ]
     end
 
+    # Only the disciplines explicitly chosen on the new-project form - see
+    # Discipline.create_selected_for_project. A project with none selected
+    # (e.g. created outside the form, from a test or the console) simply
+    # starts with none; disciplines can always be added individually later.
     def create_disciplines
-      Discipline.create_all_for_project(self)
+      Discipline.create_selected_for_project(self, codes: discipline_codes || [])
     end
 end

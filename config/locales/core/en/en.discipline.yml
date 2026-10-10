@@ -1,17 +1,15 @@
-# The discipline model has standardised content available, with translations.
-# Custom content is not translated.
+# Default display names for the standard disciplines (config/constants/
+# discipline.yml), keyed by code - the structural identifier, not the
+# (project-customizable) name. Custom, project-defined discipline names are
+# not translated - the `default:` on each t() call simply shows whatever
+# the project named it.
 en:
   discipline:
     name:
-      Administration: 'Administration'
-      Architecture: 'Architecture'
-      Civil: 'Civil'
-      Completions: 'Completions'
-      Electrical: 'Electrical'
-      Hvac: 'HVAC'
-      Instrument: 'Instrument'
-      InformationTechnology: 'Information Technology'
-      Mechanical: 'Mechanical'
-      Piping: 'Piping'
-      Process: 'Process'
-      Structural: 'Structural'
+      E: 'Electrical'
+      J: 'Instrument'
+      P: 'Process'
+      IT: 'Information Technology'
+      M: 'Mechanical'
+      PIP: 'Piping'
+      C: 'Civil'

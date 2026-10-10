@@ -35,4 +35,26 @@ class UserPolicyTest < ActiveSupport::TestCase
   test "show is allowed for any user" do
     assert policy(@admin, @project).show?
   end
+
+  test "edit is allowed for a user editing themself" do
+    assert policy(@team_member, @project, @team_member).edit?
+  end
+
+  test "edit is allowed for admins and app owners on another user" do
+    assert policy(@admin, @project, @team_member).edit?
+    assert policy(@app_owner, @project, @team_member).edit?
+  end
+
+  test "edit is denied for a user editing someone else" do
+    refute policy(@team_member, @project, @project_manager).edit?
+  end
+
+  test "edit is denied when not signed in" do
+    refute policy(nil, @project, @team_member).edit?
+  end
+
+  test "update aliases edit" do
+    assert policy(@team_member, @project, @team_member).update?
+    refute policy(@team_member, @project, @project_manager).update?
+  end
 end

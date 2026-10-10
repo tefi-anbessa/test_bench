@@ -62,7 +62,7 @@ fill_fluid:
   keys: [none, glycerine, silicone, other]
   valid: glycerine
 ingress_protection:
-  type: string
+  type: ip
   valid: 65
 safety_pattern:
   type: boolean

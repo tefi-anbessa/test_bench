@@ -673,9 +673,22 @@ Prepare the field list as for the scaffold generator (see [Preparation](#prepara
 
 ## IMPORT GENERATOR
 
-A generator is provided to retrofit spreadsheet bulk-import support (see [DEVELOPER_NOTES](DEVELOPER_NOTES.md)'s Import section for the underlying `Import::Base`/`Import::Committer`/`Import::BatchesController` framework this generates code against) onto a model that **already exists** - built via the scaffold or tagable generator, or by hand.
+A generator is provided to retrofit spreadsheet bulk-import support - see The Import Framework below for the underlying framework this generates code against - onto a model that **already exists** - built via the scaffold or tagable generator, or by hand.
 
 The generator itself is reasonably self documented, refer to [import_generator](../lib/generators/project_assistant/import_generator.rb).
+
+### The Import Framework
+
+Bulk import of spreadsheet data (CSV, Excel `.xlsx`/`.xlsm`, OpenDocument `.ods`) is provided by a generic framework, not a one-off feature per model. It is optional - only add it to a model where bulk loading is a real user need.
+
+* `Import::Base` is the abstract superclass every importable model's plugin extends. It provides the shared wizard mechanics: spreadsheet reading (via `Import::SpreadsheetReader`, any supported format), column-mapping suggestion, dry-run row building/validation, and deferred/self-referential reference resolution (e.g. a Tag's own parent reference).
+* `Import::Committer` performs the actual commit once a batch has been reviewed, inside a transaction. A generic `InvalidRowsError` rescue means an unexpected per-row save failure surfaces as a friendly re-render rather than a raw 500 - see [DEVELOPER_NOTES](DEVELOPER_NOTES.md)'s Error Handling section ("Bulk import row errors") for how this is categorised.
+* `Import::BatchesController` drives the shared wizard: upload -> (optional) worksheet selection -> column mapping -> dry-run review -> commit. A model's own controller only needs an entry point (`import`/`create_import` actions), added via the `Importable` concern.
+* Two kinds of model can be imported:
+  * **Discipline-resource models** (Tag, Document, DocType) import directly - each row becomes a new record.
+  * **Tagable models** (Motor, Heater, etc.) import via `Import::TagableBase`, which never creates a Tag - it only *attaches* to an already-persisted, unassigned Tag by natural key (full_tag). Expected workflow: bulk-import the Tag register first (`Import::Tags`, with `tagable_type` set, left deliberately unassigned), then bulk-import the type-specific detail columns, which resolve and attach to those tags. Optional Tag-level columns (Service, Stage, Location, Tag Notes) can also be set in the same pass, without ever overwriting an existing value with a blank cell.
+* New model support is added via the `project_assistant:import` generator documented below (`--tagable` flag for tagable models), which scaffolds the importer service, view, locale entries, index-button injection, and starter tests - the same "generator first" convention as the scaffold and tagable generators.
+* Bulk import is authorised the same way the single-record path already is (e.g. `TagPolicy#create?` for tagables) - it is not a separate authorization story.
 
 ### Specification
 

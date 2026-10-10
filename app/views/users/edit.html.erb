@@ -1,0 +1,35 @@
+<% provide(:title, t('.title', name: @user.name)) %>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card mb-4" style="<%= card_styles(@swatch) %>">
+        <div class="card-header" style="<%= card_header_styles(@swatch) %>">
+          <h4 class="mb-0"><%= t('.header', name: @user.name) %></h4>
+        </div>
+        <div class="card-body">
+          <%= bootstrap_form_for(@user, url: user_path(@user), html: { method: :patch, novalidate: true }) do |f| %>
+            <%= render 'shared/error_messages', object: f.object %>
+
+            <%= f.text_field :job_title, wrapper: { class: 'mb-3' } %>
+            <%= f.time_zone_select :time_zone, ActiveSupport::TimeZone.all,
+                  { default: @user.time_zone }, wrapper: { class: 'mb-3' } %>
+            <%= f.select :preferred_locale,
+                  I18n.available_locales.map { |l| [t('language', locale: l), l] },
+                  { include_blank: t('.use_app_default'), selected: @user.preferred_locale },
+                  wrapper: { class: 'mb-3' } %>
+            <%= f.file_field :avatar, accept: "image/*", wrapper: { class: 'mb-3' } %>
+
+            <% if @user.avatar.attached? %>
+              <div class="mb-3"><%= avatar_for(@user, size: 60) %></div>
+            <% end %>
+
+            <%= f.submit t('actions.update'), class: 'btn btn-primary w-100' %>
+          <% end %>
+
+          <hr class="my-3">
+          <%= link_to t('actions.cancel'), @user, class: 'btn btn-outline-secondary w-100' %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

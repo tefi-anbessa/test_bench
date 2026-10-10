@@ -100,13 +100,13 @@ class ApplicationPolicy
     # Avoid using - this can lead to UI where users can see forms but submission will cause forbidden errors.
     def user_has_a_required_role?(project)
       return false if user.nil? || project.nil?
+      # Fall back to the standard registry's default for this discipline's
+      # code (see Discipline#default_required_role), not a string match on
+      # name, which projects are free to rename.
       user.roles.select { |role| role.resource_type == "Discipline" &&
         role.resource_id.present? &&
         role.resource.project_id == project.id &&
-        (role.name.to_s == (role.resource.required_role? ? 
-          role.resource.required_role.to_s : 
-          "#{role.resource.name}::Base".safe_constantize&.required_role.to_s)
-        )
+        role.name.to_s == (role.resource.required_role.presence || role.resource.default_required_role)
       }.any?
     end
 

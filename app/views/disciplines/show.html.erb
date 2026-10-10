@@ -26,7 +26,7 @@
             <div class="mt-1">
               <span id="discipline-header" class="badge fs-5" style="<%= badge_styles(@swatch) %>">
                 <%= t('.header', 
-                      label: t("discipline.name.#{@discipline.name}", default: @discipline.name)) %>
+                      label: @discipline.display_name) %>
               </span>
             </div>
           </div>

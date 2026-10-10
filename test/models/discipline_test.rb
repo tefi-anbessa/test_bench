@@ -195,4 +195,86 @@ class DisciplineTest < ActiveSupport::TestCase
       test_project.destroy
     end
   end
+
+  test "registry_entry finds the standard entry for a module-backed code" do
+    electrical = @project.disciplines.find_by(code: "E")
+    assert_equal "Electrical", electrical.registry_entry[:name]
+  end
+
+  test "registry_entry is nil for a project-defined, non-standard code" do
+    assert_nil @discipline.registry_entry
+  end
+
+  test "module_name and backing_module resolve for a module-backed discipline" do
+    electrical = @project.disciplines.find_by(code: "E")
+    assert_equal "Electrical", electrical.module_name
+    assert_equal Electrical::Base, electrical.backing_module
+    assert electrical.module_backed?
+  end
+
+  test "module_name and backing_module are nil for a discipline with no module yet" do
+    process = @project.disciplines.find_by(code: "P")
+    assert_nil process.module_name
+    assert_nil process.backing_module
+    refute process.module_backed?
+  end
+
+  test "module_name and backing_module are nil for a project-defined discipline" do
+    assert_nil @discipline.module_name
+    assert_nil @discipline.backing_module
+    refute @discipline.module_backed?
+  end
+
+  test "default_required_role and default_catalog_required_role come from the registry" do
+    electrical = @project.disciplines.find_by(code: "E")
+    assert_equal "designer", electrical.default_required_role
+    assert_equal "custodian", electrical.default_catalog_required_role
+  end
+
+  test "default_required_role is nil for a project-defined discipline" do
+    assert_nil @discipline.default_required_role
+    assert_nil @discipline.default_catalog_required_role
+  end
+
+  test "display_name translates an unrenamed standard discipline" do
+    electrical = @project.disciplines.find_by(code: "E")
+    assert_equal I18n.t("discipline.name.E"), electrical.display_name
+  end
+
+  test "display_name shows the raw name once a standard discipline is renamed" do
+    electrical = @project.disciplines.find_by(code: "E")
+    electrical.update!(name: "Power Systems")
+    assert_equal "Power Systems", electrical.display_name
+  end
+
+  test "display_name shows the raw name for a project-defined discipline" do
+    assert_equal @discipline.name, @discipline.display_name
+  end
+
+  test "standard_options lists the registry keyed by code" do
+    options = Discipline.standard_options
+    assert_equal "Electrical", options[:E][:name]
+    assert_nil options[:P][:module]
+  end
+
+  test "create_selected_for_project only creates the requested codes" do
+    project = create(:project, discipline_codes: [])
+    assert_difference("project.disciplines.count", 2) do
+      Discipline.create_selected_for_project(project, codes: ["E", "J"])
+    end
+    assert_equal %w[E J], project.disciplines.order(:code).pluck(:code)
+  end
+
+  test "create_selected_for_project does nothing if the project already has disciplines" do
+    assert_no_difference("@project.disciplines.count") do
+      Discipline.create_selected_for_project(@project, codes: ["E"])
+    end
+  end
+
+  test "create_selected_for_project ignores codes not in the registry" do
+    project = create(:project, discipline_codes: [])
+    assert_difference("project.disciplines.count", 1) do
+      Discipline.create_selected_for_project(project, codes: ["E", "NOT_REAL"])
+    end
+  end
 end

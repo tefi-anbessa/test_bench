@@ -1,17 +1,15 @@
-# The discipline model has standardised content available, with translations.
-# Custom content is not translated.
+# Default display names for the standard disciplines (config/constants/
+# discipline.yml), keyed by code - the structural identifier, not the
+# (project-customizable) name. Custom, project-defined discipline names are
+# not translated - the `default:` on each t() call simply shows whatever
+# the project named it.
 th:
   discipline:
     name:
-      Administration: 'บริหาร'
-      Architecture: 'สถาปัตยกรรม'
-      Civil: 'โยธา'
-      Completions: 'การสิ้นสุด'
-      Electrical: 'ไฟฟ้า'
-      Hvac: 'เครื่องปรับอากาศ'
-      Instrument: 'เครื่องมือวัด'
-      InformationTechnology: 'ไอที'
-      Mechanical: 'เครื่องกล'
-      Piping: 'ท่อ'
-      Process: 'กระบวนการ'
-      Structural: 'โครงสร้าง'
+      E: 'ไฟฟ้า'
+      J: 'เครื่องมือวัด'
+      P: 'กระบวนการ'
+      IT: 'ไอที'
+      M: 'เครื่องกล'
+      PIP: 'ท่อ'
+      C: 'โยธา'

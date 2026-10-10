@@ -71,4 +71,38 @@ class UserTest < ActiveSupport::TestCase
     assert_not duplicate_user.valid?, "Username should be unique (case-insensitive)"
     assert_includes duplicate_user.errors[:name], 'has already been taken'
   end
+
+  test "time_zone defaults to UTC and must be a real zone" do
+    assert_equal "UTC", @user.time_zone
+    @user.time_zone = "Not A Real Zone"
+    assert_not @user.valid?
+    @user.time_zone = "Melbourne"
+    assert @user.valid?
+  end
+
+  test "time_zone cannot be blank" do
+    @user.time_zone = ""
+    assert_not @user.valid?
+  end
+
+  test "preferred_locale must be an available locale, but may be blank" do
+    @user.preferred_locale = nil
+    assert @user.valid?
+    @user.preferred_locale = "km"
+    assert @user.valid?
+    @user.preferred_locale = "fr"
+    assert_not @user.valid?
+  end
+
+  test "job_title is optional but length limited" do
+    @user.job_title = nil
+    assert @user.valid?
+    @user.job_title = "a" * 101
+    assert_not @user.valid?
+  end
+
+  test "initials are the first two characters of the name, upcased" do
+    @user.name = "alice"
+    assert_equal "AL", @user.initials
+  end
 end

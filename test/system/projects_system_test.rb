@@ -177,7 +177,7 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     # Discipline links 
     assert_selector "h5", text: I18n.t('disciplines.index.header', scope_text: @project.label)
     @project.disciplines.each do |discipline|
-      text = "#{discipline.code}: #{I18n.t("discipline.name.#{discipline.name}", default: discipline.name)}"
+      text = "#{discipline.code}: #{discipline.display_name}"
       assert_selector "a[href='#{discipline_path(discipline)}']", text: text
       # assert_selector "a[href='#{discipline_path(discipline)}'], [aria-label=I18n.t('actions.show')]"
       assert_selector "a[href='#{discipline_documents_path(discipline)}']"
@@ -258,19 +258,30 @@ class ProjectsSystemTest < ApplicationSystemTestCase
     assert_selector "button[type='submit']"
     assert_selector "a.btn.btn-warning", text: I18n.t('actions.discard')
 
+    # Discipline checklist - each option shows its code and is annotated
+    # with whether it's backed by a real module yet.
+    Discipline.standard_options.each do |code, attrs|
+      checkbox_text = find("label[for='discipline_code_#{code}']").text
+      assert_includes checkbox_text, code.to_s
+      assert_includes checkbox_text, attrs[:module].present? ? I18n.t('projects.form.module_ready') : I18n.t('projects.form.module_pending')
+    end
+
     # Complete the form
     fill_in "project_code", with: "TT"
     fill_in "project_title", with: "New Project"
     fill_in "project_description", with: "This is a test project"
     select "app_theme", from: "project_swatch_id"
+    check "discipline_code_E"
+    check "discipline_code_J"
 
     # Save the new project
     click_button I18n.t('actions.create')
     sleep 0.1  # Give database time to commit
     new_project = Project.find_by(code: "TT")
-    assert_current_path project_path(new_project) 
+    assert_current_path project_path(new_project)
     assert_text "New Project"
     assert_text I18n.t("flash.create.notice", resource_name: I18n.t("activerecord.models.project", count: 1))
+    assert_equal %w[E J], new_project.disciplines.order(:code).pluck(:code)
   end
 
   test "project manager edit project" do

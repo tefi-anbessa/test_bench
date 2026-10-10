@@ -103,9 +103,8 @@ class IssuesController < ApplicationController
     end
 
     def set_swatch
-      discipline_base = "#{@discipline.name}::Base".safe_constantize
-      @swatch = @discipline.swatch || 
-                discipline_base&.swatch || 
+      @swatch = @discipline.swatch ||
+                @discipline.backing_module&.swatch ||
                 Swatch.find_by(name: "app_theme")
     end
 

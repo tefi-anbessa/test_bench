@@ -125,7 +125,9 @@ class TagsController < ApplicationController
     end
 
     def set_swatch
-      @swatch = @discipline&.swatch || @project&.swatch || Swatch.find_by(name: @discipline&.name) || Swatch.find_by(name: 'app_theme')
+      @swatch = @discipline&.swatch || @project&.swatch ||
+                (Swatch.find_by(name: "Discipline #{@discipline&.code}") if @discipline&.code) ||
+                Swatch.find_by(name: 'app_theme')
     end
 
     def tag_params

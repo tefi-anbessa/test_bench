@@ -28,6 +28,27 @@
             <%= form_field(f, :description, type: :text) %>
             <% collection = options_for_select(@swatches.map { |s| [s.name, s.id] }, @project.swatch_id) %>
             <%= form_field(f, :swatch_id, type: :select, collection: collection) %>
+
+            <% if @project.new_record? %>
+              <div class="mb-3">
+                <label class="form-label fw-bold"><%= t('.disciplines_label') %></label>
+                <div class="form-text mb-2"><%= t('.disciplines_help') %></div>
+                <% Discipline.standard_options.each do |code, attrs| %>
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="discipline_code_<%= code %>"
+                      name="project[discipline_codes][]" value="<%= code %>">
+                    <label class="form-check-label" for="discipline_code_<%= code %>">
+                      <%= [code, t("discipline.name.#{code}", default: attrs[:name])].join(": ") %>
+                      <% if attrs[:module].present? %>
+                        <span class="badge bg-success"><%= t('.module_ready') %></span>
+                      <% else %>
+                        <span class="badge bg-secondary"><%= t('.module_pending') %></span>
+                      <% end %>
+                    </label>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
           </div>
         </div>
       </div>

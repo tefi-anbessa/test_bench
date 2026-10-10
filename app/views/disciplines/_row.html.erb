@@ -1,7 +1,7 @@
 <tr scope="row">
   <td><%= discipline.sort_order %></td>
   <td><%= discipline.code %></td>
-  <td><%= discipline.name %></td>
+  <td><%= discipline.display_name %></td>
   <td><%= discipline.prefix_schema&.[]('name') %></td>
   <td><%= discipline.required_role || '-' %></td>
   <td><%= index_link(action: :show, record: discipline.swatch) %></td>

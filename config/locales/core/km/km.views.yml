@@ -13,12 +13,16 @@ km:
       title:        "អ្នកប្រើប្រាស់"
       header:       "បញ្ជីអ្នកប្រើប្រាស់"
       message:      "ចូលប្រើ"
-      gravatar:     "រូបភាព"
+      avatar:       "រូបភាព"
     show:
       title:        "អ្នកប្រើប្រាស់"
       header:       "ព័ត៌មានអ្នកប្រើប្រាស់"
       message:      "ចូលប្រើ"
-      gravatar:     "រូបភាព"
+      avatar:       "រូបភាព"
+    edit:
+      title:        "Edit %{name}"
+      header:       "Edit Profile: %{name}"
+      use_app_default: "Use app default"
   errors:
     forbidden:
       title:        "ហាមឃាត់"

@@ -20,7 +20,7 @@ module Instrument
     end
 
     def self.swatch
-      Swatch.find_by(name: "Instrument") || Swatch.find_by(name: "app_theme")
+      Swatch.find_by(name: "Discipline J") || Swatch.find_by(name: "app_theme")
     end
   end
 end

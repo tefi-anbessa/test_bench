@@ -6,6 +6,7 @@ class ApplicationController < ActionController::Base
   include ErrorsHelper
 
   around_action :switch_locale
+  around_action :set_time_zone
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :set_paper_trail_whodunnit
 
@@ -107,9 +108,28 @@ class ApplicationController < ActionController::Base
       { ip: request.remote_ip, user_agent: request.user_agent, current_project_id: current_project&.id }
     end
 
+    # Resolution order: an explicit URL locale (e.g. clicking the language
+    # switcher) wins outright; otherwise fall back to the cookie it just set
+    # on a previous request, then the signed-in user's stored profile
+    # preference, then the app default. Whenever the URL gives an explicit
+    # locale, the cookie is (re)written so it sticks on the next request that
+    # doesn't - this is what lets someone switch language from the nav menu
+    # without that becoming their permanent saved preference (handy for an
+    # admin briefly viewing the app in another user's language). The cookie
+    # carries no security weight (worst case: wrong UI language), so unlike
+    # the current_project cookie it doesn't need to be signed.
     def switch_locale(&action)
-      locale = params[:locale] || I18n.default_locale
+      locale = (params[:locale] || cookies[:locale] || current_user&.preferred_locale || I18n.default_locale).to_sym
+      locale = I18n.default_locale unless I18n.available_locales.include?(locale)
+      cookies[:locale] = { value: locale, expires: 1.year.from_now } if params[:locale].present?
       I18n.with_locale(locale, &action)
+    end
+
+    # ActiveRecord always stores/queries timestamps in UTC regardless of this
+    # (Rails' default_timezone is :utc) - this only affects how they're
+    # *displayed* for the current request.
+    def set_time_zone(&action)
+      Time.use_zone(current_user&.time_zone || "UTC", &action)
     end
 
   private

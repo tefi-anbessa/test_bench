@@ -12,8 +12,11 @@ Rails.application.routes.draw do
       sessions: 'users/sessions'
     }
     
-    # Additional routes for users UI (presentation only)
-    resources :users, only: [:show, :index]
+    # Additional routes for users UI. :edit/:update are the profile fields
+    # (job title, time zone, preferred locale, avatar) only - Devise's own
+    # routes above cover account/security (email, password), and remain the
+    # only way to change those.
+    resources :users, only: [:show, :index, :edit, :update]
     
     # App wide resources
     resources :projects do

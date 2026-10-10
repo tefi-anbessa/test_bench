@@ -127,10 +127,11 @@ class DisciplineResourcePolicy < ApplicationPolicy
         end
         return false
       end
-      # Check discipline required role first. If not defined, fall back to discipline's module required role.
-      rr = record.discipline.required_role.present? ? 
-          record.discipline.required_role.to_s : 
-          "#{record.discipline.name}::Base".safe_constantize&.required_role.to_s
+      # Check discipline required role first. If not defined, fall back to the
+      # standard registry's default for this discipline's code (see
+      # Discipline#default_required_role) - not a string match on name,
+      # which projects are free to rename.
+      rr = record.discipline.required_role.presence || record.discipline.default_required_role
       return false unless rr
       user.has_role?(rr, record.discipline) || 
         user.is_admin? || 
