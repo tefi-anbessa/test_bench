@@ -225,6 +225,22 @@ class DisciplineTest < ActiveSupport::TestCase
     refute @discipline.module_backed?
   end
 
+  test "accepts_tagable_type? is true only for a type backed by this discipline's own module" do
+    electrical = @project.disciplines.find_by(code: "E")
+    assert electrical.accepts_tagable_type?("Electrical::Cable")
+    refute electrical.accepts_tagable_type?("Instrument::PressureGauge")
+  end
+
+  test "accepts_tagable_type? is false for a discipline with no backing module" do
+    process = @project.disciplines.find_by(code: "P")
+    refute process.accepts_tagable_type?("Electrical::Cable")
+  end
+
+  test "accepts_tagable_type? is false for an unknown/unresolvable type" do
+    electrical = @project.disciplines.find_by(code: "E")
+    refute electrical.accepts_tagable_type?("NotARealModel")
+  end
+
   test "default_required_role and default_catalog_required_role come from the registry" do
     electrical = @project.disciplines.find_by(code: "E")
     assert_equal "designer", electrical.default_required_role

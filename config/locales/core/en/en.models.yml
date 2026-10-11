@@ -167,6 +167,7 @@ en:
               change_tagable: "Cannot change tagable association once set"
               invalid: "Invalid type %{tagable_type}"
               taken: "This %{tagable_type} is already associated with another tag"
+              discipline_mismatch: "does not belong to this discipline"
             parent:
               self: "cannot be itself"
               circular: "cannot create a circular reference"

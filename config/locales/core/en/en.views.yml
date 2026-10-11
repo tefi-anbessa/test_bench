@@ -120,6 +120,8 @@ en:
     edit:
       title:            "Edit Tag"
       header:           "Edit Tag: %{label}"
+    form:
+      no_tagable_types: "No equipment types are available for this discipline yet."
     import:
       title:              "Import Tags"
       header_discipline:  "Import Tags into %{discipline}"

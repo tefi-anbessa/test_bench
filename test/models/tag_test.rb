@@ -169,7 +169,35 @@ class TagTest < ActiveSupport::TestCase
     refute @tag.valid?
     assert_includes @tag.errors[:tagable_type], I18n::t("errors.messages.inclusion")
   end
-  
+
+  test "should allow a tagable_type backed by this discipline's own module" do
+    @tag.tagable_type = 'Electrical::Cable'
+    assert @tag.valid?
+  end
+
+  test "should reject a tagable_type backed by a different discipline's module" do
+    @tag.tagable_type = 'Instrument::PressureGauge'
+    refute @tag.valid?
+    assert_includes @tag.errors[:tagable_type],
+      I18n.t("activerecord.errors.models.tag.attributes.tagable_type.discipline_mismatch")
+  end
+
+  test "should reject any tagable_type on a discipline with no backing module" do
+    process_discipline = @project.disciplines.find_by(name: "Process")
+    tag = build(:tag, discipline: process_discipline, tagable_type: 'Electrical::Cable')
+    refute tag.valid?
+    assert_includes tag.errors[:tagable_type],
+      I18n.t("activerecord.errors.models.tag.attributes.tagable_type.discipline_mismatch")
+  end
+
+  test "discipline should be readonly after creation" do
+    tag = create(:tag, :unique_tag, discipline: @discipline)
+    other_discipline = @project.disciplines.find_by(name: "Instrument")
+    assert_raises(ActiveRecord::ReadonlyAttributeError) do
+      tag.update(discipline: other_discipline)
+    end
+  end
+
   test "should allow creating tagable type with existing tag" do
     # First create a tag with type but no tagable
     tag = create(:tag, :unique_tag, prefix: 'EC', discipline: @discipline, 

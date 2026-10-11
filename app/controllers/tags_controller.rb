@@ -81,7 +81,6 @@ class TagsController < ApplicationController
         resource_name: I18n.t('activerecord.models.tag.one'))
       redirect_back fallback_location: project_tags_path(current_project)
     end
-    
   end
 
   private

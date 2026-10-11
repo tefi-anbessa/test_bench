@@ -12,11 +12,14 @@ class Tag < ApplicationRecord
 
   # === Attributes ===
 
+  # Lock discipline after creation. A tag's discipline drives which tagable types are valid,
+  # so moving a tag to a different discipline after the fact is not a supported operation.
+  attr_readonly :discipline_id
+
   # === Associations ===
   delegated_type :tagable, types: Constants.tagable, optional: true, dependent: :destroy
   belongs_to :discipline
   has_one :project, through: :discipline
-
   belongs_to :parent, class_name: 'Tag', optional: true
   has_many :children, class_name: 'Tag', foreign_key: 'parent_id', inverse_of: :parent, 
     dependent: :nullify
@@ -50,12 +53,13 @@ class Tag < ApplicationRecord
   validate :validate_tagable_reassignment, on: :update
 
   # Allow setting tagable_type without tagable_id to indicate intended type
-  # Only validate presence of tagable_id if we're setting a non-nil value
-  # validates :tagable_id, presence: { message: 'must be present when setting a tagable' }, 
-  #                       if: -> { tagable_type.present? && tagable_id_changed? && tagable_id.present? }
-  validates :tagable_type, inclusion: { in: Constants.tagable }, 
-                           allow_nil: true
-  
+  validates :tagable_type, inclusion: { in: Constants.tagable }, allow_nil: true
+
+  # Ensure the tagable type actually belongs to this tag's discipline (see
+  # Discipline#accepts_tagable_type?) - e.g. an Electrical::Heater can't be
+  # set on a tag whose discipline is Instrument.
+  validate :validate_tagable_matches_discipline_module, if: -> { discipline.present? && tagable_type.present? }
+
   # Ensure a tagable is only associated with one tag
   validate :tagable_not_already_associated, if: -> { tagable_id.present? && tagable_type.present? }
   
@@ -305,6 +309,11 @@ class Tag < ApplicationRecord
       errors.add(:base, I18n.t("errors.messages.taken")) if existing.any?
     end
     
+    def validate_tagable_matches_discipline_module
+      return if discipline.accepts_tagable_type?(tagable_type)
+      errors.add(:tagable_type, I18n.t("activerecord.errors.models.tag.attributes.tagable_type.discipline_mismatch"))
+    end
+
     # Prevent re-assigning a tagable to a different tag
     def tagable_not_already_associated
       return unless tagable_id.present? && tagable_type.present?

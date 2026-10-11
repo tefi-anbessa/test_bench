@@ -54,14 +54,21 @@
                     { class: 'form-select' } %>
             </div>
 
-            <!-- Tagable Type -->
-            <div class="row">
-              <%= f.select :tagable_type, 
-                options_for_select(Tag.safe_tagable_types.map { |type| [type.safe_constantize.model_name.human, type] }, 
-                  tag.tagable_type),
-                    { include_blank: t("form.none") },
-                    { class: 'form-select' } %>
-            </div>
+            <!-- Tagable Type - only types backed by this discipline's own module are offered -->
+            <% available_tagable_types = Tag.safe_tagable_types.select { |type| discipline.accepts_tagable_type?(type) } %>
+            <% if available_tagable_types.any? %>
+              <div class="row">
+                <%= f.select :tagable_type,
+                  options_for_select(available_tagable_types.map { |type| [type.safe_constantize.model_name.human, type] },
+                    tag.tagable_type),
+                      { include_blank: t("form.none") },
+                      { class: 'form-select' } %>
+              </div>
+            <% else %>
+              <div class="row">
+                <div class="form-text"><%= t('.no_tagable_types') %></div>
+              </div>
+            <% end %>
           </div>
         </div>
       </div>

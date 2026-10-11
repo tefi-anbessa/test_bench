@@ -98,6 +98,8 @@ cn:
     edit:
       title:            "Edit Tag"
       header:           "Edit Tag: %{label}"
+    form:
+      no_tagable_types: "No equipment types are available for this discipline yet."
   roles:
     index:
       title:            "Roles"

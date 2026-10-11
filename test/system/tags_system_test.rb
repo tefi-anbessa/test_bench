@@ -277,6 +277,12 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert page.title.include?(I18n.t("tags.new.title"))
 
     tag_form_field_assertions
+
+    # The tagable_type dropdown only offers this discipline's own module -
+    # @discipline is Electrical, so Electrical types appear and Instrument
+    # types (a different discipline's module) do not.
+    assert_selector "select[name='tag[tagable_type]'] option", text: "Cable"
+    assert_no_selector "select[name='tag[tagable_type]'] option", text: "Pressure gauge"
   end
 
   test "discipline sets the prefix schema" do
@@ -440,7 +446,8 @@ class TagsSystemTest < ApplicationSystemTestCase
     assert_text I18n.t("tags.edit.header", label: c_tag.reload.label)
     assert page.title.include?(I18n.t("tags.edit.title"))
 
-    tag_form_field_assertions
+    # Civil (@discipline_c) has no backing module, so no tagable types are offered.
+    tag_form_field_assertions(tagable_type_expected: false)
     assert_field "tag[prefix]"
 
     # Update the form
@@ -532,7 +539,7 @@ class TagsSystemTest < ApplicationSystemTestCase
 
   private
 
-    def tag_form_field_assertions
+    def tag_form_field_assertions(tagable_type_expected: true)
       # Data fields
       assert_field "tag[stage]"
       assert_field "tag[serial]"
@@ -540,7 +547,12 @@ class TagsSystemTest < ApplicationSystemTestCase
       assert_field "tag[service]"
       assert_field "tag[location]"
       assert_field "tag[notes]"
-      assert_selector "select[name='tag[tagable_type]']"
+      if tagable_type_expected
+        assert_selector "select[name='tag[tagable_type]']"
+      else
+        assert_no_selector "select[name='tag[tagable_type]']"
+        assert_text I18n.t("tags.form.no_tagable_types")
+      end
 
       # Form buttons
       assert_selector "button[type='submit']"

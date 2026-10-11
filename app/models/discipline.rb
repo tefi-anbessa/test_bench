@@ -56,14 +56,10 @@ class Discipline < ApplicationRecord
   end
 
   # The name to display for this discipline, in the viewer's current
-  # locale. Only translates when the name still matches the standard
-  # registry's default for this code - i.e. the project never customized
-  # it. A renamed (or project-defined, non-standard) discipline shows its
-  # own stored name as-is, untranslated - "custom content is not
-  # translated", same rule the old discipline.<locale>.yml files already
-  # stated. Translating unconditionally by code (ignoring whether the name
-  # was customized) would show "Electrical" forever even after a project
-  # renamed it to something else, which defeats the point of the rename.
+  # locale. Only translates when the name matches the
+  # registry's default for this code. A renamed (or project-defined, non-standard)
+  # discipline shows its own stored name as-is, untranslated - "custom content is not
+  # translated".
   def display_name
     entry = registry_entry
     return name if entry.nil? || name != entry[:name]
@@ -128,9 +124,23 @@ class Discipline < ApplicationRecord
     backing_module.present?
   end
 
+  # Whether this discipline's own module is the one backing the given
+  # tagable type (e.g. "Electrical::Heater" for the Electrical discipline).
+  # The single source of truth for this check - used both to filter the
+  # tagable_type choices offered on the tag form, and by Tag's own
+  # validation that a tag's tagable actually belongs to its discipline. A
+  # discipline with no backing module accepts none. Not yet aware of
+  # core-shared tagable types (e.g. a future core Cable, usable by more
+  # than one discipline's module) - revisit this one method, not its
+  # callers, when that exists.
+  def accepts_tagable_type?(type)
+    return false unless module_backed?
+    type.to_s.safe_constantize&.module_parent_name == module_name
+  end
+
   # Falls back to the registry's default for this code, not to the backing
   # module's own class method - the registry (data) is the single source
-  # of truth for these defaults now, not a second copy living in Ruby.
+  # of truth for these defaults.
   def default_required_role
     registry_entry&.[](:required_role)&.to_s
   end

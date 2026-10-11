@@ -151,6 +151,7 @@ cn:
           not_assigned: "Not assigned"
           change_tagable: "Cannot change tagable association once set"
           invalid: "Invalid type %{tagable_type}"
+          discipline_mismatch: "does not belong to this discipline"
       attributes:
         code:
           invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"
