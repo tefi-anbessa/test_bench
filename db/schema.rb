@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_08_073920) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_11_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,26 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_08_073920) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "cables", force: :cascade do |t|
+    t.decimal "route_length", precision: 4, scale: 1
+    t.decimal "vertical_allowance", precision: 3, scale: 1
+    t.decimal "termination_allowance", precision: 3, scale: 1
+    t.integer "start_mark"
+    t.integer "end_mark"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "from_type"
+    t.integer "from_id"
+    t.string "to_type"
+    t.integer "to_id"
+    t.text "notes"
+    t.string "cable_type_type", null: false
+    t.integer "cable_type_id", null: false
+    t.index ["cable_type_type", "cable_type_id"], name: "index_cables_on_cable_type"
+    t.index ["from_type", "from_id"], name: "index_cables_on_from"
+    t.index ["to_type", "to_id"], name: "index_cables_on_to"
   end
 
   create_table "change_management_requests", force: :cascade do |t|
@@ -122,25 +142,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_08_073920) do
     t.integer "construction"
     t.bigint "discipline_id", null: false
     t.index ["discipline_id"], name: "index_electrical_cable_types_on_discipline_id"
-  end
-
-  create_table "electrical_cables", force: :cascade do |t|
-    t.integer "electrical_cable_type_id", null: false
-    t.decimal "route_length", precision: 4, scale: 1
-    t.decimal "vertical_allowance", precision: 3, scale: 1
-    t.decimal "termination_allowance", precision: 3, scale: 1
-    t.integer "start_mark"
-    t.integer "end_mark"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "from_type"
-    t.integer "from_id"
-    t.string "to_type"
-    t.integer "to_id"
-    t.text "notes"
-    t.index ["electrical_cable_type_id"], name: "index_electrical_cables_on_electrical_cable_type_id"
-    t.index ["from_type", "from_id"], name: "index_electrical_cables_on_from"
-    t.index ["to_type", "to_id"], name: "index_electrical_cables_on_to"
   end
 
   create_table "electrical_circuits", force: :cascade do |t|
@@ -457,7 +458,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_08_073920) do
   add_foreign_key "documents", "disciplines"
   add_foreign_key "documents", "doc_types"
   add_foreign_key "electrical_cable_types", "disciplines"
-  add_foreign_key "electrical_cables", "electrical_cable_types"
   add_foreign_key "electrical_circuits", "electrical_switchboards"
   add_foreign_key "import_batches", "disciplines"
   add_foreign_key "import_batches", "projects"

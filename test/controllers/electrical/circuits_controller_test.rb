@@ -35,14 +35,14 @@ module Electrical
       @cable_tag1 = create(:tag, prefix: 'EC', serial: 1001, discipline: @discipline)
       @cable_tag2 = create(:tag, prefix: 'EC', serial: 1002, discipline: @discipline)
       # Create cables with the cable tags
-      @cable1 = create(:electrical_cable, tag: @cable_tag1, electrical_cable_type: @cable_type)
-      @cable2 = create(:electrical_cable, tag: @cable_tag2, electrical_cable_type: @cable_type)
+      @cable1 = create(:cable, tag: @cable_tag1, cable_type: @cable_type)
+      @cable2 = create(:cable, tag: @cable_tag2, cable_type: @cable_type)
       # Assign @cable1 as the feeder for @circuit. @cable2 remains unassigned.
       @cable1.update(from: @circuit)
       # Create out of scope cable type and cable
       @other_cable_type = create(:electrical_cable_type, discipline: @other_discipline)
       @other_cable_tag = create(:tag, prefix: 'EC', serial: 1003, discipline: @other_discipline)
-      @other_cable = create(:electrical_cable, tag: @other_cable_tag, electrical_cable_type: @other_cable_type)
+      @other_cable = create(:cable, tag: @other_cable_tag, cable_type: @other_cable_type)
       
       # Create another switchboard to use as an existing load
       @switchboard2_tag = create(:tag, prefix: 'EX', serial: 1003, discipline: @discipline)
@@ -225,10 +225,15 @@ module Electrical
 
     test "accredited user cannot assign demand from out of scope" do
       sign_in_and_set_project @accredited_user, @project
-      # Set up an "out of scope" demand
-      @motor_tag.update(discipline: @other_discipline)
+      # Set up an "out of scope" demand - discipline_id is readonly after
+      # creation (see Tag#creation_discipline/attr_readonly), so this has
+      # to be a tag genuinely created under @other_discipline, not the
+      # shared @motor_tag fixture moved there after the fact.
+      other_motor_tag = create(:tag, prefix: 'EX', serial: 1005, discipline: @other_discipline)
+      other_motor = create(:electrical_motor, tag: other_motor_tag)
+      other_motor_demand = create(:electrical_demand, basis: 'summation', demandable: other_motor)
       patch :update, params: update_params.merge(id: @circuit.id).deep_merge(
-        electrical_circuit: { demand_id: @motor_demand.id })
+        electrical_circuit: { demand_id: other_motor_demand.id })
       assert_conflict
     end
     

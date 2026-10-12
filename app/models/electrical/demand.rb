@@ -20,8 +20,8 @@ module Electrical
     # Demandable types are the models that can have electrical load information attached.
     delegated_type :demandable, types: Constants.electrical.loadable, required: true
 
-    has_one :incomer, as: :to, class_name: 'Electrical::Cable', dependent: :nullify
-    has_one :feeder, as: :from, class_name: 'Electrical::Cable', dependent: :nullify
+    has_one :incomer, as: :to, class_name: 'Cable', dependent: :nullify
+    has_one :feeder, as: :from, class_name: 'Cable', dependent: :nullify
     # Find the circuit that supplies power to this demand
     has_one :circuit, through: :incomer, source: :from, source_type: "Electrical::Circuit"
 

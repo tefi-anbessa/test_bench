@@ -1,0 +1,15 @@
+<tr>
+  <% unless current_project %>
+    <th scope="col"><%= sort_link(@q, 'tag_discipline_project_code', Project.model_name.human) %></th>
+  <% end %>
+  <th scope="col"><%= sort_link(@q, :tag_stage, t("activerecord.attributes.tag.stage")) %></th>
+  <th scope="col"><%= sort_link(@q, :tag, t("activerecord.attributes.tag.full_tag")) %></th>
+  <th scope="col"><%= t('activerecord.attributes.cable.notes') %></th>
+  <th scope="col"><%= t("activerecord.attributes.cable.from") %></th>
+  <th scope="col"><%= t("activerecord.attributes.cable.to") %></th>
+  <!-- Polymorphic, like from/to above - not ransack-sortable across an
+       unfixed class, so no sort_link, same treatment as those two. -->
+  <th scope="col"><%= t('.cable_type') %></th>
+  <th scope="col"><%= sort_link(@q, :route_length, t("activerecord.attributes.cable.route_length")) %><br>(m)</th>
+  <th scope="col" width="150px"><%= t('table.links')%></th>
+</tr>

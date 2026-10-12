@@ -20,8 +20,8 @@
         <!-- New Button (Right) -->
         <div class="col-2 text-end">
           <% if @discipline.present? && policy(@discipline.tags.build()).new? %>
-            <%= nav_button(action: :new, path: new_discipline_tagable_path(@discipline, tagable_type: "Electrical::Cable"),
-                record: Electrical::Cable.new) %>
+            <%= nav_button(action: :new, path: new_discipline_tagable_path(@discipline, tagable_type: "Cable"),
+                record: Cable.new) %>
           <% end %>
         </div>
       </div> <!-- end of row -->
@@ -30,12 +30,9 @@
       <div class="row search-form">
         <%= search_form_for @q, url: discipline_tagables_path(@discipline) do |f| %>
           <%= hidden_field_tag :tagable_type, @type %>
-          <%= f.search_field :electrical_cable_type_code_cont,
-                class: "search_field",
-                placeholder: t('activerecord.attributes.electrical/cable.electrical_cable_type') %>
           <%= f.search_field :notes_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical/cable.notes') %>
+                placeholder: t('activerecord.attributes.cable.notes') %>
           <%= f.button class: "btn btn-outline-primary btn-sm mb-1", type: :submit do %>
             <%== bs_icon('search') %>
           <% end %>
@@ -48,9 +45,9 @@
           <thead>
             <tr class="table-danger">
               <td colspan="<%= 9 + (current_project ? 1 : 0) %>">
-                <%= t('index.link_broken', 
+                <%= t('index.link_broken',
                 count: @link_broken.count,
-                models: t('activerecord.models.electrical/cable', count: @link_broken.count)) %>
+                models: t('activerecord.models.cable', count: @link_broken.count)) %>
               </th>
             </tr>
             <%= render 'tags/header' %>
@@ -67,9 +64,9 @@
           <thead>
             <tr class="table-warning">
               <td colspan="<%= 9 + (current_project ? 1 : 0) %>">
-                <%= t('index.link_incomplete', 
+                <%= t('index.link_incomplete',
                 count: @link_incomplete.count,
-                models: t('activerecord.models.electrical/cable', count: @link_incomplete.count)) %>
+                models: t('activerecord.models.cable', count: @link_incomplete.count)) %>
               </td>
             </tr>
             <%= render 'tags/header' %>
@@ -88,18 +85,18 @@
       <% can_edit = policy(@discipline.tags.build()).edit? %>
       <% can_delete = policy(@discipline.tags.build()).destroy? %>
       <table id='cables' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
-        <%= render "electrical/cables/header" %>
+        <%= render "cables/header" %>
         <tbody>
           <% unless @orphans.empty? %>
             <tr class="table-danger">
               <td colspan="10">
                 <%= t('index.orphans',
                       count: @orphans.count,
-                      models: t('activerecord.models.electrical/cable', count: @orphans.count)) %>
+                      models: t('activerecord.models.cable', count: @orphans.count)) %>
               </td>
             </tr>
             <% @orphans.each do |row| %>
-              <%= render "electrical/cables/row", row: row, can_show: can_show, can_edit: can_edit, can_delete: can_delete %>
+              <%= render "cables/row", row: row, can_show: can_show, can_edit: can_edit, can_delete: can_delete %>
             <% end %>
             <tr class="table-success">
               <td colspan="10">
@@ -108,7 +105,7 @@
             </tr>
           <% end %>
           <% @cables.each do |row| %>
-            <%= render "electrical/cables/row", row: row, can_show: can_show, can_edit: can_edit, can_delete: can_delete %>
+            <%= render "cables/row", row: row, can_show: can_show, can_edit: can_edit, can_delete: can_delete %>
           <% end %>
         </tbody>
       </table>

@@ -6,8 +6,8 @@
     <td><%= "-" %></td>
     <td class="table-danger"><%= t("index.no_tag", id: row.id) %></td>
   <% else %>
-    <td><%= row.tag.stage %></td>  
-    <td><%= index_link(action: :show_tag, record: row.tag) %></td>  
+    <td><%= row.tag.stage %></td>
+    <td><%= index_link(action: :show_tag, record: row.tag) %></td>
   <% end %>
   <td>
     <span title="<%= row.notes %>">
@@ -24,9 +24,9 @@
     <!-- To -->
     <%= show_attribute(row, :to, type: :association) %>
   </td>
-  
+
   <td>
-    <%= index_link(action: :show, record: row.electrical_cable_type) %>
+    <%= index_link(action: :show, record: row.cable_type) %>
   </td>
   <td><%= row.route_length %></td>
   <td>

@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 FactoryBot.define do
   factory :electrical_cable_type, class: 'Electrical::CableType' do
-    discipline { association :discipline } 
+    # The bare :discipline factory's default has no registry code/module,
+    # so Cable.discipline_available? (and anything else checking
+    # discipline.cable_type_class) would always reject it - default to a
+    # real, registry-backed Electrical discipline instead.
+    discipline { create(:project).disciplines.find_by(code: "E") }
     
     # Required fields
     groups { 3 }

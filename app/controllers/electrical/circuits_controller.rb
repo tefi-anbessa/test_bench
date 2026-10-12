@@ -225,7 +225,7 @@ module Electrical
       # To change an existing allocation, user must edit the cable itself.
       def set_feeder(feeder_id)
         # Check that the cable requested exists and is in scope
-        unless feeder = tagable_scope(Electrical::Cable).find_by(id: feeder_id)
+        unless feeder = tagable_scope(Cable).find_by(id: feeder_id)
           raise ApplicationController::ConflictError, :invalid_assignment
         end
 
@@ -270,10 +270,10 @@ module Electrical
       def setup_form
         # Filter cables that are not already assigned as feeders (from association is nil)
         # but include the current assignment to show selected on form.
-        @cables = tagable_scope(Electrical::Cable).where(from: nil)
-                                .or(tagable_scope(Electrical::Cable).where(from: @circuit))
+        @cables = tagable_scope(Cable).where(from: nil)
+                                .or(tagable_scope(Cable).where(from: @circuit))
                                 .map { |cable| [cable.label, cable.id] }
-        @cable = tagable_scope(Electrical::Cable).first # dummy cable for policy testing
+        @cable = tagable_scope(Cable).first # dummy cable for policy testing
 
         # Filter demands that don't already have an incomer cable
         # Build the base scope for demands
@@ -281,7 +281,7 @@ module Electrical
         
         # Find demands without an incomer
         demands_without_incomer = demands_scope
-          .where.not(id: Electrical::Cable.where(to_type: 'Electrical::Demand').where.not(to_id: nil).select(:to_id))
+          .where.not(id: Cable.where(to_type: 'Electrical::Demand').where.not(to_id: nil).select(:to_id))
         
         # If there's a current feeder, include its target demand
         if @circuit.feeder&.to_id.present?

@@ -7,9 +7,6 @@ cn:
       electrical/cable_type:
         one: "Cable Type"
         other: "Cable Types"
-      electrical/cable:
-        one: "Cable"
-        other: "Cables"
       electrical/demand:
         one: "Load"
         other: "Loads"
@@ -136,16 +133,6 @@ cn:
         voltage_rating: Voltage Rating
         notes: "Notes"
 
-      electrical/cable:
-        from: "From"
-        to: "To"
-        route_length: "Route Length"
-        vertical_allowance: "Vertical Allowance"
-        termination_allowance: "Termination Allowance"
-        start_mark: "Installed Start Mark"
-        end_mark: "Installed End Mark"
-        notes: "Notes"
-
       electrical/demand:
         incomer: "Incomer"
         feeder: "Feeder"
@@ -252,11 +239,6 @@ cn:
     help:
       electrical/cable_type:
         notes: "Record useful cable type design information here"
-      electrical/cable:
-        route_length: "Route length of cable run, plan view"
-        vertical_allowance: "Cable length to be added to plan view, e.g. for riser to switchboard. If routes are 3D modeled, set to zero."
-        termination_allowance: "Allowance for cable routing inside boxes"
-        notes: "Record useful cable related design references here"
       electrical/demand:
         basis: "Defines which load parameters are given and which are calculated"
         basis_notes: "Record references for derivation of the load parameters"

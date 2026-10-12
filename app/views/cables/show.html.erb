@@ -9,7 +9,7 @@
           <div class="d-flex align-items-center">
             <!-- Index Button -->
             <% if policy(@cable.tag).index? %>
-              <%= nav_button(action: :index_discipline, path: discipline_tagables_path(@discipline, tagable_type: "Electrical::Cable"), record: @cable) %>
+              <%= nav_button(action: :index_discipline, path: discipline_tagables_path(@discipline, tagable_type: "Cable"), record: @cable) %>
             <% end %>
 
             <!-- Previous Button -->
@@ -46,8 +46,8 @@
               <% end %>
 
               <% if policy(@cable.tag).new? %>
-                <%= nav_button(action: :new, path: new_discipline_tagable_path(@discipline.id, tagable_type: "Electrical::Cable"),
-                  record: Electrical::Cable.new) %>
+                <%= nav_button(action: :new, path: new_discipline_tagable_path(@discipline.id, tagable_type: "Cable"),
+                  record: Cable.new) %>
               <% end %>
             </div> <!-- end button group -->
           </div> <!-- end d-flex -->
@@ -81,11 +81,11 @@
 
             <div class="card-body p-3" style="<%= card_styles(@swatch) %>">
               <!-- Cable Type Card -->
-                <%= show_association(@cable, :electrical_cable_type) %>
-              
+                <%= show_association(@cable, :cable_type) %>
+
               <!-- From Section -->
                 <%= show_association(@cable, :from, header: :association) %>
-              
+
               <!-- To Section -->
                 <%= show_association(@cable, :to, header: :association) %>
 

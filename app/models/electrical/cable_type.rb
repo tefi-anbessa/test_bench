@@ -23,8 +23,9 @@ module Electrical
     # === Associations ===
     belongs_to :discipline, required: true
     has_one :project, through: :discipline
-    has_many :electrical_cables, class_name: 'Electrical::Cable', 
-          foreign_key: 'electrical_cable_type_id', dependent: :destroy
+    # Cable is polymorphic now (belongs_to :cable_type, polymorphic: true) -
+    # the inverse side uses as:, not a foreign_key:, string.
+    has_many :cables, as: :cable_type, dependent: :destroy
 
     # === Scopes ===
 
@@ -122,7 +123,7 @@ module Electrical
       end
 
       def self.ransackable_associations(auth_object = nil)
-        ["electrical_cables"]
+        ["cables"]
       end
   end
 end

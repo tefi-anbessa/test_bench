@@ -232,7 +232,7 @@ module ControllerTestHelper
 
   def resource_name
     # Convert class name to underscored symbol
-    # e.g., "Electrical::Cable" -> :electrical_cable
+    # e.g., "Electrical::Heater" -> :electrical_heater
     resource_class.model_name.param_key.to_sym
   end
 

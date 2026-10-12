@@ -10,7 +10,7 @@ module TagableControllerTests
   # Setup common to all tagable controllers
   def setup_tagables_controller_test
     setup_projects_and_users
-    setup_disciplines
+    setup_disciplines(name: discipline_name_for_tagable_tests)
     setup_accredited_users
     # Set up existing tags with associated resources 
     # for index, show, edit, update, destroy tests
@@ -332,9 +332,15 @@ module TagableControllerTests
       self.class.name.sub('ControllerTest', '').singularize.constantize
     end
 
+    # Overridable - a bare (core-shared) tagable type, e.g. Cable, has no
+    # module of its own to derive a discipline name from.
+    def discipline_name_for_tagable_tests
+      resource_class.module_parent_name
+    end
+
     def resource_name
       # Convert class name to underscored symbol
-      # e.g., "Electrical::Cable" -> :electrical_cable
+      # e.g., "Electrical::Heater" -> :electrical_heater
       resource_class.model_name.param_key.to_sym
     end
 

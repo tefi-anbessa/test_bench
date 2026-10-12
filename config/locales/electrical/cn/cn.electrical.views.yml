@@ -14,20 +14,6 @@ cn:
         title:            "Cable Type"
         header:           "Cable Type %{label}"
 
-    cables:
-      index:
-        title:            "Cables"
-        header:           "Cable Schedule"
-      edit:
-        title:            "Edit Cable"
-        header:           "Edit Cable %{label}"
-      new:
-        title:            "New Cable"
-        header:           "New Cable"
-      show:
-        title:            "Cable"
-        header:           "Cable %{label}"
-
     switchboards:
       index:
         title:            "Switchboards"

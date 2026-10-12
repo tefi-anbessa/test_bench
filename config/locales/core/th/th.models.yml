@@ -20,6 +20,9 @@ th:
       tag:
         one: "Tag"
         other: "Tags"
+      cable:
+        one: "Cable"
+        other: "Cables"
       doc_type:
         one: "Document Type"
         other: "Document Types"
@@ -113,6 +116,15 @@ th:
         notes:            "Notes"
         full_tag:         "Tag"
         tagable_type:     "Tag Type"
+      cable:
+        from: "From"
+        to: "To"
+        route_length: "Route Length"
+        vertical_allowance: "Vertical Allowance"
+        termination_allowance: "Termination Allowance"
+        start_mark: "Installed Start Mark"
+        end_mark: "Installed End Mark"
+        notes: "Notes"
       role:
         name:             "Name"
         resource_type:    "Resource"
@@ -129,6 +141,11 @@ th:
         location:         "Physical location of design element"
         stage:            "Construction stage or phase (0 to 10)"
         notes:            "Record useful tag related design information here"
+      cable:
+        route_length: "Route length of cable run, plan view"
+        vertical_allowance: "Cable length to be added to plan view, e.g. for riser to switchboard. If routes are 3D modeled, set to zero."
+        termination_allowance: "Allowance for cable routing inside boxes"
+        notes: "Record useful cable related design references here"
       role:
         resource_type:    "Leave blank for global role"
       discipline:
@@ -168,6 +185,10 @@ th:
             name:
               blank: "Role must be selected"
               invalid: "%{name} is not a valid role for %{resource}"
+        cable:
+          attributes:
+            cable_type:
+              discipline_mismatch: "does not belong to this discipline"
       attributes:
         code:
           invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"

@@ -9,7 +9,7 @@
     </span>
   </td>
   <td><%= row.code %></td>
-  <td><%= row.electrical_cables.size %></td>
+  <td><%= row.cables.size %></td>
   <td>
     <% perms = @permissions&.[](row.discipline_id) || permissions_for(row) %>
     <% if perms[:show] %>

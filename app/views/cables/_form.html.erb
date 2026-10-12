@@ -41,15 +41,18 @@
               <div class="card-header p-2" style="<%= card_header_styles(swatch) %>">
                 <h6><%= yield(:header) %></h6>
               </div>
-              
+
               <div class="card-body p-2" style="<%= form_styles(swatch) %>">
                 <%= render 'shared/error_messages', object: f.object %>
 
-                <!-- Cable Type -->
-                <% collection = options_for_select(cable_type_options, selected: cable.electrical_cable_type_id) %>
-                <%= form_field(f, :electrical_cable_type_id, type: :select, collection: collection, required: true) %>
-                    
-                <div data-controller="cable-form" 
+                <!-- Cable Type - the class is fixed by the discipline (a discipline has
+                     exactly one concrete CableType class), the field only chooses which
+                     row of it. -->
+                <%= f.hidden_field :cable_type_type, value: discipline.cable_type_class&.name %>
+                <% collection = options_for_select(cable_type_options, selected: cable.cable_type_id) %>
+                <%= form_field(f, :cable_type_id, type: :select, collection: collection, required: true) %>
+
+                <div data-controller="cable-form"
                   data-cable-form-id-options-value="<%= @id_options.to_json %>">
 
                   <!-- From Section -->
@@ -57,35 +60,35 @@
                     <%= f.select :from_type,
                       options_for_select(@connect_options, selected: cable.from_type),
                       {include_blank: t("form.optional")},
-                      { 
+                      {
                         class: 'form-select form-select-sm',
                         'data-cable-form-target': 'fromType',
                         'data-action': 'change->cable-form#updateFromOptions'
-                      } %> 
+                      } %>
                   </div>
                   <div class="row">
-                    <%= f.select :from_id, 
-                        options_for_select(@id_options[cable.from_type] || [], 
-                        selected: cable.from_id), 
+                    <%= f.select :from_id,
+                        options_for_select(@id_options[cable.from_type] || [],
+                        selected: cable.from_id),
                         {include_blank: t("form.optional")},
                         { 'data-cable-form-target': 'fromId' } %>
                   </div>
 
-                  <!-- To Section --> 
+                  <!-- To Section -->
                   <div class="row">
-                    <%= f.select :to_type, 
+                    <%= f.select :to_type,
                         options_for_select(@connect_options, selected: cable.to_type),
                         {include_blank: t("form.optional")},
-                          { 
-                            class: 'form-select form-select-sm', 
+                          {
+                            class: 'form-select form-select-sm',
                             'data-cable-form-target': 'toType',
                             'data-action': 'change->cable-form#updateToOptions'
                           } %>
                   </div>
                   <div class="row">
                     <%= f.select :to_id,
-                          options_for_select(@id_options[cable.to_type] || [], 
-                          selected: cable.to_id), 
+                          options_for_select(@id_options[cable.to_type] || [],
+                          selected: cable.to_id),
                           {include_blank: t("form.optional")},
                           { 'data-cable-form-target': 'toId' } %>
                   </div>
@@ -103,7 +106,7 @@
 
             <!-- Card Footer with Actions -->
             <div class="card-footer bg-transparent text-end p-2">
-              <%= link_to(cable.persisted? ? tag_tagable_path(tag) : discipline_tagables_path(discipline, tagable_type: 'Electrical::Cable'),
+              <%= link_to(cable.persisted? ? tag_tagable_path(tag) : discipline_tagables_path(discipline, tagable_type: 'Cable'),
                     class: 'btn btn-warning',
                     data: { confirm: t('actions.sure'), turbo: false }) do %>
                 <%= t('actions.discard') %>

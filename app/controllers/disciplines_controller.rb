@@ -133,7 +133,14 @@ class DisciplinesController < ApplicationController
       module_name = @discipline.module_name
       return @model_links = [] if module_name.nil?
       models = ActiveRecord::Base.descendants
-      .select { |model| model.module_parent_name == module_name && model.model_name.human != "Base" }
+      .select do |model|
+        model.model_name.human != "Base" &&
+          # Models owned by this discipline's own module (CableType, Demand,
+          # Circuit, ...), plus bare/core-shared tagable types this
+          # discipline is wired to accept (e.g. Cable) - the latter have no
+          # module of their own to match against directly.
+          (model.module_parent_name == module_name || @discipline.accepts_tagable_type?(model.name))
+      end
       .sort_by(&:model_name)
       @model_links = models.filter_map { |m| model_link_for(m) }
     end

@@ -85,6 +85,21 @@ th:
     edit:
       title:            "Edit Discipline"
       header:           "Edit Discipline: %{label}"
+  cables:
+    index:
+      title:            "Cables"
+      header:           "Cable Schedule"
+    edit:
+      title:            "Edit Cable"
+      header:           "Edit Cable %{label}"
+    new:
+      title:            "New Cable"
+      header:           "New Cable"
+    show:
+      title:            "Cable"
+      header:           "Cable %{label}"
+    header:
+      cable_type: "Cable Type"
   tags:
     index:
       title:            "Tags"

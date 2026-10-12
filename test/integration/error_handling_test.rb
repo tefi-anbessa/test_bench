@@ -7,7 +7,10 @@ class ErrorHandlingTest < ActionDispatch::IntegrationTest
     @user = create(:user)
     @admin = create(:user, :admin)
     @project = create(:project)
-    @discipline = create(:discipline, project: @project)
+    # A generic (non-Electrical) discipline here would fail Tag's own
+    # discipline/tagable_type validation once the switchboard below is
+    # built - reuse the project's own real Electrical discipline instead.
+    @discipline = @project.disciplines.find_by(code: "E")
     @cable_type = create(:electrical_cable_type)
     @cable_tag = create(:tag, :unique_tag, prefix: 'EC', discipline: @discipline)
     @switchboard_tag = create(:tag, :unique_tag, prefix: 'EX', discipline: @discipline)

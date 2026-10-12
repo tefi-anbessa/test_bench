@@ -31,7 +31,7 @@ module Electrical
       # Create tagables with the tags
       @switchboard = create(:electrical_switchboard, tag: @switchboard_tag)
       @motor = create(:electrical_motor, tag: @motor_tag)
-      @cable = create(:electrical_cable, tag: @cable_tag)
+      @cable = create(:cable, tag: @cable_tag)
 
       # Create a circuit on the switchboard
       @circuit = create(:electrical_circuit, switchboard: @switchboard)

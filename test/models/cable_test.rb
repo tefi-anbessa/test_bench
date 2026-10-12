@@ -1,0 +1,177 @@
+# frozen_string_literal: true
+
+require "test_helper"
+require 'helpers/tagable_model_tests'
+
+class CableTest < ActiveSupport::TestCase
+  include TagableModelTests
+
+  def setup
+    setup_common_test_data
+    @cable = @resource
+  end
+
+  # Cable is bare/core - shared by more than one discipline's module - so
+  # it has no module of its own to derive a discipline name from. Test
+  # it under Electrical, same as before the move.
+  def resource_discipline_name
+    "Electrical"
+  end
+
+  def setup_resource_prerequisites
+    @cable_type = create(:electrical_cable_type, discipline: @resource_discipline)
+  end
+
+  test "should require cable_type" do
+    @cable.cable_type = nil
+    refute @cable.valid?
+    assert_no_difference 'Cable.count' do
+      @cable.save
+    end
+    assert_includes @cable.errors[:cable_type], I18n.t('errors.messages.required')
+  end
+
+  test_associations(:cable_type)
+
+  test "should reject a cable_type from a different discipline" do
+    other_discipline = create(:project).disciplines.find_by(code: "E")
+    other_cable_type = create(:electrical_cable_type, discipline: other_discipline)
+    @cable.cable_type = other_cable_type
+    refute @cable.valid?
+    assert_includes @cable.errors[:cable_type],
+      I18n.t("activerecord.errors.models.cable.attributes.cable_type.discipline_mismatch")
+  end
+
+  test "should associate with circuit feeder" do
+    swbd = create(:electrical_switchboard, discipline: @resource_discipline)
+    circuit = swbd.circuits.create(serial: 1)
+    @cable.from = circuit
+    @cable.save
+    assert_not_nil circuit.feeder
+    assert_equal circuit, circuit.feeder.from
+  end
+
+  test "destroy circuit should nullify cable from" do
+    swbd = create(:electrical_switchboard, discipline: @resource_discipline)
+    circuit = swbd.circuits.create(serial: 1)
+    @cable.from = circuit
+    @cable.save
+    circuit.destroy
+    assert_nil @cable.reload.from_id
+  end
+
+  test "should associate with demand incomer" do
+    motor_tag = create(:tag, discipline: @resource_discipline)
+    motor = create(:electrical_motor, tag: motor_tag)
+    demand = create(:electrical_demand, demandable: motor)
+    @cable.to = demand
+    @cable.save
+    assert_not_nil demand.incomer
+    assert_equal demand, demand.incomer.to
+  end
+
+  test "destroy demand should nullify cable to" do
+    motor_tag = create(:tag, discipline: @resource_discipline)
+    motor = create(:electrical_motor, tag: motor_tag)
+    demand = create(:electrical_demand, demandable: motor)
+    @cable.to = demand
+    @cable.save
+    demand.destroy
+    assert_nil @cable.reload.to_id
+  end
+
+  test "cable from should be unique" do
+    swbd = create(:electrical_switchboard, discipline: @resource_discipline)
+    circuit = swbd.circuits.create(serial: 1)
+    cable1 = create(:cable, from: circuit,
+      tag: create(:tag, :unique_tag, prefix: "EC", discipline: @resource_discipline),
+      cable_type: @cable_type)
+    cable2 = build(:cable, from: cable1.from,
+      tag: create(:tag, :unique_tag, prefix: "EC", discipline: @resource_discipline),
+      cable_type: @cable_type)
+    refute cable2.valid?
+    assert_no_difference 'Cable.count' do
+      cable2.save
+    end
+    assert_includes cable2.errors[:from_id], I18n.t('errors.messages.taken')
+  end
+
+  test "cable to should be unique" do
+    motor_tag = create(:tag, discipline: @resource_discipline)
+    motor = create(:electrical_motor, tag: motor_tag)
+    demand = create(:electrical_demand, demandable: motor)
+    cable1 = create(:cable,
+      tag: create(:tag, :unique_tag, prefix: "EC", discipline: @resource_discipline),
+      cable_type: @cable_type)
+    cable1.to = demand
+    cable1.save
+    cable2 = build(:cable,
+      tag: create(:tag, :unique_tag, prefix: "EC", discipline: @resource_discipline),
+      cable_type: @cable_type,
+      to: demand)
+    refute cable2.valid?
+    assert_no_difference 'Cable.count' do
+      cable2.save
+    end
+    assert_includes cable2.errors[:to_id], I18n.t('errors.messages.taken')
+  end
+
+  test "navigation between cables" do
+    # Create test cables with different serials but same prefix
+    tag1 = create(:tag, prefix: 'EC', serial: 201,  discipline: @resource_discipline)
+    cable1 = create(:cable, tag: tag1, cable_type: @cable_type)
+
+    tag2 = create(:tag, prefix: 'EC', serial: 202,  discipline: @resource_discipline)
+    cable2 = create(:cable, tag: tag2, cable_type: @cable_type)
+
+    tag3 = create(:tag, prefix: 'EC', serial: 203,  discipline: @resource_discipline)
+    cable3 = create(:cable, tag: tag3, cable_type: @cable_type)
+
+    # Navigation is done via Navigator, the same way TagablesController#show
+    # builds it (scope joined through tag/discipline/project, ordered via
+    # navigator_order_sql) - Cable itself has no next/prev methods.
+    assert_equal cable2, navigator_for(cable1).next
+    assert_equal cable3, navigator_for(cable2).next
+    assert_nil navigator_for(cable3).next  # No next past the last cable
+
+    # setup_common_test_data's @resource2 (tag "AA0002") sorts immediately
+    # before cable1 (tag "EC0201") within the same discipline.
+    assert_equal @resource2, navigator_for(cable1).prev
+    assert_equal cable1, navigator_for(cable2).prev
+    assert_equal cable2, navigator_for(cable3).prev
+  end
+
+  test "navigation with different loop_ids" do
+    # First cable with prefix 'EC'
+    tag1 = create(:tag, prefix: 'EC', serial: 201,  discipline: @resource_discipline)
+    cable1 = create(:cable, tag: tag1, cable_type: @cable_type)
+
+    # Second cable with different prefix will have a different loop_id
+    # due to the first letter of the prefix being different
+    tag2 = create(:tag, prefix: 'FC', serial: 202, discipline: @resource_discipline)
+    cable2 = create(:cable, tag: tag2, cable_type: @cable_type)
+
+    # Test navigation respects loop_id ordering
+    assert_equal cable2, navigator_for(cable1).next
+    assert_nil navigator_for(cable2).next  # No next past the last cable
+
+    # setup_common_test_data's @resource2 (tag "AA0002") sorts immediately
+    # before cable1 (tag "EC0201") within the same discipline.
+    assert_equal @resource2, navigator_for(cable1).prev
+    assert_equal cable1, navigator_for(cable2).prev
+  end
+
+  test "navigation with missing tag" do
+    cable = Cable.new
+    assert_equal cable, cable.next  # Returns self when there's no tag
+    assert_equal cable, cable.prev  # Returns self when there's no tag
+  end
+
+  private
+
+    # Mirrors TagablesController#set_tagable's @scope, the actual scope the
+    # app navigates a tagable resource's show page with.
+    def navigator_for(cable)
+      Navigator.new(scope: Cable.joins(tag: { discipline: :project }), record: cable)
+    end
+end

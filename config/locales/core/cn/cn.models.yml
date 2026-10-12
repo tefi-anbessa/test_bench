@@ -20,6 +20,9 @@ cn:
       tag:
         one: "Tag"
         other: "Tags"
+      cable:
+        one: "Cable"
+        other: "Cables"
       doc_type:
         one: "Document Type"
         other: "Document Types"
@@ -102,6 +105,15 @@ cn:
         notes:            "Notes"
         full_tag:         "Tag"
         tagable_type:     "Tag Type"
+      cable:
+        from: "From"
+        to: "To"
+        route_length: "Route Length"
+        vertical_allowance: "Vertical Allowance"
+        termination_allowance: "Termination Allowance"
+        start_mark: "Installed Start Mark"
+        end_mark: "Installed End Mark"
+        notes: "Notes"
       role:
         name:             "Name"
         resource_type:    "Resource"
@@ -116,6 +128,11 @@ cn:
         location:         "Physical location of design element"
         stage:            "Construction stage or phase (0 to 10)"
         notes:            "Record useful tag related design information here"
+      cable:
+        route_length: "Route length of cable run, plan view"
+        vertical_allowance: "Cable length to be added to plan view, e.g. for riser to switchboard. If routes are 3D modeled, set to zero."
+        termination_allowance: "Allowance for cable routing inside boxes"
+        notes: "Record useful cable related design references here"
       discipline:
         name:             "Descriptive name, maximum 50 characters"
         code:             "Unique code, maximum 5 characters"
@@ -152,6 +169,10 @@ cn:
           change_tagable: "Cannot change tagable association once set"
           invalid: "Invalid type %{tagable_type}"
           discipline_mismatch: "does not belong to this discipline"
+        cable:
+          attributes:
+            cable_type:
+              discipline_mismatch: "does not belong to this discipline"
       attributes:
         code:
           invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"

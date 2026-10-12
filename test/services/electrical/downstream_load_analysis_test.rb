@@ -4,7 +4,7 @@ module Electrical
   class DownstreamLoadAnalysisTest < ActiveSupport::TestCase
     # Connects a circuit to a demand via a feeder cable, as the real app does.
     def connect(circuit, demand)
-      create(:electrical_cable, from: circuit, to: demand)
+      create(:cable, from: circuit, to: demand)
     end
 
     def leaf_demand(current:, power_factor: 1.0)

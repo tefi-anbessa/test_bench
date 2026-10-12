@@ -1,5 +1,7 @@
 # One designation for each type of tag requiring a data sheet. Name must be the Module::Model full class name.
 tagable:
+  # Core (shared by more than one discipline's module - see Discipline#accepts_tagable_type?)
+  - Cable
   # Instrument
   - Instrument::PressureTransmitter
   - Instrument::PressureGauge
@@ -7,7 +9,6 @@ tagable:
   # Electrical
   - Electrical::Heater
   - Electrical::Switchboard
-  - Electrical::Cable
   - Electrical::Motor
   - Electrical::SocketCct
   - Electrical::LightCct
