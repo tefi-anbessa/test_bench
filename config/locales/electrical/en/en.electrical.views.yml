@@ -1,19 +1,5 @@
 en:
   electrical:
-    cable_types:
-      index:
-        title:            "Cable Types"
-        header:           "Catalog of Cable Types for %{scope_text}"
-      edit:
-        title:            "Edit Cable Type"
-        header:           "Edit Cable Type %{label}"
-      new:
-        title:            "New Cable Type"
-        header:           "New Cable Type in %{scope_text}"
-      show:
-        title:            "Cable Type"
-        header:           "Cable Type %{label}"
-
     switchboards:
       index:
         title:            "Switchboards"

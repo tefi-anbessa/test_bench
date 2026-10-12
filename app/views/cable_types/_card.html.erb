@@ -1,6 +1,6 @@
 <!-- Expects object and context (optional) to be passed in -->
 <% cable_type = object %>
-<% context ||= t("activerecord.models.electrical/cable_type.one") %>
+<% context ||= t("activerecord.models.cable_type.one") %>
 <div id="<%= dom_id cable_type %>" style="<%= card_styles(@swatch)%>">
 
   <%= render 'components/collapsible',
@@ -19,76 +19,79 @@
           <span class="d-none d-md-inline"><%= text %></span>
         <% end %>
       </div>
-      
+
       <div class="row mb-1">
         <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:code) %></div>
         <div class="col-8"><%= cable_type.code.presence || '-' %></div>
       </div>
-      
+
+      <div class="row mb-1">
+        <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:primary_role) %></div>
+        <div class="col-8"><%= cable_type.primary_role.present? ? CableType.human_enum_name(:primary_roles, cable_type.primary_role) : '-' %></div>
+      </div>
+
       <div class="row mb-1">
         <div class="row mb-1">
           <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:conductor_material) %></div>
           <div class="col-8"><%= cable_type.conductor_material.presence || '-' %></div>
         </div>
-        
+
         <div class="row mb-1">
           <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:groups) %></div>
           <div class="col-8"><%= cable_type.groups.presence || '-' %></div>
         </div>
-        
+
         <div class="row mb-1">
           <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:construction) %></div>
           <div class="col-8"><%= cable_type.construction.presence || '-' %></div>
         </div>
-        
+
         <div class="row mb-1">
           <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:csa) %></div>
-          <div class="col-8"><%= number_to_human(cable_type.csa, 
+          <div class="col-8"><%= number_to_human(cable_type.csa,
                         units: { unit: "mm²" }, precision: 2) || '-' %></div>
         </div>
-        
-        <div class="row mb-1">
-          <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:neutral_csa) %></div>
-          <div class="col-8"><%= number_to_human(cable_type.neutral_csa, 
-                        units: { unit: "mm²" }, precision: 2) || '-' %></div>
-        </div>
-        
-        <div class="row mb-1">
-          <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:earth_csa) %></div>
-          <div class="col-8"><%= number_to_human(cable_type.earth_csa, 
-                        units: { unit: "mm²" }, precision: 2) || '-' %></div>
-        </div>
-        
+
         <div class="row mb-1">
           <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:insulation) %></div>
           <div class="col-8"><%= cable_type.insulation.presence || '-' %></div>
         </div>
-        
+
         <div class="row mb-1">
           <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:bedding) %></div>
           <div class="col-8"><%= cable_type.bedding.presence || '-' %></div>
         </div>
-        
+
         <div class="row mb-1">
           <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:armour) %></div>
           <div class="col-8"><%= cable_type.armour.presence || '-' %></div>
         </div>
-        
+
         <div class="row mb-1">
           <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:sheath) %></div>
           <div class="col-8"><%= cable_type.sheath.presence || '-' %></div>
         </div>
-        
+
         <div class="row mb-1">
           <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:temperature_rating) %></div>
           <div class="col-8"><%= cable_type.temperature_rating.presence || '-' %></div>
         </div>
-        
+
+        <div class="row mb-1">
+          <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:voltage_rating) %></div>
+          <div class="col-8"><%= cable_type.voltage_rating.presence || '-' %></div>
+        </div>
+
+        <div class="row mb-1">
+          <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:fire_protection) %></div>
+          <div class="col-8"><%= cable_type.fire_protection.present? ? CableType.human_enum_name(:fire_protections, cable_type.fire_protection) : '-' %></div>
+        </div>
+
         <div class="row mb-1">
           <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:overall_od) %></div>
           <div class="col-8"><%= cable_type.overall_od.present? ? "#{cable_type.overall_od} mm" : '-' %></div>
         </div>
-        
+
         <div class="row mb-1">
           <div class="col-4 text-muted"><%= cable_type.class.human_attribute_name(:bedding_od) %></div>
           <div class="col-8"><%= cable_type.bedding_od.present? ? "#{cable_type.bedding_od} mm" : '-' %></div>

@@ -1,10 +1,9 @@
-module Electrical
-  class CableTypePolicy < DisciplineResourcePolicy
-    def cable_type
-      record
-    end
-    
-    private
+class CableTypePolicy < DisciplineResourcePolicy
+  def cable_type
+    record
+  end
+
+  private
 
     # Override discipline policy to use catalog_required_role, for catalog model types.
     def user_is_accredited?(record)
@@ -17,14 +16,12 @@ module Electrical
         end
         return false
       end
-      rr = record.discipline.catalog_required_role.present? ? 
-          record.discipline.catalog_required_role.to_s : 
-          record.class.catalog_required_role.to_s
+      rr = record.discipline.catalog_required_role.presence ||
+          record.discipline.default_catalog_required_role
       return false unless rr
-      user.has_role?(rr, record.discipline) || 
-        user.is_admin? || 
+      user.has_role?(rr, record.discipline) ||
+        user.is_admin? ||
         user.is_app_owner? ||
         user.is_project_admin_of?(record.project)
     end
-  end
 end

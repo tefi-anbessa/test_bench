@@ -22,7 +22,7 @@ class Project < ApplicationRecord
   has_many :tags, through: :disciplines
   has_many :documents, through: :disciplines
   has_many :doc_types, through: :disciplines
-  has_many :electrical_cable_types, through: :disciplines
+  has_many :cable_types, through: :disciplines
   has_many :change_management_requests, class_name: "ChangeManagement::Request", dependent: :destroy
 
   # === Scopes ===
@@ -68,7 +68,7 @@ class Project < ApplicationRecord
     end
 
     def self.ransackable_associations(auth_object = nil)
-      [ :disciplines, :tags, :electrical_cable_types ]
+      [ :disciplines, :tags, :cable_types ]
     end
 
     # Only the disciplines explicitly chosen on the new-project form - see

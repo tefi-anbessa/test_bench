@@ -49,6 +49,19 @@ km:
     show:
       title:            "%{code}"
       header:           "គម្រោង: %{code}"
+  cable_types:
+    index:
+      title:            "Cable Types"
+      header:           "Cable Types"
+    edit:
+      title:            "Edit Cable Type"
+      header:           "Edit Cable Type %{label}"
+    new:
+      title:            "New Cable Type"
+      header:           "New Cable Type"
+    show:
+      title:            "Cable Type"
+      header:           "Cable Type %{label}"
   cables:
     index:
       title:            "Cables"

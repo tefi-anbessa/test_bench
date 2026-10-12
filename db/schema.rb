@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_11_120000) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_12_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,6 +42,35 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_11_120000) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "cable_types", force: :cascade do |t|
+    t.bigint "discipline_id", null: false
+    t.string "code"
+    t.string "spec_summary"
+    t.text "notes", default: "", null: false
+    t.integer "primary_role", null: false
+    t.integer "construction"
+    t.integer "groups"
+    t.integer "conductor_material"
+    t.float "csa"
+    t.integer "insulation"
+    t.integer "bedding"
+    t.integer "armour"
+    t.integer "sheath"
+    t.decimal "bedding_od", precision: 3, scale: 1
+    t.decimal "overall_od", precision: 3, scale: 1
+    t.integer "temperature_rating"
+    t.integer "voltage_rating"
+    t.integer "fire_protection"
+    t.jsonb "environment_protection"
+    t.jsonb "applicable_standard"
+    t.string "detail_type"
+    t.bigint "detail_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["detail_type", "detail_id"], name: "index_cable_types_on_detail_type_and_detail_id"
+    t.index ["discipline_id"], name: "index_cable_types_on_discipline_id"
+  end
+
   create_table "cables", force: :cascade do |t|
     t.decimal "route_length", precision: 4, scale: 1
     t.decimal "vertical_allowance", precision: 3, scale: 1
@@ -55,9 +84,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_11_120000) do
     t.string "to_type"
     t.integer "to_id"
     t.text "notes"
-    t.string "cable_type_type", null: false
     t.integer "cable_type_id", null: false
-    t.index ["cable_type_type", "cable_type_id"], name: "index_cables_on_cable_type"
+    t.index ["cable_type_id"], name: "index_cables_on_cable_type_id"
     t.index ["from_type", "from_id"], name: "index_cables_on_from"
     t.index ["to_type", "to_id"], name: "index_cables_on_to"
   end
@@ -121,27 +149,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_11_120000) do
     t.index ["serial", "discipline_id", "doc_type_id"], name: "index_documents_on_serial_and_discipline_id_and_doc_type_id", unique: true
   end
 
-  create_table "electrical_cable_types", force: :cascade do |t|
-    t.integer "conductor_material"
-    t.float "csa"
+  create_table "electrical_cable_type_details", force: :cascade do |t|
     t.float "neutral_csa"
     t.float "earth_csa"
-    t.integer "insulation"
-    t.integer "bedding"
-    t.integer "armour"
-    t.integer "sheath"
-    t.decimal "bedding_od", precision: 3, scale: 1
-    t.decimal "overall_od", precision: 3, scale: 1
-    t.integer "temperature_rating"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "code"
-    t.text "notes", default: "", null: false
-    t.integer "groups"
-    t.integer "voltage_rating"
-    t.integer "construction"
-    t.bigint "discipline_id", null: false
-    t.index ["discipline_id"], name: "index_electrical_cable_types_on_discipline_id"
   end
 
   create_table "electrical_circuits", force: :cascade do |t|
@@ -264,6 +276,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_11_120000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id", "importer_key"], name: "index_import_mapping_presets_on_user_and_importer_key", unique: true
+  end
+
+  create_table "instrument_cable_type_details", force: :cascade do |t|
+    t.boolean "individual_screen", default: false, null: false
+    t.boolean "overall_screen", default: false, null: false
+    t.float "twist_pitch"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "instrument_pressure_gauges", force: :cascade do |t|
@@ -452,12 +472,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_11_120000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "cable_types", "disciplines"
+  add_foreign_key "cables", "cable_types"
   add_foreign_key "disciplines", "projects"
   add_foreign_key "disciplines", "swatches"
   add_foreign_key "doc_types", "disciplines"
   add_foreign_key "documents", "disciplines"
   add_foreign_key "documents", "doc_types"
-  add_foreign_key "electrical_cable_types", "disciplines"
   add_foreign_key "electrical_circuits", "electrical_switchboards"
   add_foreign_key "import_batches", "disciplines"
   add_foreign_key "import_batches", "projects"

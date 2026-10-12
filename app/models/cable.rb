@@ -24,11 +24,10 @@ class Cable < ApplicationRecord
   attr_accessor :creation_discipline
 
   # === Associations ===
-  # Polymorphic: CableType is deliberately not unified into one core model -
-  # different disciplines need genuinely different attributes for their own
-  # cable types, not just different values - so each discipline-backing
-  # module defines its own concrete class (e.g. Electrical::CableType).
-  belongs_to :cable_type, polymorphic: true
+  # Plain, not polymorphic - CableType is a single shared class (its own
+  # discipline-specific remainder is handled internally via delegated_type,
+  # see app/models/cable_type.rb), so Cable only ever points at one class.
+  belongs_to :cable_type
 
   belongs_to :from, polymorphic: true, optional: true
   belongs_to :to, polymorphic: true, optional: true
@@ -50,9 +49,11 @@ class Cable < ApplicationRecord
   # Whether this (now core) tagable type is available for a given
   # discipline - the hook Discipline#accepts_tagable_type? falls back to
   # for a type with no module of its own to match against. Available
-  # wherever the discipline's own module defines a CableType class.
+  # wherever the discipline's own module defines a CableType detail class
+  # (CableType itself is shared - what varies per discipline is only
+  # whether it has a delegated detail subtype to attach).
   def self.discipline_available?(discipline)
-    discipline.cable_type_class.present?
+    discipline.cable_type_detail_class.present?
   end
 
   # === Public methods ===

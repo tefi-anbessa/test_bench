@@ -112,7 +112,7 @@ module Electrical
       end
 
       def set_swatch
-        @swatch = Electrical::Demand.swatch
+        @swatch = @discipline&.swatch || Electrical::Demand.swatch || Swatch.find_by(name: 'app_theme')
       end
 
       # For a "summation" basis demand on a distributable (e.g. a switchboard),

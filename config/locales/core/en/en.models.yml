@@ -23,6 +23,9 @@ en:
       cable:
         one: "Cable"
         other: "Cables"
+      cable_type:
+        one: "Cable Type"
+        other: "Cable Types"
       doc_type:
         one: "Document Type"
         other: "Document Types"
@@ -142,6 +145,47 @@ en:
         start_mark: "Installed Start Mark"
         end_mark: "Installed End Mark"
         notes: "Notes"
+      cable_type:
+        id: "ID"
+        code: "Code"
+        spec_summary: "Spec Summary"
+        primary_role: "Primary Role"
+        primary_roles:
+          power_distribution: "Power Distribution"
+          electrical_control: "Electrical Control"
+          analog_signal: "Analog Signal"
+          digital_signal: "Digital Signal"
+          communication: "Communication"
+          thermocouple: "Thermocouple"
+          other: "Other"
+        conductor_material: "Conductor Material"
+        groups: "Conductor Groups"
+        construction: "Construction"
+        constructions:
+          core: "Core"
+          pair: "Pair"
+          triple: "Triple"
+        csa: "CSA"
+        csa_units: "mm²"
+        insulation: "Insulation"
+        bedding: "Bedding"
+        armour: "Armour"
+        sheath: "Sheath"
+        bedding_od: "Bedding OD"
+        overall_od: "Overall OD"
+        od_units: "mm"
+        temperature_rating: "Temperature Rating"
+        voltage_rating: "Voltage Rating"
+        fire_protection: "Fire Protection"
+        fire_protections:
+          standard: "Standard"
+          flame_retardant: "Flame Retardant"
+          low_smoke_zero_halogen: "Low Smoke Zero Halogen (LSZH)"
+          fire_resistant: "Fire Resistant"
+        environment_protection: "Environment Protection"
+        applicable_standard: "Applicable Standard(s)"
+        detail: "Discipline-specific Details"
+        notes: "Notes"
       role:
         name:             "Name"
         resource_type:    "Resource"
@@ -163,6 +207,9 @@ en:
         vertical_allowance: "Cable length to be added to plan view, e.g. for riser to switchboard. If routes are 3D modeled, set to zero."
         termination_allowance: "Allowance for cable routing inside boxes"
         notes: "Record useful cable related design references here"
+      cable_type:
+        environment_protection: "Include applicable standards required for environment protection such as water penetration, oil resistance, termite resistance, UV resistance, etc."
+        applicable_standard: "Reference any applicable cable standards (e.g. Cat6, IEC 60332)"
       role:
         resource_type:    "Leave blank for global role"
       discipline:
@@ -204,6 +251,10 @@ en:
         cable:
           attributes:
             cable_type:
+              discipline_mismatch: "does not belong to this discipline"
+        cable_type:
+          attributes:
+            detail:
               discipline_mismatch: "does not belong to this discipline"
       attributes:
         code:

@@ -30,6 +30,9 @@
       <div class="row search-form">
         <%= search_form_for @q, url: discipline_tagables_path(@discipline) do |f| %>
           <%= hidden_field_tag :tagable_type, @type %>
+          <%= f.search_field :cable_type_code_cont,
+                class: "search_field",
+                placeholder: t('activerecord.attributes.cable_type.code') %>
           <%= f.search_field :notes_cont,
                 class: "search_field",
                 placeholder: t('activerecord.attributes.cable.notes') %>

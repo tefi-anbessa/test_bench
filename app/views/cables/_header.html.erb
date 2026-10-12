@@ -7,9 +7,7 @@
   <th scope="col"><%= t('activerecord.attributes.cable.notes') %></th>
   <th scope="col"><%= t("activerecord.attributes.cable.from") %></th>
   <th scope="col"><%= t("activerecord.attributes.cable.to") %></th>
-  <!-- Polymorphic, like from/to above - not ransack-sortable across an
-       unfixed class, so no sort_link, same treatment as those two. -->
-  <th scope="col"><%= t('.cable_type') %></th>
+  <th scope="col"><%= sort_link(@q, :cable_type_code, t('.cable_type')) %></th>
   <th scope="col"><%= sort_link(@q, :route_length, t("activerecord.attributes.cable.route_length")) %><br>(m)</th>
   <th scope="col" width="150px"><%= t('table.links')%></th>
 </tr>

@@ -254,14 +254,14 @@ class DisciplineTest < ActiveSupport::TestCase
     Object.send(:remove_const, :StubSharedTagable) if Object.const_defined?(:StubSharedTagable)
   end
 
-  test "cable_type_class resolves this discipline's own module-backed CableType" do
+  test "cable_type_detail_class resolves this discipline's own module-backed CableTypeDetail" do
     electrical = @project.disciplines.find_by(code: "E")
-    assert_equal Electrical::CableType, electrical.cable_type_class
+    assert_equal Electrical::CableTypeDetail, electrical.cable_type_detail_class
   end
 
-  test "cable_type_class is nil for a discipline with no backing module" do
+  test "cable_type_detail_class is nil for a discipline with no backing module" do
     process = @project.disciplines.find_by(code: "P")
-    assert_nil process.cable_type_class
+    assert_nil process.cable_type_detail_class
   end
 
   test "accepts_tagable_type? is false for a discipline with no backing module" do

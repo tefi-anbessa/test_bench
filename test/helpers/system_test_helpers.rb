@@ -100,7 +100,7 @@ module SystemTestHelpers
 
     # Document -> documents
     # Electrical::Heater -> electrical.heaters
-    # Electrical::CableType -> electrical.cable_types
+    # Electrical::Heater -> electrical.heaters
     def view_key
       resource_class.model_name.name.gsub("::", ".").underscore.pluralize
     end
@@ -334,6 +334,11 @@ module SystemTestHelpers
       # via their tag - so mirror that here instead of polymorphic_path(record).
       href = if record.class.respond_to?(:name) && Tag.safe_tagable_types.include?(record.class.name)
         tag_tagable_path(record.tag)
+      elsif record.is_a?(CableTypeDetailable)
+        # CableType's delegated detail classes have no route of their own
+        # either - same reasoning as tagables above, mirror through the
+        # owning cable_type instead.
+        cable_type_path(record.cable_type)
       else
         polymorphic_path(record)
       end

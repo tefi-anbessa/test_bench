@@ -94,8 +94,10 @@ class FactoriesTest < ActiveSupport::TestCase
   end
   
   test 'project with tags is valid' do
-    project = create(:project, code: 'CC')
-    discipline = create(:discipline, label: 'M')
+    # discipline_codes: [] - the default would auto-create every standard
+    # discipline (including code "M"), colliding with the custom one below.
+    project = create(:project, code: 'CC', discipline_codes: [])
+    discipline = create(:discipline, project: project, code: 'M')
     create_list(:tag, 3, project: project, discipline: discipline)
     assert project.valid?, "Project with tags is not valid: #{project.errors.full_messages.join(', ')}"
   end

@@ -1,0 +1,14 @@
+<!-- Expects f (the nested detail fields_for form builder) and csa_select -->
+<div class="row">
+    <%= f.select :neutral_csa,
+          csa_select.map { |csa| ["#{csa} mm²", csa] },
+          { include_blank: t("form.none"),
+          wrapper: { class: 'mb-1' } } %>
+</div>
+
+<div class="row">
+  <%= f.select :earth_csa,
+        csa_select.map { |csa| ["#{csa} mm²", csa] },
+        { include_blank: t("form.none"),
+        wrapper: { class: 'mb-1' } } %>
+</div>

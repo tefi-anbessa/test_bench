@@ -4,9 +4,9 @@ km:
       electrical/heater:
         one: "Heater"
         other: "Heaters"
-      electrical/cable_type:
-        one: "Cable Type"
-        other: "Cable Types"
+      electrical/cable_type_detail:
+        one: "Power Cable Details"
+        other: "Power Cable Details"
       electrical/demand:
         one: "Load"
         other: "Loads"
@@ -106,32 +106,11 @@ km:
           fiberglass: Fiberglass Insulation
         notes: "Notes"
 
-      electrical/cable_type:
-        id: ID
-        code: "Code"
-        conductor_material: Conductor Material
-        groups: Conductor Groups
-        construction: Construction
-        constructions:
-          core: "Core"
-          pair: "Pair"
-          triple: "Triple"
-        csa: CSA
-        csa_units: mm²
+      electrical/cable_type_detail:
         neutral: Neutral
         neutral_csa: Neutral CSA
         earth: Earth
         earth_csa: Earth CSA
-        insulation: Insulation
-        bedding: Bedding
-        armour: Armour
-        sheath: Sheath
-        bedding_od: Bedding OD
-        overall_od: Overall OD
-        od_units: mm
-        temperature_rating: Temperature Rating
-        voltage_rating: Voltage Rating
-        notes: "Notes"
 
       electrical/demand:
         incomer: "Incomer"
@@ -237,8 +216,6 @@ km:
         notes: "Notes"
 
     help:
-      electrical/cable_type:
-        notes: "Record useful cable type design information here"
       electrical/demand:
         basis: "Defines which load parameters are given and which are calculated"
         basis_notes: "Record references for derivation of the load parameters"

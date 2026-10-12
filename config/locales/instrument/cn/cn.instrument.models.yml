@@ -7,8 +7,15 @@ cn:
       instrument/pressure_gauge:
         one: "Pressure gauge"
         other: "Pressure gauges"
+      instrument/cable_type_detail:
+        one: "Instrument Cable Details"
+        other: "Instrument Cable Details"
       pressure_gauge: Pressure gauge
     attributes:
+      instrument/cable_type_detail:
+        individual_screen: "Individual screen"
+        overall_screen: "Overall screen"
+        twist_pitch: "Twist pitch"
       instrument/pressure_transmitter:
         measurement_type: "Measurement type"
         measurement_types:

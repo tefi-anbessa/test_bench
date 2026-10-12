@@ -16,7 +16,7 @@ class Discipline < ApplicationRecord
   belongs_to :swatch, optional: true
   has_many :tags, dependent: :destroy
   has_many :documents, dependent: :destroy
-  has_many :electrical_cable_types, class_name: 'Electrical::CableType', dependent: :destroy
+  has_many :cable_types, dependent: :destroy
   has_many :doc_types, dependent: :destroy
 
   # === Scopes ===
@@ -143,17 +143,15 @@ class Discipline < ApplicationRecord
     end
   end
 
-  # This discipline's own concrete CableType class (e.g. Electrical::
-  # CableType), or nil if its module has none. CableType is deliberately
-  # not unified into one core model - different disciplines need
-  # genuinely different attributes, not just different values - so each
-  # discipline-backing module defines its own. This is the one place that
-  # resolves which concrete class a given discipline uses, so Cable (bare,
-  # polymorphic cable_type) and anything else that needs it don't each
-  # re-derive the convention separately.
-  def cable_type_class
+  # This discipline's own CableType detail class (e.g.
+  # Electrical::CableTypeDetail), or nil if its module has none. CableType
+  # itself is one shared class (see app/models/cable_type.rb); what varies
+  # per discipline is only which delegated detail subtype it can attach.
+  # The one place that resolves this, so Cable.discipline_available? and
+  # anything else that needs it don't each re-derive the convention.
+  def cable_type_detail_class
     return nil if module_name.nil?
-    "#{module_name}::CableType".safe_constantize
+    "#{module_name}::CableTypeDetail".safe_constantize
   end
 
   # Falls back to the registry's default for this code, not to the backing

@@ -37,9 +37,7 @@ Rails.application.routes.draw do
       namespace :instrument do
       end
 
-      namespace :electrical do
-        resources :cable_types, only: [:index]
-      end
+      resources :cable_types, only: [:index]
 
       # Project nested routes
       resources :disciplines, shallow: true do
@@ -69,8 +67,8 @@ Rails.application.routes.draw do
           # Issue nested resources
       end # document nested routes
       resources :doc_types
+      resources :cable_types
       namespace :electrical do
-        resources :cable_types
         resources :circuits, :demands, only: [:index]
       end
     end # discipline nested routes

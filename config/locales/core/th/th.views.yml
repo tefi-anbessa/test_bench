@@ -85,6 +85,19 @@ th:
     edit:
       title:            "Edit Discipline"
       header:           "Edit Discipline: %{label}"
+  cable_types:
+    index:
+      title:            "ประเภทสายไฟ"
+      header:           "ประเภทสายไฟ"
+    edit:
+      title:            "Edit Cable Type"
+      header:           "Edit Cable Type %{label}"
+    new:
+      title:            "New Cable Type"
+      header:           "New Cable Type"
+    show:
+      title:            "Cable Type"
+      header:           "Cable Type %{label}"
   cables:
     index:
       title:            "Cables"

@@ -17,50 +17,53 @@
 
         <!-- Header Text (Left - 8 columns) -->
         <div class="col-8">
-          <% scope_text = @discipline.present? ? 
-          [@discipline.project.code, @discipline.class.model_name.human, @discipline.label].join(' ') : 
-          @project.present? ? 
-          [@project.class.model_name.human, @project.label].join(': ') : 
+          <% scope_text = @discipline.present? ?
+          [@discipline.project.code, @discipline.class.model_name.human, @discipline.label].join(' ') :
+          @project.present? ?
+          [@project.class.model_name.human, @project.label].join(': ') :
           t('index.all', models: t('activerecord.models.project.other')) %>
           <h5><%= t('.header', scope_text: scope_text) %></h5>
         </div>
 
         <!-- New Button (Right) -->
         <div class="col-2 text-end">
-          <% if @discipline.present? && policy(@discipline.electrical_cable_types.build()).new? %>
-            <%= nav_button(action: :new, path: new_discipline_electrical_cable_type_path(@discipline),
-                record: Electrical::CableType.new) %>
+          <% if @discipline.present? && policy(@discipline.cable_types.build()).new? %>
+            <%= nav_button(action: :new, path: new_discipline_cable_type_path(@discipline),
+                record: CableType.new) %>
           <% end %>
         </div>
       </div> <!-- row -->
     </div> <!-- end of card header -->
-    
+
     <div class="card-body">
       <div class="row search-form">
         <%= search_form_for @q, url: @discipline.present? ?
-              discipline_electrical_cable_types_path(@discipline) :
-              project_electrical_cable_types_path(@project) do |f| %>
+              discipline_cable_types_path(@discipline) :
+              project_cable_types_path(@project) do |f| %>
+          <%= f.search_field :primary_role_eq,
+                class: "search_field",
+                placeholder: t('activerecord.attributes.cable_type.primary_role') %>
           <%= f.search_field :conductor_material_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical/cable_type.conductor_material') %>
+                placeholder: t('activerecord.attributes.cable_type.conductor_material') %>
           <%= f.search_field :groups_eq,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical/cable_type.groups') %>
+                placeholder: t('activerecord.attributes.cable_type.groups') %>
           <%= f.search_field :construction_eq,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical/cable_type.construction') %>
+                placeholder: t('activerecord.attributes.cable_type.construction') %>
           <%= f.search_field :csa_eq,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical/cable_type.csa') %>
+                placeholder: t('activerecord.attributes.cable_type.csa') %>
           <%= f.search_field :insulation_cont,
                 class: "search_field",
-                placeholder: t('activerecord.attributes.electrical/cable_type.insulation') %>
+                placeholder: t('activerecord.attributes.cable_type.insulation') %>
           <%= f.button nil, class: "btn btn-outline-primary btn-sm mb-1", action: :submit do %>
             <%== bs_icon('search') %>
           <% end %>
         <% end %>
       </div>
-      
+
       <!-- Cable Types -->
       <table id='cable_types' class='table table-responsive table-condensed table-striped table-hoverable table-bordered' >
         <%= render "header" %>

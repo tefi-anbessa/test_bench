@@ -107,6 +107,19 @@ en:
     edit:
       title:            "Edit Discipline"
       header:           "Edit Discipline %{label} in %{scope_text}"
+  cable_types:
+    index:
+      title:            "Cable Types"
+      header:           "Catalog of Cable Types for %{scope_text}"
+    edit:
+      title:            "Edit Cable Type"
+      header:           "Edit Cable Type %{label}"
+    new:
+      title:            "New Cable Type"
+      header:           "New Cable Type in %{scope_text}"
+    show:
+      title:            "Cable Type"
+      header:           "Cable Type %{label}"
   cables:
     index:
       title:            "Cables"

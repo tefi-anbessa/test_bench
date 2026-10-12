@@ -28,7 +28,7 @@ The application caters for various user scenarios, including:
 
 This project has used more than one AI coding tool over time. AI can assist with repetitive tasks, can advise on coding conventions, can research the internet for use cases, and can assist with debugging. AI should not be relied upon when making fundamental design and architecture decisions.
 
-The operational rules an AI must actually follow live in a file or files specific to the tool. This is a fast changing technology so the guidance should be checked before using. [CLAUDE.md](../CLAUDE.md), not here - this section is background and day-to-day practice, not a second copy of the rules themselves.
+The operational rules an AI must actually follow live in a file or files specific to the tool. This is a fast changing technology so the guidance should be checked before using.
 
 ### Developers Using AI
 

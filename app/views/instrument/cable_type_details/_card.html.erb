@@ -1,0 +1,28 @@
+<!-- Expects object and context (optional) to be passed in -->
+<% detail = object %>
+<% context ||= t("activerecord.models.instrument/cable_type_detail.one") %>
+<div id="<%= dom_id detail %>" style="<%= card_styles(@swatch)%>">
+
+  <%= render 'components/collapsible',
+    id: "#{id}_#{detail.id}_details",
+    title: context,
+    expanded: false,
+    header_class: "py-1" do %>
+
+    <div class="container-fluid">
+      <!-- No route of its own - link through the owning cable_type instead -->
+      <div class="row mb-1">
+        <% text = t("actions.jump_to", model: detail.cable_type.model_name.human) %>
+        <%= link_to detail.cable_type,
+          class: "btn btn-sm btn-outline-secondary me-2",
+          title: text do %>
+          <%== bs_icon('box-arrow-in-up-left') %>
+          <span class="d-none d-md-inline"><%= text %></span>
+        <% end %>
+      </div>
+      <%= show_attribute(detail, :individual_screen, type: :boolean) %>
+      <%= show_attribute(detail, :overall_screen, type: :boolean) %>
+      <%= show_attribute(detail, :twist_pitch, type: :float, units: "mm") %>
+    </div>
+  <% end %>
+</div>

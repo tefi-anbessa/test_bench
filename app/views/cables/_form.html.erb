@@ -45,10 +45,7 @@
               <div class="card-body p-2" style="<%= form_styles(swatch) %>">
                 <%= render 'shared/error_messages', object: f.object %>
 
-                <!-- Cable Type - the class is fixed by the discipline (a discipline has
-                     exactly one concrete CableType class), the field only chooses which
-                     row of it. -->
-                <%= f.hidden_field :cable_type_type, value: discipline.cable_type_class&.name %>
+                <!-- Cable Type -->
                 <% collection = options_for_select(cable_type_options, selected: cable.cable_type_id) %>
                 <%= form_field(f, :cable_type_id, type: :select, collection: collection, required: true) %>
 

@@ -1,0 +1,16 @@
+<!-- Expects f (the nested detail fields_for form builder) -->
+<div class="row">
+  <%= f.check_box :individual_screen, wrapper: { class: 'mb-1' } %>
+</div>
+
+<div class="row">
+  <%= f.check_box :overall_screen, wrapper: { class: 'mb-1' } %>
+</div>
+
+<div class="row">
+  <%= f.number_field :twist_pitch,
+    step: '0.1',
+    min: 0,
+    wrapper: { class: 'mb-1' },
+    append: 'mm' %>
+</div>

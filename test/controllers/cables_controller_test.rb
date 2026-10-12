@@ -30,7 +30,6 @@ class CablesControllerTest < ActionController::TestCase
   def create_params
     {
       cable_type_id: @cable_type.id,
-      cable_type_type: "Electrical::CableType",
       route_length: 10.0,
       vertical_allowance: 5.0,
       termination_allowance: 5.0,

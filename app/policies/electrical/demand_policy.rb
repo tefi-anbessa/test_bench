@@ -110,7 +110,7 @@ module Electrical
           Rails.logger.error("Electrical discipline not found for project #{project&.code}")
         end
 
-        required_role = electrical_discipline&.required_role.presence || Electrical::CableType.required_role
+        required_role = electrical_discipline&.required_role.presence || electrical_discipline&.default_required_role
         user.has_role?(required_role, electrical_discipline) ||
           user.is_admin? ||
           user.is_app_owner? ||
