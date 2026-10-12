@@ -329,20 +329,22 @@ module SystemTestHelpers
       assert_selector "##{component_id}", visible: :all
       find("##{header_id}").click
       assert_selector "##{component_id}.show", visible: :all
-      # Card shall include a link to the associated resource.
-      # Tagables have no route of their own - the card's nav_link reaches them
-      # via their tag - so mirror that here instead of polymorphic_path(record).
-      href = if record.class.respond_to?(:name) && Tag.safe_tagable_types.include?(record.class.name)
-        tag_tagable_path(record.tag)
-      elsif record.is_a?(CableTypeDetailable)
-        # CableType's delegated detail classes have no route of their own
-        # either - same reasoning as tagables above, mirror through the
-        # owning cable_type instead.
-        cable_type_path(record.cable_type)
-      else
-        polymorphic_path(record)
+      # Card shall include a link to the associated resource - except
+      # CableType's own delegated detail classes, which have no route of
+      # their own and only ever appear on their owning cable_type's own
+      # show page, so a "jump to" link there would always point back at
+      # the page already being viewed.
+      unless record.is_a?(CableTypeDetailable)
+        # Tagables have no route of their own either - the card's nav_link
+        # reaches them via their tag - so mirror that here instead of
+        # polymorphic_path(record).
+        href = if record.class.respond_to?(:name) && Tag.safe_tagable_types.include?(record.class.name)
+          tag_tagable_path(record.tag)
+        else
+          polymorphic_path(record)
+        end
+        assert_link href: href
       end
-      assert_link href: href
     end
 
     def children_collapsible_assertions(parent, association)

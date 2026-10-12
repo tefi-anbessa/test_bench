@@ -248,9 +248,12 @@ class TagablesController < ApplicationController
     end
 
     def set_swatch
+      # A bare/core-shared tagable type (e.g. Cable) has no module of its
+      # own, so no module-default swatch either - skip straight past that
+      # fallback tier for one instead of raising.
       @swatch = @discipline.present? && @discipline.swatch ||
-                @resource_class.swatch ||
-                @project.present && @project.swatch ||
+                (@resource_class.swatch if @resource_class.respond_to?(:swatch)) ||
+                @project.present? && @project.swatch ||
                 Swatch.find_by(name: 'app_theme')
     end
 

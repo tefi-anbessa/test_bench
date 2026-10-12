@@ -10,16 +10,6 @@
     header_class: "py-1" do %>
 
     <div class="container-fluid">
-      <!-- No route of its own - link through the owning cable_type instead -->
-      <div class="row mb-1">
-        <% text = t("actions.jump_to", model: detail.cable_type.model_name.human) %>
-        <%= link_to detail.cable_type,
-          class: "btn btn-sm btn-outline-secondary me-2",
-          title: text do %>
-          <%== bs_icon('box-arrow-in-up-left') %>
-          <span class="d-none d-md-inline"><%= text %></span>
-        <% end %>
-      </div>
       <%= show_attribute(detail, :neutral_csa, type: :float, units: "mm²") %>
       <%= show_attribute(detail, :earth_csa, type: :float, units: "mm²") %>
     </div>

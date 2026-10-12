@@ -2,14 +2,13 @@
   <% unless current_project %>
     <td scope = "col"><%= row.project.code %></td>
   <% end %>
-  <td><%= row.id %></td>
+  <td><%= row.code %></td>
   <td><%= row.primary_role.present? ? CableType.human_enum_name(:primary_roles, row.primary_role) : '-' %></td>
   <td>
     <span title="<%= row.notes %>">
       <%= truncate(strip_tags(row.notes.to_s), length: 20) %>
     </span>
   </td>
-  <td><%= row.code %></td>
   <td><%= row.cables.size %></td>
   <td>
     <% perms = @permissions&.[](row.discipline_id) || permissions_for(row) %>
