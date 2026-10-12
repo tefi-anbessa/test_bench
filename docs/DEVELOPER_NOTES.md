@@ -370,7 +370,6 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Build a bookkeeping module to record financial transactions.
 - [ ] Build a process piping module similar to the electrical module, using pipes and fittings to model a process piping network.
 - [ ] Build an asset management module to track assets and link from design to maintenance.
-- [ ] Build a maintenance management module.
 - [ ] Add hazardous area functionality.
 - [ ] Risk Management.
 - [ ] Functional Safety.
@@ -412,7 +411,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Fix the page size js controller. Fixed pagy usage in preference.
 - [x] Write thorough tests for the tag parser and builder.
 - [x] Cable types routing should be nested under projects.
-- [ ] Cable types controller should be revised to suit nesting and protect against current project setting.
+- [x] Cable types controller should be revised to suit nesting and protect against current project setting.
 - [x] Expand tagable and scaffold generator tests to include all types and options.
 - [ ] Improve system test template for scaffold generator.
 - [x] Scaffold generator check for valid module names is not working correctly.
@@ -531,13 +530,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 
 ## Potential Features
 
-- [ ] Implement copy from other project. Global admins' ability to view (`show?`/`index?`) any
-      resource on any project, bypassing the normal current-project ring fence, exists informally to
-      support this unbuilt workflow - it was never given a clear spec of its own. In hindsight, this
-      should be a separate `#copy` action with its own Pundit policy method, not a standing exception
-      on `show?`/`index?`. When this is actually built, reassess whether the general cross-project
-      view-anywhere admin prerogative is still needed at all, since `#copy` would need its own
-      authorization regardless (see `app/policies/discipline_resource_policy.rb#show?`).
+- [ ] Implement copy from other project. 
 - [ ] Data revision management
 - [ ] Customize devise users:
   - [ ] Add policy for users
@@ -564,8 +557,8 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Nest routes for project related resource under projects to improve security around assignment to other than the current project.
 - [x] Nest tag, document resources under disciplines.
 - [ ] Change locales to regionalised codes.
-- [ ] Couple disciplines and modules tightly for tagables.
-- [ ] Move cable and cable type back to core, as they are shared by electrical and instrument disciplines, also communications.
+- [x] Couple disciplines and modules tightly for tagables.
+- [x] Move cable and cable type back to core, as they are shared by electrical and instrument disciplines, also communications.
 - [ ] Move document issues to change module, generalise so it can be used for other entities (polymorphic). HOLD.
 - [ ] Plan for database scaling as data grows.
 
@@ -578,3 +571,4 @@ It is possible to create multiple tags referencing the same tagable element, des
 
 Resource: In rails, resource usually refers to an abstracted model. In this application, resource more often refers to an abstracted tagable model. Context should clarify which meaning is intended.
 Record: Resource instance. Used very specifically internally in Pundit.
+Register: This is Claude's name for the discipline list in Constants.
