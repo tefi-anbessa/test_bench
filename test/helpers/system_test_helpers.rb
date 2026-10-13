@@ -185,7 +185,14 @@ module SystemTestHelpers
       when :delete
         path ||= polymorphic_path(record)
         assert_selector "form[action='#{path}']"
-        assert_selector "form[action='#{path}'] button", text: icon_only ? "" : label
+        # text: "" is a substring match - it's satisfied by any text at all,
+        # not just an empty one, so it can never actually catch an icon-only
+        # button that unexpectedly gained a visible label. exact_text does.
+        if icon_only
+          assert_selector "form[action='#{path}'] button", exact_text: ""
+        else
+          assert_selector "form[action='#{path}'] button", text: label
+        end
 
         # Rails method override
         assert_selector "form[action='#{path}'] input[name='_method'][value='delete']",
@@ -193,7 +200,7 @@ module SystemTestHelpers
       else
         path ||= polymorphic_path(record)
         if icon_only
-          assert_link "", href: path
+          assert_selector "a[href='#{path}']", exact_text: ""
         else
           assert_link label, href: path
         end
