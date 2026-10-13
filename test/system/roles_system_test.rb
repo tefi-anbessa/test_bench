@@ -1,29 +1,16 @@
 require "application_system_test_case"
+require "helpers/test_setup_helpers"
 
 class RolesTest < ApplicationSystemTestCase
   include Devise::Test::IntegrationHelpers
-    
+  include TestSetupHelpers
+
   # Use JavaScript driver for tests that need it
   driven_by :selenium, using: :headless_chrome, screen_size: [1400, 1400]
   
   setup do
-    # Create a project first to avoid reference issues
-    @project = create(:project, code: 'AA', title: 'Test Project')
-    
-    # Create admin user with admin role using factory
-    @admin = create(:user, :admin)
-    
-    # Create project manager user with project_manager role on the project
-    @project_manager = create(:user)
-    @project_manager.grant(:project_manager, @project)
-    
-    # Create team member user with team_member role on the project
-    @team_member = create(:user)
-    @team_member.grant(:team_member, @project)
-    
-    # Create regular user with no role on the project
-    @regular_user = create(:user)
-    
+    setup_projects_and_users
+
     # Ensure routes are loaded
     Rails.application.reload_routes_unless_loaded
   end
@@ -67,7 +54,7 @@ class RolesTest < ApplicationSystemTestCase
     # Select the user and role
     select @regular_user.name, from: 'role_user_id'
     role_display_name = I18n.t("rolify.names.#{role_name}", default: role_name.to_s.humanize)
-    select role_display_name, from: 'role_name'
+    select role_display_name, from: 'role_name', match: :first
     
     # Submit the form and verify role assignment
     assert_difference('@regular_user.roles.count', 1) do
@@ -91,14 +78,15 @@ class RolesTest < ApplicationSystemTestCase
     
     # Clear any existing roles to avoid interference
     @team_member.roles.destroy_all
-    
+    @discipline = @project.disciplines.first
+
     # Get the translated role name from the locale file
-    role_name = :electrical_designer
+    role_name = :designer
     translated_role = I18n.t("rolify.names.#{role_name}")
-    
-    # Assign a role to a user
-    @team_member.add_role(role_name)
-    assert @team_member.has_role?(role_name), "Role should be assigned before test"
+
+    # Assign a discipline-scoped role to a user
+    @team_member.add_role(role_name, @discipline)
+    assert @team_member.has_role?(role_name, @discipline), "Role should be assigned before test"
     
     visit roles_path
     
@@ -136,24 +124,26 @@ class RolesTest < ApplicationSystemTestCase
     end
     
     # Check for success message
-    assert_text I18n.t('rolify.flash.revoked', role_type: I18n.t('rolify.role_types.global')), wait: 0.5
-    
+    assert_text I18n.t('rolify.flash.revoked', role_type: I18n.t('rolify.role_types.resource_instance')), wait: 0.5
+
     # Verify the role was revoked
     @team_member.reload
-    refute @team_member.has_role?(:electrical_designer), "Expected global role to be revoked"
-    
+    refute @team_member.has_role?(:designer, @discipline), "Expected discipline-scoped role to be revoked"
+
     sign_out @admin
   end
-  
-  test "cannot assign duplicate global roles" do
+
+  test "cannot assign duplicate discipline-scoped roles" do
+    @discipline = @project.disciplines.first
     # First assign the role
-    @team_member.grant(:electrical_designer)
+    @team_member.grant(:designer, @discipline)
     sign_in @admin
-    visit roles_path
-    
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit edit_discipline_path(@discipline)
+
     # Try to assign the same role again
     select @team_member.name, from: 'role_user_id'
-    select I18n.t('rolify.names.electrical_designer'), from: 'role_name'
+    select I18n.t('rolify.names.designer'), from: 'role_name'
     
     # Submit the form - Rolify will silently ignore the duplicate
     assert_no_difference('@team_member.roles.count') do
