@@ -1,0 +1,16 @@
+# frozen_string_literal: true
+require 'test_helper'
+require 'helpers/test_setup_helpers'
+require 'helpers/discipline_resource_policy_test'
+class CableTypePolicyTest < ActiveSupport::TestCase
+  include TestSetupHelpers
+  include DisciplineResourcePolicyTest
+  # Setup test data
+  setup do
+    setup_projects_and_users
+    setup_disciplines(name: "Electrical", required_role: :designer)
+    @discipline.update(catalog_required_role: :custodian)
+    setup_discipline_resources
+    setup_accredited_users(:custodian)
+  end
+end
