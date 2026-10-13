@@ -90,15 +90,25 @@ module RolesHelper
       
       resources_to_check.each do |res_type, roles|
         next if roles.blank?
-        
+
         # Get the actual resource class or instance to check permissions
         resource_for_policy = if resource.present? && resource.is_a?(ActiveRecord::Base)
                                 resource
                               else
                                 res_type.to_s.safe_constantize
                               end
-        
-        allowed_roles = roles.select do |r|
+
+        # roles is now {resource_instance: [...], resource_wide: [...]} (see
+        # config/constants/role.yml). A known instance can only end up with a
+        # resource_instance role; with no instance yet chosen, offer both -
+        # Role's own validation decides which actually apply once submitted.
+        candidate_names = if resource.present? && resource.is_a?(ActiveRecord::Base)
+                            Array(roles[:resource_instance])
+                          else
+                            (Array(roles[:resource_instance]) + Array(roles[:resource_wide])).uniq
+                          end
+
+        allowed_roles = candidate_names.select do |r|
           role = Role.new(name: r, resource: resource_for_policy)
           RolePolicy.new(user_context(user, resource_for_policy), role).create?
         end

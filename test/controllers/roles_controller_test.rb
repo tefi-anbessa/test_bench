@@ -219,17 +219,23 @@ class RolesControllerTest < ActionController::TestCase
     sign_out @admin
   end
 
-  test "admin can create resource wide role" do
+  test "admin cannot create resource wide role" do
+    # No role is resource_wide-eligible (see config/constants/role.yml) -
+    # this is the regression test confirming that block actually holds
+    # end-to-end through the controller.
     sign_in @admin
-    post :create, params: { role: { user_id: @regular_user.id,
-                                    name: "team_member",
-                                    resource_type: "Project",
-                                    resource_id: "",
-                                    role_return_path: roles_path} }
-    # For resource-wide roles, check with the class as the resource
-    assert @regular_user.has_role?(:team_member, Project)
-    assert_equal flash_message('resource_wide', :grant), flash[:success]
-    assert_redirected_to roles_url
+    assert_no_difference '@regular_user.roles.count' do
+      post :create, params: { role: { user_id: @regular_user.id,
+                                      name: "team_member",
+                                      resource_type: "Project",
+                                      resource_id: "",
+                                      role_return_path: roles_path} }
+    end
+    refute @regular_user.has_role?(:team_member, Project)
+    assert_equal I18n.t("rolify.flash.name_invalid",
+      name: I18n.t("rolify.names.team_member"),
+      resource: I18n.t("activerecord.models.project.one")), flash.now[:alert]
+    assert_response :unprocessable_content
     sign_out @admin
   end
 
@@ -328,21 +334,6 @@ class RolesControllerTest < ActionController::TestCase
     sign_out @accredited_user
   end
 
-  test "accredited user cannot revoke resource-wide role" do
-    sign_in @accredited_user
-    # Create the role we want to destroy: resource wide roles are not used in the app at this time
-    @accredited_user.grant(:team_member, Project)
-    role = @accredited_user.roles.find_by(name: 'team_member', resource_type: 'Project', resource_id: nil)
-    delete :destroy, params: { 
-      user_id: @accredited_user.id, 
-      id: role.id,
-      role_return_path: roles_path 
-    }
-    assert @accredited_user.has_role?(:team_member, Project)
-    assert_forbidden
-    sign_out @accredited_user
-  end
-
   test "accredited user cannot revoke project instance role" do
     sign_in @accredited_user
     delete :destroy, params: { user_id: @team_member.id, 
@@ -401,20 +392,6 @@ class RolesControllerTest < ActionController::TestCase
                 role_return_path: roles_path }
     refute @accredited_user.has_role?(:document_controller)
     assert_equal flash_message('global', :revoke), flash[:success]
-    assert_redirected_to roles_url
-    sign_out @admin
-  end
-
-  test "admin can revoke resource-wide role" do
-    sign_in @admin
-    # Create the role we want to destroy: resource wide roles are not used in the app at this time
-    @accredited_user.grant(:team_member, Project)
-    role = @accredited_user.roles.find_by(name: 'team_member', resource_type: 'Project', resource_id: nil)
-    delete :destroy, params: { user_id: @accredited_user.id, 
-                  id: role.id,
-                  role_return_path: roles_path }
-    refute @accredited_user.has_role?(:team_member, Project)
-    assert_equal flash_message('resource_wide', :revoke), flash[:success]
     assert_redirected_to roles_url
     sign_out @admin
   end

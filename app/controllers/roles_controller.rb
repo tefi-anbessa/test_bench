@@ -36,14 +36,6 @@ class RolesController < ApplicationController
     end
   end
 
-  # GET /roles/new
-  def new
-    @role = Role.new # Required as vehicle for error_messages
-    authorize @role
-    setup_role_assignment
-debugger
-  end
-
   # POST /roles or /roles.json
   def create
     authorize @role
@@ -131,16 +123,13 @@ debugger
             return trap_forbidden
           end
           @role.resource = @resource
-          @role_type = :resource_instance
         else
           @role.resource_type = @resource_type
           @role.resource_id = nil
-          @role_type = :resource_wide
         end
       else
         @role.resource_type = nil
         @role.resource_id = nil
-        @role_type = :global
       end
 
       # Check user_id
@@ -208,20 +197,11 @@ debugger
       # No checks on the resource type: even if it is non-existent, the role can still be destroyed if it exists.
       if @resource_type.present?
           @resource_type_class = @resource_type.safe_constantize
-          if @resource_id.present?
-            @resource = @resource_type_class.find(@resource_id)
-            @role_type = :resource_instance
-          else
-            @role_type = :resource_wide
-          end
-      else
-        @role_type = :global
+          @resource = @resource_type_class.find(@resource_id) if @resource_id.present?
       end
-
     end
 
     # Returns the type name for ensuring the correct format of the .grant method
-    # [HOLD I also have a @role_type instance variable which I think is simpler]
     def role_type
       if @resource_id.present?
         'resource_instance'

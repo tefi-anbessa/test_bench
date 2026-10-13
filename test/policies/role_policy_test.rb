@@ -16,9 +16,11 @@ class RolePolicyTest < ActiveSupport::TestCase
     @global_role = Role.find_by(name: 'admin', resource: nil)
     @project_role = Role.find_by(name: 'team_member', resource: @project)
     @discipline_role = Role.find_by(name: 'designer', resource: @discipline)
-    # For test purposes, create a resource wide role.
-    @team_member.grant(:team_member, Project)
-    @resource_wide_role = Role.find_by(name: 'team_member', resource_type: 'Project', resource_id: nil)
+    # For test purposes, build an unsaved resource wide role - resource_wide
+    # roles are blocked by Role's own validation (see config/constants/role.yml),
+    # so this only exercises RolePolicy#destroy?'s handling of a resource-wide-shaped
+    # record, not an actually persisted one.
+    @resource_wide_role = Role.new(name: 'team_member', resource_type: 'Project')
     # Create role instances for testing (even though they won't be valid)
     @new_role = Role.new(name: 'team_member', resource: @project)
     @new_resource_wide_role = Role.new(name: 'team_member', resource_type: 'Project')

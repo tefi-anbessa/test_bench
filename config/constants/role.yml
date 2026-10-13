@@ -5,17 +5,24 @@ roles:
     - admin
     - app_owner
     - document_controller
-  # Resource-specific role definitions
+  # Resource-specific role definitions, split by whether the role applies to
+  # one specific resource instance or to every instance of the resource type
+  # (resource_type set, resource_id nil). No role is resource_wide-eligible
+  # at present - see DEVELOPER_NOTES.md Technical Debt.
   resources:
     project:
-      - project_manager
-      - project_admin
-      - team_member
-      - document_controller
+      resource_instance:
+        - project_manager
+        - project_admin
+        - team_member
+        - document_controller
+      resource_wide: []
     discipline:
-      - designer
-      - checker
-      - approver
-      - controller
-      - custodian
-      - document_controller
+      resource_instance:
+        - designer
+        - checker
+        - approver
+        - controller
+        - custodian
+        - document_controller
+      resource_wide: []

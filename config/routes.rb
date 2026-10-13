@@ -140,7 +140,7 @@ Rails.application.routes.draw do
       resources :roles, only: [:destroy]
     end
     # Role creation is attached to the index view for global and resource wide roles.
-    resources :roles, only: [:index, :new, :create]
+    resources :roles, only: [:index, :create]
   end
 
 # Defines the root path route ("/")

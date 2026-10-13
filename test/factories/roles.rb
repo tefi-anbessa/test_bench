@@ -10,9 +10,10 @@ FactoryBot.define do
       end
     end
     
-    # Generate traits for resource-specific roles
+    # Generate traits for resource-specific roles (resource_instance only -
+    # every trait below builds a real resource, never resource_wide)
     Constants.roles.resources.to_h.each do |resource_type, roles|
-      roles.each do |role_name|
+      (roles[:resource_instance] || []).each do |role_name|
         trait "#{resource_type}_#{role_name}".to_sym do
           name { role_name }
           resource_type { resource_type.to_s.classify }
@@ -29,7 +30,7 @@ FactoryBot.define do
       end
       
       # Set default role based on resource type
-      name { Constants.roles.resources[resource_type.underscore.to_sym]&.first || 'team_member' }
+      name { Constants.roles.resources[resource_type.underscore.to_sym]&.[](:resource_instance)&.first || 'team_member' }
       
       after(:build) do |role, evaluator|
         if evaluator.resource
@@ -62,9 +63,9 @@ FactoryBot.define do
         end
       end
       
-      # Create traits for resource-specific roles
+      # Create traits for resource-specific roles (resource_instance only)
       Constants.roles.resources.to_h.each do |resource_type, roles|
-        roles.each do |role_name|
+        (roles[:resource_instance] || []).each do |role_name|
           trait "#{resource_type}_#{role_name}".to_sym do
             name { role_name }
             resource_type { resource_type.to_s.classify }
