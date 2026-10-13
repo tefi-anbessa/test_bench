@@ -5,9 +5,6 @@ class RolesTest < ApplicationSystemTestCase
   include Devise::Test::IntegrationHelpers
   include TestSetupHelpers
 
-  # Use JavaScript driver for tests that need it
-  driven_by :selenium, using: :headless_chrome, screen_size: [1400, 1400]
-  
   setup do
     setup_projects_and_users
 
@@ -22,6 +19,32 @@ class RolesTest < ApplicationSystemTestCase
     # Check for the specific error message in the rendered page
     assert_text 'not allowed to RolePolicy#index?'
     sign_out @regular_user
+  end
+
+  test "choosing a resource type repopulates the role name dropdown" do
+    # app_owner is a pure global role - not valid for any resource type
+    # (see config/constants/role.yml) - so it's a clean signal for whether
+    # the dropdown has actually narrowed to the chosen resource type. Only
+    # an app_owner may grant it (see RolesController's admin/app_owner guard).
+    sign_in @app_owner
+    visit roles_path
+
+    role_select = find('select#role_name')
+    select I18n.t('activerecord.models.project.one'), from: 'role_resource_type'
+
+    within role_select do
+      assert_selector "option", text: I18n.t('rolify.names.team_member'), exact_text: true
+      refute_selector "option", text: I18n.t('rolify.names.app_owner'), exact_text: true
+    end
+
+    select I18n.t('rolify.role_types.global'), from: 'role_resource_type'
+
+    within role_select do
+      assert_selector "option", text: I18n.t('rolify.names.app_owner'), exact_text: true
+      refute_selector "option", text: I18n.t('rolify.names.team_member'), exact_text: true
+    end
+
+    sign_out @app_owner
   end
 
   test "admin can view roles index" do
@@ -210,51 +233,56 @@ class RolesTest < ApplicationSystemTestCase
     assert @project_manager.has_role?(:project_manager, @project), 
            "Project manager should have project_manager role on project"
     
-    # Sign in as project manager and navigate to project roles
+    # Sign in as project manager and navigate to project roles. RolePolicy
+    # delegates to ProjectPolicy#grant_role?, which only allows a project
+    # manager to grant roles on their *current* project - without this,
+    # current_project is nil and the grant is silently forbidden.
     sign_in @project_manager
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit edit_project_path(@project)
-    
+
     # Wait for the page to load and the form to be ready
     assert_selector 'h5', text: I18n.t('roles.new.title')
-    
+
     # Wait for the form to be interactive and find it by action
     form = find('form[action*="/roles"]', wait: 10)
-    
+
+    selected_user = nil
+
     # Wait for the user select to be present and enabled
     within form do
       # Wait for the user select to be present and enabled
       assert_selector 'select[name="role[user_id]"]:not([disabled])', wait: 10
-      
+
       # Wait for the dropdown to be populated with users (excluding the current user)
       user_options = all('select[name="role[user_id]"] option').map { |opt| [opt.text, opt.value] }
-      
+
       # Check if the regular user is in the dropdown
       assert_includes user_options.map(&:first), @regular_user.name, "Regular user should be in the dropdown"
-      
+
       # Select the user
       select @regular_user.name, from: 'role[user_id]'
-      
+
       # Wait for the role select to be present and enabled
       assert_selector 'select[name="role[name]"]:not([disabled])', wait: 10
-      
+
       # Select the role
       select I18n.t('rolify.names.team_member'), from: 'role[name]', match: :first
       user_id = find('select[name="role[user_id]"]').value
       selected_user = User.find(user_id)
-
-sleep 0.1  # Allow async role assignment to complete
-
-      # Submit the form and verify role assignment
-      assert_difference('selected_user.roles.count', 1) do
-        click_button I18n.t('actions.grant')
-        # Wait for the AJAX request to complete
-        assert_no_selector '.spinner-border', wait: 10
-      end
     end
-    
-    # Check the flash message
-    assert_text I18n.t('rolify.flash.granted', role_type: I18n.t('rolify.role_types.resource_instance')), wait: 10
-    
+
+    # Submit the form and verify role assignment. Wait for the flash message
+    # (the actual confirmation the request finished) rather than an
+    # absence-of-spinner check, which can pass before the server has
+    # persisted anything - that mismatch was the cause of the flaky failure
+    # here. The flash renders outside the form, so this has to happen
+    # outside the `within form` scope above to be found at all.
+    assert_difference('selected_user.roles.count', 1) do
+      within(form) { click_button I18n.t('actions.grant') }
+      assert_text I18n.t('rolify.flash.granted', role_type: I18n.t('rolify.role_types.resource_instance')), wait: 10
+    end
+
     sign_out @project_manager
   end
 end

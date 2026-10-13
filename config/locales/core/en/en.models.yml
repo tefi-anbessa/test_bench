@@ -210,8 +210,6 @@ en:
       cable_type:
         environment_protection: "Include applicable standards required for environment protection such as water penetration, oil resistance, termite resistance, UV resistance, etc."
         applicable_standard: "Reference any applicable cable standards (e.g. Cat6, IEC 60332)"
-      role:
-        resource_type:    "Leave blank for global role"
       discipline:
         name:             "Descriptive name, maximum 50 characters"
         code:             "Unique code, maximum 5 characters"

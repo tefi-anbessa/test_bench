@@ -9,6 +9,7 @@ module RolesHelper
     # Initialize required instance variables with defaults
     @resource_types = []
     @grouped_role_names = {}
+    @role_names_by_resource_type = {}
     @users = User.none  # Default to empty relation
     @roles = Role.none  # Default to empty relation
     @grouped_roles = []
@@ -26,6 +27,7 @@ module RolesHelper
         [r.constantize.model_name.human, r] rescue [r, r]
       end
       @grouped_role_names = role_names(resource, current_user)
+      @role_names_by_resource_type = role_names_by_resource_type(resource, current_user)
       @users = User.all
 
       # Set scope 
@@ -59,69 +61,98 @@ module RolesHelper
   # Only roles the user is allowed to grant are included (prevents attempted privilege escalation).
   def role_names(resource = nil, user = nil)
     grouped_roles = {}
-    user ||= current_user
-    
-    if resource.nil?
-      # Add global roles with group label (only allowed ones)
-      if Constants.roles.global_roles.any?
-        allowed_global_roles = Constants.roles.global_roles.select do |r|
-          role = Role.new(name: r, resource: nil)
-          RolePolicy.new(user_context(user, nil), role).create?
-        end
-        
-        if allowed_global_roles.any?
-          grouped_roles[I18n.t('rolify.groups.global')] = 
-            allowed_global_roles.map { |r| [I18n.t("rolify.names.#{r}", default: r.to_s.humanize), r] }
-        end
-      end
+
+    allowed_global_role_options(resource, user).then do |options|
+      grouped_roles[I18n.t('rolify.groups.global')] = options if options.any?
     end
-    
-    # Add resource-specific roles with group labels (filtered for resource and user permissions)
-    if Constants.roles.respond_to?(:resources) && Constants.roles.resources.any?
-      # Filter to relevant resources only (single resource if specified, otherwise all)
-      resources_to_check = if resource.present?
-                             current_type = resource.is_a?(ActiveRecord::Base) ? 
-                               resource.class.name.underscore.to_sym : 
-                               resource.to_s.underscore.to_sym
-                             Constants.roles.resources.slice(current_type)
-                           else
-                             Constants.roles.resources
-                           end
-      
-      resources_to_check.each do |res_type, roles|
-        next if roles.blank?
 
-        # Get the actual resource class or instance to check permissions
-        resource_for_policy = if resource.present? && resource.is_a?(ActiveRecord::Base)
-                                resource
-                              else
-                                res_type.to_s.safe_constantize
-                              end
-
-        # roles is now {resource_instance: [...], resource_wide: [...]} (see
-        # config/constants/role.yml). A known instance can only end up with a
-        # resource_instance role; with no instance yet chosen, offer both -
-        # Role's own validation decides which actually apply once submitted.
-        candidate_names = if resource.present? && resource.is_a?(ActiveRecord::Base)
-                            Array(roles[:resource_instance])
-                          else
-                            (Array(roles[:resource_instance]) + Array(roles[:resource_wide])).uniq
-                          end
-
-        allowed_roles = candidate_names.select do |r|
-          role = Role.new(name: r, resource: resource_for_policy)
-          RolePolicy.new(user_context(user, resource_for_policy), role).create?
-        end
-        
-        next if allowed_roles.blank?
-        
-        group_name = I18n.t("rolify.groups.resource") % {resource: res_type.to_s.humanize}
-        grouped_roles[group_name] = allowed_roles.map { |r| [I18n.t("rolify.names.#{r}", default: r.to_s.humanize), r] }
-      end
+    each_allowed_resource_role_options(resource, user) do |res_type, options|
+      grouped_roles[I18n.t("rolify.groups.resource") % {resource: res_type.to_s.humanize}] = options
     end
-    
+
     grouped_roles
   end
+
+  # Same role names as role_names, but keyed by the raw resource_type string
+  # (matching the role[resource_type] select's own option values, e.g.
+  # "Project", with "" for global) instead of a translated group label.
+  # Used to give the resource-type-selector Stimulus controller everything
+  # it needs to repopulate the role[name] select client-side, without a
+  # server round-trip, while still only ever offering roles this user is
+  # actually allowed to grant.
+  def role_names_by_resource_type(resource = nil, user = nil)
+    by_type = {}
+
+    by_type[''] = allowed_global_role_options(resource, user)
+
+    each_allowed_resource_role_options(resource, user) do |res_type, options|
+      by_type[res_type.to_s.classify] = options
+    end
+
+    by_type
+  end
+
+  private
+
+  # [[label, value], ...] for whichever global roles this user may grant.
+  def allowed_global_role_options(resource, user)
+    return [] unless resource.nil? && Constants.roles.global_roles.any?
+
+    user ||= current_user
+    Constants.roles.global_roles.select do |r|
+      role = Role.new(name: r, resource: nil)
+      RolePolicy.new(user_context(user, nil), role).create?
+    end.map { |r| [I18n.t("rolify.names.#{r}", default: r.to_s.humanize), r] }
+  end
+
+  # Yields (res_type, [[label, value], ...]) for each resource type with at
+  # least one role this user may grant - shared by role_names and
+  # role_names_by_resource_type so the permission-filtering logic (and the
+  # resource_instance/resource_wide selection) lives in exactly one place.
+  def each_allowed_resource_role_options(resource, user)
+    return unless Constants.roles.respond_to?(:resources) && Constants.roles.resources.any?
+
+    user ||= current_user
+    resources_to_check = if resource.present?
+                           current_type = resource.is_a?(ActiveRecord::Base) ?
+                             resource.class.name.underscore.to_sym :
+                             resource.to_s.underscore.to_sym
+                           Constants.roles.resources.slice(current_type)
+                         else
+                           Constants.roles.resources
+                         end
+
+    resources_to_check.each do |res_type, roles|
+      next if roles.blank?
+
+      resource_for_policy = if resource.present? && resource.is_a?(ActiveRecord::Base)
+                              resource
+                            else
+                              res_type.to_s.safe_constantize
+                            end
+
+      # roles is {resource_instance: [...], resource_wide: [...]} (see
+      # config/constants/role.yml). A known instance can only end up with a
+      # resource_instance role; with no instance yet chosen, offer both -
+      # Role's own validation decides which actually apply once submitted.
+      candidate_names = if resource.present? && resource.is_a?(ActiveRecord::Base)
+                          Array(roles[:resource_instance])
+                        else
+                          (Array(roles[:resource_instance]) + Array(roles[:resource_wide])).uniq
+                        end
+
+      allowed_roles = candidate_names.select do |r|
+        role = Role.new(name: r, resource: resource_for_policy)
+        RolePolicy.new(user_context(user, resource_for_policy), role).create?
+      end
+
+      next if allowed_roles.blank?
+
+      yield res_type, allowed_roles.map { |r| [I18n.t("rolify.names.#{r}", default: r.to_s.humanize), r] }
+    end
+  end
+
+  public
 
   def prepare_roles_for_display(roles_scope)
     # Process roles into a flat structure with user details
