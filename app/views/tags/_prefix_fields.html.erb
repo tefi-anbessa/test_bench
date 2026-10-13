@@ -14,15 +14,13 @@
         text = [option, t("activerecord.attributes.tag.prefix_parts.#{key.to_s.pluralize}.#{option}", default: value)].join(": ")
         [text, option]
       end %>
-    <%= form.select key, options_for_select(options, selected), 
+    <%= form.select key, options_for_select(options, selected),
         { include_blank: t("form.required"), class: "form-select" } %>
     <% unless conform %>
-            <div class="row mb-3">
-              <div class="form-control-plaintext text-warning">
-                <%= t("prefix_schema.non_conforming", 
-                  schema: t("prefix_schema.types.#{schema['type']}")) %>
-              </div>
-            </div>
+      <div class="alert alert-warning py-1 mb-2">
+        <%= t("prefix_schema.non_conforming",
+          schema: t("prefix_schema.types.#{schema['type']}")) %>
+      </div>
     <% end %>
   <% when 'dim2' %>
     <div class="card mb-2" style="<%= card_styles(@swatch) %>">
@@ -39,20 +37,16 @@
         <%= form_tag_prefix_element(schema, key, selected, label_cols: 3, value_cols: 9, required: false) %>
 
         <!-- Add a field to return the combined prefix. The stiumulus controller will update this field. -->
-        <div class="row mb-3">
-          <%= form.text_field :prefix, readonly: true, tabindex: -1,              
-              data: { tag_prefix_target: "prefix" }, 
-              label_col: "col-sm-3",
-              control_col: "col-sm-9" %>
-          <% unless conform %>
-            <div class="row mb-3">
-              <div class="form-control-plaintext text-warning">
-                <%= t("prefix_schema.non_conforming", 
-                  schema: t("prefix_schema.types.#{schema['type']}")) %>
-              </div>
-            </div>
-          <% end %>
-        </div>
+        <%= form.text_field :prefix, readonly: true, tabindex: -1,
+            data: { tag_prefix_target: "prefix" },
+            label_col: "col-sm-3",
+            control_col: "col-sm-9" %>
+        <% unless conform %>
+          <div class="alert alert-warning py-1 mb-2">
+            <%= t("prefix_schema.non_conforming",
+              schema: t("prefix_schema.types.#{schema['type']}")) %>
+          </div>
+        <% end %>
       </div>
     </div>
   <% when 'isa51' %>
@@ -96,20 +90,16 @@
         <%= form_tag_prefix_element(schema, key, selected, label_cols: 3, value_cols: 9, required: false) %> 
 
         <!-- Add a field to return the combined prefix. The stiumulus controller will update this field. -->
-        <div class="row mb-3">
-          <%= form.text_field :prefix, readonly: true, tabindex: -1,
-              data: { tag_prefix_target: "prefix" },
-              label_col: "col-sm-3",
-              control_col: "col-sm-9" %>
-          <% unless conform %>
-            <div class="row mb-3">
-              <div class="form-control-plaintext text-warning">
-                <%= t("prefix_schema.non_conforming", 
-                  schema: t("prefix_schema.types.#{schema['type']}")) %>
-              </div>
-            </div>
-          <% end %>
-        </div>
+        <%= form.text_field :prefix, readonly: true, tabindex: -1,
+            data: { tag_prefix_target: "prefix" },
+            label_col: "col-sm-3",
+            control_col: "col-sm-9" %>
+        <% unless conform %>
+          <div class="alert alert-warning py-1 mb-2">
+            <%= t("prefix_schema.non_conforming",
+              schema: t("prefix_schema.types.#{schema['type']}")) %>
+          </div>
+        <% end %>
       </div>
     </div>
   <% end %>
