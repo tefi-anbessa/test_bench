@@ -102,7 +102,10 @@ class DisciplineSystemTest < ApplicationSystemTestCase
       assert_text disc.notes if disc.notes.present?
       assert_text disc.required_role if disc.required_role.present?
       assert_text disc.catalog_required_role if disc.catalog_required_role.present?
-      assert_text disc.prefix_schema['name'] # [TODO: Write a test for collapsible on attribute rather than association.]
+      collapsible_attribute_assertions(
+        dom_id: disc.prefix_schema['name'],
+        header_text: [I18n.t('activerecord.attributes.discipline.prefix_schema'), disc.prefix_schema['name']].join(': ')
+      )
       refute_text disc.swatch&.name if disc.swatch.present?
       # Discipline links for tags and documents
       assert_selector "a[href='#{discipline_tags_path(disc)}']",

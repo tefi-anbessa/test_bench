@@ -347,6 +347,21 @@ module SystemTestHelpers
       end
     end
 
+    # Sibling to collapsible_assertions, for a collapsible that wraps a
+    # plain attribute value (e.g. Discipline#prefix_schema) rather than an
+    # association - there's no associated record to derive a DOM id, model
+    # name, or link target from, so the id and header text are passed
+    # directly instead of computed.
+    def collapsible_attribute_assertions(dom_id:, header_text:)
+      header_id = "#{dom_id}_header"
+      assert_text header_text
+      # Should start collapsed
+      refute_selector "##{dom_id}", visible: true
+      assert_selector "##{dom_id}", visible: :all
+      find("##{header_id}").click
+      assert_selector "##{dom_id}.show", visible: :all
+    end
+
     def children_collapsible_assertions(parent, association)
       record = parent.public_send(association)
       component_id = "#{parent.model_name.element}_#{association}_links"

@@ -358,32 +358,32 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Build a scaffold generator for models without links to tags.
 - [x] Enhance electrical model with network load calculations.
 - [x] Add bulk import of data (spreadsheet-based, generic framework + generator - see the Import section below; developed on branch `data-import`).
-- [ ] Add bulk export of data. [Planned as a separate branch, once import has landed.]
-- [ ] Add a license file.
-- [ ] Add a location model as a precursor to the hazardous area and risk assessment functions. Convert tag to allow location as foreign key.
-- [ ] Write a generator to add a field and another to remove a field.
-- [ ] Enhance the existing database models to include history of data.
-- [ ] Build a document control module to manage document storage, issue, history including versions and workflow.
-- [ ] Add polymorphic comments.
-- [ ] Management of Change with workflows.
-- [ ] Build an instrument module.
-- [ ] Build a bookkeeping module to record financial transactions.
-- [ ] Build a process piping module similar to the electrical module, using pipes and fittings to model a process piping network.
-- [ ] Build an asset management module to track assets and link from design to maintenance.
-- [ ] Add hazardous area functionality.
-- [ ] Risk Management.
-- [ ] Functional Safety.
+- [#2] Add bulk export of data. [Planned as a separate branch, once import has landed.]
+- [#3] Add a license file.
+- [#1] Add a location model as a precursor to the hazardous area and risk assessment functions. Convert tag to allow location as foreign key.
+- [#4] Write a generator to add a field and another to remove a field.
+- [#5] Enhance the existing database models to include history of data.
+- [#6] Build a document control module to manage document storage, issue, history including versions and workflow.
+- [#7] Add polymorphic comments.
+- [#8] Management of Change with workflows.
+- [#9] Build an instrument module.
+- [#10] Build a bookkeeping module to record financial transactions.
+- [#11] Build a process piping module similar to the electrical module, using pipes and fittings to model a process piping network.
+- [#12] Build an asset management module to track assets and link from design to maintenance.
+- [#13] Add hazardous area functionality.
+- [#14] Risk Management.
+- [#15] Functional Safety.
 
 ## Architecture Considerations
 
 - [x] Move Electrical to a module or namespace.
 - [x] Nest routes for project related resource under projects to improve security around assignment to other than the current project.
 - [x] Nest tag, document resources under disciplines.
-- [ ] Change locales to regionalised codes.
+- [#17] Change locales to regionalised codes.
 - [x] Couple disciplines and modules tightly for tagables.
 - [x] Move cable and cable type back to core, as they are shared by electrical and instrument disciplines, also communications.
-- [ ] Move document issues to change module, generalise so it can be used for other entities (polymorphic). HOLD.
-- [ ] Plan for database scaling as data grows.
+- [#35] Move document issues to change module, generalise so it can be used for other entities (polymorphic). HOLD.
+- [#20] Plan for database scaling as data grows.
 
 ## Technical Debt
 
@@ -417,7 +417,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Complete cable system tests for from and to after switchboard, demand, and circuit tests are working.
 - [x] Use of button text for new and edit forms is mixed. Standardise on create for new, update for edit.
 - [x] Demand form live update of calculated values not working.
-- [ ] Workflow for cable types with no current project.
+- [x] Workflow for cable types with no current project.
 - [x] Refine the collapsibles component to retain state after refresh operations (e.g. sorting links with ransack). Make a generalised solution, maybe use turbo.
 - [x] Fix the page size js controller. Fixed pagy usage in preference.
 - [x] Write thorough tests for the tag parser and builder.
@@ -428,20 +428,20 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Scaffold generator check for valid module names is not working correctly.
 - [x] Verify if two set of routes are really needed for tagables.
 - [x] Review all use of the method underscore. It is not aware of the OS and uses '/' as the separator, so is not appropriate when generating file paths. Use File.join wherever appropriate.
-- [ ] Fix module generator to use nested parent modules.
-- [ ] Provide a means for admins to edit tags to remove broken links to tagable.
+- [#23] Fix module generator to use nested parent modules.
+- [x] Provide a means for admins to edit tags to remove broken links to tagable.
 - [x] Add tagable controller checks to ensure discipline belongs to current project.
 - [x] Cable factory begets discipline, project, then cable_type, but cable_type begets its own project. Should inherit from cable factory.
 - [x] Add model tests for read only attributes - documents, tags.
 - [x] Review security of all controllers wrt injection attacks.
 - [x] Check that usage of accepts_nested_attributes_for is correct for tagable concern. It isn't - removed.
 - [x] Fix previous and next functionality in tagable navigation, and generalise it for non tagables. All models next and prev should only look inside policy scope. At present can raise forbidden.
-- [ ] RBAC still has anomalous behaviour when resource wide roles are applied. Scope will include all projects, and allow selection of any project as current, but accessing the project without a specific role will result in forbidden. Either block resource wide roles or implement them in policies.
+- [x] RBAC still has anomalous behaviour when resource wide roles are applied. Scope will include all projects, and allow selection of any project as current, but accessing the project without a specific role will result in forbidden. Either block resource wide roles or implement them in policies.
 - [x] Issue policy has been removed. Assess whether it is required or just use document policy, like circuits.
 - [x] Fix update test in tag system test.
 - [x] Fix error in doc_types system test (edit).
 - [-] Fix error in discipline system test where the test seems to be building new disciplines. This appears to be a Capybara issue, Claude couldn't solve it.
-- [ ] Write a test for collapsible on attribute rather than association (specifically discipline prefix schema).
+- [x] Write a test for collapsible on attribute rather than association (specifically discipline prefix schema).
 - [ ] Decide what to do about deletion of data. It is affecting many aspects of the architecture.
 - [x] Complete demand system test after refactor.
 - [ ] Fix tag prefix warning message for non-conforming prefix.
@@ -487,8 +487,8 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Improve implementation of Discipline model, including translation. Consider using constants hash for each project.
 - [-] Refactor colour system to use CSS variables. Deferred - probably not worthwhile.
 - [x] Abstract ingress protection functionality so it can be reused by instrument module.
-- [ ] Change index delete links to use turbo to prevent full page refresh.
-- [ ] Revise index views to use turbo for ransack searches.
+- [-] Change index delete links to use turbo to prevent full page refresh. - Turbo enabled.
+- [-] Revise index views to use turbo for ransack searches.
 - [x] Replace devise views with bespoke views in the style of the rest of the application.
 - [x] Add user profile info.
 - [x] Refactor RBAC system with functional roles limited to project scope, and project admin roles.
@@ -499,7 +499,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Add catalog required roles in disciplines, to allow different role for cable types and doc types, etc.
 - [x] Refactor cable and cable types to be core module available to electrical, instruments, telecoms (any module). Should belong to discipline.
 - [x] Index views should preload permissions and not check every row.
-- [ ] Share enums reused across models.
+- [#21] Share enums reused across models.
 - [x] Scaffold generators should include enum configuration, or build a separate generator.
 - [x] Include a valid value for fields in generators args.
 - [x] Consider whether the same improvement applies to demand.
@@ -510,22 +510,21 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Refactor model translations with count.
 - [x] Revert activerecord translations to convention with / instead of . key for namespaced models.
 - [x] Rename project change module to change management.
-- [ ] Set up ransack to sort on translated attributes where relevant (discipline, enums).
+- [#34] Set up ransack to sort on translated attributes where relevant (discipline, enums).
 - [x] Add a prefix breakdown drop down on tags show view.
-- [ ] Use scopify to simplify setup for role assignment views.
+- [-] Use scopify to simplify setup for role assignment views. - Not worthwhile.
 - [x] Refactor show views in style of documents, include generator templates.
 - [x] Decide on a standard clear presentation for booleans in show views, add it to show view for circuits, and add it to generic tests and generator templates.
-- [ ] Prettification.
-- [ ] Refactor collapsible component to use only stimulus js.
-- [ ] Consider expanding scope for models to include all projects for which user has a role.
-- [ ] Migrate i18n translations to a database system rather than YAML.
-- [ ] Refactor documents to normalize discipline: remove fk and associate discipline through doc_type.
+- [t] Prettification.
+- [t] Refactor collapsible component to use only stimulus js.
+- [t] Migrate i18n translations to a database system rather than YAML.
+- [x] Refactor documents to normalize discipline: remove fk and associate discipline through doc_type.
 - [x] Ditto cables: remove fk and associate discipline through cable_type. At the same time, sort out a decent label and add unique constraint on code.
 - [x] Refactor show views using standardised attributes helper.
 - [x] Refactor form views using standardised form fields helper.
 - [x] Extend views helper for attributes to include decimal numbers with units.
-- [ ] Carefully consider use of nested collapsible cards, as in cables from and to. Prefer a more robust nav_link? Ok for now...
-- [ ] Include a scope for unique fields in generators.
+- [x] Carefully consider use of nested collapsible cards, as in cables from and to. Prefer a more robust nav_link? Ok for now...
+- [t] Include a scope for unique fields in generators.
 - [ ] Add migration and test implementation to generator testing. Very difficult...
 - [ ] Build in git commit before scaffold generator and tagable generator run.
 - [ ] Add polymorphic option to associations in generators.
@@ -533,21 +532,21 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Review all labels and use of labels, in headers, on buttons, and for popover titles. Establish consistency across usages, including across show and index views.
 - [ ] Add searching and sorting for from and to fields in cables index.
 - [ ] Refactor the generator's `:step` option to allow the literal value `"any"` (currently coerced as a decimal, so `"any"` is rejected).
-- [ ] Improve index views to allow horizontal scrolling for wider views.
+- [t] Improve index views to allow horizontal scrolling for wider views.
 - [ ] Clean up responsive views - test all on simulator.
 - [ ] Abstract controllers for project, discipline and tag nested resources.
-- [ ] Improve cable index and search options.
+- [t] Improve cable index and search options.
 
 ## Potential Features
 
-- [ ] Implement copy from other project. Global admins' ability to view (`show?`/`index?`) any
+- [#16] Implement copy from other project. Global admins' ability to view (`show?`/`index?`) any
       resource on any project, bypassing the normal current-project ring fence, exists informally to
       support this unbuilt workflow - it was never given a clear spec of its own. In hindsight, this
       should be a separate `#copy` action with its own Pundit policy method, not a standing exception
       on `show?`/`index?`. When this is actually built, reassess whether the general cross-project
       view-anywhere admin prerogative is still needed at all, since `#copy` would need its own
       authorization regardless (see `app/policies/discipline_resource_policy.rb#show?`).
-- [ ] Data revision management
+- [t] Data revision management
 - [ ] Customize devise users:
   - [ ] Add policy for users
   - [ ] Allow users to self register through devise, edit their own profile and user name, email, password.
@@ -557,14 +556,15 @@ It is possible to create multiple tags referencing the same tagable element, des
   - [x] Customize error trapping for Pundit::NotAuthorizedError
   - [ ] Customize error trapping for unknown format
   - [x] Customize error trapping for forbidden
-- [ ] Improve locale setting, and include language/currency/flag in locale selection. Include regions with fallback to language for most translations.
+- [#17] Improve locale setting, and include language/currency/flag in locale selection. Include regions with fallback to language for most translations.
 - [x] Develop an application colour theme set. Consider discipline colour coding, also need to consider module colour coding.
 - [-] Build an IP object to allow fully flexible reusable IP code generation. Not required.
-- [ ] Allow projects to add role names.
+- [-] Allow projects to add role names. - Bad idea.
 - [x] Add a generator for scaffolding nested models.
-- [ ] Add a "locator" so accessing index view from show view centres the index on the present record.
-- [ ] Add a clear search button for index views. Add hover title for search button.
-- [ ] Add highlight to search results for all index views (refer projects).
+- [#18] Add a "locator" so accessing index view from show view centres the index on the present record.
+- [#31] Add a "clear search" button for index views. 
+- [#33] Add hover title for search button.
+- [#32] Add highlight to search results for all index views (refer projects).
 - [ ] Add bullet gem for performance issues.
 
 ## Notes
