@@ -92,9 +92,9 @@ Projects are the top level resource of this application. Projects are "ring-fenc
 
 #### Disciplines and Modules
 
-Disciplines are used to group engineering objects, and associate them to functional requirements. Each project has disciplines which can be selected from a core set including instrument, electrical, mechanical, etc. Core disciplines have associated modules, which provide the code for discipline specific elements. Projects may add bespoke disciplines with no linked module for functionality.
+Disciplines are used to group engineering objects, and associate them to functional requirements. Each project has disciplines which can be selected from a core set including instrument, electrical, mechanical, etc. Core disciplines have associated modules, which provide the code for discipline specific elements. Projects may add bespoke disciplines, but these will have no linked module for functionality.
 
-Modules keep the app's file structure manageable. 
+Modules keep the app's file structure manageable.
 
 #### Tags
 
