@@ -24,18 +24,18 @@ class DocumentNavigatorTest < ActiveSupport::TestCase
     @other_discipline_e.reload
 
     # Normal ordering (project, discipline, doc_type, serial (serial is model generated))
-    @e1 = create(:document, discipline: @discipline_e, doc_type: @doc_type_e1)
-    @e2 = create(:document, discipline: @discipline_e, doc_type: @doc_type_e1)
-    @e3 = create(:document, discipline: @discipline_e, doc_type: @doc_type_e2)
+    @e1 = create(:document, doc_type: @doc_type_e1)
+    @e2 = create(:document, doc_type: @doc_type_e1)
+    @e3 = create(:document, doc_type: @doc_type_e2)
 
     # Normal ordering (project, discipline, doc_type, serial (serial is model generated))
-    @i1  = create(:document, discipline: @discipline_j, doc_type: @doc_type_i1)
-    @i2  = create(:document, discipline: @discipline_j, doc_type: @doc_type_i2)
+    @i1  = create(:document, doc_type: @doc_type_i1)
+    @i2  = create(:document, doc_type: @doc_type_i2)
 
     # Normal ordering (project, discipline, doc_type, serial (serial is model generated))
-    @other_e1 = create(:document, discipline: @other_discipline_e, doc_type: @other_doc_type_e1)
+    @other_e1 = create(:document, doc_type: @other_doc_type_e1)
 
-    @scope = Document.joins(:doc_type, discipline: :project)
+    @scope = Document.joins(doc_type: { discipline: :project })
   end
 
   def navigator(record)

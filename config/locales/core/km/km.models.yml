@@ -237,6 +237,10 @@ km:
           attributes:
             detail:
               discipline_mismatch: "does not belong to this discipline"
+        document:
+          attributes:
+            doc_type:
+              discipline_mismatch: "does not belong to this discipline"
       attributes:
         code:
           invalid_symbol: "%{model} %{attribute} must be a valid symbol (letters, numbers, underscores, starting with a letter or underscore)"

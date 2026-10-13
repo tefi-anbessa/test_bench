@@ -9,15 +9,15 @@ class DocumentsController < ApplicationController
   # GET /documents
   def index
     authorize Document
-    @orphans = Document.where(discipline_id: nil)
+    @orphans = Document.where(doc_type_id: nil)
 
     @q = @scope.ransack(params[:q])
-    result = @q.result.includes(:doc_type, discipline: :project)
+    result = @q.result.includes(doc_type: { discipline: :project })
     @pagy, @documents = pagy(result)
     # One document per discipline present on this page is enough to compute
     # permissions for every row of that discipline - see
     # ApplicationController#permissions_by_group.
-    probes = @documents.group_by(&:discipline_id).except(nil).transform_values(&:first)
+    probes = @documents.group_by { |d| d.discipline&.id }.except(nil).transform_values(&:first)
     @permissions = permissions_by_group(probes)
   end
 
@@ -29,14 +29,14 @@ class DocumentsController < ApplicationController
 
   # GET /documents/new
   def new
-    @document = @discipline.documents.build()
+    @document = Document.new(creation_discipline: @discipline)
     authorize @document
     setup_form
   end
 
   # POST /documents
   def create
-    @document = @discipline.documents.build(create_params)
+    @document = Document.new(create_params.merge(creation_discipline: @discipline))
     authorize @document
 
     if @document.save
@@ -94,16 +94,16 @@ class DocumentsController < ApplicationController
       if params[:discipline_id].present?
         @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
         raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
-        @scope = policy_scope(Document).joins(:doc_type, discipline: :project).where(discipline: @discipline)
+        @scope = policy_scope(Document).joins(doc_type: { discipline: :project }).where(doc_types: { discipline_id: @discipline.id })
       elsif params[:project_id].present?
         @discipline = nil
         @project = policy_scope(Project).find_by(id: params[:project_id])
         raise ApplicationController::ConflictError, :out_of_scope if @project.nil?
-        @scope = policy_scope(Document).joins(:doc_type, discipline: :project).where(projects: { id: @project.id })
+        @scope = policy_scope(Document).joins(doc_type: { discipline: :project }).where(projects: { id: @project.id })
       else
         @discipline = nil
         @project = nil
-        @scope = policy_scope(Document).joins(:doc_type, discipline: :project)
+        @scope = policy_scope(Document).joins(doc_type: { discipline: :project })
       end
     end
 
@@ -111,7 +111,7 @@ class DocumentsController < ApplicationController
       @document = policy_scope(Document).find_by(id: params[:id])
       raise ApplicationController::ConflictError, :out_of_scope if @document.nil?
       @discipline = @document.discipline
-      @scope = policy_scope(Document).joins(:doc_type, discipline: :project)
+      @scope = policy_scope(Document).joins(doc_type: { discipline: :project })
       @issues = @document.issues
     end
 
@@ -120,7 +120,10 @@ class DocumentsController < ApplicationController
     end
 
     def setup_form
-      @doc_types = policy_scope(DocType)
+      # Scoped to the current discipline - unscoped, this let a document get
+      # created under @discipline's route while actually filing it under a
+      # different doc_type's discipline (see Document#doc_type_matches_discipline).
+      @doc_types = policy_scope(DocType).where(discipline: @discipline)
       set_swatch
     end
 

@@ -18,10 +18,10 @@ class DocumentsControllerTest < ActionController::TestCase
   def setup_model_specific_data
     # Set up an instance of document
     @dt = create(:doc_type, discipline: @discipline)
-    @resource = create(:document, discipline: @discipline, doc_type: @dt)
+    @resource = create(:document, doc_type: @dt)
     # Set up an out of scope instance of document
     @other_dt = create(:doc_type, discipline: @other_discipline)
-    @other_resource = create(:document, discipline: @other_discipline, doc_type: @other_dt)
+    @other_resource = create(:document, doc_type: @other_dt)
   end
 
   private

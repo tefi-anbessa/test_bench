@@ -5,7 +5,7 @@
   <td><%= row.doc_number || '-' %></td>
   <td><%= row.title || '-' %></td>
   <td>
-    <% perms = @permissions&.[](row.discipline_id) || permissions_for(row) %>
+    <% perms = @permissions&.[](row.discipline&.id) || permissions_for(row) %>
     <% if perms[:show] %>
       <%= nav_button(action: :show, record: row, icon_only: true) %>
     <% end %>

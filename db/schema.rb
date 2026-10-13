@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_12_090000) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_13_064915) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -135,7 +135,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_12_090000) do
   end
 
   create_table "documents", force: :cascade do |t|
-    t.bigint "discipline_id"
     t.bigint "doc_type_id"
     t.integer "serial"
     t.string "title", null: false
@@ -143,10 +142,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_12_090000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "doc_number"
-    t.index ["discipline_id"], name: "index_documents_on_discipline_id"
     t.index ["doc_number"], name: "index_documents_on_doc_number", unique: true
     t.index ["doc_type_id"], name: "index_documents_on_doc_type_id"
-    t.index ["serial", "discipline_id", "doc_type_id"], name: "index_documents_on_serial_and_discipline_id_and_doc_type_id", unique: true
+    t.index ["serial", "doc_type_id"], name: "index_documents_on_serial_and_doc_type_id", unique: true
   end
 
   create_table "electrical_cable_type_details", force: :cascade do |t|
@@ -477,7 +475,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_12_090000) do
   add_foreign_key "disciplines", "projects"
   add_foreign_key "disciplines", "swatches"
   add_foreign_key "doc_types", "disciplines"
-  add_foreign_key "documents", "disciplines"
   add_foreign_key "documents", "doc_types"
   add_foreign_key "electrical_circuits", "electrical_switchboards"
   add_foreign_key "import_batches", "disciplines"

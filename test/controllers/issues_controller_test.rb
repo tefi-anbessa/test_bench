@@ -14,10 +14,10 @@ class IssuesControllerTest < ActionController::TestCase
     # Set up in and out of scope instances of issue
     @source_format = create(:source_format)
     @dt = create(:doc_type, discipline: @discipline)
-    @document = create(:document, doc_type: @dt, discipline: @discipline)
+    @document = create(:document, doc_type: @dt)
     @resource = create(:issue, document: @document, source_format: @source_format)
     @other_dt = create(:doc_type, discipline: @other_discipline)
-    @other_document = create(:document, doc_type: @other_dt, discipline: @other_discipline)
+    @other_document = create(:document, doc_type: @other_dt)
     @other_resource = create(:issue, document: @other_document, source_format: @source_format)
     @request.env["devise.mapping"] = Devise.mappings[:user]
   end

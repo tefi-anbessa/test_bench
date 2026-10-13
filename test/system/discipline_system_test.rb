@@ -22,7 +22,7 @@ class DisciplineSystemTest < ApplicationSystemTestCase
     @resource2.update(sort_order: 2)
 
     @dt = create(:doc_type, discipline: @discipline)
-    @document = create(:document, discipline: @discipline, doc_type: @dt)
+    @document = create(:document, doc_type: @dt)
   end
 
   def test_setup_is_valid

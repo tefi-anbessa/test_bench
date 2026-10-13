@@ -27,7 +27,7 @@
 
         <!-- New Button (Right) -->
         <div class="col-2 align-content-end">
-          <% if @discipline.present? && policy(@discipline.documents.build()).new? %>
+          <% if @discipline.present? && policy(Document.new(creation_discipline: @discipline)).new? %>
             <%= nav_button(action: :new, path: new_discipline_document_path(@discipline), record: Document.new) %>
           <% end %>
         </div>

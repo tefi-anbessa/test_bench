@@ -11,7 +11,7 @@ class IssueTest < ActiveSupport::TestCase
   
   def setup_model_specific_data
     @dt = create(:doc_type, discipline: @discipline, code: "DOC", name: "Test Issue Type")
-    @document = create(:document, doc_type: @dt, discipline: @discipline)
+    @document = create(:document, doc_type: @dt)
     @resource = create(:issue, document: @document)
     # Insert model specific test setup here, including relationships with other models.
     # E.g. setup electrical_demand for electrical models.

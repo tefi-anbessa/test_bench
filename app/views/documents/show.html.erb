@@ -45,7 +45,7 @@
                 <%= nav_button(action: :delete, record: @document, path: document_path(@document)) %>
               <% end %>
 
-              <% if @discipline && policy(@discipline.documents.build()).new? %>
+              <% if @discipline && policy(Document.new(creation_discipline: @discipline)).new? %>
                 <%= nav_button(action: :new, record: @document, path: new_discipline_document_path(@discipline)) %>
               <% end %>
             </div> <!-- button group -->

@@ -9,7 +9,7 @@ class DocumentTest < ActiveSupport::TestCase
     @project = create(:project)
     @discipline = @project.disciplines.find_by(name: 'Electrical')
     @dt = create(:doc_type, discipline: @discipline, code: "DOC", name: "Test Document Type")
-    @resource = create(:document, discipline: @discipline, doc_type: @dt)
+    @resource = create(:document, doc_type: @dt)
   end
 
   test "title must be present" do
@@ -27,10 +27,10 @@ class DocumentTest < ActiveSupport::TestCase
   test "document number is correctly generated" do
     # Find the expected serial number of the new document.
     # This test could fail due to race condition with parallel tests...
-    serial = Document.where(discipline: @discipline, doc_type: @dt).maximum(:serial) || 0 
+    serial = Document.where(doc_type: @dt).maximum(:serial) || 0
     serial += 1
     # Create a document and verify the doc_number format
-    doc = create(:document, discipline: @discipline, doc_type: @dt)
+    doc = create(:document, doc_type: @dt)
     
     # Use the same logic as the model to generate expected format
     separator = Constants.documents.separator
@@ -42,12 +42,10 @@ class DocumentTest < ActiveSupport::TestCase
   end
 
   test "readonly attributes cannot be changed" do
-    # Test discipline_id cannot be changed
-    new_discipline = @project.disciplines.find_by(name: 'Mechanical')
-    assert_raises(ActiveRecord::ReadonlyAttributeError) do
-      @resource.update(discipline: new_discipline)
-    end
-    
+    # discipline is derived through doc_type (see Document#discipline) - it
+    # was never a directly settable attribute, so there's nothing readonly
+    # to test here anymore.
+
     # Test doc_type_id cannot be changed
     new_doc_type = create(:doc_type, discipline: @discipline)
     assert_raises(ActiveRecord::ReadonlyAttributeError) do

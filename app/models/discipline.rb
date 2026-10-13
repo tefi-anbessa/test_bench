@@ -15,9 +15,12 @@ class Discipline < ApplicationRecord
   belongs_to :project
   belongs_to :swatch, optional: true
   has_many :tags, dependent: :destroy
-  has_many :documents, dependent: :destroy
   has_many :cable_types, dependent: :destroy
   has_many :doc_types, dependent: :destroy
+  # Documents have no FK of their own - they're associated through doc_type
+  # (see Document#discipline) - destroying doc_types above already cascades
+  # to destroy their documents (DocType has_many :documents, dependent: :destroy).
+  has_many :documents, through: :doc_types
 
   # === Scopes ===
   # default_scope { order(project_id: :asc, sort_order: :asc) }

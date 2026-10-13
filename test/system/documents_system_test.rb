@@ -14,8 +14,8 @@ class DocumentsSystemTest < ApplicationSystemTestCase
 
   def setup_model_specific_data
     @dt = create(:doc_type, discipline: @discipline)
-    @resource = create(:document, doc_type: @dt, discipline: @discipline)
-    @resource2 = create(:document, doc_type: @dt, discipline: @discipline)
+    @resource = create(:document, doc_type: @dt)
+    @resource2 = create(:document, doc_type: @dt)
     @discipline_resource_index_header = I18n.t('documents.index.header', 
       scope_text: [@discipline.project.code, I18n.t("activerecord.models.discipline.one"), @discipline.long_label].join(' '))
     @project_resource_index_header = I18n.t('documents.index.header', 
