@@ -106,15 +106,15 @@
                       <% end %>
                     <% end %>
 
-                    <% if policy(Electrical::CableType).index? %>
-                      <%= link_to project_electrical_cable_types_path(@project),
+                    <% if policy(CableType).index? %>
+                      <%= link_to project_cable_types_path(@project),
                           class: "btn btn-outline-info btn-sm",
                           aria: {
-                            label: t('activerecord.models.electrical/cable_type', count: @project.electrical_cable_types.count)
+                            label: t('activerecord.models.cable_type', count: @project.cable_types.count)
                           } do %>
                         <%== bs_icon('file') %>
-                        <%= t('activerecord.models.electrical/cable_type', count: @project.electrical_cable_types.count) %>
-                        <span class="badge bg-info ms-1"><%= @project.electrical_cable_types.count %></span>
+                        <%= t('activerecord.models.cable_type', count: @project.cable_types.count) %>
+                        <span class="badge bg-info ms-1"><%= @project.cable_types.count %></span>
                       <% end %>
                     <% end %>
                   </div> <!-- end d-flex -->

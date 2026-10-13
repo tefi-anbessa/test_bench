@@ -20,7 +20,7 @@ module Electrical
     has_one :discipline, through: :switchboard
     has_one :project, through: :switchboard
 
-    has_one :feeder, as: :from, class_name: 'Electrical::Cable', dependent: :nullify
+    has_one :feeder, as: :from, class_name: 'Cable', dependent: :nullify
     has_one :demand, through: :feeder, source: :to, source_type: "Electrical::Demand"
 
     # === Scopes ===

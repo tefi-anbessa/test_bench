@@ -227,13 +227,46 @@ class DisciplineTest < ActiveSupport::TestCase
 
   test "accepts_tagable_type? is true only for a type backed by this discipline's own module" do
     electrical = @project.disciplines.find_by(code: "E")
-    assert electrical.accepts_tagable_type?("Electrical::Cable")
+    assert electrical.accepts_tagable_type?("Electrical::Heater")
     refute electrical.accepts_tagable_type?("Instrument::PressureGauge")
+  end
+
+  test "accepts_tagable_type? accepts Cable - a real, bare, core-shared tagable - wherever a CableType class exists" do
+    electrical = @project.disciplines.find_by(code: "E")
+    assert electrical.accepts_tagable_type?("Cable")
+    process = @project.disciplines.find_by(code: "P")
+    refute process.accepts_tagable_type?("Cable")
+  end
+
+  test "accepts_tagable_type? defers to the type's own discipline_available? when it defines one" do
+    electrical = @project.disciplines.find_by(code: "E")
+    stub_type = Class.new do
+      def self.name = "StubSharedTagable"
+      def self.discipline_available?(discipline) = discipline.code == "E"
+    end
+    stub_type.define_singleton_method(:to_s) { "StubSharedTagable" }
+    Object.const_set(:StubSharedTagable, stub_type) unless Object.const_defined?(:StubSharedTagable)
+
+    assert electrical.accepts_tagable_type?("StubSharedTagable")
+    process = @project.disciplines.find_by(code: "P")
+    refute process.accepts_tagable_type?("StubSharedTagable")
+  ensure
+    Object.send(:remove_const, :StubSharedTagable) if Object.const_defined?(:StubSharedTagable)
+  end
+
+  test "cable_type_detail_class resolves this discipline's own module-backed CableTypeDetail" do
+    electrical = @project.disciplines.find_by(code: "E")
+    assert_equal Electrical::CableTypeDetail, electrical.cable_type_detail_class
+  end
+
+  test "cable_type_detail_class is nil for a discipline with no backing module" do
+    process = @project.disciplines.find_by(code: "P")
+    assert_nil process.cable_type_detail_class
   end
 
   test "accepts_tagable_type? is false for a discipline with no backing module" do
     process = @project.disciplines.find_by(code: "P")
-    refute process.accepts_tagable_type?("Electrical::Cable")
+    refute process.accepts_tagable_type?("Electrical::Heater")
   end
 
   test "accepts_tagable_type? is false for an unknown/unresolvable type" do

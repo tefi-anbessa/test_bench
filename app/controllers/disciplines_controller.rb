@@ -129,13 +129,29 @@ class DisciplinesController < ApplicationController
     end
 
     def setup_dashboard
-      Rails.application.eager_load! if Rails.env.development?
+      # ActiveRecord::Base.descendants below only finds classes Zeitwerk has
+      # already autoloaded - wherever the app isn't configured to eager
+      # load everything at boot (development, and test outside CI), a
+      # model nothing else has touched yet simply wouldn't be in that list
+      # yet. Keyed on the actual config, not the environment name, so this
+      # covers both rather than just development.
+      Rails.application.eager_load! unless Rails.application.config.eager_load
       module_name = @discipline.module_name
       return @model_links = [] if module_name.nil?
       models = ActiveRecord::Base.descendants
-      .select { |model| model.module_parent_name == module_name && model.model_name.human != "Base" }
-      .sort_by(&:model_name)
-      @model_links = models.filter_map { |m| model_link_for(m) }
+      .select do |model|
+        model.model_name.human != "Base" &&
+          # Models owned by this discipline's own module (Demand, Circuit,
+          # ...), plus bare/core-shared tagable types this discipline is
+          # wired to accept (e.g. Cable) - the latter have no module of
+          # their own to match against directly.
+          (model.module_parent_name == module_name || @discipline.accepts_tagable_type?(model.name))
+      end
+      # CableType is also bare/shared, but isn't a tagable type, so neither
+      # branch above finds it - add it explicitly whenever this discipline
+      # actually has a concrete detail class to attach.
+      models << CableType if @discipline.cable_type_detail_class.present?
+      @model_links = models.sort_by(&:model_name).filter_map { |m| model_link_for(m) }
     end
 
     # Tagable models (see Tag.safe_tagable_types) share the single unified

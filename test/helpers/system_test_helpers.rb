@@ -43,7 +43,7 @@ module SystemTestHelpers
            .find { |a| a.foreign_key.to_s == field_name.to_s }
     end
 
-    # Electrical::Cable -> Electrical
+    # Electrical::Heater -> Electrical
     # Document -> nil
     def module_name
         resource_class.name.split('::').count > 1 ? resource_class.name.split('::').first : nil
@@ -60,18 +60,18 @@ module SystemTestHelpers
     end
 
     # Document -> discipline_documents_path(discipline)
-    # Electrical::Cable -> discipline_electrical_cables_path(discipline)
+    # Electrical::Heater -> discipline_electrical_heaters_path(discipline)
     def discipline_resource_index_path(discipline)
       send("discipline_#{resource_class.model_name.route_key}_path", discipline)
     end
 
-    # Electrical::Cable -> discipline_electrical_cables_path(discipline)
+    # Electrical::Heater -> discipline_tagables_path(discipline, tagable_type: "Electrical::Heater")
     def discipline_tagable_resources_path(discipline)
       discipline_tagables_path(discipline, tagable_type: resource_class.name)
     end
 
     # Document -> document_path
-    # Electrical::Cable -> electrical_cable_path
+    # Electrical::Heater -> electrical_heater_path
     def resource_path(resource)
       send("#{resource_class.model_name.singular_route_key}_path", resource)
     end
@@ -82,25 +82,25 @@ module SystemTestHelpers
     end
 
     # Document -> new_document_path(discipline)
-    # Electrical::Cable -> new_discipline_electrical_cable_path(discipline)
+    # Electrical::Heater -> new_discipline_electrical_heater_path(discipline)
     def new_discipline_resource_path(discipline)
       send("new_discipline_#{resource_class.model_name.singular_route_key}_path", discipline)
     end
 
-    # Electrical::Cable -> new_tag_electrical_cable_path
+    # Electrical::Heater -> new_tag_electrical_heater_path
     def new_tag_resource_path(tag)
       send("new_tag_#{resource_class.model_name.singular_route_key}_path", tag)
     end
 
     # Document -> edit_document_path
-    # Electrical::Cable -> edit_electrical_cable_path
+    # Electrical::Heater -> edit_electrical_heater_path
     def edit_resource_path(resource)
       send("edit_#{resource_class.model_name.singular_route_key}_path", resource)
     end
 
     # Document -> documents
-    # Electrical::Cable -> electrical.cables
-    # Electrical::CableType -> electrical.cable_types
+    # Electrical::Heater -> electrical.heaters
+    # Electrical::Heater -> electrical.heaters
     def view_key
       resource_class.model_name.name.gsub("::", ".").underscore.pluralize
     end
@@ -329,15 +329,22 @@ module SystemTestHelpers
       assert_selector "##{component_id}", visible: :all
       find("##{header_id}").click
       assert_selector "##{component_id}.show", visible: :all
-      # Card shall include a link to the associated resource.
-      # Tagables have no route of their own - the card's nav_link reaches them
-      # via their tag - so mirror that here instead of polymorphic_path(record).
-      href = if record.class.respond_to?(:name) && Tag.safe_tagable_types.include?(record.class.name)
-        tag_tagable_path(record.tag)
-      else
-        polymorphic_path(record)
+      # Card shall include a link to the associated resource - except
+      # CableType's own delegated detail classes, which have no route of
+      # their own and only ever appear on their owning cable_type's own
+      # show page, so a "jump to" link there would always point back at
+      # the page already being viewed.
+      unless record.is_a?(CableTypeDetailable)
+        # Tagables have no route of their own either - the card's nav_link
+        # reaches them via their tag - so mirror that here instead of
+        # polymorphic_path(record).
+        href = if record.class.respond_to?(:name) && Tag.safe_tagable_types.include?(record.class.name)
+          tag_tagable_path(record.tag)
+        else
+          polymorphic_path(record)
+        end
+        assert_link href: href
       end
-      assert_link href: href
     end
 
     def children_collapsible_assertions(parent, association)

@@ -374,6 +374,17 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Risk Management.
 - [ ] Functional Safety.
 
+## Architecture Considerations
+
+- [x] Move Electrical to a module or namespace.
+- [x] Nest routes for project related resource under projects to improve security around assignment to other than the current project.
+- [x] Nest tag, document resources under disciplines.
+- [ ] Change locales to regionalised codes.
+- [x] Couple disciplines and modules tightly for tagables.
+- [x] Move cable and cable type back to core, as they are shared by electrical and instrument disciplines, also communications.
+- [ ] Move document issues to change module, generalise so it can be used for other entities (polymorphic). HOLD.
+- [ ] Plan for database scaling as data grows.
+
 ## Technical Debt
 
 - [x] Refactor models to incorporate i18n messages for validations
@@ -413,7 +424,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Cable types routing should be nested under projects.
 - [x] Cable types controller should be revised to suit nesting and protect against current project setting.
 - [x] Expand tagable and scaffold generator tests to include all types and options.
-- [ ] Improve system test template for scaffold generator.
+- [x] Improve system test template for scaffold generator.
 - [x] Scaffold generator check for valid module names is not working correctly.
 - [x] Verify if two set of routes are really needed for tagables.
 - [x] Review all use of the method underscore. It is not aware of the OS and uses '/' as the separator, so is not appropriate when generating file paths. Use File.join wherever appropriate.
@@ -429,17 +440,14 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Issue policy has been removed. Assess whether it is required or just use document policy, like circuits.
 - [x] Fix update test in tag system test.
 - [x] Fix error in doc_types system test (edit).
-- [ ] Refactor cable and cable type system tests after restructure to core.
 - [-] Fix error in discipline system test where the test seems to be building new disciplines. This appears to be a Capybara issue, Claude couldn't solve it.
 - [ ] Write a test for collapsible on attribute rather than association (specifically discipline prefix schema).
 - [ ] Decide what to do about deletion of data. It is affecting many aspects of the architecture.
 - [x] Complete demand system test after refactor.
 - [ ] Fix tag prefix warning message for non-conforming prefix.
 - [ ] Fix assertion in projects system test for show link with no text.
-- [ ] Improve cable index and search options.
 - [x] Generators file input from ruby format.
 - [x] Clean up abstraction of policies and policy tests. Update generator and tests.
-- [ ] Abstract controllers for project, discipline and tag nested resources.
 - [x] Generic tag_resource_policy may be required. Generator provides for tag nesting but use case is not certain. Only demands are tag linked but not tagable.
 - [ ] Complete nested system test for scaffold generator.
 - [x] Scaffold generator to build routes for namespaced models other than tagables.
@@ -489,7 +497,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Improve forbidden error logging messages, include user. Consider automatic sign out.
 - [-] Abstract controllers for project linked models, similar to tagables controller. Defer until after developing change control and document issues, when requirements will be understood better.
 - [x] Add catalog required roles in disciplines, to allow different role for cable types and doc types, etc.
-- [ ] Refactor cable and cable types to be core module available to electrical, instruments, telecoms (any module). Should belong to discipline.
+- [x] Refactor cable and cable types to be core module available to electrical, instruments, telecoms (any module). Should belong to discipline.
 - [x] Index views should preload permissions and not check every row.
 - [ ] Share enums reused across models.
 - [x] Scaffold generators should include enum configuration, or build a separate generator.
@@ -497,7 +505,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Consider whether the same improvement applies to demand.
 - [x] Remove unnecessary namespacing within electrical module naming, e.g. switchboard has many electrical_circuits. Switchboards can refer to circuits, and circuits can refer to switchboards, without the module prefix.
 - [x] Transition documents to discipline nested.
-- [ ] Transition cable types to core module, discipline nested. This should allow other disciplines (instrument, communication) to create appropriate cable types.
+- [x] Transition cable types to core module, discipline nested. This should allow other disciplines (instrument, communication) to create appropriate cable types.
 - [x] Revise index views to get credentials once and use for links, for all resources where the credentials are not granular, which would be most everything that is discipline nested.
 - [x] Refactor model translations with count.
 - [x] Revert activerecord translations to convention with / instead of . key for namespaced models.
@@ -512,7 +520,7 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Consider expanding scope for models to include all projects for which user has a role.
 - [ ] Migrate i18n translations to a database system rather than YAML.
 - [ ] Refactor documents to normalize discipline: remove fk and associate discipline through doc_type.
-- [ ] Ditto cables: remove fk and associate discipline through cable_type. At the same time, sort out a decent label and add unique constraint on code.
+- [x] Ditto cables: remove fk and associate discipline through cable_type. At the same time, sort out a decent label and add unique constraint on code.
 - [x] Refactor show views using standardised attributes helper.
 - [x] Refactor form views using standardised form fields helper.
 - [x] Extend views helper for attributes to include decimal numbers with units.
@@ -527,10 +535,18 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Refactor the generator's `:step` option to allow the literal value `"any"` (currently coerced as a decimal, so `"any"` is rejected).
 - [ ] Improve index views to allow horizontal scrolling for wider views.
 - [ ] Clean up responsive views - test all on simulator.
+- [ ] Abstract controllers for project, discipline and tag nested resources.
+- [ ] Improve cable index and search options.
 
 ## Potential Features
 
-- [ ] Implement copy from other project. 
+- [ ] Implement copy from other project. Global admins' ability to view (`show?`/`index?`) any
+      resource on any project, bypassing the normal current-project ring fence, exists informally to
+      support this unbuilt workflow - it was never given a clear spec of its own. In hindsight, this
+      should be a separate `#copy` action with its own Pundit policy method, not a standing exception
+      on `show?`/`index?`. When this is actually built, reassess whether the general cross-project
+      view-anywhere admin prerogative is still needed at all, since `#copy` would need its own
+      authorization regardless (see `app/policies/discipline_resource_policy.rb#show?`).
 - [ ] Data revision management
 - [ ] Customize devise users:
   - [ ] Add policy for users
@@ -550,17 +566,6 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [ ] Add a clear search button for index views. Add hover title for search button.
 - [ ] Add highlight to search results for all index views (refer projects).
 - [ ] Add bullet gem for performance issues.
-
-## Architecture Considerations
-
-- [x] Move Electrical to a module or namespace.
-- [x] Nest routes for project related resource under projects to improve security around assignment to other than the current project.
-- [x] Nest tag, document resources under disciplines.
-- [ ] Change locales to regionalised codes.
-- [x] Couple disciplines and modules tightly for tagables.
-- [x] Move cable and cable type back to core, as they are shared by electrical and instrument disciplines, also communications.
-- [ ] Move document issues to change module, generalise so it can be used for other entities (polymorphic). HOLD.
-- [ ] Plan for database scaling as data grows.
 
 ## Notes
 

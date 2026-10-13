@@ -11,8 +11,10 @@ module TagableModelTests
     # Create project with standard disciplines
     @project = create(:project, title: "#{resource_class} Tagable Model Test")
 
-    # Set resource discipline using the class' module name
-    @resource_discipline = @project.disciplines.find_by(name: resource_class.module_parent_name)
+    # Set resource discipline using the class' module name. A bare
+    # (core-shared) tagable has no module to derive this from - override
+    # #resource_discipline_name in the including test class for those.
+    @resource_discipline = @project.disciplines.find_by(name: resource_discipline_name)
     # Factory default unique tag will be "A:AA-0001"
     @tag = create(:tag, :unique_tag, discipline: @resource_discipline)
     setup_resource_prerequisites if defined?(setup_resource_prerequisites)
@@ -106,6 +108,12 @@ module TagableModelTests
 
   def resource_class
    self.class.name.sub('Test', '').singularize.constantize
+  end
+
+  # Overridable - a bare (core-shared) tagable type, e.g. Cable, has no
+  # module of its own to derive a discipline name from.
+  def resource_discipline_name
+    resource_class.module_parent_name
   end
 
 end

@@ -67,11 +67,11 @@ class CircuitTest < ActiveSupport::TestCase
   test "destroy circuit should nullify cable feeder reference" do
     circuit = create(:electrical_circuit, switchboard: @switchboard)
     cable_tag = create(:tag, discipline: @discipline)
-    cable = create(:electrical_cable, tag: cable_tag, from: circuit)
+    cable = create(:cable, tag: cable_tag, from: circuit)
 
     # Only the circuit count should decrease
     assert_difference 'Electrical::Circuit.count', -1 do
-      assert_no_difference ['Electrical::Cable.count'] do
+      assert_no_difference ['Cable.count'] do
         circuit.destroy
       end
     end

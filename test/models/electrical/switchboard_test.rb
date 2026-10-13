@@ -13,7 +13,7 @@ module Electrical
     end
 
     test_required_fields(:voltage_rating, :busbar_rating)
-    test_enum_field(:voltage_rating, constants_path: "electrical.voltage_ratings")
+    test_enum_field(:voltage_rating, constants_path: "cable.voltage_ratings")
 
     test "circuit setup must be valid" do
       assert @circuit.valid?
@@ -106,11 +106,11 @@ module Electrical
     test "destroy circuit should nullify cable feeder reference" do
       circuit = create(:electrical_circuit, switchboard: @resource)
       cable_tag = create(:tag, discipline: @resource_discipline, prefix: "EC")
-      cable = create(:electrical_cable, tag: cable_tag, from: circuit)
+      cable = create(:cable, tag: cable_tag, from: circuit)
 
       # Only the circuit count should decrease
       assert_difference 'Electrical::Circuit.count', -1 do
-        assert_no_difference ['Electrical::Cable.count'] do
+        assert_no_difference ['Cable.count'] do
           circuit.destroy
         end
       end

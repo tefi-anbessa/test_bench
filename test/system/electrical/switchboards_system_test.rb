@@ -78,8 +78,8 @@ module Electrical
 
       @cable_tag = create(:tag, project: @project, stage: '1', discipline: @discipline, 
         prefix: 'EC', serial: '1', suffix: "i", service: 'TEST FEEDER', notes: "",
-        tagable_type: "Electrical::Cable")
-      @cable = create(:electrical_cable, tag: @cable_tag, route_length: 55.5, vertical_allowance: 5.5,
+        tagable_type: "Cable")
+      @cable = create(:cable, tag: @cable_tag, route_length: 55.5, vertical_allowance: 5.5,
                         termination_allowance: 1.5, start_mark: "154", end_mark: "42", 
                         notes: "test cable for switchboard system test")
     end

@@ -48,8 +48,8 @@ module Electrical
       @cable_type = create(:electrical_cable_type, discipline: @discipline)
       @cable_tag = create(:tag, stage: '1', discipline: @discipline, 
         prefix: 'EC', serial: '1', service: 'TEST CABLE E:EC-0001',
-        tagable_type: "Electrical::Cable")
-      @cable = create(:electrical_cable, tag: @cable_tag, cable_type: @cable_type, route_length: 55.5, 
+        tagable_type: "Cable")
+      @cable = create(:cable, tag: @cable_tag, cable_type: @cable_type, route_length: 55.5,
                         vertical_allowance: 5.5, termination_allowance: 1.5, 
                         start_mark: "154", end_mark: "42", 
                         notes: "cable for circuits system test")

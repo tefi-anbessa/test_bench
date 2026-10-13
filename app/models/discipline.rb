@@ -16,7 +16,7 @@ class Discipline < ApplicationRecord
   belongs_to :swatch, optional: true
   has_many :tags, dependent: :destroy
   has_many :documents, dependent: :destroy
-  has_many :electrical_cable_types, class_name: 'Electrical::CableType', dependent: :destroy
+  has_many :cable_types, dependent: :destroy
   has_many :doc_types, dependent: :destroy
 
   # === Scopes ===
@@ -129,13 +129,29 @@ class Discipline < ApplicationRecord
   # The single source of truth for this check - used both to filter the
   # tagable_type choices offered on the tag form, and by Tag's own
   # validation that a tag's tagable actually belongs to its discipline. A
-  # discipline with no backing module accepts none. Not yet aware of
-  # core-shared tagable types (e.g. a future core Cable, usable by more
-  # than one discipline's module) - revisit this one method, not its
-  # callers, when that exists.
+  # discipline with no backing module accepts none, unless the type itself
+  # opts out of the plain module-match check (see the discipline_available?
+  # hook below - used by core-shared tagable types like Cable, which have
+  # no module of their own to match against).
   def accepts_tagable_type?(type)
-    return false unless module_backed?
-    type.to_s.safe_constantize&.module_parent_name == module_name
+    klass = type.to_s.safe_constantize
+    return false unless klass
+    if klass.respond_to?(:discipline_available?)
+      klass.discipline_available?(self)
+    else
+      module_backed? && klass.module_parent_name == module_name
+    end
+  end
+
+  # This discipline's own CableType detail class (e.g.
+  # Electrical::CableTypeDetail), or nil if its module has none. CableType
+  # itself is one shared class (see app/models/cable_type.rb); what varies
+  # per discipline is only which delegated detail subtype it can attach.
+  # The one place that resolves this, so Cable.discipline_available? and
+  # anything else that needs it don't each re-derive the convention.
+  def cable_type_detail_class
+    return nil if module_name.nil?
+    "#{module_name}::CableTypeDetail".safe_constantize
   end
 
   # Falls back to the registry's default for this code, not to the backing

@@ -31,7 +31,7 @@ module Electrical
       # Create tagables with the tags
       @switchboard = create(:electrical_switchboard, tag: @switchboard_tag)
       @motor = create(:electrical_motor, tag: @motor_tag)
-      @cable = create(:electrical_cable, tag: @cable_tag)
+      @cable = create(:cable, tag: @cable_tag)
 
       # Create a circuit on the switchboard
       @circuit = create(:electrical_circuit, switchboard: @switchboard)
@@ -45,7 +45,7 @@ module Electrical
     test "cannot create with tag out of scope" do
       sign_in_and_set_project @accredited_user, @project
       assert_no_difference("#{resource_class}.count") do
-        post :create, params: new_nesting_params.merge(create_params).merge(tag_id: @other_tag.id)
+        post :create, params: new_params.merge(create_params).merge(tag_id: @other_tag.id)
       end
       assert_conflict
     end
@@ -53,7 +53,7 @@ module Electrical
     test "cannot create with tag that has no tagable" do
       sign_in_and_set_project @accredited_user, @project
       assert_no_difference("#{resource_class}.count") do
-        post :create, params: new_nesting_params.merge(create_params).merge(tag_id: @tag_no_tagable.id)
+        post :create, params: new_params.merge(create_params).merge(tag_id: @tag_no_tagable.id)
       end
       assert_conflict
     end
@@ -61,7 +61,7 @@ module Electrical
     test "cannot create with tag already has a demand" do
       sign_in_and_set_project @accredited_user, @project
       assert_no_difference("#{resource_class}.count") do
-        post :create, params: new_nesting_params.merge(create_params).merge(tag_id: @tag.id)
+        post :create, params: new_params.merge(create_params).merge(tag_id: @tag.id)
       end
       assert_conflict
     end
@@ -71,14 +71,19 @@ module Electrical
     
     private
 
-      # Required for nested routes to new and create
-      def new_nesting_params
+      # Demand has split nesting (new/create under tag, index under
+      # discipline) that ControllerTestHelper's single @nesting value can't
+      # express - override its path/param hooks directly instead.
+      def new_params
         { tag_id: @unassigned_tag.id }
       end
 
-      # Required for nested routes to new and create
-      def index_nesting_params
+      def index_params
         { discipline_id: @discipline.id }
+      end
+
+      def resource_index_path
+        discipline_electrical_demands_path(@discipline)
       end
 
       # Set the minimum required params for a valid resource

@@ -137,7 +137,7 @@ module ProjectAssistant
     def edit_routes_file
       # Seeds an empty namespace at both insertion points (project-nested and
       # discipline-nested) - a ready-made home for any non-tagable,
-      # module-namespaced model's own routes (e.g. Electrical::CableType),
+      # module-namespaced model's own routes (e.g. Electrical::Circuit),
       # added later by the scaffold generator or by hand. Tagable models
       # need no route changes at all (every tagable type shares the generic
       # tagable routes, keyed by tagable_type - see TagableGenerator, which

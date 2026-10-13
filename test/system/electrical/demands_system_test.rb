@@ -342,7 +342,7 @@ module Electrical
 
       # Connects a circuit to a demand via a feeder cable, as the real app does.
       def connect_circuit(circuit, demand)
-        create(:electrical_cable, from: circuit, to: demand)
+        create(:cable, from: circuit, to: demand)
       end
 
       # current/power/vector/power_factor are basis-dependent: for any given

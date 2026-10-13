@@ -44,7 +44,7 @@ FactoryBot.define do
     # Factory to create a circuit with a cable
     trait :with_cable do
       after(:create) do |circuit, evaluator|
-        create(:electrical_cable, from: circuit)
+        create(:cable, from: circuit)
       end
     end
   end

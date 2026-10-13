@@ -1,0 +1,12 @@
+<% provide(:title, t('.title')) %>
+<% provide(:header, t('.header', label: @cable.long_label)) %>
+<% provide(:button_text, t('actions.update')) %>
+<% partial = File.join(@cable.model_name.collection, "form") %>
+<%= render partial,
+  cable: @cable,
+  discipline: @discipline,
+  tag: @tag,
+  parent: @tag,
+  swatch: @swatch,
+  cable_type_options: @cable_type_options
+%>

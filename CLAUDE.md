@@ -44,6 +44,11 @@ themselves, and work from the output they share back.
   defaults are prone to masking coding errors.
 - Markdown: ordered lists should use `1.` for every item (let the renderer
   number them - see `.markdownlint.json`), not sequential numbers.
+- Code comments describe the current state of the code: what it does, and
+  interfaces/behavior that aren't obvious from reading it. They don't
+  describe history or the reasons a change was made - that belongs in the
+  commit message, not the file. Don't write "renamed from X" or "this used
+  to do Y" in a comment.
 
 ## Working style
 

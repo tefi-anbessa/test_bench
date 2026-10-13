@@ -1,0 +1,18 @@
+<!-- Expects object and context (optional) to be passed in -->
+<% detail = object %>
+<% context ||= t("activerecord.models.instrument/cable_type_detail.one") %>
+<div id="<%= dom_id detail %>" style="<%= card_styles(@swatch)%>">
+
+  <%= render 'components/collapsible',
+    id: "#{id}_#{detail.id}_details",
+    title: context,
+    expanded: false,
+    header_class: "py-1" do %>
+
+    <div class="container-fluid">
+      <%= show_attribute(detail, :individual_screen, type: :boolean) %>
+      <%= show_attribute(detail, :overall_screen, type: :boolean) %>
+      <%= show_attribute(detail, :twist_pitch, type: :float, units: "mm") %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,17 @@
+<!-- Expects object and context (optional) to be passed in -->
+<% detail = object %>
+<% context ||= t("activerecord.models.electrical/cable_type_detail.one") %>
+<div id="<%= dom_id detail %>" style="<%= card_styles(@swatch)%>">
+
+  <%= render 'components/collapsible',
+    id: "#{id}_#{detail.id}_details",
+    title: context,
+    expanded: false,
+    header_class: "py-1" do %>
+
+    <div class="container-fluid">
+      <%= show_attribute(detail, :neutral_csa, type: :float, units: "mm²") %>
+      <%= show_attribute(detail, :earth_csa, type: :float, units: "mm²") %>
+    </div>
+  <% end %>
+</div>

@@ -122,10 +122,19 @@ class DisciplineSystemTest < ApplicationSystemTestCase
       # Mimic the controller's setup_dashboard/model_link_for methods -
       # tagable models (see Tag.safe_tagable_types) share the unified tagable
       # index route; everything else keeps its own dedicated discipline route,
-      # if it has one.
-      models = ActiveRecord::Base.descendants
-        .select { |model| model.module_parent_name == disc.name && model.model_name.human != "Base" }
-        .sort_by(&:model_name)
+      # if it has one. A discipline with no backing module has no dashboard
+      # at all, same as setup_dashboard's own early return.
+      models = if disc.module_name.nil?
+        []
+      else
+        ActiveRecord::Base.descendants
+          .select do |model|
+            model.model_name.human != "Base" &&
+              (model.module_parent_name == disc.module_name || disc.accepts_tagable_type?(model.name))
+          end
+      end
+      models << CableType if disc.cable_type_detail_class.present?
+      models = models.sort_by(&:model_name)
       @model_links = models.filter_map do |m|
         if Tag.safe_tagable_types.include?(m.name)
           [m.model_name.human.pluralize, discipline_tagables_path(disc, tagable_type: m.name)]

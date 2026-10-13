@@ -7,7 +7,10 @@ class ErrorHandlingTest < ActionDispatch::IntegrationTest
     @user = create(:user)
     @admin = create(:user, :admin)
     @project = create(:project)
-    @discipline = create(:discipline, project: @project)
+    # A generic (non-Electrical) discipline here would fail Tag's own
+    # discipline/tagable_type validation once the switchboard below is
+    # built - reuse the project's own real Electrical discipline instead.
+    @discipline = @project.disciplines.find_by(code: "E")
     @cable_type = create(:electrical_cable_type)
     @cable_tag = create(:tag, :unique_tag, prefix: 'EC', discipline: @discipline)
     @switchboard_tag = create(:tag, :unique_tag, prefix: 'EX', discipline: @discipline)
@@ -28,12 +31,15 @@ class ErrorHandlingTest < ActionDispatch::IntegrationTest
     assert_equal @switchboard.tag, @switchboard_tag
   end
 
-  # Test that unauthorized access to destroy action shows the custom 403 page
-  test "unauthorized user sees custom 403 page when trying to delete project" do
+  # A user with no role on any project has an empty policy_scope(Project),
+  # so ProjectsController#get_project raises ConflictError (409) before
+  # Pundit's own authorize check ever runs - consistent with how most
+  # other controllers' own get_resource-style methods already behave.
+  test "user out of scope for any project sees custom conflict page when trying to delete project" do
     assert_no_difference('Project.count') do
       delete project_path(@project)
     end
-    assert_forbidden
+    assert_conflict
   end
 
   # Test that conflict error shows the custom conflict page
@@ -90,17 +96,19 @@ class ErrorHandlingTest < ActionDispatch::IntegrationTest
     # Define the controller in the Object namespace
     Object.const_set('TestErrorController', test_controller)
     
-    # Stub Rails.env to simulate production
-    Rails.stub(:env, ActiveSupport::StringInquirer.new('production')) do
-      # Add route for the test controller
-      with_routing do |routes|
-        routes.draw do
-          get '/test_error', to: 'test_error#test_error_with_handling'
-        end
-        
-        get '/test_error'
-        assert_response :internal_server_error
+    # Stub Rails.env to simulate production - this project uses Mocha, not
+    # minitest/mock, so the stub is set directly rather than block-scoped;
+    # Mocha tears it down at the end of the test either way.
+    Rails.stubs(:env).returns(ActiveSupport::StringInquirer.new('production'))
+
+    # Add route for the test controller
+    with_routing do |routes|
+      routes.draw do
+        get '/test_error', to: 'test_error#test_error_with_handling'
       end
+
+      get '/test_error'
+      assert_response :internal_server_error
     end
     
     # Clean up

@@ -49,6 +49,34 @@ km:
     show:
       title:            "%{code}"
       header:           "គម្រោង: %{code}"
+  cable_types:
+    index:
+      title:            "Cable Types"
+      header:           "Cable Types"
+    edit:
+      title:            "Edit Cable Type"
+      header:           "Edit Cable Type %{label}"
+    new:
+      title:            "New Cable Type"
+      header:           "New Cable Type"
+    show:
+      title:            "Cable Type"
+      header:           "Cable Type %{label}"
+  cables:
+    index:
+      title:            "Cables"
+      header:           "Cable Schedule"
+    edit:
+      title:            "Edit Cable"
+      header:           "Edit Cable %{label}"
+    new:
+      title:            "New Cable"
+      header:           "New Cable"
+    show:
+      title:            "Cable"
+      header:           "Cable %{label}"
+    header:
+      cable_type: "Cable Type"
   tags:
     index:
       title:            "ស្លាក"

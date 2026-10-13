@@ -1,33 +1,5 @@
 cn:
   electrical:
-    cable_types:
-      index:
-        title:            "Cable Types"
-        header:           "Cable Types"
-      edit:
-        title:            "Edit Cable Type"
-        header:           "Edit Cable Type %{label}"
-      new:
-        title:            "New Cable Type"
-        header:           "New Cable Type"
-      show:
-        title:            "Cable Type"
-        header:           "Cable Type %{label}"
-
-    cables:
-      index:
-        title:            "Cables"
-        header:           "Cable Schedule"
-      edit:
-        title:            "Edit Cable"
-        header:           "Edit Cable %{label}"
-      new:
-        title:            "New Cable"
-        header:           "New Cable"
-      show:
-        title:            "Cable"
-        header:           "Cable %{label}"
-
     switchboards:
       index:
         title:            "Switchboards"

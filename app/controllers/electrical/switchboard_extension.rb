@@ -5,7 +5,7 @@ module Electrical
 
       def setup_additional_form_data
         @circuits = @switchboard.persisted? ? @switchboard.circuits.count : 0
-        @voltage_ratings = Constants.electrical.voltage_ratings
+        @voltage_ratings = Constants.cable.voltage_ratings
       end
 
       def after_create_hook(switchboard)

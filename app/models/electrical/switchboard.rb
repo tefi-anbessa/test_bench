@@ -7,7 +7,7 @@ module Electrical
     include Electrical::Distributable
 
     # === Constants ===
-    enum :voltage_rating, Constants.electrical.voltage_ratings.to_h
+    enum :voltage_rating, Constants.cable.voltage_ratings.to_h
 
     # === Gem macros ===
 

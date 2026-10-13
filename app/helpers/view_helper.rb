@@ -1,10 +1,23 @@
 module ViewHelper
   def show_attribute(record, attr, type: :string, label_cols: 4, value_cols: 8, **options)
     label = record.class.human_attribute_name(attr)
-    value = record.send(attr)
+    # A polymorphic association's stored *_type can be stale data pointing
+    # at a class that no longer exists under that name (e.g. a module
+    # rename that never backfilled old rows) - #send raises NameError
+    # while resolving it, before the :association case below even gets a
+    # chance to check presence. Treat that the same as any other invalid/
+    # missing association, not as an unhandled error.
+    value = begin
+      record.send(attr)
+    rescue NameError => e
+      Rails.logger.warn "show_attribute: #{record.class}##{attr} could not be resolved - #{e.message}"
+      :invalid
+    end
     case type
     when :association
-      if value.present?
+      if value == :invalid
+        value_section = I18n.t("show.invalid", model: label)
+      elsif value.present?
         value_section = index_link(action: :show, record: value)
       else
         value_section = I18n.t("index.unassigned")
