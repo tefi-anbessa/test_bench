@@ -1,0 +1,221 @@
+## Development Check List
+
+- [x] Build static pages as framework for future displays for casual visitors
+- [x] Build application layout with headers, footers, navigation
+- [x] Build core module with project and tag models
+- [x] Internationalise the application
+- [x] Build user interaction management, using gems devise for authentication, rolify and pundit for authorization
+- [x] Build electrical module with basic data sheet options for electrical tagged items
+- [x] Enhance electrical module, allowing interconnection of tagged items with cables to model a distribution network
+- [x] Build a module generator.
+- [x] Build a tagable generator.
+- [x] Build a scaffold generator for models without links to tags.
+- [x] Enhance electrical model with network load calculations.
+- [x] Add bulk import of data (spreadsheet-based, generic framework + generator - see the Import section below; developed on branch `data-import`).
+- [#2] Add bulk export of data. [Planned as a separate branch, once import has landed.]
+- [#3] Add a license file.
+- [#1] Add a location model as a precursor to the hazardous area and risk assessment functions. Convert tag to allow location as foreign key.
+- [#4] Write a generator to add a field and another to remove a field.
+- [#5] Enhance the existing database models to include history of data.
+- [#6] Build a document control module to manage document storage, issue, history including versions and workflow.
+- [#7] Add polymorphic comments.
+- [#8] Management of Change with workflows.
+- [#9] Build an instrument module.
+- [#10] Build a bookkeeping module to record financial transactions.
+- [#11] Build a process piping module similar to the electrical module, using pipes and fittings to model a process piping network.
+- [#12] Build an asset management module to track assets and link from design to maintenance.
+- [#13] Add hazardous area functionality.
+- [#14] Risk Management.
+- [#15] Functional Safety.
+
+## Architecture Considerations
+
+- [x] Move Electrical to a module or namespace.
+- [x] Nest routes for project related resource under projects to improve security around assignment to other than the current project.
+- [x] Nest tag, document resources under disciplines.
+- [#17] Change locales to regionalised codes.
+- [x] Couple disciplines and modules tightly for tagables.
+- [x] Move cable and cable type back to core, as they are shared by electrical and instrument disciplines, also communications.
+- [#35] Move document issues to change module, generalise so it can be used for other entities (polymorphic). HOLD.
+- [#20] Plan for database scaling as data grows.
+
+## Technical Debt
+
+- [x] Refactor models to incorporate i18n messages for validations
+- [x] Refactor error messages partial to use i18n.
+- [x] Refactor error views to use i18n.
+- [x] Refactor roles new view and projects edit view to translate resource names with a key value pair in the select field.
+- [x] Serve bootstrap from local dev or prod.
+- [x] Complete tags controller test.
+- [x] Review all policies and tests for compliance with guidelines.
+- [x] Review all models for compliance with guidelines.
+- [x] Clean up old Load model references after migration.
+- [x] The project was originally written for Rails 7 but got hibernated. On reawakening, it was upgraded to Rails 8. It has never been deployed to production, so Rails 8 upgrade is not yet officially declared complete.
+- [x] The transition to rails 8 should have changed over the asset pipeline to use propshaft. This has not been done properly, needs to be rectified.
+- [x] Improve has_one validation on tagable, possibly include database constraint.
+- [x] Improve has_one validation on demandable, possibly include database constraint.
+  - Database constraints deferred due to risk of locking database. Continue with inclusion of orphans on admin index displays, and manual clean up.
+- [x] Revisit the roles policy test. The roles policy is now using the role context from the controller, need to factor this into tests.
+- [x] Roles policy is delegating to resource policies for resource instances. Tests need to consider this.
+- [x] Ensure select for role names does not include restricted roles unless current user has app_owner role.
+- [x] System tests for all resources.
+- [x] Model tests should include test of enums.
+- [ ] Complete workflows with admin and no project selected.
+- [x] Complete proper ordering by switchboard tag and serial for circuits.
+- [x] Update index view header lines.
+- [x] Custom 404 not found error page. E.g. Case where admin deletes a record than uses browser back button.
+- [x] Suppress translation of html5 messages on required fields.
+- [x] Complete discipline system tests.
+- [x] Complete swatch system tests.
+- [x] Complete switchboard controller test.
+- [x] Complete cable system tests for from and to after switchboard, demand, and circuit tests are working.
+- [x] Use of button text for new and edit forms is mixed. Standardise on create for new, update for edit.
+- [x] Demand form live update of calculated values not working.
+- [x] Workflow for cable types with no current project.
+- [x] Refine the collapsibles component to retain state after refresh operations (e.g. sorting links with ransack). Make a generalised solution, maybe use turbo.
+- [x] Fix the page size js controller. Fixed pagy usage in preference.
+- [x] Write thorough tests for the tag parser and builder.
+- [x] Cable types routing should be nested under projects.
+- [x] Cable types controller should be revised to suit nesting and protect against current project setting.
+- [x] Expand tagable and scaffold generator tests to include all types and options.
+- [x] Improve system test template for scaffold generator.
+- [x] Scaffold generator check for valid module names is not working correctly.
+- [x] Verify if two set of routes are really needed for tagables.
+- [x] Review all use of the method underscore. It is not aware of the OS and uses '/' as the separator, so is not appropriate when generating file paths. Use File.join wherever appropriate.
+- [#23] Fix module generator to use nested parent modules.
+- [x] Provide a means for admins to edit tags to remove broken links to tagable.
+- [x] Add tagable controller checks to ensure discipline belongs to current project.
+- [x] Cable factory begets discipline, project, then cable_type, but cable_type begets its own project. Should inherit from cable factory.
+- [x] Add model tests for read only attributes - documents, tags.
+- [x] Review security of all controllers wrt injection attacks.
+- [x] Check that usage of accepts_nested_attributes_for is correct for tagable concern. It isn't - removed.
+- [x] Fix previous and next functionality in tagable navigation, and generalise it for non tagables. All models next and prev should only look inside policy scope. At present can raise forbidden.
+- [x] RBAC still has anomalous behaviour when resource wide roles are applied. Scope will include all projects, and allow selection of any project as current, but accessing the project without a specific role will result in forbidden. Either block resource wide roles or implement them in policies.
+- [x] Issue policy has been removed. Assess whether it is required or just use document policy, like circuits.
+- [x] Fix update test in tag system test.
+- [x] Fix error in doc_types system test (edit).
+- [-] Fix error in discipline system test where the test seems to be building new disciplines. This appears to be a Capybara issue, Claude couldn't solve it.
+- [x] Write a test for collapsible on attribute rather than association (specifically discipline prefix schema).
+- [ ] Decide what to do about deletion of data. It is affecting many aspects of the architecture.
+- [x] Complete demand system test after refactor.
+- [x] Fix tag prefix warning message for non-conforming prefix.
+- [x] Fix assertion in projects system test for show link with no text.
+- [x] Generators file input from ruby format.
+- [x] Clean up abstraction of policies and policy tests. Update generator and tests.
+- [x] Generic tag_resource_policy may be required. Generator provides for tag nesting but use case is not certain. Only demands are tag linked but not tagable.
+- [#45] Complete nested system test for scaffold generator.
+- [x] Scaffold generator to build routes for namespaced models other than tagables.
+- [x] Update module generator routes edit action with new tagable structure. The insert hooks are all changed.
+- [x] In show views with loop children (only instruments), loop children should only be in the same discipline.
+
+## Refactoring Opportunities
+
+- [x] Improve role and permissions implementation and workflow.
+- [x] Refactor models to include a universal "label" attribute to be used when presenting polymorphic associations.
+- [x] Refactor projects controller with improved workflow.
+- [x] Add type checking with Sorbet or RBS - rejected.
+- [x] Implement caching for frequently accessed data - deferred: nothing in the app calls `Rails.cache` or uses fragment caching today, so there's nothing to tune yet. Rails only caches automatically for per-request AR queries and fingerprinted assets (already configured). Revisit once production shows an actual slow view or repeated lookup; at that point switch `config.cache_store` (currently the file-based default) to `:redis_cache_store`, reusing the Redis already provisioned for Action Cable.
+- [x] Upgrade to Rails 8 (Completed in rails8 branch).
+- [x] Refactor electrical policy classes (CablePolicy, SwitchboardPolicy, MotorPolicy, LightCctPolicy, SocketCctPolicy) to use a shared concern or base class to reduce code duplication.
+- [x] Refactor all views to use pundit policy checks.
+- [x] Change terminology and implementation from project owner to project manager.
+- [x] Refactor projects controller and application controller setting of current project: `def after_sign_in_path_for(resource)to use app/controllers/concerns/current_project_concern.rb to reduce code duplication.
+- [x] Tags:
+  - [x] Refactor tag 'description' to 'service'.
+  - [x] Add location attribute to tag, remove from all tagables.
+  - [x] Add parent/child capability.
+- [x] Cable types:  
+  - [x] convert core material to enum.
+  - [x] convert insulation material to enum.
+  - [x] add volt rating enum.
+- [x] Motors:
+  - [x] convert motor type to enum.
+  - [x] convert frame size to enum.
+  - [x] build a view helper and a form helper for ingress protection, convert ingress protection to use them.
+- [x] Redesign tag module:
+  - [x] builder/parser model for each discipline which creates the string according to the required format, and can parse the string back into the components.
+  - [x] provide default format for each discipline, e.g. isa5.1
+  - [x] add next/previous functionality
+  - [x] add colour code by discipline
+- [x] Look at use of hover on buttons, and use turbo to prevent page refresh.
+- [x] Improve implementation of Discipline model, including translation. Consider using constants hash for each project.
+- [-] Refactor colour system to use CSS variables. Deferred - probably not worthwhile.
+- [x] Abstract ingress protection functionality so it can be reused by instrument module.
+- [-] Change index delete links to use turbo to prevent full page refresh. - Turbo enabled.
+- [-] Revise index views to use turbo for ransack searches.
+- [x] Replace devise views with bespoke views in the style of the rest of the application.
+- [x] Add user profile info.
+- [x] Refactor RBAC system with functional roles limited to project scope, and project admin roles.
+- [#44] Refactor all controllers to use the preferred safe params expect rather than require.
+- [x] Refactor test helpers to minimise code duplication, and simplify generation of new models.
+- [x] Improve forbidden error logging messages, include user. Consider automatic sign out.
+- [-] Abstract controllers for project linked models, similar to tagables controller. Defer until after developing change control and document issues, when requirements will be understood better.
+- [x] Add catalog required roles in disciplines, to allow different role for cable types and doc types, etc.
+- [x] Refactor cable and cable types to be core module available to electrical, instruments, telecoms (any module). Should belong to discipline.
+- [x] Index views should preload permissions and not check every row.
+- [#21] Share enums reused across models.
+- [x] Scaffold generators should include enum configuration, or build a separate generator.
+- [x] Include a valid value for fields in generators args.
+- [x] Consider whether the same improvement applies to demand.
+- [x] Remove unnecessary namespacing within electrical module naming, e.g. switchboard has many electrical_circuits. Switchboards can refer to circuits, and circuits can refer to switchboards, without the module prefix.
+- [x] Transition documents to discipline nested.
+- [x] Transition cable types to core module, discipline nested. This should allow other disciplines (instrument, communication) to create appropriate cable types.
+- [x] Revise index views to get credentials once and use for links, for all resources where the credentials are not granular, which would be most everything that is discipline nested.
+- [x] Refactor model translations with count.
+- [x] Revert activerecord translations to convention with / instead of . key for namespaced models.
+- [x] Rename project change module to change management.
+- [#34] Set up ransack to sort on translated attributes where relevant (discipline, enums).
+- [x] Add a prefix breakdown drop down on tags show view.
+- [-] Use scopify to simplify setup for role assignment views. - Not worthwhile.
+- [x] Refactor show views in style of documents, include generator templates.
+- [x] Decide on a standard clear presentation for booleans in show views, add it to show view for circuits, and add it to generic tests and generator templates.
+- [#22] Prettification.
+- [#25] Refactor collapsible component to use only stimulus js.
+- [#26] Migrate i18n translations to a database system rather than YAML.
+- [x] Refactor documents to normalize discipline: remove fk and associate discipline through doc_type.
+- [x] Ditto cables: remove fk and associate discipline through cable_type. At the same time, sort out a decent label and add unique constraint on code.
+- [x] Refactor show views using standardised attributes helper.
+- [x] Refactor form views using standardised form fields helper.
+- [x] Extend views helper for attributes to include decimal numbers with units.
+- [x] Carefully consider use of nested collapsible cards, as in cables from and to. Prefer a more robust nav_link? Ok for now...
+- [#27] Include a scope for unique fields in generators.
+- [-] Add migration and test implementation to generator testing. Very difficult...
+- [-] Build in git commit before scaffold generator and tagable generator run.
+- [#39] Add polymorphic option to associations in generators.
+- [x] Consider changing "discard" to "cancel" on all forms.
+- [#40] Review all labels and use of labels, in headers, on buttons, and for popover titles. Establish consistency across usages, including across show and index views.
+- [#41] Add searching and sorting for from and to fields in cables index.
+- [#36] Refactor the generator's `:step` option to allow the literal value `"any"` (currently coerced as a decimal, so `"any"` is rejected).
+- [#28] Improve index views to allow horizontal scrolling for wider views.
+- [#37] Clean up responsive views - test all on simulator.
+- [#44] Abstract controllers for project, discipline and tag nested resources.
+- [#29] Improve cable index and search options.
+
+## Potential Features
+
+- [#16] Implement copy from other project.
+- [#5] Data revision management
+- [#42] Customize devise users:
+  - [x] Add policy for users
+  - [x] Allow users to self register through devise, edit their own profile and user name, email, password.
+  - [#42] Insert an admin approval in the confirmation process
+  - [-] Disable destroy, because the [future] change history will have links to users making changes. We may need to historise user name changes as well, that's a future problem. The revision management system may well include some sort of active/inactive status features. - Destroy remains available to admins, to cater for events where stuff gets accidentally added. Rather than leave the database cluttered with incorrect records that have no useful history, allow deletion here.
+- [#43] Customize error trapping:
+  - [x] Customize error trapping for Pundit::NotAuthorizedError
+  - [#43] Customize error trapping for unknown format
+  - [x] Customize error trapping for forbidden
+- [#17] Improve locale setting, and include language/currency/flag in locale selection. Include regions with fallback to language for most translations.
+- [x] Develop an application colour theme set. Consider discipline colour coding, also need to consider module colour coding.
+- [-] Build an IP object to allow fully flexible reusable IP code generation. Not required.
+- [-] Allow projects to add role names. - Bad idea.
+- [x] Add a generator for scaffolding nested models.
+- [#18] Add a "locator" so accessing index view from show view centres the index on the present record.
+- [#31] Add a "clear search" button for index views.
+- [#33] Add hover title for search button.
+- [#32] Add highlight to search results for all index views (refer projects).
+- [#19] Add bullet gem for performance issues.
+
+## Notes
+
+- [x] Keep backward compatibility during the Load → Demand transition
+- [#19] Consider adding performance benchmarks for critical paths
