@@ -21,6 +21,14 @@ class ApplicationController < ActionController::Base
   
   rescue_from Pundit::NotAuthorizedError do |exception|
     @exception = exception
+    Rails.logger.warn(
+      "Security: Pundit::NotAuthorizedError raised - " \
+      "Query: #{exception.query}, " \
+      "Record: #{exception.record.class}, " \
+      "Controller: #{controller_name}, " \
+      "Action: #{action_name}, " \
+      "User: #{current_user&.id}"
+    )
     respond_to do |format|
       format.html do
         flash[:danger] = I18n.t('pundit.unauthorized',

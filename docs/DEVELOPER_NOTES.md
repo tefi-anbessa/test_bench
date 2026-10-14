@@ -444,12 +444,12 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Write a test for collapsible on attribute rather than association (specifically discipline prefix schema).
 - [ ] Decide what to do about deletion of data. It is affecting many aspects of the architecture.
 - [x] Complete demand system test after refactor.
-- [ ] Fix tag prefix warning message for non-conforming prefix.
-- [ ] Fix assertion in projects system test for show link with no text.
+- [x] Fix tag prefix warning message for non-conforming prefix.
+- [x] Fix assertion in projects system test for show link with no text.
 - [x] Generators file input from ruby format.
 - [x] Clean up abstraction of policies and policy tests. Update generator and tests.
 - [x] Generic tag_resource_policy may be required. Generator provides for tag nesting but use case is not certain. Only demands are tag linked but not tagable.
-- [ ] Complete nested system test for scaffold generator.
+- [#45] Complete nested system test for scaffold generator.
 - [x] Scaffold generator to build routes for namespaced models other than tagables.
 - [x] Update module generator routes edit action with new tagable structure. The insert hooks are all changed.
 - [x] In show views with loop children (only instruments), loop children should only be in the same discipline.
@@ -474,7 +474,7 @@ It is possible to create multiple tags referencing the same tagable element, des
   - [x] convert core material to enum.
   - [x] convert insulation material to enum.
   - [x] add volt rating enum.
-- [ ] Motors:
+- [x] Motors:
   - [x] convert motor type to enum.
   - [x] convert frame size to enum.
   - [x] build a view helper and a form helper for ingress protection, convert ingress protection to use them.
@@ -492,9 +492,9 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Replace devise views with bespoke views in the style of the rest of the application.
 - [x] Add user profile info.
 - [x] Refactor RBAC system with functional roles limited to project scope, and project admin roles.
-- [ ] Refactor all controllers to use the preferred safe params expect rather than require.
+- [#44] Refactor all controllers to use the preferred safe params expect rather than require.
 - [x] Refactor test helpers to minimise code duplication, and simplify generation of new models.
-- [ ] Improve forbidden error logging messages, include user. Consider automatic sign out.
+- [x] Improve forbidden error logging messages, include user. Consider automatic sign out.
 - [-] Abstract controllers for project linked models, similar to tagables controller. Defer until after developing change control and document issues, when requirements will be understood better.
 - [x] Add catalog required roles in disciplines, to allow different role for cable types and doc types, etc.
 - [x] Refactor cable and cable types to be core module available to electrical, instruments, telecoms (any module). Should belong to discipline.
@@ -524,37 +524,31 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [x] Refactor form views using standardised form fields helper.
 - [x] Extend views helper for attributes to include decimal numbers with units.
 - [x] Carefully consider use of nested collapsible cards, as in cables from and to. Prefer a more robust nav_link? Ok for now...
-- [t] Include a scope for unique fields in generators.
-- [ ] Add migration and test implementation to generator testing. Very difficult...
-- [ ] Build in git commit before scaffold generator and tagable generator run.
-- [ ] Add polymorphic option to associations in generators.
+- [#27] Include a scope for unique fields in generators.
+- [-] Add migration and test implementation to generator testing. Very difficult...
+- [-] Build in git commit before scaffold generator and tagable generator run.
+- [#39] Add polymorphic option to associations in generators.
 - [x] Consider changing "discard" to "cancel" on all forms.
-- [ ] Review all labels and use of labels, in headers, on buttons, and for popover titles. Establish consistency across usages, including across show and index views.
-- [ ] Add searching and sorting for from and to fields in cables index.
-- [ ] Refactor the generator's `:step` option to allow the literal value `"any"` (currently coerced as a decimal, so `"any"` is rejected).
-- [t] Improve index views to allow horizontal scrolling for wider views.
-- [ ] Clean up responsive views - test all on simulator.
-- [ ] Abstract controllers for project, discipline and tag nested resources.
-- [t] Improve cable index and search options.
+- [#40] Review all labels and use of labels, in headers, on buttons, and for popover titles. Establish consistency across usages, including across show and index views.
+- [#41] Add searching and sorting for from and to fields in cables index.
+- [#36] Refactor the generator's `:step` option to allow the literal value `"any"` (currently coerced as a decimal, so `"any"` is rejected).
+- [#28] Improve index views to allow horizontal scrolling for wider views.
+- [#37] Clean up responsive views - test all on simulator.
+- [#45] Abstract controllers for project, discipline and tag nested resources.
+- [#29] Improve cable index and search options.
 
 ## Potential Features
 
-- [#16] Implement copy from other project. Global admins' ability to view (`show?`/`index?`) any
-      resource on any project, bypassing the normal current-project ring fence, exists informally to
-      support this unbuilt workflow - it was never given a clear spec of its own. In hindsight, this
-      should be a separate `#copy` action with its own Pundit policy method, not a standing exception
-      on `show?`/`index?`. When this is actually built, reassess whether the general cross-project
-      view-anywhere admin prerogative is still needed at all, since `#copy` would need its own
-      authorization regardless (see `app/policies/discipline_resource_policy.rb#show?`).
-- [t] Data revision management
-- [ ] Customize devise users:
-  - [ ] Add policy for users
-  - [ ] Allow users to self register through devise, edit their own profile and user name, email, password.
-  - [ ] Insert an admin approval in the confirmation process
-  - [ ] Disable destroy, because the [future] change history will have links to users making changes. We may need to historise user name changes as well, that's a future problem. The revision management system may well include some sort of active/inactive status features.
-- [ ] Customize error trapping:
+- [#16] Implement copy from other project.
+- [#5] Data revision management
+- [#42] Customize devise users:
+  - [x] Add policy for users
+  - [x] Allow users to self register through devise, edit their own profile and user name, email, password.
+  - [#42] Insert an admin approval in the confirmation process
+  - [-] Disable destroy, because the [future] change history will have links to users making changes. We may need to historise user name changes as well, that's a future problem. The revision management system may well include some sort of active/inactive status features. - Destroy remains available to admins, to cater for events where stuff gets accidentally added. Rather than leave the database cluttered with incorrect records that have no useful history, allow deletion here.
+- [#43] Customize error trapping:
   - [x] Customize error trapping for Pundit::NotAuthorizedError
-  - [ ] Customize error trapping for unknown format
+  - [#43] Customize error trapping for unknown format
   - [x] Customize error trapping for forbidden
 - [#17] Improve locale setting, and include language/currency/flag in locale selection. Include regions with fallback to language for most translations.
 - [x] Develop an application colour theme set. Consider discipline colour coding, also need to consider module colour coding.
@@ -562,15 +556,15 @@ It is possible to create multiple tags referencing the same tagable element, des
 - [-] Allow projects to add role names. - Bad idea.
 - [x] Add a generator for scaffolding nested models.
 - [#18] Add a "locator" so accessing index view from show view centres the index on the present record.
-- [#31] Add a "clear search" button for index views. 
+- [#31] Add a "clear search" button for index views.
 - [#33] Add hover title for search button.
 - [#32] Add highlight to search results for all index views (refer projects).
-- [ ] Add bullet gem for performance issues.
+- [#19] Add bullet gem for performance issues.
 
 ## Notes
 
 - [x] Keep backward compatibility during the Load → Demand transition
-- [ ] Consider adding performance benchmarks for critical paths
+- [#19] Consider adding performance benchmarks for critical paths
 
 ## Glossary
 
