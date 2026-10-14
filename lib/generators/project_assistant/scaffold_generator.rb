@@ -7,13 +7,13 @@ module ProjectAssistant
     include ProjectAssistant::Shared::ScaffoldHelper
     source_root File.expand_path("scaffold/templates", __dir__)
     class_option :definition, type: :string, desc: "Fields definition file name"
-    class_option :nesting, type: :string, desc: "Parent class, options: none (default), project, discipline, tag, document, issue"
-    
+    class_option :nesting, type: :string, desc: "Parent class, options: #{VALID_NESTING_OPTIONS.join(', ')} (none is default)"
+
     def validate_nesting
       # $stderr.puts "DEBUG (GENERATOR): options[:nesting]: #{options[:nesting].inspect} (#{options[:nesting].class})"
       errors = []
       if options[:nesting].present?
-        unless options[:nesting].in? %w[project discipline tag document issue none]
+        unless VALID_NESTING_OPTIONS.map(&:to_s).include?(options[:nesting])
           errors << "Invalid nesting option #{options[:nesting]}"
         end
         @nesting = options[:nesting].to_sym

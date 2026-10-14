@@ -1,4 +1,5 @@
 require "application_system_test_case"
+require "helpers/nested_resource_system_tests"
 <%- if @namespaced -%>
 module <%= module_name %>
 <%- end -%>
@@ -6,22 +7,54 @@ module <%= module_name %>
     include Devise::Test::IntegrationHelpers
     include Warden::Test::Helpers
     include ActionView::Helpers::NumberHelper
+    include NestedResourceSystemTests
+
+    # The only two routes that actually vary by nesting type - everything
+    # else (content check, show, new, edit, update, delete) is handled
+    # generically by NestedResourceSystemTests.
+    def resource_index_path
+      <%= index_path(@nesting) %>
+    end
+
+    def new_resource_path
+      <%= new_path(@nesting) %>
+    end
 
     setup do
-      setup_projects_and_users
-      # Discipline defaults to (name: "Electrical", required_role: :designer)
-      # Set as required
+      setup_common_data
+<%- case @nesting -%>
+<%- when :discipline -%>
       setup_disciplines
-      # Role for accredited users defaults to (role = :designer)
-      # Set as required
       setup_accredited_users
+<%- when :tag -%>
+      setup_disciplines
+      setup_accredited_users
+      setup_tags
+<%- when :document -%>
+      setup_disciplines
+      setup_accredited_users
+      setup_documents
+<%- when :project -%>
+      # Reuse the project-scoped tiers setup_projects_and_users already
+      # created - this resource isn't discipline-scoped, so there's no
+      # functional role to grant a separate accredited_user.
+      @accredited_user = @project_manager
+      @admin = @project_admin
+<%- when :none -%>
+      # No distinct editor tier is assumed here - adjust if this resource's
+      # policy actually grants edit access to someone other than admins.
+      @accredited_user = @admin
+<%- end -%>
       setup_model_specific_data
     end
 
     def setup_model_specific_data
+      setup_nested_resources(<%= @nesting.inspect %>, <%= @nesting == :none ? "nil" : "@#{@nesting}" %>)
+      @resource_index_header = I18n.t("<%= view_key %>.index.header", scope_text: <%= index_scope_text %>)
+      @resource_index_title = I18n.t("<%= view_key %>.index.title")
 
-      # List fields that should appear in index. 
-      # The generator will include test for sort link header for each included field, 
+      # List fields that should appear in index.
+      # The generator will include test for sort link header for each included field,
       # and test for an appropriate value field for the type.
       @index_fields = %i[<%= @index_field_names.join(" ") %>]
 

@@ -16,7 +16,7 @@ module ProjectAssistant
       @class_name = "ExistingModule::NewModel" # Default namespaced class
       # Set the namedbase substitutes
       name_setup_for_test
-      @nesting_options = %i[project discipline tag none]
+      @nesting_options = ProjectAssistant::Shared::ScaffoldHelper::VALID_NESTING_OPTIONS
 
       # Create clean files for testing (avoid conflicts with real app files)
       FileUtils.mkdir_p(File.join(destination_root, 'config'))
@@ -875,6 +875,10 @@ nr: "Not Required"
 
     def singular_name
       @model_class_name.underscore # "new_model"
+    end
+
+    def plural_name
+      @singular_name.pluralize # "new_models"
     end
 
     def table_name

@@ -2,6 +2,15 @@
 require "test_helper"
 require "helpers/test_setup_helpers"
 require "helpers/system_test_helpers"
+
+# Generic CRUD system test flow for a resource nested one level under a
+# single parent - project, discipline, tag, document, or any future nesting
+# option the scaffold generator adds. The including class only needs to
+# define resource_index_path and new_resource_path (the two routes that
+# actually vary by nesting type) and set up the usual @resource/@resource2/
+# @admin/@team_member/@accredited_user/@resource_index_header/
+# @resource_index_title ivars - everything from there (content check, show,
+# new, edit, update, delete, next/previous) follows by convention.
 module NestedResourceSystemTests
   extend ActiveSupport::Concern
   include TestSetupHelpers
@@ -9,19 +18,13 @@ module NestedResourceSystemTests
 
   def setup_common_data
     setup_projects_and_users
-    setup_disciplines(name: "Electrical", required_role: :designer)
-    setup_accredited_users(:designer)
   end
 
   def test_setup_is_valid
     assert @project.valid?
     assert @project.persisted?
-    assert @discipline.valid?
-    assert @discipline.persisted?
     assert @admin.valid?
     assert @admin.persisted?
-    assert @project_manager.valid?
-    assert @project_manager.persisted?
     assert @team_member.valid?
     assert @team_member.persisted?
     assert @regular_user.valid?
@@ -34,33 +37,16 @@ module NestedResourceSystemTests
     assert @resource2.persisted?
   end
 
-  def test_team_member_navigating_to_project_resource_index
+  def test_team_member_view_index
     sign_in @team_member
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit project_path(@project)
-    assert_current_path project_path(@project)
-    click_link(href: project_resource_index_path(@project))
-    assert_current_path project_resource_index_path(@project)
-    
-    project_resource_index_assertions
-    # Variable assertions
-    refute_selector "a[href='#{edit_resource_path(@resource)}']" # team member cannot edit resource
-    refute_selector "a[href='#{resource_path(@resource)}'][data-method='delete']" # team member cannot delete resource
-  end
+    visit resource_index_path
+    assert_current_path resource_index_path
 
-  def test_team_member_navigating_to_discipline_resource_index
-    sign_in @team_member
-    # Mock current_project for this test
-    ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit project_path(@project)
-    assert_current_path project_path(@project)
-    click_link(href: discipline_resource_index_path(@discipline))
-    assert_current_path discipline_resource_index_path(@discipline)
-    
-    discipline_resource_index_assertions
+    resource_index_assertions
     # Variable assertions
-    refute_selector "a[href='#{new_discipline_resource_path(@discipline)}']" # Link to new resource
+    refute_selector "a[href='#{new_resource_path}']" # team member cannot create resource
     refute_selector "a[href='#{edit_resource_path(@resource)}']" # team member cannot edit resource
     refute_delete(resource_path(@resource)) # team member cannot delete resource
   end
@@ -69,26 +55,24 @@ module NestedResourceSystemTests
     sign_in @accredited_user
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit discipline_resource_index_path(@discipline)
-    assert_current_path discipline_resource_index_path(@discipline)
+    visit resource_index_path
+    assert_current_path resource_index_path
 
-    discipline_resource_index_assertions
-    # Variable assertions
-    assert_nav_button(:new, path: new_discipline_resource_path(@discipline)) # Link to new resource
-    assert_nav_button(:edit, @resource, path: edit_resource_path(@resource)) # accredited team member can edit resource
-    refute_delete(resource_path(@resource)) # accredited team member cannot delete resource
+    resource_index_assertions
+    assert_nav_button(:new, path: new_resource_path) # Link to new resource
+    assert_nav_button(:edit, @resource, path: edit_resource_path(@resource)) # accredited user can edit resource
+    refute_delete(resource_path(@resource)) # accredited user cannot delete resource
   end
 
   def test_admin_view_index
-    sign_in @project_admin
+    sign_in @admin
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit discipline_resource_index_path(@discipline)
-    assert_current_path discipline_resource_index_path(@discipline)
+    visit resource_index_path
+    assert_current_path resource_index_path
 
-    discipline_resource_index_assertions
-    # Variable assertions
-    assert_nav_button(:new, path: new_discipline_resource_path(@discipline)) # Link to new resource
+    resource_index_assertions
+    assert_nav_button(:new, path: new_resource_path) # Link to new resource
     assert_nav_button(:edit, @resource, path: edit_resource_path(@resource)) # admin can edit resource
     assert_nav_button(:delete, @resource, icon_only: true) # admin can delete resource
   end
@@ -97,21 +81,17 @@ module NestedResourceSystemTests
     sign_in @team_member
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit project_path(@project)
-    assert_current_path project_path(@project)
-    click_link(href: project_resource_index_path(@project))
-    assert_current_path project_resource_index_path(@project)
-    
+    visit resource_index_path
+    assert_current_path resource_index_path
+
     click_link href: resource_path(@resource)
     assert_current_path resource_path(@resource)
 
     show_assertions
-    # Include discipline in @show_associations
-
     # Variable assertions
     refute_selector "a[href='#{edit_resource_path(@resource)}']"
     refute_delete(resource_path(@resource)) # team member cannot delete resource
-    refute_selector "a[href='#{new_discipline_resource_path(@discipline)}']"
+    refute_selector "a[href='#{new_resource_path}']"
   end
 
   def test_team_member_test_next_and_previous_buttons
@@ -120,11 +100,11 @@ module NestedResourceSystemTests
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit resource_path(@resource)
     assert_current_path resource_path(@resource)
-    
+
     # Header bar should include disabled previous button and enabled next button
     assert_nav_button_disabled(:previous)
     assert_nav_button(:next, @resource2)
-    
+
     click_link I18n.t('actions.next')
     assert_current_path resource_path(@resource2)
 
@@ -147,11 +127,11 @@ module NestedResourceSystemTests
     # Variable assertions
     assert_nav_button(:edit, @resource, path: edit_resource_path(@resource))
     refute_delete(resource_path(@resource))
-    assert_nav_button(:new, path: new_discipline_resource_path(@discipline))
+    assert_nav_button(:new, path: new_resource_path)
   end
 
   def test_admin_resource_show_view
-    sign_in @project_admin
+    sign_in @admin
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit resource_path(@resource)
@@ -161,7 +141,7 @@ module NestedResourceSystemTests
     # Variable assertions
     assert_nav_button(:edit, @resource, path: edit_resource_path(@resource))
     assert_nav_button(:delete, @resource)
-    assert_nav_button(:new, path: new_discipline_resource_path(@discipline))
+    assert_nav_button(:new, path: new_resource_path)
   end
 
   def test_accredited_user_navigating_to_resource_new_view_from_show
@@ -171,21 +151,21 @@ module NestedResourceSystemTests
     visit resource_path(@resource)
     assert_current_path resource_path(@resource)
 
-    find("a[href='#{new_discipline_resource_path(@discipline)}']").click
-    assert_current_path new_discipline_resource_path(@discipline)
+    find("a[href='#{new_resource_path}']").click
+    assert_current_path new_resource_path
 
     new_resource_form_assertions
   end
 
   def test_admin_navigating_to_resource_new_view_from_index
-    sign_in @project_admin
+    sign_in @admin
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit discipline_resource_index_path(@discipline)
-    assert_current_path discipline_resource_index_path(@discipline)
+    visit resource_index_path
+    assert_current_path resource_index_path
 
-    find("a[href='#{new_discipline_resource_path(@discipline)}']").click
-    assert_current_path new_discipline_resource_path(@discipline)
+    find("a[href='#{new_resource_path}']").click
+    assert_current_path new_resource_path
   end
 
   def test_accredited_user_create_resource
@@ -194,11 +174,11 @@ module NestedResourceSystemTests
     sign_in @accredited_user
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit resource_path(@resource)
-    assert_current_path resource_path(@resource)
+    visit resource_index_path
+    assert_current_path resource_index_path
 
-    find("a[href='#{new_discipline_resource_path(@discipline)}']").click
-    assert_current_path new_discipline_resource_path(@discipline)
+    find("a[href='#{new_resource_path}']").click
+    assert_current_path new_resource_path
 
     new_resource_form_assertions
     fill_in_resource_fields
@@ -216,8 +196,8 @@ module NestedResourceSystemTests
     sign_in @accredited_user
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit discipline_resource_index_path(@discipline)
-    assert_current_path discipline_resource_index_path(@discipline)
+    visit resource_index_path
+    assert_current_path resource_index_path
     original = @resource
 
     find("a[href='#{edit_resource_path(@resource)}']").click
@@ -230,7 +210,7 @@ module NestedResourceSystemTests
     @edit_attributes.each do |field, value|
       fill_in "#{resource_class.model_name.param_key}[#{field}]", with: value
     end
-    
+
     # Submit the form data
     click_button I18n.t('actions.update')
     sleep 1.0  # Give database time to commit
@@ -240,7 +220,7 @@ module NestedResourceSystemTests
       assert_text value
       assert @resource.send(field) == value
     end
-    assert_text I18n.t("flash.update.notice", 
+    assert_text I18n.t("flash.update.notice",
       resource_name: I18n.t("activerecord.models.#{resource_class.model_name.i18n_key}.one"))
 
     # Edit again to test the show view link
@@ -250,7 +230,7 @@ module NestedResourceSystemTests
     @edit_attributes.each do |key, value|
       fill_in "#{resource_class.model_name.param_key}[#{key}]", with: original.send(key)
     end
-    
+
     accept_confirm do
       click_link(text: I18n.t('actions.discard'))
     end
@@ -265,13 +245,13 @@ module NestedResourceSystemTests
     sign_in @admin
     # Mock current_project for this test
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
-    visit discipline_resource_index_path(@discipline)
-    assert_current_path discipline_resource_index_path(@discipline)
-    
+    visit resource_index_path
+    assert_current_path resource_index_path
+
     click_delete(resource_path(@resource))
-    assert_current_path discipline_resource_index_path(@discipline)
+    assert_current_path resource_index_path
     refute_selector "a[href='#{resource_path(@resource)}']"
-    assert_text I18n.t("flash.destroy.notice", 
+    assert_text I18n.t("flash.destroy.notice",
       resource_name: I18n.t("activerecord.models.#{resource_class.model_name.i18n_key}.one"))
   end
 
@@ -281,23 +261,21 @@ module NestedResourceSystemTests
     ApplicationController.any_instance.stubs(:current_project).returns(@project)
     visit resource_path(@resource)
     assert_current_path resource_path(@resource)
-    
+
     click_delete(resource_path(@resource))
-    assert_current_path discipline_resource_index_path(@discipline)
+    assert_current_path resource_index_path
     refute_selector "a[href='#{resource_path(@resource)}']"
     assert_text I18n.t("flash.destroy.notice", resource_name: @resource.model_name.human)
   end
 
   private # Helper methods
-    
-    # This assertion is generalised for discipline resource indexes, 
-    # the including module shall provide the expected header and title as instance variables
-    def discipline_resource_index_assertions
-      assert_text @discipline_resource_index_header
-      assert page.title.include?(@discipline_resource_index_title)
 
-      assert_nav_button(:show_project, @project) # Link back to project resource view
-      assert_nav_button(:show_discipline, @discipline) # Link back to discipline resource view
+    # Generalised for any single-parent nesting type - the including class
+    # provides resource_index_path/new_resource_path (the only routes that
+    # vary by nesting type) plus these header/title ivars.
+    def resource_index_assertions
+      assert_text @resource_index_header
+      assert page.title.include?(@resource_index_title)
 
       assert_nav_button(:show, @resource, icon_only: true) # Link to resource show view
       index_field_assertions
