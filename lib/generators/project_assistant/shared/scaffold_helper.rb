@@ -25,6 +25,15 @@ module ProjectAssistant
       # Don't edit this.
       VALID_FIELD_TYPES = (RAILS_FIELD_TYPES + SPECIAL_FIELD_TYPES).freeze
 
+      # TODO: document and issue are valid routes.rb nesting points (see the
+      # "Document nested routes"/"Issue nested routes" insertion comments)
+      # but aren't supported end-to-end yet - policy_resource_class below has
+      # no :document/:issue case, so the generated policy comes out as
+      # "class FooPolicy < " (blank superclass, a syntax error), and
+      # controller_mixin's "#{nesting}ResourcesController" doesn't correspond
+      # to any module that actually exists. Re-add them here once that's fixed.
+      VALID_NESTING_OPTIONS = %i[project discipline tag none].freeze
+
       # Options can be added, but you will have to write the generator and test code to implement them.
       VALID_OPTIONS = %i[required index uniq unique valid precision scale units si step max min].freeze
       # required will add a validation to the model and a null: false in the migration.
@@ -613,12 +622,20 @@ module ProjectAssistant
           [action, record]
         end
 
+        # Electrical::Heater -> "electrical.heaters"; Document -> "documents"
+        # Matches SystemTestHelpers#view_key (test/helpers/system_test_helpers.rb),
+        # computed here from generator state since the model class doesn't
+        # exist yet at generation time.
+        def view_key
+          @namespaced ? "#{@class_path.join('.')}.#{plural_name}" : plural_name
+        end
+
         def index_scope_text
           case @nesting
           when :tagable
             "[t('activerecord.models.discipline.one'), @discipline.label].join(': ')"
           when :none
-            "t('index.all', models: t('activerecord.models.project.other'))"
+            "t('index.all', models: t('activerecord.models.#{i18n_model_scope}.other'))"
           else
             "[t('activerecord.models.#{@nesting}.one'), @#{@nesting}.label].join(': ')"
           end
@@ -1241,6 +1258,15 @@ module ProjectAssistant
           assert_includes content, "class #{@model_class_name.pluralize}SystemTest < ApplicationSystemTestCase"
           assert_includes content, "include Devise::Test::IntegrationHelpers"
           assert_includes content, "include Warden::Test::Helpers"
+          assert_includes content, "include NestedResourceSystemTests"
+          assert_includes content, index_path(nesting)
+          assert_includes content, new_path(nesting)
+          parent = nesting == :none ? "nil" : "@#{nesting}"
+          assert_includes content, "setup_nested_resources(#{nesting.inspect}, #{parent})"
+          @nesting = nesting # index_scope_text reads @nesting, not an argument
+          assert_includes content, "I18n.t(\"#{view_key}.index.header\", scope_text: #{index_scope_text})"
+          assert_includes content, "I18n.t(\"#{view_key}.index.title\")"
+
           text = @index_field_names.join(" ")
           assert_includes content, "@index_fields = %i[#{text}]"
 

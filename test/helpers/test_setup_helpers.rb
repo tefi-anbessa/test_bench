@@ -92,6 +92,25 @@ module TestSetupHelpers
     @unassigned_tag = create(:tag, :unique_tag, discipline: @discipline, service: "Unassigned tag")
   end
 
+  # Must run setup_disciplines first
+  def setup_documents
+    @document = create(:document, discipline: @discipline)
+    @other_document = create(:document, discipline: @other_discipline)
+  end
+
+  # Including class must implement resource_class method. Builds two
+  # resources in the *same* scope (unlike setup_project_resources/
+  # setup_discipline_resources, which build an in-scope and an
+  # out-of-scope one for policy tests) - used by NestedResourceSystemTests
+  # for the next/previous navigation test. `nesting` is the association
+  # name to nest under (:project, :discipline, :tag, :document, etc), or
+  # :none for no parent at all.
+  def setup_nested_resources(nesting, parent)
+    attrs = nesting == :none ? {} : { nesting => parent }
+    @resource = create(resource_class.model_name.param_key, **attrs)
+    @resource2 = create(resource_class.model_name.param_key, **attrs)
+  end
+
   # Including class must implement resource_class method
   # Must run setup_tags first
   def setup_tagable_resources
