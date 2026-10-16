@@ -7,10 +7,14 @@ class SwatchPolicy < ApplicationPolicy
   end
 
   def index?
+    # Protect against url injection
+    return false if user.nil?
     true
   end
 
   def show?
+    # Protect against url injection
+    return false if user.nil?
     true
   end
 

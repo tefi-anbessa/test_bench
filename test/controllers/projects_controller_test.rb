@@ -265,7 +265,7 @@ class ProjectsControllerTest < ActionController::TestCase
     get :select
     assert_response :success
     assert_not_nil assigns(:options)
-    assert_equal assigns(:options).count, 2
+    assert_equal assigns(:options).count, 1
   end
 
   test "ordinary user can call select but won't have any selections available" do
@@ -273,7 +273,7 @@ class ProjectsControllerTest < ActionController::TestCase
     get :select
     assert_response :success
     assert_not_nil assigns(:options)
-    assert_equal 1, assigns(:options).count
+    assert_equal 0, assigns(:options).count
   end
 
   test "team member can call set with valid project" do
@@ -285,13 +285,6 @@ class ProjectsControllerTest < ActionController::TestCase
   end
 
   # Set action tests
-  test "regular user can call set with no project" do
-    sign_in @regular_user
-    post :set, params: { project_id: 'none' }
-    assert_nil session[:project_id]
-    assert_redirected_to projects_url
-  end
-
   test "regular user can call set with invalid project" do
     sign_in @regular_user
     @new_project = create(:project)

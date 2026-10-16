@@ -118,7 +118,7 @@ module NestedResourcesController
     end
     
     def set_parent
-      return unless nesting.in?(%i[tag discipline project])
+      return unless nesting.in?(%i[tag discipline project document issue])
 
       klass = nesting.to_s.classify.constantize
       @parent_var  = :"@#{nesting}"
@@ -133,7 +133,7 @@ module NestedResourcesController
     def set_resource
       @resource = policy_scope(resource_class).find_by(id: params[:id])
       raise ApplicationController::ConflictError, :out_of_scope if @resource.nil?
-      @scope = 
+      @scope =
         case nesting
         when :project
           policy_scope(resource_class).joins(:project).where(project: @project)
@@ -141,6 +141,10 @@ module NestedResourcesController
           policy_scope(resource_class).joins(discipline: :project).where(discipline: @discipline)
         when :tag
           policy_scope(resource_class).joins(tag: { discipline: :project }).where(tag: @tag)
+        when :document
+          policy_scope(resource_class).joins(document: { discipline: :project }).where(document: @document)
+        when :issue
+          policy_scope(resource_class).joins(issue: { document: { discipline: :project } }).where(issue: @issue)
         end
       @parent = @resource.public_send(nesting)
       @parent_var = :"@#{nesting}"

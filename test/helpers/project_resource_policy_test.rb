@@ -68,11 +68,10 @@ module ProjectResourcePolicyTest
       refute_includes scope, @other_resource
     end
 
-    test 'scope for global admins returns resources for all projects when current project is nil' do
+    test 'scope for global admins returns no resources when current project is nil' do
       context = ApplicationPolicy::UserContext.new(@admin, nil)
       scope = policy_class::Scope.new(context, resource_class).resolve
-      assert_includes scope, @resource
-      assert_includes scope, @other_resource
+      assert_empty scope
     end
 
     test 'scope for users without project role returns empty scope' do
@@ -100,12 +99,9 @@ module ProjectResourcePolicyTest
       assert policy(@accredited_user, @project).index?
     end
 
-    test 'index? is available to admins without current project' do
-      assert policy(@admin, nil).index?
-      assert policy(@app_owner, nil).index?
-    end
-
-    test 'index? denies team members when no project is selected' do
+    test 'index? denies everyone, including admins, when no project is selected' do
+      refute policy(@admin, nil).index?
+      refute policy(@app_owner, nil).index?
       refute policy(@project_manager, nil).index?
       refute policy(@project_admin, nil).index?
       refute policy(@team_member, nil).index?
@@ -133,18 +129,19 @@ module ProjectResourcePolicyTest
       assert policy(@accredited_user, @project, @resource).show?
     end
 
-    test 'show? denies users without a project role to view resource' do
+    test 'show? denies everyone, including admins, a resource on a different project than the one currently selected' do
       refute policy(@project_manager, @project, @other_resource).show?
       refute policy(@project_admin, @project, @other_resource).show?
       refute policy(@team_member, @project, @other_resource).show?
       refute policy(@accredited_user, @project, @other_resource).show?
-      assert policy(@admin, @project, @other_resource).show?
-      assert policy(@app_owner, @project, @other_resource).show?
+      refute policy(@admin, @project, @other_resource).show?
+      refute policy(@app_owner, @project, @other_resource).show?
     end
 
-    test 'show? allows admins with nil current project to view any resource' do
-      assert policy(@admin, nil, @resource).show?
-      assert policy(@admin, nil, @other_resource).show?
+    test 'show? denies everyone, including admins, any resource when no current project is selected' do
+      refute policy(@admin, nil, @resource).show?
+      refute policy(@admin, nil, @other_resource).show?
+      refute policy(@app_owner, nil, @resource).show?
     end
 
     test 'show? denies a user with a role on the resource project when it is not the current project' do

@@ -41,15 +41,16 @@ class SourceFormatPolicy < ApplicationPolicy
   def edit?
     # Protect against url injection
     return false if user.nil?
-    user.is_admin? || user.is_app_owner? || user.roles.exists?(name: :project_admin) || 
-      user.roles.exists?(name: :document_controller)
+    # Matrix: Edit SourceFormat is Global-Admin-only (unlike Create, which
+    # also allows project_admin/document_controller - editing shared,
+    # system-wide reference data is more tightly held than contributing to it).
+    user.is_admin? || user.is_app_owner?
   end
 
   def update?
     # Protect against url injection
     return false if user.nil?
-    user.is_admin? || user.is_app_owner? || user.roles.exists?(name: :project_admin) || 
-      user.roles.exists?(name: :document_controller)
+    user.is_admin? || user.is_app_owner?
   end
 
   def destroy?

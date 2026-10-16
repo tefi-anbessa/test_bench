@@ -59,8 +59,6 @@ cn:
       title:            "Select Project"
       header:           "Project Selection"
       select:           "Select"
-      no_project:       "No Project"
-      no_project_help:  "Select this to work outside of any project"
       no_description:   "No description"
       cancel:           "Cancel"
     new:

@@ -2,33 +2,28 @@
 
 class DocTypePolicy < DisciplineResourcePolicy
 
-  class Scope < ApplicationPolicy::Scope
-    def resolve
-      if current_project.present? && 
-        (user_has_project_role?(current_project) || user&.is_admin? || user&.is_app_owner?)
-          scope.joins(:discipline).where(disciplines: { project_id: current_project.id })
-      elsif user&.is_admin? || user&.is_app_owner?
-        scope.all
-      else
-        scope.none
-      end
-    end
-  end
+  # No own Scope - doc_types.discipline_id is a direct column, so the
+  # inherited DisciplineResourcePolicy::Scope already produces the same
+  # query without duplicating it here.
 
   # Override index? from DisciplineResourcePolicy
   # Only doc controllers and admins need to see the doc type index
   def index?
     # Protect against url injection
     return false if user.nil?
-    return true if user&.is_admin? || user&.is_app_owner?
+    # Current project is required - no cross-project exception, admin included.
+    return false if current_project.nil?
     if record.is_a?(DocType)
-      (user.has_role?(:document_controller, record.discipline) || 
-        user.has_role?(:document_controller, record.discipline.project) || 
-        user.is_project_admin_of?(record.project))
+      record.project == current_project &&
+        (user.has_role?(:document_controller, record.discipline) ||
+          user.has_role?(:document_controller, record.discipline.project) ||
+          user.is_project_admin_of?(record.project) ||
+          user.is_admin? || user.is_app_owner?)
     # When discipline is not available, use current project to determine permission
     elsif record == DocType
-      user.has_role?(:document_controller, current_project) || 
-        user.is_project_admin_of?(current_project)
+      user.has_role?(:document_controller, current_project) ||
+        user.is_project_admin_of?(current_project) ||
+        user.is_admin? || user.is_app_owner?
     end
   end
 

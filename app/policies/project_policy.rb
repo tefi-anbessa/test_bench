@@ -117,10 +117,4 @@ class ProjectPolicy < ApplicationPolicy
     
     false
   end
-
-  private
-
-    def project_manager?
-      user.present? && user.has_role?(:project_manager, record)
-    end
 end

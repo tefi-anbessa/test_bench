@@ -24,18 +24,13 @@ module Electrical
 
     class Scope < ApplicationPolicy::Scope
       def resolve
-        if current_project.present? && 
-          (user_has_project_role?(current_project) || 
-          user&.is_admin? || 
-          user&.is_app_owner?)
+        if current_project.present? && user_has_project_role?(current_project)
           # Get all demandables that belong to the current project through their tags
-          scope.joins('INNER JOIN tags ON electrical_demands.demandable_type = tags.tagable_type AND 
+          scope.joins('INNER JOIN tags ON electrical_demands.demandable_type = tags.tagable_type AND
               electrical_demands.demandable_id = tags.tagable_id')
               .joins('INNER JOIN disciplines ON tags.discipline_id = disciplines.id')
               .joins('INNER JOIN projects ON disciplines.project_id = projects.id')
               .where(projects: { id: current_project.id })
-        elsif user&.is_admin? || user&.is_app_owner?
-          scope.all
         else
           scope.none
         end
@@ -45,21 +40,17 @@ module Electrical
     def index?
       # Protect against url injection
       return false if user.nil?
-      # Global admins can see index irrespective of current project
-      return true if user&.is_admin? || user&.is_app_owner?
+      # Current project is required to set scope (global roles count as
+      # having a role on it too - see user_has_project_role?).
       current_project.present? && user_has_project_role?(current_project)
     end
 
     def show?
       # Protect against url injection
       return false if user.nil?
-      # Global admins can see any record on any project - a deliberate
-      # exception to the current-project ring fence below, kept to support
-      # the unbuilt "copy from other project" workflow (see
-      # docs/DEVELOPER_NOTES.md).
-      return true if user&.is_admin? || user&.is_app_owner?
-      # Everyone else is restricted to the currently selected project, even
-      # if they also hold a role on the record's actual project.
+      # Restricted to the currently selected project - global roles count
+      # as having a role on it too (see user_has_project_role?), but there
+      # is no cross-project exception: current_project must be set and match.
       current_project.present? &&
         tag.project == current_project &&
         user_has_project_role?(current_project)

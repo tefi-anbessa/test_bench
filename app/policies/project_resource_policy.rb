@@ -10,11 +10,8 @@
 class ProjectResourcePolicy < ApplicationPolicy
   class Scope < ApplicationPolicy::Scope
     def resolve
-      if current_project.present? && 
-        (user_has_project_role?(current_project) || user&.is_admin? || user&.is_app_owner?)
+      if current_project.present? && user_has_project_role?(current_project)
         scope.where(project_id: current_project.id)
-      elsif user&.is_admin? || user&.is_app_owner?
-        scope.all
       else
         scope.none
       end
@@ -24,21 +21,17 @@ class ProjectResourcePolicy < ApplicationPolicy
   def index?
     # Protect against url injection
     return false if user.nil?
-    # Global admins can see index irrespective of current project
-    return true if user&.is_admin? || user&.is_app_owner?
-    # Other users must have current project set in order to set scope
+    # Current project is required to set scope (global roles count as
+    # having a role on it too - see user_has_project_role?).
     user_has_project_role?(current_project)
   end
 
   def show?
     # Protect against url injection
     return false if user.nil?
-    # Global admins can see any record on any project - a deliberate exception
-    # to the current-project ring fence below, kept to support the unbuilt
-    # "copy from other project" workflow (see docs/DEVELOPER_NOTES.md).
-    return true if user&.is_admin? || user&.is_app_owner?
-    # Everyone else is restricted to the currently selected project, even if
-    # they also hold a role on the record's actual project.
+    # Restricted to the currently selected project - global roles count as
+    # having a role on it too (see user_has_project_role?), but there is no
+    # cross-project exception: current_project must be set and match.
     record.is_a?(ApplicationRecord) &&
       current_project.present? &&
       record.project == current_project &&

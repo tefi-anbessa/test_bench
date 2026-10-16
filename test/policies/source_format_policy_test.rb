@@ -113,16 +113,17 @@ class SourceFormatPolicyTest < ActiveSupport::TestCase
     refute policy(nil, @project, @new_resource).create?
   end
 
-  # Edit tests
-  test 'edit allows admins and accredited users on current project to access edit form' do
+  # Edit tests - matrix: Edit SourceFormat is Global-Admin-only, unlike
+  # Create, which also allows project_admin/document_controller.
+  test 'edit allows only global admins to access edit form' do
     assert policy(@admin, @project, @resource).edit?
     assert policy(@app_owner, @project, @resource).edit?
-    assert policy(@project_admin, @project, @resource).edit?
-    assert policy(@accredited_user, @project, @resource).edit?
-    assert policy(@accredited_user_other_project, @project, @resource).edit?
   end
 
-  test 'edit denies users without required role' do
+  test 'edit denies everyone else, including project_admin and accredited users' do
+    refute policy(@project_admin, @project, @resource).edit?
+    refute policy(@accredited_user, @project, @resource).edit?
+    refute policy(@accredited_user_other_project, @project, @resource).edit?
     refute policy(@project_manager, @project, @resource).edit?
     refute policy(@team_member, @project, @resource).edit?
     refute policy(@regular_user, @project, @resource).edit?
@@ -130,15 +131,15 @@ class SourceFormatPolicyTest < ActiveSupport::TestCase
   end
 
   # Update Tests
-  test 'update allows admins and accredited users to update resource' do
+  test 'update allows only global admins to update resource' do
     assert policy(@admin, @project, @resource).update?
     assert policy(@app_owner, @project, @resource).update?
-    assert policy(@project_admin, @project, @resource).update?
-    assert policy(@accredited_user, @project, @resource).update?
-    assert policy(@accredited_user_other_project, @project, @resource).update?
   end
 
-  test 'update denies users without required role' do
+  test 'update denies everyone else, including project_admin and accredited users' do
+    refute policy(@project_admin, @project, @resource).update?
+    refute policy(@accredited_user, @project, @resource).update?
+    refute policy(@accredited_user_other_project, @project, @resource).update?
     refute policy(@project_manager, @project, @resource).update?
     refute policy(@team_member, @project, @resource).update?
     refute policy(@regular_user, @project, @resource).update?
