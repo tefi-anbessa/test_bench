@@ -2,16 +2,14 @@
 
 class DocTypePolicy < DisciplineResourcePolicy
 
-  # No own Scope - doc_types.discipline_id is a direct column, so the
-  # inherited DisciplineResourcePolicy::Scope already produces the same
-  # query without duplicating it here.
+  # doc_types.discipline_id is a direct column, so the inherited
+  # DisciplineResourcePolicy::Scope already produces the correct query.
 
   # Override index? from DisciplineResourcePolicy
   # Only doc controllers and admins need to see the doc type index
   def index?
     # Protect against url injection
     return false if user.nil?
-    # Current project is required - no cross-project exception, admin included.
     return false if current_project.nil?
     if record.is_a?(DocType)
       record.project == current_project &&

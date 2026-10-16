@@ -40,17 +40,13 @@ module Electrical
     def index?
       # Protect against url injection
       return false if user.nil?
-      # Current project is required to set scope (global roles count as
-      # having a role on it too - see user_has_project_role?).
       current_project.present? && user_has_project_role?(current_project)
     end
 
     def show?
       # Protect against url injection
       return false if user.nil?
-      # Restricted to the currently selected project - global roles count
-      # as having a role on it too (see user_has_project_role?), but there
-      # is no cross-project exception: current_project must be set and match.
+      # user_has_project_role? already covers global roles - see its own comment.
       current_project.present? &&
         tag.project == current_project &&
         user_has_project_role?(current_project)

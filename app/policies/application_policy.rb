@@ -31,10 +31,9 @@ class ApplicationPolicy
     end
 
     private
-    # A project is still required even for global roles - they're exempt
-    # from needing an actual Role row (spec: "Users with global roles are
-    # considered to 'have a project role' for all projects"), not exempt
-    # from current_project being set at all.
+    # Global roles count as having a role on whichever project is given,
+    # without needing an actual Role row - but a project must still be
+    # given; this never returns true for a nil project, even for admins.
     # Only project and discipline instance roles are tested beyond that.
     # Resource wide roles are not checked.
     def user_has_project_role?(project)
@@ -88,10 +87,9 @@ class ApplicationPolicy
   end
 
   private
-    # A project is still required even for global roles - they're exempt
-    # from needing an actual Role row (spec: "Users with global roles are
-    # considered to 'have a project role' for all projects"), not exempt
-    # from current_project being set at all.
+    # Global roles count as having a role on whichever project is given,
+    # without needing an actual Role row - but a project must still be
+    # given; this never returns true for a nil project, even for admins.
     # Only project and discipline instance roles are tested beyond that.
     # Resource wide roles are not checked.
     def user_has_project_role?(project)
