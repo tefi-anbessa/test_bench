@@ -7,10 +7,26 @@ module <%= module_name %>
     def <%= singular_name %>
       record
     end
-    
-    # Inherit Scope from <%= @resource_class %>
-    
-    # Inherit all actions from <%= @resource_class %>
+<%- if @nesting.in?(%i[tag document issue]) -%>
+
+    # <%= @nesting.to_s.capitalize %>'s own :discipline association may itself be
+    # indirect, so this can't use the inherited Scope's where(discipline_id: ...)
+    # - same reason DocumentPolicy/IssuePolicy define their own.
+    class Scope < ApplicationPolicy::Scope
+      def resolve
+        if current_project.present? && user_has_project_role?(current_project)
+          scope.joins(<%= @nesting %>: :discipline).where(disciplines: { project_id: current_project.id })
+        else
+          scope.none
+        end
+      end
+    end
+<%- else -%>
+
+    # Inherit Scope from <%= policy_resource_class %>
+<%- end -%>
+
+    # Inherit all actions from <%= policy_resource_class %>
   end
 <%- if @namespaced -%>
 end

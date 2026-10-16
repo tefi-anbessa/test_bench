@@ -1,31 +1,48 @@
 require 'test_helper'
-<%- unless @nesting == :none %>
-require <%= "helpers/#{@nesting.to_s}_resource_policy_test" %>
+require 'helpers/test_setup_helpers'
+<%- unless @nesting == :none -%>
+require <%= "helpers/#{policy_resource_class.underscore}_test".inspect %>
 <%- end -%>
-require 'helpers/resource_policy_test'
 <%- if @namespaced -%>
 module <%= module_name %>
 <%- end -%>
   class <%= model_class_name %>PolicyTest < ActiveSupport::TestCase
-<%- unless @nesting == :none %>
-    include <%= "#{@nesting.to_s.camelize}ResourcePolicyTest" %>
+    include TestSetupHelpers
+<%- unless @nesting == :none -%>
+    include <%= "#{policy_resource_class}Test" %>
 <%- end -%>
 
-    def setup
-      setup_resource_policy_test
-      @resource = create(:<%= singular_table_name %>, discipline: @discipline)
-      @other_resource = create(:<%= singular_table_name %>, discipline: @other_discipline)
+    setup do
+      setup_projects_and_users
+<%- case @nesting -%>
+<%- when :project -%>
+      setup_project_resources
+<%- when :discipline -%>
+      setup_disciplines
+      setup_discipline_resources
+      setup_accredited_users
+<%- when :tag -%>
+      setup_disciplines
+      setup_tags
+      setup_nested_discipline_resources(:tag, @tag, @other_tag)
+      setup_accredited_users
+<%- when :document -%>
+      setup_disciplines
+      setup_documents
+      setup_nested_discipline_resources(:document, @document, @other_document)
+      setup_accredited_users
+<%- when :issue -%>
+      setup_disciplines
+      setup_documents
+      setup_issues
+      setup_nested_discipline_resources(:issue, @issue, @other_issue)
+      setup_accredited_users
+<%- when :none -%>
+      # System resources are bespoke, standalone policies (see
+      # docs/ROLES_AND_PERMISSIONS.md's Policy Architecture section) - no
+      # shared test module to include, write this resource's own tests.
+<%- end -%>
     end
-
-    def new_project_resource
-      build(:<%= singular_table_name %>, discipline: @discipline)
-    end
-
-    def new_other_project_resource
-      build(:<%= singular_table_name %>, discipline: @other_discipline)
-    end
-
-    # All setup and tests have been abstracted to ResourcePolicyTest and PolicyTestHelpers.
   end
 <%- if @namespaced -%>
 end

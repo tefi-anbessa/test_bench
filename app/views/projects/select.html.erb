@@ -21,11 +21,11 @@
         </div>
         <% @options.each do |option| %>
           <div class="form-check">
-            <%= f.radio_button :project_id, 
-                             option.id, 
+            <%= f.radio_button :project_id,
+                             option.id,
                              class: 'form-check-input',
-                             checked: (option.id == 'none' && current_project.nil?) || (option.id == current_project&.id),
-                             label: (option.id == 'none' ? t('.no_project') : option.long_label) %>
+                             checked: option.id == current_project&.id,
+                             label: option.long_label %>
           </div>
         <% end %>
       </div>

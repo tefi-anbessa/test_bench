@@ -98,6 +98,24 @@ module TestSetupHelpers
     @other_document = create(:document, discipline: @other_discipline)
   end
 
+  # Must run setup_documents first
+  def setup_issues
+    @issue = create(:issue, document: @document)
+    @other_issue = create(:issue, document: @other_document)
+  end
+
+  # Including class must implement resource_class method. The generic form
+  # of setup_project_resources/setup_discipline_resources, for a resource
+  # nested under some other association (:tag, :document, :issue, etc) that
+  # doesn't get its own named helper - builds an in-scope and an
+  # out-of-scope resource/new_resource pair for policy tests.
+  def setup_nested_discipline_resources(nesting, parent, other_parent)
+    @resource = create(resource_class.model_name.param_key, nesting => parent)
+    @other_resource = create(resource_class.model_name.param_key, nesting => other_parent)
+    @new_resource = build(resource_class.model_name.param_key, nesting => parent)
+    @new_other_resource = build(resource_class.model_name.param_key, nesting => other_parent)
+  end
+
   # Including class must implement resource_class method. Builds two
   # resources in the *same* scope (unlike setup_project_resources/
   # setup_discipline_resources, which build an in-scope and an

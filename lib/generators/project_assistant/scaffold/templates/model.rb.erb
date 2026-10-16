@@ -30,6 +30,12 @@ class <%= model_class_name %> < ApplicationRecord
 <%- unless @nesting.in?(%i[none tagable]) -%>
     belongs_to <%= @nesting.inspect %>
 <%- end -%>
+<%- if @nesting == :discipline -%>
+    has_one :project, through: :discipline
+<%- elsif @nesting.in?(%i[tag document issue]) -%>
+    has_one :discipline, through: <%= @nesting.inspect %>
+    has_one :project, through: :discipline
+<%- end -%>
 
   # === Scopes ===
 

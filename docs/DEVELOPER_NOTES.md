@@ -2,14 +2,13 @@
 
 1. Read [Readme](../README.md), it is the primary documentation for installers and users. It explains the application's capabilities. [TODO: update readme]
 1. Read [DOCUMENTATION_PREFERENCES](DOCUMENTATION_PREFERENCES.md), it explains the available documentation for the application and how to use it.
+1. Read [KISS Principle](KISS_Principle.md), it is just a heads up on good design philosopy to follow. It was originally written to dissuade AI tools from over elaborating, however this seems to be an impossible mission.
 1. Read [ROLES_AND_PERMISSIONS](ROLES_AND_PERMISSIONS.md), it explains the role based access control (RBAC) system, one of the pillars of the application.
 1. Read the following sections of this document:
    - AI Integration
-   - KISS Principle Guidelines
    - Implementation
-   Other sections can be skimmed until needed:
-   - Known Issues
-1. The backlog (development checklist, technical debt, refactoring opportunities, potential features) is tracked in the project's GitHub issues, not in this document. The pre-GitHub version of those lists is archived in [retired_check_lists.md](retired_check_lists.md) for historical reference only.
+   Other sections can be skimmed until needed.
+1. The backlog (development checklist, technical debt, refactoring opportunities, potential features) is tracked in the project's GitHub issues, not in this document. The pre-GitHub version of those lists is archived in [retired_check_lists](retired_check_lists.md) [retired_known_issues](retired_known_issues.md) for historical reference only.
 
 ## Application Objective
 
@@ -25,9 +24,11 @@ The application caters for various user scenarios, including:
 
 This project has used more than one AI coding tool over time. AI can assist with repetitive tasks, can advise on coding conventions, can research the internet for use cases, and can assist with debugging. AI should not be relied upon when making fundamental design and architecture decisions.
 
-The operational rules an AI must actually follow live in a file or files specific to the tool. This is a fast changing technology so the guidance should be checked before using. [CLAUDE.md](../CLAUDE.md), not here - this section is background and day-to-day practice, not a second copy of the rules themselves.
+The operational rules an AI must actually follow live in a file or files specific to the tool. This is a fast changing technology so the guidance should be checked before using.
 
 ### Developers Using AI
+
+Let the AI tool consult whatever persistent memory it maintains rather than re-deriving project context from scratch each session.
 
 #### Cascade
 
@@ -35,43 +36,13 @@ The operational rules an AI must actually follow live in a file or files specifi
 
 #### Claude
 
-1. Claude Code reads [CLAUDE.md](../CLAUDE.md) automatically at the start of every session, which in turn points it at this document, `docs/DOCUMENTATION_PREFERENCES.md`, `docs/TESTING.md`, and `docs/ROLES_AND_PERMISSIONS.md`. A different AI tool won't necessarily do this on its own - point it at the same documents directly.
-1. Let a tool consult whatever persistent memory it maintains rather than re-deriving project context from scratch each session.
+1. Claude Code reads [CLAUDE.md](../CLAUDE.md) automatically at the start of every session, which in turn points it at this document, `docs/DOCUMENTATION_PREFERENCES.md`, `docs/TESTING.md`, and `docs/ROLES_AND_PERMISSIONS.md`.
 
 ### Documentation Maintenance
 
 - These guidelines and requirements evolve over time.
-- Any changes should be reflected in the documentation.
+- Any code changes should be reflected in the documentation.
 - When modifying role permissions or access controls, ensure both [ROLES_AND_PERMISSIONS](ROLES_AND_PERMISSIONS.md) and the corresponding policy files are updated.
-
-## KISS Principle Guidelines
-
-The project follows the KISS (Keep It Simple, Stupid) principle with these priorities:
-
-1. **Minimal Viable Features First**:
-   - Implement only requested features
-   - Avoid adding unrequested functionality
-   - Keep initial implementations simple and focused
-
-1. **Testing Foundation**:
-   - Ensure all tests pass before adding new features
-   - Maintain test coverage for core functionality
-   - Focus on stable, working features over feature completeness
-
-1. **Incremental Development**:
-   - Build a solid foundation before adding enhancements
-   - Get approval for each feature before moving forward
-   - Keep pull requests and changes small and focused
-
-1. **Focus**:
-   - Application functionality is always the priority
-   - Format and presentation should be deferred until core functionality is stable
-   - Avoid premature optimization or over-engineering
-
-1. **Code Review Guidelines**:
-   - Question any added complexity
-   - Challenge features that weren't explicitly requested
-   - Prefer simple, maintainable solutions over complex ones
 
 ## Implementation
 
@@ -95,7 +66,7 @@ Engineering design elements require a tag to be assigned. Tags are used to label
 
 #### Tagables
 
-Tags can have a "tagable" model attached, which extends the information linked to the tag to include the specific information relevant to the type of element. For example, a motor and a cable have different information requirements, so the database needs to have a different table for each, but they share the structure of the tags table. Each of these models is known as a tagable model. All tagables are grouped into modules which associate them to the correct discipline.
+Tags can have a "tagable" model attached, which extends the information linked to the tag to include the specific information relevant to the type of element. For example, a motor and a cable have different information requirements, so the database needs to have a different table for each, but they share the structure of the tags table. Each of these models is known as a tagable model. All tagables are grouped into disciplines which associate them to the correct modules.
 
 #### Documents
 
@@ -131,7 +102,7 @@ Bulk import of spreadsheet data (CSV, Excel `.xlsx`/`.xlsm`, OpenDocument `.ods`
 The application has been designed for international use from the outset.
 
 - All user facing text is provided with translations for all implemented languages.
-- To date, the only need for translation of database content identified is for discipline names. Further content translation is included in the potential features list below.
+- To date, the only need for translation of database content identified is for discipline names. Further content translation is included in the potential features issues.
 - The application uses the rails-i18n gem to assist with internationalization. This gem provides translations into many languages for the core rails features, including model validation, database errors, time and date functions, currency, etc.
 - For reference, a copy of the en version of the translations is saved in [config/locales/rails-i18n gem en for reference/en.yml.ref](../config/locales/rails-i18n%20gem%20en%20for%20reference/en.yml.ref). This file is not used in the application, it is simply a copy of the en.yml file that is provided by the rails-i18n gem. Check in this file if you are not sure whether a translation is already provided, and *avoid duplicating core translations* if possible. Also note that not all language files include all translations! It is a community work in progress...
 - The locale setting follows the basic guidelines in [Rails Internationalization (I18n) API section 2.2](https://guides.rubyonrails.org/i18n.html#setting-the-locale-from-url-params).
@@ -158,29 +129,35 @@ Ruby on Rails implements the Model View Controller (MVC) pattern for data driven
 - In this application, models correspond to database tables. For example, there is a tags table holding the data for the class Tag.
 - Every tagable type has its own model.
 - Model classes include all logic pertaining to the object.
-- Model classes should include custom validations where required. Custom validations must include i18n translation of custom error messages.
-- All resource models should have a label method, which is used to present a human readable, non language specific identifier, preferably unique, for the model. This can be simply a reference to another attribute, or a combination of attributes. It will be used in views as a card header, link id, etc.
-- All resources should have a long label method, which includes a parent identifier as well as the instance identifier. This will be used for view headers.
+- Model classes include custom validations where required. Custom validations must include i18n translation of custom error messages.
+- All resource models have a label method, which is used to present a human readable, non language specific identifier, preferably unique, for the model. This can be simply a reference to another attribute, or a combination of attributes. It will be used in views as a card header, link id, etc.
+- All resources have a long label method, which includes a parent identifier as well as the instance identifier. This will be used for view headers.
 
 #### Controllers
 
-CRUD operations refer to the four basic functions of persistent storage in computer programming: Create, Read, Update, and Delete. These operations are essential for managing data in databases and applications, allowing users to add, retrieve, modify, and remove data as needed.
+CRUD operations refer to the four basic functions of persistent storage in computer programming: Create, Read, Update, and Delete. These operations are essential for managing data in databases and applications, allowing users to add, retrieve, modify, and remove data as needed. Rails controllers implement these operations as actions within the controller class. There are seven standard actions that are typically all implemented in a controller: #index, #show, #new, #create, #edit, #update, and #destroy. Create functionality is achieved using #new to present a form view to the user, and #create to process the form submission. Read functionality is achieved using #index to list all instances, and #show to display a single instance. Update functionality is achieved using #edit to present a form view to the user, and #update to process the form submission. Delete functionality is achieved using #destroy to remove an instance.
+
+This application supports additional controller actions beyond the standard CRUD operations.
+
+1. An import facility provides for bulk import of data from a spreadsheet. Its controller actions are abstracted, implemented in the Importable concern, and individual controllers don't need any actions.
+1. Copy facility allows copying an existing record to seed a new record with the same data.
 
 - Controller classes include logic for performing CRUD operations on the object.
   - Controllers are responsible for controlling access, by implementing the RBAC system.
-  - Controllers are responsible for setting variables for the view, including select options that are derived from data.
+  - Controllers are responsible for setting variables for the views, including select options that are derived from data.
+  - Controllers are responsible for carrying out content modification actions.
   - Controllers are responsible for providing the user with feedback via an appropriate flash message after every operation that modifies content.
 
 #### Views
 
-The standard set of views (as generated by the rails scaffold generator, or the application's tagable generator) should be provided for each resource model, including:
+The standard set of views (as generated by the rails scaffold generator, or the application's generators) should be provided for each resource model, including:
 
 - Index
 - Show
 - New
 - Edit
 
-The index view should use partials for the header and list items:
+The index view should use partials for the header and list parts:
 
 - `_header`
 - `_row`
@@ -195,7 +172,7 @@ In addition, a card partial should be provided for collapsible view on pages whe
 
 - All views shall provide a page title which appears on the browser tab, which includes the view and the model name.
 - Index and show views shall have a header line which includes the header and a standard set of navigation buttons.
-- The index header shall specify whether the index is for project, discipline, or all projects.
+- The index header shall include the scope of the index.
 - The show view header shall include the resource model name, the record's long_label, and optionally a title or service description.
 - The new view header shall include the scope where the resource is to be created e.g. discipline label.
 - The edit view header shall include the resource's long_label.
@@ -316,28 +293,6 @@ Errors are categorized as:
   - "save" class "-primary" for save (create or update) buttons on forms
 - Flag icons are used to assist with locale/language selection.
   - The gem rails-icons is used with the library 'flags' to provide the icons.
-  
-## Known Issues
-
-### Tagable Validation - fixed
-
-It is possible to create multiple tags referencing the same tagable element, despite the validations in place.
-
-### Pagination - fixed
-
-- **Issue**: The pagination system is not respecting the `per_page` parameter correctly.
-- **Symptoms**:  
-  - The URL updates with the selected `per_page` value
-  - The page size selector shows the correct selected value
-  - However, the number of items displayed remains at the default (20)
-- **Affected Files**:  
-  - `app/controllers/concerns/page_sizeable.rb`
-  - `app/views/shared/_page_size_selector.html.erb`
-  - `test/system/page_size_selector_test.rb`
-- **Next Steps**:  
-  - Check if the pagination is being overridden by any default scopes
-  - Verify the pagination parameters are being passed correctly to the database query
-  - Add more detailed logging to trace the pagination flow
 
 ## Glossary
 

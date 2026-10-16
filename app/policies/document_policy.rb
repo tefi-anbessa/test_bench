@@ -29,14 +29,9 @@ class DocumentPolicy < DisciplineResourcePolicy
   # where(discipline_id: ...) - same reason IssuePolicy::Scope overrides it.
   class Scope < ApplicationPolicy::Scope
     def resolve
-      if current_project.present? &&
-        (user_has_project_role?(current_project) || user&.is_admin? || user&.is_app_owner?)
+      if current_project.present? && user_has_project_role?(current_project)
         scope.joins(doc_type: { discipline: :project })
           .where(disciplines: { project_id: current_project.id })
-
-      elsif user&.is_admin? || user&.is_app_owner?
-        scope.all
-
       else
         scope.none
       end

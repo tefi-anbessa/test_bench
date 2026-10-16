@@ -90,20 +90,11 @@ class ProjectsController < ApplicationController
   # GET /projects/select
   def select
     @options = policy_scope(Project).order(:code)
-    # Add a 'No Project' option at the beginning
-    @options = [OpenStruct.new(id: 'none', label: 'No Project')] + @options
   end
 
   # POST /projects/set
   def set
-    if params[:project_id] == 'none'
-      # Handle 'No Project' selection
-      set_current_project(nil)
-      # Clear any stored location for project to prevent redirect loops
-      # clear_stored_location_for_project
-      redirect_to stored_location_for_project || projects_path,
-                  notice: I18n.t('projects.none_selected')
-    elsif @project
+    if @project
       # Set the project in both cookie (signed for security) and session
       set_current_project(@project)
       saved_path = stored_location_for_project

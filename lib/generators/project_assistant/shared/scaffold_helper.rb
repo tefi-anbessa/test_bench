@@ -25,14 +25,7 @@ module ProjectAssistant
       # Don't edit this.
       VALID_FIELD_TYPES = (RAILS_FIELD_TYPES + SPECIAL_FIELD_TYPES).freeze
 
-      # TODO: document and issue are valid routes.rb nesting points (see the
-      # "Document nested routes"/"Issue nested routes" insertion comments)
-      # but aren't supported end-to-end yet - policy_resource_class below has
-      # no :document/:issue case, so the generated policy comes out as
-      # "class FooPolicy < " (blank superclass, a syntax error), and
-      # controller_mixin's "#{nesting}ResourcesController" doesn't correspond
-      # to any module that actually exists. Re-add them here once that's fixed.
-      VALID_NESTING_OPTIONS = %i[project discipline tag none].freeze
+      VALID_NESTING_OPTIONS = %i[project discipline tag document issue none].freeze
 
       # Options can be added, but you will have to write the generator and test code to implement them.
       VALID_OPTIONS = %i[required index uniq unique valid precision scale units si step max min].freeze
@@ -159,23 +152,12 @@ module ProjectAssistant
 
         def policy_resource_class
           case @nesting
-          when :project, :discipline, :tag
-            "#{@nesting.to_s.camelize}ResourcePolicy"
-          when :tagable
-            "#{@nesting.to_s.camelize}Policy"
+          when :project
+            "ProjectResourcePolicy"
+          when :discipline, :tag, :document, :issue
+            "DisciplineResourcePolicy"
           when :none
             "ApplicationPolicy"
-          end
-        end
-
-        def policy_test_class
-          case @nesting
-          when :project, :discipline, :tag
-            "#{@nesting.to_s.camelize}ResourcePolicyTest"
-          when :tagable
-            "TagablePolicyTest"
-          else
-            nil
           end
         end
 
@@ -186,7 +168,7 @@ module ProjectAssistant
           when :none
             ""
           else
-            "#{@nesting.to_s.camelize}ResourcesController"
+            "NestedResourcesController"
           end
         end
 
@@ -875,6 +857,12 @@ module ProjectAssistant
           unless nesting.in?(%i[none tagable])
             assert_includes content, "belongs_to :#{nesting}"
           end
+          if nesting == :discipline
+            assert_includes content, "has_one :project, through: :discipline"
+          elsif nesting.in?(%i[tag document issue])
+            assert_includes content, "has_one :discipline, through: :#{nesting}"
+            assert_includes content, "has_one :project, through: :discipline"
+          end
 
           # Check for presence validations on required fields
           @required_fields.each do |f|
@@ -992,12 +980,31 @@ module ProjectAssistant
           end
         end
 
+        # Hardcoded rather than derived from policy_resource_class, so this
+        # actually catches a regression in that method instead of trivially
+        # agreeing with it.
+        def expected_policy_superclass(nesting)
+          case nesting
+          when :project then "ProjectResourcePolicy"
+          when :discipline, :tag, :document, :issue then "DisciplineResourcePolicy"
+          when :none then "ApplicationPolicy"
+          end
+        end
+
         def test_assertions_policy(content, nesting)
-          assert_includes content, "class #{@model_class_name}Policy < #{policy_resource_class}"
+          assert_includes content, "class #{@model_class_name}Policy < #{expected_policy_superclass(nesting)}"
+          if nesting.in?(%i[tag document issue])
+            assert_includes content, "scope.joins(#{nesting}: :discipline)"
+          else
+            refute_includes content, "class Scope < ApplicationPolicy::Scope"
+          end
         end
 
         def test_assertions_policy_test(content, nesting)
-          assert_includes content, "class #{@model_class_name}PolicyTest < #{policy_resource_class}"
+          assert_includes content, "class #{@model_class_name}PolicyTest < ActiveSupport::TestCase"
+          unless nesting == :none
+            assert_includes content, "include #{expected_policy_superclass(nesting)}Test"
+          end
         end
 
         def test_assertions_controller(content, nesting)

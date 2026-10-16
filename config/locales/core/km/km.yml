@@ -64,7 +64,6 @@ km:
         alert: "មិនអាចលុប %{resource_name} បានទេ។"
 
   projects:
-    none_selected: "មិនមានគម្រោងដែលបានជ្រើសរើស"
     selected: "គម្រោង '%{code}' ត្រូវបានជ្រើសរើស"
     invalid_selection: "សូមជ្រើសរើសគម្រោងដែលត្រឹមត្រូវដើម្បីបន្ត"
 
