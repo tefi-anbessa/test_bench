@@ -77,19 +77,15 @@ The project follows the KISS (Keep It Simple, Stupid) principle with these prior
 
 ### Application Structure
 
-The application has a core structure encompassing Users and the associated access control system, Projects, Disciplines, Tags and Documents. Further functionality is encapsulated in modules, which correspond to engineering disciplines.
-
-Only one level of module nesting is envisaged, however some features have provisioned for future sub-modules.
-
-Refer to [ROLES_AND_PERMISSIONS](ROLES_AND_PERMISSIONS.md) for details on the RBAC system.
+The application has a core structure encompassing Users and the associated access control system, Projects, Disciplines, Tags and Documents. Further functionality is encapsulated in modules, which correspond to engineering disciplines. Only one level of module nesting is envisaged, however some features have provisioned for future sub-modules.
 
 #### Projects
 
-Projects are the top level resource of this application. Projects are "ring-fenced" for security, so users are always working on their current project. Users with access to more than one project can copy from one to the other. [TODO: not implemented yet]
+Projects are the top level resource of this application. They contain all the information resources needed to execute the project. Projects are "ring-fenced" for security, so users are always working on their current project. Refer to [ROLES_AND_PERMISSIONS](ROLES_AND_PERMISSIONS.md) for details on how the RBAC system implements this security model.
 
 #### Disciplines and Modules
 
-Disciplines are used to group engineering objects, and associate them to functional requirements. Each project has disciplines which can be selected from a core set including instrument, electrical, mechanical, etc. Core disciplines have associated modules, which provide the code for discipline specific elements. Projects may add bespoke disciplines, but these will have no linked module for functionality.
+Disciplines are used to group engineering objects, and associate them to functional requirements. Each project has disciplines which can be selected from a core set including instrument, electrical, mechanical, etc. Core disciplines have associated modules, which provide the code for discipline specific elements. Projects may add bespoke disciplines for grouping, but these will have no linked module for functionality.
 
 Modules keep the app's file structure manageable.
 
@@ -113,7 +109,9 @@ Documents can be generated from the application database, or stored in a content
 
 #### Change Management
 
-TBC
+The ChangeManagement module tracks and manages changes on a project.
+
+The Request model records the instigation of change management processes. If a change request (CR) is considered beneficial, it is assigned to a lead discipline to develop a change proposal (CP). The CP fully evaluates the options, assess cost vs benefit, risk, and completes detailed engineering design of the proposed change. After submission, the CP is reviewed and either approved, sent for revision, or rejected. If approved, a Change Order (CO) is raised and assigned to an implementation team.
 
 #### Import
 
