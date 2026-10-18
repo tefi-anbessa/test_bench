@@ -666,6 +666,20 @@ module ProjectAssistant
           params
         end
 
+        # Given content and a byte offset right after an indented block's own
+        # key line, returns the offset where that block ends - the first
+        # line at the same or shallower indentation, or the end of the
+        # content if there is none. Shared between insert_enum_constants
+        # (finds where to insert sibling content after an existing block)
+        # and RemoveFieldGenerator (finds how much of an existing block to
+        # delete) - same "how far does this indented block extend" question
+        # either direction.
+        def block_end_offset(content, after_index:, indent:)
+          rest = content[after_index..]
+          block_end = rest =~ /^#{Regexp.escape(indent)}\S/
+          after_index + (block_end || rest.length)
+        end
+
         # Shared between ScaffoldGenerator and TagableGenerator - inserts an
         # enum-constants key for the new model into its module's constants
         # file (or core.yml for a non-namespaced model). No nesting-specific
@@ -697,10 +711,7 @@ module ProjectAssistant
               key_pattern = /^([ \t]*)#{Regexp.escape(module_key)}[ \t]*\n/
               if (match = content.match(key_pattern))
                 indent = match[1]
-                insert_at = match.end(0)
-                rest = content[insert_at..]
-                block_end = rest =~ /^#{Regexp.escape(indent)}\S/
-                insert_at += block_end || rest.length
+                insert_at = block_end_offset(content, after_index: match.end(0), indent: indent)
                 needs_newline = insert_at > 0 && content[insert_at - 1] != "\n"
                 content = content[0...insert_at] + (needs_newline ? "\n" : "") + "#{indent}#{tab}#{insertion_text}" + content[insert_at..]
               else

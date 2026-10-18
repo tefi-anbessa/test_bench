@@ -265,32 +265,33 @@ Errors are categorized as:
 - Bootstrap icons are used as graphical elements to support usability.
 - The gem bootstrap-icons-helper simplifies finding the icons (notoriously difficult with the recommended installation methods).
 - Icons have been copied to app/assets/icons.
-- If a new icon is required, search in <https://icons.getbootstrap.com>, find the name and use it. (The website doesn't include sorting facilities so it is not easy to find by function unless the name corresponds to the function.)
+- If a new icon is required, search in <https://icons.getbootstrap.com>, find the name and use it. (The website doesn't include sorting facilities so it is not easy to find by function unless the name corresponds to the function. AI can help.)
 - The helper method bs_icon(name) in app/helpers/bootstrap_icon_helper.rb is used to further simplify icon usage.
-- Typical usage is:
-`<%= f.submit((yield(:button_text)), class: 'btn btn-primary') do %>
-          <%== bs_icon('save') %>
-        <% end %>`
-- Important: The double equals is used to prevent html escaping of the icon.
-- Be consistent in icon usage. Preferred icons and colours are:
-  - "list-columns-reverse" class "-info" for index views
-  - "box-arrow-in-left" class "-secondary" for link to previous object same class
-  - "box-arrow-in-right" class "-secondary" for link to next object same class
-  - "box-arrow-down-right" class "-info" for link to child object
-  - "box-arrow-up-left" class "-info" for link to parent object
-  - "folder" class "-info" for link to project object
-  - "layers" class "-info" for link to discipline object
-  - "tag" class "-info" for link to tag object or index
-  - "file" class "-info" for link to document object or index
-  - "eye" class "-info" for link to view other objects
-  - "link" class "-primary" for link to open a form for a new child object
-  - "plus" class "-primary" for new buttons to open a form
-  - "file-earmark-arrow-up" class "-primary" for import buttons (bulk spreadsheet import - optional, see the Import section below)
-  - "pencil" class "-warning" for edit buttons to open a form
-  - "trash" class "-danger" for delete buttons to delete the object
-  - "search" class "-primary" for search buttons on views
-  - "x-square" class "-warning" for Discard Changes buttons on forms
-  - "save" class "-primary" for save (create or update) buttons on forms
+- Bootstrap icon usage is now mostly encapsulated in the helper methods in [view_helper](../app/helpers/view_helper.rb) and [navigation_helper](../app/helpers/navigation_helper.rb). The following is retained for use outside these helpers:
+  - Typical usage is:
+  `<%= f.submit((yield(:button_text)), class: 'btn btn-primary') do %>
+            <%== bs_icon('save') %>
+          <% end %>`
+  - Important: The double equals is used to prevent html escaping of the icon.
+  - Be consistent in icon usage. Preferred icons and colours are:
+    - "list-columns-reverse" class "-info" for index views
+    - "box-arrow-in-left" class "-secondary" for link to previous object same class
+    - "box-arrow-in-right" class "-secondary" for link to next object same class
+    - "box-arrow-down-right" class "-info" for link to child object
+    - "box-arrow-up-left" class "-info" for link to parent object
+    - "folder" class "-info" for link to project object
+    - "layers" class "-info" for link to discipline object
+    - "tag" class "-info" for link to tag object or index
+    - "file" class "-info" for link to document object or index
+    - "eye" class "-info" for link to view other objects
+    - "link" class "-primary" for link to open a form for a new child object
+    - "plus" class "-primary" for new buttons to open a form
+    - "file-earmark-arrow-up" class "-primary" for import buttons
+    - "pencil" class "-warning" for edit buttons to open a form
+    - "trash" class "-danger" for delete buttons to delete the object
+    - "search" class "-primary" for search buttons on views
+    - "x-square" class "-warning" for Discard Changes buttons on forms
+    - "save" class "-primary" for save (create or update) buttons on forms
 - Flag icons are used to assist with locale/language selection.
   - The gem rails-icons is used with the library 'flags' to provide the icons.
 
