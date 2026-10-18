@@ -58,6 +58,35 @@ class CableTypesSystemTest < ApplicationSystemTestCase
     @edit_attributes = { notes: "REVISED FOR TEST" }
   end
 
+  # team_member cannot see cable_types except in selectors. Unlike DocType's
+  # document_controller, custodian is a discipline-only role (see
+  # config/constants/role.yml) - there's no project-wide grant that would
+  # let a non-admin reach the project-wide index at all, so this is
+  # dropped rather than overridden.
+  undef test_team_member_navigating_to_project_resource_index
+  undef test_team_member_navigating_to_discipline_resource_index
+  undef test_team_member_navigating_to_resource_show_view
+
+  # custodian is a discipline-only role (see config/constants/role.yml) -
+  # there's no project-wide equivalent to grant, so a discipline-scoped
+  # accredited user can never see the project-wide index button, unlike
+  # DocType's document_controller (which spans both levels).
+  undef test_accredited_user_resource_show_view
+
+  def test_accredited_user_resource_show_view
+    sign_in @accredited_user
+    # Mock current_project for this test
+    ApplicationController.any_instance.stubs(:current_project).returns(@project)
+    visit resource_path(@resource)
+    assert_current_path resource_path(@resource)
+
+    show_assertions(check_project_index: false)
+    # Variable assertions
+    assert_nav_button(:edit, @resource, path: edit_resource_path(@resource))
+    refute_delete(resource_path(@resource))
+    assert_nav_button(:new, path: new_discipline_resource_path(@discipline))
+  end
+
   test "index search fields" do
     # Test for eq search fields not covered by standard tests.
     sign_in @accredited_user

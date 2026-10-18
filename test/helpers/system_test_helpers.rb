@@ -151,12 +151,18 @@ module SystemTestHelpers
       field_display_assertions(@index_fields)
     end
 
-    def show_assertions
+    # check_project_index: false for a model whose project-wide index can
+    # be gated separately from its discipline-scoped one (see
+    # CableTypePolicy#index?) - a discipline-scoped-only accredited user
+    # never sees that button, so the including test overrides this case.
+    def show_assertions(check_project_index: true)
       assert_text I18n.t("#{view_key}.show.header", label: @resource.long_label)
       assert page.title.include?(I18n.t("#{view_key}.show.title"))
 
       # Navigation
-      assert_nav_button(:index_project, path: project_resource_index_path(@project), label: @project.code) # Link back to project resource index
+      if check_project_index
+        assert_nav_button(:index_project, path: project_resource_index_path(@project), label: @project.code) # Link back to project resource index
+      end
       assert_nav_button(:index_discipline, path: discipline_resource_index_path(@discipline), label: @discipline.code) # Link back to discipline resource index
 
       # Field labels

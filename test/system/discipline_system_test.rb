@@ -136,7 +136,12 @@ class DisciplineSystemTest < ApplicationSystemTestCase
               (model.module_parent_name == disc.module_name || disc.accepts_tagable_type?(model.name))
           end
       end
-      models << CableType if disc.cable_type_detail_class.present?
+      # CableType's index is deliberately gated (see CableTypePolicy#index?) -
+      # mimic the controller's own guard, not just its detail-class check.
+      user_context = ApplicationPolicy::UserContext.new(@team_member, @project)
+      if disc.cable_type_detail_class.present? && CableTypePolicy.new(user_context, disc).index?
+        models << CableType
+      end
       models = models.sort_by(&:model_name)
       @model_links = models.filter_map do |m|
         if Tag.safe_tagable_types.include?(m.name)

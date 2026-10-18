@@ -33,9 +33,7 @@ module ChangeManagement
     around_create :set_request_number
 
     # === Class methods ===
-    def self.swatch
-      Swatch.find_by(name: "app_theme")
-    end
+    # self.swatch inherited from Base - no leaf-level override needed.
 
     # === Class methods - Queries ===
     # Provide SQL for ordering swatches in the navigator

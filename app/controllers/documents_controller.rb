@@ -1,139 +1,96 @@
 # frozen_string_literal: true
 class DocumentsController < ApplicationController
-  before_action :authenticate_user!
-  before_action :require_project!, only: %i[ new create edit update ]
-  before_action :set_discipline, only: [:index, :new, :create]
-  before_action :set_document, only: [:show, :edit, :update, :destroy]
-  before_action :set_swatch, only: [:index, :show]
+  include NestedResourcesController
 
   # GET /documents
   def index
-    authorize Document
+    index_resource
     @orphans = Document.where(doc_type_id: nil)
-
-    @q = @scope.ransack(params[:q])
-    result = @q.result.includes(doc_type: { discipline: :project })
-    @pagy, @documents = pagy(result)
-    # One document per discipline present on this page is enough to compute
-    # permissions for every row of that discipline - see
-    # ApplicationController#permissions_by_group.
-    probes = @documents.group_by { |d| d.discipline&.id }.except(nil).transform_values(&:first)
-    @permissions = permissions_by_group(probes)
   end
 
   # GET /documents/1
   def show
-    authorize @document
-    @neighbours = Navigator.new(scope: @scope, record: @document).neighbours
+    show_resource
   end
 
   # GET /documents/new
+  # Document has no direct discipline association (it's indirect, via
+  # doc_type - see Document#discipline) - @discipline.documents.build isn't
+  # usable (has_many :through can't build new records that way), so this
+  # can't go through the generic new_resource/create_resource, unlike every
+  # other NestedResourcesController consumer so far.
   def new
-    @document = Document.new(creation_discipline: @discipline)
-    authorize @document
+    # @resource kept in sync with @document - the generic setup_form calls
+    # instance_variable_set(resource_var_name, @resource), which would
+    # otherwise stomp @document back to nil (@resource is never set by
+    # anything else on this path, since new_resource isn't used here).
+    @document = @resource = Document.new(creation_discipline: @discipline)
+    authorize @document, :new?
     setup_form
   end
 
   # POST /documents
   def create
-    @document = Document.new(create_params.merge(creation_discipline: @discipline))
-    authorize @document
+    @document = @resource = Document.new(create_params.merge(creation_discipline: @discipline))
+    authorize @document, :create?
 
     if @document.save
-      flash[:success] = t('flash.create.notice', 
+      flash[:success] = t('flash.create.notice',
         resource_name: t('activerecord.models.document.one'))
       redirect_to @document
     else
-      flash[:alert] = t('flash.create.alert', 
+      flash[:alert] = t('flash.create.alert',
         resource_name: t('activerecord.models.document.one').downcase)
-        setup_form
+      setup_form
       render :new, status: :unprocessable_content
     end
   end
 
   # GET /documents/1/edit
   def edit
-    authorize @document
-    setup_form
+    edit_resource
   end
 
   # PATCH/PUT /documents/1
   def update
-    authorize @document
-    if @document.update(update_params)
-      flash[:success] = t('flash.update.notice', 
-        resource_name: t('activerecord.models.document.one'))
-      redirect_to @document
-    else
-      flash[:alert] = t('flash.update.alert', 
-        resource_name: t('activerecord.models.document.one').downcase)
-      setup_form
-      set_swatch
-      render :edit, status: :unprocessable_content 
-    end
+    update_resource
   end
 
   # DELETE /documents/1
   def destroy
-    authorize @document
-    if @document.destroy
-      flash[:success] = t('flash.destroy.notice', 
-        count: 1, 
-        resource_name: t('activerecord.models.document.one'))
-    else
-      flash[:alert] = t('flash.destroy.alert', 
-        count: 1, 
-        resource_name: t('activerecord.models.document.one').downcase)
-    end
-    redirect_to discipline_documents_path(@discipline)
+    destroy_resource
   end
 
   private
 
-    def set_discipline
-      if params[:discipline_id].present?
-        @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
-        raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
-        @scope = policy_scope(Document).joins(doc_type: { discipline: :project }).where(doc_types: { discipline_id: @discipline.id })
-      elsif params[:project_id].present?
-        @discipline = nil
-        @project = policy_scope(Project).find_by(id: params[:project_id])
-        raise ApplicationController::ConflictError, :out_of_scope if @project.nil?
-        @scope = policy_scope(Document).joins(doc_type: { discipline: :project }).where(projects: { id: @project.id })
-      else
-        @discipline = nil
-        @project = nil
-        @scope = policy_scope(Document).joins(doc_type: { discipline: :project })
-      end
+    def index_includes(scope)
+      scope.includes(doc_type: { discipline: :project })
     end
 
-    def set_document
-      @document = policy_scope(Document).find_by(id: params[:id])
-      raise ApplicationController::ConflictError, :out_of_scope if @document.nil?
-      @discipline = @document.discipline
-      @scope = policy_scope(Document).joins(doc_type: { discipline: :project })
-      @issues = @document.issues
+    # @discipline.documents.build (the default - see
+    # NestedResourcesController#new_resource_probe) doesn't set up doc_type,
+    # so the built record's own #discipline would be nil - creation_discipline
+    # is how a new Document actually learns its discipline before doc_type
+    # is chosen (see Document#creation_discipline).
+    def new_resource_probe
+      Document.new(creation_discipline: @discipline)
     end
 
-    def set_swatch
-    @swatch = @discipline&.swatch || @project&.swatch || Swatch.find_by(name: 'app_theme')
-    end
-
-    def setup_form
+    def setup_additional_form_data
       # Scoped to the current discipline - unscoped, this let a document get
       # created under @discipline's route while actually filing it under a
       # different doc_type's discipline (see Document#doc_type_matches_discipline).
       @doc_types = policy_scope(DocType).where(discipline: @discipline)
-      set_swatch
     end
 
     def create_params
-      params.require(:document)
-      .permit(:doc_type_id, :title, :notes)
+      params.require(:document).permit(:doc_type_id, :title, :notes)
     end
 
-    def update_params
-      params.require(:document)
-      .permit(:title, :notes)
+    # Used by the generic update_resource - title/notes only, doc_type_id
+    # is set once at creation and not changed on edit (matches the
+    # original create_params/update_params split).
+    def resource_params
+      params.require(:document).permit(:title, :notes)
     end
 end

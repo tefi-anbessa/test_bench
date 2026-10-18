@@ -24,9 +24,9 @@ class Cable < ApplicationRecord
   attr_accessor :creation_discipline
 
   # === Associations ===
-  # Plain, not polymorphic - CableType is a single shared class (its own
-  # discipline-specific remainder is handled internally via delegated_type,
-  # see app/models/cable_type.rb), so Cable only ever points at one class.
+  # CableType is a single shared class (its own discipline-specific remainder is 
+  # handled via delegated_type, see app/models/cable_type.rb), so Cable only 
+  # ever points at one class.
   belongs_to :cable_type
 
   belongs_to :from, polymorphic: true, optional: true

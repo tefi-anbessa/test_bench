@@ -30,6 +30,15 @@ class CableTypesControllerTest < ActionController::TestCase
     assert @accredited_user_other_project.has_role?(:custodian, @other_discipline)
   end
 
+  # Cable types index permissions are anomalous: only custodians/admins can
+  # access (see CableTypePolicy#index?), same reasoning as DocType.
+  undef test_team_member_can_access_index
+  test "team member can access index" do
+    sign_in_and_set_project @accredited_user, @project
+    get :index, params: index_params
+    assert_response :success
+  end
+
   private
 
     # Set the expected params for a valid resource create

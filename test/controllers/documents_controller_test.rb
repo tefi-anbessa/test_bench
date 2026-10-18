@@ -25,7 +25,7 @@ class DocumentsControllerTest < ActionController::TestCase
   end
 
   private
-  
+
     # Set the expected params for a valid create
     def create_params
         { document: 

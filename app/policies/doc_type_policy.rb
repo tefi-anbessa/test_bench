@@ -5,23 +5,30 @@ class DocTypePolicy < DisciplineResourcePolicy
   # doc_types.discipline_id is a direct column, so the inherited
   # DisciplineResourcePolicy::Scope already produces the correct query.
 
-  # Override index? from DisciplineResourcePolicy
-  # Only doc controllers and admins need to see the doc type index
+  # Doc types are only ever meant to be browsed by someone accredited to
+  # manage them (or an admin) - never a generic project role, unlike most
+  # other discipline resources (see docs/ROLES_AND_PERMISSIONS.md). A
+  # document_controller grant can sit at either the project or the
+  # discipline level, and the two index views need gating separately: a
+  # discipline-scoped grant is enough for that one discipline's index, but
+  # not for the project-wide one spanning every other discipline too.
+  # Called with the actual Discipline/Project being indexed (see
+  # DocTypesController#index), not the bare class - that's what lets the
+  # two cases be told apart at all.
   def index?
-    # Protect against url injection
     return false if user.nil?
-    return false if current_project.nil?
-    if record.is_a?(DocType)
-      record.project == current_project &&
-        (user.has_role?(:document_controller, record.discipline) ||
-          user.has_role?(:document_controller, record.discipline.project) ||
-          user.is_project_admin_of?(record.project) ||
-          user.is_admin? || user.is_app_owner?)
-    # When discipline is not available, use current project to determine permission
-    elsif record == DocType
-      user.has_role?(:document_controller, current_project) ||
-        user.is_project_admin_of?(current_project) ||
+    case record
+    when Discipline
+      user.has_role?(:document_controller, record) ||
+        user.has_role?(:document_controller, record.project) ||
+        user.is_project_admin_of?(record.project) ||
         user.is_admin? || user.is_app_owner?
+    when Project
+      user.has_role?(:document_controller, record) ||
+        user.is_project_admin_of?(record) ||
+        user.is_admin? || user.is_app_owner?
+    else
+      false
     end
   end
 

@@ -192,7 +192,48 @@ module ProjectAssistant
         say_status :error, "#{routes_file.relative_path_from(Rails.root)}: Not found", :red
       end
     end
-         
+
+    # A :project-nested model has a direct belongs_to :project, with no
+    # discipline involved - NestedResourcesController#scope_to_parent's
+    # :project branch filters via Project's own reverse association (same
+    # shape as ChangeManagement::Request's has_many :change_management_requests),
+    # so Project needs one added for every new model nested this way.
+    def edit_project_model_file
+      return unless @nesting == :project
+      project_file = Pathname.new(File.join(destination_root, "app", "models", "project.rb"))
+      if File.exist?(project_file)
+        content = File.read(project_file)
+        # \s in the indentation capture would also match \n - with ^/$ as
+        # line anchors, the regex engine then prefers the leftmost match,
+        # which lets \s* swallow the blank line above the marker into $1
+        # instead of stopping at just this line's own indentation
+        # (confirmed: content.match(/^(\s*)(# === Scopes ===)$/)[1] comes
+        # back as "\n  ", not "  "). Matching the preceding \n explicitly
+        # and restricting the capture to [ \t] keeps it on one line and
+        # preserves that newline rather than reinserting a second one.
+        insertion_pattern = /\n([ \t]*)(# === Scopes ===)/
+        if content.match?(insertion_pattern)
+          association = if @namespaced
+            "has_many :#{table_name}, class_name: \"#{class_name}\", dependent: :destroy"
+          else
+            "has_many :#{table_name}, dependent: :destroy"
+          end
+          content.sub!(insertion_pattern) do
+            # $1 is the captured indentation, $2 is the scopes comment line
+            "\n#{$1}#{association}\n#{$1}#{$2}"
+          end
+        else
+          say_status :error, "#{project_file.relative_path_from(Rails.root)}: Could not find associations section", :red
+          return
+        end
+
+        File.write(project_file, content) unless options[:pretend]
+        say_status :update, "#{project_file.relative_path_from(Rails.root)}: Added #{table_name} association", :green
+      else
+        say_status :error, "#{project_file.relative_path_from(Rails.root)}: Not found", :red
+      end
+    end
+
     def update_constants
       insert_enum_constants
     end

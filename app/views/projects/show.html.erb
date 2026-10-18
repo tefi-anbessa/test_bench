@@ -94,7 +94,7 @@
                       <span class="badge bg-info ms-1"><%= @project.documents.count %></span>
                     <% end %>
                     
-                    <% if policy(DocType).index? %>
+                    <% if policy_for(@project, DocTypePolicy).index? %>
                       <%= link_to project_doc_types_path(@project),
                           class: "btn btn-outline-info btn-sm",
                           aria: {
@@ -106,7 +106,7 @@
                       <% end %>
                     <% end %>
 
-                    <% if policy(CableType).index? %>
+                    <% if policy_for(@project, CableTypePolicy).index? %>
                       <%= link_to project_cable_types_path(@project),
                           class: "btn btn-outline-info btn-sm",
                           aria: {

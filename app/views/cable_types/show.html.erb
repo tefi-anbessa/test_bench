@@ -8,9 +8,13 @@
         <!-- Left Navigation -->
         <div class="col-auto">
           <div class="d-flex align-items-center">
-            <!-- Index Buttons -->
-            <% if policy(CableType).index? %>
+            <!-- Index Buttons - project and discipline access are gated
+                 separately (see CableTypePolicy#index?), so each button
+                 checks its own target, not one shared check. -->
+            <% if policy_for(@discipline.project, CableTypePolicy).index? %>
               <%= nav_button(action: :index_project, path: project_cable_types_path(@discipline.project), record: @cable_type) %>
+            <% end %>
+            <% if policy_for(@discipline, CableTypePolicy).index? %>
               <%= nav_button(action: :index_discipline, path: discipline_cable_types_path(@discipline), record: @cable_type) %>
             <% end %>
             <!-- Previous Button -->

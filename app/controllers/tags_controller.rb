@@ -1,135 +1,90 @@
 class TagsController < ApplicationController
+  include NestedResourcesController
   include Importable
 
-  before_action :authenticate_user!
-  before_action :require_project!, only: %i[ new create edit update import create_import ]
-  before_action :set_discipline, only: %i[ index new create import create_import ]
-  before_action :set_tag, only: %i[ show edit update destroy ]
-  before_action :set_swatch, only: %i[ index show import create_import ]
+  # import/create_import need the same @discipline/@project resolution as
+  # index/new/create, and set_swatch for their own view - neither is in
+  # NestedResourcesController's own before_action lists, since it has no
+  # notion of the Importable actions. Registering set_parent/require_project!
+  # again under a second before_action with a different `only:` doesn't add
+  # a second, independent entry - it replaces the concern's own one
+  # (confirmed via the actual callback chain), silently breaking it for
+  # index/new/create/edit/update. Distinctly-named wrappers avoid that.
+  before_action :set_parent_for_import, only: %i[import create_import]
+  before_action :require_project_for_import!, only: %i[import create_import]
+  before_action :set_swatch, only: %i[import create_import]
 
   # GET /tags
   def index
-    authorize Tag
+    index_resource
     @orphans = Tag.where(discipline_id: nil)
-
-    @q = @scope.ransack(params[:q])
-    result = @q.result.includes(:parent, discipline: :project)
-    @pagy, @tags = pagy(result)
-    # One tag per discipline present on this page is enough to compute
-    # permissions for every row of that discipline - see
-    # ApplicationController#permissions_by_group.
-    probes = @tags.group_by(&:discipline_id).except(nil).transform_values(&:first)
-    @permissions = permissions_by_group(probes)
     @children_counts = counts_by(Tag, :parent_id, @tags.map(&:id))
   end
 
   # GET /tags/1 or /tags/1.json
   def show
-    authorize @tag
-    @neighbours = Navigator.new(scope: @scope, record: @tag).neighbours
+    show_resource
   end
 
   # GET /tags/new
   def new
-    raise ApplicationController::ConflictError, :missing_param if @discipline.nil?
-    authorize @tag = @discipline.tags.build()
-    setup_form
+    new_resource
   end
 
   # POST /tags or /tags.json
   def create
-    raise ApplicationController::ConflictError, :missing_param if @discipline.nil?
-    @tag = authorize @discipline.tags.build(tag_params)
-    if @tag.save
-      flash[:success] = I18n.t('flash.create.notice', resource_name: I18n.t('activerecord.models.tag.one'))
-      redirect_to @tag
-    else
-      flash[:alert] = I18n.t('flash.create.alert', resource_name: I18n.t('activerecord.models.tag.one'))
-      setup_form
-      render :new, status: :unprocessable_content
-    end
+    create_resource
   end
 
   # GET /tags/1/edit
   def edit
-    authorize @tag
-    setup_form
+    edit_resource
   end
 
   # PATCH/PUT /tags/1 or /tags/1.json
   def update
-    authorize @tag
-    if @tag.update(tag_params)
-      flash[:success] = I18n.t('flash.update.notice', resource_name: I18n.t('activerecord.models.tag.one'))
-      redirect_to @tag
-    else
-      flash[:alert] = I18n.t('flash.update.alert', resource_name: I18n.t('activerecord.models.tag.one'))
-      setup_form
-      render :edit, status: :unprocessable_content
-    end
+    update_resource
   end
 
   # DELETE /tags/1 or /tags/1.json
   def destroy
-    authorize @tag
-    if @tag.destroy
-      flash[:success] = I18n.t('flash.destroy.notice', 
-        resource_name: I18n.t('activerecord.models.tag.one'))
-      redirect_to discipline_tags_path(@discipline)
-    else
-      flash.now[:danger] = I18n.t('flash.destroy.alert', 
-        resource_name: I18n.t('activerecord.models.tag.one'))
-      redirect_back fallback_location: project_tags_path(current_project)
-    end
+    destroy_resource
   end
 
   private
 
-    def set_discipline
-      if params[:discipline_id].present?
-        @discipline = policy_scope(Discipline).find_by(id: params[:discipline_id])
-        raise ApplicationController::ConflictError, :out_of_scope if @discipline.nil?
-        @project = @discipline.project
-        @scope = policy_scope(Tag).joins(:discipline).where(discipline_id: @discipline.id)
-      elsif params[:project_id].present?
-        @discipline = nil
-        @project = policy_scope(Project).find_by(id: params[:project_id])
-        raise ApplicationController::ConflictError, :out_of_scope if @project.nil?
-        @scope = policy_scope(Tag).joins(discipline: :project).where(projects: { id: @project.id })
-      else
-        @discipline = nil
-        @project = nil
-        @scope = policy_scope(Tag)
-      end
+    def set_parent_for_import
+      set_parent
     end
 
-    def set_tag
-      @tag = policy_scope(Tag).find_by(id: params[:id])
-      raise ApplicationController::ConflictError, :out_of_scope if @tag.nil?
-      @discipline = @tag.discipline
+    def require_project_for_import!
+      require_project!
+    end
+
+    def index_includes(scope)
+      scope.includes(:parent, discipline: :project)
+    end
+
+    # Tag's Navigator deliberately spans the whole project, not just this
+    # tag's own discipline - prev/next browses every tag in the project,
+    # unlike CableType/DocType/Document, whose Navigator is confined to one
+    # discipline. Can't use the generic set_resource, which would narrow
+    # @scope to just @discipline.
+    def set_resource
+      @resource = policy_scope(Tag).find_by(id: params[:id])
+      raise ApplicationController::ConflictError, :out_of_scope if @resource.nil?
+      @parent = @discipline = @resource.discipline
       @scope = policy_scope(Tag).joins(discipline: :project)
     end
 
-    def isa51_schema?
-      return false unless @discipline.present?
-      @discipline.prefix_schema['name'] == 'isa51' || @discipline.prefix_schema['type'] == 'isa51'
-    end
-
-    def setup_form
-      set_swatch
+    def setup_additional_form_data
       @safe_tagable_types = Tag.safe_tagable_types
       @parents = @tag.prospective_parents(policy_scope(Tag)).order(:discipline_id, :full_tag)
       @schema = @discipline.schema_for_form.with_indifferent_access
       @parts = @tag.prefix_parts
     end
 
-    def set_swatch
-      @swatch = @discipline&.swatch || @project&.swatch ||
-                (Swatch.find_by(name: "Discipline #{@discipline&.code}") if @discipline&.code) ||
-                Swatch.find_by(name: 'app_theme')
-    end
-
-    def tag_params
+    def resource_params
       params.require(:tag).permit(*Tag::IMPORTABLE_ATTRIBUTES)
     end
 
@@ -145,6 +100,4 @@ class TagsController < ApplicationController
       # (see Importable#authorize_import!'s own comment).
       authorize @discipline.tags.build, :import? if @discipline.present?
     end
-
-
 end
