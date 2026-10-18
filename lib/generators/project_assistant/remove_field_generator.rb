@@ -115,7 +115,7 @@ module ProjectAssistant
         end
       RUBY
       create_file migration_file, content
-      say_status :info, "Migration file #{migration_file.relative_path_from(Rails.root)} created. Review and run `bin/rails db:migrate`", :yellow
+      say_status :info, "Migration file #{Pathname.new(migration_file).relative_path_from(Rails.root)} created. Review and run `bin/rails db:migrate`", :yellow
     end
   end
 end

@@ -45,28 +45,42 @@ module ProjectAssistant
             @is_enum = @model_class.defined_enums.key?(field_name)
             @enum_keys = @is_enum ? @model_class.defined_enums[field_name].keys : []
             @is_ip = (field_name == "ingress_protection" && @column_type == :string)
+            # SEARCHABLE_TYPES/INDEX_TYPES are defined in the generator's own
+            # type vocabulary (:enum is its own type there), not raw AR
+            # column types - an enum column's real column.type is always
+            # :integer (confirmed: Instrument::PressureTransmitter#movement_type
+            # reports :integer), which is excluded from SEARCHABLE_TYPES. Using
+            # @column_type directly for those checks would silently skip
+            # every enum field's search-related touchpoints - not reported
+            # as missing, just never attempted at all. @classification_type
+            # is what every INDEX_TYPES/SEARCHABLE_TYPES check should use
+            # instead; @column_type stays the real column type, still needed
+            # as-is for the migration.
+            @classification_type = @is_enum ? :enum : @column_type
             validators = @model_class.validators_on(field_name.to_sym)
             @required = validators.any? { |v| v.is_a?(ActiveModel::Validations::PresenceValidator) }
             @unique = validators.any? { |v| v.is_a?(ActiveRecord::Validations::UniquenessValidator) }
           end
 
+          # Only @is_tagable is actually load-bearing below (it picks which
+          # file the controller touchpoint lives in - *_extension.rb vs
+          # *_controller.rb). NESTED_SCOPES/nesting shape isn't consulted
+          # by any removal logic - a dual-scope model's hand-evolved
+          # controller/views just show up as ordinary missing touchpoints
+          # in the normal report, same as any other hand-edit, with no
+          # special-cased precondition needed.
           @is_tagable = @model_class.include?(Tagable)
-          @nesting =
-            if @is_tagable
-              :tagable
-            elsif @model_class.const_defined?(:NESTED_SCOPES)
-              scopes = @model_class::NESTED_SCOPES
-              if scopes.size > 1
-                say_status :error,
-                  "#{class_name}::NESTED_SCOPES has more than one entry (#{scopes.inspect}) - " \
-                  "this generator only understands a single fixed nesting, same as the scaffold " \
-                  "generator's own templates. Not safe to proceed.", :red
-                raise Thor::Error, "Aborting generator"
-              end
-              scopes.first
-            else
-              :none
-            end
+
+          # Models with their own Import:: service (confirmed: only Tag and
+          # Electrical::Motor today, but issue #54's own discussion expects
+          # more as import becomes the default for tagables/catalog models)
+          # centralize their permit list into this model-level constant,
+          # shared with the import service - params.require(...).permit(
+          # *Model::IMPORTABLE_ATTRIBUTES) has no per-field token at all, so
+          # the generic controller_permit touchpoint has nothing to find
+          # there. const_defined?(..., false) - this model's own constant,
+          # not one it happens to inherit.
+          @has_importable_attributes = @model_class.const_defined?(:IMPORTABLE_ATTRIBUTES, false)
 
           @index_exists = @kind == :attribute &&
             @model_class.connection.index_exists?(@model_class.table_name, field_name)
@@ -204,18 +218,45 @@ module ProjectAssistant
             )
           end
 
+          # NOTE: every touchpoint below needs its own uniquely-named local
+          # variables for its regex/token, never shared ones reassigned
+          # across blocks - a lambda closes over the *variable*, not its
+          # value at definition time, so a later block reassigning the same
+          # name silently corrupts an earlier touchpoint's closure before
+          # apply_removals ever calls it (confirmed the hard way: this
+          # exact bug made model_ransackable_attributes's removal edit
+          # IMPORTABLE_ATTRIBUTES's line instead of its own, with no error -
+          # it's the single thing most worth not reintroducing here).
           ransack_array_name = @kind == :association ? "ransackable_associations" : "ransackable_attributes"
-          applies_to_ransack = @kind == :association || ScaffoldHelper::SEARCHABLE_TYPES.include?(@column_type)
+          applies_to_ransack = @kind == :association || ScaffoldHelper::SEARCHABLE_TYPES.include?(@classification_type)
           if applies_to_ransack
-            array_regex = /def self\.#{ransack_array_name}\(auth_object = nil\)\n(.*?)\n[ \t]*end\n/m
-            token = symbol_or_string_token(field_name)
+            ransack_array_regex = /def self\.#{ransack_array_name}\(auth_object = nil\)\n(.*?)\n[ \t]*end\n/m
+            ransack_token = symbol_or_string_token(field_name)
             points << tp(
               key: :"model_#{ransack_array_name}", path: path,
               locate: ->(c) {
-                m = c.match(array_regex)
-                m && m[1].match?(token)
+                m = c.match(ransack_array_regex)
+                m && m[1].match?(ransack_token)
               },
-              remove: ->(c) { remove_bracket_element(c, array_regex, token) }
+              remove: ->(c) { remove_bracket_element(c, ransack_array_regex, ransack_token) }
+            )
+          end
+
+          if @has_importable_attributes
+            # %i[...] syntax, space-separated bare words - an association
+            # field's FK carries the _id suffix there, same convention as
+            # the permit list it replaces (confirmed: Tag::IMPORTABLE_ATTRIBUTES
+            # has discipline_id/parent_id, not discipline/parent).
+            importable_token_name = @kind == :association ? "#{field_name}_id" : field_name
+            importable_array_regex = /IMPORTABLE_ATTRIBUTES = %i\[(.*?)\]/m
+            importable_token = /\b#{Regexp.escape(importable_token_name)}\b/
+            points << tp(
+              key: :model_importable_attributes, path: path,
+              locate: ->(c) {
+                m = c.match(importable_array_regex)
+                m && m[1].match?(importable_token)
+              },
+              remove: ->(c) { remove_bracket_element(c, importable_array_regex, importable_token, separator: " ") }
             )
           end
 
@@ -257,11 +298,18 @@ module ProjectAssistant
 
         def controller_touchpoints
           path = controller_path_for_removal
-          permit_method = @is_tagable ? "tagable_params" : "resource_params"
-          permit_token = @kind == :association ? /:#{field_name}_id\b/ : symbol_or_string_token(field_name)
-          permit_regex = /def #{permit_method}\b.*?\.permit\((.*?)\)/m
-          points = [
-            tp(
+          points = []
+
+          # When IMPORTABLE_ATTRIBUTES is present, the permit list lives on
+          # the model instead (see model_importable_attributes_touchpoint) -
+          # the controller's permit(*Model::IMPORTABLE_ATTRIBUTES) call has
+          # no per-field token of its own to find, so checking it would
+          # just be a permanent, meaningless MISSING.
+          unless @has_importable_attributes
+            permit_method = @is_tagable ? "tagable_params" : "resource_params"
+            permit_token = @kind == :association ? /:#{field_name}_id\b/ : symbol_or_string_token(field_name)
+            permit_regex = /def #{permit_method}\b.*?\.permit\((.*?)\)/m
+            points << tp(
               key: :controller_permit, path: path,
               locate: ->(c) {
                 m = c.match(permit_regex)
@@ -269,7 +317,7 @@ module ProjectAssistant
               },
               remove: ->(c) { remove_bracket_element(c, permit_regex, permit_token) }
             )
-          ]
+          end
 
           if @kind == :association
             line_regex = /^[ \t]*@#{field_name.pluralize} = policy_scope\(#{field_name.classify}\)\n/
@@ -301,7 +349,7 @@ module ProjectAssistant
           points << row_view_touchpoint
           points << show_view_touchpoint
           points << card_view_touchpoint
-          points << index_search_touchpoint if ScaffoldHelper::SEARCHABLE_TYPES.include?(@column_type) && @kind == :attribute
+          points << index_search_touchpoint if ScaffoldHelper::SEARCHABLE_TYPES.include?(@classification_type) && @kind == :attribute
           points.compact
         end
 
@@ -332,9 +380,17 @@ module ProjectAssistant
         end
 
         def header_view_touchpoint
-          return nil unless ScaffoldHelper::INDEX_TYPES.include?(@column_type) || @kind == :association
+          return nil unless ScaffoldHelper::INDEX_TYPES.include?(@classification_type) || @kind == :association
           path = view_path("_header.html.erb")
-          line_regex = /^[ \t]*<th><%=\s*sort_link\(@q, :#{field_name}\)\s*%><\/th>\n/
+          # Match the field token anywhere inside a <th>...</th> line and
+          # remove the whole line, rather than anchoring on the exact
+          # sort_link(@q, :field) call shape - a <th scope="col"> attribute
+          # or an explicit third label argument to sort_link (both
+          # confirmed real, e.g. tags/_header.html.erb) don't change what's
+          # being removed or where the line's boundaries are, so they
+          # shouldn't make this unfindable. Greedy .* on both sides is safe
+          # here since there's exactly one <th>...</th> per line.
+          line_regex = /^[ \t]*<th\b.*:#{field_name}\b.*<\/th>\n/
           tp(
             key: :view_header, path: path,
             locate: ->(c) { c.match?(line_regex) },
@@ -343,9 +399,21 @@ module ProjectAssistant
         end
 
         def row_view_touchpoint
-          return nil unless ScaffoldHelper::INDEX_TYPES.include?(@column_type) || @kind == :association
+          return nil unless ScaffoldHelper::INDEX_TYPES.include?(@classification_type) || @kind == :association
           path = view_path("_row.html.erb")
-          line_regex = /^[ \t]*<td><%=\s*index_attribute\(row, :#{field_name}\b.*?%><\/td>\n/
+          # Match the field token anywhere inside a <td>...</td> span and
+          # remove the whole span, rather than anchoring on the
+          # index_attribute(row, :field) helper call - confirmed real
+          # (tags/_row.html.erb never adopted the helper at all, e.g.
+          # <td><%= row.service %></td>) so requiring that call shape made
+          # every field in that file unfindable. \b#{field_name}\b matches
+          # equally whether the field is referenced as :field, row.field,
+          # or bare - the surrounding punctuation doesn't matter. Some
+          # <td> blocks span multiple lines (e.g. notes, further down in
+          # the same file) - (?:(?!<\/td>).)*? with /m stops the match from
+          # crossing into a different <td>'s own closing tag while still
+          # allowing it to cross a newline within the same one.
+          line_regex = /^[ \t]*<td\b[^>]*>(?:(?!<\/td>).)*?\b#{field_name}\b(?:(?!<\/td>).)*?<\/td>\n/m
           tp(
             key: :view_row, path: path,
             locate: ->(c) { c.match?(line_regex) },
@@ -426,26 +494,26 @@ module ProjectAssistant
 
           if @required
             macro = @kind == :association ? "test_required_associations" : "test_required_fields"
-            line_regex = /^[ \t]*#{macro}\((.*?)\)\n/
+            required_line_regex = /^[ \t]*#{macro}\((.*?)\)\n/m
             points << tp(
               key: :model_test_required, path: path,
               locate: ->(c) {
-                m = c.match(line_regex)
+                m = c.match(required_line_regex)
                 m && m[1].match?(token)
               },
-              remove: ->(c) { remove_arg_or_whole_call(c, line_regex, token) }
+              remove: ->(c) { remove_arg_or_whole_call(c, required_line_regex, token) }
             )
           end
 
           if @kind == :attribute && @unique
-            line_regex = /^[ \t]*test_unique_fields\((.*?)\)\n/
+            unique_line_regex = /^[ \t]*test_unique_fields\((.*?)\)\n/m
             points << tp(
               key: :model_test_unique, path: path,
               locate: ->(c) {
-                m = c.match(line_regex)
+                m = c.match(unique_line_regex)
                 m && m[1].match?(token)
               },
-              remove: ->(c) { remove_arg_or_whole_call(c, line_regex, token) }
+              remove: ->(c) { remove_arg_or_whole_call(c, unique_line_regex, token) }
             )
           end
 
@@ -461,7 +529,7 @@ module ProjectAssistant
             # metadata (see discover_field) - discovered here by probing
             # whether this field's symbol actually appears inside a
             # test_enum_translations(...) call, not pre-decided.
-            translations_regex = /^[ \t]*test_enum_translations\((.*?)\)\n/
+            translations_regex = /^[ \t]*test_enum_translations\((.*?)\)\n/m
             points << tp(
               key: :model_test_enum_translations, path: path,
               locate: ->(c) {
@@ -487,12 +555,12 @@ module ProjectAssistant
           token = symbol_or_string_token(field_name)
           points = []
 
-          [["@index_fields", ScaffoldHelper::INDEX_TYPES.include?(@column_type) && @kind == :attribute],
-           ["@search_fields", ScaffoldHelper::SEARCHABLE_TYPES.include?(@column_type) && @kind == :attribute],
+          [["@index_fields", ScaffoldHelper::INDEX_TYPES.include?(@classification_type) && @kind == :attribute],
+           ["@search_fields", ScaffoldHelper::SEARCHABLE_TYPES.include?(@classification_type) && @kind == :attribute],
            ["@show_fields", @kind == :attribute],
            ["@show_associations", @kind == :association]].each do |ivar, applicable|
             next unless applicable
-            array_regex = /#{Regexp.escape(ivar)} = %i\[(.*?)\]/
+            array_regex = /#{Regexp.escape(ivar)} = %i\[(.*?)\]/m
             points << tp(
               key: :"system_test_#{ivar.delete('@')}", path: path,
               locate: ->(c) {
@@ -503,7 +571,7 @@ module ProjectAssistant
             )
           end
 
-          new_fields_regex = /@new_fields = \{(.*?)\}/
+          new_fields_regex = /@new_fields = \{(.*?)\}/m
           points << tp(
             key: :system_test_new_fields, path: path,
             locate: ->(c) {

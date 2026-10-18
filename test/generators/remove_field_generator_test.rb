@@ -107,6 +107,43 @@ module ProjectAssistant
       assert_match(/remove_reference :#{TABLE_NAME}, :owner, foreign_key: true/, migration)
     end
 
+    test "removes a field from IMPORTABLE_ATTRIBUTES instead of the controller permit list, when present" do
+      # Mirrors the real Tag/Electrical::Motor shape: the permit list moves
+      # out of the controller into a model constant shared with an
+      # Import:: service - applied by hand after running the import
+      # generator (see field_removal_helper.rb's own comment), not
+      # something ScaffoldGenerator produces on its own.
+      model_path = File.join(destination_root, "app", "models", "remove_field_test_gizmo.rb")
+      model_content_before = File.read(model_path)
+      File.write(model_path, model_content_before.sub(
+        "class RemoveFieldTestGizmo < ApplicationRecord\n",
+        "class RemoveFieldTestGizmo < ApplicationRecord\n  IMPORTABLE_ATTRIBUTES = %i[plain_field unique_field status owner_id].freeze\n"
+      ))
+
+      controller_path = File.join(destination_root, "app", "controllers", "#{TABLE_NAME}_controller.rb")
+      controller_content_before = File.read(controller_path)
+      File.write(controller_path, controller_content_before.sub(
+        /def resource_params\s*\n\s*params\.require\(:remove_field_test_gizmo\)\s*\n\s*\.permit\(.*?\)\s*\n\s*end/m,
+        "def resource_params\n        params.require(:remove_field_test_gizmo).permit(*RemoveFieldTestGizmo::IMPORTABLE_ATTRIBUTES)\n      end"
+      ))
+      refute_equal controller_content_before, File.read(controller_path), "the controller fixture rewrite didn't match"
+
+      # discover_field reflects on the live class, not this text fixture -
+      # it needs the same fact asserted directly, same as build_live_table_and_model
+      # does for every other discovery fact.
+      Object.const_get(CLASS_NAME).const_set(:IMPORTABLE_ATTRIBUTES, %i[plain_field unique_field status owner_id].freeze)
+
+      output = capture(:stdout) { run_remove_field("plain_field") }
+      assert_match(/found\s+model_importable_attributes/, output)
+      refute_match(/controller_permit/, output) # not even attempted - nothing to check there
+
+      refute_match(/plain_field/, model_content)
+      assert_match(/IMPORTABLE_ATTRIBUTES = %i\[unique_field status owner_id\]/, model_content)
+      # The controller's own permit call is untouched - it only ever
+      # referenced the constant, never the field directly.
+      assert_match(/permit\(\*RemoveFieldTestGizmo::IMPORTABLE_ATTRIBUTES\)/, controller_content)
+    end
+
     # --- Abort / --force behavior ---
 
     test "aborts and changes nothing when a touchpoint was hand-edited since generation" do
