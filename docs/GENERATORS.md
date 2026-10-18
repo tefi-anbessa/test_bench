@@ -789,3 +789,74 @@ Run with `--pretend` first, exactly as for the scaffold generator, to see every 
 6. Test the feature in dev: start the server, sign in, navigate to the model's own index view, and confirm the new Import button reaches the upload form, walks through mapping -> review -> commit, and lands back on the index view with the new/updated record(s) visible.
 
 Congratulations! The model can now be bulk-imported from a spreadsheet.
+
+## REMOVE FIELD GENERATOR
+
+A generator is provided to remove one field from an existing scaffold- or tagable-generated model, reversing everything that generator wrote for it when the model was created. It is the mirror image of adding a field by hand: where the scaffold/tagable generators only ever insert new content at a fixed anchor, this one has to locate an existing field's declaration across every file it touches and remove just that, without disturbing anything else.
+
+The generator itself is reasonably self documented, refer to [remove_field_generator](../lib/generators/project_assistant/remove_field_generator.rb) and [field_removal_helper](../lib/generators/project_assistant/shared/field_removal_helper.rb).
+
+### Specification
+
+#### Command Line
+
+```bash
+rails generate project_assistant:remove_field <Model> <field_name> [--force] [--pretend]
+```
+
+`Model` is a Ruby class specifier, bare or module-prefixed, the same as for the scaffold/tagable generators. `field_name` is the one attribute or association to remove - there is no type/option argument to supply, because the generator discovers everything it needs about the field itself (see Discovery below) rather than being told. `--pretend` (or `-p`) works exactly as for every other generator in this app: it runs the full check and reports every action, without writing anything.
+
+#### Discovery
+
+The generator never reads `model.rb` or `db/schema.rb` as text to decide what kind of field this is - it reflects on the real, loaded model class instead (`class_name.safe_constantize`, then `columns_hash`/`reflect_on_association`/`validators_on`/`defined_enums`). A model's own files can drift from exactly what the generator would have written (confirmed in this app - see `app/models/electrical/switchboard.rb`'s hand-reformatted `ransackable_attributes`), so text is never trustworthy as a *source of fact* about the field, only as a *target to search*. This distinction matters for enum fields in particular: Rails reports an enum-backed column's real `column.type` as `:integer` (or whatever the underlying DB type is), never `:enum` - the generator accounts for this explicitly so that an enum field's search/index classification doesn't silently differ from how it was originally generated.
+
+#### Verify-then-mutate
+
+The generator always locates *every* applicable touchpoint first, and prints the complete result - every touchpoint, found or not - before deciding anything. It never stops at the first miss. By default, if any touchpoint couldn't be matched exactly as the scaffold/tagable generator would have produced it (most often because the file has been hand-edited since generation), nothing is written at all, and the report explains which touchpoint(s) blocked it. `--force` continues anyway: it removes everything that *did* match and leaves anything that didn't for you to finish by hand, with a warning naming each one. There is no partial state possible without `--force` - either every touchpoint matched and everything was removed, or nothing was.
+
+Two things are never affected by `--force`, because they aren't "couldn't match a pattern" failures - they're "there is nothing to remove at all": the model/class not resolving, and the field name matching neither a column nor an association on it.
+
+#### Touchpoints
+
+The generator covers:
+
+* **Model** (`app/models/#{file_path}.rb`): the `enum`/`belongs_to`/`validates :presence`/`validates :uniqueness` line, and the field's own entry in `ransackable_attributes` or `ransackable_associations`.
+* **Migration**: not an edit - a new, timestamped file, `db/migrate/#{timestamp}_remove_#{field}_from_#{table}.rb`, with `remove_column`/`remove_reference` (and a `remove_index` guard if the column had one). Never runs `db:migrate` itself.
+* **Controller** (`app/controllers/#{controller_file_path}_controller.rb`, or `app/controllers/#{file_path}_extension.rb` for a tagable model): the field's entry in the permit list, and - for an association field - its `setup_additional_form_data` collection-building line.
+* **`IMPORTABLE_ATTRIBUTES`** (`app/models/#{file_path}.rb`): when a model centralises its permit list into this constant instead (see the Import Generator's Follow Up step 2, and `Tag`/`Electrical::Motor` for real examples), the generator removes the field from the constant's `%i[...]` array instead of checking the controller's permit list at all - there is nothing field-specific left in `params.require(...).permit(*Model::IMPORTABLE_ATTRIBUTES)` for the controller touchpoint to find.
+* **Views** (`app/views/#{controller_file_path}/`): `_form.html.erb`, `_header.html.erb`, `_row.html.erb`, `show.html.erb`, `_card.html.erb`, and (for a searchable field) `index.html.erb`'s search input. The header/row touchpoints match the field's own token anywhere inside the relevant `<th>...</th>`/`<td>...</td>` span, rather than requiring the exact `sort_link`/`index_attribute` helper call shape - a `<th scope="col">` attribute, an explicit label argument, or a bare `row.field` reference instead of the generated helper call don't change what's being removed.
+* **Factory** (`test/factories/#{controller_file_path}.rb`), **model test** (`test/models/#{file_path}_test.rb`, including the `test_required_fields`/`test_unique_fields`/`test_enum_field`/`test_enum_translations` macro calls), **system test** (`test/system/#{controller_file_path}_system_test.rb`, including `@index_fields`/`@search_fields`/`@show_fields`/`@show_associations`/`@new_fields`, and - for a tagable model - a recompute of `@edit_attributes` if this field was the one its own heuristic had chosen), and **controller test** (`test/controllers/#{controller_file_path}_controller_test.rb`'s `create_params`).
+* **Constants** (`config/constants/#{module_name}.yml` or `core.yml`, enum fields only): the field's own nested sub-block, collapsed to `#{model}: {}` if it was the model's last enum field - matching exactly what the scaffold generator's own constants edit produces for an enum-less model, so removal stays idempotent with a fresh scaffold.
+* **Locales** (`config/locales/**/*.models.yml`, every field): the attribute label line, plus - for an `enum_translated` field - its sibling pluralized key block. Whether a given enum field is specifically `enum_translated` isn't recoverable from Rails' own enum metadata (both report identically via `defined_enums`), so this is discovered by probing for the sibling block's actual presence, not decided up front from discovery.
+
+#### Known, genuine exceptions - not generator bugs
+
+Several `MISSING` results turned out, on inspection, not to be fragile pattern-matching at all, but a field that genuinely isn't where the generator expects, for a real reason:
+
+* **Curated field lists.** A model with many fields (a catalog/datasheet type especially) will often have its index/search/show field lists deliberately trimmed by hand after generation, to keep the index table and test coverage practical. A field missing from `@index_fields`/`@search_fields`/`@show_fields`/the view's own displayed columns, consistently, across every one of those places, is a sign of this - not a bug to report.
+* **Fields shown outside the generic attribute list.** A field used to build a record's header/badge label (e.g. `Tag#service`, used in the show page's title) is deliberately excluded from the generic attribute display, since it's already shown elsewhere.
+* **Bespoke test coverage.** A field can be tested through its own hand-written mechanism (a dedicated `@edit_attributes` entry plus direct `fill_in`/`assert_field` calls, for example) instead of the generic `@new_fields`/`@show_fields` hash/array - `Tag`'s own system test does this for `service`.
+* **Models never actually built by either generator.** A controller/view predating both generators (`IssuesController`, `TagsController`'s own hand-evolved permit mechanism) won't match the generic shapes, consistently, across most or all of its touchpoints - this shows up as a large cluster of `MISSING` results together, not one or two isolated ones, and is a sign to treat the whole model as an exception rather than to chase it touchpoint by touchpoint.
+
+A handful of isolated `MISSING` results, by contrast, usually means the file was hand-edited in some small way since generation (an extra validation option, a reformatted line) - `--force` is useful for that case.
+
+### Usage
+
+#### Preparation
+
+1. Commit or otherwise safeguard current work first, same as for every other generator in this app - a mistaken `--force` run, or a migration generated against the wrong understanding of the field, is much easier to walk back from a clean checkpoint.
+
+#### Running the Command
+
+1. Run with `--pretend` first, always. Read the full report - every touchpoint prints, found or not, so there's no need to run it for real just to see what it would do.
+1. If anything is `MISSING`, check it against the Known, genuine exceptions above before reaching for `--force` - a cluster of misses across most of the model's files usually means the model predates the generators entirely (see Tag, Issues); a field absent from `@show_fields`/an index view consistently across every touchpoint usually means it was deliberately curated out after generation. Either way, `--force` is the right tool once you've confirmed the reason, not a way to avoid looking.
+1. If a `MISSING` touchpoint doesn't match any of those patterns - the field is genuinely still there in the generic shape you'd expect, just not matching - that's worth treating as a real gap in the generator's own pattern-matching, not something to paper over with `--force`.
+1. Run again without `--pretend` once the report looks right.
+
+#### Follow Up
+
+1. Open the generated migration file (the last one created, under `db/migrate/`) and review it before running `bin/rails db:migrate` yourself - the generator never runs it automatically.
+1. Run the model, controller, and system tests for the affected model, one file at a time (per this project's own testing convention), to confirm nothing downstream still refers to the removed field.
+1. If `--force` was used, finish removing the field by hand from whatever touchpoints it skipped, using the warning it printed as the list.
+
+Congratulations! The field has been removed, and the model's tests should confirm nothing was left behind.
