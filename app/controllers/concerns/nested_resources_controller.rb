@@ -184,16 +184,26 @@ module NestedResourcesController
       return scope if nesting == :none
       case nesting
       when :project
-        # No .where needed - every discipline-scoped and project-only
-        # Policy::Scope already restricts to current_project, which is
-        # @parent here. The join is still needed so Navigator's ORDER BY
-        # can reference projects columns (e.g. ChangeManagement::Request's
-        # navigator_order_sql) - .where(project: @parent) would add
-        # nothing real and breaks outright for a has_one :through project
-        # (e.g. CableType's, via discipline: confirmed .joins(:project)
-        # alone correctly joins "projects", but the hash-condition
-        # shorthand then references a bare, nonexistent "project" table).
-        scope.joins(:project)
+        # @parent is resolved from params[:project_id] via policy_scope,
+        # which only requires the user to have *some* role on it - for a
+        # user with roles on several projects (e.g. an admin), @parent can
+        # be a genuinely different project than current_project. Relying on
+        # policy_scope(resource_class)'s own current_project restriction
+        # alone (as this used to) would then silently show current_project's
+        # rows under @parent's URL/breadcrumb instead of @parent's own -
+        # wrong, not just empty. .merge with the parent's own association
+        # (Project has has_many :x, through: :disciplines for every
+        # discipline-scoped resource, and its own has_many for a direct
+        # project resource like ChangeManagement::Request) filters to
+        # @parent specifically, regardless of current_project. The join is
+        # still needed too, for Navigator's ORDER BY to reference projects
+        # columns (e.g. ChangeManagement::Request's navigator_order_sql) -
+        # .where(project: @parent) alone would add nothing real on top of
+        # .merge and breaks outright for a has_one :through project (e.g.
+        # CableType's, via discipline - confirmed .joins(:project) alone
+        # correctly joins "projects", but the hash-condition shorthand then
+        # references a bare, nonexistent "project" table).
+        scope.joins(:project).merge(@parent.public_send(resource_class.model_name.plural))
       when :discipline
         # Navigator's ORDER BY can reference projects/disciplines columns
         # (see e.g. DocType/Document.navigator_order_sql), so the scope

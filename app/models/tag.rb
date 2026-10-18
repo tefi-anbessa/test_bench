@@ -1,7 +1,13 @@
 class Tag < ApplicationRecord
   # === Mixins ===
-  
+
   # === Constants ===
+  # Index can be reached scoped to either parent - discipline is this
+  # record's own true, direct parent (see belongs_to below); project is a
+  # broader, index-only convenience. Order matters - see
+  # CableType::NESTED_SCOPES.
+  NESTED_SCOPES = %i[discipline project].freeze
+
   # The single allowlist for what a user (via the manual form) or a
   # spreadsheet import may set directly - see TagsController#tag_params and
   # Import::Tags#permitted_attributes.
