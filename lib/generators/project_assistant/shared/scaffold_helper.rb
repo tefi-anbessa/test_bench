@@ -856,6 +856,7 @@ module ProjectAssistant
           end
           unless nesting.in?(%i[none tagable])
             assert_includes content, "belongs_to :#{nesting}"
+            assert_includes content, "NESTED_SCOPES = %i[#{nesting}].freeze"
           end
           if nesting == :discipline
             assert_includes content, "has_one :project, through: :discipline"

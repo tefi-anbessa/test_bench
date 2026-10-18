@@ -11,6 +11,10 @@ class <%= model_class_name %> < ApplicationRecord
 <%- end -%>
 
   # === Constants ===
+<%- unless @nesting.in?(%i[none tagable]) -%>
+    # Fixed single nesting - see NestedResourcesController#nesting.
+    NESTED_SCOPES = %i[<%= @nesting %>].freeze
+<%- end -%>
     # enum declarations
 <%- @enum_fields.each do |field| -%>
     enum :<%= field[:name] %>, Constants.<%= i18n_scope %>.<%= field[:name] %>.to_h, prefix: true

@@ -21,7 +21,19 @@ module ProjectAssistant
       # Create clean files for testing (avoid conflicts with real app files)
       FileUtils.mkdir_p(File.join(destination_root, 'config'))
       FileUtils.mkdir_p(File.join(destination_root, 'config', 'constants'))
-      
+      FileUtils.mkdir_p(File.join(destination_root, 'app', 'models'))
+
+      # Create clean project.rb with an insertion point - only the
+      # associations/scopes boundary matters for this generator.
+      File.write(File.join(destination_root, 'app', 'models', 'project.rb'), <<~RUBY)
+        class Project < ApplicationRecord
+          # === Associations ===
+          has_many :disciplines, dependent: :destroy
+
+          # === Scopes ===
+        end
+      RUBY
+
       # Create clean routes.rb with insertion points
       File.write(File.join(destination_root, 'config', 'routes.rb'), <<~RUBY)
   Rails.application.routes.draw do
@@ -754,6 +766,41 @@ nr: "Not Required"
         routes_file = File.join(destination_root, "config", "routes.rb")
         assert_file routes_file do |content|
           assert_match(/resources\s+:#{@plural_name}/, content)
+        end
+      end
+    end
+
+    test "updates project model file only for --nesting=project" do
+      original_class_name = @class_name
+      original_model_class_name = @model_class_name
+      @nesting_options.each do |nesting|
+        # Namespaced model: Set class name with namespace module
+        @class_name = original_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        project_file = File.join(destination_root, "app", "models", "project.rb")
+        assert_file project_file do |content|
+          if nesting == :project
+            assert_match(/has_many :#{@table_name}, class_name: "#{@class_name}", dependent: :destroy/, content)
+          else
+            refute_match(/has_many :#{@table_name}/, content)
+          end
+        end
+      end
+      # Core model: Set class name without namespace module
+      @nesting_options.excluding(:tagable).each do |nesting|
+        @class_name = original_model_class_name + nesting.to_s.classify
+        # Reset the namedbase substitutes
+        name_setup_for_test
+        run_generator [@class_name, *@args, "--nesting=#{nesting}"]
+        project_file = File.join(destination_root, "app", "models", "project.rb")
+        assert_file project_file do |content|
+          if nesting == :project
+            assert_match(/has_many :#{@table_name}, dependent: :destroy/, content)
+          else
+            refute_match(/has_many :#{@table_name}/, content)
+          end
         end
       end
     end

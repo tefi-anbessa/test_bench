@@ -223,7 +223,7 @@ module ProjectAssistant
       system_test_file = File.join(destination_root, 'test', 'system', @folder, "#{@plural_name}_system_test.rb")
       assert_file system_test_file do |content|
         assert_includes content, "module #{@module_name}"
-        test_assertions_system_test(content, @nesting)
+        assert_tagable_system_test(content)
       end
     end
 
@@ -340,6 +340,21 @@ module ProjectAssistant
       assert_includes content, "provide(:header, t('.header', label: @#{@singular_name}.long_label))"
       assert_includes content, "render partial"
       assert_includes content, [*form_variables].join(",\n\t")
+    end
+
+    # Tagable models are never NestedResourcesController consumers (see
+    # TagablesController), so the shared test_assertions_system_test (which
+    # checks for NestedResourceSystemTests) doesn't apply here - this
+    # checks what the tagable system_test.rb.erb template actually produces.
+    def assert_tagable_system_test(content)
+      assert_includes content, "class #{@model_class_name.pluralize}SystemTest < ApplicationSystemTestCase"
+      assert_includes content, "include Devise::Test::IntegrationHelpers"
+      assert_includes content, "include Warden::Test::Helpers"
+      assert_includes content, "include TagableSystemTests"
+      assert_includes content, "@index_fields = %i[#{@index_field_names.join(" ")}]"
+      assert_includes content, "@search_fields = %i[#{@searchable_field_names.join(" ")}]"
+      assert_includes content, "@show_fields = %i[#{@attribute_names.join(" ")}]"
+      assert_includes content, "@show_associations = %i[#{@association_names.join(" ")}]"
     end
   end
 end
