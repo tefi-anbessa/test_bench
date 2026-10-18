@@ -130,6 +130,6 @@ Both files hold "core" (non-namespaced) translations, but for two different look
 When updating translations:
 
 1. Be sure to update all language versions.
-2. Keep the .yml structure exactly consistent between language files.
-3. Never alter keys without thorough retesting, it is not always obvious where translations are used.
-4. Update this document if you introduce new organizational patterns.
+1. Keep the .yml structure exactly consistent between language files.
+1. Never alter keys without thorough retesting, it is not always obvious where translations are used.
+1. Update this document if you introduce new organizational patterns.
