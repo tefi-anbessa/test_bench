@@ -7,6 +7,7 @@ class DisciplinesController < ApplicationController
   before_action :set_swatch, only: [:index, :show]
   before_action :setup_discipline_users, only: :show
   before_action :validate_required_role, only: [:create, :update]
+  before_action :validate_catalog_required_role, only: [:create, :update]
 
   # GET /disciplines or /disciplines.json
   def index
@@ -201,9 +202,18 @@ class DisciplinesController < ApplicationController
     def validate_required_role
       required_role = params.dig(:discipline, :required_role)
       return if required_role.blank?
-      
+
       unless Role.valid_role?(required_role, "Discipline")
         raise ApplicationController::ConflictError, "Invalid role: #{required_role}"
+      end
+    end
+
+    def validate_catalog_required_role
+      catalog_required_role = params.dig(:discipline, :catalog_required_role)
+      return if catalog_required_role.blank?
+
+      unless Role.valid_role?(catalog_required_role, "Discipline")
+        raise ApplicationController::ConflictError, "Invalid role: #{catalog_required_role}"
       end
     end
     

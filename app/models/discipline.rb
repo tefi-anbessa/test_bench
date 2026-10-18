@@ -31,6 +31,7 @@ class Discipline < ApplicationRecord
   validates :code, presence: true, length: { maximum: 5 }, uniqueness: { scope: :project_id }
   validates :prefix_schema, presence: true
   validate :validate_required_role
+  validate :validate_catalog_required_role
   validate :validate_prefix_schema
 
   # === Callbacks ===
@@ -262,6 +263,13 @@ class Discipline < ApplicationRecord
       return if required_role.blank?
       unless Role.valid_role?(required_role, "Discipline")
         errors.add(:required_role, :inclusion)
+      end
+    end
+
+    def validate_catalog_required_role
+      return if catalog_required_role.blank?
+      unless Role.valid_role?(catalog_required_role, "Discipline")
+        errors.add(:catalog_required_role, :inclusion)
       end
     end
 
