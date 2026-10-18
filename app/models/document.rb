@@ -3,6 +3,11 @@ class Document < ApplicationRecord
   # === Mixins ===
 
   # === Constants ===
+  # Index can be reached scoped to either parent - discipline is this
+  # record's own true, direct parent (indirect, via doc_type); project is
+  # a broader, index-only convenience. Order matters - see
+  # CableType::NESTED_SCOPES.
+  NESTED_SCOPES = %i[discipline project].freeze
 
   # === Gem macros ===
   # Record all changes to this model's data

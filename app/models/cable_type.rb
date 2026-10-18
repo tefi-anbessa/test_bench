@@ -14,6 +14,13 @@ class CableType < ApplicationRecord
   # === Mixins ===
 
   # === Constants ===
+  # Index can be reached scoped to either parent - discipline is this
+  # record's own true, direct parent (see belongs_to below); project is a
+  # broader, index-only convenience. Order matters - the first entry is
+  # the primary scope used for show/edit/update/destroy, which have no
+  # parent param of their own to resolve from (see NestedResourcesController#nesting).
+  NESTED_SCOPES = %i[discipline project].freeze
+
   # prefix: true avoids an enum method clash - both primary_role and
   # voltage_rating have an "other" option, which would otherwise both try
   # to define the same bare #other? method.

@@ -149,8 +149,12 @@ class DisciplinesController < ApplicationController
       end
       # CableType is also bare/shared, but isn't a tagable type, so neither
       # branch above finds it - add it explicitly whenever this discipline
-      # actually has a concrete detail class to attach.
-      models << CableType if @discipline.cable_type_detail_class.present?
+      # actually has a concrete detail class to attach, and the viewer can
+      # actually see its (deliberately gated - see CableTypePolicy#index?)
+      # index.
+      if @discipline.cable_type_detail_class.present? && policy_for(@discipline, CableTypePolicy).index?
+        models << CableType
+      end
       @model_links = models.sort_by(&:model_name).filter_map { |m| model_link_for(m) }
     end
 

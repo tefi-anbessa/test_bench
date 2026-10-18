@@ -7,9 +7,13 @@
         <!-- Left Navigation -->
         <div class="col-auto">
           <div class="d-flex align-items-center">
-            <!-- Index Buttons -->
-            <% if policy(DocType).index? %>
+            <!-- Index Buttons - project and discipline access are gated
+                 separately (see DocTypePolicy#index?), so each button
+                 checks its own target, not one shared check. -->
+            <% if policy_for(@doc_type.project, DocTypePolicy).index? %>
               <%= nav_button(action: :index_project, path: project_doc_types_path(@doc_type.project), record: @doc_type) %>
+            <% end %>
+            <% if policy_for(@doc_type.discipline, DocTypePolicy).index? %>
               <%= nav_button(action: :index_discipline, path: discipline_doc_types_path(@doc_type.discipline), record: @doc_type) %>
             <% end %>
 

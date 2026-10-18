@@ -162,6 +162,18 @@ class ApplicationController < ActionController::Base
       { show: policy(probe).show?, edit: policy(probe).edit?, destroy: policy(probe).destroy? }
     end
 
+    # The policy() helper infers its policy class from record's own class
+    # name, so it can't be used when a record needs checking against a
+    # different model's policy (e.g. a Discipline checked against
+    # CableTypePolicy#index?, to gate that discipline's cable_types index
+    # separately from its project-wide one). This does by hand what
+    # policy() does internally, just with the policy class given explicitly
+    # instead of inferred.
+    def policy_for(record, policy_class)
+      policy_class.new(pundit_user, record)
+    end
+    helper_method :policy_for
+
     # Scope a tagable class to the records whose tag is within the current
     # user's Tag policy scope. Tagable models have no policy of their own -
     # authorization for them always routes through TagPolicy via their

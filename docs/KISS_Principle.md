@@ -9,7 +9,7 @@
 - Implement only explicitly requested features
 - Avoid scope creep and "nice-to-have" additions
 - Keep initial implementations simple and focused
-- Get user approval before expanding functionality
+- Get developer approval before expanding functionality
 
 ### 2. Testing Foundation
 - All tests must pass before adding new features

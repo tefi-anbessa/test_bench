@@ -267,9 +267,11 @@ Tagable models are the database equivalent to datasheets for engineering element
 The DocTypes model provides a list of available document types for each discipline. The doc_type association of a document determines its workflow.
 
 - DocTypes belong to a discipline, which determines their project association.
-- The required role for doc_types is :document_controller scoped either to project or discipline.
+- The required role for doc_types is :document_controller.
+- When the user has the :document_controller role scoped to project, they can show the index for the whole project, and they have content modification permission for all doc_types in the project.
+- When the user has the :document_controller role scoped to discipline, they can show the index only for the discipline, and they have content modification permission only for doc_types in the discipline.
 - Global admins and project admins have full access to doc_type resources.
-- Scope for the doc_type model includes all doc_types belonging to the current project.
+- Scope for the doc_type model includes all doc_types belonging to the current project. In practice, doc_types are usually scoped to discipline.
 
 ### Permission Matrix for DocTypes Model
 

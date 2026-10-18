@@ -22,6 +22,15 @@ class DocTypesControllerTest < ActionController::TestCase
     # Working ok with standard discipline resource setup.
   end
 
+  # Doc types index permissions are anomalous: only accredited users can access.
+  undef test_team_member_can_access_index
+  # Index Tests - Success cases
+  def test_team_member_can_access_index
+    sign_in_and_set_project @accredited_user, @project
+    get :index, params: index_params
+    assert_response :success
+  end
+
   private
 
     # Set the expected params for a valid create
@@ -53,15 +62,5 @@ class DocTypesControllerTest < ActionController::TestCase
     # Nominate a valid value to update the attribute to
     def updated_attribute_value
       "NEW"
-    end
-
-    # Doc types index permissions are anomalous: only accredited users can access.
-    
-    undef test_team_member_can_access_index
-      # Index Tests - Success cases
-    def test_team_member_can_access_index
-      sign_in_and_set_project @accredited_user, @project
-      get :index, params: index_params
-      assert_response :success
     end
 end
