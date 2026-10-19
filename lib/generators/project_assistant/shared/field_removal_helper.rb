@@ -142,11 +142,29 @@ module ProjectAssistant
           end
         end
 
-        # A bareword hash key's value, stopping at the next comma or
-        # closing brace/bracket - for hash literals whose values aren't
+        # A bareword hash key's value, for hash literals whose values aren't
         # otherwise predictable (factory defaults, test fixture params).
+        # Matches lazily, stopping at the first point where only
+        # whitespace stands between it and the next real delimiter (comma,
+        # closing brace/bracket) - rather than matching greedily up to that
+        # delimiter. For a non-last key, that's no different (the trailing
+        # whitespace before the comma is still picked up by the \s* this
+        # token gets combined with in remove_list_element). It matters for
+        # the *last* key, which has no trailing comma to stop at: a greedy
+        # match would consume the whitespace/newline/indentation separating
+        # it from the closing brace as if it were part of the value, so
+        # removing it dragged the brace up onto the previous line instead
+        # of leaving the hash's formatting intact.
+        #
+        # \z is included alongside the delimiter class because both real
+        # callers (system_test's @new_fields, controller_test's
+        # create_params) apply this token against a regex capture group
+        # that stops *before* the closing brace (e.g. /\{(.*?)\}/m's
+        # match[1]) - for the last key, the brace this lookahead would
+        # otherwise need isn't even present in the text being matched,
+        # only end-of-string is.
         def hash_key_token(key)
-          /#{Regexp.escape(key)}:\s*[^,}\]]*/
+          /#{Regexp.escape(key)}:\s*[^,}\]]*?(?=[ \t\n]*(?:[,}\]]|\z))/
         end
 
         def symbol_or_string_token(name)
