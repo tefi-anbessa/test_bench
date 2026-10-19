@@ -107,6 +107,17 @@ module ProjectAssistant
       assert_match(/remove_reference :#{TABLE_NAME}, :owner, foreign_key: true/, migration)
     end
 
+    test "removing a hash's last key preserves the closing brace's own line and indentation" do
+      # "owner" is deliberately the last field in the scaffold args below,
+      # so it's also the last key in controller_test's create_params hash -
+      # hash_key_token's value-match must stop at the newline rather than
+      # greedily consuming it along with the key, or the closing brace gets
+      # dragged up onto the previous line (see issue #4's add_field work,
+      # which surfaced this as a pre-existing bug here).
+      run_remove_field("owner")
+      assert_match(/status: "active"\n[ \t]*\}\n/, controller_test_content)
+    end
+
     test "removes a field from IMPORTABLE_ATTRIBUTES instead of the controller permit list, when present" do
       # Mirrors the real Tag/Electrical::Motor shape: the permit list moves
       # out of the controller into a model constant shared with an
@@ -229,6 +240,10 @@ module ProjectAssistant
 
       def controller_content
         File.read(File.join(destination_root, "app", "controllers", "#{TABLE_NAME}_controller.rb"))
+      end
+
+      def controller_test_content
+        File.read(File.join(destination_root, "test", "controllers", "#{TABLE_NAME}_controller_test.rb"))
       end
 
       def constants_content

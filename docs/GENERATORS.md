@@ -860,3 +860,69 @@ A handful of isolated `MISSING` results, by contrast, usually means the file was
 1. If `--force` was used, finish removing the field by hand from whatever touchpoints it skipped, using the warning it printed as the list.
 
 Congratulations! The field has been removed, and the model's tests should confirm nothing was left behind.
+
+## ADD FIELD GENERATOR
+
+A generator is provided to add one field to an existing scaffold- or tagable-generated model, writing everything the scaffold/tagable generators would have written for it, had it been there from the start. It is the mirror image of the remove field generator: where that one locates a field's existing content and deletes it, this one locates a stable, always-present anchor in each file and inserts new content next to it.
+
+The generator itself is reasonably self documented, refer to [add_field_generator](../lib/generators/project_assistant/add_field_generator.rb) and [field_addition_helper](../lib/generators/project_assistant/shared/field_addition_helper.rb).
+
+### Specification
+
+#### Command Line
+
+```bash
+rails generate project_assistant:add_field <Model> <field_spec> [--force] [--pretend]
+```
+
+`Model` is a Ruby class specifier, bare or module-prefixed, the same as for the scaffold/tagable/remove field generators. `field_spec` uses the same `name:type[:option=value]...` grammar as a scaffold definition's own field line - there is no separate syntax to learn. `--pretend` (or `-p`) works exactly as for every other generator in this app: it runs the full check and reports every action, without writing anything.
+
+#### Validation
+
+Three things are hard preconditions - checked before anything is touched, and `--force` has no effect on any of them, because they aren't "couldn't match a pattern" failures, they're "there is nothing to add":
+
+* The model/class must resolve to a real, loaded `ActiveRecord::Base` subclass.
+* The field name must **not** already exist as a column or association on it - the mirror of the remove generator's "must exist" check.
+* The field spec must pass the same validation the scaffold generator's own field parsing applies (valid type, valid options for that type, `:ip` rejected as tagable-only).
+
+One more hard precondition is specific to this generator: **`required:` without `valid:` is refused outright**, for an attribute field. A required field being added to a table that may already have rows needs an explicit value to backfill existing rows with before the column can be made `NOT NULL`, and this generator will not invent one - that would mask exactly the kind of coding error this project's own "don't invent default values" convention exists to catch. Add `:valid=<value>` to the field spec, or drop `:required` and enforce it going forward only. This check doesn't apply to a required *association* - see Touchpoints below for why.
+
+#### Verify-then-insert
+
+The generator always locates *every* applicable insertion point first, and prints the complete result - every touchpoint, found or not - before deciding anything. It never stops at the first miss. By default, if any insertion point couldn't be found (most often because a file has been hand-edited since generation in a way that moved or removed the anchor this generator looks for), nothing is written at all, and the report explains which touchpoint(s) blocked it. `--force` continues anyway: it inserts everything that *did* match and leaves anything that didn't for you to finish by hand, with a warning naming each one.
+
+Insertion never tries to reproduce the scaffold generator's exact ordering within a section (a new `belongs_to` line may land after the model's own nesting association, rather than before it, the way the scaffold generator itself would place it). That ordering is purely cosmetic - nothing in Ruby, YAML, or ERB cares about it - so every touchpoint anchors on the nearest fixed, always-present marker and inserts immediately next to it.
+
+#### Touchpoints
+
+The generator covers the same nine file categories as the remove field generator, phrased as insertions:
+
+* **Model** (`app/models/#{file_path}.rb`): the `enum`/`belongs_to`/`validates :presence`/`validates :uniqueness` line, and the field's own entry in `ransackable_attributes` or `ransackable_associations`.
+* **Migration**: not an edit - a new, timestamped file, `db/migrate/#{timestamp}_add_#{field}_to_#{table}.rb`, with `add_column`/`add_reference` (and an `add_index` for `index:`/`unique:`). Never runs `db:migrate` itself. A required *attribute* field's migration backfills existing rows to its `valid:` value (quoted appropriately for the column type; for an enum field, resolved to its position in the field spec's own `keys:` list) before tightening with `change_column_null`, using `up`/`down` rather than `change` since that pair isn't safely reversible as one block. A required *association* never gets this treatment: the scaffold generator's own `create_table` migration never enforces `NOT NULL` on a reference's FK column either, required or not, so a required association here only ever drives the model-level `belongs_to` (no `optional: true`) - never a DB constraint, and so never needs a backfill value.
+* **Controller** (`app/controllers/#{controller_file_path}_controller.rb`, or `app/controllers/#{file_path}_extension.rb` for a tagable model): the field's entry in the permit list, and - for an association field - its `setup_additional_form_data` collection-building line.
+* **`IMPORTABLE_ATTRIBUTES`** (`app/models/#{file_path}.rb`): when a model centralises its permit list into this constant instead (see the Import Generator's Follow Up step 2, and `Tag`/`Electrical::Motor` for real examples), the generator adds the field to the constant's `%i[...]` array instead of touching the controller's permit list at all.
+* **Views** (`app/views/#{controller_file_path}/`): `_form.html.erb`, `_header.html.erb`, `_row.html.erb`, `show.html.erb`, `_card.html.erb`, and (for a searchable field) `index.html.erb`'s search input.
+* **Factory** (`test/factories/#{controller_file_path}.rb`), **model test** (`test/models/#{file_path}_test.rb`, including the `test_required_fields`/`test_unique_fields`/`test_enum_field`/`test_enum_translations` macro calls - these only exist in the first place if some earlier field already needed them, so this touchpoint appends into an existing call when one's there, or writes a fresh one when it isn't), **system test** (`test/system/#{controller_file_path}_system_test.rb`, including `@index_fields`/`@search_fields`/`@show_fields`/`@show_associations`/`@new_fields`, and - for a tagable model - a conservative recompute of `@edit_attributes` only when it's still at its collapsed empty default and the new field qualifies, never overriding a developer's existing choice), and **controller test** (`test/controllers/#{controller_file_path}_controller_test.rb`'s `create_params`).
+* **Constants** (`config/constants/#{module_name}.yml` or `core.yml`, enum fields only): the field's own nested sub-block, appended inside the model's existing top-level block - expanding a collapsed `#{model}: {}` back into a real block first, if this is the model's first enum field.
+* **Locales** (`config/locales/**/*.models.yml`, every field): the attribute label line, plus - for an `enum_translated` field - its sibling pluralized key block. Unlike removal, which has to probe whether an existing enum field is specifically `enum_translated` (Rails' own enum metadata can't tell `enum` and `enum_translated` apart), this generator is told explicitly on the CLI, so there's nothing to probe for here.
+
+### Usage
+
+#### Preparation
+
+1. Commit or otherwise safeguard current work first, same as for every other generator in this app.
+
+#### Running the Command
+
+1. Run with `--pretend` first, always. Read the full report - every touchpoint prints, found or not, so there's no need to run it for real just to see what it would do.
+1. If anything is `MISSING`, it almost always means a file was hand-edited since generation in a way that moved or removed the anchor this generator looks for - `--force` is the right tool once you've confirmed that's the reason, not a way to avoid looking.
+1. Run again without `--pretend` once the report looks right.
+
+#### Follow Up
+
+1. Open the generated migration file (the last one created, under `db/migrate/`) and review it before running `bin/rails db:migrate` yourself - the generator never runs it automatically.
+1. If the field was `required:`, remember the migration only ever adds a *nullable* column (backfilled and tightened to `NOT NULL` only when `valid:` was given) - a required reference never gets a DB-level constraint at all, matching the scaffold generator's own behavior for references. If you need the DB itself to enforce it later, that's a deliberate, separate migration with a hand-chosen backfill value, the same way the real examples already in `db/migrate/` do it.
+1. Run the model, controller, and system tests for the affected model, one file at a time (per this project's own testing convention), to confirm the new field behaves as expected.
+1. If `--force` was used, finish adding the field by hand to whatever touchpoints it skipped, using the warning it printed as the list.
+
+Congratulations! The field has been added, matching what the scaffold generator would have produced had it been there from the start.

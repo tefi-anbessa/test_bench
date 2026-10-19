@@ -13,3 +13,11 @@ copyright holder except as may be separately agreed in writing.
 
 Unauthorized use, reproduction, or distribution of this software, or any
 portion of it, is strictly prohibited.
+
+---
+
+TODO before going live: this app bundles @fortawesome/free-regular-svg-icons
+and @fortawesome/free-solid-svg-icons (transitive dependencies of
+vanilla-jsoneditor, used by its bundled UI icons), whose icon artwork is
+licensed CC-BY-4.0 and requires an attribution credit. Add that credit
+(e.g. a footer or CREDITS file) before release.
