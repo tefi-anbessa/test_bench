@@ -67,7 +67,7 @@ en:
         avatar:           "Avatar"
         job_title:        "Job title"
         time_zone:        "Time zone"
-        preferred_locale: "Preferred language"
+        preferred_locale: "Preferred locale"
       project:
         swatch_id:        "Swatch"
         code:             "Code"

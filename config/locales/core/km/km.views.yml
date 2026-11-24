@@ -45,8 +45,8 @@ km:
       title:            "គម្រោងថ្មី"
       header:           "គម្រោងថ្មី"
     show:
-      title:            "%{code}"
-      header:           "គម្រោង: %{code}"
+      title:            "គម្រោង"
+      header:           "គម្រោង: %{label}"
   disciplines:
     index:
       title:            "Disciplines"
