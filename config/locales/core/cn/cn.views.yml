@@ -73,7 +73,7 @@ cn:
   disciplines:
     index:
       title:            "Disciplines"
-      header:           "Disciplines for %{project}"
+      header:           "Disciplines for %{scope_text}"
     new:
       title:            "New Discipline"
       header:           "New Discipline"
@@ -114,7 +114,7 @@ cn:
   tags:
     index:
       title:            "Tags"
-      header:           "Tag List for %{project}"
+      header:           "Tag List for %{scope_text}"
     new:
       title:            "New Tag"
       header:           "New Tag"
@@ -155,7 +155,7 @@ cn:
     documents:
       index:
         title:            "Documents"
-        header:           "Documents Schedule for %{project}"
+        header:           "Documents Schedule for %{scope_text}"
       edit:
         title:            "Edit Document"
         header:           "Edit Document: %{label}"

@@ -11,11 +11,13 @@ module ApplicationHelper
     end
   end
 
-  # Returns a country symbol for a given language symbol, to help with flag icons.
+  # Returns a country symbol for a given locale, to help with flag icons -
+  # sourced from config/locales/core/supported.yml so a new locale/region
+  # never needs a code change here. Falls back to the locale's own code
+  # when no flag: entry is set for it.
   # Can be controversial!
   def flag_code(locale)
-    codes = {en: :gb, km: :kh}
-    codes[locale] || locale
+    I18n.t("flag", locale: locale, default: locale)
   end
   
   # Check if current user is an admin

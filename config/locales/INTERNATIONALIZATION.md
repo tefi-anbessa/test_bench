@@ -48,15 +48,29 @@ ALTERNATIVELY:
 
 - Use ISO 639 international language codes from [www.unicode.org/iso15924/iso15924-codes.html](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes).
 - Edit [application.rb](../application.rb) to add the new language code to the I18n.available_locales array.
-- Choose a flag for the new language from the flag icons in app/assets/images/flags. This icon is presented in the application header for selecting locale, in case the user does not recognise the language of the text.
-- If the new language code is not the same as an appropriate flag code in the flag icons, add the code translation in app/helpers/application_helper.rb flag_code helper.
+- Add an entry for it in [supported.yml](core/supported.yml): a `language:` display name, and a `flag:` code naming one of the flag icons in app/assets/svg/icons/flags. This is the only place a locale's flag is chosen - `app/helpers/application_helper.rb`'s `flag_code` helper reads it from here, so adding a locale never needs a Ruby code change.
 - Be sensitive around flags, many language groups don't necessarily respect the national flag of the land where they live.
-- Add the new language to each core language locale file (core/en.yml etc) under :locales. [HOLD]- there doesn't seem to be much sense in translating language names - users need to recognise their own language when selecting a locale.
 - Add the new language folder to each module folder.
 - Copy all files from one of the existing languages to the new language, for each module.
 - Rename the files with the new language code.
 - Translate the content of the files without affecting the keys.
 - Add an empty folder to config/locales/new for the new language, so it will be included when a new module is created.
+
+## Adding a Region Variant of an Existing Language
+
+- For a locale that only needs to override a handful of strings for a
+  region (e.g. `en-AU` vs `en`), rely on I18n's own fallback chain instead
+  of duplicating every file: a dash-separated locale tag automatically
+  falls back to its base language (`en-AU` → `en`) when
+  `config.i18n.fallbacks = true` is set - already the case in every
+  environment.
+- Add the region code to `I18n.available_locales` in
+  [application.rb](../application.rb), same as a new language.
+- Add its `language:`/`flag:` entry to [supported.yml](core/supported.yml)
+  explicitly - these two keys are never left to fall back, or the region
+  would silently show its base language's name/flag.
+- Only add a real per-module override file for the region once there's an
+  actual string that needs to differ - an empty region doesn't need one.
 
 ## File Structure
 
