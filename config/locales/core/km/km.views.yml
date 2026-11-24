@@ -94,7 +94,7 @@ km:
       header:           "បញ្ជីស្លាក"
     edit:
       title:            "កែសម្រួល %{tag}"
-      header:           "%{tag}"
+      header:           "%{label}"
     form:
       no_tagable_types: "No equipment types are available for this discipline yet."
     new:
@@ -102,7 +102,7 @@ km:
       header:           "ស្លាកថ្មី"
     show:
       title:            "ស្លាក %{tag}"
-      header:           "%{tag}"
+      header:           "%{label}"
   roles:
     index:
       title:            "តួនាទី"
@@ -128,7 +128,7 @@ km:
       header:           "ប្រភេទកាប៊ែលថ្មី"
     show:
       title:            "ប្រភេទកាប៊ែល %{id}"
-      header:           "ប្រភេទកាប៊ែល %{id}"
+      header:           "ប្រភេទកាប៊ែល %{label}"
   cables:
     index:
       title:            "កាប៊ែល"
@@ -141,7 +141,7 @@ km:
       header:           "កាប៊ែលថ្មី"
     show:
       title:            "កាប៊ែល %{tag}"
-      header:           "កាប៊ែល: %{tag}"
+      header:           "កាប៊ែល: %{label}"
   demands:
     index:
       title:            "បញ្ជីបន្ទុក"
