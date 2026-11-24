@@ -40,13 +40,26 @@ km:
       cancel:           "បោះបង់"
     edit:
       title:            "កែសម្រួលគម្រោង"
-      header:           "កែសម្រួលគម្រោង: %{project}"
+      header:           "កែសម្រួលគម្រោង: %{label}"
     new:
       title:            "គម្រោងថ្មី"
       header:           "គម្រោងថ្មី"
     show:
-      title:            "%{code}"
-      header:           "គម្រោង: %{code}"
+      title:            "គម្រោង"
+      header:           "គម្រោង: %{label}"
+  disciplines:
+    index:
+      title:            "Disciplines"
+      header:           "Disciplines for %{scope_text}"
+    new:
+      title:            "New Discipline"
+      header:           "New Discipline in %{scope_text}"
+    show:
+      title:            "Discipline"
+      header:           "Discipline %{label}"
+    edit:
+      title:            "Edit Discipline"
+      header:           "Edit Discipline %{label} in %{scope_text}"
   cable_types:
     index:
       title:            "Cable Types"
@@ -158,7 +171,7 @@ km:
     documents:
       index:
         title:            "Documents"
-        header:           "Documents Schedule for %{project}"
+        header:           "Documents Schedule for %{scope_text}"
       edit:
         title:            "Edit Document"
         header:           "Edit Document: %{label}"

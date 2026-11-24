@@ -1,8 +1,15 @@
-en: 
+en:
   language: "English"
-km: 
+  flag: gb
+km:
   language: "ភាសាខ្មែរ"
-th: 
+  flag: kh
+th:
   language: "ไทย"
-cn: 
+  flag: th
+cn:
   language: "中文"
+  flag: cn
+en-AU:
+  language: "English (AU)"
+  flag: au

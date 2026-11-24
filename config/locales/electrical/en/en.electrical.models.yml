@@ -144,9 +144,6 @@ en:
         circuit: "Circuit"
 
       electrical/switchboard:
-        ingress_protection: "Ingress Protection"
-        ip_1: "1st digit"
-        ip_2: "2nd digit"
         voltage_rating: "Voltage Rating"
         busbar_rating: "Busbar Rating"
         busbar_fault_rating: "Busbar Fault Rating"

@@ -52,6 +52,18 @@ class ProjectsControllerTest < ActionController::TestCase
     assert_response :success
   end
 
+  test "project details render without error in every supported locale" do
+    # Regression test: cn/th/km's disciplines.index.header translations
+    # once referenced a stale %{project} interpolation key that no longer
+    # matched what this view passes (scope_text), raising
+    # I18n::MissingInterpolationArgument - see config/locales/core/*/*.views.yml.
+    sign_in @team_member
+    I18n.available_locales.each do |locale|
+      get :show, params: { id: @project.id, locale: locale }
+      assert_response :success, "expected :show to render successfully in locale #{locale.inspect}"
+    end
+  end
+
   # New action tests
   test "admin can access new project form" do
     sign_in @admin
