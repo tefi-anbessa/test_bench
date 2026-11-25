@@ -677,6 +677,16 @@ module SystemTestHelpers
       find("##{field_id}-ts-control").click
       find("##{field_id}-ts-control").set(with)
       find("##{field_id}-ts-dropdown .option", text: with).click
+      # Tom Select keeps keyboard focus on its own control after a selection
+      # (correct behavior for a real keyboard user) - but with that focus
+      # still in place, a native Selenium click on another element (e.g. a
+      # submit button) right afterwards silently does nothing in this
+      # Chrome/chromedriver combination: no error, no request, no page
+      # change. Confirmed by comparing a real click (no-op) against a JS
+      # requestSubmit() (works) on an otherwise-identical form. Tabbing
+      # away first, as a real keyboard user naturally would when done with
+      # the field, avoids it.
+      find("##{field_id}-ts-control").native.send_keys(:tab)
     end
 
 end

@@ -115,6 +115,32 @@ class TagsControllerTest < ActionController::TestCase
     assert_response :conflict
   end
 
+  # === Parent field rendering (form_field's :tom_select type - see
+  # app/helpers/view_helper.rb) ===
+
+  test "new form's parent field is Tom Select-enhanced with no initial option" do
+    sign_in_and_set_project(@accredited_user, @project)
+    get :new, params: { discipline_id: @discipline.id }
+    assert_response :success
+    assert_select "select#tag_parent_id[data-controller='tom-select']" do
+      assert_select "option[value]:not([value=''])", count: 0
+    end
+    assert_select "select#tag_parent_id[data-tom-select-url-value]"
+    assert_select "select#tag_parent_id[data-tom-select-label-field-value='long_label']"
+  end
+
+  test "edit form's parent field is Tom Select-enhanced with the current parent as its only initial option" do
+    parent = create(:tag, discipline: @discipline, prefix: "ZZ")
+    @resource.update!(parent: parent)
+    sign_in_and_set_project(@accredited_user, @project)
+    get :edit, params: { id: @resource.id }
+    assert_response :success
+    assert_select "select#tag_parent_id[data-controller='tom-select']" do
+      assert_select "option[value='#{parent.id}']", text: parent.long_label
+      assert_select "option[value]:not([value='']):not([value='#{parent.id}'])", count: 0
+    end
+  end
+
   private
 
     # Set the minimum required params for a valid resource

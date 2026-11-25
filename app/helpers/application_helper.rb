@@ -15,7 +15,6 @@ module ApplicationHelper
   # sourced from config/locales/core/supported.yml so a new locale/region
   # never needs a code change here. Falls back to the locale's own code
   # when no flag: entry is set for it.
-  # Can be controversial!
   def flag_code(locale)
     I18n.t("flag", locale: locale, default: locale)
   end

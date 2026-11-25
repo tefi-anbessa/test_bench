@@ -51,19 +51,13 @@
                  app/javascript/controllers/tom_select_controller.js and
                  TagsController#parent_search) rather than rendering every
                  prospective parent in the project up front. -->
-            <div class="row">
-              <%= f.select :parent_id,
-                    options_for_select([tag.parent && [tag.parent.long_label, tag.parent_id]].compact, tag.parent_id),
-                    { include_blank: t("form.none") },
-                    { class: 'form-select',
-                      data: {
-                        controller: 'tom-select',
-                        tom_select_url_value: parent_search_discipline_tags_path(discipline),
-                        tom_select_label_field_value: 'long_label',
-                        tom_select_display_fields_value: ['long_label', 'service'],
-                        tom_select_params_value: { tag_id: tag.persisted? ? tag.id : '' }
-                      } } %>
-            </div>
+            <%= form_field(f, :parent_id, type: :tom_select,
+                  include_blank: t("form.none"),
+                  url: parent_search_discipline_tags_path(discipline),
+                  initial_option: tag.parent && [tag.parent.long_label, tag.parent_id],
+                  label_field: "long_label",
+                  display_fields: ["long_label", "service"],
+                  params: { tag_id: tag.persisted? ? tag.id : "" }) %>
 
             <!-- Tagable Type - only types backed by this discipline's own module are offered -->
             <% available_tagable_types = Tag.safe_tagable_types.select { |type| discipline.accepts_tagable_type?(type) } %>
