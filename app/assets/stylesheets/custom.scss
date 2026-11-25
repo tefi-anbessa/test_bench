@@ -94,6 +94,18 @@
     }
   }
 }
+/* Tom Select keeps the original <select> in the DOM for screen readers/
+   keyboard users (class .ts-hidden-accessible, from tom-select's own
+   vendored CSS), visually clipped rather than display:none - but its CSS
+   leaves it 1px wide and full height with pointer-events left enabled, so
+   a mouse click can land on that sliver and pop the native picker instead
+   of Tom Select's own UI. Screen readers don't use pointer-events to
+   interact, so this only takes away a stray mouse target, not the
+   accessibility affordance Tom Select intended to keep. */
+.ts-hidden-accessible {
+  pointer-events: none;
+}
+
 /* Style for show data
 */
 .data-field {

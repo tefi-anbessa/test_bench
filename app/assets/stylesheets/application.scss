@@ -2,6 +2,9 @@
 @use "rails_bootstrap_forms";
 
 @use "bootstrap.min.css" as *;
+// Vendored from node_modules/tom-select/dist/css into vendor/assets/stylesheets,
+// same as bootstrap.min.css above - see package.json for the tracked version.
+@use "tom-select.bootstrap5.min.css" as *;
 
 // Custom styles
 @use "custom" as *;

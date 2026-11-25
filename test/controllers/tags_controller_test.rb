@@ -62,6 +62,59 @@ class TagsControllerTest < ActionController::TestCase
     assert_nil Import::Batch.last.discipline
   end
 
+  # === Parent search (remote Tom Select endpoint - see
+  # TagsController#parent_search and
+  # app/javascript/controllers/tom_select_controller.js) ===
+
+  test "accredited user can search prospective parents by full_tag" do
+    sign_in_and_set_project(@accredited_user, @project)
+    candidate = create(:tag, discipline: @discipline, prefix: "ZZ")
+    get :parent_search, params: { discipline_id: @discipline.id, q: candidate.full_tag }
+    assert_response :success
+    assert_includes JSON.parse(response.body).map { |h| h["id"] }, candidate.id
+  end
+
+  test "search results include discipline code (via long_label) and service" do
+    sign_in_and_set_project(@accredited_user, @project)
+    candidate = create(:tag, discipline: @discipline, prefix: "ZZ", service: "Candidate service text")
+    get :parent_search, params: { discipline_id: @discipline.id, q: candidate.full_tag }
+    assert_response :success
+    result = JSON.parse(response.body).find { |h| h["id"] == candidate.id }
+    assert_equal candidate.long_label, result["long_label"]
+    assert_equal "Candidate service text", result["service"]
+  end
+
+  test "a tag's own descendants are excluded from its prospective parents" do
+    sign_in_and_set_project(@accredited_user, @project)
+    child = create(:tag, discipline: @discipline, parent: @resource, prefix: "ZZ")
+    get :parent_search, params: { discipline_id: @discipline.id, tag_id: @resource.id, q: child.full_tag }
+    assert_response :success
+    assert_not_includes JSON.parse(response.body).map { |h| h["id"] }, child.id
+  end
+
+  test "results are scoped to the current project" do
+    sign_in_and_set_project(@accredited_user, @project)
+    get :parent_search, params: { discipline_id: @discipline.id, q: @other_resource.full_tag }
+    assert_response :success
+    assert_not_includes JSON.parse(response.body).map { |h| h["id"] }, @other_resource.id
+  end
+
+  test "a team member with only a project role can still search, unlike import" do
+    sign_in_and_set_project(@team_member, @project)
+    get :parent_search, params: { discipline_id: @discipline.id, q: @resource.full_tag }
+    assert_response :success
+  end
+
+  test "a user with no project role at all cannot search" do
+    # Rejected even earlier than authorize Tag, :index? - set_parent_for_import
+    # can't resolve @discipline at all for this user (policy_scope(Discipline)
+    # is .none), same as e.g. "user cannot view project details without a
+    # project role" in projects_controller_test.rb.
+    sign_in_and_set_project(@regular_user, @project)
+    get :parent_search, params: { discipline_id: @discipline.id, q: @resource.full_tag }
+    assert_response :conflict
+  end
+
   private
 
     # Set the minimum required params for a valid resource

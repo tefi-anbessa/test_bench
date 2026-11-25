@@ -666,4 +666,17 @@ module SystemTestHelpers
       end
     end
 
+    # Selects an option from a Tom Select-enhanced field (see
+    # app/javascript/controllers/tom_select_controller.js) by typing into it
+    # and clicking the matching remote-loaded result. field_id is the
+    # underlying <select>'s id (e.g. "tag_parent_id", not the Tom Select
+    # wrapper) - Capybara's own `select`/`find(..., from:)` can't be used
+    # here, since Tom Select hides the original <select> and only the
+    # currently-selected option (if any) is ever rendered server-side.
+    def select_via_tom_select(field_id, with:)
+      find("##{field_id}-ts-control").click
+      find("##{field_id}-ts-control").set(with)
+      find("##{field_id}-ts-dropdown .option", text: with).click
+    end
+
 end
