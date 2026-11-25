@@ -59,6 +59,7 @@ Rails.application.routes.draw do
         collection do
           get :import
           post :import, action: :create_import
+          get :parent_search
         end
       end
       resources :documents, shallow: true do

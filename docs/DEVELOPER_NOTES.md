@@ -107,7 +107,7 @@ The application has been designed for international use from the outset.
 - For reference, a copy of the en version of those translations is saved in [config/locales/rails-i18n gem en for reference/en.yml.ref](../config/locales/rails-i18n%20gem%20en%20for%20reference/en.yml.ref). This file is not used in the application, it is simply a copy of the en.yml file that is provided by the rails-i18n gem. Check in this file if you are not sure whether a translation is already provided, and *avoid duplicating core translations* if possible. Also note that not all language files include all translations! It is a community work in progress...
 - The locale setting follows the basic guidelines in [Rails Internationalization (I18n) API section 2.2](https://guides.rubyonrails.org/i18n.html#setting-the-locale-from-url-params).
 - Changing locale is available in the layout header via a drop down menu.
-- Region variants of a language (e.g. `en-AU`) are supported via I18n's own fallback chain (`config.i18n.fallbacks = true`, set in every environment) rather than duplicating every translation file - a region only needs its own file for the handful of strings that actually differ; everything else falls back to the base language automatically. See "Adding a Region Variant" in [INTERNATIONALIZATION](../config/locales/INTERNATIONALIZATION.md).
+- Region variants of a locale (e.g. `en-AU`) are supported via I18n's own fallback chain (`config.i18n.fallbacks = true`, set in every environment) rather than duplicating every translation file - a region only needs its own file for the handful of strings that actually differ; everything else falls back to the base language automatically. See "Adding a Region Variant" in [INTERNATIONALIZATION](../config/locales/INTERNATIONALIZATION.md).
 - A locale's flag icon and display name are never hardcoded in Ruby - both come from `config/locales/core/supported.yml`, keyed by locale code (`flag:`/`language:`). Adding a locale/region never requires a code change.
 - **Pitfall found the hard way**: when an interpolation argument in an `en.*.yml` string is renamed (e.g. `%{project}` → `%{scope_text}`), every other language's file using that same key has to be updated too, or it raises `I18n::MissingInterpolationArgument` the moment that key is rendered in that locale - Ruby/view code has no way to catch this at the call site, since the mismatch only exists inside the translation string itself. This has happened more than once (see git history around issue #17) - when renaming an interpolation argument, grep every locale file for the old name, not just `en`.
 - The storage of translation files is detailed in the [INTERNATIONALIZATION](../config/locales/INTERNATIONALIZATION.md) document.
@@ -186,12 +186,12 @@ In addition, a card partial should be provided for collapsible view on pages whe
 - Show views shall also include edit, delete, and new "action" buttons to the right of the header, conditional on user permissions.
 - Title and header shall be translated using a `views.yml` file in the locales structure, see [INTERNATIONALIZATION](../config/locales/INTERNATIONALIZATION.md).
 - Views should not include complex logical processing.
-- Views should use the helpers in [view_helper.rb](../app/helpers/view_helper.rb). These helpers standardise the presentation of attributes in show and form views. Read the code to know what arguments are expected.
+- Views should use the helpers in [view_helper.rb](../app/helpers/view_helper.rb) and [navigation_helper.rb](../app/helpers/navigation_helper.rb). These helpers standardise the presentation of attributes and links in show and form views. Read the code to know what arguments are expected.
   - Show views can display most attribute types using `show_attribute`.
   - Forms can present most field types using `form_field`.
   - The helpers ensure that attributes labels are translated consistently.
   - The :enum_translated type ensures translation of enum options when translations are available.
-- Show views should use the shared partials [_association](../app/views/shared/_association.html.erb) and [_children](../app/views/shared/_children.html.erb) to include collapsible cards with associated data.
+- Show views should use the shared partials [_association](../app/views/shared/_association.html.erb) and [_children](../app/views/shared/_children.html.erb) to include collapsible cards with associated data when applicable.
 - Conditionals should be controlled by pundit policy calls where applicable.
 - Conditionals may also use presence or otherwise of variables set in the controller.
 - Flash messages
@@ -199,6 +199,52 @@ In addition, a card partial should be provided for collapsible view on pages whe
   - Complex forms may require further flash processing.
 - Messages
   - Occasionally, bespoke explanatory messages are required. Translations should be provided in the appropriate views.yml file.
+
+##### Form Design
+
+- Use bootstrap_form for forms.
+- Use bootstrap buttons wherever possible for consistent appearance and behavior.
+- Use bootstrap card format wherever applicable, for consistent appearance.
+- Make use of the reusable collapsible card (with js controller) for ancilliary information relevant to the form but not for modification. e.g. Cable form includes a collapsible card showing details of the cable type.
+- Selector fields should use bootstrap dropdowns for most cases, where the selection list is short and static. The form_field helper provides three options for selector fields: :select, :enum, and :enum_translated.
+- Enhanced dropdowns (type-ahead search, remote/server-driven search, long option lists) should be used when the selection options are data driven and could be numerous. Use [Tom Select](https://tom-select.js.org/) via the generic Stimulus controller [tom_select_controller.js](../app/javascript/controllers/tom_select_controller.js). Read the controller's own header comment for the full `data-tom-select-*` attribute API.
+  - Only used on the tag form's parent field so far (issue #50) - a pilot before rolling the pattern out to other dropdowns, not yet a blanket replacement for plain `<select>`s.
+  - Tom Select's own CSS is built for form controls (border, background, fixed sizing) - avoid using it outside a form context (e.g. a navbar) without expecting to override that styling.
+
+##### Icons
+
+- Bootstrap icons are used as graphical elements to support usability.
+- The gem bootstrap-icons-helper simplifies finding the icons (notoriously difficult with the recommended installation methods).
+- Icons have been copied to app/assets/icons.
+- If a new icon is required, search in <https://icons.getbootstrap.com>, find the name and use it. (The website doesn't include sorting facilities so it is not easy to find by function unless the name corresponds to the function. AI can help.)
+- The helper method bs_icon(name) in app/helpers/bootstrap_icon_helper.rb is used to further simplify icon usage.
+- Bootstrap icon usage is now mostly encapsulated in the helper methods in [view_helper](../app/helpers/view_helper.rb) and [navigation_helper](../app/helpers/navigation_helper.rb). The following is retained for use outside these helpers:
+  - Typical usage is:
+  `<%= f.submit((yield(:button_text)), class: 'btn btn-primary') do %>
+            <%== bs_icon('save') %>
+          <% end %>`
+  - Important: The double equals is used to prevent html escaping of the icon.
+  - Be consistent in icon usage. Preferred icons and colours are:
+    - "list-columns-reverse" class "-info" for index views
+    - "box-arrow-in-left" class "-secondary" for link to previous object same class
+    - "box-arrow-in-right" class "-secondary" for link to next object same class
+    - "box-arrow-down-right" class "-info" for link to child object
+    - "box-arrow-up-left" class "-info" for link to parent object
+    - "folder" class "-info" for link to project object
+    - "layers" class "-info" for link to discipline object
+    - "tag" class "-info" for link to tag object or index
+    - "file" class "-info" for link to document object or index
+    - "eye" class "-info" for link to view other objects
+    - "link" class "-primary" for link to open a form for a new child object
+    - "plus" class "-primary" for new buttons to open a form
+    - "file-earmark-arrow-up" class "-primary" for import buttons
+    - "pencil" class "-warning" for edit buttons to open a form
+    - "trash" class "-danger" for delete buttons to delete the object
+    - "search" class "-primary" for search buttons on views
+    - "x-square" class "-warning" for Discard Changes buttons on forms
+    - "save" class "-primary" for save (create or update) buttons on forms
+- Flag icons are used to assist with locale/language selection.
+  - The gem rails-icons is used with the library 'flags' to provide the icons.
 
 ### Error Handling
 
@@ -255,48 +301,6 @@ Errors are categorized as:
 - At present, the custom /409 page includes a flash alert with the translated error message. This may not be required in production if it is considered that 409 errors are definitely hacking attempts.
 - Controller tests should include thorough test of each path through the controller to ensure that all security breach attempts are trapped.
 - Tests can use the test helper method assert_conflict.
-
-### Form Design
-
-- Use bootstrap_form for forms.
-- Use bootstrap buttons wherever possible for consistent appearance and behavior.
-- Use bootstrap card format wherever applicable, for consistent appearance.
-- Make use of the reusable collapsible card (with js controller) for ancilliary information relevant to the form but not for modification. e.g. Cable form includes a collapsible card showing details of the cable type.
-
-### Icons
-
-- Bootstrap icons are used as graphical elements to support usability.
-- The gem bootstrap-icons-helper simplifies finding the icons (notoriously difficult with the recommended installation methods).
-- Icons have been copied to app/assets/icons.
-- If a new icon is required, search in <https://icons.getbootstrap.com>, find the name and use it. (The website doesn't include sorting facilities so it is not easy to find by function unless the name corresponds to the function. AI can help.)
-- The helper method bs_icon(name) in app/helpers/bootstrap_icon_helper.rb is used to further simplify icon usage.
-- Bootstrap icon usage is now mostly encapsulated in the helper methods in [view_helper](../app/helpers/view_helper.rb) and [navigation_helper](../app/helpers/navigation_helper.rb). The following is retained for use outside these helpers:
-  - Typical usage is:
-  `<%= f.submit((yield(:button_text)), class: 'btn btn-primary') do %>
-            <%== bs_icon('save') %>
-          <% end %>`
-  - Important: The double equals is used to prevent html escaping of the icon.
-  - Be consistent in icon usage. Preferred icons and colours are:
-    - "list-columns-reverse" class "-info" for index views
-    - "box-arrow-in-left" class "-secondary" for link to previous object same class
-    - "box-arrow-in-right" class "-secondary" for link to next object same class
-    - "box-arrow-down-right" class "-info" for link to child object
-    - "box-arrow-up-left" class "-info" for link to parent object
-    - "folder" class "-info" for link to project object
-    - "layers" class "-info" for link to discipline object
-    - "tag" class "-info" for link to tag object or index
-    - "file" class "-info" for link to document object or index
-    - "eye" class "-info" for link to view other objects
-    - "link" class "-primary" for link to open a form for a new child object
-    - "plus" class "-primary" for new buttons to open a form
-    - "file-earmark-arrow-up" class "-primary" for import buttons
-    - "pencil" class "-warning" for edit buttons to open a form
-    - "trash" class "-danger" for delete buttons to delete the object
-    - "search" class "-primary" for search buttons on views
-    - "x-square" class "-warning" for Discard Changes buttons on forms
-    - "save" class "-primary" for save (create or update) buttons on forms
-- Flag icons are used to assist with locale/language selection.
-  - The gem rails-icons is used with the library 'flags' to provide the icons.
 
 ## Glossary
 

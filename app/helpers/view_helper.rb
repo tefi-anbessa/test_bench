@@ -362,6 +362,43 @@ module ViewHelper
       form.select(attr, collection, { include_blank: blank }, 
         label_col: "col-sm-#{label_cols}", control_col: "col-sm-#{control_cols}", class: "form-select", **options)
 
+    when :tom_select
+      # Enhanced <select> via the generic Stimulus controller - see
+      # app/javascript/controllers/tom_select_controller.js for the full
+      # data-tom-select-* attribute API.
+      #
+      # Local mode (like :select above): pass :collection, nothing else -
+      # Tom Select just adds type-ahead/search over the rendered options.
+      #
+      # Remote mode: pass :url (a JSON search endpoint) and :initial_option
+      # instead of :collection. :initial_option is a single [label, value]
+      # pair for the field's current value (nil/omitted for a blank field) -
+      # the only option ever rendered server-side. Everything else is
+      # fetched from :url as the user types, and Tom Select writes the
+      # chosen result back into the real <select> on selection, so the form
+      # still submits normally. :label_field, :value_field, :search_field,
+      # :display_fields and :params are passed straight through to the
+      # controller's own data attributes when given. :include_blank
+      # overrides the default required/optional blank-option wording, for
+      # callers where neither fits (e.g. an association picker's "None").
+      required = options.delete(:required)
+      blank = options.delete(:include_blank) || (required ? t("form.required") : t("form.optional"))
+      tom_select_data = { controller: "tom-select" }
+      if (url = options.delete(:url))
+        tom_select_data[:tom_select_url_value] = url
+        collection = [options.delete(:initial_option)].compact
+      else
+        collection = options.delete(:collection) || []
+      end
+      %i[label_field value_field search_field display_fields params].each do |key|
+        if (value = options.delete(key))
+          tom_select_data[:"tom_select_#{key}_value"] = value
+        end
+      end
+      form.select(attr, collection, { include_blank: blank },
+        label_col: "col-sm-#{label_cols}", control_col: "col-sm-#{control_cols}",
+        class: "form-select", data: tom_select_data, **options)
+
     when :enum
       # expects :required in options
       blank = options.delete(:required) ? t("form.required") : t("form.optional")

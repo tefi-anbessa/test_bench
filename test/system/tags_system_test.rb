@@ -508,8 +508,10 @@ class TagsSystemTest < ApplicationSystemTestCase
     @count = 11
     fill_in_tag_fields
     select("PM", from: "tag[prefix]", match: :first)
-    assert_selector "select[name='tag[parent_id]']"
-    select(@tag.full_tag, from: "tag[parent_id]", match: :first)
+    # Parent field is Tom Select-enhanced (remote search, see
+    # TagsController#parent_search) - the full option list is never rendered
+    # server-side, so it can't be driven via Capybara's native select().
+    select_via_tom_select("tag_parent_id", with: @tag.full_tag)
 
     click_button I18n.t('actions.create')
     sleep 0.1  # Give database time to commit
