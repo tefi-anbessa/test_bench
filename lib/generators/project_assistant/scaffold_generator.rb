@@ -91,6 +91,7 @@ module ProjectAssistant
         next unless field[:type] == :ip
         errors << "#{field[:name]}: :ip is only supported by the tagable generator."
       end
+      errors.concat(validate_unique_scopes(@fields, @nesting))
 
       # Handle validation results
       if errors.any?

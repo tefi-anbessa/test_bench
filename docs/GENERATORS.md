@@ -429,7 +429,7 @@ Usage is explained using the example used by the generator test, which covers al
 
       * Flag options:
         * :index: use this option to implement a database index. This will greatly improve search and sort operations.
-        * :uniq: or :unique: use one of these options instead of :index, if the field must be unique. It will ensure uniqueness at the database level, as well as in validation. [TODO: allow scope to be provided with unique]
+        * :uniq: or :unique: use one of these options instead of :index, if the field must be unique. It will ensure uniqueness at the database level, as well as in validation. Bare (or `=true`) means unscoped, project-wide uniqueness. A value - an association's name, or `[name1,name2]` for several (same array syntax as :keys) - scopes the uniqueness to those associations' columns instead, e.g. `unique=project` for uniqueness within a project. The association must be either another field in the same field list (a :references/:belongs_to field with that name) or the model's own --nesting value - no indirect/transitive associations (e.g. nesting: discipline does not make `unique=project` valid, even though a discipline belongs to a project); hand-edit the generated migration/model for a case like that.
         * :required: use this option for fields that must have a value set. Use carefully, as a record cannot be saved if it has a missing required field, which may degrade the user experience.
 
       * Value options:

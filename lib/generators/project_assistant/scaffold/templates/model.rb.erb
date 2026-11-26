@@ -51,7 +51,7 @@ class <%= model_class_name %> < ApplicationRecord
     
     # Uniqueness validation for unique fields.
 <%- @unique_fields.each do |field| -%>
-    validates :<%= field[:name] %>, uniqueness: true
+    validates :<%= field[:name] %>, <%= uniqueness_clause(unique_scope_fields(field)) %>
 <%- end -%>
 
   # === Callbacks ===

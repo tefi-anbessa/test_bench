@@ -92,7 +92,7 @@ nr: "Not Required"
         'birthday:date',
         'created:datetime',
         'flex_field:jsonb',
-        'code:string:uniq:valid=AA',
+        'code:string:uniq=[parent,owner]:valid=AA',
         'blob:binary',
         'parent:references:required=false',
         'owner:belongs_to:required'
@@ -126,6 +126,12 @@ nr: "Not Required"
         run_generator [@class_name, "--definition=electrical_test"]
       end
       assert_no_match(/error/i, output)
+      # code's uniq: [parent, owner] (a real YAML array, not a CLI string)
+      # must resolve through the same scope-parsing path as the CLI form,
+      # including the multi-association case.
+      assert_file File.join(destination_root, "app", "models", @folder, "#{@singular_name}.rb") do |content|
+        assert_includes content, "validates :code, uniqueness: { scope: [:parent_id, :owner_id] }"
+      end
     end
 
     test "generator runs without errors from a ruby-format definition file" do
@@ -133,6 +139,12 @@ nr: "Not Required"
         run_generator [@class_name, "--definition=electrical_test_rb"]
       end
       assert_no_match(/error/i, output)
+      # code's uniq: [:parent, :owner] (a real Ruby Array literal of
+      # Symbols, not a CLI string) must resolve through the same
+      # scope-parsing path as the CLI form.
+      assert_file File.join(destination_root, "app", "models", @folder, "#{@singular_name}.rb") do |content|
+        assert_includes content, "validates :code, uniqueness: { scope: [:parent_id, :owner_id] }"
+      end
     end
 
     test "generator runs without errors from definition file" do
@@ -471,6 +483,18 @@ nr: "Not Required"
         end
       end
 
+    end
+
+    test "a unique scope that isn't another field or the nesting is rejected" do
+      @class_name = "BadScopeGizmo"
+      name_setup_for_test
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, "name:string:valid=Widget:unique=discipline", "--nesting=project"],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        capture(:stdout) { generator.invoke_all }
+      end
     end
 
     test "creates policy" do
