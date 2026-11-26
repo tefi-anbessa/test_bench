@@ -38,7 +38,7 @@ flex_field:
   type: jsonb
 code:
   type: string
-  uniq: owner
+  uniq: [parent, owner]
 blob:
   type: binary
 parent:

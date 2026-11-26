@@ -92,7 +92,7 @@ nr: "Not Required"
         'birthday:date',
         'created:datetime',
         'flex_field:jsonb',
-        'code:string:uniq=owner:valid=AA',
+        'code:string:uniq=[parent,owner]:valid=AA',
         'blob:binary',
         'parent:references:required=false',
         'owner:belongs_to:required'
@@ -126,10 +126,11 @@ nr: "Not Required"
         run_generator [@class_name, "--definition=electrical_test"]
       end
       assert_no_match(/error/i, output)
-      # code's uniq: owner (a bare YAML scalar, not a CLI string) must
-      # resolve through the same scope-parsing path as the CLI form.
+      # code's uniq: [parent, owner] (a real YAML array, not a CLI string)
+      # must resolve through the same scope-parsing path as the CLI form,
+      # including the multi-association case.
       assert_file File.join(destination_root, "app", "models", @folder, "#{@singular_name}.rb") do |content|
-        assert_includes content, "validates :code, uniqueness: { scope: :owner_id }"
+        assert_includes content, "validates :code, uniqueness: { scope: [:parent_id, :owner_id] }"
       end
     end
 
@@ -138,10 +139,11 @@ nr: "Not Required"
         run_generator [@class_name, "--definition=electrical_test_rb"]
       end
       assert_no_match(/error/i, output)
-      # code's uniq: "owner" (a Ruby String literal, not a CLI string)
-      # must resolve through the same scope-parsing path as the CLI form.
+      # code's uniq: [:parent, :owner] (a real Ruby Array literal of
+      # Symbols, not a CLI string) must resolve through the same
+      # scope-parsing path as the CLI form.
       assert_file File.join(destination_root, "app", "models", @folder, "#{@singular_name}.rb") do |content|
-        assert_includes content, "validates :code, uniqueness: { scope: :owner_id }"
+        assert_includes content, "validates :code, uniqueness: { scope: [:parent_id, :owner_id] }"
       end
     end
 
