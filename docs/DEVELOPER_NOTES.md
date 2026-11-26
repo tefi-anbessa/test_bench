@@ -102,7 +102,7 @@ Bulk import of spreadsheet data (CSV, Excel `.xlsx`/`.xlsm`, OpenDocument `.ods`
 The application has been designed for international use from the outset.
 
 - All user facing text is provided with translations for all implemented languages.
-- To date, the only need for translation of database content identified is for discipline names. Further content translation is included in the potential features issues.
+- To date, the only need for translation of database content identified is for discipline names.
 - The application uses the rails-i18n gem to assist with internationalization. This gem provides translations into many languages for the core rails features, including model validation, database errors, time and date functions, currency, etc.
 - For reference, a copy of the en version of those translations is saved in [config/locales/rails-i18n gem en for reference/en.yml.ref](../config/locales/rails-i18n%20gem%20en%20for%20reference/en.yml.ref). This file is not used in the application, it is simply a copy of the en.yml file that is provided by the rails-i18n gem. Check in this file if you are not sure whether a translation is already provided, and *avoid duplicating core translations* if possible. Also note that not all language files include all translations! It is a community work in progress...
 - The locale setting follows the basic guidelines in [Rails Internationalization (I18n) API section 2.2](https://guides.rubyonrails.org/i18n.html#setting-the-locale-from-url-params).

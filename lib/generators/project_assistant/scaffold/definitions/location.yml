@@ -1,0 +1,16 @@
+name:
+  type: string
+  required: true
+  valid: "Location Name"
+description:
+  type: text
+exposure:
+  type: enum_translated
+  keys: [controlled_atmosphere, indoor, outdoor_sheltered, outdoor_exposed]
+exposure_notes:
+  type: text
+corrosivity:
+  type: enum_translated
+  keys: [c1, c2, c3, c4, c5, cx]
+corrosivity_notes:
+  type: text
