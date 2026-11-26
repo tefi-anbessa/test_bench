@@ -15,7 +15,7 @@
   birthday: { type: :date },
   created: { type: :datetime },
   flex_field: { type: :jsonb },
-  code: { type: :string, uniq: true },
+  code: { type: :string, uniq: :owner },
   blob: { type: :binary },
   parent: { type: :references, required: false },
   owner: { type: :belongs_to, required: true }

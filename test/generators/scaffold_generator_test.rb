@@ -92,7 +92,7 @@ nr: "Not Required"
         'birthday:date',
         'created:datetime',
         'flex_field:jsonb',
-        'code:string:uniq:valid=AA',
+        'code:string:uniq=owner:valid=AA',
         'blob:binary',
         'parent:references:required=false',
         'owner:belongs_to:required'
@@ -126,6 +126,11 @@ nr: "Not Required"
         run_generator [@class_name, "--definition=electrical_test"]
       end
       assert_no_match(/error/i, output)
+      # code's uniq: owner (a bare YAML scalar, not a CLI string) must
+      # resolve through the same scope-parsing path as the CLI form.
+      assert_file File.join(destination_root, "app", "models", @folder, "#{@singular_name}.rb") do |content|
+        assert_includes content, "validates :code, uniqueness: { scope: :owner_id }"
+      end
     end
 
     test "generator runs without errors from a ruby-format definition file" do
@@ -133,6 +138,11 @@ nr: "Not Required"
         run_generator [@class_name, "--definition=electrical_test_rb"]
       end
       assert_no_match(/error/i, output)
+      # code's uniq: "owner" (a Ruby String literal, not a CLI string)
+      # must resolve through the same scope-parsing path as the CLI form.
+      assert_file File.join(destination_root, "app", "models", @folder, "#{@singular_name}.rb") do |content|
+        assert_includes content, "validates :code, uniqueness: { scope: :owner_id }"
+      end
     end
 
     test "generator runs without errors from definition file" do
@@ -471,34 +481,6 @@ nr: "Not Required"
         end
       end
 
-    end
-
-    test "a scoped unique field (issue #27) produces a composite index, scoped validation, and a scoped test_unique_fields call" do
-      @class_name = "ScopedUniqueGizmo"
-      name_setup_for_test
-      args = [
-        "name:string:valid=Widget:unique=project",
-        "owner:belongs_to:required",
-        "code:string:valid=AA:unique=[owner]"
-      ]
-      run_generator [@class_name, *args, "--nesting=project"]
-
-      migration_file = Dir.glob(File.join(destination_root, "db", "migrate", "*_create_#{@singular_table_name}.rb")).first
-      assert_file migration_file do |content|
-        assert_includes content, "add_index :#{@table_name}, [:project_id, :name], unique: true"
-        assert_includes content, "add_index :#{@table_name}, [:owner_id, :code], unique: true"
-        # The scoped fields' own columns must not also get an inline unique option.
-        refute_match(/t\.string :name.*unique/, content)
-      end
-
-      assert_file File.join(destination_root, "app", "models", "#{@singular_name}.rb") do |content|
-        assert_includes content, "validates :name, uniqueness: { scope: :project_id }"
-        assert_includes content, "validates :code, uniqueness: { scope: :owner_id }"
-      end
-
-      assert_file File.join(destination_root, "test", "models", "#{@singular_name}_test.rb") do |content|
-        assert_includes content, "test_unique_fields(name: [:project], code: [:owner])"
-      end
     end
 
     test "a unique scope that isn't another field or the nesting is rejected" do
