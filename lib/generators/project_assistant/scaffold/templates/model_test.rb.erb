@@ -28,7 +28,7 @@ module <%= module_name %>
     test_required_associations(<%= required_associations.map { |f| ":#{f[:name]}" }.join(", ") %>)
 <%- end -%>
 <%- if @unique_fields.any? -%>
-    test_unique_fields(<%= @unique_fields.map { |f| ":#{f[:name]}" }.join(", ") %>)
+    test_unique_fields(<%= unique_test_macro_args(@unique_fields).join(", ") %>)
 <%- end -%>
 <%- @enum_fields.each do |field| -%>
     test_enum_field(:<%= field[:name] %>, prefix: true)

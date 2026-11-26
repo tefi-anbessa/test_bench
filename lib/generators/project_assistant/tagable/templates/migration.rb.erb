@@ -13,9 +13,7 @@ class Create<%= singular_table_name.camelize %> < ActiveRecord::Migration[<%= Ra
   <%- if field.dig(:options, :required) -%>
     <%- options = ", null: false" -%>
   <%- end -%>
-  <%- if field.dig(:options, :unique) || field.dig(:options, :uniq) -%>
-    <%- options += ", index: { unique: true }" -%>
-  <%- elsif field.dig(:options, :index) -%>
+  <%- if field.dig(:options, :index) && !field_unique?(field) -%>
     <%- options += ", index: true" -%>
   <%- end -%>
       t.<%= field_type %> :<%= field[:name] + options %>
@@ -25,5 +23,8 @@ class Create<%= singular_table_name.camelize %> < ActiveRecord::Migration[<%= Ra
 <%- end -%>
       t.timestamps
     end
+<%- @unique_fields.each do |field| -%>
+    add_index :<%= table_name %>, [<%= unique_index_columns(field[:name], unique_scope_fields(field)).map { |c| ":#{c}" }.join(', ') %>], unique: true
+<%- end -%>
   end
 end

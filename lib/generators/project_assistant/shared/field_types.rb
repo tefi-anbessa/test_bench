@@ -17,7 +17,12 @@ module ProjectAssistant
       VALID_OPTIONS = %i[required index uniq unique valid precision scale units si step max min].freeze
       # required will add a validation to the model and a null: false in the migration.
       # index will add an index to the migration.
-      # uniq or unique will add a unique index to the migration.
+      # uniq or unique will add a unique index to the migration. Its value
+      # is normally absent/true (plain, unscoped uniqueness), but can also
+      # be an association's name, or an array of them, to scope the
+      # uniqueness to those associations' columns instead (e.g.
+      # unique=project, scoping uniqueness to project_id) - see
+      # ScaffoldHelper#unique_scope_fields and #validate_unique_scopes.
       # valid will provide the given value as a default to the test factory
       # precision and scale will provide those options to decimal and float types
       # units and si (boolean) will be used in presentation of decimal or float numbers.

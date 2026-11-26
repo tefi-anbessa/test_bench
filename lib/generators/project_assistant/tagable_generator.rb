@@ -49,6 +49,7 @@ module ProjectAssistant
         input_fields = prepare_cli(args || [])
       end
       @fields, errors = process_fields(input_fields)
+      errors.concat(validate_unique_scopes(@fields, @nesting))
 
       if errors.any?
         say_status :error, "Validation errors found:", :red

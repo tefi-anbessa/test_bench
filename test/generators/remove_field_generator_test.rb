@@ -89,6 +89,42 @@ module ProjectAssistant
       assert_match(/validates :plain_field, presence: true/, model_content)
     end
 
+    test "removes a scoped unique attribute (issue #27) from every touchpoint" do
+      # The live model/table (build_live_table_and_model) is hand-rolled,
+      # not derived from a generated migration/model file - so a scoped
+      # unique field is added to both sides by hand here, fully isolated
+      # to this one test (teardown rebuilds the live table/model fresh
+      # for every test regardless).
+      ActiveRecord::Base.connection.add_column(TABLE_NAME, :scoped_code, :string)
+      ActiveRecord::Base.connection.add_index(TABLE_NAME, [:owner_id, :scoped_code], unique: true)
+      Object.const_get(CLASS_NAME).validates(:scoped_code, uniqueness: { scope: :owner_id })
+      Object.const_get(CLASS_NAME).reset_column_information
+
+      model_path = File.join(destination_root, "app", "models", "remove_field_test_gizmo.rb")
+      File.write(model_path, File.read(model_path).sub(
+        "# Uniqueness validation for unique fields.\n",
+        "# Uniqueness validation for unique fields.\n    validates :scoped_code, uniqueness: { scope: :owner_id }\n"
+      ))
+      model_test_path = File.join(destination_root, "test", "models", "remove_field_test_gizmo_test.rb")
+      File.write(model_test_path, File.read(model_test_path).sub(
+        /test_unique_fields\((.*?)\)\n/, "test_unique_fields(\\1, scoped_code: [:owner])\n"
+      ))
+
+      # Only the model/model_test fixtures above were hand-extended with
+      # scoped_code - every other touchpoint (views, factory, locale,
+      # etc.) genuinely has nothing to find for a field that was never
+      # scaffolded through them, so --force is needed to skip just those
+      # and still apply the two touchpoints under test here.
+      run_remove_field("scoped_code", force: true)
+      assert_removed_from_model(/validates :scoped_code, uniqueness: \{ scope: :owner_id \}\n/)
+      assert_removed_from_model_test(/scoped_code: \[:owner\]/)
+      assert_match(/validates :unique_field, uniqueness: true/, model_content) # sibling survives
+
+      migration = migration_content(:scoped_code)
+      assert_match(/remove_index :#{TABLE_NAME}, \[:owner_id, :scoped_code\] if index_exists\?\(:#{TABLE_NAME}, \[:owner_id, :scoped_code\]\)/, migration)
+      assert_match(/remove_column :#{TABLE_NAME}, :scoped_code, :string/, migration)
+    end
+
     test "removes an enum field, including its constants and locale sub-blocks" do
       run_remove_field("status")
       assert_removed_from_model(/enum :status, Constants\..*?\.to_h.*?\n/)

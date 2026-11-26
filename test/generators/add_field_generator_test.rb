@@ -92,8 +92,22 @@ module ProjectAssistant
 
       migration = migration_content(:new_unique)
       assert_match(/add_column :#{TABLE_NAME}, :new_unique, :string/, migration)
-      assert_match(/add_index :#{TABLE_NAME}, :new_unique, unique: true/, migration)
+      assert_match(/add_index :#{TABLE_NAME}, \[:new_unique\], unique: true/, migration)
       assert_match(/def change/, migration) # no backfill needed - plain `change` is fine
+    end
+
+    test "adds a scoped unique attribute (issue #27) to every touchpoint" do
+      run_add_field("new_code:string:unique=existing_owner")
+      assert_added_to_model(/validates :new_code, uniqueness: \{ scope: :existing_owner_id \}\n/)
+      assert_added_to_model_test(/test_unique_fields\(.*?new_code: \[:existing_owner\].*?\)/)
+
+      migration = migration_content(:new_code)
+      assert_match(/add_column :#{TABLE_NAME}, :new_code, :string/, migration)
+      assert_match(/add_index :#{TABLE_NAME}, \[:existing_owner_id, :new_code\], unique: true/, migration)
+    end
+
+    test "aborts when a unique scope isn't a real association on the existing model" do
+      assert_raises(Thor::Error) { run_add_field("new_code:string:unique=not_a_real_association") }
     end
 
     test "adds an enum field, including its constants and locale sub-blocks" do

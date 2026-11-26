@@ -82,8 +82,21 @@ module ProjectAssistant
           # not one it happens to inherit.
           @has_importable_attributes = @model_class.const_defined?(:IMPORTABLE_ATTRIBUTES, false)
 
-          @index_exists = @kind == :attribute &&
-            @model_class.connection.index_exists?(@model_class.table_name, field_name)
+          # A plain index is always single-column (field_name itself). A
+          # unique index may be composite (scoped) - its real column set
+          # is read back from the live index rather than re-derived from
+          # the validator's :scope option, so this stays correct even if
+          # the two were ever hand-edited out of sync.
+          if @unique
+            existing_index = @model_class.connection.indexes(@model_class.table_name)
+              .find { |idx| idx.unique && idx.columns.map(&:to_s).include?(field_name) }
+            @index_columns = existing_index&.columns&.map(&:to_sym) || [field_name.to_sym]
+            @index_exists = @kind == :attribute && existing_index.present?
+          else
+            @index_columns = [field_name.to_sym]
+            @index_exists = @kind == :attribute &&
+              @model_class.connection.index_exists?(@model_class.table_name, field_name)
+          end
         end
 
         # === Shared removal primitives
@@ -215,10 +228,14 @@ module ProjectAssistant
           end
 
           if @kind == :attribute && @unique
+            # Matches either uniqueness: true (unscoped) or uniqueness: {
+            # scope: ... } (scoped, scalar or array) - whichever shape the
+            # live validator actually produced (see discover_field).
+            uniqueness_regex = /^[ \t]*validates :#{field_name}, uniqueness: .+\n/
             points << tp(
               key: :model_validates_uniqueness, path: path,
-              locate: ->(c) { c.match?(/^[ \t]*validates :#{field_name}, uniqueness: true\n/) },
-              remove: ->(c) { remove_whole_line(c, /^[ \t]*validates :#{field_name}, uniqueness: true\n/) }
+              locate: ->(c) { c.match?(uniqueness_regex) },
+              remove: ->(c) { remove_whole_line(c, uniqueness_regex) }
             )
           end
 
@@ -296,7 +313,9 @@ module ProjectAssistant
           else
             lines = []
             if @index_exists
-              lines << "    remove_index :#{table_name}, :#{field_name} if index_exists?(:#{table_name}, :#{field_name})"
+              columns = @index_columns.map { |c| ":#{c}" }.join(', ')
+              columns = "[#{columns}]" if @index_columns.size > 1
+              lines << "    remove_index :#{table_name}, #{columns} if index_exists?(:#{table_name}, #{columns})"
               lines << ""
             end
             lines << "    remove_column :#{table_name}, :#{field_name}, :#{@sql_type}"
@@ -524,14 +543,19 @@ module ProjectAssistant
           end
 
           if @kind == :attribute && @unique
+            # A scoped unique field's own entry is a field: [:scope, ...]
+            # keyword pair, not the bare :field_name token every other
+            # touchpoint here looks for (see @index_columns - more than
+            # just the field's own column means it's scoped).
             unique_line_regex = /^[ \t]*test_unique_fields\((.*?)\)\n/m
+            unique_token = @index_columns.size > 1 ? /#{Regexp.escape(field_name)}: \[.*?\]/ : token
             points << tp(
               key: :model_test_unique, path: path,
               locate: ->(c) {
                 m = c.match(unique_line_regex)
-                m && m[1].match?(token)
+                m && m[1].match?(unique_token)
               },
-              remove: ->(c) { remove_arg_or_whole_call(c, unique_line_regex, token) }
+              remove: ->(c) { remove_arg_or_whole_call(c, unique_line_regex, unique_token) }
             )
           end
 

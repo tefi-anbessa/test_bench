@@ -60,8 +60,24 @@ module ProjectAssistant
 
           @kind = ScaffoldHelper::ASSOCIATION_TYPES.include?(@field[:type]) ? :association : :attribute
           @required = @field[:options][:required] == true
-          @unique = @field[:options][:unique] == true || @field[:options][:uniq] == true
+          @unique = field_unique?(@field)
+          @unique_scope_fields = unique_scope_fields(@field)
           @index_opt = @field[:options][:index] == true
+
+          # Unlike ScaffoldGenerator (validate_unique_scopes - no model
+          # exists yet, so a scope name is checked against the rest of the
+          # field list or --nesting), the model this field is being added
+          # to already exists - a scope name is valid exactly when it's a
+          # real association on it, which also covers a nesting-derived
+          # association for free (it's a real belongs_to on the live
+          # class by now). Same "no transitive chains" limit as there.
+          @unique_scope_fields.each do |scope|
+            unless @model_class.reflect_on_association(scope)
+              say_status :error, "#{field_name.inspect} option unique: #{scope} is not an association on " \
+                "#{class_name} - add it as its own field first, or fix the scope name.", :red
+              raise Thor::Error, "Aborting generator"
+            end
+          end
           @valid = @field[:options][:valid]
           @enum_keys = @field[:options][:keys] || []
           @classification_type = @field[:type].in?(%i[enum enum_translated]) ? :enum : @field[:type]
@@ -215,7 +231,7 @@ module ProjectAssistant
 
           if @kind == :attribute && @unique
             anchor = /^[ \t]*# Uniqueness validation for unique fields\.\n/
-            line = "    validates :#{field_name}, uniqueness: true\n"
+            line = "    validates :#{field_name}, #{uniqueness_clause(@unique_scope_fields)}\n"
             points << tp(
               key: :model_validates_uniqueness, path: path,
               locate: ->(c) { c.match?(anchor) },
@@ -306,7 +322,8 @@ module ProjectAssistant
           else
             lines = ["    add_column :#{table_name}, :#{field_name}, :#{@sql_type}"]
             if @unique
-              lines << "    add_index :#{table_name}, :#{field_name}, unique: true"
+              columns = unique_index_columns(field_name, @unique_scope_fields).map { |c| ":#{c}" }.join(', ')
+              lines << "    add_index :#{table_name}, [#{columns}], unique: true"
             elsif @index_opt
               lines << "    add_index :#{table_name}, :#{field_name}"
             end
@@ -563,12 +580,21 @@ module ProjectAssistant
           end
 
           if @kind == :attribute && @unique
+            # insert_arg_or_new_call always appends at the end of an
+            # existing call's argument list (see its own comment) - fine
+            # when appending a scoped field: [...] keyword pair after any
+            # existing bare symbols, but it would produce invalid Ruby if
+            # an unscoped field were ever appended after an existing
+            # scoped one is already present. Not worth a general-purpose
+            # reordering fix for this one touchpoint; hand-fix the rare
+            # case where it comes up.
+            unique_token = unique_test_macro_args([@field]).first
             existing_call_regex = /^[ \t]*test_unique_fields\((.*?)\)\n/m
-            new_line = "    test_unique_fields(#{token})\n"
+            new_line = "    test_unique_fields(#{unique_token})\n"
             points << tp(
               key: :model_test_unique, path: path,
               locate: ->(c) { c.match?(existing_call_regex) || c.match?(FINAL_MARKER_REGEX) },
-              insert: ->(c) { insert_arg_or_new_call(c, existing_call_regex, FINAL_MARKER_REGEX, new_line, token) }
+              insert: ->(c) { insert_arg_or_new_call(c, existing_call_regex, FINAL_MARKER_REGEX, new_line, unique_token) }
             )
           end
 

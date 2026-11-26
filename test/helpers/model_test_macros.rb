@@ -66,11 +66,18 @@ module ModelTestMacros
       end
     end
 
-    def test_unique_fields(*fields)
+    # Plain fields are unscoped uniqueness (the whole-table duplicate check
+    # below is sufficient on its own). A field: [:scope, ...] keyword pair
+    # is scoped uniqueness - a factory-built duplicate normally gets its
+    # own independent scope association (e.g. a different project), which
+    # would make it legitimately valid, so the listed scope association(s)
+    # are also copied from @resource onto the duplicate first.
+    def test_unique_fields(*fields, **scoped_fields)
       define_method("test_unique_fields_uniqueness") do
-        fields.each do |field|
+        fields.index_with { [] }.merge(scoped_fields).each do |field, scope_fields|
           duplicate = build(@resource.class.model_name.singular)
           duplicate.public_send("#{field}=", @resource.public_send(field))
+          scope_fields.each { |scope| duplicate.public_send("#{scope}=", @resource.public_send(scope)) }
 
           refute duplicate.valid?, "Expected #{field} to be invalid when duplicated"
           assert_includes duplicate.errors[field], I18n.t("errors.messages.taken"),

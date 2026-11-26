@@ -473,6 +473,46 @@ nr: "Not Required"
 
     end
 
+    test "a scoped unique field (issue #27) produces a composite index, scoped validation, and a scoped test_unique_fields call" do
+      @class_name = "ScopedUniqueGizmo"
+      name_setup_for_test
+      args = [
+        "name:string:valid=Widget:unique=project",
+        "owner:belongs_to:required",
+        "code:string:valid=AA:unique=[owner]"
+      ]
+      run_generator [@class_name, *args, "--nesting=project"]
+
+      migration_file = Dir.glob(File.join(destination_root, "db", "migrate", "*_create_#{@singular_table_name}.rb")).first
+      assert_file migration_file do |content|
+        assert_includes content, "add_index :#{@table_name}, [:project_id, :name], unique: true"
+        assert_includes content, "add_index :#{@table_name}, [:owner_id, :code], unique: true"
+        # The scoped fields' own columns must not also get an inline unique option.
+        refute_match(/t\.string :name.*unique/, content)
+      end
+
+      assert_file File.join(destination_root, "app", "models", "#{@singular_name}.rb") do |content|
+        assert_includes content, "validates :name, uniqueness: { scope: :project_id }"
+        assert_includes content, "validates :code, uniqueness: { scope: :owner_id }"
+      end
+
+      assert_file File.join(destination_root, "test", "models", "#{@singular_name}_test.rb") do |content|
+        assert_includes content, "test_unique_fields(name: [:project], code: [:owner])"
+      end
+    end
+
+    test "a unique scope that isn't another field or the nesting is rejected" do
+      @class_name = "BadScopeGizmo"
+      name_setup_for_test
+      generator = ProjectAssistant::ScaffoldGenerator.new(
+        [@class_name, "name:string:valid=Widget:unique=discipline", "--nesting=project"],
+        {},
+        destination_root: destination_root)
+      assert_raises(Thor::Error) do
+        capture(:stdout) { generator.invoke_all }
+      end
+    end
+
     test "creates policy" do
       original_class_name = @class_name
       original_model_class_name = @model_class_name

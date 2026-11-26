@@ -31,7 +31,12 @@ module ProjectAssistant
       VALID_OPTIONS = %i[required index uniq unique valid precision scale units si step max min].freeze
       # required will add a validation to the model and a null: false in the migration.
       # index will add an index to the migration.
-      # uniq or unique will add a unique index to the migration.
+      # uniq or unique will add a unique index to the migration. Its value
+      # is normally absent/true (plain, unscoped uniqueness), but can also
+      # be an association's name, or an array of them, to scope the
+      # uniqueness to those associations' columns instead (e.g.
+      # unique=project, scoping uniqueness to project_id) - see
+      # #unique_scope_fields and #validate_unique_scopes.
       # valid will provide the given value as a default to the test factory
       # precision and scale will provide those options to decimal and float types
       # units and si (boolean) will be used in presentation of decimal or float numbers.
@@ -358,13 +363,29 @@ module ProjectAssistant
               options.each do |key, value|
                 # $stderr.puts "DEBUG (HELPER): checking option: key: #{key.inspect}, value: #{value.inspect}"
                 case key
-                when :required, :index, :uniq, :unique
+                when :required, :index
                   value, error = coerce(value, :boolean)
                   if error
                     errors << "#{name} option #{key}: #{error}"
                     # clear flag
                     @valid = false
                     next
+                  end
+                  options[key] = value
+
+                when :uniq, :unique
+                  value, error = coerce(value, :boolean)
+                  if error
+                    scope_fields = coerce_array(value)
+                    if scope_fields.present? && scope_fields.all? { |s| s.to_s.match?(IDENTIFIER_REGEX) }
+                      value = scope_fields.map(&:to_sym)
+                    else
+                      errors << "#{name} option #{key}: must be true/false, an association name, or an " \
+                        "array of association names (each a valid identifier)"
+                      # clear flag
+                      @valid = false
+                      next
+                    end
                   end
                   options[key] = value
 
@@ -515,6 +536,72 @@ module ProjectAssistant
           end
         end
 
+        # A unique/uniq option's value, once process_fields has coerced it,
+        # is either a plain boolean (true: unscoped uniqueness) or an Array
+        # of association names to scope it to (e.g. unique=project
+        # normalizes to [:project]). This always returns that array, empty
+        # for the unscoped case, so migration/model/test/removal code only
+        # ever has one shape to deal with.
+        def unique_scope_fields(field)
+          value = field[:options][:unique] || field[:options][:uniq]
+          value.is_a?(Array) ? value.map(&:to_sym) : []
+        end
+
+        def field_unique?(field)
+          value = field[:options][:unique] || field[:options][:uniq]
+          value == true || value.is_a?(Array)
+        end
+
+        # The migration/removal column set for a unique field: each scope
+        # association's foreign key column, followed by the field's own.
+        def unique_index_columns(field_name, scope_fields)
+          scope_fields.map { |scope| "#{scope}_id" } + [field_name.to_s]
+        end
+
+        # The model-side uniqueness validation clause for a unique field.
+        def uniqueness_clause(scope_fields)
+          case scope_fields.size
+          when 0 then "uniqueness: true"
+          when 1 then "uniqueness: { scope: :#{scope_fields.first}_id }"
+          else "uniqueness: { scope: [#{scope_fields.map { |s| ":#{s}_id" }.join(', ')}] }"
+          end
+        end
+
+        # The test_unique_fields(...) call's argument list (see
+        # ModelTestMacros#test_unique_fields): a bare :field symbol for an
+        # unscoped unique field, or a field: [:scope, ...] keyword pair for
+        # a scoped one. Unscoped fields are always ordered first - Ruby
+        # doesn't allow a positional argument after a keyword one in the
+        # same call, regardless of the fields' own declaration order.
+        def unique_test_macro_args(unique_fields)
+          unscoped, scoped = unique_fields.partition { |field| unique_scope_fields(field).empty? }
+          unscoped.map { |field| ":#{field[:name]}" } +
+            scoped.map { |field| "#{field[:name]}: [#{unique_scope_fields(field).map { |s| ":#{s}" }.join(', ')}]" }
+        end
+
+        # A unique field's scope name must resolve directly - either
+        # another field in this same list that's a :references/:belongs_to
+        # association with that name, or the model's own --nesting
+        # association. Deliberately no transitive belongs_to chains (e.g.
+        # nesting: discipline does not imply discipline's own project) -
+        # too complex for the generator to resolve safely; hand-edit the
+        # generated code for a case like that. :tagable nesting (fixed,
+        # not a real association name) never contributes an implicit
+        # target either.
+        def validate_unique_scopes(fields, nesting)
+          errors = []
+          association_names = fields.select { |f| ASSOCIATION_TYPES.include?(f[:type]) }.map { |f| f[:name].to_sym }
+          valid_targets = association_names + (nesting.in?(%i[none tagable]) ? [] : [nesting])
+
+          fields.each do |field|
+            (unique_scope_fields(field) - valid_targets).each do |bad_scope|
+              errors << "#{field[:name]} option unique: #{bad_scope} is not an association on this model or " \
+                "its --nesting - add it as a :references/:belongs_to field, or use the matching --nesting value."
+            end
+          end
+          errors
+        end
+
         def field_sets
           @index_fields = @fields.select { |field| INDEX_TYPES.include?(field[:type]) }
           @searchable_fields = @fields.select { |field| SEARCHABLE_TYPES.include?(field[:type]) }
@@ -522,7 +609,7 @@ module ProjectAssistant
           @attribute_fields = @fields - @association_fields
           @required_fields = @fields.select { |field| field[:options][:required] == true }
           @enum_fields = @fields.select { |field| field[:type].in?(%i[enum enum_translated]) }
-          @unique_fields = @fields.select { |field| field[:options][:unique] == true || field[:options][:uniq] == true }      
+          @unique_fields = @fields.select { |field| field_unique?(field) }
           @all_field_names = @fields.map { |field| field[:name].to_sym } 
           @index_field_names = @index_fields.map { |field| "#{field[:name]}" } 
           @searchable_field_names = @searchable_fields.map { |field| "#{field[:name]}" } 
@@ -938,7 +1025,7 @@ module ProjectAssistant
             assert_includes content, "test_required_associations(#{required_associations.map { |f| ":#{f[:name]}" }.join(", ")})"
           end
           if @unique_fields.any?
-            assert_includes content, "test_unique_fields(#{@unique_fields.map { |f| ":#{f[:name]}" }.join(", ")})"
+            assert_includes content, "test_unique_fields(#{unique_test_macro_args(@unique_fields).join(", ")})"
           end
           assert_includes content, "include ModelTestMacros" unless nesting == :tagable
           @enum_fields.each do |field|
@@ -970,9 +1057,7 @@ module ProjectAssistant
             if field.dig(:options, :required)
               options << "null: false"
             end
-            if field.dig(:options, :uniq) || field.dig(:options, :unique)
-              options << "index: { unique: true }"
-            elsif field.dig(:options, :index)
+            if field.dig(:options, :index) && !field_unique?(field)
               options << "index: true"
             end
             target = /
@@ -989,6 +1074,10 @@ module ProjectAssistant
           end
           @association_fields.each do |field|
             assert_includes content, "t.references :#{field[:name]}, foreign_key: true"
+          end
+          @unique_fields.each do |field|
+            columns = unique_index_columns(field[:name], unique_scope_fields(field)).map { |c| ":#{c}" }.join(', ')
+            assert_includes content, "add_index :#{@table_name}, [#{columns}], unique: true"
           end
         end
 
